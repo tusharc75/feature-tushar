@@ -20,7 +20,6 @@ import AssetsGrid from './AssetGrid';
 import LoadingTicketGrid from './LoadingTicket';
 import ReceivingTicketGrid from './ReceivingTicket';
 import { MdEdit } from 'react-icons/md';
-import { defaultActivityShow } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import TabPanel from 'src/components/TabPanel';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
@@ -53,8 +52,6 @@ const TransferAssetDetailPage = () => {
   const [transferType, setType] = useState(null);
   const [tabValue, setTabValue] = useState(parsedTab);
   const [loading, setLoading] = useState(true);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [isDeleting, setDeleting] = useState(false);
   const [transferAssetData, setTransferAssetData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -70,7 +67,6 @@ const TransferAssetDetailPage = () => {
   const [plantId, setPlantId] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [isTransferEnded, setTransferIsEnded] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [isProcessor, setProcessor] = useState(false);
@@ -291,9 +287,6 @@ const TransferAssetDetailPage = () => {
       });
   };
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
 
   const handleViewPdf = (download) => {
     setFileDownloading(true);
@@ -331,14 +324,6 @@ const TransferAssetDetailPage = () => {
         setFileDownloading(false);
       });
   };
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
 
   return (
     <Box className="main-container-v1">

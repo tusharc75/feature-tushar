@@ -17,7 +17,7 @@ import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
 import Steps from 'src/pages/RentalManagement/Steps';
 import { MdEdit } from 'react-icons/md';
-import { defaultActivityShow, transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
+import { transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import TabPanel from 'src/components/TabPanel';
 import { BiFoodMenu } from 'react-icons/bi';
@@ -33,8 +33,6 @@ const TransferInventoryDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferInventory.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
 
   const { id } = useParams();
   const history = useHistory();
@@ -53,7 +51,6 @@ const TransferInventoryDetailPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [transferInventoryFields, setTransferInventoryFields] = useState([]);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [currentStep, setCurrentStep] = useState(0);
   const [locationKeys, setLocationKeys] = useState([]);
   const [nextStep, setNextStep] = useState(false);
@@ -224,23 +221,11 @@ const TransferInventoryDetailPage = () => {
       .put(`${routes.transferInventory.path}/${id}/process-status`, {
         processStatus: transferInvSteps[step]
       })
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
-
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
 
   return (
     <Box className="main-container-v1">
@@ -324,7 +309,7 @@ const TransferInventoryDetailPage = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           {transferInventoryData && (
-            <Paper>
+            <Box>
               <Steps
                 steps={transferInvSteps}
                 currentStep={currentStep}
@@ -353,9 +338,6 @@ const TransferInventoryDetailPage = () => {
                     renderedFrom={`${renderedFrom}_grid-2`}
                     allowedToEdit={allowedToEdit}
                     stepFullScreen={stepFullScreen}
-                    isTabletScreen={isTabletScreen}
-                    isSmallScreen={isSmallScreen}
-                    showActivity={showActivity}
                     canLoad={canLoad}
                   />
                 )}
@@ -370,7 +352,7 @@ const TransferInventoryDetailPage = () => {
                   />
                 )}
               </ContentFullScreen>
-            </Paper>
+            </Box>
           )}
         </TabPanel>
       </Box>

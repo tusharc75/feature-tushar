@@ -60,15 +60,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, updateJobStatus }) => {
+const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol, renderedFrom, stepFullScreen, updateJobStatus }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
     state: { user, permissions }
   }: any = useData();
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [isUpdating, setUpdating] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState([]);

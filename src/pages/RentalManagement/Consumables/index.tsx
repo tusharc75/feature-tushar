@@ -30,9 +30,6 @@ const Consumables = ({
   rentalManagementData,
   setNextStep,
   currencySymbol,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity,
   renderedFrom,
   stepFullScreen,
   allowedToEdit

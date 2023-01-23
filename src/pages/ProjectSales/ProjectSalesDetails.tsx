@@ -27,17 +27,14 @@ import {
   formatAmountWithCurrency,
   opportunity,
   projectSales,
-  quote,
-  defaultActivityShow
+  quote
 } from '../../constants/helpers';
-import Activity from '../../components/Activity';
 import CreateProjectSales from './CreateProjectSales';
 import { isMobile, isTablet } from 'react-device-detect';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import accountClass from '../Account/account.module.scss';
 import { FaWpforms } from 'react-icons/fa';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 
@@ -72,7 +69,6 @@ const ProjectSalesDetails = () => {
   const {
     state: { user, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [loading, setLoading] = useState(false);
   const [copyOfProjectSalesData, setCopyOfProjectSalesData] = useState(null);
   const [projectSalesData, setProjectSalesData] = useState(null);
@@ -92,7 +88,6 @@ const ProjectSalesDetails = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState('');
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes?.projectSales]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [loadingGraphData, setLoadingGraphData] = useState(false);
@@ -109,9 +104,7 @@ const ProjectSalesDetails = () => {
     setTabValue(newValue);
   };
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
+
   useEffect(() => {
     //  When it is nodal structure tab
     initializeGraphData();
@@ -188,12 +181,6 @@ const ProjectSalesDetails = () => {
       toastConfig.setToastConfig(error);
     }
   };
-
-  useEffect(() => {
-    if (isSmallScreen) {
-      setActivityShow(true);
-    }
-  }, [isSmallScreen]);
 
   useEffect(() => {
     getSalesData();

@@ -5,7 +5,7 @@ import { Skeleton } from "@material-ui/lab";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import queryString from 'query-string';
-import { yyyyMMDD, deliveryTicket, getObjKeysWithValues, defaultActivityShow, dateTimeFormat, ACTIVITY_RESOURCE } from "../../constants/helpers";
+import { yyyyMMDD, deliveryTicket, getObjKeysWithValues, dateTimeFormat, ACTIVITY_RESOURCE } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../../components/Helpers/Routes";
@@ -15,8 +15,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import ManageDeliveryTicket from "./ManageDeliveryTicket"
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { serializedAsset, gridLoadingTimeout } from "../../constants/helpers"
-import { IoIosArrowDropright, IoIosArrowDropleft, IoMdDownload } from 'react-icons/io';
-import Activity from "../../components/Activity";
+import { IoMdDownload } from 'react-icons/io';
 import { isMobile, isTablet } from "react-device-detect";
 import SignatureDialog from '../../components/Helpers/SignatureDialog';
 import ViewSignsDialog from './ViewSignsDialog'
@@ -83,7 +82,6 @@ export default function DeliveryTicketDetail(props) {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [deliveryTicketFields, setDeliveryTicketFields] = useState([]);
   const [gridApi, setGridApi] = useState(null);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [state, dispatch] = useReducer(reducer, intialState);
   const [okBtnLoading, setOkBtnLoading] = useState(false)
   const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false)
@@ -102,7 +100,6 @@ export default function DeliveryTicketDetail(props) {
   const [downlodingFile, setDownlodingFile] = useState(false)
   const [locationKeys, setLocationKeys] = useState([])
   const { isOffline } = useContext(CustomOfflineContext);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
 
   useEffect(() => {
     return history.listen(location => {
@@ -131,9 +128,6 @@ export default function DeliveryTicketDetail(props) {
     history.push(`?tab=${newValue}`);
   };
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity)
-  }
   useEffect(() => {
     fetchDeliveryTicketData();
   }, [id]);
@@ -269,16 +263,6 @@ export default function DeliveryTicketDetail(props) {
   useEffect(() => {
     fetchGridColumns()
   }, [])
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true)
-    }
-    else {
-      setActivityShow(false)
-    }
-  }, [isSmallScreen, tabValue])
-
 
   const fetchGridColumns = async () => {
     try {

@@ -42,7 +42,6 @@ const QuoteBuilder = ({
   quotationData,
   setNextStep,
   currencySymbol,
-  showActivity,
   sentToCustomer = false,
   stepFullScreen,
   fetchQuotationData,
@@ -58,8 +57,6 @@ const QuoteBuilder = ({
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
 
   useEffect(() => {
     fetchFields();

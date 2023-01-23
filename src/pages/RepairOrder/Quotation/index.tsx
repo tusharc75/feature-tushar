@@ -51,8 +51,6 @@ const Quotation = ({
     state: { user, permissions }
   }: any = useData();
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const isMobileScreen = useMediaQuery('(max-width: 767px)');
   const [isUpdating, setUpdating] = useState(false);
 

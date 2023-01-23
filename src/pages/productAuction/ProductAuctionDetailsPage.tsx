@@ -14,7 +14,6 @@ import { productAuction } from '../../constants/helpers';
 import ManageProductAuction from './ManageProductAuction';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import Products from '../Packages/Products';
 import { FaWpforms } from 'react-icons/fa';

@@ -223,7 +223,9 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         <Toolbar />
         <div id="sidebarOrDrawer">
           {toggleDrawer ? (
-            <img className={styles.logo} src={SVG('LogoNew')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
+            user?.brandLogo ?
+              <img src={user.brandLogo} alt="brand" className={styles.logo} /> :
+              <img className={styles.logo} src={SVG('LogoNew')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
           ) : (
             <img className={styles.logo} src={SVG('LogoNewShort')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
           )}
@@ -258,9 +260,9 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 )}
               </ListItemIcon>
               <ListItemText
-                onClick={() => {}}
+                onClick={() => { }}
                 primary={[user?.user?.firstName, user?.user?.lastName].filter((f) => f).join(' ')}
-                // className={`wordWrap`}
+              // className={`wordWrap`}
               />
             </ListItem>
             {permissions?.dashboard?.isRead && !isOffline && (
@@ -353,9 +355,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                       <List component="div" disablePadding className={`${styles.subList} `}>
                         {listItem.items.map((item, j) => (
                           <Link
-                            className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${
-                              itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''
-                            }`}
+                            className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''
+                              }`}
                             key={j}
                             onClick={() => {
                               setItemToAddActiveClass(i);

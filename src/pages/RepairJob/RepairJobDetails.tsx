@@ -1,30 +1,23 @@
 import { useState, useEffect, useContext } from 'react';
 import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { repairJob, sidebarResource, repairJobProcessSteps, REPAIR_JOB_STATUS, ACTIVITY_RESOURCE, serializedAsset } from 'src/constants/helpers';
-import Activity from 'src/components/Activity';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairJob from './ManageRepairJob';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import TabPanel from 'src/components/TabPanel';
-import HideWhenOffline from 'src/components/HideWhenOffline';
-import { defaultActivityShow } from 'src/constants/helpers';
 import AddSerializedAsset from './AddSerializedAsset';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Steps from '../RentalManagement/Steps';
 import { GiAbstract055 } from 'react-icons/gi';
 import { camelCase } from 'lodash';
@@ -32,7 +25,6 @@ import { RiFlowChart } from 'react-icons/ri';
 import RepairJobViews from './RoadMapViews/index';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 
 function a11yProps(index: any) {
@@ -68,17 +60,10 @@ const RepairJobDetails = () => {
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
-
   const [locationKeys, setLocationKeys] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
 
   useEffect(() => {
     return history.listen((location) => {
@@ -219,16 +204,6 @@ const RepairJobDetails = () => {
       });
   };
 
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true)
-    }
-    else {
-      setActivityShow(false)
-    }
-  }, [isSmallScreen, tabValue])
-
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -315,40 +290,38 @@ const RepairJobDetails = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Paper>
-              <Steps
-                isNextStep={false}
-                nextStep={nextStep}
-                steps={repairJobProcessSteps}
-                currentStep={currentStep}
-                setCurrentStep={setCurrentStep}
-                isStepEnded={[REPAIR_JOB_STATUS.completed].includes(repairJobData?.status)}
-                setStepFullScreen={() => setStepFullScreen(true)}
-              />
-              <ContentFullScreen title={repairJobProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
-                {currentStep === 0 && (
-                  <AddSerializedAsset
-                    repairJobData={repairJobData}
-                    setNextStep={setNextStep}
-                    updateJobStatus={updateJobStatus}
-                    repairedAssetStatus={repairedAssetStatus}
-                    renderedFrom={`${renderedFrom}_grid-1`}
-                    allowedToEdit={allowedToEdit}
-                    allowUpdateStatus={allowUpdateStatus}
-                  />
-                )}
-                {currentStep === 1 && (
-                  <SerializedAsset
-                    repairJobData={repairJobData}
-                    fetchRepairJobData={fetchRepairJobData}
-                    repairedAssetStatus={repairedAssetStatus}
-                    renderedFrom={`${renderedFrom}_grid-2`}
-                    allowedToEdit={allowedToEdit}
-                    allowUpdateStatus={allowUpdateStatus}
-                  />
-                )}
-              </ContentFullScreen>
-            </Paper>
+            <Steps
+              isNextStep={false}
+              nextStep={nextStep}
+              steps={repairJobProcessSteps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isStepEnded={[REPAIR_JOB_STATUS.completed].includes(repairJobData?.status)}
+              setStepFullScreen={() => setStepFullScreen(true)}
+            />
+            <ContentFullScreen title={repairJobProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+              {currentStep === 0 && (
+                <AddSerializedAsset
+                  repairJobData={repairJobData}
+                  setNextStep={setNextStep}
+                  updateJobStatus={updateJobStatus}
+                  repairedAssetStatus={repairedAssetStatus}
+                  renderedFrom={`${renderedFrom}_grid-1`}
+                  allowedToEdit={allowedToEdit}
+                  allowUpdateStatus={allowUpdateStatus}
+                />
+              )}
+              {currentStep === 1 && (
+                <SerializedAsset
+                  repairJobData={repairJobData}
+                  fetchRepairJobData={fetchRepairJobData}
+                  repairedAssetStatus={repairedAssetStatus}
+                  renderedFrom={`${renderedFrom}_grid-2`}
+                  allowedToEdit={allowedToEdit}
+                  allowUpdateStatus={allowUpdateStatus}
+                />
+              )}
+            </ContentFullScreen>
           </Grid>
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
@@ -362,7 +335,6 @@ const RepairJobDetails = () => {
           </Box>
         </TabPanel>
       </Box>
-
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}

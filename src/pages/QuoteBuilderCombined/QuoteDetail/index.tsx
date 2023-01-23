@@ -38,10 +38,8 @@ import {
   formatAmountWithCurrency,
   gridLoadingTimeout,
   termsAndCondition,
-  defaultActivityShow,
   ACTIVITY_RESOURCE
 } from '../../../constants/helpers';
-import Activity from '../../../components/Activity';
 import { useData } from '../../../StateProvider/Provider';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../../components/Helpers/Routes';
@@ -51,7 +49,6 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ManageQuoteDialog from '../ManageQuote/ManageQuoteDialog';
 import { HiPencil } from 'react-icons/hi';
 import { isMobile, isTablet } from 'react-device-detect';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ProjectInAccordion from '../../../components/ProjectInAccordion/ProjectInAccordion';
 import QuoteProcess from './QuoteProcess';
 import QuoteDetailPage from './QuoteDetailPage';
@@ -175,7 +172,6 @@ export default function QuoteDetail() {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [state, dispatch] = useReducer(reducer, intialState);
   const [quoteData, setQuoteData] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -198,7 +194,6 @@ export default function QuoteDetail() {
   const [reopenReason, setReopenReason] = useState('');
   const [quoteReOpening, setQuoteReOpening] = useState(false);
   const [editCurrency, setEditCurrency] = useState(false);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [tabValue, setTabValue] = useState(0);
   const [relatedTo, setRelatedTo] = useState({});
   const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([{ id: id, type: qbResource }]);
@@ -229,9 +224,6 @@ export default function QuoteDetail() {
     setTabValue(newValue);
   };
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
   useEffect(() => {
     if (id) {
       if (location.state !== undefined) {
@@ -602,12 +594,6 @@ export default function QuoteDetail() {
   const handleReopenReasonChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setReopenReason(event.target.value);
   };
-
-  useEffect(() => {
-    if (isSmallScreen) {
-      setActivityShow(true);
-    }
-  }, [isSmallScreen]);
 
   const deleteVersion = () => {
     let versions = quoteData?.versions;

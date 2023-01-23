@@ -26,7 +26,6 @@ import {
   sidebarResource,
   customerAccount,
   processFieldName,
-  defaultActivityShow
 } from '../../constants/helpers';
 import ManageAccount from './ManageAccount/ManageAccount';
 import ManageAccountDialog from './ManageAccount/index';
@@ -92,9 +91,6 @@ export default function AccountDetailPage(props) {
     state: { user, permissions, selectedEntity, tour },
     dispatch
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const [headingLbl, setHeadingLbl] = useState('');
-  // const [isUpdating, setIsUpdating] = useState(false);
   const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false);
   const [parentId, setParentId] = useState(undefined);
   const [accountData, setAccountData] = useState<any>({});
@@ -124,14 +120,10 @@ export default function AccountDetailPage(props) {
   const [showAtLast, setShowAtLast] = useState(false);
   const [deleteAccount, setDeleteAccountId] = useState<any>({});
   const [additionalFieldName, setAdditionalFieldName] = useState('');
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [showAccountHierarchyInFullScreenDialog, setShowAccountHierarchyInFullScreenDialog] = useState(false);
   const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false);
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
   const [loadingGraphData, setLoadingGraphData] = useState(false);
   const [graphData, setGraphData] = useState({
     edges: [],
@@ -198,11 +190,6 @@ export default function AccountDetailPage(props) {
     };
   }, [tabValue]);
 
-  useEffect(() => {
-    if (isSmallScreen) {
-      setActivityShow(true);
-    }
-  }, [isSmallScreen]);
 
   useEffect(() => {
     if ((tour.start && tour.path === '/customer-account/detail') || tour.path === '/supplier-account/detail') {
@@ -316,7 +303,6 @@ export default function AccountDetailPage(props) {
     }
 
     setCustomizedRoutes([accountBreadcrumb, { title: data.accountName }]);
-    setHeadingLbl(data.accountName || '');
     handleMainPonts(data);
     setAccountData(data);
     setCanEdit([...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id));

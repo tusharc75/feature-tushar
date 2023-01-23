@@ -19,12 +19,10 @@ import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import TabPanel from 'src/components/TabPanel';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import { defaultActivityShow } from 'src/constants/helpers';
 import Steps from '../RentalManagement/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
@@ -40,10 +38,10 @@ function a11yProps(index: any) {
 }
 
 const ProductionOrderDetails = () => {
+  
   const renderedFrom = camelCase(routes?.productionOrder.title);
   const toastConfig = useContext(CustomToastContext);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
+
   const { id } = useParams();
   const history = useHistory();
 
@@ -61,7 +59,6 @@ const ProductionOrderDetails = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
   const [productionOrderProcessSteps, setProductionOrderProcessSteps] = useState(['Add']);
@@ -203,14 +200,6 @@ const ProductionOrderDetails = () => {
     setAnchorEl(null);
   };
 
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -341,9 +330,6 @@ const ProductionOrderDetails = () => {
                 fetchProductionOrderData={fetchProductionOrderData}
                 productionOrderData={productionOrderData}
                 setNextStep={setNextStep}
-                isSmallScreen={isSmallScreen}
-                isTabletScreen={isTabletScreen}
-                showActivity={showActivity}
                 renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={true}

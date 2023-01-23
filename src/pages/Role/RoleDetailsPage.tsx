@@ -475,7 +475,12 @@ const RoleDetailsPage = () => {
             {roleData ? (
               <>
                 {permissions.role.isUpdate && (
-                  <Button disabled={isUpdating || checkError()} variant="contained" color="primary" size="small" onClick={handleUpdateRole}>
+                  <Button
+                    disabled={isUpdating || checkError()}
+                    variant="contained"
+                    color="primary"
+                    size="medium"
+                    onClick={handleUpdateRole}>
                     {isUpdating ? <CircularProgress size={22} /> : 'Update'}
                   </Button>
                 )}
@@ -496,7 +501,7 @@ const RoleDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Grid container spacing={1} className="detail-container">
+        <Grid container spacing={1} >
           <Grid item xs={12} sm={12} md={8} lg={8}>
             <Box display="flex" marginTop={2} marginBottom={2} gridGap={10} px={1}>
               <TextField
@@ -720,7 +725,6 @@ const RoleDetailsPage = () => {
           </Grid>
         </Grid>
       </Box>
-
       {showAssignUserDialog &&
         (roleData?.type === roleTypes.find((d) => d.key === 'Global')?.value ? (
           <AssignUserDialog
@@ -754,10 +758,10 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-              : entityDeleteRec
-              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-              : ''
+                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+                : entityDeleteRec
+                  ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+                  : ''
           }
           onClose={() => {
             setShowConfirmBox(false);

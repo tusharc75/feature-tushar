@@ -11,7 +11,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { salesOrder, defaultActivityShow, salesOrderProcessSteps, getUniqueCurrencies, ACTIVITY_RESOURCE } from '../../constants/helpers';
+import { salesOrder, salesOrderProcessSteps, getUniqueCurrencies, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
@@ -27,9 +27,6 @@ import Invoice from './Invoice';
 import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { GrStatusInfo } from 'react-icons/all';
-import HideWhenOffline from '../../components/HideWhenOffline';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-import Activity from '../../components/Activity';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -46,9 +43,6 @@ const SalesOrderDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
-
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [salesOrderData, setSalesOrderData] = useState(null);
@@ -60,7 +54,6 @@ const SalesOrderDetails = () => {
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -77,24 +70,6 @@ const SalesOrderDetails = () => {
       'aria-controls': `main-tabpanel-${index}`
     };
   }
-
-  // useEffect(() => {
-  //   if (id) {
-  //   }
-  //   // eslint-disable-next-line
-  // }, [id]);
-
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
 
   const handleStatusChange = (o) => {
     if (o.optionValue && salesOrderData?.status !== o.optionValue) {
@@ -126,7 +101,7 @@ const SalesOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${salesOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -349,7 +324,6 @@ const SalesOrderDetails = () => {
                 setNextStep={setNextStep}
                 currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-1`}
-                showActivity={showActivity}
                 stepFullScreen={stepFullScreen}
               />
             )}
@@ -360,9 +334,6 @@ const SalesOrderDetails = () => {
                       <SerializedAsset
                         salesOrderData={salesOrderData}
                         setNextStep={setNextStep}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
                         currencySymbol={currencySymbol}
                         renderedFrom={`${renderedFrom}_grid-3`}  
                       />

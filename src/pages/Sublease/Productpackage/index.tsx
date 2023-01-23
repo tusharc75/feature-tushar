@@ -33,10 +33,7 @@ const Productpackage = ({
   isIssued,
   renderedFrom,
   allowedToEdit,
-  stepFullScreen,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity
+  stepFullScreen
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {

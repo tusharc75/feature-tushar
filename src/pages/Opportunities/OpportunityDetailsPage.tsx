@@ -9,7 +9,6 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import axiosInstance from './../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
-import Activity from '../../components/Activity';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageOpportunityDialog from './ManageOpportunityDialog/ManageOpportunityDialog';
@@ -24,8 +23,7 @@ import {
   customerContact,
   getObjKeysWithValues,
   processFieldName,
-  formatAmountWithCurrency,
-  defaultActivityShow
+  formatAmountWithCurrency
 } from '../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { opportunity, sidebarResource } from '../../constants/helpers';
@@ -38,12 +36,10 @@ import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccord
 import ProcessFlow from '../../components/ProcessFlow';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { SVG } from '../../assets';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { BiEdit } from 'react-icons/bi';
-import contactClass from '../Contact/contact.module.scss';
-import accountClass from '../Account/account.module.scss';
+
 import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const recordsPerLine = 3;
@@ -53,7 +49,6 @@ function OpportunityDetailsPage() {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(true);
   const [opportunityData, setOpportunityData] = useState(null);
@@ -71,7 +66,6 @@ function OpportunityDetailsPage() {
   const [supplierContacts, setSupplierContacts] = useState([]);
   const [customerContacts, setCustomerContacts] = useState([]);
   const [quotes, setQuotes] = useState([]);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
   const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' });
@@ -96,9 +90,6 @@ function OpportunityDetailsPage() {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [, setShowAtLast] = useState(false);
   const [, setAdditionalFieldName] = useState('');
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
 
   const handleOpenUpdateDialog = () => {
     if (activeStep === steps.length - 1) {
@@ -133,11 +124,6 @@ function OpportunityDetailsPage() {
     }
   }, [id]);
 
-  useEffect(() => {
-    if (isSmallScreen) {
-      setActivityShow(true);
-    }
-  }, [isSmallScreen]);
 
   useEffect(() => {
     if (

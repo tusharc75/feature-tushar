@@ -32,9 +32,6 @@ const TechnicianDispatch = ({
     serviceOrderData,
     setNextStep,
     currencySymbol,
-    isTabletScreen,
-    isSmallScreen,
-    showActivity,
     renderedFrom,
     stepFullScreen,
     allowedToEdit

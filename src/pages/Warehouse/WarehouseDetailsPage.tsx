@@ -15,7 +15,6 @@ import ManageWarehouse from './ManageWarehouse';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { BiEdit } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 import { MdDelete } from 'react-icons/md';
 
 const WarehouseDetailsPage = () => {

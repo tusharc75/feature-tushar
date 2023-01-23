@@ -13,7 +13,6 @@ import { ACTIVITY_RESOURCE, serviceMaster } from '../../constants/helpers';
 import ManageServiceMaster from './ManageServiceMaster';
 import { BiEdit } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import LeadTimeMaster from '../../components/LeadTime';

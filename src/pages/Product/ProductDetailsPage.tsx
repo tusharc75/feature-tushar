@@ -32,7 +32,6 @@ import ParentProduct from './ParentProduct';
 import NonSerializedAssetProductInventory from './inventory';
 import ProductRepairType from './RepairType';
 import { MdDelete } from 'react-icons/md';
-import accountClass from '../Account/account.module.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit } from 'react-icons/bi';
 import InventoryHistory from './InventoryHistory';

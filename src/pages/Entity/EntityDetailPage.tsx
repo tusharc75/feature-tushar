@@ -7,7 +7,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import BoxWithBorder from '../../components/BoxWithBorder';
@@ -19,12 +18,10 @@ import AssignUserDialog from '../../components/AssignRolesDialog/AssignEntityDia
 import AssignedUsers from './AssignedUsers';
 import ManageEntity from './ManageEntity';
 import NewStepper from '../../components/Helpers/NewStepper';
-import { isObjectEmpty } from '../../constants/helpers';
 import DoaDialog from '../DoaSetup/ManageDoa/ManageDoaDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 import { BiEdit } from 'react-icons/bi';
 import { MdDelete } from 'react-icons/md';
 
@@ -293,9 +290,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          name: `${user.firstName} ${user.lastName}`
-        }))
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`
+      }))
       : [];
 
     setUserList(rows);
@@ -334,62 +331,52 @@ const EntityDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         <Grid container spacing={1}>
           <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-            {/* {entityData && <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true} />} */}
             <Box>
               {loading || !entityFields.length ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
                   <CommonSkeleton lenArray={[...Array(7).keys()]} />
                 </Grid>
               ) : (
-                <>
-                  <Box width="100%" padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between">
-                    <Typography variant="subtitle2">Entity Detail</Typography>
-                  </Box>
-                  <DetailsPage data={entityData} fields={fieldsToShowInDetailPage} />
-                </>
+                <DetailsPage data={entityData} fields={fieldsToShowInDetailPage} />
               )}
             </Box>
-            {
-              <>
-                <Box>
-                  <Box width="100%" padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between">
-                    <Grid container>
-                      <Grid item xs={8}>
-                        <Box display="flex">
-                          <Box padding="5px">
-                            <Typography variant="subtitle2">{'DOA Details '}</Typography>
-                          </Box>
-                        </Box>
-                      </Grid>
-                      <Grid item container xs={4} justify="flex-end">
-                        {permissions.entity?.isUpdate && user?.user?.permissions?.doaSetup && (
-                          <Button variant="contained" color="primary" size="small" onClick={() => setDoaDialogOpen(true)}>
-                            {doa.length > 0 ? 'Edit DOA' : 'Add DOA'}
-                          </Button>
-                        )}
-                      </Grid>
-                    </Grid>
-                  </Box>
-                </Box>
-                <Grid container style={{ padding: '8px' }} spacing={1}>
-                  <Grid item xs={12} sm={12}>
-                    <BoxWithBorder
-                      style={{
-                        padding: '0px'
-                      }}
-                    >
-                      {doa.length > 0 ? (
-                        <NewStepper heading={' '} steps={doa} doaCurrency={doaCurrency} doaApproveType={doaApproveType} />
-                      ) : (
-                        <Box textAlign="center" marginTop={2}>
-                          <Typography variant="body2">Entity doesn't have any DOA</Typography>
-                        </Box>
-                      )}
-                    </BoxWithBorder>
+            <Box>
+              <Box width="100%" padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between">
+                <Grid container>
+                  <Grid item xs={8}>
+                    <Box display="flex">
+                      <Box padding="5px">
+                        <Typography variant="subtitle2">{'DOA Details '}</Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                  <Grid item container xs={4} justify="flex-end">
+                    {permissions.entity?.isUpdate && user?.user?.permissions?.doaSetup && (
+                      <Button variant="contained" color="primary" size="small" onClick={() => setDoaDialogOpen(true)}>
+                        {doa.length > 0 ? 'Edit DOA' : 'Add DOA'}
+                      </Button>
+                    )}
                   </Grid>
                 </Grid>
-              </>
-            }
+              </Box>
+            </Box>
+            <Grid container style={{ padding: '8px' }} spacing={1}>
+              <Grid item xs={12} sm={12}>
+                <BoxWithBorder
+                  style={{
+                    padding: '0px'
+                  }}
+                >
+                  {doa.length > 0 ? (
+                    <NewStepper heading={' '} steps={doa} doaCurrency={doaCurrency} doaApproveType={doaApproveType} />
+                  ) : (
+                    <Box textAlign="center" marginTop={2}>
+                      <Typography variant="body2">Entity doesn't have any DOA</Typography>
+                    </Box>
+                  )}
+                </BoxWithBorder>
+              </Grid>
+            </Grid>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
             <Paper style={{ overflow: 'hidden' }}>
@@ -456,7 +443,6 @@ const EntityDetailsPage = () => {
           </Grid>
         </Grid>
       </Box>
-
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
