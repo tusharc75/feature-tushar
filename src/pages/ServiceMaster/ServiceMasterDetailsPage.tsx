@@ -5,11 +5,10 @@ import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, serviceMaster } from '../../constants/helpers';
+import { serviceMaster } from '../../constants/helpers';
 import ManageServiceMaster from './ManageServiceMaster';
 import { BiEdit } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -19,7 +18,6 @@ import LeadTimeMaster from '../../components/LeadTime';
 import Steps from './Steps';
 import Product from './Product';
 import { Skeleton } from '@material-ui/lab';
-import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const ServiceMasterDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -112,40 +110,44 @@ const ServiceMasterDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab label={<div className='tab-font'>Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0"  className={'tabLayout'}/>
-          <Tab label={<div className='tab-font'>Steps</div>} value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className={'tabLayout'}/>
-          <Tab label={<div className='tab-font'>Consumables</div>} value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2"  className={'tabLayout'}/>
-        </Tabs>
-        {tabValue === 0 && (
-          <Box>
-            {loading || (!fields.length && serviceMasterDetailData != null) ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={serviceMasterDetailData} fields={fields} />
+        <Grid container spacing={2}>
+          <Grid item xs={permissions?.leadTimeMaster?.isRead ? 8 : 12}>
+            <Tabs
+              className="new-tab-container-v1"
+              value={tabValue}
+              onChange={handleMainTabChange}
+              textColor="primary"
+              TabIndicatorProps={{
+                style: {
+                  height: 0
+                }
+              }}
+            >
+              <Tab label={<div className='tab-font'>Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+              <Tab label={<div className='tab-font'>Steps</div>} value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className={'tabLayout'} />
+              <Tab label={<div className='tab-font'>Consumables</div>} value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className={'tabLayout'} />
+            </Tabs>
+            {tabValue === 0 && (
+              <Box>
+                {loading || (!fields.length && serviceMasterDetailData != null) ? (
+                  <Grid container spacing={2} style={{ padding: '8px' }}>
+                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  </Grid>
+                ) : (
+                  <DetailsPage data={serviceMasterDetailData} fields={fields} />
+                )}
+              </Box>
             )}
-          </Box>
-        )}
-        {tabValue === 1 && <Steps serviceId={id} />}
-        {tabValue === 2 && <Product id={id} />}
+            {tabValue === 1 && <Steps serviceId={id} />}
+            {tabValue === 2 && <Product id={id} />}
 
-        <Grid item xs={12}>
+          </Grid>
           {permissions?.leadTimeMaster?.isRead && (
-            <Box mb={2}>
-              <LeadTimeMaster Id={id} type={'service'} />
-            </Box>
+            <Grid item xs={4}>
+              <Box mb={2}>
+                <LeadTimeMaster Id={id} type={'service'} />
+              </Box>
+            </Grid>
           )}
         </Grid>
       </Box>
