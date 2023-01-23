@@ -32,9 +32,6 @@ const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm
 const WorkOrder = ({
   repairOrderData,
   setNextStep,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity,
   stepFullScreen,
   allowedToEdit,
   allowedToDelete,
@@ -98,25 +95,27 @@ const WorkOrder = ({
             </Box>
             <Chip
               className="ml-1"
-              label={`${row.original.type === 'service'
-                ? 'Service'
-                : row.original.type === 'product'
+              label={`${
+                row.original.type === 'service'
+                  ? 'Service'
+                  : row.original.type === 'product'
                   ? 'Product'
                   : row.original.type === 'serializedAsset'
-                    ? 'Asset'
-                    : 'Package'
-                }`}
+                  ? 'Asset'
+                  : 'Package'
+              }`}
               size="small"
               color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'service'
-                    ? routes.serviceMasterDetail.path
-                    : row.original.type === 'product'
+                  `${
+                    row.original.type === 'service'
+                      ? routes.serviceMasterDetail.path
+                      : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : routes.packagesDetail.path
+                      ? routes.serializedAssetDetail.path
+                      : routes.packagesDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -351,35 +350,37 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service'
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'serializedAsset'
-            ? parent?.serializedAsset?.assetNumber
-            : parent?.packageDetail?.packageName
-        }`;
+          ? parent?.serializedAsset?.assetNumber
+          : parent?.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'serializedAsset'
-                ? parent?.serializedAssetDetail?.product?.productDesc || ''
-                : '';
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAssetDetail?.product?.productDesc || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === 'service'
-        ? parent.serviceDetail?.status
-        : parent.type === 'product'
+      parent.status = `${
+        parent.type === 'service'
+          ? parent.serviceDetail?.status
+          : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
-        }`;
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
@@ -423,18 +424,18 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow?.serializedAsset?.assetNumber
-              : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow?.serializedAsset?.assetNumber
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -592,19 +593,19 @@ const WorkOrder = ({
                   disabled={
                     selectedProducts?.filter((e) => e.type === 'service').length
                       ? selectedServices?.filter(
-                        (d) =>
-                          d.type === 'service' &&
-                          d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
-                          d.status === WORKORDER_SERVICE_STATUS.pending
-                      )?.length === selectedServices?.length
+                          (d) =>
+                            d.type === 'service' &&
+                            d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
+                            d.status === WORKORDER_SERVICE_STATUS.pending
+                        )?.length === selectedServices?.length
                         ? false
                         : true
                       : selectedAssets?.length
-                        ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
-                          selectedAssets?.length
-                          ? false
-                          : true
+                      ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
+                        selectedAssets?.length
+                        ? false
                         : true
+                      : true
                   }
                 >
                   Delete
@@ -617,13 +618,9 @@ const WorkOrder = ({
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={'100%'}
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-            >
+            <Box zIndex={5} width={'100%'}>
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                 columns={columns}
                 data={rowsData}
                 onSelect={(data) => {

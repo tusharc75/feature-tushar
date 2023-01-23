@@ -330,10 +330,6 @@ const WorkOrder = () => {
       <div className="header-panel">
         <Grid container className={isMobile ? styles.mobile_filter_side_container_workOrder_ticket : styles.filter_side_container_workOrder_ticket}>
           <Grid item xs={isMobile && !isTablet ? 12 : 6} className="d-flex align-items-center gap-1">
-            <Grid>
-              <GiAbstract055 className="headerLogo" />
-              <span className="listingHeader">{routes.workOrder.title} </span>
-            </Grid>
             <HideWhenOffline>
               <div className={`align-items-center gap-1 layout-for-mobile `}>
                 {WorkOrderType && (

@@ -208,8 +208,6 @@ const WorkOrderSupervisor = () => {
           <div className="header-panel">
             <Grid container>
               <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center gap-1">
-                <MdOutlineSupervisorAccount size={25} style={{ paddingBottom: '3px' }} className="headerLogo" />
-                <span className="listingHeader">{routes.workOrderSupervisor.title}</span>
                 <Autocomplete
                   style={{ width: '200px' }}
                   options={usersData}

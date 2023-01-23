@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Divider, IconButton, makeStyles, useMediaQuery, Menu, MenuItem, Button } from '@material-ui/core';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import axiosInstance from '../../axios/axiosInstance';
@@ -70,6 +70,7 @@ export default function ImportExportLinks({
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
+
   const toastConfig = useContext(CustomToastContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -217,7 +218,7 @@ export default function ImportExportLinks({
 
   return !onlyExport ? (
     <div id="importExportLinks" className={!isDropDownIconShow && `${classes.root}`}>
-      {!isDropDownIconShow ? (
+      {!isMobile ? (
         <div className={classes.linksContainer}>
           {permissions?.isCreate && (
             <>
@@ -253,7 +254,7 @@ export default function ImportExportLinks({
         </label> */}
         </div>
       ) : (
-        <Menu id="import-export-links" anchorEl={anchorEl} keepMounted={false} open={open} onClose={handleClose}>
+        <Menu id="import-export-links" anchorEl={anchorEl} open={open} onClose={handleClose}>
           {permissions?.isCreate && (
             <MenuItem>
               <label htmlFor="importFromExcel" className="new-headerbox-button-v1">
@@ -291,7 +292,7 @@ export default function ImportExportLinks({
     </div>
   ) : (
     <div id="importExportLinks" className={!isDropDownIconShow && `${classes.root}`}>
-      {!isDropDownIconShow ? (
+      {!isMobile ? (
         <div className={classes.linksContainer}>
           <label onClick={exportToExcel} className={` new-headerbox-button-v1`}>
             Export to Excel{' '}
@@ -299,7 +300,7 @@ export default function ImportExportLinks({
           </label>
         </div>
       ) : (
-        <Menu id="import-export-links" anchorEl={anchorEl} keepMounted={false} open={open} onClose={handleClose}>
+        <Menu id="import-export-links" anchorEl={anchorEl} open={open} onClose={handleClose}>
           {console.log('hi')}
           <MenuItem
             onClick={() => {

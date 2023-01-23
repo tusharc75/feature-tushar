@@ -29,7 +29,7 @@ const Survey = () => {
   const renderedFrom = camelCase(routes?.surveys.title);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, selectedEntity,user }
+    state: { permissions, selectedEntity, user }
   }: any = useData();
 
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -57,7 +57,14 @@ const Survey = () => {
           if (o?.fieldData?.primaryField === true) {
             columns = [
               ...columns,
-              { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer', primaryField: true }
+              {
+                field: o?.fieldData?.fieldName,
+                headerName: o?.fieldData?.fieldLabel,
+                show: true,
+                disabled: true,
+                cellRenderer: 'nameRenderer',
+                primaryField: true
+              }
             ];
           } else {
             let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.surveys.path);
@@ -94,8 +101,8 @@ const Survey = () => {
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data.map((u: any) => {
-          let finalObject:any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions.surveys.isDelete  && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+          let finalObject: any = prepareDataForGrid(u);
+          finalObject['canDelete'] = permissions.surveys.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions.surveys.isUpdate;
 
@@ -209,7 +216,7 @@ const Survey = () => {
   };
 
   const ActionsRenderer = (params) => (
-      <Fragment>
+    <Fragment>
       {permissions?.surveys?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
@@ -226,7 +233,7 @@ const Survey = () => {
       ) : (
         <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
           <IconButton aria-label="Clone" size="small">
-            <FileCopyIcon fontSize="small"  />
+            <FileCopyIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       )}
@@ -246,7 +253,7 @@ const Survey = () => {
       ) : (
         <Tooltip className="cursor-stop" title="You do not have permission to delete">
           <IconButton aria-label="Delete" size="small">
-            <DeleteIcon fontSize="small"/>
+            <DeleteIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       )}
@@ -286,7 +293,6 @@ const Survey = () => {
     fetchSurveyData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -321,14 +327,10 @@ const Survey = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <RiSurveyLine size={20} style={{ paddingBottom: '3px' }} />
-                <span className="listingHeader">{routes.surveys.title}</span>
-              </div>
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ width: '100%', display: 'flex' }}>
+                <Grid>
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}
@@ -355,47 +357,51 @@ const Survey = () => {
                     </Button>
                   )}
                   {permissions?.surveys?.isDelete && (
-                      <>
-                       <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    disabled={selectedRecords.length ? false : true}
-                    aria-controls="action-menu"
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                  >
-                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                    disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e)=>e?.canDelete === true)?.length) === selectedRecords?.length)}
-                      onClick={() => {
-                        closeActions();
-                        // eslint-disable-next-line no-lone-blocks
-                        {
-                          selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                        }
-                        setShowDeleteConfirmBox(true);
-                      }}
-                    >
-                      Delete
-                    </MenuItem> 
-                  </Menu>
-                      </>
+                    <>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        disabled={selectedRecords.length ? false : true}
+                        aria-controls="action-menu"
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      >
+                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        <MenuItem
+                          disabled={
+                            !(
+                              (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) ===
+                              selectedRecords?.length
+                            )
+                          }
+                          onClick={() => {
+                            closeActions();
+                            // eslint-disable-next-line no-lone-blocks
+                            {
+                              selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                            }
+                            setShowDeleteConfirmBox(true);
+                          }}
+                        >
+                          Delete
+                        </MenuItem>
+                      </Menu>
+                    </>
                   )}
-                 
                 </Grid>
               </Box>
             </Grid>

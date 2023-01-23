@@ -24,9 +24,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
-
 const FrequentlyAskedQuestion = () => {
-  const renderedFrom = camelCase(routes?.frequentlyAskedQuestion.title)
+  const renderedFrom = camelCase(routes?.frequentlyAskedQuestion.title);
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
@@ -36,8 +35,8 @@ const FrequentlyAskedQuestion = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-    const { getColumnData } = useColumns();
-    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+  const { getColumnData } = useColumns();
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -47,7 +46,7 @@ const FrequentlyAskedQuestion = () => {
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
-  const [freqentlyAskedQuestionId, setFrequentlyAskedQuestionId] = useState(null)
+  const [freqentlyAskedQuestionId, setFrequentlyAskedQuestionId] = useState(null);
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -59,56 +58,55 @@ const FrequentlyAskedQuestion = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-    .get('/field?resource=Frequently Asked Question')
-    .then(({data:{data}})=>{
-      let columns = [];
-      let rendererNames = [];
-      data.forEach((o) => {
-        if (['label'].find((d) => d === o?.fieldData?.fieldName)) {
-          columns = [
-            ...columns,
-            {
-              disabled: false,
-              field: 'label',
-              headerName: 'Label',
-              pivotIndex: 0,
-              show: true,
-              cellRenderer: 'nameRenderer',
-              primaryField: true
-            }
-          ];
-        } else {
-          if (o?.fieldData?.primaryField === true) {
+      .get('/field?resource=Frequently Asked Question')
+      .then(({ data: { data } }) => {
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
+          if (['label'].find((d) => d === o?.fieldData?.fieldName)) {
             columns = [
               ...columns,
-              { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
+              {
+                disabled: false,
+                field: 'label',
+                headerName: 'Label',
+                pivotIndex: 0,
+                show: true,
+                cellRenderer: 'nameRenderer',
+                primaryField: true
+              }
             ];
           } else {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.frequentlyAskedQuestion.path);
+            if (o?.fieldData?.primaryField === true) {
+              columns = [
+                ...columns,
+                { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
+              ];
+            } else {
+              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.frequentlyAskedQuestion.path);
 
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName);
+              if (currentColumn !== null) {
+                columns = [...columns, currentColumn?.columnData];
+                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                  rendererNames.push(currentColumn?.rendererName);
+                }
               }
             }
           }
-        }
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          nameRenderer: NameRenderer,
+          actionsRenderer: ActionsRenderer
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...getStaticFields()];
+        setColumns([...columns]);
       });
-      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-      tempFrameworkComponent = {
-        ...tempFrameworkComponent,
-        nameRenderer: NameRenderer,
-        actionsRenderer: ActionsRenderer
-      };
-      setFrameWorkComponent({ ...tempFrameworkComponent });
-      columns = [...columns, ...getStaticFields()];
-      setColumns([...columns]);
-    })
-  }
+  };
 
-
-  const fetchFrequentlyAskedQuestionData= () => {
+  const fetchFrequentlyAskedQuestionData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
@@ -116,15 +114,16 @@ const FrequentlyAskedQuestion = () => {
       gridApi.setRowData([]);
     }
 
-      axiosInstance().get(`/frequently-asked-question${queryString}`)
+    axiosInstance()
+      .get(`/frequently-asked-question${queryString}`)
       .then(({ data: { data } }) => {
-        let count = data?.count
+        let count = data?.count;
         let rows = data?.data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.frequentlyAskedQuestion?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.frequentlyAskedQuestion?.isUpdate;
-         
+
           return {
             ...finalObject
           };
@@ -165,64 +164,63 @@ const FrequentlyAskedQuestion = () => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       });
-  }
+  };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-
   const NameRenderer = (params) => {
-   return <span className=" d-flex gap-2 align-items-center">
+    return (
+      <span className=" d-flex gap-2 align-items-center">
         <Link className="link" to={`${routes.frequentlyAskedQuestionDetail.path}/${params.data._id}`}>
-         {params.value}
+          {params.value}
         </Link>
-    </span>
+      </span>
+    );
   };
 
   const ActionsRenderer = (params) => (
     <Fragment>
       {permissions?.freqentlyAskedQuestion?.isCreate ? (
-            <Tooltip
-            title='Clone'
+        <Tooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setFrequentlyAskedQuestionId(params.data.id);
+              setOpen({ open: true, isClone: true });
+            }}
           >
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              onClick={() => {
-                setFrequentlyAskedQuestionId(params.data.id);
-                setOpen({ open: true, isClone: true });
-              }}
-            >
-              <FileCopyIcon fontSize="small" color="primary" />
-            </IconButton>
-          </Tooltip>
-      ):(
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-        <IconButton aria-label="Clone" size="small">
-          <FileCopyIcon fontSize="small"  />
-        </IconButton>
-      </Tooltip>
-      )}
-        {permissions?.freqentlyAskedQuestion?.isDelete ? (
-           <Tooltip title="Delete">
-           <IconButton
-             aria-label="Delete"
-             onClick={() => {
-               setDeleteRecord(params.data);
-               setShowDeleteConfirmBox(true);
-             }}
-           >
-             <DeleteIcon fontSize="small" color="error" />
-           </IconButton>
-         </Tooltip>
-        ):(
-          <Tooltip className="cursor-stop" title="You do not have permission to delete">
-          <IconButton aria-label="Delete" size="small">
-            <DeleteIcon fontSize="small"/>
+            <FileCopyIcon fontSize="small" color="primary" />
           </IconButton>
         </Tooltip>
-        )}
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+          <IconButton aria-label="Clone" size="small">
+            <FileCopyIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+      {permissions?.freqentlyAskedQuestion?.isDelete ? (
+        <Tooltip title="Delete">
+          <IconButton
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(params.data);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to delete">
+          <IconButton aria-label="Delete" size="small">
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
     </Fragment>
   );
 
@@ -238,7 +236,6 @@ const FrequentlyAskedQuestion = () => {
         return field;
     }
   };
-
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
@@ -267,7 +264,7 @@ const FrequentlyAskedQuestion = () => {
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -280,30 +277,29 @@ const FrequentlyAskedQuestion = () => {
     }
     axiosInstance()
       .put(`/frequently-asked-question/remove`, { ids: ids })
-      .then(({data}) => {
-        removeLocalStorage(localStorageSelectedRecords)
+      .then(({ data }) => {
+        removeLocalStorage(localStorageSelectedRecords);
         fetchFrequentlyAskedQuestionData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data?.message,
-      });
+          type: 'success',
+          message: data?.message
+        });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchGridColumns();
-  },[])
+  }, []);
 
   useEffect(() => {
     fetchFrequentlyAskedQuestionData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
-
 
   return (
     <Fragment>
@@ -339,15 +335,12 @@ const FrequentlyAskedQuestion = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <FaQuestionCircle size={20} style={{ paddingBottom: '3px' }} />
-                <span className="listingHeader">{routes.frequentlyAskedQuestion.title}</span>
-              </div>
+        
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ width: '100%', display: 'flex' }}>
-                <SearchBox
+                <Grid>
+                  <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}
                     width={isMobile ? '200px' : '242px'}
@@ -359,58 +352,58 @@ const FrequentlyAskedQuestion = () => {
                 <Grid style={{ display: 'flex', gap: '5px' }}>
                   {permissions?.freqentlyAskedQuestion?.isCreate && (
                     <Button
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                    onClick={() => {
-                      setFrequentlyAskedQuestionId(null)
-                      setOpen({ open: true, isClone: false });
-                    }}
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    color="primary"
-                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                  >
-                    {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                  </Button>
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                      onClick={() => {
+                        setFrequentlyAskedQuestionId(null);
+                        setOpen({ open: true, isClone: false });
+                      }}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      size="small"
+                      color="primary"
+                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                    >
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                    </Button>
                   )}
                   {permissions?.freqentlyAskedQuestion?.isDelete && (
-                      <>
-                         <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                    >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                    </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        // eslint-disable-next-line no-lone-blocks
-                        {
-                          selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                        }
-                        setShowDeleteConfirmBox(true);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </Menu>
-                      </>
+                    <>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        disabled={selectedRecords.length ? false : true}
+                        aria-controls="action-menu"
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      >
+                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            // eslint-disable-next-line no-lone-blocks
+                            {
+                              selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                            }
+                            setShowDeleteConfirmBox(true);
+                          }}
+                        >
+                          Delete
+                        </MenuItem>
+                      </Menu>
+                    </>
                   )}
                 </Grid>
               </Box>
@@ -473,26 +466,26 @@ const FrequentlyAskedQuestion = () => {
             />
           )
         ) : null}
-         {showDeleteConfirmBox && (
+        {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${routes?.frequentlyAskedQuestion?.title?.toLowerCase()}  ${deleteRecord?.name || ''} ?`}
             onClose={() => {
-              setDeleteRecord(null)
-              setShowDeleteConfirmBox(false)
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
             }}
             onOk={handleDelete}
           />
         )}
 
-         {open?.open && (
+        {open?.open && (
           <ManageFrequentlyAskedQuestion
             id={freqentlyAskedQuestionId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
-          fetchFrequentlyAskedQuestionData()
+              fetchFrequentlyAskedQuestionData();
             }}
           />
         )}

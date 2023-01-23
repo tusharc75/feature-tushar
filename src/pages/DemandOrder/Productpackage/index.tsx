@@ -573,12 +573,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
       </Box>
       {columns && rowsData ? (
         <>
-          <Box
-            p="6px"
-            zIndex={5}
-            width={'100%'}
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-          >
+          <Box p="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
               columns={columns}

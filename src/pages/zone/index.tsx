@@ -30,13 +30,12 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { FaSuitcase } from 'react-icons/fa';
-import MobileSortDialog from "../../components/MobileSortDialog"
-import MobileFilterDialog from "../../components/MobileFilterDialog"
+import MobileSortDialog from '../../components/MobileSortDialog';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 
-
 const Zone = () => {
-  const renderedFrom = camelCase(routes?.zone.title)
+  const renderedFrom = camelCase(routes?.zone.title);
   const history = useHistory();
   const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
@@ -53,14 +52,14 @@ const Zone = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
-  const [isOpenDialog, setisOpenDialog] = useState(false)
+  const [isOpenDialog, setisOpenDialog] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-
 
   useEffect(() => {
     const parsedParams = queryString.parse(location?.search);
@@ -70,7 +69,6 @@ const Zone = () => {
     }
   }, [location]);
 
-
   useEffect(() => {
     fetchZone();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
@@ -78,7 +76,6 @@ const Zone = () => {
   useEffect(() => {
     fetchGridColumns();
   }, []);
-
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -134,8 +131,7 @@ const Zone = () => {
     <Link className="link" title={params.value} to={`${routes.zoneDetail.path}/${params.data._id}`}>
       {params.value}
     </Link>
-
-  )
+  );
 
   const ActionsRenderer = (params) => (
     <Fragment>
@@ -216,7 +212,7 @@ const Zone = () => {
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -238,7 +234,6 @@ const Zone = () => {
           finalObject['allowedToEdit'] = permissions?.zone?.isUpdate;
           return {
             ...finalObject
-
           };
         });
         setIsAllChecked(false);
@@ -325,13 +320,11 @@ const Zone = () => {
 
   const handleClickClose = () => {
     setSortOpen(false);
-
   };
 
   const handleFilterClose = () => {
     setisOpenDialog(false);
   };
-
 
   return (
     <Fragment>
@@ -362,11 +355,7 @@ const Zone = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-              <div className="d-flex align-items-center">
-                <GiFireZone size={20} style={{ paddingBottom: '3px' }} />
-                <span className="listingHeader">{routes.zone.title}</span>
-              </div>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
               {isMobile && (
                 <>
                   <Grid style={{ display: 'inline-flex' }}>
@@ -422,7 +411,7 @@ const Zone = () => {
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ width: '100%', display: 'flex' }}>
+                <Grid>
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}
@@ -522,9 +511,7 @@ const Zone = () => {
                   field: 'name'
                 }
               ]}
-              chips={[
-
-              ]}
+              chips={[]}
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={true}
@@ -560,7 +547,7 @@ const Zone = () => {
             message={`Are you sure you want to delete zone  ${deleteRecord?._id ? deleteRecord?.name : ''}?`}
             onClose={() => {
               setDeleteRecord(null);
-              setShowDeleteConfirmBox(false)
+              setShowDeleteConfirmBox(false);
             }}
             onOk={handleDelete}
           />

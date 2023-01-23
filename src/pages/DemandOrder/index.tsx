@@ -32,11 +32,20 @@ import { camelCase } from 'lodash';
 
 let searchTimeout;
 
-const DemandOrder = () => {
+const DemandOrderType = [
+    {
+        key: 'All Demand Order',
+        value: 1
+    },
+    {
+        key: 'My Demand Order',
+        value: 2
+    }
+];
 
+const DemandOrder = () => {
   const renderedFrom = camelCase(routes?.demandOrder.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -277,6 +286,7 @@ const DemandOrder = () => {
 
   const handleSalesOrderTypeSel = (filterValues) => {
     setSelectedType(filterValues);
+    history.push(`?type=${filterValues}`)
   };
 
   const handleTransferEntityDialog = () => {
@@ -373,8 +383,10 @@ const DemandOrder = () => {
         <div className="header-panel">
           {columns && (
             <SalesOrderHeader
+              selectedType={selectedType}
               selectedRecords={selectedRecords}
               onTypeChange={handleSalesOrderTypeSel}
+              options={DemandOrderType}
               onSearch={handleSearch}
               searchVal={search}
               SalesOrderPermissions={permissions?.demandOrder}
@@ -477,11 +489,7 @@ const DemandOrder = () => {
             }
             onOk={handleSingleDeleteSalesOrder}
           />
-        ) : (
-          <Box p={2} height={500} bgcolor="white">
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
+        ) : null}
       </CustomContainer>
       {showManageSalesOrderDialog.open && (
         <ManageSalesOrderDialog

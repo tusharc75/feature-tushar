@@ -30,7 +30,7 @@ const useStyles = makeStyles(() => ({
     backgroundColor: '#f8fffe',
     zIndex: 1,
     ['@media (max-width:900px)']: {
-      paddingInline: '24px',
+      paddingInline: '13px',
       width: '100%'
     }
   }

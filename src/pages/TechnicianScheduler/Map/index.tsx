@@ -1,29 +1,13 @@
-import React from 'react';
-import { Box, Typography, CircularProgress } from '@material-ui/core';
+import React, { useEffect } from 'react';
+import { Box, CircularProgress } from '@material-ui/core';
 import { GoogleMap, Marker, MarkerClusterer, InfoWindow, Polyline } from '@react-google-maps/api';
 import axiosInstance from '../../../axios/axiosInstance';
 
-type locationType = {
-  count: number;
-  location: {
-    concatedName: string;
-    latitude: number;
-    longitude: number;
-  };
-  _id: string | any;
-};
-
-interface MapViewProps {
-  data: any[];
-  onClose: () => void;
-}
-
-const MapView = (props: MapViewProps) => {
-  const { data, onClose } = props;
-  const [isFetching, setFetching] = React.useState(false);
+const MapView = ({ technician, onClose }) => {
   const [center, setCenter] = React.useState(null);
-  const [selectedAsset, setSelectedAsset] = React.useState([]);
-  const [selectedBase, setSelectedBase] = React.useState(null);
+  const [serviceData, setServiceData] = React.useState([]);
+  const [selectedService, setSelectedService] = React.useState(null);
+  const [loadingData, setLoadingData] = React.useState(false);
 
   const containerStyle = {
     minHeight: '500px',
@@ -32,26 +16,28 @@ const MapView = (props: MapViewProps) => {
     minWidth: '100%'
   };
 
-  //   const fetchLocationData = React.useCallback(async (id: string, assetData: locationType) => {
-  //     setSelectedBase(assetData);
-  //     setSelectedAsset([]);
-  //     setFetching(true);
-  //     try {
-  //       const {
-  //         data: { data }
-  //       } = await axiosInstance().get(`dashboard/location-base-status-count?location=${id}`);
-  //       if (data) {
-  //         setSelectedAsset(data);
-  //       }
-  //       setFetching(false);
-  //     } catch (error) {
-  //       setFetching(false);
-  //     }
-  //   }, []);
+  useEffect(() => {
+    fetchData();
+  }, [technician]);
+
+  const fetchData = async () => {
+    setLoadingData(true);
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/technician-scheduler/technician-service/${technician}`);
+      if (data) {
+        setServiceData(data);
+      }
+      setLoadingData(false);
+    } catch (error) {
+      setLoadingData(false);
+    }
+  };
 
   if (!window.google || typeof window.google !== 'object') return <div>Loading...</div>;
 
-  return (
+  return !loadingData ? (
     <Box width={'100%'} height={'100%'} overflow="hidden" borderRadius={1}>
       <GoogleMap
         options={{
@@ -86,77 +72,48 @@ const MapView = (props: MapViewProps) => {
         <MarkerClusterer>
           {(clusterer) => (
             <>
-              {data.map(
-                (asset: locationType) =>
-                  asset?._id && (
-                    <Marker
-                      key={asset._id}
-                      label={{
-                        text: asset.count.toString(),
-                        fontWeight: 'bold',
-                        color: 'white',
-                        fontSize: '14px'
-                      }}
-                      // onClick={() => {
-                      //   //   setCenter(new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude));
-                      //   //   fetchLocationData(asset._id, asset);
-                      // }}
-                      position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}
-                      clusterer={clusterer}
-                    />
-                  )
-              )}
+              {serviceData?.map((data: any, index) => (
+                <Marker
+                  key={data._id}
+                  label={{
+                    text: (index + 1)?.toString(),
+                    fontWeight: 'bold',
+                    color: 'white',
+                    fontSize: '14px'
+                  }}
+                  onClick={() => {
+                    setSelectedService(data);
+                  }}
+                  position={new google.maps.LatLng(data?.shippingAddress?.latitude, data?.shippingAddress?.longitude)}
+                  clusterer={clusterer}
+                />
+              ))}
               <Polyline
-                // key={clusterer.batchSize}
-                path={data.map((asset) => new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude))}
+                path={serviceData?.map((data: any) => new google.maps.LatLng(data?.shippingAddress?.latitude, data?.shippingAddress?.longitude))}
                 options={{
                   strokeColor: '#0000FF',
                   strokeOpacity: 0.8,
                   strokeWeight: 1,
-                  icons: [
-                    { icon: { path: 'M 0,-1 0,1', strokeOpacity: 1, scale: 4 }, offset: '0', repeat: '20px' },
-                    { icon: { path: 'M -2,-2 2,0 M 2,-2 -2,0', strokeOpacity: 1, scale: 1 }, offset: '50%' }
-                  ]
+                  icons: [{ icon: { path: 'M -2,-2 2,0 M 2,-2 -2,0', strokeOpacity: 1, scale: 1 } }]
                 }}
               />
+              {selectedService && (
+                <InfoWindow
+                  key={selectedService._id}
+                  position={new google.maps.LatLng(selectedService?.shippingAddress?.latitude, selectedService?.shippingAddress?.longitude)}
+                  onCloseClick={() => setSelectedService(null)}
+                >
+                  <div>{selectedService?.serviceOrderNumber}</div>
+                </InfoWindow>
+              )}
             </>
           )}
         </MarkerClusterer>
-
-        {/* {selectedBase && (
-          <InfoWindow
-            position={new google.maps.LatLng(selectedBase?.location.latitude, selectedBase?.location.longitude)}
-            onCloseClick={() => {
-              if (isFetching) return;
-              setSelectedBase(null);
-              setSelectedAsset([]);
-            }}
-          >
-            {selectedAsset.length > 0 || !isFetching ? (
-              <Box textAlign={'left'} maxWidth={250}>
-                <Typography color="textPrimary" variant="body1">
-                  {`"${selectedBase?.location.concatedName}"`}
-                </Typography>
-                <Box my={1} />
-                <Typography color="textPrimary" variant="body2">
-                  <strong>Total Asset: </strong>
-                  {selectedBase?.count}
-                </Typography>
-                {selectedAsset.map((d: { count: number; status: string }) => (
-                  <Typography key={d.status} color="textPrimary" variant="body2">
-                    <strong>{`${d.status}: `}</strong>
-                    {d.count}
-                  </Typography>
-                ))}
-              </Box>
-            ) : (
-              <Box width={100} p={2} display={'flex'} justifyContent={'center'}>
-                <CircularProgress size={18} color="primary" />
-              </Box>
-            )}
-          </InfoWindow>
-        )} */}
       </GoogleMap>
+    </Box>
+  ) : (
+    <Box width={'100%'} height={'100%'} display="flex" justifyContent="center" alignItems="center">
+      <CircularProgress />
     </Box>
   );
 };

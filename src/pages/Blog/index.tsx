@@ -331,14 +331,10 @@ const Blog = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <FaBlogger size={20} style={{ paddingBottom: '3px' }} />
-                <span className="listingHeader">{routes.blog.title}</span>
-              </div>
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ width: '100%', display: 'flex' }}>
+                <Grid>
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}

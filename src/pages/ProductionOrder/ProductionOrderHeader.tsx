@@ -92,10 +92,6 @@ function ProductionOrderHeader(props) {
   return (
     <Grid className={styles.filter_side_container} container>
       <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet">
-        <Grid>
-          {icon} <span className="listingHeader">{heading}</span>
-        </Grid>
-
         {isMobile && (
           <>
             <Grid style={{ display: 'inline-flex' }}>
