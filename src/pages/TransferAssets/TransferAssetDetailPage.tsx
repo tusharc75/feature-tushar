@@ -389,10 +389,6 @@ const TransferAssetDetailPage = () => {
         >
           <Tab
             className={'tabLayout'}
-            style={{
-              background: '',
-              color: tabValue === 1 ? '#163340' : '#163340'
-            }}
             label={
               <div className="d-flex align-items-center tab-font">
                 <FaWpforms className="mr-1" fontSize="inherit" /> Header
@@ -402,10 +398,6 @@ const TransferAssetDetailPage = () => {
           />
           <Tab
             className={'tabLayout'}
-            style={{
-              background: '',
-              color: '#163340'
-            }}
             label={
               <div className="d-flex align-items-center tab-font">
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
@@ -415,10 +407,6 @@ const TransferAssetDetailPage = () => {
           />
           <Tab
             className={'tabLayout'}
-            style={{
-              background: '',
-              color: tabValue === 2 ? 'blue' : '#163340'
-            }}
             label={
               <div className="d-flex align-items-center tab-font">
                 <RiFlowChart className="mr-1" fontSize="inherit" /> Views

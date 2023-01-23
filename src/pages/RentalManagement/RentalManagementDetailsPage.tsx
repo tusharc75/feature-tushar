@@ -38,7 +38,7 @@ import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { RiFlowChart } from 'react-icons/ri';
 import TabPanel from '../../components/TabPanel';
 import Menu from '@material-ui/core/Menu';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { GrStatusInfo } from 'react-icons/all';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -466,7 +466,9 @@ const RentalManagementDetailsPage = () => {
                       ) && ['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep])
                     ) && (
                       <Fragment>
-                        <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                        <Button variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          className={'btn-outline-v1'}
+                          onClick={handleOpenUpdateDialog}>
                           Edit
                         </Button>
                         <Button
@@ -551,10 +553,6 @@ const RentalManagementDetailsPage = () => {
           >
             <Tab
               className={'tabLayout'}
-              style={{
-                background: tabValue === 1 ? 'white' : '',
-                color: tabValue === 1 ? '#163340' : '#163340'
-              }}
               label={
                 <div className="d-flex align-items-center tab-font">
                   <FaWpforms className="mr-1" fontSize="inherit" /> Header
@@ -564,10 +562,6 @@ const RentalManagementDetailsPage = () => {
             />
             <Tab
               className={'tabLayout'}
-              style={{
-                background: tabValue === 2 ? 'white' : '',
-                color: '#163340'
-              }}
               label={
                 <div className="d-flex align-items-center tab-font">
                   <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
@@ -578,10 +572,6 @@ const RentalManagementDetailsPage = () => {
             {displayProgressiveBillingTab && (
               <Tab
                 className={'tabLayout'}
-                style={{
-                  background: tabValue === 3 ? 'white' : '',
-                  color: '#163340'
-                }}
                 label={
                   <div className="d-flex align-items-center tab-font">
                     <RiFlowChart className="mr-1" fontSize="inherit" /> Progressive Billing
@@ -593,10 +583,6 @@ const RentalManagementDetailsPage = () => {
             {!isOffline && (
               <Tab
                 className={'tabLayout'}
-                style={{
-                  background: tabValue === 4 ? 'white' : '',
-                  color: '#163340'
-                }}
                 label={
                   <div className="d-flex align-items-center tab-font">
                     <RiFlowChart className="mr-1" fontSize="inherit" />

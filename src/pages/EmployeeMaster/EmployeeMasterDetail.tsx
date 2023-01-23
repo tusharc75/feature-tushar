@@ -126,7 +126,6 @@ const EmployeeMasterDetail = () => {
                 )}
 
                 {permissions?.employeeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                <ActivityButton referenceId={employeeMasterData?._id} resource={ACTIVITY_RESOURCE.employeeMaster} />
               </>
             )}
           </Box>

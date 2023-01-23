@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useContext, Fragment } from "react";
-import { Grid, Box, Button, Typography, Paper } from "@material-ui/core";
-import { Skeleton } from "@material-ui/lab";
-import { useParams, useHistory } from "react-router-dom";
-import axiosInstance from "../../axios/axiosInstance";
-import routes from "../../components/Helpers/Routes";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import DetailsPageHeader from "../../components/DetailsPageHeader";
-import DetailsPage from "../../components/Shared/DetailsPage";
-import { useData } from "../../StateProvider/Provider";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import React, { useState, useEffect, useContext, Fragment } from 'react';
+import { Grid, Box, Button, Typography, Paper } from '@material-ui/core';
+import { Skeleton } from '@material-ui/lab';
+import { useParams, useHistory } from 'react-router-dom';
+import axiosInstance from '../../axios/axiosInstance';
+import routes from '../../components/Helpers/Routes';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import DetailsPageHeader from '../../components/DetailsPageHeader';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { useData } from '../../StateProvider/Provider';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CreateZone from './CreateZone';
-import DeleteButton from "../../components/Helpers/DeleteButton";
+import DeleteButton from '../../components/Helpers/DeleteButton';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import Zipcode from "./zip";
+import Zipcode from './zip';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -38,27 +38,23 @@ const ZoneDetailPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions },
+    state: { permissions }
   }: any = useData();
   const [activeTable, setActiveTable] = useState('Details');
   const [tabValue, setTabValue] = useState(0);
-  const [headingLbl, setHeadingLbl] = useState("");
+  const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
-  const [productCategoryData, setProductCategoryData] = useState(null);
+  const [zoneData, setZoneData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [productCategoryFields, setCategoryFields] = useState([]);
+  const [zoneFields, setZoneFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [productCategoryResource, setProductCategoryResource] = useState(null);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([
-    routes.address,
-  ]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([]);
 
   useEffect(() => {
     if (id) {
       getZoneFields();
       fetchZoneData();
-
     }
   }, [id]);
 
@@ -66,12 +62,11 @@ const ZoneDetailPage = () => {
     setLoading(true);
     try {
       const {
-        data: { data },
+        data: { data }
       } = await axiosInstance().get(`/zone/${id}`);
       handleMainPoints(data);
       setHeadingLbl(data.name);
-      setProductCategoryData(data);
-      setProductCategoryResource({ id: data._id });
+      setZoneData(data);
       setCustomizedRoutes([routes.zone, { title: data.name }]);
       setLoading(false);
     } catch (error) {
@@ -82,18 +77,16 @@ const ZoneDetailPage = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       name: `${data?.name}`,
-      taxJurisdiction: data.taxJurisdiction || "",
+      taxJurisdiction: data.taxJurisdiction || ''
     };
     setMainPoints(tempMp);
   };
 
   const getZoneFields = () => {
     axiosInstance()
-      .get("/field?resource=Zone")
+      .get('/field?resource=Zone')
       .then(({ data }) => {
-
-        setCategoryFields(data.data?.filter((field) => field.isRead))
-
+        setZoneFields(data.data?.filter((field) => field.isRead));
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -102,7 +95,7 @@ const ZoneDetailPage = () => {
 
   const handleDeleteZone = () => {
     if (id) {
-      if (permissions?.address?.isDelete) {
+      if (permissions?.zone?.isDelete) {
         axiosInstance()
           .put(`/zone/remove`, { ids: [id] })
           .then(({ data }) => {
@@ -135,7 +128,66 @@ const ZoneDetailPage = () => {
   };
 
   return (
-    <>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {!zoneData ? (
+              <div>
+                <Skeleton variant="text" width="150px" height="40px" />
+                <Box display="flex">
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                  <Box marginX={1} />
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                </Box>
+              </div>
+            ) : (
+              <>
+                {permissions?.zone?.isUpdate && (
+                  <Button variant="contained" className={'btn-outline-v1'} size="small" onClick={handleOpenUpdateDialog}>
+                    Edit
+                  </Button>
+                )}
+                {permissions?.zone?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              </>
+            )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              height: 0
+            }
+          }}
+        >
+          <Tab label={<div className="tab-font">Details</div>} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+          <Tab label={<div className="tab-font">Zip Code</div>} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className={'tabLayout'} />
+        </Tabs>
+
+        <TabPanel value={tabValue} index={0}>
+          <Box>
+            {loading || !zoneFields.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={zoneData} fields={zoneFields} />
+            )}
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Zipcode id={id} />
+        </TabPanel>
+      </Box>
       {openUpdateDialog && (
         <CreateZone
           open={openUpdateDialog}
@@ -144,7 +196,7 @@ const ZoneDetailPage = () => {
           //   fetchZoneData();
           // }}
           zoneId={id}
-          isUpdateDisabled = {false}
+          isUpdateDisabled={false}
           isClone={false}
           onSuccess={() => {
             fetchZoneData();
@@ -157,110 +209,12 @@ const ZoneDetailPage = () => {
           open={showConfirmBox}
           message={`Are you sure you want to delete ${routes.zone.title.toLowerCase()} ${headingLbl}?`}
           onClose={() => {
-            setShowConfirmBox(false)
+            setShowConfirmBox(false);
           }}
           onOk={handleDeleteZone}
         />
       )}
-      <Fragment>
-        <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
-            <Paper>
-              {!productCategoryData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
-                    <Box marginX={1} />
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
-                  </Box>
-                </div>
-              ) : (
-
-                <DetailsPageHeader
-                  heading={headingLbl}
-                  mainPoints={null}
-                  showHeading={true}
-                >
-                  {permissions?.address?.isUpdate && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                    >
-                      Edit
-                    </Button>
-                  )}
-                  <Box component="span" />
-                  {permissions?.address?.isDelete && (
-                    <span
-                      title={
-                        id
-                          ? "Primarily selected address can't be deleted"
-                          : "Permanently delete this address"
-                      }
-                    >
-                      <DeleteButton
-                        text="Delete"
-                        onClick={() => setShowConfirmBox(true)}
-                      />
-                    </span>
-                  )}
-                </DetailsPageHeader>
-              )}
-
-              <Tabs
-                className="oms-tab"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                indicatorColor="primary"
-                textColor="primary"
-                aria-label="icon tabs example"
-                TabIndicatorProps={{
-                  style: {
-                    height: 0
-                  }
-                }}
-              >
-                <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-                <Tab label="Zip Code" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
-              </Tabs>
-
-              <TabPanel value={tabValue} index={0}>
-              <Box>
-                {loading || !productCategoryFields.length ? (
-                  <Grid container spacing={2} style={{ padding: "8px" }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <DetailsPage data={productCategoryData} fields={productCategoryFields} />
-                )}
-              </Box>
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={1}>
-                  <Zipcode 
-                  id = {id}
-                  />
-                    </TabPanel>
-            </Paper>
-          </Grid>
-        </Grid>
-
-      </Fragment>
-
-    </>
+    </Box>
   );
 };
 
