@@ -1,10 +1,9 @@
 import { Box, Button, Grid, Paper } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import {  useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Skeleton } from '@material-ui/lab';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
@@ -20,7 +19,6 @@ const BlogDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [headingLbl, setHeadingLbl] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.contactUs]);
   const [contactUsData, setContactUsData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -55,7 +53,6 @@ const BlogDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/contact-us/${id}`);
-      setHeadingLbl(data.name);
       setContactUsData(data);
       setCustomizedRoutes([routes.contactUs, { title: data?.name }]);
       setLoading(false);
@@ -97,13 +94,13 @@ const BlogDetail = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={customizedRoutes} />
-      </Grid>
-      <Grid container spacing={1} className="detail-container">
-        <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-          <Paper>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="controls-buttons-v1">
             {!contactUsData ? (
               <div>
                 <Skeleton variant="text" width="150px" height="40px" />
@@ -114,12 +111,10 @@ const BlogDetail = () => {
                 </Box>
               </div>
             ) : (
-              <DetailsPageHeader heading={headingLbl} showHeading={true}>
                 <>
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
-                    size="small"
+                    className="btn-outline-v1"
                     onClick={handleOpenUpdateDialog}
                     style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                   >
@@ -132,8 +127,12 @@ const BlogDetail = () => {
                     <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                   </span>
                 </>
-              </DetailsPageHeader>
             )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+          <Paper>
             <Box>
               {loading || !fields?.length ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -144,8 +143,7 @@ const BlogDetail = () => {
               )}
             </Box>
           </Paper>
-        </Grid>
-      </Grid>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -167,7 +165,7 @@ const BlogDetail = () => {
           }}
         />
       )}
-    </Fragment>
+    </Box>
   );
 };
 
