@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Paper, Typography } from '@material-ui/core';
+import { Grid, Box, Button, Typography } from '@material-ui/core';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
@@ -95,7 +95,7 @@ const RepairTypeDetailsPage = () => {
       <Box className='detail-container-v1'>
         <Grid container spacing={1}>
         <Grid item xs={12} sm={12} md={8} lg={8}>
-          <Paper style={{ height: '650px' }}>
+          <div style={{ height: '650px' }}>
             <Box>
               {repairTypeData && fields.length ? (
                 <DetailsPage data={repairTypeData} fields={fields} />
@@ -105,10 +105,10 @@ const RepairTypeDetailsPage = () => {
                 </Grid>
               )}
             </Box>
-          </Paper>
+          </div>
         </Grid>
         <Grid item xs={12} sm={12} md={4} lg={4}>
-          <Paper style={{ overflow: 'hidden' }}>
+          <div style={{ overflow: 'hidden' }}>
             <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
               <Typography variant="subtitle2">Repair Steps</Typography>
             </Box>
@@ -124,7 +124,7 @@ const RepairTypeDetailsPage = () => {
                 </Grid>
               </Box>
             ))}
-          </Paper>
+          </div>
         </Grid>
         </Grid>
       </Box>
