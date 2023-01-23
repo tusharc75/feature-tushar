@@ -278,7 +278,7 @@ const InvoiceDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={invoiceData?._id} resource={ACTIVITY_RESOURCE.repairOrder} />
+            <ActivityButton referenceId={invoiceData?._id} resource={ACTIVITY_RESOURCE.invoice} />
           </Box>
         </Box>
       </Box>
