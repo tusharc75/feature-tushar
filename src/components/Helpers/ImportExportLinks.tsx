@@ -61,7 +61,7 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -222,21 +222,21 @@ export default function ImportExportLinks({
         <div className={classes.linksContainer}>
           {permissions?.isCreate && (
             <>
-              <label htmlFor="importFromExcel" className={` new-headerbox-button-v1`}>
+              <label htmlFor="importFromExcel" className={`new-headerbox-button-v1`}>
                 {ImportInput}
                 Import from Excel
               </label>
               {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
             </>
           )}
-          <label onClick={exportToExcel} className={` new-headerbox-button-v1`}>
+          <label onClick={exportToExcel} className={`new-headerbox-button-v1`}>
             Export to Excel{' '}
             {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
           </label>
           {isDownloadExcel && (
             <>
               {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
-              <label onClick={downloadTemplate} className={` new-headerbox-button-v1`}>
+              <label onClick={downloadTemplate} className={`new-headerbox-button-v1`}>
                 Download Template
               </label>
             </>
@@ -294,7 +294,7 @@ export default function ImportExportLinks({
     <div id="importExportLinks" className={!isDropDownIconShow && `${classes.root}`}>
       {!isMobile ? (
         <div className={classes.linksContainer}>
-          <label onClick={exportToExcel} className={` new-headerbox-button-v1`}>
+          <label onClick={exportToExcel} className={`new-headerbox-button-v1`}>
             Export to Excel{' '}
             {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
           </label>

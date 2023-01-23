@@ -324,6 +324,7 @@ interface sidecardInterface {
   handleRoutes: any;
   mode: 'Collaboration Tools' | 'Setups';
 }
+
 const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration Tools' }: sidecardInterface) => {
   const [modalContent, setModalContent] = useState(null);
   const [colabData, setColabData] = useState(null);
