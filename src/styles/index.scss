@@ -2643,6 +2643,7 @@ svg.MuiSvgIcon-root {
     border-radius: 10px;
     min-height: 600px;
     height: calc(100vh - 136px);
+    overflow-y: scroll;
   }
 
   .control-buttons-v1 {
