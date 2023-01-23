@@ -39,9 +39,6 @@ const Productpackage = ({
   rentalManagementData,
   setNextStep,
   currencySymbol,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity,
   renderedFrom,
   stepFullScreen,
   allowedToEdit
@@ -553,11 +550,10 @@ const Productpackage = ({
               <Box display="flex">
                 {permissions?.product?.isRead && (
                   <Button
-                    color="primary"
+                    className="btn-outline-v1"
                     size="small"
                     disabled={isOffline}
-                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                    style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                    variant={'contained'}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
                     }}
@@ -568,10 +564,9 @@ const Productpackage = ({
                 <Box mx={isMobile ? 0.5 : 1} />
                 {permissions?.packages?.isRead && (
                   <Button
-                    color="primary"
+                    className="btn-outline-v1"
                     size="small"
-                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                    style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                    variant='contained'
                     disabled={isOffline}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'package', parentId: null });

@@ -623,7 +623,6 @@ export default function DeliveryTicketDetail(props) {
                 {...a11yProps(0)}
               />
             }
-            <div className={'uio'}> </div>
           </Tabs>
           <TabPanel value={tabValue} index={0}>
             {(deliveryTicketData && deliveryTicketFields.length > 0 ?

@@ -219,7 +219,6 @@ const SubleaseDetailsPage = () => {
                         }
                         {...a11yProps(1)}
                     />
-                    <div className={'uio'}> </div>
                 </Tabs>
                 <TabPanel value={tabValue} index={0}>
                     <Box>
