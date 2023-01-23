@@ -2698,7 +2698,7 @@ svg.MuiSvgIcon-root {
     right: calc(var(--width, 100vw) * -1);
     transition: right 0.3s ease-in-out;
     z-index: 9;
-    top: var(--top, 109px);
+    top: var(--top, 112px);
     bottom: 0;
     overflow: auto;
     background-color: white;
@@ -2745,7 +2745,10 @@ svg.MuiSvgIcon-root {
     min-height: unset;
     border-bottom: 1px solid #cecece;
     width: 100%;
-    margin-bottom: 15px;
+    margin-bottom: 30px;
+    @media all and (max-width: 768px) {
+      margin-bottom: 15px;
+    }
 
     // overflow: initial;
     // & > div {
@@ -2905,6 +2908,55 @@ body {
     }
     &:hover {
       background-color: rgba(0, 0, 0, 0.04) !important;
+    }
+  }
+}
+.form-v1 {
+  .single-form-v1 {
+    margin-bottom: 26px;
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+  .form-head-v1 {
+    padding: 15px 28px;
+    background: #effbf9;
+    border-radius: 4.06331px 4.06331px 0px 0px;
+    & > :is(h1, h2, h3, h4, h5, h6) {
+      font-weight: 600;
+      font-size: 14.2056px;
+      line-height: 1.05;
+      color: #2a3042;
+    }
+  }
+  .formdata-v1 {
+    padding: 18px 28px 30px;
+    border: 1px solid #f7f7f7;
+    box-shadow: 0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03);
+    border-radius: 0px 0px 4.04585px 4.04585px;
+  }
+  .formdata-title-v1 {
+    border-right: 1px solid #e2e2e2;
+    & :is(h1, h2, h3, h4, h5) {
+      padding: 7px 10px;
+      color: #555555;
+      font-size: 0.9rem;
+      @media all and (max-width: 600px) {
+        padding: 6px 8px;
+        font-size: 0.8rem;
+      }
+    }
+  }
+  .formdata-text-v1 {
+    & :is(h1, h2, h3, h4, h5, span) {
+      padding: 7px 10px;
+      font-size: 0.9rem;
+      color: #5e5e5e;
+      font-weight: 400;
+      @media all and (max-width: 600px) {
+        padding: 6px 8px;
+        font-size: 0.8rem;
+      }
     }
   }
 }
