@@ -580,7 +580,6 @@ function OpportunityDetailsPage() {
                  {allowedToEdit ? (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
                     size="small"
                     onClick={handleOpenUpdateDialog}
                     className={'btn-outline-v1'}
