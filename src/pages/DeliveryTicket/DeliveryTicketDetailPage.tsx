@@ -587,10 +587,6 @@ export default function DeliveryTicketDetail(props) {
           >
             <Tab
               className={'tabLayout'}
-              style={{
-                background: tabValue === 1 ? 'white' : '',
-                color: tabValue === 1 ? '#163340' : '#163340'
-              }}
               label={
                 <div className="d-flex align-items-center tab-font">
                   <FaWpforms className="mr-1" fontSize="inherit" /> Header
@@ -600,10 +596,6 @@ export default function DeliveryTicketDetail(props) {
             />
             <Tab
               className={'tabLayout'}
-              style={{
-                background: tabValue === 2 ? 'white' : '',
-                color: tabValue === 2 ? '#163340' : '#163340'
-              }}
               label={
                 <div className="d-flex align-items-center tab-font">
                   <BiFoodMenu className="mr-1" fontSize="inherit" /> Serialized Assets
@@ -613,10 +605,6 @@ export default function DeliveryTicketDetail(props) {
             />
             <Tab
               className={'tabLayout'}
-              style={{
-                background: tabValue === 3 ? 'white' : '',
-                color: tabValue === 3 ? '#163340' : '#163340'
-              }}
               label={
                 <div className="d-flex align-items-center tab-font">
                   <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Products
@@ -627,10 +615,6 @@ export default function DeliveryTicketDetail(props) {
             {deliveryTicketData?.additionalCost?.length > 0 &&
               <Tab
                 className={'tabLayout'}
-                style={{
-                  background: tabValue === 4 ? 'white' : '',
-                  color: tabValue === 4 ? '#163340' : '#163340'
-                }}
                 label={
                   <div className="d-flex align-items-center tab-font">
                     <BiFoodMenu className="mr-1" fontSize="inherit" /> Services and Consumables
