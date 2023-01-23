@@ -44,6 +44,7 @@ import { MdDelete, MdEdit } from 'react-icons/md';
 import { BiEdit } from 'react-icons/bi';
 import contactClass from '../Contact/contact.module.scss';
 import accountClass from '../Account/account.module.scss';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -567,36 +568,22 @@ function OpportunityDetailsPage() {
 
   return (
     <>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={customizedRoutes} />
-      </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-        <div>
-          <Paper style={isMobile ? { width: '98%' } : {}}>
-            {!opportunityData ? (
-              <div>
-                <Skeleton variant="text" width="150px" height="40px" />
-                <Box display="flex">
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  <Box marginX={1} />
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                </Box>
-              </div>
-            ) : (
-              <DetailsPageHeader
-                heading={headingLbl}
-                logo={opportunityData?.leadLogo ? opportunityData.leadLogo : undefined}
-                mainPoints={parentLead.leadId ? Object.assign(mainPoints, { 'Parent Lead': parentLead }) : mainPoints}
-                showHeading={true}
-              >
-                {allowedToEdit ? (
+      <Box className="main-container-v1">
+        <Box className="headerbox-v1">
+          <Box className="nav-v1">
+            <CustomBreadCrumbs routes={customizedRoutes} />
+          </Box>
+          <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {opportunityData ? (
+              <>
+                 {allowedToEdit ? (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
                     size="small"
                     onClick={handleOpenUpdateDialog}
-                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                    className={'btn-outline-v1'}
                   >
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
@@ -608,19 +595,24 @@ function OpportunityDetailsPage() {
                   <DeleteButton
                     text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
                     onClick={() => setShowConfirmBox(true)}
-                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
                   />
                 ) : null}
-              </DetailsPageHeader>
+          <ActivityButton referenceId={opportunityData?._id} resource={opportunityResource} />
+              </>
+            ):(
+              <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ProcessFlow
+            </Box>
+            </Box>
+        </Box>
+        <Box className={`detail-container-v1`}>
+        <ProcessFlow
               disableBackNext={allowedToEdit ? false : true}
               steps={steps}
               activeStep={activeStep}
               handleMarkAsCompleted={handleMarkAsCompleted}
-            />
-
-            {loading ? (
+            />     
+          {loading ? (
               <Grid container spacing={2}>
                 {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
                   <Grid key={index} item sm={6} md={6}>
@@ -637,8 +629,7 @@ function OpportunityDetailsPage() {
             ) : (
               <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
             )}
-
-            <div className="p-3 modified_style_of_accordion">
+              <div className="p-3 modified_style_of_accordion">
               {opportunityData && permissions?.supplierContact?.isRead && (
                 <OpportunityContacts
                   contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
@@ -712,83 +703,8 @@ function OpportunityDetailsPage() {
                 />
               )}
             </div>
-          </Paper>
-        </div>
-        <div className={isMobile ? 'position-relative mb-5' : 'position-relative'}>
-          {/* {showActivity ?
-            <Paper>
-              {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                <IoIosArrowDropright className="icon" />
-              </span>}
-              {!opportunityData ? (
-                <Box>
-                  <Skeleton variant="text" width="100px" height="25px" />
-                  <Box marginY={1} />
-                  {[0, 1, 2, 3, 4].map((i, index) => (
-                    <Skeleton key={index} width="100%" height="50px" />
-                  ))}
-                </Box>
-              ) : (
-                <div>
-                  <Activity
-                    resourceId={opportunityData?._id}
-                    resource={opportunityResource}
-                    relatedTo={[
-                      {
-                        type: opportunityResource,
-                        referenceId: opportunityData?._id,
-                        access: true
-                      }
-                    ]}
-                    handleActivityRefresh={() => { }}
-                    emails={contactsEmailsData}
-                  />
-                </div>
-              )}
-            </Paper>
-            :
-            !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-              <IoIosArrowDropleft className="icon" />
-            </span>} */}
-
-          <Paper>
-            {!isSmallScreen && (
-              <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-              </span>
-            )}
-            <div style={{ display: showActivity ? 'block' : 'none' }}>
-              {!opportunityData ? (
-                <Box>
-                  <Skeleton variant="text" width="100px" height="25px" />
-                  <Box marginY={1} />
-                  {[0, 1, 2, 3, 4].map((i, index) => (
-                    <Skeleton key={index} width="100%" height="50px" />
-                  ))}
-                </Box>
-              ) : (
-                <div>
-                  <Activity
-                    resourceId={opportunityData?._id}
-                    resource={opportunityResource}
-                    relatedTo={[
-                      {
-                        type: opportunityResource,
-                        referenceId: opportunityData?._id,
-                        access: true
-                      }
-                    ]}
-                    handleActivityRefresh={() => {}}
-                    emails={contactsEmailsData}
-                  />
-                </div>
-              )}
-            </div>
-          </Paper>
-        </div>
-      </div>
-
-      {showConfirmBox ? (
+        </Box>
+        {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
           message={`Are you sure you want to delete this opportunity`}
@@ -888,7 +804,8 @@ function OpportunityDetailsPage() {
           />
         </>
       )}
-    </>
+      </Box>
+     </>
   );
 }
 
