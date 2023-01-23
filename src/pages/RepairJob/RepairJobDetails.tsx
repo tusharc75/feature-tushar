@@ -301,7 +301,6 @@ const RepairJobDetails = () => {
             }
             {...a11yProps(3)}
           />
-          <div className={'uio'}> </div>
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

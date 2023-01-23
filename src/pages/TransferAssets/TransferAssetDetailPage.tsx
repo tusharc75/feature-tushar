@@ -414,9 +414,7 @@ const TransferAssetDetailPage = () => {
             }
             {...a11yProps(2)}
           />
-          <div className={'uio'}> </div>
         </Tabs>
-
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !transferAssetData ? (
@@ -428,7 +426,6 @@ const TransferAssetDetailPage = () => {
             )}
           </Box>
         </TabPanel>
-
         <TabPanel value={tabValue} index={1}>
           <Box my={2}>
             <Steps

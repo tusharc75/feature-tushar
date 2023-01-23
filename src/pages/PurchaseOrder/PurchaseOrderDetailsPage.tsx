@@ -390,7 +390,6 @@ const PurchaseOrderDetailsPage = () => {
               {...a11yProps(2)}
             />
           )}
-          <div className={'uio'}> </div>
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

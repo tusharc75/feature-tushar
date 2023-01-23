@@ -369,9 +369,7 @@ const BrandBackup = () => {
                   }
                   {...a11yProps(1)}
                 />
-                <div className={'uio'}> </div>
               </Tabs>
-
               <TabPanel value={tabValue} index={0}>
                 <Box mt={2} className="bg-white">
                   <Grid container xs={12} lg={5} md={5} style={{ padding: '1rem', paddingTop: 0 }}>

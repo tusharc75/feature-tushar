@@ -244,13 +244,9 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                 }
                                 {...a11yProps(1)}
                             />
-                            <div className={'uio'}> </div>
                         </Tabs>
-
                         <TabPanel value={tabValue} index={0}>
-
                             <div className="d-flex gap-3 mt-3">
-
                                 <Button
                                     variant="contained"
                                     color="primary"
@@ -259,7 +255,6 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                         setManageRentDialog({ open: true, id: null, okBtnLoading: false });
                                     }}
                                 >Add</Button>
-
                                 <Button
                                     disabled={selectedRecords.length === 0}
                                     variant="outlined"
@@ -269,10 +264,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                         setRemoveRentDialog({ open: true, ids: selectedRecords.map(m => m._id), okBtnLoading: false });
                                     }}
                                 >Remove</Button>
-
                             </div>
-
-
                             <Grid item xs={12} md={12} sm={12} className="mt-3">
                                 {
                                     Object.keys(frameWorkComponent).length > 0 ?
