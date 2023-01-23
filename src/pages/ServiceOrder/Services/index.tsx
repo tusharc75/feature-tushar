@@ -132,6 +132,7 @@ const Services = ({
           accessor: element.fieldName,
           Header: element.fieldLabel,
           disableFilters: true,
+          width: 250,
           Cell: ({ row }) =>
             row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName]).format(dateTimeFormat)}</p> : <NoDataCell />
         });
@@ -519,6 +520,7 @@ const Services = ({
           }}
           serviceData={isProductEdit.data}
           from={routes.serviceOrder.title}
+          currency={serviceOrderData.currency}
           handleSave={handleSaveData} />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (

@@ -332,7 +332,9 @@ export const CHILD_RESOURCE = {
   quotationProduct: 'Quotation Product',
   quotationCost: 'Quotation Cost',
   quotationService: 'Quotation Service',
-  repairOrderProduct: 'Repair Order Product'
+  repairOrderProduct: 'Repair Order Product',
+  serviceOrderDetails: 'Service Order Detail'
+
 };
 
 export const sidebarResourceObjectFromValues = () => {
