@@ -16,15 +16,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const useClasses = makeStyles(() => ({
-  root: {
-    height: 'calc(80vh + 20px)'
-  }
-}));
-
 const DashboardBuilder = () => {
 
-  const classes = useClasses();
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
 
@@ -123,26 +116,26 @@ const DashboardBuilder = () => {
     const dataToExport =
       formData?.length > 0
         ? {
-            name,
-            charts: formData
-          }
+          name,
+          charts: formData
+        }
         : {
-            name: '',
-            charts: [
-              {
-                graphyType: '', // Valid types ["Chart", "Map", "Table"]
-                chartType: '', // Valid types ["Pie", "Line", "Bar", "Doughnut"]
-                column: 6,
-                chartTitle: '',
-                kpi: { name: '', kpi: '', resource: '', id: 0, graphType: '', chartType: '' },
-                hasFilters: false,
-                hasTableView: false,
-                hasExport: false,
-                statusOptions: [],
-                filters: []
-              }
-            ]
-          };
+          name: '',
+          charts: [
+            {
+              graphyType: '', // Valid types ["Chart", "Map", "Table"]
+              chartType: '', // Valid types ["Pie", "Line", "Bar", "Doughnut"]
+              column: 6,
+              chartTitle: '',
+              kpi: { name: '', kpi: '', resource: '', id: 0, graphType: '', chartType: '' },
+              hasFilters: false,
+              hasTableView: false,
+              hasExport: false,
+              statusOptions: [],
+              filters: []
+            }
+          ]
+        };
     let blob = new Blob([JSON.stringify(dataToExport)], { type: 'text/plain;charset=utf-8' });
     saveAs(blob, `${name || 'Dashboard Fields'}.json`);
   };
@@ -193,102 +186,100 @@ const DashboardBuilder = () => {
     }
   };
 
-  return (
-    <div>
-      <div className="headerbox">
-        <Grid container justifyContent="space-between">
-          <Grid item xs={6}>
-            <CustomBreadCrumbs
-              routes={[
-                { title: 'Dashboard Master', path: '/dashboard-master' },
-                { title: type && type === 'clone' ? 'Clone' : !isNew ? name : 'New', path: '' }
-              ]}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <Box display="flex" justifyContent="flex-end">
-              <Box mr={2}>
-                <Typography className="link cursor-pointer" style={{ color: 'var(--tertiary-light)' }} onClick={handleExportField}>
-                  Export
-                </Typography>
-              </Box>
-              <Box mr={1}>
-                <input accept="json" style={{ display: 'none' }} onChange={handleImport} id="import-file" multiple={false} type="file" />
-                <label htmlFor="import-file">
-                  <Typography className="cursor-pointer" style={{ color: 'var(--tertiary-light)' }}>
-                    Import
-                  </Typography>
-                </label>
-              </Box>
+  return (<Box className="main-container-v1">
+    <Box className="headerbox-v1">
+      <Box className="nav-v1">
+        <CustomBreadCrumbs
+          routes={[
+            { title: 'Dashboard Master', path: '/dashboard-master' },
+            { title: type && type === 'clone' ? 'Clone' : !isNew ? name : 'New', path: '' }
+          ]}
+        />
+      </Box>
+      <Box className="controls-v1">
+        <Box className="control-buttons-v1">
+          <Box display="flex" justifyContent="flex-end">
+            <Box mr={2}>
+              <Typography className="link cursor-pointer" style={{ color: 'var(--tertiary-light)' }} onClick={handleExportField}>
+                Export
+              </Typography>
             </Box>
+            <Box mr={1}>
+              <input accept="json" style={{ display: 'none' }} onChange={handleImport} id="import-file" multiple={false} type="file" />
+              <label htmlFor="import-file">
+                <Typography className="cursor-pointer" style={{ color: 'var(--tertiary-light)' }}>
+                  Import
+                </Typography>
+              </label>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+    <Box className={`detail-container-v1`}>
+      <Box bgcolor={'white'} p={1.2} display="flex" justifyContent="space-between" alignItems={'center'}>
+        <Box>
+          <TextField
+            disabled={isLoading}
+            style={{ height: 40, width: 300 }}
+            variant="outlined"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            size="small"
+            label="Dashboard Name"
+          />
+        </Box>
+        {permissions?.dashboardMaster?.isUpdate && (
+          <Box py={'6px'}>
+            <Button
+              color="primary"
+              variant="contained"
+              size="small"
+              disableRipple
+              disabled={!Boolean(name) || formData.length === 0 || isSubmitting || (!isNew && compareData.oldData === compareData.newData)}
+              onClick={handleClickSave}
+              startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+            >
+              Save
+            </Button>
+          </Box>
+        )}
+      </Box>
+      <Box bgcolor="#f5f5f5" p={1}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={4}>
+            <Builder setFormData={setFormData} selectedData={selectedData} handleUpdate={handleUpdate} />
+          </Grid>
+          <Grid item xs={12} sm={8}>
+            {formData.length === 0 && (
+              <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
+                {isLoading ? (
+                  <CircularProgress size={22} color="primary" />
+                ) : (
+                  <Box textAlign="center">
+                    <MdDashboardCustomize size={120} className="headerLogo" />
+                    <Typography variant="body1" align="center">
+                      Start creating layout
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            )}
+            <DndProvider backend={HTML5Backend}>
+              <DashboardView
+                selectedData={selectedData}
+                formData={formData}
+                setFormData={setFormData}
+                handleEdit={handleEdit}
+                handleRemove={handleRemove}
+              />
+            </DndProvider>
           </Grid>
         </Grid>
-      </div>
-      <div className="detail-container">
-        <Box bgcolor={'white'} p={1.2} display="flex" justifyContent="space-between" alignItems={'center'}>
-          <Box>
-            <TextField
-              disabled={isLoading}
-              style={{ height: 40, width: 300 }}
-              variant="outlined"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              size="small"
-              label="Dashboard Name"
-            />
-          </Box>
-          {permissions?.dashboardMaster?.isUpdate && (
-            <Box py={'6px'}>
-              <Button
-                color="primary"
-                variant="contained"
-                size="small"
-                disableRipple
-                disabled={!Boolean(name) || formData.length === 0 || isSubmitting || (!isNew && compareData.oldData === compareData.newData)}
-                onClick={handleClickSave}
-                startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
-              >
-                Save
-              </Button>
-            </Box>
-          )}
-        </Box>
-
-        <Box bgcolor="#f5f5f5" p={1}>
-          <Grid container spacing={2} className={classes.root}>
-            <Grid item xs={12} sm={4}>
-              <Builder setFormData={setFormData} selectedData={selectedData} handleUpdate={handleUpdate} />
-            </Grid>
-            <Grid item xs={12} sm={8}>
-              {formData.length === 0 && (
-                <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
-                  {isLoading ? (
-                    <CircularProgress size={22} color="primary" />
-                  ) : (
-                    <Box textAlign="center">
-                      <MdDashboardCustomize size={120} className="headerLogo" />
-                      <Typography variant="body1" align="center">
-                        Start creating layout
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-              )}
-              <DndProvider backend={HTML5Backend}>
-                <DashboardView
-                  selectedData={selectedData}
-                  formData={formData}
-                  setFormData={setFormData}
-                  handleEdit={handleEdit}
-                  handleRemove={handleRemove}
-                />
-              </DndProvider>
-            </Grid>
-          </Grid>
-        </Box>
-      </div>
-    </div>
+      </Box>
+    </Box>
+  </Box>
   );
 };
 
