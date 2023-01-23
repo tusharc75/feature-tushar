@@ -171,9 +171,7 @@ function Roadmap({ filter }) {
             </Box>
           ) : (
             <Box border={1} width={'100%'} height={'100%'} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
-              <MapView
-                technician={selected}
-                onClose={() => setSelected(null)} />
+              <MapView technician={selected} onClose={() => setSelected(null)} />
               <IconButton
                 onClick={() => setSelected(null)}
                 style={{
