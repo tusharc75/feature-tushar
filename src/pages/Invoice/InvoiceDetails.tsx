@@ -21,7 +21,7 @@ import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import Steps from '../RentalManagement/Steps';
 import Productpackage from './Productpackage';
 import Invoice from './Invoice';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { GrStatusInfo } from 'react-icons/all';
 import HideWhenOffline from '../../components/HideWhenOffline';
@@ -29,6 +29,7 @@ import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from '../../components/Activity';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -208,257 +209,162 @@ const InvoiceDetails = () => {
   };
 
   return (
-    <>
-      <Fragment>
-        <Grid container className="headerbox">
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
           <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-
-        <div className={`detail-container ${showActivity || isSmallScreen ? 'grid-with-activity' : 'grid-without-activity'}`}>
-          <div>
-            <div>
-              <Paper>
-                {!invoiceData ? (
-                  <div>
-                    <Skeleton variant="text" width="150px" height="40px" />
-                    <Box display="flex">
-                      <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                      <Box marginX={1} />
-                      <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    </Box>
-                  </div>
-                ) : (
-                  <DetailsPageHeader heading={headingLabel} mainPoints={[]} showHeading={true}>
-                    {permissions?.invoice?.isUpdate && allowedToEdit && (
-                      <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                        Edit
-                      </Button>
-                    )}
-
-                    {permissions?.invoice?.isDelete && ['Invoiced', 'Closed'].indexOf(invoiceData?.status) === -1 && (
-                      <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                    )}
-
-                    {permissions?.invoice?.isUpdate && ['Ready to Invoice', 'Invoiced'].includes(invoiceData?.status) && (
-                      <>
-                        <Button
-                          variant="outlined"
-                          color="default"
-                          size="small"
-                          onClick={openActions}
-                          aria-controls="action-menu"
-                          endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                        >
-                          {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
-                        </Button>
-                        <Menu
-                          anchorEl={anchorEl}
-                          keepMounted
-                          getContentAnchorEl={null}
-                          anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left'
-                          }}
-                          id="action-menu"
-                          open={Boolean(anchorEl)}
-                          onClose={closeActions}
-                        >
-                          {statusOptions?.map((o, index) => {
-                            return (
-                              <MenuItem
-                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)}
-                                onClick={() => {
-                                  closeActions();
-                                  handleStatusChange(o);
-                                }}
-                                value={o}
-                              >
-                                {o?.optionLabel}
-                              </MenuItem>
-                            );
-                          })}
-                        </Menu>
-                      </>
-                    )}
-                  </DetailsPageHeader>
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {invoiceData ? (
+              <>
+                {permissions?.invoice?.isUpdate && allowedToEdit && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    className={'btn-outline-v1'}
+                    size="small"
+                    onClick={handleOpenUpdateDialog}
+                  >
+                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  </Button>
                 )}
 
-                <Tabs
-                  className="quote-tab"
-                  value={tabValue}
-                  onChange={handleMainTabChange}
-                  textColor="primary"
-                  TabIndicatorProps={{
-                    style: {
-                      display: 'none'
-                    }
-                  }}
-                >
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 1 ? 'white' : '',
-                      color: tabValue === 1 ? '#163340' : '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                      </div>
-                    }
-                    {...a11yProps(0)}
-                  />
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 2 ? 'white' : '',
-                      color: tabValue === 2 ? 'blue' : '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                      </div>
-                    }
-                    {...a11yProps(1)}
-                  />
-                  <div className={'uio'}> </div>
-                </Tabs>
-
-                <TabPanel value={tabValue} index={0}>
-                  <Box>
-                    {loading || !invoiceFields.length ? (
-                      <Grid container spacing={2} style={{ padding: '8px' }}>
-                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                      </Grid>
-                    ) : (
-                      <>
-                        <DetailsPage data={invoiceData} fields={invoiceFields} />
-                      </>
-                    )}
-                  </Box>
-                </TabPanel>
-
-                <TabPanel value={tabValue} index={1}>
-                  <Paper>
-                    <Steps
-                      isNextStep={false}
-                      nextStep={nextStep}
-                      steps={invoiceProcessSteps}
-                      currentStep={currentStep}
-                      setCurrentStep={setCurrentStep}
-                      isStepEnded={['Invoiced', 'Closed'].includes(invoiceData?.status)}
-                    />
-                    <ContentFullScreen title={invoiceProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                      {currentStep === 0 && invoiceData && (
-                        <Productpackage
-                          invoiceData={invoiceData}
-                          setNextStep={setNextStep}
-                          currencySymbol={currencySymbol}
-                          renderedFrom={`${renderedFrom}_grid-1`}
-                          showActivity={showActivity}
-                          stepFullScreen={stepFullScreen}
-                          updateJobStatus={updateJobStatus}
-                          currentStep={currentStep}
-                        />
-                      )}
-
-                      {currentStep === 1 && invoiceData && (
-                        <Invoice
-                          invoiceData={invoiceData}
-                          setNextStep={setNextStep}
-                          currencySymbol={currencySymbol}
-                          updateJobStatus={updateJobStatus}
-                          stepFullScreen={stepFullScreen}
-                          statusOptions={statusOptions}
-                          showActivity={showActivity}
-                          renderedFrom={`${renderedFrom}_grid-5`}
-                        />
-                      )}
-                    </ContentFullScreen>
-                  </Paper>
-                </TabPanel>
-              </Paper>
-            </div>
-            <Box my={1} />
-          </div>
-
-          <div className="position-relative">
-            <HideWhenOffline>
-              {/* {showActivity ?
-                <Paper>
-                  {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                    <IoIosArrowDropright className="icon" />
-                  </span>}
-                  <Grid container>
-                    <Grid item xs={12}>
-                      {rentalManagementData && (
-                        <div>
-                          <Activity
-                            resourceId={rentalManagementData._id}
-                            resource={rentalManagement.resource}
-                            restrictedAddActivities={
-                              permissions &&
-                                permissions["rentalManagement"] &&
-                                permissions["rentalManagement"].isUpdate
-                                ? []
-                                : ["Attachment", "Case"]
-                            }
-                            relatedTo={[
-                              {
-                                type: rentalManagement,
-                                referenceId: rentalManagementData._id,
-                                access: true,
-                              },
-                            ]}
-                            handleActivityRefresh={() => { }}
-                            emails={[]}
-                          />
-                        </div>
-                      )}
-                    </Grid>
-                  </Grid>
-                </Paper> :
-                !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropleft className="icon" />
-                </span>} */}
-              <Paper>
-                {!isSmallScreen && (
-                  <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                    {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                  </span>
+                {permissions?.invoice?.isDelete && ['Invoiced', 'Closed'].indexOf(invoiceData?.status) === -1 && (
+                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
-                <div style={{ display: showActivity ? 'block' : 'none' }}>
-                  <Grid container>
-                    <Grid item xs={12}>
-                      {invoiceData && (
-                        <div>
-                          <Activity
-                            resourceId={invoiceData._id}
-                            resource={ACTIVITY_RESOURCE.invoice}
-                            restrictedAddActivities={
-                              permissions && permissions[`${ACTIVITY_RESOURCE.invoice}`] && permissions[`${ACTIVITY_RESOURCE.invoice}`].isUpdate
-                                ? []
-                                : ['Attachment', 'Case']
-                            }
-                            relatedTo={[
-                              {
-                                type: ACTIVITY_RESOURCE.invoice,
-                                referenceId: invoiceData._id,
-                                access: true
-                              }
-                            ]}
-                            handleActivityRefresh={() => {}}
-                            emails={[]}
-                          />
-                        </div>
-                      )}
-                    </Grid>
-                  </Grid>
-                </div>
-              </Paper>
-            </HideWhenOffline>
-          </div>
-        </div>
-      </Fragment>
+
+                {permissions?.invoice?.isUpdate && ['Ready to Invoice', 'Invoiced'].includes(invoiceData?.status) && (
+                  <>
+                    <Button
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                      endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                    >
+                      {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      {statusOptions?.map((o, index) => {
+                        return (
+                          <MenuItem
+                            disabled={index <= statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)}
+                            onClick={() => {
+                              closeActions();
+                              handleStatusChange(o);
+                            }}
+                            value={o}
+                          >
+                            {o?.optionLabel}
+                          </MenuItem>
+                        );
+                      })}
+                    </Menu>
+                  </>
+                )}
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
+            <ActivityButton referenceId={invoiceData?._id} resource={ACTIVITY_RESOURCE.repairOrder} />
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            {...a11yProps(0)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
+            }
+            {...a11yProps(1)}
+          />
+        </Tabs>
+
+        <TabPanel value={tabValue} index={0}>
+          <Box>
+            {loading || !invoiceFields.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <>
+                <DetailsPage data={invoiceData} fields={invoiceFields} />
+              </>
+            )}
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Steps
+            isNextStep={false}
+            nextStep={nextStep}
+            steps={invoiceProcessSteps}
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
+            isStepEnded={['Invoiced', 'Closed'].includes(invoiceData?.status)}
+          />
+          <ContentFullScreen title={invoiceProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            {currentStep === 0 && invoiceData && (
+              <Productpackage
+                invoiceData={invoiceData}
+                setNextStep={setNextStep}
+                currencySymbol={currencySymbol}
+                renderedFrom={`${renderedFrom}_grid-1`}
+                showActivity={showActivity}
+                stepFullScreen={stepFullScreen}
+                updateJobStatus={updateJobStatus}
+                currentStep={currentStep}
+              />
+            )}
+
+            {currentStep === 1 && invoiceData && (
+              <Invoice
+                invoiceData={invoiceData}
+                setNextStep={setNextStep}
+                currencySymbol={currencySymbol}
+                updateJobStatus={updateJobStatus}
+                stepFullScreen={stepFullScreen}
+                statusOptions={statusOptions}
+                showActivity={showActivity}
+                renderedFrom={`${renderedFrom}_grid-5`}
+              />
+            )}
+          </ContentFullScreen>
+        </TabPanel>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -484,7 +390,7 @@ const InvoiceDetails = () => {
           }}
         />
       )}
-    </>
+    </Box>
   );
 };
 
