@@ -27,6 +27,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import Checkbox from '@material-ui/core/Checkbox';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { Check, Edit } from '@material-ui/icons';
+import { CgSearch } from 'react-icons/cg';
+import { GrFormClose } from 'react-icons/gr';
 
 const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, ...rest }: any, ref) => {
   const defaultRef = React.useRef();
@@ -57,23 +59,59 @@ function DefaultColumnFilter({
     setFilter
   }
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = React.useRef(null);
+  const inputRef = React.useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ref]);
+
+  useEffect(() => {
+    if (isOpen) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
+
   // const count = preFilteredRows.length
   return (
-    <TextField
-      autoComplete="off"
-      type="search"
-      id="search"
-      style={{ padding: 0 }}
-      fullWidth
-      value={filterValue || ''}
-      size="small"
-      InputProps={{
-        startAdornment: <FilterListIcon fontSize="small" className="mr-2" />
-      }}
-      onChange={(e) => {
-        setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
-      }}
-    />
+    <div>
+      <IconButton onClick={() => setIsOpen(true)} size="small" className={`${filterValue ? 'activeFilter' : ''}`}>
+        <CgSearch />
+      </IconButton>
+      {/* {isOpen && ( */}
+      <div className={`tableFilterSearch ${isOpen ? 'open' : ''}`} ref={ref}>
+        <input
+          value={filterValue || ''}
+          onChange={(e) => {
+            setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
+          }}
+          autoComplete="off"
+          placeholder="Search..."
+          type="text"
+          id="search"
+          aria-hidden={!isOpen}
+          ref={inputRef}
+        />
+        {/* {filterValue !== '' && ( */}
+        <GrFormClose
+          onClick={() => {
+            setFilter('');
+            setIsOpen(false);
+          }}
+        />
+        {/* )} */}
+      </div>
+      {/* )} */}
+    </div>
   );
 }
 
@@ -389,7 +427,7 @@ export default function CustomReactTable({
   };
   // Render the UI for your table
   return (
-    <>
+    <div style={{ position: 'relative' }}>
       {displayCustomReactTableHeaderOptions && (
         <CustomReactTableHeaderOptions
           columns={allColumns}
@@ -414,14 +452,13 @@ export default function CustomReactTable({
         style={{
           display: 'block',
           overflow: 'auto',
-          minHeight: '450px',
           height: height ?? '100%'
           // maxWidth: "100%",
           // overflowX: "scroll",
           // overflowY: "hidden",
           // borderBottom: "1px solid black"
         }}
-        className="border custom-react-table"
+        className="border custom-react-table custom-react-table-v1"
       >
         <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
           <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
@@ -429,22 +466,29 @@ export default function CustomReactTable({
               <>
                 <TableRow {...headerGroup.getHeaderGroupProps()} key={index} className="tr">
                   {headerGroup.headers.map((column, index) => (
-                    <TableCell key={`${index}-${column?.Header}`} {...column.getHeaderProps()} className="th text-truncate table-header">
-                      <div className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
-                        <span>{column.render('Header')}</span>
-                        {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
+                    <TableCell
+                      key={`${index}-${column?.Header}`}
+                      {...column.getHeaderProps()}
+                      className="th text-truncate table-header overflow-initial"
+                    >
+                      <div className="d-flex align-items-center justify-content-space-between pos-rel">
+                        <div className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
+                          <span>{column.render('Header')}</span>
+                          {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
+                        </div>
+                        <div>{column.canFilter ? column.render('Filter') : null}</div>
                       </div>
                       <div {...column.getResizerProps()} className="resizer" />
                     </TableCell>
                   ))}
                 </TableRow>
-                <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
+                {/* <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
                   {headerGroup.headers.map((column) => (
                     <TableCell {...column.getHeaderProps()} className="th text-truncate bg-white">
                       <div>{column.canFilter ? column.render('Filter') : null}</div>
                     </TableCell>
                   ))}
-                </TableRow>
+                </TableRow> */}
               </>
             ))}
           </TableHead>
@@ -574,6 +618,6 @@ export default function CustomReactTable({
                 }}
                 rowsPerPageOptions={gridPageSizes}
             /> */}
-    </>
+    </div>
   );
 }
