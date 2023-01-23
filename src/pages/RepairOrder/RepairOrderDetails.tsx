@@ -272,11 +272,11 @@ const RepairOrderDetails = () => {
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
-        <Box className="nav-new-v1">
+        <Box className="nav-v1">
           <CustomBreadCrumbs routes={[routes.repairOrder, { title: repairOrderData?.repairOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
-          <Box className="control-buttons-new-v1">
+          <Box className="control-buttons-v1">
             {repairOrderData ? (
               <>
                 {permissions?.repairOrder?.isUpdate &&
@@ -367,7 +367,7 @@ const RepairOrderDetails = () => {
           </Box>
         </Box>
       </Box>
-      <div className={`detail-container-v1 `}>
+      <Box className={`detail-container-v1`}>
         <Tabs
           className="new-tab-container-v1"
           value={tabValue}
@@ -512,7 +512,7 @@ const RepairOrderDetails = () => {
             )}
           </ContentFullScreen>
         </TabPanel>
-      </div>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
