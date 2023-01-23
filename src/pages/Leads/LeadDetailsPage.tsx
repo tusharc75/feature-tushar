@@ -11,7 +11,7 @@ import { leadPage } from '../../routes/Lead';
 import routes from '../../components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
 import { SVG } from '../../assets';
-import { getObjKeysWithValues, lead, processFieldName, defaultActivityShow, ACTIVITY_RESOURCE } from '../../constants/helpers';
+import { getObjKeysWithValues, lead, processFieldName, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
@@ -34,7 +34,6 @@ const LeadDetailsPage = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(true);
   const [leadData, setLeadData] = useState(null);
@@ -50,7 +49,6 @@ const LeadDetailsPage = () => {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [leadsPermissions, setLeadsPermissions] = useState({
     isCreate: false,
     isUpdate: false,
@@ -73,15 +71,6 @@ const LeadDetailsPage = () => {
   const { leadResource, leadApi } = lead;
   let { id } = useParams();
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
-  // useEffect(() => {
-  //   if (id && user) {
-  //     fetchLeadData();
-  //   }
-  // }, [id]);
-
   useEffect(() => {
     if (permissions) {
       setLeadsPermissions(permissions[leadResource]);
@@ -102,12 +91,6 @@ const LeadDetailsPage = () => {
       }
     }
   }, [steps]);
-
-  useEffect(() => {
-    if (isSmallScreen) {
-      setActivityShow(true);
-    }
-  }, [isSmallScreen]);
 
   useEffect(() => {
     fetchLeadData();

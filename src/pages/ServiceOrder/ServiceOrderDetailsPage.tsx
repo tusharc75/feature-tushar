@@ -10,9 +10,7 @@ import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { serviceOrder, defaultActivityShow, ACTIVITY_RESOURCE, getUniqueCurrencies } from '../../constants/helpers';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-import Activity from '../../components/Activity';
+import { serviceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies } from '../../constants/helpers';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
@@ -42,16 +40,13 @@ const ServiceOrderDetailsPage = () => {
   const {
     state: { user, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
+
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [serviceOrderData, setServiceOrderData] = useState(null);
 
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [serviceOrderFields, setServiceOrderFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState(null);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
@@ -89,10 +84,6 @@ const ServiceOrderDetailsPage = () => {
     }
   }, [currentStep]);
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
-
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
@@ -106,31 +97,18 @@ const ServiceOrderDetailsPage = () => {
   }
 
   useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
-
-  useEffect(() => {
     if (id) {
       getServiceOrderFields();
       fetchServiceOrderData();
     }
   }, [id]);
 
-  const handleMainPoints = (data) => {
-    let mainPoint = {};
-    setMainPoints(mainPoint);
-  };
 
   const fetchServiceOrderData = async () => {
     try {
       let data;
       const response: any = await axiosInstance().get(`${serviceOrder.api}/${id}`);
       data = response?.data?.data;
-      handleMainPoints(data);
       setLoadingDetails(false);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
@@ -156,7 +134,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const getServiceOrderFields = async () => {
@@ -184,13 +162,6 @@ const ServiceOrderDetailsPage = () => {
         setShowConfirmBox(false);
       });
   };
-
-  let style = {};
-  if (isSmallScreen) {
-    style = { overflowX: 'hidden', gridTemplateColumns: '100%' };
-  } else {
-    style = { overflowX: 'hidden' };
-  }
 
   return (
     <Box className="main-container-v1">
@@ -285,9 +256,6 @@ const ServiceOrderDetailsPage = () => {
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
                 currencySymbol={currencySymbol}
-                isSmallScreen={isSmallScreen}
-                isTabletScreen={isTabletScreen}
-                showActivity={showActivity}
                 renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={true}
@@ -298,9 +266,6 @@ const ServiceOrderDetailsPage = () => {
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
                 currencySymbol={currencySymbol}
-                isSmallScreen={isSmallScreen}
-                isTabletScreen={isTabletScreen}
-                showActivity={showActivity}
                 renderedFrom={`${renderedFrom}_grid-2`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={true}
@@ -311,9 +276,6 @@ const ServiceOrderDetailsPage = () => {
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
                 currencySymbol={currencySymbol}
-                isSmallScreen={isSmallScreen}
-                isTabletScreen={isTabletScreen}
-                showActivity={showActivity}
                 renderedFrom={`${renderedFrom}_grid-3`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={serviceSteps[currentStep] === 'Invoice' ? false : true}
@@ -324,9 +286,6 @@ const ServiceOrderDetailsPage = () => {
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
                 currencySymbol={currencySymbol}
-                isSmallScreen={isSmallScreen}
-                isTabletScreen={isTabletScreen}
-                showActivity={showActivity}
                 renderedFrom={`${renderedFrom}_grid-4`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={false}

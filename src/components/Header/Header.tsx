@@ -956,13 +956,10 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
             {/* Searchbar */}
             {!is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />}
 
-            {/* <Link to="/">
-              <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
-            </Link> */}
           </Box>
 
           {/* Brand Logo */}
-          {user?.brandLogo ? <img src={user.brandLogo} alt="brand" className={`${styles.brandLogo}`} /> : null}
+          {/* {user?.brandLogo ? <img src={user.brandLogo} alt="brand" className={`${styles.brandLogo}`} /> : null} */}
 
           {/* Select entity */}
           {!isMobile && (

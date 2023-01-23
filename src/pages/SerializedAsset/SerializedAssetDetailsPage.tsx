@@ -24,7 +24,7 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import ReasonDialog from './ReasonDialog';
-import { ACTIVITY_RESOURCE, defaultActivityShow } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE } from '../../constants/helpers';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, DateTimeRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
@@ -40,9 +40,6 @@ import { GiAutoRepair, GrStatusInfo } from 'react-icons/all';
 import { MdEdit } from 'react-icons/md';
 import { camelCase, startCase } from 'lodash';
 import moment from 'moment';
-import Activity from '../../components/Activity';
-import HideWhenOffline from '../../components/HideWhenOffline';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -67,8 +64,6 @@ const SerializedAssetDetailsPage = () => {
   const {
     state: { permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [headingLbl, setHeadingLbl] = useState('');
   const [loadingProductInventory, setLoadingProductInventory] = useState(false);
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
@@ -108,9 +103,9 @@ const SerializedAssetDetailsPage = () => {
     <>
       {params.value ? (
         params.data.type === 'Loading Ticket' ||
-        params.data.type === 'Receiving Ticket' ||
-        params.data.type === 'Return Ticket' ||
-        params.data.type === 'Delivery Ticket' ? (
+          params.data.type === 'Receiving Ticket' ||
+          params.data.type === 'Return Ticket' ||
+          params.data.type === 'Delivery Ticket' ? (
           <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link>
@@ -336,7 +331,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { ids: [id] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -385,16 +380,6 @@ const SerializedAssetDetailsPage = () => {
       }
     }
   }, [productInventoryData]);
-
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
-
-  useEffect(() => {
-    if (isSmallScreen) {
-      setActivityShow(true);
-    }
-  }, [isSmallScreen]);
 
   return (
     <Box className="main-container-v1">

@@ -13,7 +13,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import {
   quotation,
-  defaultActivityShow,
   getUniqueCurrencies,
   ACTIVITY_RESOURCE,
   quotationProcessSteps,
@@ -45,7 +44,6 @@ import {
 } from 'react-icons/all';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-import Activity from '../../components/Activity';
 import { camelCase } from 'lodash';
 import Service from './Service';
 import QuoteBuilder from './QuoteBuilder';
@@ -73,8 +71,6 @@ const QuotationDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
 
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
@@ -87,7 +83,6 @@ const QuotationDetails = () => {
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [statusOptions, setStatusOptions] = useState([]);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -126,18 +121,6 @@ const QuotationDetails = () => {
     setOpenUpdateDialog(true);
     setShowAllVersionStatus(false);
   };
-
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
 
   const handleStatusChange = (o) => {
     if (o.optionValue && quotationData?.status !== o.optionValue) {
@@ -537,7 +520,6 @@ const QuotationDetails = () => {
                   setNextStep={setNextStep}
                   currencySymbol={currencySymbol}
                   renderedFrom={`${renderedFrom}_grid-1`}
-                  showActivity={showActivity}
                   stepFullScreen={stepFullScreen}
                   version={currentVersion}
                 />
@@ -556,7 +538,6 @@ const QuotationDetails = () => {
                   quotationData={quotationData}
                   setNextStep={setNextStep}
                   currencySymbol={currencySymbol}
-                  showActivity={showActivity}
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}
@@ -570,7 +551,6 @@ const QuotationDetails = () => {
                   setNextStep={setNextStep}
                   currencySymbol={currencySymbol}
                   sentToCustomer={sentToCustomer}
-                  showActivity={showActivity}
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}
@@ -583,7 +563,6 @@ const QuotationDetails = () => {
                   quotationData={quotationData}
                   setNextStep={setNextStep}
                   currencySymbol={currencySymbol}
-                  showActivity={showActivity}
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}

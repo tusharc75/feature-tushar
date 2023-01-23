@@ -216,12 +216,10 @@ function LeadsHeader(props) {
                         (leadPermissions.isDelete || allowToConvertLeadToOpportunity) && <>
                             <Button
                                 variant={isMobile && !isTablet ? "text" : "contained"}
-                                color="default"
                                 size="small"
-                                // className={styles.action_submit_btn}
                                 onClick={openActions}
                                 aria-controls="action-menu"
-                                className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                                className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                             >
                                 {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
                             </Button>

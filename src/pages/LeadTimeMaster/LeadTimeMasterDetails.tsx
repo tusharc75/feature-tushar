@@ -15,7 +15,6 @@ import { sidebarResource, serializedAsset, leadTimeMaster } from 'src/constants/
 import ManageLeadTimeMaster from './ManageLeadTimeMaster';
 import queryString from 'query-string';
 import { BiEdit } from 'react-icons/bi';
-import { defaultActivityShow } from 'src/constants/helpers';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -41,9 +40,6 @@ const LeadTimeMasterDetails = () => {
   const [lTMFields, setLTMFields] = useState([]);
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
-
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-
   const [locationKeys, setLocationKeys] = useState([]);
 
   useEffect(() => {

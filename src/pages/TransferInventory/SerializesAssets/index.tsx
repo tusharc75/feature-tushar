@@ -21,9 +21,6 @@ const SerialzedAssets = ({
   setNextStep,
   renderedFrom,
   stepFullScreen,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity,
   canLoad
 }) => {
   const toastConfig = useContext(CustomToastContext);

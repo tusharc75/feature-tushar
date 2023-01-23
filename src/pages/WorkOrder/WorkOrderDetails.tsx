@@ -17,7 +17,6 @@ import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import TabPanel from 'src/components/TabPanel';
-import { defaultActivityShow } from 'src/constants/helpers';
 import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 import accountClass from '../Account/account.module.scss';
@@ -35,8 +34,6 @@ import { RiFlowChart } from 'react-icons/ri';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const { id } = useParams();
   const history = useHistory();
 
@@ -52,7 +49,6 @@ const WorkOrderDetails = () => {
   const [workOrderFields, setWorkOrderFields] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [locationKeys, setLocationKeys] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [previewPdf, setPreviewPdf] = useState(false);
@@ -146,14 +142,6 @@ const WorkOrderDetails = () => {
       fetchWorkOrderData();
     }
   };
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
 
   const previewWorkOrderPdf = () => {
     setPreviewPdf(true);

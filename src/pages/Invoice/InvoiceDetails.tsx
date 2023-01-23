@@ -11,7 +11,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { invoice, defaultActivityShow, invoiceProcessSteps, getUniqueCurrencies, ACTIVITY_RESOURCE } from '../../constants/helpers';
+import { invoice, invoiceProcessSteps, getUniqueCurrencies, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
@@ -24,9 +24,6 @@ import Invoice from './Invoice';
 import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { GrStatusInfo } from 'react-icons/all';
-import HideWhenOffline from '../../components/HideWhenOffline';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-import Activity from '../../components/Activity';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -43,8 +40,6 @@ const InvoiceDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
 
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,7 +52,6 @@ const InvoiceDetails = () => {
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -74,24 +68,6 @@ const InvoiceDetails = () => {
       'aria-controls': `main-tabpanel-${index}`
     };
   }
-
-  // useEffect(() => {
-  //   if (id) {
-  //   }
-  //   // eslint-disable-next-line
-  // }, [id]);
-
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
 
   const handleStatusChange = (o) => {
     if (o.optionValue && invoiceData?.status !== o.optionValue) {
@@ -343,7 +319,6 @@ const InvoiceDetails = () => {
                 setNextStep={setNextStep}
                 currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-1`}
-                showActivity={showActivity}
                 stepFullScreen={stepFullScreen}
                 updateJobStatus={updateJobStatus}
                 currentStep={currentStep}
@@ -358,7 +333,6 @@ const InvoiceDetails = () => {
                 updateJobStatus={updateJobStatus}
                 stepFullScreen={stepFullScreen}
                 statusOptions={statusOptions}
-                showActivity={showActivity}
                 renderedFrom={`${renderedFrom}_grid-5`}
               />
             )}

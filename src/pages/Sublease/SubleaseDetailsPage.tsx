@@ -10,7 +10,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { sublease, SUBLEASE_STATUS, subleaseSteps, defaultActivityShow, ACTIVITY_RESOURCE } from "../../constants/helpers";
+import { sublease, SUBLEASE_STATUS, subleaseSteps, ACTIVITY_RESOURCE } from "../../constants/helpers";
 import ManageSublease from "./ManageSublease";
 import Steps from "../RentalManagement/Steps";
 import { FaWpforms } from "react-icons/fa";
@@ -18,24 +18,17 @@ import { BiEdit, BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
 import queryString from 'query-string';
 import { isMobile, isTablet } from "react-device-detect";
-import accountClass from "../Account/account.module.scss";
 import Productpackage from './Productpackage';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
 import { GiAbstract055 } from 'react-icons/gi';
 import { camelCase } from "lodash";
-import HideWhenOffline from "src/components/HideWhenOffline";
-import Activity from '../../components/Activity';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ContentFullScreen from "src/components/ContentFullScreen";
 import ActivityButton from "src/components/Activity/ActivityButton";
 
 const SubleaseDetailsPage = () => {
     const renderedFrom = camelCase(routes?.sublease.title)
     const toastConfig = useContext(CustomToastContext);
-    const isSmallScreen = useMediaQuery('(max-width:1300px)');
-    const isTabletScreen = useMediaQuery('(max-width:960px)')
-    const [showActivity, setActivityShow] = useState(defaultActivityShow);
 
     const { id } = useParams();
     const history = useHistory();
@@ -145,18 +138,6 @@ const SubleaseDetailsPage = () => {
         setAnchorEl(null);
     };
 
-    const handleActivityHideShow = () => {
-        setActivityShow(!showActivity);
-    };
-
-    useEffect(() => {
-        if (isSmallScreen && tabValue === 0) {
-            setActivityShow(true);
-        } else {
-            setActivityShow(false);
-        }
-    }, [isSmallScreen, tabValue]);
-
     return (
         <Box className="main-container-v1">
             <Box className="headerbox-v1">
@@ -237,48 +218,40 @@ const SubleaseDetailsPage = () => {
                     <Grid item xs={12} sm={12} md={12} lg={12} >
                         {subleaseData ? (
                             <Grid item xs={12} sm={12} md={12} lg={12}>
-                                <>
-                                    <Paper>
-                                        <Steps
-                                            isNextStep={false}
-                                            nextStep={nextStep}
-                                            steps={subleaseSteps}
-                                            currentStep={currentStep}
-                                            setCurrentStep={setCurrentStep}
-                                            isStepEnded={[SUBLEASE_STATUS.completed].includes(subleaseData?.status)}
-                                            setStepFullScreen={() => setStepFullScreen(true)}
+                                <Steps
+                                    isNextStep={false}
+                                    nextStep={nextStep}
+                                    steps={subleaseSteps}
+                                    currentStep={currentStep}
+                                    setCurrentStep={setCurrentStep}
+                                    isStepEnded={[SUBLEASE_STATUS.completed].includes(subleaseData?.status)}
+                                    setStepFullScreen={() => setStepFullScreen(true)}
+                                />
+                                <ContentFullScreen title={subleaseSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+
+                                    {currentStep === 0 && subleaseData && (
+                                        <Productpackage
+                                            subleaseData={subleaseData}
+                                            setNextStep={setNextStep}
+                                            fetchData={fetchData}
+                                            isIssued={isIssued}
+                                            renderedFrom={`${renderedFrom}_grid-1`}
+                                            allowedToEdit={allowedToEdit}
+                                            stepFullScreen={stepFullScreen}
                                         />
-                                        <ContentFullScreen title={subleaseSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
-
-                                            {currentStep === 0 && subleaseData && (
-                                                <Productpackage
-                                                    subleaseData={subleaseData}
-                                                    setNextStep={setNextStep}
-                                                    fetchData={fetchData}
-                                                    isIssued={isIssued}
-                                                    renderedFrom={`${renderedFrom}_grid-1`}
-                                                    allowedToEdit={allowedToEdit}
-                                                    stepFullScreen={stepFullScreen}
-                                                    isSmallScreen={isSmallScreen}
-                                                    isTabletScreen={isTabletScreen}
-                                                    showActivity={showActivity}
-                                                />
-                                            )}
-                                            {(currentStep === 1 || currentStep === 2) && subleaseData && (
-                                                <SerializedAsset
-                                                    fetchData={fetchData}
-                                                    subleaseData={subleaseData}
-                                                    setNextStep={setNextStep}
-                                                    currentStep={currentStep}
-                                                    renderedFrom={`${renderedFrom}_grid-2`}
-                                                    allowedToEdit={allowedToEdit}
-                                                    isProcessor={isProcessor}
-                                                />
-                                            )}
-                                        </ContentFullScreen>
-
-                                    </Paper>
-                                </>
+                                    )}
+                                    {(currentStep === 1 || currentStep === 2) && subleaseData && (
+                                        <SerializedAsset
+                                            fetchData={fetchData}
+                                            subleaseData={subleaseData}
+                                            setNextStep={setNextStep}
+                                            currentStep={currentStep}
+                                            renderedFrom={`${renderedFrom}_grid-2`}
+                                            allowedToEdit={allowedToEdit}
+                                            isProcessor={isProcessor}
+                                        />
+                                    )}
+                                </ContentFullScreen>
                             </Grid>
                         ) : (
                             <Grid container spacing={2} style={{ padding: "8px" }}>

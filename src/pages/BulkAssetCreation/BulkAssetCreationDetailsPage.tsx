@@ -30,8 +30,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import Product from './Product';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import Activity from '../../components/Activity';
-import { defaultActivityShow } from '../../constants/helpers';
-import accountClass from '../Account/account.module.scss';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Steps from '../RentalManagement/Steps';
 import { camelCase } from 'lodash';
@@ -59,10 +57,7 @@ const BulkAssetCreationDetailsPage = () => {
     const [allowedToEdit, setAllowedToEdit] = useState(false);
     const [currentStep, setCurrentStep] = useState(null);
 
-    const isSmallScreen = useMediaQuery('(max-width:1300px)');
-
     const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
-    const [showActivity, setActivityShow] = useState(defaultActivityShow);
     const [nextStep, setNextStep] = useState(true);
     const [stepFullScreen, setStepFullScreen] = useState(false);
 
@@ -184,20 +179,6 @@ const BulkAssetCreationDetailsPage = () => {
         }
     };
 
-    const handleActivityHideShow = () => {
-        setActivityShow(!showActivity);
-    };
-
-    useEffect(() => {
-        if (isSmallScreen && tabValue === 0) {
-            setActivityShow(true)
-        }
-        else {
-            setActivityShow(false)
-        }
-    }, [isSmallScreen, tabValue])
-
-
     return (
         <Box className="main-container-v1">
             <Box className="headerbox-v1">
@@ -281,37 +262,35 @@ const BulkAssetCreationDetailsPage = () => {
                             </Grid>
                         ) : (
                             <Grid item xs={12} sm={12} md={12} lg={12}>
-                                <Paper>
-                                    <Steps
-                                        isNextStep={false}
-                                        nextStep={nextStep}
-                                        steps={bulkAssetCreationSteps}
-                                        currentStep={currentStep}
-                                        setCurrentStep={setCurrentStep}
-                                        isStepEnded={["Completed"]?.includes(bulkAssetCreationData?.status)}
-                                        setStepFullScreen={() => setStepFullScreen(true)}
-                                    />
-                                    <ContentFullScreen title={bulkAssetCreationSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
-                                        {currentStep === 0 && (
-                                            <Product
-                                                bulkAssetCreationData={bulkAssetCreationData}
-                                                setNextStep={setNextStep}
-                                                setBulkAssetCreationProduct={setBulkAssetCreationProduct}
-                                                renderedFrom={`${renderedFrom}_grid-1`}
-                                                handleUpdateData={handleUpdateData}
-                                                fetchData={fetchData}
-                                                allowedToEdit={allowedToEdit}
-                                            />
-                                        )}
-                                        {currentStep === 1 && (
-                                            <SerializedAsset
-                                                bulkAssetCreationData={bulkAssetCreationData}
-                                                renderedFrom={`${renderedFrom}_grid-2`}
-                                                allowedToEdit={allowedToEdit}
-                                            />
-                                        )}
-                                    </ContentFullScreen>
-                                </Paper>
+                                <Steps
+                                    isNextStep={false}
+                                    nextStep={nextStep}
+                                    steps={bulkAssetCreationSteps}
+                                    currentStep={currentStep}
+                                    setCurrentStep={setCurrentStep}
+                                    isStepEnded={["Completed"]?.includes(bulkAssetCreationData?.status)}
+                                    setStepFullScreen={() => setStepFullScreen(true)}
+                                />
+                                <ContentFullScreen title={bulkAssetCreationSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                                    {currentStep === 0 && (
+                                        <Product
+                                            bulkAssetCreationData={bulkAssetCreationData}
+                                            setNextStep={setNextStep}
+                                            setBulkAssetCreationProduct={setBulkAssetCreationProduct}
+                                            renderedFrom={`${renderedFrom}_grid-1`}
+                                            handleUpdateData={handleUpdateData}
+                                            fetchData={fetchData}
+                                            allowedToEdit={allowedToEdit}
+                                        />
+                                    )}
+                                    {currentStep === 1 && (
+                                        <SerializedAsset
+                                            bulkAssetCreationData={bulkAssetCreationData}
+                                            renderedFrom={`${renderedFrom}_grid-2`}
+                                            allowedToEdit={allowedToEdit}
+                                        />
+                                    )}
+                                </ContentFullScreen>
                             </Grid>
                         )}
                     </Grid>

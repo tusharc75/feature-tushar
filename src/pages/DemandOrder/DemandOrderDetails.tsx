@@ -38,8 +38,6 @@ const DemandOrderDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
 
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,7 +50,6 @@ const DemandOrderDetails = () => {
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -69,14 +66,6 @@ const DemandOrderDetails = () => {
       'aria-controls': `main-tabpanel-${index}`
     };
   }
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
 
   const handleStatusChange = (o) => {
     if (o.optionValue && salesOrderData?.status !== o.optionValue) {
@@ -273,7 +262,6 @@ const DemandOrderDetails = () => {
             )}
           </Box>
         </TabPanel>
-
         <TabPanel value={tabValue} index={1}>
           <Steps
             isNextStep={false}
@@ -290,7 +278,6 @@ const DemandOrderDetails = () => {
                 setNextStep={setNextStep}
                 currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-1`}
-                showActivity={showActivity}
                 stepFullScreen={stepFullScreen}
               />
             )}

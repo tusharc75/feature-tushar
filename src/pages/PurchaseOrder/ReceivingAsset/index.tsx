@@ -26,9 +26,6 @@ const ReceivingAsset = ({
   purchaseOrderData,
   updateStatus,
   stepFullScreen,
-  isSmallScreen,
-  isTabletScreen,
-  showActivity,
   renderedFrom,
   checkReceivedProduct,
   allowedToEdit
@@ -38,8 +35,6 @@ const ReceivingAsset = ({
     state: { user, permissions }
   }: any = useData();
   const theme = useTheme();
-  const isMobileScreen = useMediaQuery(theme.breakpoints.down('xs'));
-
   const [receiveDialog, setReceiveDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectProductDialog, setRejectProductDialog] = useState(null);

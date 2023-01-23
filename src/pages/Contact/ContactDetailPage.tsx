@@ -3,21 +3,18 @@ import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, Lis
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { Skeleton } from '@material-ui/lab';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import { Link } from 'react-router-dom';
 import contactClass from './contact.module.scss';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useData } from '../../StateProvider/Provider';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import axiosInstance from './../../axios/axiosInstance';
-import Activity from '../../components/Activity';
 import {
   getObjKeysWithValues,
   isObjectEmpty,
   sidebarResource,
   customerAccount,
   processFieldName,
-  defaultActivityShow,
   userType,
   customerContact
 } from './../../constants/helpers';
@@ -41,17 +38,14 @@ import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAcc
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
 import ProcessFlow from '../../components/ProcessFlow';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import routes from '../../components/Helpers/Routes';
 import queryString from 'query-string';
 import AddReportsToContact from './AddReportsToContact';
 import { MdDelete, MdEdit } from 'react-icons/md';
-import accountClass from '../Account/account.module.scss';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import Warehouse from '../Account/Warehouse';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { camelCase } from 'lodash';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const ContactDetailsPage = (props) => {
@@ -70,7 +64,7 @@ const ContactDetailsPage = (props) => {
     state: { user, permissions, selectedEntity, tour },
     dispatch
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
+  
   const [headingLbl, setHeadingLbl] = useState('');
   const [contactData, setContactData] = useState<any>({});
   const [loading, setLoading] = useState(false);
@@ -85,7 +79,6 @@ const ContactDetailsPage = (props) => {
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
   const [contactPermissions, setContactPermissions] = useState({
     isCreate: false,
@@ -131,12 +124,6 @@ const ContactDetailsPage = (props) => {
       fetchLoggedInUserEntities();
     }
   }, [id]);
-
-  useEffect(() => {
-    if (isSmallScreen) {
-      setActivityShow(true);
-    }
-  }, [isSmallScreen]);
 
   useEffect(() => {
     if (steps.length > 0) {
@@ -502,9 +489,6 @@ const ContactDetailsPage = (props) => {
     }
   };
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
   const handleOpneUpdateDialog = () => {
     if (activeStep === steps.length - 1) {
       setShowAtLast(true);
