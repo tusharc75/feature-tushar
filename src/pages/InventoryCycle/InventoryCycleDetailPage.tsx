@@ -13,6 +13,8 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageInventoryCycle from './ManageInventoryCycle';
 import DeleteButton from '../../components/Helpers/DeleteButton';
+import { BiEdit } from 'react-icons/bi';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const InventoryCycleDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,7 +54,9 @@ const InventoryCycleDetailPage = () => {
   const fetchInventoryCycleData = async () => {
     setLoading(true);
     try {
-      const { data: { data } } = await axiosInstance().get(`/inventory-cycle/${id}`);
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/inventory-cycle/${id}`);
       setHeadingLbl(data.cycleCode);
       setInventoryCycleData(data);
       setCustomizedRoutes([routes.inventoryCycle, { title: data.cycleCode }]);
@@ -74,7 +78,6 @@ const InventoryCycleDetailPage = () => {
         .catch((err) => {
           setShowConfirmBox(false);
         });
-
     } else {
       setShowConfirmBox(false);
     }
@@ -89,34 +92,37 @@ const InventoryCycleDetailPage = () => {
   };
 
   return (
-    <>
-      <Fragment>
-        <Grid container className="headerbox">
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
           <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-        <Grid container spacing={1} className="detail-container">
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {inventoryCycleData ? (
+              <>
+                {permissions?.inventoryCycle?.isUpdate && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    className={'btn-outline-v1'}
+                    size="small"
+                    onClick={handleOpenUpdateDialog}
+                  >
+                    {isMobile ? <BiEdit size={20} /> : 'Edit'}
+                  </Button>
+                )}
+                {permissions?.inventoryCycle?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Grid container spacing={1}>
           <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
             <Paper>
-              {!inventoryCycleData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    <Box marginX={1} />
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  </Box>
-                </div>
-              ) : (
-                <DetailsPageHeader heading={headingLbl} mainPoints={null} showHeading={true}>
-                  {permissions?.inventoryCycle?.isUpdate &&
-                    <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                      Edit
-                    </Button>}
-                  {permissions?.inventoryCycle?.isDelete &&
-                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                  }
-                </DetailsPageHeader>
-              )}
               <Box>
                 {loading || !formsData.length ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -129,7 +135,8 @@ const InventoryCycleDetailPage = () => {
             </Paper>
           </Grid>
         </Grid>
-      </Fragment>
+      </Box>
+
       {openUpdateDialog && (
         <ManageInventoryCycle
           isUpdateDisabled={false}
@@ -152,8 +159,7 @@ const InventoryCycleDetailPage = () => {
           onOk={handleDeleteInventoryCycle}
         />
       )}
-
-    </>
+    </Box>
   );
 };
 
