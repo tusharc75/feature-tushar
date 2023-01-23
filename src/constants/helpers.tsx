@@ -1845,6 +1845,7 @@ export const ACTIVITY_RESOURCE = {
   serviceOrder: 'serviceOrder',
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
+  employeeMaster:'employeeMaster'
 };
 
 export const REPORT_LIST = [
