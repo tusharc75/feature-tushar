@@ -179,6 +179,8 @@ import EmployeeMasterDetail from './pages/EmployeeMaster/EmployeeMasterDetail';
 import CompetencyMaster from './pages/CompetencyMaster';
 import CompetencyMasterDetail from './pages/CompetencyMaster/CompetencyMasterDetail';
 import TechnicianScheduler from './pages/TechnicianScheduler';
+import BudgetDetail from './pages/Budget/BudgetDetail';
+import MarketSegmentDetail from './pages/MarketSegment/MarketSegmentDetail';
 
 var notificationInterval: any = null;
 
@@ -653,6 +655,9 @@ function App() {
             <PrivateRoute exact path={routes.budget.path}>
               <Budget />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.budget.path}/detail/:id`}>
+              <BudgetDetail />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.pricingCondition.path}>
               <PricingConditions />
             </PrivateRoute>
@@ -661,6 +666,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.marketSegment.path}>
               <MarketSegment />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.marketSegment.path}/detail/:id`}>
+              <MarketSegmentDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.deliveryTicket.path}>
               <DeliveryTicket />
