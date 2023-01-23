@@ -610,14 +610,19 @@ body::-webkit-scrollbar-thumb {
 
   & .MuiToggleButton-sizeSmall {
     padding: 4px 8px !important;
-    background: #effbf9;
+    background: #f0f0f0;
+    border-radius: 6px !important;
     color: #298b88 !important;
-    border: 1px solid #effbf9;
+    border: 0;
     border-radius: 6px !important;
     margin-left: 10px !important;
     &:first-of-type {
       margin-left: 0 !important;
     }
+  }
+  .MuiToggleButton-root.Mui-selected {
+    background-color: #effbf9 !important;
+    color: #298b88 !important;
   }
 
   & .MuiOutlinedInput-inputMarginDense {
@@ -726,7 +731,10 @@ body::-webkit-scrollbar-thumb {
   box-shadow: 0px 3.90676px 39.0676px rgba(0, 0, 0, 0.08);
   overflow-y: hidden;
 
-  padding: 10px 10px 0;
+  padding: 25px;
+  @media all and (max-width: 768px) {
+    padding: 15px;
+  }
 }
 
 .detail-container {
@@ -884,7 +892,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .detail-box {
-  padding: 10px 20px 0 20px;
+  padding: 0;
 }
 
 .detail-box-content {
@@ -2592,12 +2600,15 @@ svg.MuiSvgIcon-root {
   .detail-container-v1 {
     position: relative;
     // padding: var(--container-padding, 20px 15px);
-    padding: 10px;
+    padding: 25px;
     background: #ffffff;
     box-shadow: 0px 3.90676px 39.0676px rgba(0, 0, 0, 0.08);
     border-radius: 10px;
-    min-height: 600px;
-    height: calc(100vh - 136px);
+    min-height: 700px;
+    // height: calc(100vh - 136px);
+    @media all and (max-width: 768px) {
+      padding: 15px;
+    }
   }
   .control-buttons-v1 {
     display: flex;
@@ -2634,8 +2645,6 @@ svg.MuiSvgIcon-root {
     bottom: 0;
     overflow: auto;
     background-color: white;
-    display: flex;
-    align-items: center;
 
     .close-icon-v1 {
       position: absolute;
@@ -2645,6 +2654,11 @@ svg.MuiSvgIcon-root {
         padding: 9px;
       }
     }
+  }
+  .detailHeader {
+    position: sticky;
+    top: 0;
+    z-index: 5;
   }
   .backdrop-new-v1 {
     position: fixed;
@@ -2773,41 +2787,47 @@ svg.MuiSvgIcon-root {
   }
 }
 
-.btn-secondary-v1 {
-  background: #eeeeee !important;
-  border: 1px solid #e2e2e2 !important;
-  box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
-  border-radius: 3px !important;
-  &:disabled {
-    opacity: 0.5;
+body {
+  --button-v1-padding: 6px 16px !important;
+  .btn-secondary-v1 {
+    background: #eeeeee !important;
+    border: 1px solid #e2e2e2 !important;
+    box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
+    border-radius: 3px !important;
+    padding: var(--button-v1-padding);
+    &:disabled {
+      opacity: 0.5;
+    }
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04) !important;
+    }
   }
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.04) !important;
+  .btn-outline-v1 {
+    background: #ffffff !important;
+    border: 1px solid #e2e2e2 !important;
+    box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
+    border-radius: 3px !important;
+    padding: var(--button-v1-padding);
+    &:disabled {
+      opacity: 0.5;
+    }
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04) !important;
+    }
   }
-}
-.btn-outline-v1 {
-  background: #ffffff !important;
-  border: 1px solid #e2e2e2 !important;
-  box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
-  border-radius: 3px !important;
-  &:disabled {
-    opacity: 0.5;
-  }
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.04) !important;
-  }
-}
 
-.btn-outline-red-v1 {
-  background: #ffffff !important;
-  border: 1px solid #f44336 !important;
-  color: #f44336 !important;
-  box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
-  border-radius: 3px !important;
-  &:disabled {
-    opacity: 0.5;
-  }
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.04) !important;
+  .btn-outline-red-v1 {
+    background: #ffffff !important;
+    border: 1px solid #f44336 !important;
+    color: #f44336 !important;
+    box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
+    border-radius: 3px !important;
+    padding: var(--button-v1-padding);
+    &:disabled {
+      opacity: 0.5;
+    }
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04) !important;
+    }
   }
 }
