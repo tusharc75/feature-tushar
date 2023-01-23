@@ -1,10 +1,9 @@
-import { Box, Button, Grid, Paper } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Box, Button, Grid, Menu, MenuItem, Paper } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Skeleton } from '@material-ui/lab';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
@@ -20,7 +19,6 @@ const CompetencyMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [headingLbl, setHeadingLbl] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.blog]);
   const [competencyMasterData, setCompetencyMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -55,7 +53,6 @@ const CompetencyMasterDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/competency-master/${id}`);
-      setHeadingLbl(data.competencyName);
       setCompetencyMasterData(data);
       setCustomizedRoutes([routes.competencyMaster, { title: data?.competencyName }]);
       setLoading(false);
@@ -97,13 +94,13 @@ const CompetencyMasterDetail = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={customizedRoutes} />
-      </Grid>
-      <div className="detail-container grid-without-activity">
-        <div>
-          <Paper>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
             {!competencyMasterData ? (
               <div>
                 <Skeleton variant="text" width="150px" height="40px" />
@@ -114,12 +111,11 @@ const CompetencyMasterDetail = () => {
                 </Box>
               </div>
             ) : (
-              <DetailsPageHeader heading={headingLbl} showHeading={true}>
+              <>
                 {permissions?.competencyMaster?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
-                    size="small"
+                    className="btn-outline-v1"
                     onClick={handleOpenUpdateDialog}
                     style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                   >
@@ -127,20 +123,24 @@ const CompetencyMasterDetail = () => {
                   </Button>
                 )}
                 {permissions?.competencyMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </DetailsPageHeader>
+              </>
             )}
-            <Box>
-              {loading || !fields?.length ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              ) : (
-                <DetailsPage data={competencyMasterData} fields={fields} />
-              )}
-            </Box>
-          </Paper>
-        </div>
-      </div>
+          </Box>
+        </Box>
+      </Box>
+      <Box className="detail-container-v1">
+        <Paper>
+          <Box>
+            {loading || !fields?.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={competencyMasterData} fields={fields} />
+            )}
+          </Box>
+        </Paper>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -162,7 +162,7 @@ const CompetencyMasterDetail = () => {
           }}
         />
       )}
-    </Fragment>
+    </Box>
   );
 };
 

@@ -1,12 +1,11 @@
-import { Box, Button, Grid, Paper, Tab, Tabs } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Skeleton } from '@material-ui/lab';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { useData } from 'src/StateProvider/Provider';
 import { useParams, useHistory } from 'react-router-dom';
@@ -17,6 +16,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageSurveys from './ManageSurveys';
 import FieldDialog from './FieldDialog';
 import SurveysData from './SurveysData';
+import { FaWpforms } from 'react-icons/fa';
 
 const SurveysDetail = () => {
   const { id } = useParams();
@@ -107,13 +107,13 @@ const SurveysDetail = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={customizedRoutes} />
-      </Grid>
-      <div className="detail-container grid-without-activity">
-        <div>
-          <Paper>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="controls-buttons-v1">
             {!SurveyData ? (
               <div>
                 <Skeleton variant="text" width="150px" height="40px" />
@@ -124,69 +124,85 @@ const SurveysDetail = () => {
                 </Box>
               </div>
             ) : (
-              <DetailsPageHeader heading={headingLbl} showHeading={true}>
+              <>
                 {permissions.surveys?.isUpdate && allowedToEdit && (
                   <>
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
+                      className={'btn-outline-v1'}
                       onClick={handleOpenUpdateDialog}
                       style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                     >
                       {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                     <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  color="primary"
-                  size="small"
-                  onClick={(e) => {
-                    setStepFieldsDialog(true);
-                  }}
-                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                >
-                  Fields
-                </Button>
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      className={'btn-outline-v1'}
+                      onClick={(e) => {
+                        setStepFieldsDialog(true);
+                      }}
+                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                    >
+                      Fields
+                    </Button>
                   </>
                 )}
                 {permissions?.surveys?.isDelete && allowedToDelete && SurveyData?.canDelete && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
-              </DetailsPageHeader>
+              </>
             )}
-            <Tabs
-              variant="scrollable"
-              scrollButtons="auto"
-              className="oms-tab"
-              value={tabValue}
-              onChange={handleMainTabChange}
-              indicatorColor="primary"
-              textColor="primary"
-              aria-label="Product Details Tab"
-              TabIndicatorProps={{
-                style: {
-                  height: 0
-                }
-              }}
-            >
-              <Tab label="Details" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-              <Tab label="Data" value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
-            </Tabs>
-            {tabValue === 0 && (
-              <Box>
-                {loading || !fields?.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <DetailsPage data={SurveyData} fields={fields} />
-                )}
-              </Box>
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              height: 0
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            value={0}
+            aria-controls="a11y-tabpanel-0"
+            id="a11y-tab-0"
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
+            }
+            value={1}
+            aria-controls="a11y-tabpanel-1"
+            id="a11y-tab-1"
+          />
+        </Tabs>
+        {tabValue === 0 && (
+          <Box>
+            {loading || !fields?.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={SurveyData} fields={fields} />
             )}
-            {tabValue === 1 && <SurveysData surveyId={id} />}
-          </Paper>
-        </div>
-      </div>
+          </Box>
+        )}
+        {tabValue === 1 && <SurveysData surveyId={id} />}
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -220,7 +236,7 @@ const SurveysDetail = () => {
           }}
         />
       )}
-    </Fragment>
+    </Box>
   );
 };
 
