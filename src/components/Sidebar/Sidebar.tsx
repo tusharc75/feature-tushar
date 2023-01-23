@@ -322,11 +322,12 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             {user &&
               listItems().map((listItem, i) => {
                 const items = listItem.items.map((item) => item.name.toLowerCase().split(' ').join('-'));
+
                 return (
                   <React.Fragment key={i}>
                     <Tooltip title={!toggleDrawer ? listItem.section : ''}>
                       <ListItem
-                        className={`${styles.listItem} dropdown-items ${items.some((item) => pathName.includes(item)) && styles.activeList}`}
+                        className={`${styles.listItem} dropdown-items ${items.some((item) => pathName === item) && styles.activeList}`}
                         button
                         key={listItem.section + '' + i}
                         onClick={() => {
@@ -336,7 +337,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                           }
                         }}
                       >
-                        {items.some((item) => pathName.includes(item)) && (
+                        {items.some((item) => pathName === item) && (
                           <>
                             <i />
                             <i />
@@ -351,7 +352,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                       <List component="div" disablePadding className={`${styles.subList} `}>
                         {listItem.items.map((item, j) => (
                           <Link
-                            className={`sub-list ${pathName.includes(item.name.toLowerCase().split(' ').join('-')) && styles.active_sub} ${
+                            className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${
                               itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''
                             }`}
                             key={j}
