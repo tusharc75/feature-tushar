@@ -91,16 +91,13 @@ const FormBuilder = () => {
       <CustomContainer>
         <Grid className={styles.filter_side_container} container>
           <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-            <div className="d-flex align-items-center">
-              <FaWpforms className="headerLogo" /> <span className="listingHeader">{routes.formBuilder.title}</span>
-            </div>
           </Grid>
           <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
             <Grid style={{ display: 'flex', gap: '5px' }}>
               <Button
                 variant="outlined"
-                color="primary"
                 size="small"
+                className={'btn-outline-v1'}
                 onClick={() => {
                   setArrangeViewOpen(true);
                 }}

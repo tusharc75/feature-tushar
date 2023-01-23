@@ -8,15 +8,12 @@ import { FormBuilder } from '../../components/FormBuilder';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import CustomContainer from '../../components/CustomContainer';
 import { useData } from '../../StateProvider/Provider';
 import { checkFormulaLoop, checkUniqueValidation } from '../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { IoIosArrowDropdown } from 'react-icons/io';
-import { classNames } from 'react-easy-crop/helpers';
 import { RiCloseCircleFill, RiSaveFill } from 'react-icons/all';
 import TextField from '@material-ui/core/TextField';
 import { camelCase } from 'lodash';
@@ -233,10 +230,10 @@ const CreateFormBuilder = () => {
     reader.readAsBinaryString(f);
   };
 
-  return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={5} sm={11} xs={10}>
+  return (<Fragment>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
           <CustomBreadCrumbs
             routes={[routes.formBuilder, { title: resource }]}
             isConfirmBeforeClick={true}
@@ -246,32 +243,11 @@ const CreateFormBuilder = () => {
               } else history.push({ pathname: path });
             }}
           />
-        </Grid>
-        <Grid container justify="flex-end" item md={7} sm={1} xs={2} className="pr-3">
-          <div className={classes.linksContainer} style={{ display: 'none' }}>
-            <label htmlFor="importField" style={{ color: 'white' }} className="cursor-pointer mr-3">
-              Import Fields
-              <input
-                onClick={(e: any) => (e.target.value = null)}
-                id="importField"
-                name="importField"
-                onChange={handleImportFields}
-                style={{
-                  opacity: '0',
-                  position: 'absolute',
-                  zIndex: -1
-                }}
-                type="file"
-              />
-            </label>
-            <label style={{ color: 'white' }} className="cursor-pointer" onClick={handleExportFields}>
-              Export Fields
-            </label>
-            <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
-          </div>
-          <Menu id="importField" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-            <MenuItem>
-              <label htmlFor="importField" className="cursor-pointer">
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            <div className={classes.linksContainer} style={{ display: 'none' }}>
+              <label htmlFor="importField" className="cursor-pointer mr-3">
                 Import Fields
                 <input
                   onClick={(e: any) => (e.target.value = null)}
@@ -286,17 +262,40 @@ const CreateFormBuilder = () => {
                   type="file"
                 />
               </label>
-            </MenuItem>
-            <MenuItem onClick={handleExportFields}>Export Fields</MenuItem>
-          </Menu>
-          {isMobile && (
-            <IconButton onClick={handleClick} className={classes.menuButtonList}>
-              <IoIosArrowDropdown className={classes.expandIcon} />
-            </IconButton>
-          )}
-        </Grid>
-      </Grid>
-      <CustomContainer>
+              <label className="cursor-pointer" onClick={handleExportFields}>
+                Export Fields
+              </label>
+              <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
+            </div>
+            <Menu id="importField" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+              <MenuItem>
+                <label htmlFor="importField" className="cursor-pointer">
+                  Import Fields
+                  <input
+                    onClick={(e: any) => (e.target.value = null)}
+                    id="importField"
+                    name="importField"
+                    onChange={handleImportFields}
+                    style={{
+                      opacity: '0',
+                      position: 'absolute',
+                      zIndex: -1
+                    }}
+                    type="file"
+                  />
+                </label>
+              </MenuItem>
+              <MenuItem onClick={handleExportFields}>Export Fields</MenuItem>
+            </Menu>
+            {isMobile && (
+              <IconButton onClick={handleClick} className={classes.menuButtonList}>
+                <IoIosArrowDropdown className={classes.expandIcon} />
+              </IconButton>
+            )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
         {section ? (
           <Fragment>
             <Box p={1} pb={0} ml={1} bgcolor="white">
@@ -423,8 +422,9 @@ const CreateFormBuilder = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-      </CustomContainer>
-    </Fragment>
+      </Box>
+    </Box>
+  </Fragment>
   );
 };
 
