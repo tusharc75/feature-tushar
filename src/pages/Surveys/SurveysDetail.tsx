@@ -113,44 +113,31 @@ const SurveysDetail = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Box>
         <Box className="controls-v1">
-          <Box className="controls-buttons-v1">
-            {!SurveyData ? (
-              <div>
-                <Skeleton variant="text" width="150px" height="40px" />
-                <Box display="flex">
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  <Box marginX={1} />
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                </Box>
-              </div>
-            ) : (
-              <>
-                {permissions.surveys?.isUpdate && allowedToEdit && (
-                  <>
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      className={'btn-outline-v1'}
-                      onClick={handleOpenUpdateDialog}
-                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      className={'btn-outline-v1'}
-                      onClick={(e) => {
-                        setStepFieldsDialog(true);
-                      }}
-                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    >
-                      Fields
-                    </Button>
-                  </>
-                )}
-                {permissions?.surveys?.isDelete && allowedToDelete && SurveyData?.canDelete && (
-                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                )}
-              </>
+          <Box className="control-buttons-v1">
+            {permissions.surveys?.isUpdate && allowedToEdit && (
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                className={'btn-outline-v1'}
+                onClick={(e) => {
+                  setStepFieldsDialog(true);
+                }}
+                size="small"
+              >
+                Fields
+              </Button>
+            )}
+            {permissions.surveys?.isUpdate && allowedToEdit && (
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                className={'btn-outline-v1'}
+                onClick={handleOpenUpdateDialog}
+                size="small"
+              >
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              </Button>
+            )}
+            {permissions?.surveys?.isDelete && allowedToDelete && SurveyData?.canDelete && (
+              <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
             )}
           </Box>
         </Box>
@@ -203,40 +190,46 @@ const SurveysDetail = () => {
         )}
         {tabValue === 1 && <SurveysData surveyId={id} />}
       </Box>
-      {showConfirmBox && (
-        <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.surveys?.title?.toLowerCase()} ?`}
-          onClose={() => {
-            setShowConfirmBox(false);
-          }}
-          onOk={handleDelete}
-        />
-      )}
-      {openUpdateDialog && (
-        <ManageSurveys
-          id={id}
-          isClone={false}
-          onClose={closeUpdateDialog}
-          onSuccess={() => {
-            closeUpdateDialog();
-            fetchData();
-          }}
-        />
-      )}
-      {stepFieldsDialog && (
-        <FieldDialog
-          surveyId={id}
-          handleClose={() => {
-            setStepFieldsDialog(false);
-          }}
-          handleSuccess={() => {
-            setStepFieldsDialog(false);
-            fetchData();
-          }}
-        />
-      )}
-    </Box>
+      {
+        showConfirmBox && (
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={`Are you sure you want to delete ${routes?.surveys?.title?.toLowerCase()} ?`}
+            onClose={() => {
+              setShowConfirmBox(false);
+            }}
+            onOk={handleDelete}
+          />
+        )
+      }
+      {
+        openUpdateDialog && (
+          <ManageSurveys
+            id={id}
+            isClone={false}
+            onClose={closeUpdateDialog}
+            onSuccess={() => {
+              closeUpdateDialog();
+              fetchData();
+            }}
+          />
+        )
+      }
+      {
+        stepFieldsDialog && (
+          <FieldDialog
+            surveyId={id}
+            handleClose={() => {
+              setStepFieldsDialog(false);
+            }}
+            handleSuccess={() => {
+              setStepFieldsDialog(false);
+              fetchData();
+            }}
+          />
+        )
+      }
+    </Box >
   );
 };
 
