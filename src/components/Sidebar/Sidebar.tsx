@@ -47,7 +47,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split('/').filter((x) => x);
-  const pathName = pathnames.join(' ');
+  const pathName = pathnames[0];
 
   const renderIcon = (sectionName: string) => {
     let icon = <FaReact size={20} className={styles.sidebarIcon} />;
@@ -231,14 +231,14 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             <ListItem
               button
               selected={location.pathname === '/'}
-              className={`${styles.listItem} ${pathName === '' ? styles.activeList : ''}`}
+              className={`${styles.listItem} ${location.pathname === '/' ? styles.activeList : ''}`}
               onClick={() => {
                 setItemToAddActiveClass(NaN);
                 setSubItemToAddActiveClass(NaN);
                 history.push('/');
               }}
             >
-              {pathName === '' && (
+              {location.pathname === '/' && (
                 <>
                   <i />
                   <i />
@@ -319,6 +319,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 </Tooltip>
               </Link>
             )}
+
             {user &&
               listItems().map((listItem, i) => {
                 const items = listItem.items.map((item) => item.name.toLowerCase().split(' ').join('-'));
@@ -362,7 +363,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                             }}
                             to={handleRoutes(item)}
                           >
-                            <ListItem button selected={pathnames.includes(lowerCase(item.name))} className={classes.nested}>
+                            <ListItem button selected={pathnames?.includes(lowerCase(item.name))} className={classes.nested}>
                               <ListItemText primary={item.resourceLabel || item.name} />
                             </ListItem>
                           </Link>
