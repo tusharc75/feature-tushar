@@ -26,9 +26,6 @@ const ReceivingAsset = ({
   purchaseOrderData,
   updateStatus,
   stepFullScreen,
-  isSmallScreen,
-  isTabletScreen,
-  showActivity,
   renderedFrom,
   checkReceivedProduct,
   allowedToEdit
@@ -38,14 +35,11 @@ const ReceivingAsset = ({
     state: { user, permissions }
   }: any = useData();
   const theme = useTheme();
-  const isMobileScreen = useMediaQuery(theme.breakpoints.down('xs'));
-
   const [receiveDialog, setReceiveDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectProductDialog, setRejectProductDialog] = useState(null);
-  const [historyDialog, setHistoryDialog] = useState({ open: false, product: "", productName: "" });
+  const [historyDialog, setHistoryDialog] = useState({ open: false, product: '', productName: '' });
   const [inventoryHistory, setInventoryHistory] = useState([]);
-
 
   const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -53,7 +47,7 @@ const ReceivingAsset = ({
 
   useEffect(() => {
     if (purchaseOrderData?.status === PURCHASE_ORDER_STATUS.closed) {
-      setColumns(null)
+      setColumns(null);
     }
     fetchColumns();
     fetchProduct();
@@ -122,8 +116,7 @@ const ReceivingAsset = ({
           accessor: 'productCategory',
           Header: e?.fieldData?.fieldLabel,
           width: 150,
-          Cell: ({ row }) =>
-            row.original.type === 'Product' ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />
+          Cell: ({ row }) => (row.original.type === 'Product' ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />)
         });
       }
     });
@@ -248,10 +241,12 @@ const ReceivingAsset = ({
           sticky: 'right',
           disableFilters: true,
           canDrag: false,
-          Cell: ({ row }) => (
-            row?.original?.type === "Product" ?
+          Cell: ({ row }) =>
+            row?.original?.type === 'Product' ? (
               <>
-                {(permissions?.purchaseOrder?.isUpdate && allowedToEdit && row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0)) ? (
+                {permissions?.purchaseOrder?.isUpdate &&
+                allowedToEdit &&
+                row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) ? (
                   <HtmlTooltip title="Reject">
                     <span>
                       <IconButton
@@ -279,8 +274,10 @@ const ReceivingAsset = ({
                     </IconButton>
                   </span>
                 </HtmlTooltip>
-              </> : <></>
-          )
+              </>
+            ) : (
+              <></>
+            )
         }
       ]
     ]);
@@ -293,7 +290,7 @@ const ReceivingAsset = ({
       const serializedAsset = assets?.data?.data?.serializedAsset;
       const productSerialNumber = assets?.data?.data?.productSerialNumber;
 
-      setInventoryHistory(assets?.data?.data?.inventoryHistory)
+      setInventoryHistory(assets?.data?.data?.inventoryHistory);
 
       let rows = result?.data?.data?.map((item) => {
         let finalObject = prepareDataForGrid(item);
@@ -350,33 +347,43 @@ const ReceivingAsset = ({
     <>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex">
-          {permissions?.purchaseOrder?.isUpdate && allowedToEdit && <Button
-            variant={'contained'}
-            color="primary"
-            size="small"
-            style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-            disabled={selectedRecords.length === 0 ||
-              (selectedRecords?.filter((e: any) => e.type === "Product" && e.qty - (e?.actualReceived || 0) > 0).length > 0 ? false : true)}
-            onClick={() => {
-              setReceiveDialog(true);
-            }}
-          >
-            Receive
-          </Button>}
-          {permissions?.purchaseOrder?.isUpdate && allowedToEdit && <Button
-            variant={'contained'}
-            color="primary"
-            size="small"
-            className='ml-2'
-            style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-            disabled={selectedRecords.length === 0 ||
-              (selectedRecords?.filter((e: any) => e.type === "Product" && e.qty !== (e?.rejectQuantity || 0 + e?.assetQty || 0)).length > 0 ? false : true)}
-            onClick={() => {
-              setRejectDialog(true);
-            }}
-          >
-            Reject
-          </Button>}
+          {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
+            <Button
+              variant={'contained'}
+              color="primary"
+              size="small"
+              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
+              disabled={
+                selectedRecords.length === 0 ||
+                (selectedRecords?.filter((e: any) => e.type === 'Product' && e.qty - (e?.actualReceived || 0) > 0).length > 0 ? false : true)
+              }
+              onClick={() => {
+                setReceiveDialog(true);
+              }}
+            >
+              Receive
+            </Button>
+          )}
+          {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
+            <Button
+              variant={'contained'}
+              color="primary"
+              size="small"
+              className="ml-2"
+              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
+              disabled={
+                selectedRecords.length === 0 ||
+                (selectedRecords?.filter((e: any) => e.type === 'Product' && e.qty !== (e?.rejectQuantity || 0 + e?.assetQty || 0)).length > 0
+                  ? false
+                  : true)
+              }
+              onClick={() => {
+                setRejectDialog(true);
+              }}
+            >
+              Reject
+            </Button>
+          )}
         </Box>
         <div className="d-flex gap-2">
           <SendEmail purchaseOrderData={purchaseOrderData} />
@@ -386,7 +393,7 @@ const ReceivingAsset = ({
         {columns && rowsData ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
               onSelect={setSelectedRecords}
@@ -411,7 +418,7 @@ const ReceivingAsset = ({
             setReceiveDialog(false);
             fetchProduct();
           }}
-          productList={selectedRecords.filter((d) => d.type === "Product" && d.qty !== d.actualReceived)}
+          productList={selectedRecords.filter((d) => d.type === 'Product' && d.qty !== d.actualReceived)}
           purchaseOrderData={purchaseOrderData}
         />
       )}
@@ -423,7 +430,7 @@ const ReceivingAsset = ({
             setRejectDialog(false);
             fetchProduct();
           }}
-          productList={selectedRecords.filter((d) => d.type === "Product" && d.qty !== (d?.rejectQuantity || 0 + d?.assetQty || 0))}
+          productList={selectedRecords.filter((d) => d.type === 'Product' && d.qty !== (d?.rejectQuantity || 0 + d?.assetQty || 0))}
           purchaseOrderData={purchaseOrderData}
         />
       )}
@@ -442,7 +449,7 @@ const ReceivingAsset = ({
       )}
       {historyDialog.open && (
         <History
-          handleClose={() => setHistoryDialog({ open: false, product: "", productName: "" })}
+          handleClose={() => setHistoryDialog({ open: false, product: '', productName: '' })}
           productName={historyDialog.productName}
           inventoryHistory={inventoryHistory?.filter((e) => e.product === historyDialog.product)}
         />

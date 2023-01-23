@@ -29,6 +29,7 @@ import { CustomDialogTransition } from './../../constants/helpers';
 import HistoryDialog from './History/index';
 import { useData } from './../../StateProvider/Provider';
 import InfoIcon from '@material-ui/icons/Info';
+import CloseIcon from '@material-ui/icons/Close';
 
 const useStyles = makeStyles(() => ({
   activityBox: {
@@ -54,7 +55,7 @@ const useStyles = makeStyles(() => ({
 
 const Activity = (props) => {
   const classes = useStyles();
-  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '' } = props;
+  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => {} } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [type, setType] = useState(null);
@@ -191,6 +192,9 @@ const Activity = (props) => {
       <Box>
         <Box className="detailHeader">
           <h2 className="listingHeader single">Activities</h2>
+          <IconButton onClick={() => close()} className="close-icon-v1">
+            <CloseIcon />
+          </IconButton>
         </Box>
         <Box className={` ${classes.activityBox}`}>
           <>

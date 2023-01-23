@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
 import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
@@ -34,7 +34,7 @@ function RepairOrderHeader(props) {
     // showCloneRentalManagementDialog
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
-  
+
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -47,10 +47,9 @@ function RepairOrderHeader(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
-
     }
   };
-  const [isOpenDialog, setisOpenDialog] = useState(false)
+  const [isOpenDialog, setisOpenDialog] = useState(false);
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -68,17 +67,10 @@ function RepairOrderHeader(props) {
 
   const handleClickClose = () => {
     setOpen(false);
-
   };
 
   let toggleInner = options && (
-    <ToggleButtonGroup
-      size="small"
-      className=" toggle-button-layout"
-      value={filter}
-      exclusive
-      onChange={handleFilter}
-    >
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
         return (
           <ToggleButton value={k.key} key={index}>
@@ -92,9 +84,9 @@ function RepairOrderHeader(props) {
   return (
     <Grid className={styles.filter_side_container} container>
       <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet">
-        <Grid>
+        {/* <Grid>
           {icon} <span className="listingHeader">{heading}</span>
-        </Grid>
+        </Grid> */}
 
         {isMobile && (
           <>
@@ -110,7 +102,6 @@ function RepairOrderHeader(props) {
                 disableElevation
                 startIcon={<MdSort />}
                 className={'sort-filter-tablet'}
-                style={isTablet ? { marginLeft: '50px' } : {}}
               >
                 Sort
               </Button>
@@ -125,7 +116,7 @@ function RepairOrderHeader(props) {
               />
 
               <Button
-               onClick={handleOpen}
+                onClick={handleOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
@@ -154,7 +145,7 @@ function RepairOrderHeader(props) {
         {options && (
           <ToggleButtonGroup
             size="small"
-            className="ml-2 align-items-center gap-1 layout-for-mobile "
+            className="align-items-center gap-1 layout-for-mobile "
             value={options[selectedType - 1].key}
             exclusive
             onChange={handleFilter}
@@ -198,41 +189,41 @@ function RepairOrderHeader(props) {
               </Button>
             )}
             {RepairOrderPermissions?.isDelete && (
-                <>
-                  <Button
-                    disabled={canDelete}
-                    variant={isMobile ? "text" : "outlined"}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
-                  >
-                    {isMobile && !isTablet  ? "" :  "Actions" } <ExpandMore/>
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+              <>
+                <Button
+                  disabled={canDelete}
+                  variant={isMobile ? 'text' : 'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                >
+                  {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      showConfirmBox(null);
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
                   >
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        showConfirmBox(null);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </Menu>
-                </>
-              )}
+                    Delete
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
           </Grid>
         </Box>
       </Grid>

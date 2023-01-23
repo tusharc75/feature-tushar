@@ -264,7 +264,7 @@ export default function Attachment() {
     }
     </>
   );
-  
+
   const downloadFile = (data1) => {
     const file = data1?.file
     setIsDownloading(true);
@@ -478,7 +478,8 @@ export default function Attachment() {
           <div className="header-panel">
             <Grid container className={styles.filter_side_container}>
               <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
-                <AiOutlinePaperClip className="headerLogo" /> <span className="listingHeader">{routes.attachment.title} </span>
+                <AiOutlinePaperClip className="headerLogo" />
+                <span className="listingHeader">{routes.attachment.title} </span>
                 <Autocomplete
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}

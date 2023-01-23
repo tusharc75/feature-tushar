@@ -42,16 +42,10 @@ export default function ActivityList(props) {
       let label = (
         <Box width={'100%'} height={50} className="d-flex align-items-center">
           <Box width={'100%'} className="d-flex align-items-center">
-            <Avatar
-              variant="circle"
-              sizes="small"
-              style={{ height: 45, width: 45 }}
-              alt="Remy Sharp"
-              src={data?.technicianDetail?.photo}
-            />
+            <Avatar variant="circle" sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo} />
             <Box ml={2} flex style={{ flexDirection: 'column' }}>
-              <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}  >{`${data?.technicianDetail?.firstName} ${data?.technicianDetail?.lastName}`}</Typography>
-              <p style={{ fontSize: '0.6rem', color: 'grey' }}>{`${data?.technicianDetail?.employeeNumber}`}</p>
+              <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${data?.firstName} ${data?.lastName}`}</Typography>
+              <p style={{ fontSize: '0.6rem', color: 'grey' }}>{`${data?.employeeNumber}`}</p>
             </Box>
           </Box>
         </Box>

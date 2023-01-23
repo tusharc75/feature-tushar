@@ -17,7 +17,7 @@ import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
 import Steps from 'src/pages/RentalManagement/Steps';
 import { MdEdit } from 'react-icons/md';
-import { defaultActivityShow, transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
+import { transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import TabPanel from 'src/components/TabPanel';
 import { BiFoodMenu } from 'react-icons/bi';
@@ -27,13 +27,12 @@ import SerializesAssets from './SerializesAssets';
 import LoadingTicket from './LoadingTicket';
 import { camelCase } from 'lodash';
 import ContentFullScreen from '../../components/ContentFullScreen';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const TransferInventoryDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferInventory.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
 
   const { id } = useParams();
   const history = useHistory();
@@ -52,7 +51,6 @@ const TransferInventoryDetailPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [transferInventoryFields, setTransferInventoryFields] = useState([]);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [currentStep, setCurrentStep] = useState(0);
   const [locationKeys, setLocationKeys] = useState([]);
   const [nextStep, setNextStep] = useState(false);
@@ -64,7 +62,6 @@ const TransferInventoryDetailPage = () => {
 
   const [canReceive, setCanReceive] = useState(false);
   const [canLoad, setCanLoad] = useState(false);
-
 
   useEffect(() => {
     return history.listen((location) => {
@@ -122,34 +119,31 @@ const TransferInventoryDetailPage = () => {
         const userEntity = user?.entity?.map((e) => e._id) ?? [];
         if (data?.transferFromPlant?.entity?.length) {
           setCanLoad(data?.transferFromPlant?.entity?.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0);
-        }
-        else {
+        } else {
           setCanLoad(true);
         }
 
         if (data?.transfertoPlant?.entity?.length) {
           setCanReceive(data?.transfertoPlant?.entity?.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0);
-        }
-        else {
+        } else {
           setCanReceive(true);
         }
 
         axiosInstance()
           .get(`${routes.transferInventory.path}/${id}/product`)
           .then(({ data: { data } }) => {
-
             var isSerializedAssetsStep = false;
             data?.products?.forEach((e) => {
               if (e?.productDetail?.serializedProduct) {
-                isSerializedAssetsStep = true
+                isSerializedAssetsStep = true;
               }
-            })
+            });
             var steps = transferInventorySteps;
             // if (!isSerializedAssetsStep) {
             //   steps = steps?.filter((e) => e !== "Serialized Assets")
             // }
-            steps = steps?.filter((e) => e !== "Serialized Assets")
-            setTransferInvSteps(steps)
+            steps = steps?.filter((e) => e !== 'Serialized Assets');
+            setTransferInvSteps(steps);
             getRessourceFields();
             setHeadingLabel(transferData.transferNumber);
             setCustomizedRoutes([routes.transferInventory, { title: transferData.transferNumber }]);
@@ -163,7 +157,7 @@ const TransferInventoryDetailPage = () => {
               params.delete('openEdit');
               history.push({ search: params.toString() });
             }
-          })
+          });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -204,7 +198,8 @@ const TransferInventoryDetailPage = () => {
   }
 
   const updateStatus = (status: string) => {
-    axiosInstance().put(`${routes.transferInventory.path}/${id}/status`, { status })
+    axiosInstance()
+      .put(`${routes.transferInventory.path}/${id}/status`, { status })
       .then(() => {
         toastConfig.setToastConfig({
           open: true,
@@ -232,194 +227,135 @@ const TransferInventoryDetailPage = () => {
       });
   };
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
-
-
   return (
-    <>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={customizedRoutes} />
-      </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-        <div>
-          <div>
-            <Paper>
-              {!transferInventoryData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    <Box marginX={1} />
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  </Box>
-                </div>
-              ) : (
-                <DetailsPageHeader heading={headingLabel} mainPoints={{}} showHeading={true}>
-                  {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
-                    <Button color="primary" className="buttonStyleBigScreen" variant="contained" size="small" onClick={handleOpenUpdateDialog}>
-                      Edit
-                    </Button>
-                  )}
-                  {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
-                    <Button className="buttonStyleSmallScreen" variant="contained" size="small" onClick={handleOpenUpdateDialog}>
-                      <MdEdit size={24} />
-                    </Button>
-                  )}
-                </DetailsPageHeader>
-              )}
-              <Tabs
-                className="quote-tab"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    display: 'none'
-                  }
-                }}
-              >
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 1 ? 'white' : '',
-                    color: tabValue === 1 ? '#163340' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                    </div>
-                  }
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 2 ? 'white' : '',
-                    color: tabValue === 2 ? 'blue' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                    </div>
-                  }
-                  {...a11yProps(1)}
-                />
-                <div className={'uio'}> </div>
-              </Tabs>
-              <TabPanel value={tabValue} index={0}>
-                <Box>
-                  {loading || !transferInventoryData ? (
-                    <Grid container spacing={2} style={{ padding: '8px' }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  ) : (
-                    <DetailsPage data={transferInventoryData} fields={transferInventoryFields} />
-                  )}
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {!transferInventoryData ? (
+              <div>
+                <Skeleton variant="text" width="150px" height="40px" />
+                <Box display="flex">
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                  <Box marginX={1} />
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
                 </Box>
-              </TabPanel>
-              <TabPanel value={tabValue} index={1}>
-                {transferInventoryData &&
-                  <Paper>
-                    <Steps
-                      steps={transferInvSteps}
-                      currentStep={currentStep}
-                      setCurrentStep={setCurrentStep}
-                      isNextStep={false}
-                      nextStep={nextStep}
-                      updateStatus={updateProcessStatus}
-                      isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
-                      setStepFullScreen={() => setStepFullScreen(true)}
-                    />
-                    <ContentFullScreen title={transferInvSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
-                      {transferInvSteps[currentStep] === "Add Products" && (
-                        <Products
-                          transferInventoryData={transferInventoryData}
-                          setNextStep={setNextStep}
-                          renderedFrom={`${renderedFrom}_grid-1`}
-                          allowedToEdit={allowedToEdit}
-                          updateStatus={updateStatus}
-                          fetchTransferInventoryData={fetchTransferInventoryData}
-                        />
-                      )}
-                      {transferInvSteps[currentStep] === "Serialized Assets" && (
-                        <SerializesAssets
-                          transferInventoryData={transferInventoryData}
-                          setNextStep={setNextStep}
-                          renderedFrom={`${renderedFrom}_grid-2`}
-                          allowedToEdit={allowedToEdit}
-                          stepFullScreen={stepFullScreen}
-                          isTabletScreen={isTabletScreen}
-                          isSmallScreen={isSmallScreen}
-                          showActivity={showActivity}
-                          canLoad={canLoad}
-                        />
-                      )}
-                      {transferInvSteps[currentStep] === "Loading Ticket" && (
-                        <LoadingTicket
-                          transferInventoryData={transferInventoryData}
-                          updateStatus={updateStatus}
-                          renderedFrom={`${renderedFrom}_grid-3`}
-                          allowedToEdit={allowedToEdit}
-                          canLoad={canLoad}
-                          canReceive={canReceive}
-                        />
-                      )}
-                    </ContentFullScreen>
-                  </Paper>
-                }
-              </TabPanel>
-            </Paper>
-          </div>
-          <Box my={1} />
-        </div>
-        <div className="position-relative">
-          <Paper>
-            {!isSmallScreen && (
-              <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-              </span>
+              </div>
+            ) : (
+              <>
+                {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
+                  <Button className={'btn-outline-v1'} variant="contained" size="small" onClick={handleOpenUpdateDialog}>
+                    Edit
+                  </Button>
+                )}
+                <ActivityButton referenceId={transferInventoryData?._id} resource={ACTIVITY_RESOURCE.transferInventory} />
+              </>
             )}
-            <div style={{ display: showActivity ? 'block' : 'none' }}>
-              <Grid container>
-                <Grid item xs={12}>
-                  {transferInventoryData && (
-                    <div>
-                      <Activity
-                        resourceId={transferInventoryData?._id}
-                        resource={ACTIVITY_RESOURCE.transferInventory}
-                        // restrictedAddActivities={
-                        //   permissions && permissions['transferInventory'] && permissions['rentalManagement'].isUpdate
-                        //   ? []
-                        //   : ['Attachment', 'Case']
-                        // }
-                        relatedTo={[
-                          {
-                            access: true,
-                            referenceId: transferInventoryData?._id,
-                            type: ACTIVITY_RESOURCE.transferInventory
-                          }
-                        ]}
-                        handleActivityRefresh={() => { }}
-                        emails={[]}
-                      />
-                    </div>
-                  )}
-                </Grid>
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            style={{
+              background: tabValue === 1 ? 'white' : '',
+              color: tabValue === 1 ? '#163340' : '#163340'
+            }}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            {...a11yProps(0)}
+          />
+          <Tab
+            className={'tabLayout'}
+            style={{
+              background: tabValue === 2 ? 'white' : '',
+              color: tabValue === 2 ? 'blue' : '#163340'
+            }}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
+            }
+            {...a11yProps(1)}
+          />
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          <Box>
+            {loading || !transferInventoryData ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </Grid>
-            </div>
-          </Paper>
-        </div>
-      </div>
+            ) : (
+              <DetailsPage data={transferInventoryData} fields={transferInventoryFields} />
+            )}
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          {transferInventoryData && (
+            <Box>
+              <Steps
+                steps={transferInvSteps}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+                isNextStep={false}
+                nextStep={nextStep}
+                updateStatus={updateProcessStatus}
+                isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
+                setStepFullScreen={() => setStepFullScreen(true)}
+              />
+              <ContentFullScreen title={transferInvSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                {transferInvSteps[currentStep] === 'Add Products' && (
+                  <Products
+                    transferInventoryData={transferInventoryData}
+                    setNextStep={setNextStep}
+                    renderedFrom={`${renderedFrom}_grid-1`}
+                    allowedToEdit={allowedToEdit}
+                    updateStatus={updateStatus}
+                    fetchTransferInventoryData={fetchTransferInventoryData}
+                  />
+                )}
+                {transferInvSteps[currentStep] === 'Serialized Assets' && (
+                  <SerializesAssets
+                    transferInventoryData={transferInventoryData}
+                    setNextStep={setNextStep}
+                    renderedFrom={`${renderedFrom}_grid-2`}
+                    allowedToEdit={allowedToEdit}
+                    stepFullScreen={stepFullScreen}
+                    canLoad={canLoad}
+                  />
+                )}
+                {transferInvSteps[currentStep] === 'Loading Ticket' && (
+                  <LoadingTicket
+                    transferInventoryData={transferInventoryData}
+                    updateStatus={updateStatus}
+                    renderedFrom={`${renderedFrom}_grid-3`}
+                    allowedToEdit={allowedToEdit}
+                    canLoad={canLoad}
+                    canReceive={canReceive}
+                  />
+                )}
+              </ContentFullScreen>
+            </Box>
+          )}
+        </TabPanel>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           okBtnLoading={isDeleting}
@@ -447,7 +383,7 @@ const TransferInventoryDetailPage = () => {
           }}
         />
       )}
-    </>
+    </Box>
   );
 };
 

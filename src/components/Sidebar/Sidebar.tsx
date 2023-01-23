@@ -47,7 +47,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split('/').filter((x) => x);
-  const pathName = pathnames.join(' ');
+  const pathName = pathnames[0];
 
   const renderIcon = (sectionName: string) => {
     let icon = <FaReact size={20} className={styles.sidebarIcon} />;
@@ -223,7 +223,9 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         <Toolbar />
         <div id="sidebarOrDrawer">
           {toggleDrawer ? (
-            <img className={styles.logo} src={SVG('LogoNew')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
+            user?.brandLogo ?
+              <img src={user.brandLogo} alt="brand" className={styles.logo} /> :
+              <img className={styles.logo} src={SVG('LogoNew')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
           ) : (
             <img className={styles.logo} src={SVG('LogoNewShort')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
           )}
@@ -231,14 +233,14 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             <ListItem
               button
               selected={location.pathname === '/'}
-              className={`${styles.listItem} ${pathName === '' ? styles.activeList : ''}`}
+              className={`${styles.listItem} ${location.pathname === '/' ? styles.activeList : ''}`}
               onClick={() => {
                 setItemToAddActiveClass(NaN);
                 setSubItemToAddActiveClass(NaN);
                 history.push('/');
               }}
             >
-              {pathName === '' && (
+              {location.pathname === '/' && (
                 <>
                   <i />
                   <i />
@@ -258,9 +260,9 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 )}
               </ListItemIcon>
               <ListItemText
-                onClick={() => {}}
+                onClick={() => { }}
                 primary={[user?.user?.firstName, user?.user?.lastName].filter((f) => f).join(' ')}
-                // className={`wordWrap`}
+              // className={`wordWrap`}
               />
             </ListItem>
             {permissions?.dashboard?.isRead && !isOffline && (
@@ -319,14 +321,16 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 </Tooltip>
               </Link>
             )}
+
             {user &&
               listItems().map((listItem, i) => {
                 const items = listItem.items.map((item) => item.name.toLowerCase().split(' ').join('-'));
+
                 return (
                   <React.Fragment key={i}>
                     <Tooltip title={!toggleDrawer ? listItem.section : ''}>
                       <ListItem
-                        className={`${styles.listItem} dropdown-items ${items.some((item) => pathName.includes(item)) && styles.activeList}`}
+                        className={`${styles.listItem} dropdown-items ${items.some((item) => pathName === item) && styles.activeList}`}
                         button
                         key={listItem.section + '' + i}
                         onClick={() => {
@@ -336,7 +340,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                           }
                         }}
                       >
-                        {items.some((item) => pathName.includes(item)) && (
+                        {items.some((item) => pathName === item) && (
                           <>
                             <i />
                             <i />
@@ -351,9 +355,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                       <List component="div" disablePadding className={`${styles.subList} `}>
                         {listItem.items.map((item, j) => (
                           <Link
-                            className={`sub-list ${pathName.includes(item.name.toLowerCase().split(' ').join('-')) && styles.active_sub} ${
-                              itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''
-                            }`}
+                            className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''
+                              }`}
                             key={j}
                             onClick={() => {
                               setItemToAddActiveClass(i);
@@ -361,7 +364,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                             }}
                             to={handleRoutes(item)}
                           >
-                            <ListItem button selected={pathnames.includes(lowerCase(item.name))} className={classes.nested}>
+                            <ListItem button selected={pathnames?.includes(lowerCase(item.name))} className={classes.nested}>
                               <ListItemText primary={item.resourceLabel || item.name} />
                             </ListItem>
                           </Link>

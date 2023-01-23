@@ -1,22 +1,21 @@
-import { useState, useEffect, useContext, Fragment } from "react";
-import { Grid, Box, Button, Paper } from "@material-ui/core";
-import { Skeleton } from "@material-ui/lab";
-import { useParams, useHistory } from "react-router-dom";
-import axiosInstance from "../../axios/axiosInstance";
-import routes from "../../components/Helpers/Routes";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import DetailsPageHeader from "../../components/DetailsPageHeader";
-import DetailsPage from "../../components/Shared/DetailsPage";
-import { useData } from "../../StateProvider/Provider";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import ManageWarehouse from "./ManageWarehouse";
-import DeleteButton from "../../components/Helpers/DeleteButton";
-import { BiEdit } from "react-icons/bi";
-import { isMobile, isTablet } from "react-device-detect";
-import accountClass from '../Account/account.module.scss';
-import { MdDelete } from "react-icons/md";
+import { useState, useEffect, useContext, Fragment } from 'react';
+import { Grid, Box, Button, Paper } from '@material-ui/core';
+import { Skeleton } from '@material-ui/lab';
+import { useParams, useHistory } from 'react-router-dom';
+import axiosInstance from '../../axios/axiosInstance';
+import routes from '../../components/Helpers/Routes';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import DetailsPageHeader from '../../components/DetailsPageHeader';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { useData } from '../../StateProvider/Provider';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import ManageWarehouse from './ManageWarehouse';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import { BiEdit } from 'react-icons/bi';
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdDelete } from 'react-icons/md';
 
 const WarehouseDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -24,9 +23,9 @@ const WarehouseDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions },
+    state: { permissions }
   }: any = useData();
-  const [headingLbl, setHeadingLbl] = useState("");
+  const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
   const [warehouseData, setWarehouseData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -34,15 +33,12 @@ const WarehouseDetailsPage = () => {
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [addressResource, setAddressResource] = useState(null);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([
-    routes.warehouse,
-  ]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.warehouse]);
 
   useEffect(() => {
     if (id) {
       getWarehouseFields();
       fetchWarehouseData();
-
     }
   }, [id]);
 
@@ -50,7 +46,7 @@ const WarehouseDetailsPage = () => {
     setLoading(true);
     try {
       const {
-        data: { data },
+        data: { data }
       } = await axiosInstance().get(`/warehouse/${id}`);
 
       handleMainPoints(data);
@@ -68,18 +64,16 @@ const WarehouseDetailsPage = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       name: `${data.warehouseName}`,
-      taxJurisdiction: data.taxJurisdiction || "",
+      taxJurisdiction: data.taxJurisdiction || ''
     };
     setMainPoints(tempMp);
   };
 
   const getWarehouseFields = () => {
     axiosInstance()
-      .get("/field?resource=Warehouse")
+      .get('/field?resource=Warehouse')
       .then(({ data }) => {
-
-        setWarehouseFields(data.data?.filter((field) => field.isRead))
-
+        setWarehouseFields(data.data?.filter((field) => field.isRead));
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -114,7 +108,49 @@ const WarehouseDetailsPage = () => {
   };
 
   return (
-    <>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {warehouseData ? (
+              <>
+                {permissions?.warehouse?.isUpdate && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={handleOpenUpdateDialog}
+                  >
+                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  </Button>
+                )}
+                {permissions?.warehouse?.isDelete && (
+                  <span title={id ? "Primarily selected warehouse can't be deleted" : 'Permanently delete this warehouse'}>
+                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                  </span>
+                )}
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        {warehouseData && <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true} />}
+        <Box>
+          {loading || !warehouseFields.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={warehouseData} fields={warehouseFields} />
+          )}
+        </Box>
+      </Box>
       {openUpdateDialog && (
         <ManageWarehouse
           open={openUpdateDialog}
@@ -128,8 +164,6 @@ const WarehouseDetailsPage = () => {
             fetchWarehouseData();
             closeUpdateDialog();
           }}
-
-
         />
       )}
       {showConfirmBox && (
@@ -137,92 +171,12 @@ const WarehouseDetailsPage = () => {
           open={showConfirmBox}
           message={`Are you sure you want to delete ${routes.warehouse.title.toLowerCase()} ${headingLbl}?`}
           onClose={() => {
-            setShowConfirmBox(false)
+            setShowConfirmBox(false);
           }}
           onOk={handleDeleteWarehouse}
         />
       )}
-      <Fragment>
-
-        <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-            <Paper>
-              {!warehouseData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
-                    <Box marginX={1} />
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
-                  </Box>
-                </div>
-              ) : (
-
-                <DetailsPageHeader
-                  heading={headingLbl}
-                  mainPoints={mainPoints}
-                  showHeading={true}
-                >
-                  {permissions?.warehouse?.isUpdate && (
-                    <Button
-
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                      onClick={handleOpenUpdateDialog}
-                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
-                  )}
-                  <Box component="span" marginX={1} />
-                  {permissions?.warehouse?.isDelete && (
-                    <span
-                      title={
-                        id
-                          ? "Primarily selected warehouse can't be deleted"
-                          : "Permanently delete this warehouse"
-                      }
-                    >
-                      <DeleteButton
-                        text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
-                        className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                        onClick={() => setShowConfirmBox(true)}
-                      />
-                    </span>
-                  )}
-                </DetailsPageHeader>
-              )}
-
-              <Box>
-                {loading || !warehouseFields.length ? (
-                  <Grid container spacing={2} style={{ padding: "8px" }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <DetailsPage data={warehouseData} fields={warehouseFields} />
-                )}
-              </Box>
-
-            </Paper>
-          </Grid>
-        </Grid>
-
-      </Fragment>
-
-    </>
+    </Box>
   );
 };
 

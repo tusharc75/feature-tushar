@@ -29,6 +29,7 @@ function DemandOrderHeader(props) {
     columns,
     dispatch,
     showTransferEntityDialog,
+    selectedType,
     filters
     // showCloneRentalManagementDialog
   } = props;
@@ -36,6 +37,7 @@ function DemandOrderHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
+  const [filter, setFilter] = useState(options[0].key);
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -53,6 +55,13 @@ function DemandOrderHeader(props) {
     setOpen(false);
   };
 
+  const handleFilter = (event, newFilter) => {
+    if (newFilter != null) {
+      setFilter(newFilter);
+      onTypeChange(options.find((d) => d.key === newFilter).value);
+    }
+  };
+
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -61,12 +70,97 @@ function DemandOrderHeader(props) {
     setAnchorEl(null);
   };
 
+  let toggleInner = options && (
+    <ToggleButtonGroup
+      size="small"
+      className=" toggle-button-layout"
+      value={filter}
+      exclusive
+      onChange={handleFilter}
+    >
+      {options.map((k, index) => {
+        return (
+          <ToggleButton value={k.key} key={index}>
+            {k.key}
+          </ToggleButton>
+        );
+      })}
+    </ToggleButtonGroup>
+  );
+
   return (
     <Grid className={styles.filter_side_container} container>
       <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
         <div className="d-flex align-items-center">
-          {icon} <span className="listingHeader">{heading}</span>
+          
         </div>
+        {isMobile && (
+          <>
+            <Grid style={{ display: 'inline-flex' }}>
+              <Button
+                onClick={handleClickOpen}
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                color="secondary"
+                variant="text"
+                disableElevation
+                startIcon={<MdSort />}
+                className={'sort-filter-tablet'}
+                style={isTablet ? { marginLeft: '50px' } : {}}
+              >
+                Sort
+              </Button>
+              <MobileSortDialog
+                isOpen={open}
+                handleClose={handleClickClose}
+                contentPart={toggleInner}
+                secHeading={['Sort Service Order']}
+                columns={columns}
+                dispatch={dispatch}
+              />
+              <Button
+               onClick={handleOpen}
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                variant="text"
+                color="secondary"
+                disableElevation
+                className={'sort-filter-tablet'}
+                startIcon={<MdFilterList />}
+              >
+                Filter
+              </Button>
+              <MobileFilterDialog
+                isOpen={isOpenDialog}
+                handleClose={handleClose}
+                contentPart={toggleInner}
+                columns={columns}
+                dispatch={dispatch}
+                title={routes?.serviceOrder?.title}
+                filters={filters}
+              />
+            </Grid>
+          </>
+        )}
+        {options && (
+          <ToggleButtonGroup
+            size="small"
+            className="ml-2 align-items-center gap-1 layout-for-mobile "
+            value={options[selectedType - 1].key}
+            exclusive
+            onChange={handleFilter}
+          >
+            {options.map((k, index) => {
+              return (
+                <ToggleButton value={k.key} key={index}>
+                  {k.key}
+                </ToggleButton>
+              );
+            })}
+          </ToggleButtonGroup>
+        )}
         {children}
       </Grid>
       <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
@@ -82,7 +176,6 @@ function DemandOrderHeader(props) {
               style={isMobile ? { flex: 1 } : {}}
             />
           </Grid>
-
           <Grid style={{ display: 'flex', gap: '5px' }}>
             {
               <Button

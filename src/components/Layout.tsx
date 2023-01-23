@@ -23,14 +23,14 @@ const useStyles = makeStyles(() => ({
   },
   layout: {
     flexGrow: 1,
-    width: 'calc(100% - 2%)',
+    width: 'calc(100% - 6%)',
     marginInline: 'auto',
 
     height: '100%',
     backgroundColor: '#f8fffe',
     zIndex: 1,
     ['@media (max-width:900px)']: {
-      paddingInline: '24px',
+      paddingInline: '13px',
       width: '100%'
     }
   }

@@ -11,8 +11,7 @@ import { leadPage } from '../../routes/Lead';
 import routes from '../../components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
 import { SVG } from '../../assets';
-import Activity from '../../components/Activity';
-import { getObjKeysWithValues, lead, processFieldName, defaultActivityShow } from '../../constants/helpers';
+import { getObjKeysWithValues, lead, processFieldName, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
@@ -20,13 +19,12 @@ import AccordionOfOpportunity from './AccordionOfOpportunity';
 import ProcessFlow from '../../components/ProcessFlow';
 import { isMobile, isTablet } from 'react-device-detect';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { FaFunnelDollar } from 'react-icons/all';
 import { BiEdit } from 'react-icons/bi';
-import contactClass from '../Contact/contact.module.scss';
 import accountClass from '../Account/account.module.scss';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -36,7 +34,6 @@ const LeadDetailsPage = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(true);
   const [leadData, setLeadData] = useState(null);
@@ -52,7 +49,6 @@ const LeadDetailsPage = () => {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [leadsPermissions, setLeadsPermissions] = useState({
     isCreate: false,
     isUpdate: false,
@@ -75,15 +71,6 @@ const LeadDetailsPage = () => {
   const { leadResource, leadApi } = lead;
   let { id } = useParams();
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
-  // useEffect(() => {
-  //   if (id && user) {
-  //     fetchLeadData();
-  //   }
-  // }, [id]);
-
   useEffect(() => {
     if (permissions) {
       setLeadsPermissions(permissions[leadResource]);
@@ -104,12 +91,6 @@ const LeadDetailsPage = () => {
       }
     }
   }, [steps]);
-
-  useEffect(() => {
-    if (isSmallScreen) {
-      setActivityShow(true);
-    }
-  }, [isSmallScreen]);
 
   useEffect(() => {
     fetchLeadData();
@@ -142,10 +123,10 @@ const LeadDetailsPage = () => {
 
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-              user?.user?.permissions?.convertLeadToOpportunity &&
-              isAllowedToUpdate &&
-              data[processFieldName] &&
-              data[processFieldName].toLowerCase() === 'qualified'
+            user?.user?.permissions?.convertLeadToOpportunity &&
+            isAllowedToUpdate &&
+            data[processFieldName] &&
+            data[processFieldName].toLowerCase() === 'qualified'
           );
           setIsLeadAlreadyConvertedToOpportunity(
             data.staticData && data.staticData['convertedToOpportunity'] ? data.staticData['convertedToOpportunity'] : false
@@ -354,7 +335,114 @@ const LeadDetailsPage = () => {
 
   let filteredLeadFields = leadFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
   return (
-    <>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {!isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && (
+              <>
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  color="primary"
+                  size="small"
+                  className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                  style={isMobile && !isTablet ? { color: 'var(--warning-light)', borderColor: 'var(--warning-light)' } : {}}
+                  onClick={() => {
+                    const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
+                    setConvertLeadToOpportunityConfirmationDialog({
+                      open: true,
+                      id: leadData._id,
+                      leadName: leadName,
+                      message: `Are you sure you want to convert ${leadName} to opportunity?`
+                    });
+                  }}
+                >
+                  {isMobile && !isTablet ? <FaFunnelDollar size={19} /> : 'Convert Lead To Opportunity'}
+                </Button>
+              </>
+            )}
+            {leadsPermissions.isUpdate && allowedToEdit && (
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                size="small"
+                onClick={handleOpneUpdateDialog}
+                className={'btn-outline-v1'}
+              >
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              </Button>
+            )}
+            {leadsPermissions.isDelete && allowedToDelete && (
+              <DeleteButton
+                text={isMobile && !isTablet ?
+                  <MdDelete size={20} /> : 'Delete'}
+                onClick={() => setShowConfirmBox(true)}
+              />
+            )}
+            <ActivityButton referenceId={leadData?._id} resource={ACTIVITY_RESOURCE.lead} />
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Box pb={2}>
+          <ProcessFlow
+            disableBackNext={leadsPermissions.isUpdate && allowedToEdit ? false : true}
+            steps={steps}
+            activeStep={activeStep}
+            handleMarkAsCompleted={handleMarkAsCompleted}
+            hideBackButton={isLeadAlreadyConvertedToOpportunity}
+            className="stepper-box-layout"
+          />
+        </Box>
+        {loading ? (
+          <Grid container spacing={2}>
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
+              <Grid key={index} item sm={6} md={6}>
+                <Skeleton variant="text" width="100px" height="16px" />
+                <Box marginY={1} />
+                <Skeleton width="100%" height="50px" />
+              </Grid>
+            ))}
+          </Grid>
+        ) : !leadFields.length ? (
+          <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
+            <img src={SVG('Contacts Placeholder')} alt="No Data" />
+          </Box>
+        ) : showAtLast ? (
+          <DetailsPage data={leadData} fields={leadFields} />
+        ) : (
+          <DetailsPage data={leadData} fields={filteredLeadFields} />
+        )}
+        <Box pt={3} className="modified_style_of_accordion">
+          <AccordionOfOpportunity recordsPerLine={3} opportunity={leadData?.staticData?.opportunity} />
+        </Box>
+      </Box>
+      {convertLeadToOpportunityConfirmationDialog.open && (
+        <ConfirmationDialog
+          open={convertLeadToOpportunityConfirmationDialog.open}
+          message={convertLeadToOpportunityConfirmationDialog.message}
+          onClose={() =>
+            setConvertLeadToOpportunityConfirmationDialog({
+              open: false,
+              id: null,
+              leadName: null,
+              message: null
+            })
+          }
+          onOk={convertLeadToOpportunity}
+        />
+      )}
+      {openAdditionalDialog && (
+        <AdditionalDialogPopUp
+          open={openAdditionalDialog}
+          close={() => setOpenAdditionalDialog(false)}
+          handleSave={handleSave}
+          title="Additional Information"
+          fieldData={sectionFields}
+        />
+      )}
       {openUpdateDialog && (
         <ManageLeadDialog
           open={openUpdateDialog}
@@ -367,213 +455,15 @@ const LeadDetailsPage = () => {
           leadApi={leadApi}
         />
       )}
-      {showConfirmBox ? (
+      {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
           message={`Are you sure you want to delete this Lead`}
           onClose={() => setShowConfirmBox(false)}
           onOk={handleDeleteLead}
         />
-      ) : null}
-      <Fragment>
-        <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-          <div>
-            <Paper style={isMobile ? { width: '98%' } : {}}>
-              {!leadData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    <Box marginX={1} />
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  </Box>
-                </div>
-              ) : (
-                <DetailsPageHeader
-                  heading={headingLbl}
-                  logo={leadData?.leadLogo ? leadData.leadLogo : undefined}
-                  leadStatus={leadData?.process ?? ''}
-                  mainPoints={mainPoints}
-                  showHeading={true}
-                >
-                  {leadsPermissions.isUpdate && allowedToEdit && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      onClick={handleOpneUpdateDialog}
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
-                  )}
-                  {!isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && (
-                    <>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                        style={isMobile && !isTablet ? { color: 'var(--warning-light)', borderColor: 'var(--warning-light)' } : {}}
-                        onClick={() => {
-                          const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
-                          setConvertLeadToOpportunityConfirmationDialog({
-                            open: true,
-                            id: leadData._id,
-                            leadName: leadName,
-                            message: `Are you sure you want to convert ${leadName} to opportunity?`
-                          });
-                        }}
-                      >
-                        {isMobile && !isTablet ? <FaFunnelDollar size={19} /> : 'Convert Lead To Opportunity'}
-                      </Button>
-                    </>
-                  )}
-                  {leadsPermissions.isDelete && allowedToDelete && (
-                    <DeleteButton
-                      text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
-                      onClick={() => setShowConfirmBox(true)}
-                      className={isMobile ? accountClass.mobile_button_layout : ''}
-                    />
-                  )}
-                </DetailsPageHeader>
-              )}
-              <ProcessFlow
-                disableBackNext={leadsPermissions.isUpdate && allowedToEdit ? false : true}
-                steps={steps}
-                activeStep={activeStep}
-                handleMarkAsCompleted={handleMarkAsCompleted}
-                hideBackButton={isLeadAlreadyConvertedToOpportunity}
-                className="stepper-box-layout"
-              />
-              {loading ? (
-                <Grid container spacing={2}>
-                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
-                    <Grid key={index} item sm={6} md={6}>
-                      <Skeleton variant="text" width="100px" height="16px" />
-                      <Box marginY={1} />
-                      <Skeleton width="100%" height="50px" />
-                    </Grid>
-                  ))}
-                </Grid>
-              ) : !leadFields.length ? (
-                <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-                  <img src={SVG('Contacts Placeholder')} alt="No Data" />
-                </Box>
-              ) : showAtLast ? (
-                <DetailsPage data={leadData} fields={leadFields} />
-              ) : (
-                <DetailsPage data={leadData} fields={filteredLeadFields} />
-              )}
-              <div className="p-3 modified_style_of_accordion">
-                <AccordionOfOpportunity recordsPerLine={3} opportunity={leadData?.staticData?.opportunity} />
-              </div>
-
-              {/* <ProjectInAccordion recordsPerLine={3} projectSales={null}/> */}
-              {/* <QuotesInAccordion recordsPerLine={3} /> */}
-              {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
-              {/* <LeadInAccordion recordsPerLine={3} /> */}
-            </Paper>
-          </div>
-          <div className="position-relative">
-            <Paper style={isMobile ? { marginBottom: '50px' } : {}}>
-              {!isMobile && !isTablet && (
-                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                </span>
-              )}
-              <div style={{ display: showActivity ? 'block' : 'none' }}>
-                {!leadData ? (
-                  <Box>
-                    <Skeleton variant="text" width="100px" height="25px" />
-                    <Box marginY={1} />
-                    {[0, 1, 2, 3, 4].map((i, index) => (
-                      <Skeleton key={index} width="100%" height="50px" />
-                    ))}
-                  </Box>
-                ) : (
-                  <div>
-                    <Activity
-                      restrictedAddActivities={leadsPermissions.isUpdate && allowedToEdit ? [] : ['Attachment', 'Case']}
-                      relatedTo={[
-                        {
-                          type: leadResource,
-                          referenceId: leadData._id,
-                          access: true
-                        }
-                      ]}
-                      resourceId={leadData._id}
-                      resource={leadResource}
-                      handleActivityRefresh={() => {}}
-                      emails={[leadData?.email ?? '']}
-                    />
-                  </div>
-                )}
-              </div>
-            </Paper>
-          </div>
-        </div>
-        {convertLeadToOpportunityConfirmationDialog.open ? (
-          <ConfirmationDialog
-            open={convertLeadToOpportunityConfirmationDialog.open}
-            message={convertLeadToOpportunityConfirmationDialog.message}
-            onClose={() =>
-              setConvertLeadToOpportunityConfirmationDialog({
-                open: false,
-                id: null,
-                leadName: null,
-                message: null
-              })
-            }
-            onOk={convertLeadToOpportunity}
-          />
-        ) : null}
-
-        {openAdditionalDialog && (
-          // <Dialog
-          //   disableBackdropClick={true}
-          //   fullWidth
-          //   maxWidth="sm"
-          //   open={openAdditionalDialog}
-          //   onClose={() => setOpenAdditionalDialog(false)}
-          //   aria-labelledby="form-dialog-title"
-          //   fullScreen={isMobile || isTablet}
-          // >
-          //   <CustomDialogHeader
-          //     title="Additonal Information"
-          //     onClose={() => setOpenAdditionalDialog(false)}
-          //   ></CustomDialogHeader>
-          //   {sectionFields.map((item) => (
-          //     <CustomDialogContent>{item}</CustomDialogContent>
-          //   ))}
-
-          //   <CustomDialogFooter>
-          //     <Button
-          //       color="primary"
-          //       size="small"
-          //       onClick={() => setOpenAdditionalDialog(false)}
-          //     >
-          //       Close
-          //     </Button>
-          //     <Button color="primary" size="small" onClick={handleSave}>
-          //       Save
-          //     </Button>
-          //   </CustomDialogFooter>
-          // </Dialog>
-          <AdditionalDialogPopUp
-            open={openAdditionalDialog}
-            close={() => setOpenAdditionalDialog(false)}
-            handleSave={handleSave}
-            title="Additional Information"
-            fieldData={sectionFields}
-          />
-        )}
-      </Fragment>
-    </>
+      )}
+    </Box>
   );
 };
 

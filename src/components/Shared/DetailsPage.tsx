@@ -30,7 +30,6 @@ import { camelCase } from 'lodash';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
-    padding: theme.spacing(0, 0.5, 0.2, 1),
     borderRadius: 4,
     cursor: 'normal',
     textOverflow: 'ellipsis',
@@ -65,26 +64,13 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'hidden',
     whiteSpace: 'nowrap'
   },
-  dataValue: {
-    fontWeight: 500,
-    color: theme.palette.primary.main
-  },
-  detailLabel: {
-    padding: '4px 10px 4px 4px',
-    fontSize: '0.9rem',
-    fontWeight: 'bold',
-    color: '#656464'
-  },
+
   approvalIcon: {
     position: 'relative',
     marginLeft: '2px',
     top: '4px'
   },
   '@media only screen and (max-width: 600px)': {
-    detailLabel: {
-      padding: '2px 10px 2px 4px',
-      fontSize: '0.8rem'
-    },
     fieldText: {
       fontSize: '0.8rem'
     }
@@ -276,7 +262,7 @@ const Details = (props: DetailProps) => {
                       //   )
                       // }
                     >
-                      <span className={`text-truncate ${classes.dataValue} link`}>
+                      <span className={`text-truncate link`}>
                         {_val.optionLabel}
                         {i < data[fieldData.fieldName].length - 1 ? ',' : ''}
                       </span>
@@ -297,7 +283,7 @@ const Details = (props: DetailProps) => {
                 //   )
                 // }
               >
-                <span className={`text-truncate ${classes.dataValue} link`}>
+                <span className={`text-truncate link`}>
                   {data[fieldData.fieldName].optionLabel}
                   {data[fieldData.fieldName]?.staticData?.approved && data[fieldData.fieldName]?.staticData?.approved === true ? (
                     <FcApproval className={classes.approvalIcon} title="Approved" size={20} />
@@ -342,12 +328,12 @@ const Details = (props: DetailProps) => {
           {fieldData.type === 'url' || fieldData.type === 'email' ? (
             <>
               <MuiLink href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`} target="_blank">
-                <span className={`text-truncate ${classes.dataValue}`}> {value} </span>
+                <span className={`text-truncate `}> {value} </span>
               </MuiLink>
               {fieldData.type === 'email' && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
             </>
           ) : (
-            <span className={`text-truncate ${classes.dataValue}`}> {value} </span>
+            <span className={`text-truncate `}> {value} </span>
           )}
           {fieldData.type === 'mobileNumber' && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
         </Typography>
@@ -356,36 +342,31 @@ const Details = (props: DetailProps) => {
   };
 
   return (
-    <div>
+    <div className="form-v1">
       {formsData?.map((form) => {
         return (
           form.name && (
             <React.Fragment key={form.name}>
-              <div className="detail-box" style={containerPadding ? { padding: containerPadding } : {}}>
-                <div className={'detail-box-content'}>
-                  <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                  <h3 className="form-label-style" title={form.name}>
+              <div className="single-form-v1" style={containerPadding ? { padding: containerPadding } : {}}>
+                <div className={'form-head-v1'}>
+                  {/* <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} /> */}
+                  <h3 className="form-label-style-v1" title={form.name}>
                     {form.name}
                   </h3>
                 </div>
-                <Grid container style={{ paddingTop: '6px' }}>
+                <Grid container className="formdata-v1">
                   {form.sectionFields.map((field, i) => (
                     <Grid
                       key={i}
                       item
                       xs={12}
                       sm={gridSize ?? dynamicSize(6, field.fieldData.type)}
-                      md={gridSize ?? dynamicSize(6, field.fieldData.type)}
+                      md={gridSize ?? dynamicSize(4, field.fieldData.type)}
                     >
                       <Grid container alignItems="center" style={{ border: '1px solid #EDEDED' }}>
-                        <Grid
-                          item
-                          xs={dynamicSize(6, field.fieldData.type)}
-                          sm={dynamicSize(5, field.fieldData.type)}
-                          md={dynamicSize(5, field.fieldData.type)}
-                        >
-                          <div className="d-flex align-items-center pr-1" style={{ backgroundColor: '#F5F5F5', padding: '3px 0' }}>
-                            <h4 title={field.fieldData.fieldLabel} className={`text-truncate ${classes.detailLabel}`}>
+                        <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(5, field.fieldData.type)}>
+                          <div className="d-flex align-items-center formdata-title-v1">
+                            <h4 title={field.fieldData.fieldLabel} className={`text-truncate `}>
                               {field.fieldData.fieldLabel}
                             </h4>
                             {field.fieldData.isTooltip && (
@@ -396,18 +377,13 @@ const Details = (props: DetailProps) => {
                           </div>
                         </Grid>
 
-                        <Grid
-                          item
-                          xs={dynamicSize(6, field.fieldData.type)}
-                          sm={dynamicSize(7, field.fieldData.type)}
-                          md={dynamicSize(7, field.fieldData.type)}
-                        >
+                        <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(7, field.fieldData.type)}>
                           {field.fieldData.type === 'imageUpload' ? (
                             <Box paddingLeft={2} marginTop={1} marginBottom={4}>
                               <Avatar src={initialVals[field.fieldData.fieldName]} />
                             </Box>
                           ) : (
-                            <Box display="flex" alignItems="center">
+                            <Box display="flex" alignItems="center" className="formdata-text-v1">
                               {field.fieldData.type === 'fileUpload' && initialVals[field.fieldData.fieldName] ? <InsertDriveFile /> : null}{' '}
                               {renderData(initialVals, field.fieldData)}
                               {field.fieldData.type === 'fileUpload'

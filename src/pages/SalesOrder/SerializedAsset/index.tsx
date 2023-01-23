@@ -20,7 +20,7 @@ import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
 import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
 
-const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol, renderedFrom }) => {
+const SerializedAsset = ({ salesOrderData, setNextStep, currencySymbol, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();

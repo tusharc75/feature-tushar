@@ -184,8 +184,7 @@ const CurrencyConverter = () => {
       <CustomContainer styles={{overflowY:"auto"}}>
         <div className="header-panel">
           <Grid container>
-            <Grid item xs={6} md={6} sm={6} className="d-flex align-items-center gap-1">
-              <FaWpforms /> <span className="listingHeader">{routes.currencyConverter.title}</span>
+            <Grid item xs={6} md={6} sm={6} className="d-flex align-items-center gap-1"> 
             </Grid>
             <Grid xs={6} md={6} sm={6} container justify="flex-end">
               {currencyConverterPermissions.isUpdate &&

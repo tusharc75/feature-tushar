@@ -23,8 +23,8 @@ import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import ProductionOrderQty from 'src/pages/ProductionOrder/Productpackage/ProductionOrderQty';
-import AddIcon from "@material-ui/icons/Add";
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import SendIcon from '@material-ui/icons/Send'
+import CheckCircleIcon from '@material-ui/icons/CheckCircle'
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import moment from 'moment';
 
@@ -32,9 +32,6 @@ const TechnicianDispatch = ({
     serviceOrderData,
     setNextStep,
     currencySymbol,
-    isTabletScreen,
-    isSmallScreen,
-    showActivity,
     renderedFrom,
     stepFullScreen,
     allowedToEdit
@@ -54,7 +51,7 @@ const TechnicianDispatch = ({
 
     useEffect(() => {
         fetchFields();
-    }, [allowedToEdit]);
+    }, []);
 
     useEffect(() => {
         fetchData();
@@ -148,11 +145,11 @@ const TechnicianDispatch = ({
                                         handleDispatch(obj);
                                     }}
                                 >
-                                    <AddIcon fontSize="small" color={'primary'} />
+                                    <SendIcon fontSize="small" color={'primary'} />
                                 </IconButton>
                             </span>
                         </HtmlTooltip>
-                        : <HtmlTooltip title={'Complete'}>
+                        : row.original.status === "Dispatched" ? <HtmlTooltip title={'Complete'}>
                             <span>
                                 <IconButton
                                     size="small"
@@ -162,10 +159,11 @@ const TechnicianDispatch = ({
                                         handleCompleted(obj);
                                     }}
                                 >
-                                    <HighlightOffIcon fontSize="small" color={'primary'} />
+                                    <CheckCircleIcon fontSize="small" color={'primary'} />
                                 </IconButton>
                             </span>
                         </HtmlTooltip>
+                            : null
                 ) : null
             }
         });
@@ -196,6 +194,9 @@ const TechnicianDispatch = ({
             });
         });
         setRowsData(rowsTechnician);
+        if (rowsTechnician.some(d => d.status !== 'Completed')) {
+            setNextStep(false)
+        }
         setSelectedProducts([]);
     };
 
@@ -291,16 +292,16 @@ const TechnicianDispatch = ({
                         <Box display="flex" justifyContent="space-between" m={1} mb={0}>
                             <Box display="flex"></Box>
                             <Box display="flex">
-                                {/* <Button
+                                <Button
                                     variant={'outlined'}
                                     color="primary"
                                     size="small"
                                     onClick={handleClick}
-                                    disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => e.type === 'technician').length)}
+                                    disabled={!Boolean(selectedProducts && selectedProducts.length)}
                                     endIcon={<BiChevronDown />}
                                 >
                                     Actions
-                                </Button> */}
+                                </Button>
                                 <Menu
                                     anchorEl={anchorEl}
                                     open={open}
@@ -311,15 +312,28 @@ const TechnicianDispatch = ({
                                     }}
                                     onClose={handleClose}
                                 >
-                                    <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+                                    <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Dispatched selected records' : 'Select records to dispatch'}>
                                         <MenuItem
                                             disabled={isDeleting}
                                             onClick={() => {
-                                                handleDeleteMultiple();
+                                                const obj: any = selectedProducts.filter(d => d.status === "Assigned").map(ele => { return { _id: ele?._id, technician: ele?.technician?._id } });
+                                                handleDispatch(obj)
                                                 handleClose();
                                             }}
                                         >
-                                            Delete
+                                            Dispatched
+                                        </MenuItem>
+                                    </HtmlTooltip>
+                                    <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Complete selected records' : 'Select records to complete'}>
+                                        <MenuItem
+                                            disabled={isDeleting}
+                                            onClick={() => {
+                                                const obj: any = selectedProducts.filter(d => d.status === "Dispatched").map(ele => { return { _id: ele?._id, technician: ele?.technician?._id } });
+                                                handleCompleted(obj)
+                                                handleClose();
+                                            }}
+                                        >
+                                            Completed
                                         </MenuItem>
                                     </HtmlTooltip>
                                 </Menu>

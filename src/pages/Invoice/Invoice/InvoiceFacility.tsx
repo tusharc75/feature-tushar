@@ -39,8 +39,6 @@ const InvoiceFacility = ({ invoiceData }) => {
   const {
     state: { user, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [sendEmail, setSendEmail] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });

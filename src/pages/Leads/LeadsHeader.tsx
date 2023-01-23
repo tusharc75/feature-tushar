@@ -110,10 +110,6 @@ function LeadsHeader(props) {
 
     return <Grid className={styles.filter_side_container} container >
         <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-            <div className="d-flex align-items-center">
-                {icon} <span className="listingHeader">{heading}
-                </span>
-            </div>
             {isMobile && !isTablet ?
                 <div className="d-flex ">
                     <Button
@@ -220,12 +216,10 @@ function LeadsHeader(props) {
                         (leadPermissions.isDelete || allowToConvertLeadToOpportunity) && <>
                             <Button
                                 variant={isMobile && !isTablet ? "text" : "contained"}
-                                color="default"
                                 size="small"
-                                // className={styles.action_submit_btn}
                                 onClick={openActions}
                                 aria-controls="action-menu"
-                                className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                                className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                             >
                                 {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
                             </Button>

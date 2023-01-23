@@ -72,10 +72,6 @@ const Header = (props) => {
   return (
     <Grid container className={styles.filter_side_container}>
       <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-        <div className="d-flex align-items-center">
-          <FaUsers className="headerLogo" />{" "}
-          <span id="resourceHeader" className="listingHeader">{routes.user.title}</span>
-        </div>
         {isMobile && (
           <>
             <Grid style={{ display: 'inline-flex' }}>

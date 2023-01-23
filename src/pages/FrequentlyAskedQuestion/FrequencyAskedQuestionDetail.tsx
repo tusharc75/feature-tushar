@@ -1,10 +1,9 @@
-import { Box, Button, Grid, Paper } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Box, Button, Grid } from '@material-ui/core';
+import {  useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Skeleton } from '@material-ui/lab';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
@@ -20,7 +19,6 @@ const FrequencyAskedQuestionDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [headingLbl, setHeadingLbl] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.frequentlyAskedQuestion]);
   const [frequentlyAskedQuestionData, setFrequentlyAskedQuestionData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -55,7 +53,6 @@ const FrequencyAskedQuestionDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/frequently-asked-question/${id}`);
-      setHeadingLbl(data.label);
       setFrequentlyAskedQuestionData(data);
       setCustomizedRoutes([routes.frequentlyAskedQuestion, { title: data?.label }]);
       setLoading(false);
@@ -66,21 +63,21 @@ const FrequencyAskedQuestionDetail = () => {
 
   const handleDelete = () => {
     if (id) {
-        axiosInstance()
-          .put(`/frequently-asked-question/remove`, { ids: [id] })
-          .then(({ data }) => {
-            setShowConfirmBox(false);
+      axiosInstance()
+        .put(`/frequently-asked-question/remove`, { ids: [id] })
+        .then(({ data }) => {
+          setShowConfirmBox(false);
 
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: data?.message
-            });
-            history.goBack();
-          })
-          .catch((err) => {
-            setShowConfirmBox(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
           });
+          history.goBack();
+        })
+        .catch((err) => {
+          setShowConfirmBox(false);
+        });
     } else {
       setShowConfirmBox(false);
     }
@@ -95,13 +92,13 @@ const FrequencyAskedQuestionDetail = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={customizedRoutes} />
-      </Grid>
-      <div className="detail-container grid-without-activity">
-        <div>
-          <Paper>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
             {!frequentlyAskedQuestionData ? (
               <div>
                 <Skeleton variant="text" width="150px" height="40px" />
@@ -112,23 +109,24 @@ const FrequencyAskedQuestionDetail = () => {
                 </Box>
               </div>
             ) : (
-              <DetailsPageHeader heading={headingLbl} showHeading={true}>
-                {permissions?.freqentlyAskedQuestion?.isUpdate &&
+              <>
+                {permissions?.freqentlyAskedQuestion?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
-                    size="small"
+                    className="btn-outline-v1"
                     onClick={handleOpenUpdateDialog}
                     style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                   >
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
-                  } 
-                 {permissions?.freqentlyAskedQuestion?.isDelete &&
-                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                  }
-              </DetailsPageHeader>
+                )}
+                {permissions?.freqentlyAskedQuestion?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              </>
             )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className="detail-container-v1">
             <Box>
               {loading || !fields?.length ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -138,9 +136,7 @@ const FrequencyAskedQuestionDetail = () => {
                 <DetailsPage data={frequentlyAskedQuestionData} fields={fields} />
               )}
             </Box>
-          </Paper>
-        </div>
-      </div>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -162,7 +158,7 @@ const FrequencyAskedQuestionDetail = () => {
           }}
         />
       )}
-    </Fragment>
+    </Box>
   );
 };
 

@@ -39,10 +39,7 @@ import WarningIcon from '@material-ui/icons/Warning';
 
 const SerializedAsset = ({
   rentalManagementData,
-  isTabletScreen,
-  isSmallScreen,
   setNextStep,
-  showActivity,
   currencySymbol,
   stepFullScreen,
   allowedToEdit

@@ -1,7 +1,6 @@
 import React from "react";
 import CustomSteps from "./CustomSteps/CustomSteps";
 import CustomMobileStepperOpportunities from "./CustomMobileStepperOpportunities";
-
 import { Button, Typography } from "@material-ui/core";
 import {
   IoIosArrowDroprightCircle,
@@ -20,7 +19,7 @@ export default function ProcessFlow(props) {
     disableBackNext = false,
   } = props;
 
-  
+
 
   return (
     <>
@@ -31,75 +30,59 @@ export default function ProcessFlow(props) {
               variant="outlined"
               color="primary"
               disabled={true}
-              onClick={() => {}}
+              onClick={() => { }}
             >
               Processing...
             </Button>
           ) : (
             <Button
-              variant= {"text"}
+              variant={"text"}
               color="primary"
               size="small"
               className="mr-1 MobileStep-next-back-button"
               disabled={
                 !steps[activeStep + 1]?.canCompleteManually ||
-                isProcessing
+                  isProcessing
                   ? true
                   : false
-                
+
               }
               onClick={handleMarkAsCompleted}
               endIcon={<BsChevronRight />}
             >
 
-              {activeStep === steps.length - 2  ? "Finish" : "Next" }
+              {activeStep === steps.length - 2 ? "Finish" : "Next"}
             </Button>
           )
-        ) } backButton={
-            <Button
-              variant={"text"}
-              color="primary"
-              className="ml-1 MobileStep-next-back-button"
-              onClick={() =>
-                handleMarkAsCompleted({ isSetBackStep: true })
-              }
-              disabled={activeStep === 0 ? true :false}
-              size="small"
-              startIcon={<AiOutlineLeft />}
-            >
-              {activeStep === 0 ? "" : "Back"}
-            </Button>
-           }   /> :  
+        )} backButton={
+          <Button
+            variant={"text"}
+            color="primary"
+            className="ml-1 MobileStep-next-back-button"
+            onClick={() =>
+              handleMarkAsCompleted({ isSetBackStep: true })
+            }
+            disabled={activeStep === 0 ? true : false}
+            size="small"
+            startIcon={<AiOutlineLeft />}
+          >
+            {activeStep === 0 ? "" : "Back"}
+          </Button>
+        } /> :
 
 
-         <div
-          className="stepper-box"
-          style={{ paddingBottom: activeStep < steps.length - 1 ? "" : "10px" }}
-        >
-          <div className="mainview">
-            
-            <CustomSteps steps={steps} active={activeStep} />
-          </div>
-          {disableBackNext ? null : (
-            <div className="actionview">
-              <div className="d-flex justify-content-space-between ">
-                {/* {activeStep > 0 &&
-                activeStep <= steps.length  ? (
+          <div
+            className="stepper-box"
+            style={{ paddingBottom: activeStep < steps.length - 1 ? "" : "10px" }}
+          >
+            <div className="mainview">
+
+              <CustomSteps steps={steps} active={activeStep} />
+            </div>
+            {disableBackNext ? null : (
+              <div className="actionview">
+                <div className="d-flex justify-content-space-between ">
                   <Button
-                    variant={isMobile ? "text" : "contained"}
-                    color="primary"
-                    className="mr-1"
-                    onClick={() =>
-                      handleMarkAsCompleted({ isSetBackStep: true })
-                    }
-                    disabled={isProcessing}
-                    size="small"
-                    startIcon={<IoIosArrowDropleftCircle />}
-                  >
-                    {isMobile ? "" : "Back"}
-                  </Button>
-                ) : null} */}
-                <Button
                     variant={isMobile ? "text" : "contained"}
                     color="primary"
                     className="mr-1"
@@ -112,57 +95,23 @@ export default function ProcessFlow(props) {
                   >
                     {isMobile ? "" : "Back"}
                   </Button>
-
-
-                {/* {activeStep < steps.length - 1 ? (
-                  isProcessing ? (
+                  {isProcessing ? (
                     <Button
                       variant="outlined"
                       color="primary"
                       disabled={true}
-                      onClick={() => {}}
+                      onClick={() => { }}
                     >
                       Processing...
                     </Button>
                   ) : (
                     <Button
-                      variant= {isMobile ? "text" : "contained"}
+                      variant={isMobile ? "text" : "contained"}
                       color="primary"
                       size="small"
                       disabled={
                         !steps[activeStep + 1]?.canCompleteManually ||
-                        isProcessing
-                          ? true
-                          : false
-                      }
-                      onClick={handleMarkAsCompleted}
-                      endIcon={<IoIosArrowDroprightCircle />}
-                    >
-
-                      {activeStep === steps.length - 2 ? isMobile ? "" : "Finish" : isMobile ? "" : "Next"}
-                    </Button>
-                  )
-                ) : (
-                  ""
-                )} */}
-
-{isProcessing ? (
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      disabled={true}
-                      onClick={() => {}}
-                    >
-                      Processing...
-                    </Button>
-                  ) : (
-                    <Button
-                      variant= {isMobile ? "text" : "contained"}
-                      color="primary"
-                      size="small"
-                      disabled={
-                        !steps[activeStep + 1]?.canCompleteManually ||
-                        isProcessing
+                          isProcessing
                           ? true
                           : false
                       }
@@ -173,10 +122,10 @@ export default function ProcessFlow(props) {
                       {activeStep === steps.length - 2 ? isMobile ? "" : "Finish" : isMobile ? "" : "Next"}
                     </Button>
                   )}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
       )}
     </>

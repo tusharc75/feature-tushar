@@ -1,30 +1,23 @@
 import { useState, useEffect, useContext } from 'react';
 import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { repairJob, sidebarResource, repairJobProcessSteps, REPAIR_JOB_STATUS, ACTIVITY_RESOURCE, serializedAsset } from 'src/constants/helpers';
-import Activity from 'src/components/Activity';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairJob from './ManageRepairJob';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import TabPanel from 'src/components/TabPanel';
-import HideWhenOffline from 'src/components/HideWhenOffline';
-import { defaultActivityShow } from 'src/constants/helpers';
 import AddSerializedAsset from './AddSerializedAsset';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Steps from '../RentalManagement/Steps';
 import { GiAbstract055 } from 'react-icons/gi';
 import { camelCase } from 'lodash';
@@ -32,7 +25,7 @@ import { RiFlowChart } from 'react-icons/ri';
 import RepairJobViews from './RoadMapViews/index';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 function a11yProps(index: any) {
   return {
@@ -67,17 +60,10 @@ const RepairJobDetails = () => {
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
-
   const [locationKeys, setLocationKeys] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
 
   useEffect(() => {
     return history.listen((location) => {
@@ -218,210 +204,137 @@ const RepairJobDetails = () => {
       });
   };
 
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true)
-    }
-    else {
-      setActivityShow(false)
-    }
-  }, [isSmallScreen, tabValue])
-
-
   return (
-    <>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.repairJob, { title: repairJobData?.repairJobName }]} />
-      </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-        <div>
-          <div>
-            <Paper>
-              {repairJobData ? (
-                <DetailsPageHeader heading={repairJobData?.repairJobName} mainPoints={null} showHeading={true}>
-                  {permissions?.repairJob?.isUpdate && allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
-                  )}
-                  {/* {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
-                </DetailsPageHeader>
-              ) : (
-                <Skeleton variant="text" width="150px" height="40px" />
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={[routes.repairJob, { title: repairJobData?.repairJobName }]} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            <>
+              {permissions?.repairJob?.isUpdate && allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className={'btn-outline-v1'}
+                  onClick={handleOpenUpdateDialog}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
               )}
-              <Tabs
-                className="quote-tab"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    display: 'none'
-                  }
-                }}
-              >
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 1 ? 'white' : '',
-                    color: tabValue === 1 ? '#163340' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                    </div>
-                  }
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 2 ? 'white' : '',
-                    color: tabValue === 2 ? '#163340' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                    </div>
-                  }
-                  {...a11yProps(1)}
-                />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 3 ? 'white' : '',
-                    color: tabValue === 3 ? '#163340' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <GiAbstract055 className="mr-1" fontSize="inherit" /> {routes.deliveryTicket.title}
-                    </div>
-                  }
-                  {...a11yProps(2)}
-                />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 4 ? 'white' : '',
-                    color: tabValue === 4 ? '#163340' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-                    </div>
-                  }
-                  {...a11yProps(3)}
-                />
-                <div className={'uio'}> </div>
-              </Tabs>
-              <TabPanel value={tabValue} index={0}>
-                <Box>
-                  {repairJobData && repairJobFields.length ? (
-                    <DetailsPage data={repairJobData} fields={repairJobFields} />
-                  ) : (
-                    <Grid container spacing={2} style={{ padding: '8px' }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  )}
-                </Box>
-              </TabPanel>
-              <TabPanel value={tabValue} index={1}>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                  <Paper>
-                    <Steps
-                      isNextStep={false}
-                      nextStep={nextStep}
-                      steps={repairJobProcessSteps}
-                      currentStep={currentStep}
-                      setCurrentStep={setCurrentStep}
-                      isStepEnded={[REPAIR_JOB_STATUS.completed].includes(repairJobData?.status)}
-                      setStepFullScreen={() => setStepFullScreen(true)}
-                    />
-                    <ContentFullScreen title={repairJobProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
-                      {currentStep === 0 && (
-                        <AddSerializedAsset
-                          repairJobData={repairJobData}
-                          setNextStep={setNextStep}
-                          updateJobStatus={updateJobStatus}
-                          repairedAssetStatus={repairedAssetStatus}
-                          renderedFrom={`${renderedFrom}_grid-1`}
-                          allowedToEdit={allowedToEdit}
-                          allowUpdateStatus={allowUpdateStatus}
-                        />
-                      )}
-                      {currentStep === 1 && (
-                        <SerializedAsset
-                          repairJobData={repairJobData}
-                          fetchRepairJobData={fetchRepairJobData}
-                          repairedAssetStatus={repairedAssetStatus}
-                          renderedFrom={`${renderedFrom}_grid-2`}
-                          allowedToEdit={allowedToEdit}
-                          allowUpdateStatus={allowUpdateStatus}
-                        />
-                      )}
-                    </ContentFullScreen>
-                  </Paper>
-                </Grid>
-              </TabPanel>
-              <TabPanel value={tabValue} index={2}>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                  {repairJobData && <Tickets repairJobData={repairJobData} renderedFrom={`${renderedFrom}_grid-3`} />}
-                </Grid>
-              </TabPanel>
-              <TabPanel value={tabValue} index={3}>
-                <Box>
-                  <RepairJobViews repairJobName={repairJobData?.repairJobName} repairId={id} repairStatus={repairJobData?.status} />
-                </Box>
-              </TabPanel>
-            </Paper>
-          </div>
-          <Box my={1} />
-        </div>
-        <div className="position-relative">
-          <HideWhenOffline>
-            <Paper>
-              {!isSmallScreen && (
-                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                </span>
-              )}
-              <div style={{ display: showActivity ? 'block' : 'none' }}>
-                <Grid container>
-                  <Grid item xs={12}>
-                    {repairJobData && (
-                      <div>
-                        <Activity
-                          resourceId={repairJobData._id}
-                          resource={ACTIVITY_RESOURCE.repairJob}
-                          restrictedAddActivities={
-                            permissions && permissions[`${ACTIVITY_RESOURCE.repairJob}`] && permissions[`${ACTIVITY_RESOURCE.repairJob}`].isUpdate ? [] : ['Attachment', 'Case']
-                          }
-                          relatedTo={[
-                            {
-                              type: ACTIVITY_RESOURCE.repairJob,
-                              referenceId: repairJobData._id,
-                              access: true
-                            }
-                          ]}
-                          handleActivityRefresh={() => { }}
-                          emails={[]}
-                        />
-                      </div>
-                    )}
-                  </Grid>
-                </Grid>
+              {/* {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
+              <ActivityButton referenceId={repairJobData?._id} resource={ACTIVITY_RESOURCE.repairJob} />
+            </>
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
               </div>
-            </Paper>
-          </HideWhenOffline>
-        </div>
-      </div>
+            }
+            {...a11yProps(0)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
+            }
+            {...a11yProps(1)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <GiAbstract055 className="mr-1" fontSize="inherit" /> {routes.deliveryTicket.title}
+              </div>
+            }
+            {...a11yProps(2)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+              </div>
+            }
+            {...a11yProps(3)}
+          />
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          <Box>
+            {repairJobData && repairJobFields.length ? (
+              <DetailsPage data={repairJobData} fields={repairJobFields} />
+            ) : (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            )}
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Grid item xs={12} sm={12} md={12} lg={12}>
+            <Steps
+              isNextStep={false}
+              nextStep={nextStep}
+              steps={repairJobProcessSteps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isStepEnded={[REPAIR_JOB_STATUS.completed].includes(repairJobData?.status)}
+              setStepFullScreen={() => setStepFullScreen(true)}
+            />
+            <ContentFullScreen title={repairJobProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+              {currentStep === 0 && (
+                <AddSerializedAsset
+                  repairJobData={repairJobData}
+                  setNextStep={setNextStep}
+                  updateJobStatus={updateJobStatus}
+                  repairedAssetStatus={repairedAssetStatus}
+                  renderedFrom={`${renderedFrom}_grid-1`}
+                  allowedToEdit={allowedToEdit}
+                  allowUpdateStatus={allowUpdateStatus}
+                />
+              )}
+              {currentStep === 1 && (
+                <SerializedAsset
+                  repairJobData={repairJobData}
+                  fetchRepairJobData={fetchRepairJobData}
+                  repairedAssetStatus={repairedAssetStatus}
+                  renderedFrom={`${renderedFrom}_grid-2`}
+                  allowedToEdit={allowedToEdit}
+                  allowUpdateStatus={allowUpdateStatus}
+                />
+              )}
+            </ContentFullScreen>
+          </Grid>
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Grid item xs={12} sm={12} md={12} lg={12}>
+            {repairJobData && <Tickets repairJobData={repairJobData} renderedFrom={`${renderedFrom}_grid-3`} />}
+          </Grid>
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <Box>
+            <RepairJobViews repairJobName={repairJobData?.repairJobName} repairId={id} repairStatus={repairJobData?.status} />
+          </Box>
+        </TabPanel>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -445,20 +358,22 @@ const RepairJobDetails = () => {
           okBtnLoading={okBtnLoading}
         />
       } */}
-      {openUpdateDialog && (
-        <ManageRepairJob
-          isClone={false}
-          repairJobId={id}
-          onClose={() => {
-            setOpenUpdateDialog(false);
-          }}
-          onSuccess={() => {
-            fetchRepairJobData();
-            setOpenUpdateDialog(false);
-          }}
-        />
-      )}
-    </>
+      {
+        openUpdateDialog && (
+          <ManageRepairJob
+            isClone={false}
+            repairJobId={id}
+            onClose={() => {
+              setOpenUpdateDialog(false);
+            }}
+            onSuccess={() => {
+              fetchRepairJobData();
+              setOpenUpdateDialog(false);
+            }}
+          />
+        )
+      }
+    </Box>
   );
 };
 

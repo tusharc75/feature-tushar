@@ -1,330 +1,325 @@
 /* Extra small devices (phones, 600px and down) */
 .buttonStyleSmallScreen {
-    display: none !important;
+  display: none !important;
 }
 
 .buttonDeleteSmallScreen {
-    display: none !important;
+  display: none !important;
 }
 
 .buttonDeleteBigScreen {
-    color: #f44336 !important;
-    border: 1px solid #f44336 !important;
-    background: #fff !important;
+  color: #f44336 !important;
+  border: 1px solid #f44336 !important;
+  background: #fff !important;
 }
 
 .DetailCube {
-    display: none;
+  display: none;
 }
 
 .deleteIconNew {
-    display: none;
+  display: none;
 }
 
 .uio {
-    border: 1px solid grey;
-    flex-grow: 1;
+  border: 1px solid grey;
+  flex-grow: 1;
 }
 
-.detailHeaderDashboard {
-    // display: none;
-}
+// .detailHeaderDashboard {
+//   // display: none;
+// }
 
 .mainview {
-    width: 98vw;
-    padding: 20px 50px 45px 50px !important;
+  width: 98vw;
+  padding: 20px 50px 45px 50px !important;
 }
 
 .actionview {
-    padding: 0px 20px 10px 20px !important;
+  padding: 0px 20px 10px 20px !important;
 }
 
 .all-button {
-    font-size: 0.7rem !important;
+  font-size: 0.7rem !important;
 }
 
 .help_icon {
-    padding: 5px 10px !important;
+  padding: 5px 10px !important;
 }
 
-
 @media only screen and (max-width: 600px) {
-    .stepper-responsive {
-        .MuiStepLabel-iconContainer {
-            display: none;
+  .stepper-responsive {
+    .MuiStepLabel-iconContainer {
+      display: none;
+    }
+
+    .MuiStepLabel-label {
+      font-size: 11px;
+    }
+  }
+
+  .tab-font {
+    font-size: 10px;
+  }
+
+  .MuiButton-outlinedSizeSmall {
+    padding: 2px 9px;
+    font-size: 0.6rem;
+  }
+
+  .MuiMenuItem-root {
+    font-size: 0.8rem;
+    min-height: 34px;
+    min-height: auto !important;
+  }
+
+  .headerLogo {
+    font-size: 1rem;
+  }
+
+  .listingHeader {
+    font-size: 0.8rem;
+  }
+
+  .listingHeaderActivity {
+    font-size: 1rem;
+  }
+
+  .MuiToggleButton-sizeSmall {
+    padding: 4px !important;
+    font-size: 0.5rem !important;
+  }
+
+  .all-button {
+    font-size: 0.5rem !important;
+  }
+
+  .brandLogo {
+    height: auto !important;
+  }
+
+  .headerbox {
+    position: static;
+    height: auto;
+    width: 100% !important;
+
+    ol {
+      li {
+        a {
+          font-size: 0.8rem;
         }
 
-        .MuiStepLabel-label {
-            font-size: 11px;
+        p {
+          font-size: 0.8rem;
         }
+      }
+    }
+  }
+
+  .detail-container {
+    height: auto;
+    top: 0;
+    padding: 0;
+    margin-top: 0 !important;
+    overflow: hidden;
+  }
+
+  .detailHeaderDashboard {
+    padding: 2px;
+  }
+
+  .quoteBox {
+    padding: 4px !important;
+  }
+
+  .MuiButton-containedSizeSmall {
+    font-size: 0.7rem !important;
+  }
+
+  .detail-box {
+    padding: 5px 6px;
+  }
+
+  .MuiButton-startIcon {
+    margin-right: 0 !important;
+  }
+
+  .MuiButton-root {
+    min-width: auto !important;
+  }
+
+  // .headerbox {
+  //     padding: 2px 6px;
+  // }
+
+  //.detailHeaderDashboard {
+  //    display: flex;
+  //    align-items: normal;
+  //    justify-content: center;
+  //    flex-direction: column;
+  //    padding: 0px;
+  //}
+
+  .listing-grid {
+    height: calc(100vh - 233px);
+  }
+
+  .rbc-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .greyBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .chat-box {
+    position: absolute;
+    top: 10px;
+    left: 2px;
+    right: 10px;
+    bottom: 14px;
+  }
+
+  .bgbox,
+  .profileBox {
+    background: transparent;
+  }
+
+  .product-builder-edit-grid {
+    height: 400px !important;
+  }
+
+  .supplier-price-edit-grid {
+    height: 300px !important;
+  }
+
+  .MuiTab-textColorPrimary.Mui-selected {
+    border-radius: 0;
+    background: white !important;
+    color: #163340 !important;
+    border-radius: 0;
+  }
+
+  .stepper-box {
+    //background: #eeeeee;
+    padding: 4px;
+
+    & .mainview {
+      width: 98vw;
+      padding: 10px 10px 25px 10px !important;
     }
 
-    .tab-font {
-        font-size: 10px;
+    & .actionview {
+      padding: 12px 20px !important;
     }
+  }
 
-    .detailHeader {
-        padding: 2px !important;
-    }
+  .buttonStyleBigScreen {
+    display: none !important;
+  }
 
-    .MuiButton-outlinedSizeSmall {
-        padding: 2px 9px;
-        font-size: 0.6rem;
-    }
+  .buttonStyleSmallScreen {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    display: flex !important;
+    padding: 5px !important;
+    min-width: 40px !important;
+    color: var(--primary);
+  }
 
-    .MuiMenuItem-root {
-        font-size: 0.8rem;
-        min-height: 34px;
-        min-height: auto !important;
-    }
+  .buttonDeleteBigScreen {
+    display: none !important;
+  }
 
-    .headerLogo {
-        font-size: 1rem;
-    }
+  .buttonDeleteSmallScreen {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    display: flex !important;
+    padding: 5px !important;
+    min-width: 40px !important;
+    color: var(--danger-light) !important;
+  }
 
-    .listingHeader {
-        font-size: 0.8rem;
-    }
+  .mobileHeading {
+    padding: 5px 8px;
+    color: white !important;
+    border-radius: 8px;
+  }
 
-    .listingHeaderActivity {
-        font-size: 1rem;
-    }
+  .listingHeader {
+    padding-right: 0px !important;
+    font-size: 0.9rem;
+  }
 
-    .MuiToggleButton-sizeSmall {
-        padding: 4px !important;
-        font-size: 0.5rem !important;
-    }
+  .DetailCube {
+    display: flex !important;
+    padding: 8px;
+  }
 
-    .all-button {
-        font-size: 0.5rem !important;
-    }
+  .detailHeading {
+    padding: 0px 16px;
+  }
 
-    .brandLogo {
-        height: auto !important;
-    }
+  .deleteButtonIcon {
+    color: var(--danger-light) !important;
+    margin: 0px !important;
+  }
 
-    .headerbox {
-        position: static;
-        height: auto;
-        width: 100% !important;
+  .deleteIconNew {
+    display: flex;
+    color: var(--danger-light);
+    padding-bottom: 3px;
+  }
 
-        ol {
-            li {
-                a {
-                    font-size: 0.8rem;
-                }
+  .uio {
+    border: 1px solid grey;
+    flex-grow: 0;
+  }
 
-                p {
-                    font-size: 0.8rem;
-                }
-            }
-        }
-    }
+  .MuiButton-root {
+    min-width: auto !important;
+  }
 
-    .detail-container {
-        height: auto;
-        top: 0;
-        padding: 0;
-        margin-top: 0 !important;
-        overflow: hidden;
-    }
+  .MuiButton-startIcon {
+    margin-right: 0px !important;
+  }
 
-    .detailHeaderDashboard {
-        padding: 2px;
-    }
+  .MuiButton-endIcon {
+    margin-left: 0px !important;
+  }
 
-    .quoteBox {
-        padding: 4px !important;
-    }
+  .MuiButton-outlinedSizeSmall {
+    padding: 2px;
+  }
 
-    .MuiButton-containedSizeSmall {
-        font-size: 0.7rem !important;
-    }
+  .quoteHeader {
+    flex-direction: column;
+  }
 
-    .detail-box {
-        padding: 5px 6px;
-    }
+  .quoteBoxicon {
+    color: #ffffff;
+  }
 
-    .MuiButton-startIcon {
-        margin-right: 0 !important;
-    }
+  .actio-pos-quote {
+    top: 2px;
+  }
 
-    .MuiButton-root {
-        min-width: auto !important;
-    }
-
-    .headerbox {
-        padding: 2px 6px;
-    }
-
-    //.detailHeaderDashboard {
-    //    display: flex;
-    //    align-items: normal;
-    //    justify-content: center;
-    //    flex-direction: column;
-    //    padding: 0px;
-    //}
-
-    .listing-grid {
-        height: calc(100vh - 233px);
-    }
-
-    .rbc-toolbar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-    }
-
-    .greyBox {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-    }
-
-    .chat-box {
-        position: absolute;
-        top: 10px;
-        left: 2px;
-        right: 10px;
-        bottom: 14px;
-    }
-
-    .bgbox,
-    .profileBox {
-        background: transparent;
-    }
-
-    .product-builder-edit-grid {
-        height: 400px !important;
-    }
-
-    .supplier-price-edit-grid {
-        height: 300px !important;
-    }
-
-    .MuiTab-textColorPrimary.Mui-selected {
-        border-radius: 0;
-        background: white !important;
-        color: #163340 !important;
-        border-radius: 0;
-    }
-
-    .stepper-box {
-        background: #eeeeee;
-        padding: 4px;
-
-        & .mainview {
-            width: 98vw;
-            padding: 10px 10px 25px 10px !important;
-        }
-
-        & .actionview {
-            padding: 12px 20px !important;
-        }
-    }
-
-    .buttonStyleBigScreen {
-        display: none !important;
-    }
-
-    .buttonStyleSmallScreen {
-        background-color: transparent !important;
-        box-shadow: none !important;
-        display: flex !important;
-        padding: 5px !important;
-        min-width: 40px !important;
-        color: var(--primary);
-    }
-
-    .buttonDeleteBigScreen {
-        display: none !important;
-    }
-
-    .buttonDeleteSmallScreen {
-        background-color: transparent !important;
-        box-shadow: none !important;
-        display: flex !important;
-        padding: 5px !important;
-        min-width: 40px !important;
-        color: var(--danger-light) !important;
-    }
-
-    .mobileHeading {
-        padding: 5px 8px;
-        color: white !important;
-        border-radius: 8px;
-    }
-
-    .listingHeader {
-        padding-right: 0px !important;
-        font-size: 0.9rem;
-    }
-
-    .DetailCube {
-        display: flex !important;
-        padding: 8px;
-    }
-
-    .detailHeading {
-        padding: 0px 16px;
-    }
-
-    .deleteButtonIcon {
-        color: var(--danger-light) !important;
-        margin: 0px !important;
-    }
-
-    .deleteIconNew {
-        display: flex;
-        color: var(--danger-light);
-        padding-bottom: 3px;
-    }
-
-    .uio {
-        border: 1px solid grey;
-        flex-grow: 0;
-    }
-
-    .MuiButton-root {
-        min-width: auto !important;
-    }
-
-    .MuiButton-startIcon {
-        margin-right: 0px !important;
-    }
-
-    .MuiButton-endIcon {
-        margin-left: 0px !important;
-    }
-
-    .MuiButton-outlinedSizeSmall {
-        padding: 2px;
-    }
-
-    .quoteHeader {
-        flex-direction: column;
-    }
-
-    .quoteBoxicon {
-        color: #ffffff;
-    }
-
-    .actio-pos-quote {
-        top: 2px;
-    }
-
-    .all-button-sub-icon {
-        font-size: 18px !important;
-    }
+  .all-button-sub-icon {
+    font-size: 18px !important;
+  }
 }
 
 @media only screen and (max-width: 380px) {
-    .tab-font {
-        font-size: 12px;
-        line-height: 18px;
-    }
+  .tab-font {
+    font-size: 12px;
+    line-height: 18px;
+  }
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
@@ -332,67 +327,69 @@
 
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (min-width: 600px) and (max-width: 768px) {
-    .headerbox {
-        position: static;
-        height: auto;
-        width: 100% !important;
-    }
+  .headerbox {
+    position: static;
+    height: auto;
+    width: 100% !important;
+  }
 }
 
 @media only screen and (max-width: 770px) {
-    .detail-container {
-        top: 0;
-        margin: 0;
-    }
+  .detail-container {
+    top: 0;
+    margin: 0;
+  }
 
-    .main-container {
-        top: 0;
-        margin: 0;
-    }
+  .main-container {
+    top: 0;
+    margin: 0;
+  }
 
-    .tabLayout {
-        padding: 3px 0 !important;
-        flex: 1;
-    }
+  .tabLayout {
+    padding: 3px 0 !important;
+    flex: 1;
+  }
 
-    .tab-font {
-        font-size: 12px;
-    }
+  .tab-font {
+    font-size: 12px;
+  }
 }
 
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (max-width: 959px) {
-    .headerbox {
-        width: 100% !important;
-    }
+  .headerbox {
+    width: 100% !important;
+  }
 }
 
 /* Large devices (laptops/desktops, 992px and up) */
-@media only screen and (min-width: 992px) {}
+@media only screen and (min-width: 992px) {
+}
 
 /* Extra large devices (large laptops and desktops, 1200px and up) */
-@media only screen and (min-width: 1200px) {}
+@media only screen and (min-width: 1200px) {
+}
 
 /* Extra small devices -Activity And detail changes(phones, 1300px and down) */
 @media only screen and (max-width: 1300px) {
-    .grid-with-activity {
-        display: grid;
-        //grid-template-rows: 1fr 1fr;
-        gap: 10px;
-        grid-template-columns: none;
-    }
+  .grid-with-activity {
+    display: grid;
+    //grid-template-rows: 1fr 1fr;
+    gap: 10px;
+    grid-template-columns: none;
+  }
 
-    .grid-with-activity-user {
-        display: grid;
-        grid-template-columns: 100%;
-        column-gap: 10px;
-    }
+  .grid-with-activity-user {
+    display: grid;
+    grid-template-columns: 100%;
+    column-gap: 10px;
+  }
 
-    .activityHide {
-        display: none;
-    }
+  .activityHide {
+    display: none;
+  }
 }
 
 .scroll-y-hidden {
-    overflow-y: hidden;
+  overflow-y: hidden;
 }

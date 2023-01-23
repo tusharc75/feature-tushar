@@ -9,6 +9,7 @@ import { disabledColumns, getSortedColumns } from '../../constants/columns';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import ArrangeViewDialog from './ArrangeViewDialog';
 import ReportArrangeView from './ReportArrangeView';
+// import {BsArrowLeftRight} from 'react-icons/bs';
 
 let timeout;
 export default function CustomGridHeaderOptions({
@@ -101,7 +102,7 @@ export default function CustomGridHeaderOptions({
 
   return (
     <>
-      <Box className="ag-grid-listing-grid-header-options border px-2 py-1 d-flex gap-2 justify-content-space-between">
+      <Box className="ag-grid-listing-grid-header-options d-flex gap-2 justify-content-space-between">
         <div className="d-flex gap-2">
           <Button
             aria-describedby="columnSelection"
@@ -214,7 +215,7 @@ export default function CustomGridHeaderOptions({
           </Popover> */}
           {showOnlyShowFilteredRecordSwitch && (
             <>
-              <Divider orientation="vertical" flexItem className="mr-2" />
+              {/* <Divider orientation="vertical" flexItem className="mr-2" /> */}
 
               <FormControlLabel
                 value={checked}

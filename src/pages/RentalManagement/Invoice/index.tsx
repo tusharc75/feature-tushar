@@ -35,14 +35,11 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const Invoice = ({
   rentalManagementData,
-  isTabletScreen,
-  isSmallScreen,
   setNextStep,
   fetchRentalData,
   updateJobStatus,
   statusOptions,
   renderedFrom,
-  showActivity,
   stepFullScreen,
   currencySymbol,
   allowedToEdit
@@ -490,7 +487,7 @@ const Invoice = ({
             <Fragment>
               <Button
                 variant="outlined"
-                color="primary"
+                className="btn-outline-v1"
                 size="small"
                 disabled={isOffline}
                 onClick={() => {
@@ -505,7 +502,7 @@ const Invoice = ({
           {permissions?.rentalManagement?.isRead && !isMobile && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
+              className="btn-outline-v1"
               type="button"
               size="small"
               style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
@@ -523,7 +520,7 @@ const Invoice = ({
           {permissions?.rentalManagement?.isRead && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
+              className="btn-outline-v1"
               type="button"
               size="small"
               style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
@@ -574,7 +571,7 @@ const Invoice = ({
           {permissions?.rentalManagement?.isRead && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
+              className="btn-outline-v1"
               size="small"
               style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
               disabled={downlodingFile === 'Email' && isLoading ? true : false || isOffline}

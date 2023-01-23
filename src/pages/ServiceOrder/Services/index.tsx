@@ -11,7 +11,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { dateTimeFormat, serviceOrder } from '../../../constants/helpers';
+import { dateTimeFormat, formatAmountWithCurrency, serviceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -28,9 +28,6 @@ const Services = ({
   serviceOrderData,
   setNextStep,
   currencySymbol,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity,
   renderedFrom,
   stepFullScreen,
   allowedToEdit
@@ -58,13 +55,15 @@ const Services = ({
 
   useEffect(() => {
     fetchFields();
-  }, [allowedToEdit]);
+  }, []);
 
   useEffect(() => {
     fetchProductInventory();
   }, [columns]);
 
   const fetchFields = async () => {
+    const response = await axiosInstance().get('/field?resource=Service Order Detail&view=true');
+    const serviceFields = response?.data?.data?.map((d: any) => d.fieldData)
     const column: any = [
       {
         accessor: 'srno',
@@ -123,40 +122,45 @@ const Services = ({
           </div>
         )
       },
-      {
-        accessor: 'qty',
-        Header: 'Qty',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
-        },
-        editable: true
-      },
-      {
-        accessor: 'unit',
-        Header: 'Unit',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['unit'] ? <p className="text-truncate">{row.original.unit}</p> : <NoDataCell />;
-        }
-      },
-      {
-        accessor: 'estimateStartDate',
-        Header: 'Estimate Start Date',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['estimateStartDate'] ? <p>{moment(row.original['estimateStartDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
-        }
-      },
-      {
-        accessor: 'estimateEndDate',
-        Header: 'Estimate End Date',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['estimateEndDate'] ? <p>{moment(row.original['estimateEndDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
-        }
-      },
     ];
+    serviceFields?.forEach((element) => {
+      if (element.type === 'dateTime') {
+        column.push({
+          accessor: element.fieldName,
+          Header: element.fieldLabel,
+          disableFilters: true,
+          width: 250,
+          Cell: ({ row }) =>
+            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName]).format(dateTimeFormat)}</p> : <NoDataCell />
+        });
+      }
+      else if (element.type === 'currencyAmount') {
+        element.displayCurrency.forEach((_currency) => {
+          let fieldName = element.fieldName + '_' + _currency.toLowerCase();
+          let fieldLabel = element.fieldLabel + ' ' + _currency;
+          column.push({
+            accessor: fieldName,
+            Header: fieldLabel,
+            Cell: ({ row }) =>
+              row.original[fieldName] ? (
+                <p>{formatAmountWithCurrency(serviceOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+              ) : (
+                <NoDataCell />
+              )
+          });
+        });
+      }
+      else {
+        if (element.fieldName === 'qty') {
+          element.fieldName = 'qtyDisplay';
+        }
+        column.push({
+          accessor: element.fieldName,
+          Header: element.fieldLabel,
+          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+        });
+      }
+    })
     column.push({
       accessor: 'action',
       Header: '',
@@ -231,6 +235,7 @@ const Services = ({
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : '';
+      parent.qtyDisplay = parent.qty;
       parent.canDelete = technician.some(d => d._id === parent._id) ? false : true;
       parent.estimateStartDate = parent.estimateStartDate ? parent.estimateStartDate : serviceOrderData?.estimateStartDate
       parent.estimateEndDate = parent.estimateEndDate ? parent.estimateEndDate : serviceOrderData?.estimateEndDate
@@ -267,6 +272,7 @@ const Services = ({
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
+      _subRow.qtyDisplay = _subRow.qty;
       _subRow.canDelete = technician.some(d => d.service.optionValue === _subRow._id) ? false : true;
       _subRow.estimateStartDate = _subRow.estimateStartDate ? _subRow.estimateStartDate : serviceOrderData?.estimateStartDate
       _subRow.estimateEndDate = _subRow.estimateEndDate ? _subRow.estimateEndDate : serviceOrderData?.estimateEndDate
@@ -374,8 +380,8 @@ const Services = ({
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = material.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qty')) {
-      inputField['qty'] = inputField['qty'];
+    if (inputField.hasOwnProperty('qtyDisplay')) {
+      inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(material, inputField, allFields, updatedData);
@@ -511,6 +517,7 @@ const Services = ({
           }}
           serviceData={isProductEdit.data}
           from={routes.serviceOrder.title}
+          currency={serviceOrderData.currency}
           handleSave={handleSaveData} />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (

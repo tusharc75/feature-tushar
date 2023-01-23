@@ -16,9 +16,7 @@ import CustomAgGrid, { intialState, reducer } from "src/components/AgGridCompone
 import { getFrameworkComponents, genrateColoum } from 'src/constants/columns';
 import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
-import { MdAdd, MdDelete } from 'react-icons/md';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import { RiEditCircleLine, RiExchangeFundsLine } from 'react-icons/ri';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ManageAssetDialog from './ManageAssetDialog';
 import AssetScrapRepairDialog from 'src/components/AssetScrapRepairDialog/AssetScrapRepairDialog';

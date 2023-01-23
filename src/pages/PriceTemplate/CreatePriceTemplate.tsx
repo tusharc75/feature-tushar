@@ -12,7 +12,6 @@ import {
   useMediaQuery
 } from "@material-ui/core";
 import { useParams, useHistory } from "react-router-dom";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { FormBuilder } from "../../components/FormBuilder";
 import { Formik, Form } from "formik";
 import { object, string } from "yup";
@@ -29,8 +28,9 @@ import HistoryButton from "../../components/Helpers/HistoryButton";
 import HistoryDialog from "../../components/Activity/History"
 import { priceTemplate } from "../../constants/helpers"
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
-import { IoIosArrowDropdown } from "react-icons/io";
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { camelCase } from "lodash";
+import { IoIosArrowDropdown } from "react-icons/io";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -124,9 +124,6 @@ const PriceTemplate = () => {
       }
     }
   }
-
-
-
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -345,10 +342,10 @@ const PriceTemplate = () => {
     }
   };
 
-  return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+  return (<Fragment>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
           <CustomBreadCrumbs
             routes={[
               {
@@ -375,51 +372,13 @@ const PriceTemplate = () => {
               else history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : path })
             }}
           />
-        </Grid>
-        <Grid container justify="flex-end" item md={8} sm={1} xs={2} className="pr-3">
-
-          <div className={classes.linksContainer}>
-            <label
-              htmlFor="importField"
-              style={{ color: "white" }}
-              className="cursor-pointer mr-3"
-            >
-              Import Fields
-              <input
-                onClick={(e: any) => (e.target.value = null)}
-                id="importField"
-                name="importField"
-                onChange={handleImportFields}
-                style={{
-                  opacity: "0",
-                  position: "absolute",
-                  zIndex: -1,
-                }}
-                type="file"
-              />
-            </label>
-            <label
-              style={{ color: "white" }}
-              className="cursor-pointer"
-              onClick={handleExportFields}
-            >
-              Export Fields
-            </label>
-            <a id="downloadAnchorElem" style={{ display: "none" }}></a>
-          </div>
-
-          <Menu
-            id="importField"
-            anchorEl={anchorEl}
-            keepMounted
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-          >
-            <MenuItem
-            >
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            <div className={classes.linksContainer}>
               <label
                 htmlFor="importField"
-                className="cursor-pointer"
+                className={`new-headerbox-button-v1`}
               >
                 Import Fields
                 <input
@@ -435,24 +394,58 @@ const PriceTemplate = () => {
                   type="file"
                 />
               </label>
-
-            </MenuItem>
-            <MenuItem
-              onClick={handleExportFields}
+              <label
+                onClick={handleExportFields}
+                className={`new-headerbox-button-v1`}
+              >
+                Export Fields
+              </label>
+              <a id="downloadAnchorElem" style={{ display: "none" }}></a>
+            </div>
+            <Menu
+              id="importField"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
             >
-              Export Fields
-            </MenuItem>
-            {/* <MenuItem>Email a Link</MenuItem> */}
-          </Menu>
-          {isMobile && (
-            <IconButton onClick={handleClick} className={classes.menuButtonList}>
-              <IoIosArrowDropdown className={classes.expandIcon} />
-            </IconButton>
-          )}
+              <MenuItem
+              >
+                <label
+                  htmlFor="importField"
+                  className="cursor-pointer"
+                >
+                  Import Fields
+                  <input
+                    onClick={(e: any) => (e.target.value = null)}
+                    id="importField"
+                    name="importField"
+                    onChange={handleImportFields}
+                    style={{
+                      opacity: "0",
+                      position: "absolute",
+                      zIndex: -1,
+                    }}
+                    type="file"
+                  />
+                </label>
 
-        </Grid>
-      </Grid>
-      <div className="main-container">
+              </MenuItem>
+              <MenuItem
+                onClick={handleExportFields}
+              >
+                Export Fields
+              </MenuItem>
+            </Menu>
+            {isMobile && (
+              <IconButton onClick={handleClick} className={classes.menuButtonList}>
+                <IoIosArrowDropdown className={classes.expandIcon} />
+              </IconButton>
+            )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
         {initialValues ? (
           <Formik
             innerRef={ref}
@@ -462,7 +455,6 @@ const PriceTemplate = () => {
           >
             {({ submitForm, touched, errors, setFieldValue, values }) => (
               <Form>
-                <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                 <Box p={1} ml={1} bgcolor="white">
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={3}>
@@ -683,22 +675,21 @@ const PriceTemplate = () => {
                     resource=""
                   />
                 </Box>
-                {
-                  showConfirmDialog ?
-                    <ConfirmCancelDialog
-                      close={() => setShowConfirmDialog(false)}
-                      open={showConfirmDialog}
-                      onSave={() => {
-                        setShowConfirmDialog(false)
-                        submitForm();
-                      }}
-                      onClose={() => {
-                        setShowConfirmDialog(false)
-                        history.push({
-                          pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path,
-                        })
-                      }}
-                    /> : null
+                {showConfirmDialog ?
+                  <ConfirmCancelDialog
+                    close={() => setShowConfirmDialog(false)}
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false)
+                      submitForm();
+                    }}
+                    onClose={() => {
+                      setShowConfirmDialog(false)
+                      history.push({
+                        pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.priceTemplate.path,
+                      })
+                    }}
+                  /> : null
                 }
               </Form>
             )}
@@ -716,8 +707,9 @@ const PriceTemplate = () => {
             onClose={() => setShowHistory(false)}
           /> : null
         }
-      </div>
-    </Fragment >
+      </Box>
+    </Box>
+  </Fragment >
   );
 };
 
