@@ -465,136 +465,105 @@ const RoleDetailsPage = () => {
   const isEditDeleteDisable = [PERMISSION.superAdmin, PERMISSION.brandAdmin].indexOf(roleData?.permission) >= 0;
 
   return (
-    <>
-      {showAssignUserDialog &&
-        (roleData?.type === roleTypes.find((d) => d.key === 'Global')?.value ? (
-          <AssignUserDialog
-            usersDialogOpen={showAssignUserDialog}
-            handleCloseDialog={userDialogClose}
-            roleIds={[id]}
-            assignedUsers={roleUsers}
-            onSuccess={() => {
-              fetchRoleData();
-              userDialogClose();
-            }}
-            selectedEntity={selectedEntity || ''}
-          />
-        ) : (
-          <AssignRegionalRolesUserDialog
-            entitiesDialogOpen={showAssignUserDialog}
-            handleCloseDialog={userDialogClose}
-            ids={[id]}
-            assignedUsers={roleUsers}
-            onSuccess={() => {
-              fetchRoleData();
-              userDialogClose();
-            }}
-            entityAccessIds={entityAccess}
-          />
-        ))}
-
-      <Fragment>
-        <Grid container className="headerbox">
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
           <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {roleData ? (
+              <>
+                {permissions.role.isUpdate && (
+                  <Button disabled={isUpdating || checkError()} variant="contained" color="primary" size="small" onClick={handleUpdateRole}>
+                    {isUpdating ? <CircularProgress size={22} /> : 'Update'}
+                  </Button>
+                )}
+                {permissions.role.isDelete && !isEditDeleteDisable && (
+                  <DeleteButton
+                    text="Delete"
+                    onClick={() => {
+                      setRoleDeleteRec(id);
+                      setShowConfirmBox(true);
+                    }}
+                  />
+                )}
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8}>
+            <Box display="flex" marginTop={2} marginBottom={2} gridGap={10} px={1}>
+              <TextField
+                disabled={roleData?.type && roleData?.permission ? true : !permissions.role.isUpdate}
+                required
+                variant="outlined"
+                size="small"
+                fullWidth
+                label="Role Name"
+                value={values.name}
+                onChange={(e) => setValues({ ...values, name: e.target.value.trimStart() })}
+              />
+
+              <TextField
+                disabled={roleData?.type && roleData?.permission ? true : !permissions.role.isUpdate}
+                required
+                variant="outlined"
+                size="small"
+                fullWidth
+                label="Role Description"
+                value={values.description}
+                onChange={(e) => setValues({ ...values, description: e.target.value.trimStart() })}
+              />
+            </Box>
             <Paper>
-              {!roleData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    <Box marginX={1} />
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  </Box>
+              {loading ? (
+                <div className="d-flex align-items-center justify-content-center" style={{ minHeight: 200, height: '70vh' }}>
+                  <Loader style={{ height: '100%' }} text="Loading..." />
                 </div>
               ) : (
-                <DetailsPageHeader heading={headingLbl} showHeading={true}>
-                  {permissions.role.isUpdate ? (
-                    <Button disabled={isUpdating || checkError()} variant="contained" color="primary" size="small" onClick={handleUpdateRole}>
-                      {isUpdating ? <CircularProgress size={22} /> : 'Update'}
-                    </Button>
-                  ) : null}
-                  <Box marginX={1} component="span" />
-                  {permissions.role.isDelete && !isEditDeleteDisable ? (
-                    <DeleteButton
-                      text="Delete"
-                      onClick={() => {
-                        setRoleDeleteRec(id);
-                        setShowConfirmBox(true);
-                      }}
+                field.length &&
+                resource.length && (
+                  <>
+                    <RoleEngine
+                      style={{ height: '70vh' }}
+                      field={field}
+                      resource={resource}
+                      setField={setField}
+                      setResource={setResource}
+                      isDisable={permissions.role.isUpdate ? (isEditDeleteDisable ? true : false) : true}
                     />
-                  ) : null}
-                </DetailsPageHeader>
-              )}
-
-              <Box display="flex" marginTop={2} marginBottom={2} gridGap={10} px={1}>
-                <TextField
-                  disabled={roleData?.type && roleData?.permission ? true : !permissions.role.isUpdate}
-                  required
-                  variant="outlined"
-                  size="small"
-                  fullWidth
-                  label="Role Name"
-                  value={values.name}
-                  onChange={(e) => setValues({ ...values, name: e.target.value.trimStart() })}
-                />
-
-                <TextField
-                  disabled={roleData?.type && roleData?.permission ? true : !permissions.role.isUpdate}
-                  required
-                  variant="outlined"
-                  size="small"
-                  fullWidth
-                  label="Role Description"
-                  value={values.description}
-                  onChange={(e) => setValues({ ...values, description: e.target.value.trimStart() })}
-                />
-              </Box>
-              <Paper>
-                {loading ? (
-                  <div className="d-flex align-items-center justify-content-center" style={{ minHeight: 200, height: '70vh' }}>
-                    <Loader style={{ height: '100%' }} text="Loading..." />
-                  </div>
-                ) : (
-                  field.length &&
-                  resource.length && (
-                    <>
-                      <RoleEngine
-                        style={{ height: '70vh' }}
-                        field={field}
-                        resource={resource}
-                        setField={setField}
-                        setResource={setResource}
-                        isDisable={permissions.role.isUpdate ? (isEditDeleteDisable ? true : false) : true}
+                    {isPolicyTableVisible() && (
+                      <PolicyResources
+                        policyResources={policyResources}
+                        fieldOfPolicyResources={fieldOfPolicyResources}
+                        resourceCheckbox={resourceCheckbox}
+                        policyFieldCheckBox={policyFieldCheckBox}
+                        isPolicyCheckBoxChecked={isPolicyCheckBoxChecked}
+                        handlePolicyCheckBox={handlePolicyCheckBox}
+                        open={open}
+                        setOpen={setOpen}
+                        permissions={permissions}
                       />
-                      {isPolicyTableVisible() && (
-                        <PolicyResources
-                          policyResources={policyResources}
-                          fieldOfPolicyResources={fieldOfPolicyResources}
-                          resourceCheckbox={resourceCheckbox}
-                          policyFieldCheckBox={policyFieldCheckBox}
-                          isPolicyCheckBoxChecked={isPolicyCheckBoxChecked}
-                          handlePolicyCheckBox={handlePolicyCheckBox}
-                          open={open}
-                          setOpen={setOpen}
-                          permissions={permissions}
-                        />
-                      )}
-                      {dashBoardOption?.length > 0 && (
-                        <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} />
-                      )}
-                      <DefaultResources resourceList={resourceOption} resourceName={defaultResourceName} setResourceName={setDefaultResourceName} />
-                    </>
-                  )
-                )}
-                {/* </TableBody>
+                    )}
+                    {dashBoardOption?.length > 0 && (
+                      <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} />
+                    )}
+                    <DefaultResources resourceList={resourceOption} resourceName={defaultResourceName} setResourceName={setDefaultResourceName} />
+                  </>
+                )
+              )}
+              {/* </TableBody>
                   </Table>
                 </TableContainer> */}
-              </Paper>
-              <Box marginY={2} />
-              {/* {roleData && roleData.type === 2 && (
+            </Paper>
+            <Box marginY={2} />
+            {/* {roleData && roleData.type === 2 && (
                 <div>
                   <Box
                     padding={1}
@@ -678,7 +647,6 @@ const RoleDetailsPage = () => {
                   </Box>
                 </div>
               )} */}
-            </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
             <Paper>
@@ -751,7 +719,34 @@ const RoleDetailsPage = () => {
             </Paper>
           </Grid>
         </Grid>
-      </Fragment>
+      </Box>
+
+      {showAssignUserDialog &&
+        (roleData?.type === roleTypes.find((d) => d.key === 'Global')?.value ? (
+          <AssignUserDialog
+            usersDialogOpen={showAssignUserDialog}
+            handleCloseDialog={userDialogClose}
+            roleIds={[id]}
+            assignedUsers={roleUsers}
+            onSuccess={() => {
+              fetchRoleData();
+              userDialogClose();
+            }}
+            selectedEntity={selectedEntity || ''}
+          />
+        ) : (
+          <AssignRegionalRolesUserDialog
+            entitiesDialogOpen={showAssignUserDialog}
+            handleCloseDialog={userDialogClose}
+            ids={[id]}
+            assignedUsers={roleUsers}
+            onSuccess={() => {
+              fetchRoleData();
+              userDialogClose();
+            }}
+            entityAccessIds={entityAccess}
+          />
+        ))}
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -773,7 +768,7 @@ const RoleDetailsPage = () => {
           onOk={roleDeleteRec ? handleDeleteRole : entityDeleteRec ? unassignEntity : unassignUserRole}
         />
       )}
-    </>
+    </Box>
   );
 };
 
