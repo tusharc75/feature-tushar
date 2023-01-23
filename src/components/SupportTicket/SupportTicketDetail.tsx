@@ -1,5 +1,5 @@
 import { Box, Button, Grid } from '@material-ui/core';
-import {  useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -96,75 +96,61 @@ const SupportTicketDetail = () => {
     setOpenUpdateDialog(false);
   };
 
-  return (
-    <Box className="main-container-v1">
-      <Box className="headerbox-v1">
-        <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
-        </Box>
-        <Box className="controls-v1">
-          <Box className="controls-buttons-v1">
-            {!supportTicketData ? (
-              <div>
-                <Skeleton variant="text" width="150px" height="40px" />
-                <Box display="flex">
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  <Box marginX={1} />
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                </Box>
-              </div>
-            ) : (
-              <>
-                {permissions.supportTicket?.isUpdate && allowedToEdit && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    onClick={handleOpenUpdateDialog}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-
-                {permissions?.supportTicket?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </>
-            )}
-          </Box>
+  return (<Box className="main-container-v1">
+    <Box className="headerbox-v1">
+      <Box className="nav-v1">
+        <CustomBreadCrumbs routes={customizedRoutes} />
+      </Box>
+      <Box className="controls-v1">
+        <Box className="control-buttons-v1">
+          {permissions.supportTicket?.isUpdate && allowedToEdit && (
+            <Button
+              variant={isMobile ? 'text' : 'contained'}
+              className={'btn-outline-v1'}
+              onClick={handleOpenUpdateDialog}
+            >
+              {isMobile ? <BiEdit size={20} /> : 'Edit'}
+            </Button>
+          )}
+          {permissions?.supportTicket?.isDelete && allowedToDelete &&
+            <DeleteButton
+              text="Delete" onClick={() => setShowConfirmBox(true)} />}
         </Box>
       </Box>
-      <Box className={'btn-outline-v1'}>
-            <Box>
-              {loading || !fields?.length ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              ) : (
-                <DetailsPage data={supportTicketData} fields={fields} />
-              )}
-            </Box>
-      </Box>
-      {showConfirmBox && (
-        <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.supportTicket?.title?.toLowerCase()} ?`}
-          onClose={() => {
-            setShowConfirmBox(false);
-          }}
-          onOk={handleDelete}
-        />
-      )}
-      {openUpdateDialog && (
-        <ManageSupportTicket
-          id={id}
-          isClone={false}
-          onClose={closeUpdateDialog}
-          onSuccess={() => {
-            closeUpdateDialog();
-            fetchData();
-          }}
-        />
-      )}
     </Box>
+    <Box className={'detail-container-v1'}>
+      <Box>
+        {loading || !fields?.length ? (
+          <Grid container spacing={2} style={{ padding: '8px' }}>
+            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+          </Grid>
+        ) : (
+          <DetailsPage data={supportTicketData} fields={fields} />
+        )}
+      </Box>
+    </Box>
+    {showConfirmBox && (
+      <ConfirmationDialog
+        open={showConfirmBox}
+        message={`Are you sure you want to delete ${routes?.supportTicket?.title?.toLowerCase()} ?`}
+        onClose={() => {
+          setShowConfirmBox(false);
+        }}
+        onOk={handleDelete}
+      />
+    )}
+    {openUpdateDialog && (
+      <ManageSupportTicket
+        id={id}
+        isClone={false}
+        onClose={closeUpdateDialog}
+        onSuccess={() => {
+          closeUpdateDialog();
+          fetchData();
+        }}
+      />
+    )}
+  </Box>
   );
 };
 
