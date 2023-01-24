@@ -2632,6 +2632,7 @@ svg.MuiSvgIcon-root {
     align-items: center;
     justify-content: space-between;
     margin-block: 10px;
+    min-height: 32px;
 
     .primaryButton {
       background: var(--new_theme_color);
@@ -2904,12 +2905,15 @@ body {
     border-radius: 3px !important;
     padding: var(--button-v1-padding);
     &:disabled {
-      opacity: 0.5;
+      opacity: 0.3;
+      border-color: gray !important;
     }
     &:hover {
       background-color: rgba(0, 0, 0, 0.04) !important;
     }
   }
+
+  
 }
 .form-v1 {
   .single-form-v1 {
