@@ -175,8 +175,8 @@ const Productpackage = ({
         parent.type === 'product'
           ? parent?.productDetail?.productDesc || ''
           : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.packageDetail?.packageDescription || ''
+            : '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.allowedToDelete = parent.workOrder ? true : false;
@@ -206,8 +206,8 @@ const Productpackage = ({
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDesc || ''
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.packageDetail?.packageDescription || ''
+            : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
       _subRow.hideSelection = true;
@@ -450,7 +450,7 @@ const Productpackage = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'packages' && (
         <AssignPackageDialog
-          referenceType={routes.productionOrder.title}
+          referenceType={"productionOrder"}
           onSuccess={handleAdd}
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false });
