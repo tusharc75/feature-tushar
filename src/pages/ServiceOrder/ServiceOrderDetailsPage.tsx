@@ -282,13 +282,14 @@ const ServiceOrderDetailsPage = () => {
               />
             )}
             {serviceSteps[currentStep] === 'Invoice' && serviceOrderData && (
-              <TechnicianDispatch
+              <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
                 currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-4`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={false}
+                fromInvoice={true}
               />
             )}
           </ContentFullScreen>
