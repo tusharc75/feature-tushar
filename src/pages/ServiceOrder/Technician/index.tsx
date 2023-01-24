@@ -9,35 +9,30 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { dateTimeFormat, serviceOrder } from '../../../constants/helpers';
+import { dateTimeFormat, formatAmountWithCurrency, serviceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
-import ProductionOrderQty from 'src/pages/ProductionOrder/Productpackage/ProductionOrderQty';
-import AddIcon from "@material-ui/icons/Add";
+import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import moment from 'moment';
+import SendEmail from '../SendEmail';
+import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 
 const Technician = ({
     serviceOrderData,
     setNextStep,
-    currencySymbol,
     renderedFrom,
     stepFullScreen,
-    allowedToEdit
+    allowedToEdit,
+    fromInvoice = false
 }: any) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
-
 
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [deleteData, setDeleteData] = useState(null);
@@ -56,6 +51,7 @@ const Technician = ({
     }, [columns]);
 
     const fetchFields = async () => {
+        var { fields: data, allFields } = await fetch_service_order_detail_fields(serviceOrderData?.currency);
         const column: any = [
             {
                 accessor: 'srno',
@@ -90,6 +86,7 @@ const Technician = ({
                         {row.original.detail}
                         <IconButton
                             size="small"
+                            style={{ marginLeft: "10px" }}
                             onClick={() => {
                                 if (row.original.type === 'service') {
                                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
@@ -102,40 +99,55 @@ const Technician = ({
                         </IconButton>
                     </div>
                 )
-            },
-            {
-                accessor: 'qty',
-                Header: 'Qty',
+            }, {
+                accessor: 'status',
+                Header: 'Status',
                 width: 200,
-                Cell: ({ row }) => {
-                    return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
-                },
-            },
-            {
-                accessor: 'unit',
-                Header: 'Unit',
-                width: 200,
-                Cell: ({ row }) => {
-                    return row.original['unit'] ? <p className="text-truncate">{row.original.unit}</p> : <NoDataCell />;
-                }
-            },
-            {
-                accessor: 'estimateStartDate',
-                Header: 'Estimate Start Date',
-                width: 200,
-                Cell: ({ row }) => {
-                    return row.original['estimateStartDate'] ? <p>{moment(row.original['estimateStartDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
-                }
-            },
-            {
-                accessor: 'estimateEndDate',
-                Header: 'Estimate End Date',
-                width: 200,
-                Cell: ({ row }) => {
-                    return row.original['estimateEndDate'] ? <p>{moment(row.original['estimateEndDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
-                }
+                Cell: ({ row }) =>
+                    row.original['status'] ? (
+                        <p>
+                            {row.original?.status}
+                        </p>
+                    ) : (
+                        <NoDataCell />
+                    )
             },
         ];
+        allFields?.forEach((element) => {
+            if (element.type === 'dateTime') {
+                column.push({
+                    accessor: element.fieldName,
+                    Header: element.fieldLabel,
+                    disableFilters: true,
+                    width: 250,
+                    Cell: ({ row }) =>
+                        row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName]).format(dateTimeFormat)}</p> : <NoDataCell />
+                });
+            }
+            else if (element.type === 'currencyAmount') {
+                element.displayCurrency.forEach((_currency) => {
+                    let fieldName = element.fieldName + '_' + _currency.toLowerCase();
+                    let fieldLabel = element.fieldLabel + ' ' + _currency;
+                    column.push({
+                        accessor: fieldName,
+                        Header: fieldLabel,
+                        Cell: ({ row }) =>
+                            row.original[fieldName] ? (
+                                <p>{formatAmountWithCurrency(serviceOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                            ) : (
+                                <NoDataCell />
+                            )
+                    });
+                });
+            }
+            else {
+                column.push({
+                    accessor: element.fieldName,
+                    Header: element.fieldLabel,
+                    Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+                });
+            }
+        })
         column.push({
             accessor: 'action',
             Header: '',
@@ -167,6 +179,7 @@ const Technician = ({
     };
 
     const fetchData = async () => {
+        setNextStep(false)
         var data: any = [];
         const response = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
 
@@ -187,6 +200,8 @@ const Technician = ({
                         : parent?.packageDetail?.packageName;
             parent.subRows = generateNestedData(data.material, technician, parent);
         });
+
+        setNextStep(true)
         setRowsData(rows);
         setSelectedProducts([]);
     };
@@ -203,6 +218,8 @@ const Technician = ({
             obj.type = "technician"
             obj.estimateStartDate = element?.estimateStartDate
             obj.estimateEndDate = element?.estimateEndDate
+            obj.status = element?.status
+            parent.isValid = true;
             subRowsTechnician.push(obj)
         });
 
@@ -284,10 +301,14 @@ const Technician = ({
     return (
         <Fragment>
             <Grid container spacing={2}>
-                {allowedToEdit && (
-                    <Grid item xs={12} md={12} sm={12}>
-                        <Box display="flex" justifyContent="space-between" m={1} mb={0}>
-                            <Box display="flex"></Box>
+                <Grid item xs={12} md={12} sm={12}>
+                    <Box display="flex" justifyContent="space-between" m={1} mb={0}>
+                        <Box display="flex">
+                            {fromInvoice && (
+                                <SendEmail serviceOrderData={serviceOrderData} />
+                            )}
+                        </Box>
+                        {allowedToEdit && (
                             <Box display="flex">
                                 <Button
                                     variant="contained"
@@ -335,16 +356,12 @@ const Technician = ({
                                     </HtmlTooltip>
                                 </Menu>
                             </Box>
-                        </Box>
-                    </Grid>
-                )}
+                        )}
+                    </Box>
+                </Grid>
                 <Grid item xs={12} md={12} sm={12}>
                     {columns && rowsData ? (
-                        <Box
-                            zIndex={5}
-                            width={'100%'}
-                            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-                        >
+                        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}   >
                             <CustomReactTable
                                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                                 columns={columns}

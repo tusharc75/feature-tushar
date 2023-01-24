@@ -47,10 +47,11 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import PriceRequestDialog from './PriceRequestDialog';
 import { ExpandMore } from '@material-ui/icons';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
-import { capitalize } from 'lodash';
+import { capitalize, startCase } from 'lodash';
 import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import CloseIcon from '@material-ui/icons/Close';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -108,6 +109,31 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
       {
+        accessor: 'srno',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) =>  (<p className="text-truncate">{row.original.srno}</p>),
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        disableFilters: true,
+        sticky: isMobile ? 'none' : 'left',
+        width: 200,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {`${startCase(row.original?.type)} `}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
@@ -140,24 +166,24 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
               </Box>
             }
 
-            <Chip
-              className="ml-1"
-              label={`${row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}`}
+            <IconButton
               size="small"
-              color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'serializedAsset'
-                    ? routes.serializedAssetDetail.path
-                    : row.original.type === 'product'
+                  `${
+                    row.original.type === 'serializedAsset'
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'package'
-                        ? routes.packagesDetail.path
-                        : routes.serviceMasterDetail.path
+                      ? routes.packagesDetail.path
+                      : routes.serviceMasterDetail.path
                   }/${row.original.materialId}`
                 );
               }}
-            />
+            >
+             <OpenInNewIcon fontSize="small" color="primary" /> 
+            </IconButton>
           </div>
         )
       },
@@ -327,14 +353,16 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${parent.type === 'serializedAsset'
+      parent.srno = i + 1;
+      parent.detail = `${
+        parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'service'
-              ? parent.serviceDetail?.serviceName
-              : parent.packageDetail?.packageName
-        }`;
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -355,14 +383,15 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
   const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
           ? _subRow.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'service'
-              ? _subRow.serviceDetail?.serviceName
-              : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -548,8 +577,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
         <Box display="flex" alignItems="center">
           {permissions?.product?.isRead && (
             <Button
+              className="btn-outline-v1"
               variant="contained"
-              color="primary"
               size="small"
               onClick={() => {
                 setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
@@ -561,8 +590,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
           <Box mx={1} />
           {permissions?.packages?.isRead && (
             <Button
+              className="btn-outline-v1"
               variant="contained"
-              color="primary"
               size="small"
               onClick={() => {
                 setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
@@ -574,8 +603,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
           <Box mx={1} />
           {permissions?.serviceMaster?.isRead && (
             <Button
+              className="btn-outline-v1"
               variant="contained"
-              color="primary"
               size="small"
               onClick={() => {
                 setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
@@ -586,46 +615,6 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
           )}
         </Box>
         <Box display="flex">
-          <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-            <span>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
-              >
-                Bulk Edit
-              </Button>
-            </span>
-          </HtmlTooltip>
-          <Box mx={1} />
-          <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-              onClick={() => {
-                const dataToDelete =
-                  selectedProducts &&
-                  selectedProducts
-                    .filter((e) => !e.hideSelection)
-                    .map((rec: any) => {
-                      const obj: any = {};
-                      obj.id = rec._id;
-                      obj.type = rec?.type;
-                      obj.materialId = rec?.materialId;
-                      return obj;
-                    });
-                setDeleteData(dataToDelete);
-              }}
-              endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
-            >
-              Delete
-            </Button>
-          </HtmlTooltip>
-          <Box mx={1} />
           <div className="d-flex gap-2">
             <span>
               <Button variant={'outlined'} color="default" size="small" onClick={openActions} aria-controls="action-menu">
@@ -692,6 +681,35 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
               >
                 View Customer Price
               </MenuItem> */}
+              <MenuItem
+                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                onClick={() => {
+                  setIsProductEdit({ open: true, isBulkedit: true })
+                  closeActions();
+                }}
+              >
+              Bulk Edit
+              </MenuItem>
+              <MenuItem
+               disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+               onClick={() => {
+                const dataToDelete =
+                  selectedProducts &&
+                  selectedProducts
+                    .filter((e) => !e.hideSelection)
+                    .map((rec: any) => {
+                      const obj: any = {};
+                      obj.id = rec._id;
+                      obj.type = rec?.type;
+                      obj.materialId = rec?.materialId;
+                      return obj;
+                    });
+                setDeleteData(dataToDelete);
+                closeActions();
+              }}
+              >
+              Delete
+              </MenuItem>
             </Menu>
           </div>
         </Box>
@@ -747,8 +765,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
             addExistingProductDialog.type === 'product'
               ? `${renderedFrom}-product`
               : addExistingProductDialog.type === 'service'
-                ? `${renderedFrom}-service`
-                : `${renderedFrom}-package`
+              ? `${renderedFrom}-service`
+              : `${renderedFrom}-package`
           }
           isAddingProducts={isAddingProducts}
           addProductInventory={handleAdd}

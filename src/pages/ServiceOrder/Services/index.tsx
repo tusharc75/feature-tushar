@@ -23,6 +23,7 @@ import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManag
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ServiceOrderQty from './ServiceOrderQty';
 import moment from 'moment';
+import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 
 const Services = ({
   serviceOrderData,
@@ -62,8 +63,7 @@ const Services = ({
   }, [columns]);
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get('/field?resource=Service Order Detail&view=true');
-    const serviceFields = response?.data?.data?.map((d: any) => d.fieldData)
+    var { fields: data, allFields } = await fetch_service_order_detail_fields(serviceOrderData?.currency);
     const column: any = [
       {
         accessor: 'srno',
@@ -109,6 +109,7 @@ const Services = ({
             </p>
             <IconButton
               size="small"
+              style={{ marginLeft: "10px" }}
               onClick={() => {
                 if (row.original.type === 'service') {
                   window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
@@ -121,9 +122,9 @@ const Services = ({
             </IconButton>
           </div>
         )
-      },
+      }
     ];
-    serviceFields?.forEach((element) => {
+    allFields?.forEach((element) => {
       if (element.type === 'dateTime') {
         column.push({
           accessor: element.fieldName,
@@ -151,9 +152,6 @@ const Services = ({
         });
       }
       else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
         column.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
@@ -205,10 +203,10 @@ const Services = ({
   };
 
   const fetchProductInventory = async () => {
+
     setNextStep(false);
+
     var data: any = [];
-    var inventory: any = [];
-    var nonSerializeAsset: any = [];
 
     const response = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
     data = response?.data?.data;
@@ -235,21 +233,17 @@ const Services = ({
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : '';
-      parent.qtyDisplay = parent.qty;
+      parent.qty = parent.qty;
       parent.canDelete = technician.some(d => d._id === parent._id) ? false : true;
       parent.estimateStartDate = parent.estimateStartDate ? parent.estimateStartDate : serviceOrderData?.estimateStartDate
       parent.estimateEndDate = parent.estimateEndDate ? parent.estimateEndDate : serviceOrderData?.estimateEndDate
       parent.subRows = generateNestedData(data.material, parent, technician);
     });
 
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(false);
-    } else {
+    if (rows?.length > 0) {
       setNextStep(true);
     }
-    if (rows?.length === 0) {
-      setNextStep(true);
-    }
+
     setRowsData(rows);
     setSelectedProducts([]);
   };
@@ -272,7 +266,7 @@ const Services = ({
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
-      _subRow.qtyDisplay = _subRow.qty;
+      _subRow.qty = _subRow.qty;
       _subRow.canDelete = technician.some(d => d.service.optionValue === _subRow._id) ? false : true;
       _subRow.estimateStartDate = _subRow.estimateStartDate ? _subRow.estimateStartDate : serviceOrderData?.estimateStartDate
       _subRow.estimateEndDate = _subRow.estimateEndDate ? _subRow.estimateEndDate : serviceOrderData?.estimateEndDate
@@ -313,7 +307,6 @@ const Services = ({
     rows.forEach((element) => {
       delete element.srno;
       delete element.detail;
-      delete element.qtyDisplay;
       delete element.isValid;
       delete element.canDelete;
       delete element.assetQty;
@@ -378,9 +371,6 @@ const Services = ({
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = material.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(material, inputField, allFields, updatedData);
     handleSaveData(rows);
@@ -395,10 +385,7 @@ const Services = ({
               <Box display="flex">
                 {permissions?.serviceMaster?.isRead && (
                   <Button
-                    color="primary"
-                    size="small"
-                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                    style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                    className={'btn-outline-v1'} variant="contained" size="small"
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
                     }}
@@ -409,10 +396,7 @@ const Services = ({
                 <Box mx={isMobile ? 0.5 : 1} />
                 {permissions?.packages?.isRead && (
                   <Button
-                    color="primary"
-                    size="small"
-                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                    style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                    className={'btn-outline-v1'} variant="contained" size="small"
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                     }}
@@ -460,11 +444,7 @@ const Services = ({
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={'100%'}
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-            >
+            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}  >
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
