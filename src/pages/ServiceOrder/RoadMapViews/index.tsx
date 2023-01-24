@@ -9,25 +9,21 @@ import { MdZoomOutMap } from 'react-icons/md';
 import axiosInstance from 'src/axios/axiosInstance';
 
 const customNodeStyles = {
-  purchaseOrder: {
-    name: 'Purchase Order',
+  serviceOrder: {
+    name: 'Service Order',
     ...COLOUR_MASTER.purchaseOrder
   },
-  product: {
-    name: 'Product',
+  serviceOrderClosed: {
+    name: 'Service Order Closed',
+    ...COLOUR_MASTER.purchaseOrder
+  },
+  service: {
+    name: 'Service',
     ...COLOUR_MASTER.product
   },
-  productAssets: {
-    name: 'Assets',
+  technician: {
+    name: 'Technician',
     ...COLOUR_MASTER.assets
-  },
-  serialNumber: {
-    name: 'Serial Number',
-    ...COLOUR_MASTER.transferAsset
-  },
-  receiving: {
-    name: 'Receiving',
-    ...COLOUR_MASTER.receivingTicket
   }
 };
 
@@ -64,7 +60,7 @@ function ServiceOrderViews({ serviceData }) {
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{serviceData?.serviceOrderNumber || ''}</div>
           },
           position: { x: xPosition, y: 80 },
-          style: customNodeStyles.purchaseOrder
+          style: customNodeStyles.serviceOrder
         }
       ];
       var flowEdge: any[] = [];
@@ -87,7 +83,7 @@ function ServiceOrderViews({ serviceData }) {
             )
           },
           position: { x: xPosition, y: 80 * index },
-          style: customNodeStyles.purchaseOrder
+          style: customNodeStyles.service
         });
         flowEdge.push({
           id: `${service?._id}__${serviceData?._id}_edge`,
@@ -113,7 +109,7 @@ function ServiceOrderViews({ serviceData }) {
             )
           },
           position: { x: xPosition, y: 80 * index },
-          style: customNodeStyles.purchaseOrder
+          style: customNodeStyles.technician
         });
         flowEdge.push({
           id: `${technician?.service?.optionValue}__${technician?.technician?._id}_edge`,
@@ -137,7 +133,7 @@ function ServiceOrderViews({ serviceData }) {
           )
         },
         position: { x: xPosition, y: 80 },
-        style: customNodeStyles.receiving
+        style: customNodeStyles.serviceOrderClosed
       });
       allServices?.map((service, index) => {
         if (!availableTechnician[service?.materialId]) {
