@@ -1,243 +1,315 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, Grid } from '@material-ui/core';
-import { isMobile, isTablet } from 'react-device-detect';
-import { Form, Formik } from 'formik';
-import {
-  CustomDialogTransition,
-  getObjKeys,
-  getObjKeysWithValues,
-  isFieldNotTouched,
-  setFieldsInAscendingOrder,
-  yupSchema
-} from 'src/constants/helpers';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
-import FormTypes from 'src/components/Helpers/FormTypes';
-import { Skeleton } from '@material-ui/lab';
-import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import routes from 'src/components/Helpers/Routes';
-import { FaDiceOne } from 'react-icons/fa';
+import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
+import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import axiosInstance from "../../../axios/axiosInstance";
+import { groupBy, unionBy, uniqBy } from 'lodash';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition, arrayToDropwdownOption } from "..//../../constants/helpers";
+import { Formik, Form } from "formik";
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
+import CustomButton from '../../../components/Helpers/CustomButton'
+import { FaDiceOne } from "react-icons/fa";
+import FormTypes from "../../../components/Helpers/FormTypes";
+import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
+import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
+import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
+import moment from "moment";
+import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import { object, number } from 'yup';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 
-const ServiceOrderQty = ({ onClose, serviceData, handleSave, from = null, currency }) => {
+interface EditDialogProps {
+  onClose: VoidFunction | any;
+  handleSaveData: VoidFunction | any;
+  serviceOrderData: any;
+  rowData?: object | any;
+}
 
+
+const ServiceOrderQtyDialog: FC<EditDialogProps> = (
+  {
+    onClose,
+    handleSaveData,
+    serviceOrderData,
+    rowData,
+  }) => {
+
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [initialData, setInitialData] = useState({ fields: [], values: {} });
+  const [allFields, setAllFields] = useState([]);
+  const [fields, setFields] = useState([]);
+  const [priceMethodList, setPriceMethodList] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [digitalData, setDigitalData] = useState({ fields: [], initialValues: {} });
-  const [formsData, setFormsData] = useState([]);
-  const [formValues, setFormValues] = useState({});
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const toastConfig = useContext(CustomToastContext);
-
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const ref = useRef(null);
   useEffect(() => {
-    fetchFields()
+    fetchData()
   }, []);
 
-  const fetchFields = async () => {
-    const fieldData: any = await fetch_service_order_detail_fields(currency);
-    setDigitalData({
-      fields: fieldData,
-      initialValues: getObjKeysWithValues(serviceData, fieldData)
+  const fetchData = async () => {
+    var { fields: data } = await fetch_service_order_detail_fields(serviceOrderData?.currency);
+    setAllFields(JSON.parse(JSON.stringify(data)))
+    let unitOptions: any = []
+    let pricingMethodOptions: any = []
+    if (rowData?.[`${rowData.type}Detail`]?.unit) {
+      unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
+    }
+    if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
+      pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
+    }
+    setPriceMethodList(pricingMethodOptions)
+    data.forEach(element => {
+      if (element.fieldName === "unit") {
+        element.option = unitOptions;
+      }
+      if (element.fieldName === "pricingMethod") {
+        element.option = pricingMethodOptions;
+      }
     });
-    setFormsData(setFieldsInAscendingOrder(fieldData));
+    let initialValues = getObjKeysWithValues(rowData, data)
+    setInitialData({
+      fields: data,
+      values: initialValues
+    });
+    EvaluteproductFields(data);
   }
 
-  const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
-    if (Object.keys(errors).length) {
-      digitalData.fields.forEach((input) => {
-        if (input.required || values[input.fieldName]) {
-          setTouched(input.fieldName, true);
-        }
-      });
-      setErrors({ ...errors });
+  const EvaluteproductFields = (fields) => {
+    const sections = uniq(map(fields, 'sectionName'));
+    const customData = sections.map((name) => {
+      let sectionFields = fields.filter((field) => field.sectionName === name);
+      sectionFields = orderBy(sectionFields, 'order', 'asc');
+      return { name, sectionFields };
+    });
+    setFields(customData)
+  }
+
+  const getTitle = () => {
+    if (rowData) {
+      let editTitle = `Edit - ${rowData.detail}`;
+      if (rowData.subRows && rowData.subRows?.length > 0) {
+        editTitle = `Edit - ${rowData.detail}`;
+      }
+      return editTitle;
     } else {
-      handleSave([{ ...serviceData, ...values }]);
+      return "Bulk Edit";
     }
+  }
+
+  const handleSubmit = async (values) => {
+    handleSaveData([{ ...rowData, ...values }])
   };
 
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
+  function validate(values) {
+    const errors = {};
+    let estimateStartDate = moment(values?.estimateStartDate);
+    let estimateEndDate = moment(values?.estimateEndDate);
+    if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+      errors['estimateEndDate'] = 'Please enter valid estimate end date';
+    }
+    return errors;
+  }
 
-  return (
-    <>
-      <Dialog
-        maxWidth="md"
-        fullWidth
-        fullScreen={fullScreen || isMobile || isTablet}
-        TransitionComponent={CustomDialogTransition}
-        aria-labelledby="customized-dialog-title"
-        onClose={(e, reason) => {
-          if (reason !== 'backdropClick') {
-            setShowConfirmDialog(true);
-          }
-        }}
-        open={true}
-      >
-        <CustomDialogHeader
-          title={`Edit ${serviceData?.detail || ''}`}
-          onClose={(e, reason) => {
-            if (isFieldNotTouched(digitalData, formValues)) onClose();
-            else setShowConfirmDialog(true);
-          }}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen((prevState) => !prevState);
-          }}
-          showManimizeMaximize={true}
-        />
-        {!digitalData.fields.length ? (
-          <>
+  return (<Dialog
+    maxWidth="md"
+    fullScreen={fullScreen || (isMobile || isTablet)}
+    TransitionComponent={CustomDialogTransition}
+    aria-labelledby="customized-dialog-title"
+    open={true}
+    fullWidth
+  >
+    {initialData && initialData.fields.length ?
+      <Formik
+        innerRef={ref}
+        enableReinitialize={true}
+        initialValues={initialData.values}
+        validationSchema={yupSchema(initialData.fields)}
+        validateOnMount
+        validate={validate}
+        onSubmit={handleSubmit}>
+        {({ values,
+          errors,
+          touched,
+          setFieldValue,
+          submitForm,
+        }) => (
+          <Fragment>
+            <CustomDialogHeader
+              title={getTitle()}
+              onClose={() => {
+                if (!isEqual(ref?.current?.values, initialData.values)) {
+                  setShowConfirmDialog(true)
+                }
+                else {
+                  onClose()
+                }
+              }}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+              }}
+              showManimizeMaximize={true}
+            ></CustomDialogHeader>
             <CustomDialogContent>
-              <Skeleton width="100%" height="70px" />
-              <Grid container spacing={2}>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                  <Grid key={i} item xs={12} sm={6} md={6}>
-                    <Skeleton width="100%" height="60px" />
-                  </Grid>
+              {/* {isBulkedit && <h6 className="form-label-style mb-2" >* Please enter value you want to bulk update.</h6>} */}
+              <Form autoComplete="off" autoCorrect="off" noValidate >
+                {fields && fields.map((section, i) => (
+                  <div key={i}>
+                    <div className={"detail-box-content detail-product-box"}>
+                      <div className={"product-form-layout"}>
+                        <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                        <h2 className={`${"form-label-style"} ${"form-label-product"}`} >
+                          {section.name}
+                        </h2>
+                      </div>
+                    </div>
+                    <Box marginY={2}>
+                      <Grid spacing={3} container>
+                        {section.sectionFields && section.sectionFields.map((field) => (
+                          (field.type === "converter" || field.type === "currencyAmount" || field.isConverter) ?
+                            <FormTypes
+                              fields={initialData.fields}
+                              fieldData={{ ...field, hideConverter: true }}
+                              values={values}
+                              errors={errors}
+                              touched={touched}
+                              label={field.fieldLabel}
+                              name={field.fieldName}
+                              type={field.type}
+                              options={field.option}
+                              setFieldValue={(name, value) => {
+                                setFieldValue(name, value)
+                              }}
+                              required={field.required}
+                              fullWidth
+                              isTooltip={field.isTooltip}
+                              tooltipMessage={field.tooltipMessage}
+                              size="small"
+                            /> :
+                            ["estimateStartDate", "estimateEndDate"].includes(field.fieldName) ?
+                              <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                <Box display="flex" >
+                                  <Box flexGrow={1}  >
+                                    <FormTypes
+                                      {...field}
+                                      fields={initialData.fields}
+                                      fieldData={field}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value)
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field.isTooltip}
+                                      tooltipMessage={field.tooltipMessage}
+                                      size="small"
+                                      minDate={serviceOrderData?.estimateStartDate}
+                                      maxDate={serviceOrderData?.estimateEndDate}
+                                    />
+                                  </Box>
+                                </Box>
+                              </Grid>
+                              : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                <Box display="flex" >
+                                  <Box flexGrow={1}  >
+                                    <FormTypes
+                                      {...field}
+                                      fields={initialData.fields}
+                                      fieldData={field}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value)
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field.isTooltip}
+                                      tooltipMessage={field.tooltipMessage}
+                                      size="small"
+                                    />
+                                  </Box>
+                                </Box>
+                              </Grid>
+                        ))}
+                      </Grid>
+                    </Box>
+                  </div>
                 ))}
-              </Grid>
+              </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button variant="outlined" size="small" color="primary" disabled>
-                Cancel
-              </Button>
-              <Button variant="contained" size="small" color="primary" disabled>
-                Submit
-              </Button>
+              <Button
+                size="small"
+                color="primary"
+                onClick={() => {
+                  if (!isEqual(ref.current.values, initialData.values)) {
+                    setShowConfirmDialog(true)
+                  }
+                  else {
+                    onClose()
+                  }
+                }}
+              >{"Close"}</Button>
+              <CustomButton
+                loading={false}
+                disabled={isEqual(ref?.current?.values, initialData.values)}
+                variant="contained"
+                color="primary"
+                type="submit"
+                onClick={submitForm}
+              > Save
+              </CustomButton>
             </CustomDialogFooter>
-          </>
-        ) : (
-          <Formik
-            initialValues={digitalData.initialValues}
-            validationSchema={yupSchema(digitalData.fields)}
-            validateOnMount
-            // validate={validate}
-            onSubmit={() => { }}
-          >
-            {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
-              <>
-                <CustomDialogContent>
-                  <Form>
-                    {formsData &&
-                      formsData.map((form, i) => {
-                        return (
-                          form.name && (
-                            <div key={i}>
-                              <div className={"detail-box-content detail-product-box"}>
-                                <div className={"product-form-layout"}>
-                                  <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-                                  <h2 className={`${"form-label-style"} ${"form-label-product"}`} >
-                                    {form.name}
-                                  </h2>
-                                </div>
-                              </div>
-                              <Box marginY={2}>
-                                <Grid spacing={3} container>
-                                  {form.sectionFields.map((field) => (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                      <FormTypes
-                                        {...field}
-                                        fieldData={field}
-                                        disabled={field.disabled}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={from === routes.serviceOrder.title && field.fieldName === "unit" ? serviceData?.serviceDetail?.unit?.map((d, index) => {
-                                          return {
-                                            "optionLabel": d,
-                                            "optionValue": d,
-                                            "order": index + 1,
-                                            "default": false
-                                          }
-                                        }) : field.option}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value });
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isMultipleUpload={true}
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
-                                            : null
-                                        }
-                                        row={true}
-                                      />
-                                    </Grid>
-                                  ))}
-                                </Grid>
-                              </Box>
-                            </div>
-                          )
-                        );
-                      })}
-                  </Form>
-                </CustomDialogContent>
-                <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      if (isFieldNotTouched(digitalData, values)) onClose();
-                      else setShowConfirmDialog(true);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
-                    disabled={uploadingImageOrFileProgress > 0 || loading}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
-                    }}
-                  >
-                    Save
-                  </CustomButton>
-                </CustomDialogFooter>
-                {showConfirmDialog ? (
-                  <ConfirmCancelDialog
-                    open={showConfirmDialog}
-                    onSave={() => {
-                      setShowConfirmDialog(false);
-
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
-                    }}
-                    close={() => setShowConfirmDialog(false)}
-                    onClose={() => {
-                      setShowConfirmDialog(false);
-                      onClose();
-                    }}
-                  />
-                ) : null}
-              </>
-            )}
-          </Formik>
+            {
+              showConfirmationDialog && <ConfirmationDialog
+                open={showConfirmationDialog}
+                message="Would you prefer to override the product-level price configuration?"
+                onOk={() => {
+                  submitForm()
+                }}
+                onClose={() => {
+                  setShowConfirmationDialog(false)
+                }}
+              />
+            }
+            {
+              showConfirmDialog ?
+                <ConfirmCancelDialog
+                  close={() => setShowConfirmDialog(false)}
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false)
+                    submitForm()
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false)
+                    onClose()
+                  }}
+                /> : null
+            }
+          </Fragment>
         )}
-      </Dialog>
-    </>
-  );
+      </Formik>
+      :
+      <Box p={2} height={500} bgcolor="white">
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>}
+  </Dialog>);
 };
 
-export default ServiceOrderQty;
+export default ServiceOrderQtyDialog;
