@@ -25,7 +25,6 @@ import { GrDrag } from 'react-icons/gr';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const Steps = ({ serviceId }) => {
-
   const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_stps`;
 
   const [stepDialog, setStepDialog] = useState({ open: false, stepId: '' });
@@ -210,7 +209,7 @@ const Steps = ({ serviceId }) => {
               </Button>
             </Grid>
             <Grid item xs={9} md={9} sm={9}>
-              <Box display={'flex'} justifyContent={'flex-end'}>
+              <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
                 <Button
                   variant="outlined"
                   color="default"
@@ -252,13 +251,19 @@ const Steps = ({ serviceId }) => {
                 </Menu>
                 <Box ml={1} />
                 {dataRows?.length ? (
-                  <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                  <Button
+                    variant="outlined"
+                    className="btn-outline-v1"
+                    size="small"
+                    onClick={() => setArrangeView(true)}
+                    style={{ padding: '4.5px 16px' }}
+                  >
                     <GrDrag fontSize="small" color="primary" className="mr-1" />
                     Arrange
                   </Button>
                 ) : null}
                 <Box ml={1} />
-                {/* <ImportExportLinks
+                <ImportExportLinks
                   permissions={permissions?.serviceMaster}
                   module="Service Master Steps"
                   api={`${serviceMaster.api}/steps/${serviceId}`}
@@ -279,7 +284,7 @@ const Steps = ({ serviceId }) => {
                   }}
                   isDropDownIconShow={true}
                   isBackgroundWhite={true}
-                /> */}
+                />
               </Box>
             </Grid>
           </Grid>

@@ -11,8 +11,9 @@ const useStyles = makeStyles((theme) => ({
     padding: 0,
     height: '70px',
     borderRadius: '3px 3px 0 0',
-    borderBottom: '1px solid #e1dde6',
-    boxShadow: '1px 3px 3px #ddd',
+    // borderBottom: '1px solid #e1dde6',
+    // boxShadow: '1px 3px 3px #ddd',
+    backgroundColor: 'white',
     [theme.breakpoints.down('sm')]: {
       height: 'auto'
     },
@@ -97,23 +98,25 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
   };
 
   return (
-    <AppBar className={classes.appBar} position="sticky" elevation={0} color="default">
-      <Box p={1} pt={2}>
+    <AppBar className={classes.appBar} position="sticky" elevation={0} style={{ zIndex: 1 }}>
+      <Box pt={1}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <Grid container spacing={2}>
-              {dashboardList.length !== 0 && <Grid item xs={12} sm={6}>
-                <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
-                  <InputLabel id="dashboard-type">Dashboard</InputLabel>
-                  <Select labelId="dashboard-type" id="type" value={globalFilters.dashboardType} onChange={handleSelectDashboard}>
-                    {dashboardList.map((d: { name: string; id: string }) => (
-                      <MenuItem key={d.id} value={d.name}>
-                        {d.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>}
+              {dashboardList.length !== 0 && (
+                <Grid item xs={12} sm={6}>
+                  <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
+                    <InputLabel id="dashboard-type">Dashboard</InputLabel>
+                    <Select labelId="dashboard-type" id="type" value={globalFilters.dashboardType} onChange={handleSelectDashboard}>
+                      {dashboardList.map((d: { name: string; id: string }) => (
+                        <MenuItem key={d.id} value={d.name}>
+                          {d.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              )}
               <Grid item xs={12} sm={6}>
                 <FormTypes
                   disabled={disabled}
