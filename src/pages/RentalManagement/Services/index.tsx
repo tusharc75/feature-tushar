@@ -602,8 +602,8 @@ const Services = ({
       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
           referenceType={renderedFrom}
-          onSuccess={(packages) => {
-            handleAdd(packages.map((d) => ({ ...d, detail: d.packageName })));
+          onSuccess={(rows) => {
+            handleAdd(rows.map((d) => ({ ...d, detail: d.packageName })));
           }}
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });

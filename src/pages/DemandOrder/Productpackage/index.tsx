@@ -332,15 +332,14 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.qty = parent.qty;
       parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -361,15 +360,14 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
     let productIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + `${productIndex + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.qty = _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
       _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
@@ -392,7 +390,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
       const element: any = {};
       element.materialId = d._id;
       element.type = addExistingProductDialog.type;
-      element.unit = d?.unit;
+      element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addExistingProductDialog.parentId;
       material.push(element);
@@ -623,38 +621,14 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
             handleAdd(d);
           }}
         />
-        // <AddExistingProductInventory
-        //   renderedFrom={
-        //     addExistingProductDialog.type === 'product'
-        //       ? `${renderedFrom}-product`
-        //       : addExistingProductDialog.type === 'service'
-        //       ? `${renderedFrom}-service`
-        //       : `${renderedFrom}-package`
-        //   }
-        //   isAddingProducts={isAddingProducts}
-        //   addProductInventory={handleAdd}
-        //   handleProductInventoryClose={() => {
-        //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        //   }}
-        //   type={addExistingProductDialog.type}
-        //   refrenceType={'Quotation'}
-        //   ignoreIds={rowsData?.map((e) => e?.materialId)}
-        // />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
           referenceType="demandOrder"
           handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
           ids={rowsData?.map((e) => e?.materialId)}
-          onSuccess={(d) => {
-            handleAdd(
-              d?.map((e) => {
-                return {
-                  ...e,
-                  qty: 1
-                };
-              })
-            );
+          onSuccess={(rows) => {
+            handleAdd(rows)
           }}
           packageType={null}
         />
