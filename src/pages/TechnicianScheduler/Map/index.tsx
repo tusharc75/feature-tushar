@@ -66,7 +66,7 @@ const MapView = ({ technician }) => {
           gestureHandling: 'cooperative'
         }}
         mapContainerStyle={containerStyle}
-        center={center || { lat: 25.8391492, lng: 77.5541247 }}
+        center={center || { lat: 31.9686, lng: 99.9018 }}
         zoom={4}
       >
         <MarkerClusterer>
