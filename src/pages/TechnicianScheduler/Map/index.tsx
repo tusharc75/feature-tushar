@@ -3,7 +3,7 @@ import { Box, CircularProgress } from '@material-ui/core';
 import { GoogleMap, Marker, MarkerClusterer, InfoWindow, Polyline } from '@react-google-maps/api';
 import axiosInstance from '../../../axios/axiosInstance';
 
-const MapView = ({ technician, onClose }) => {
+const MapView = ({ technician }) => {
   const [center, setCenter] = React.useState(null);
   const [serviceData, setServiceData] = React.useState([]);
   const [selectedService, setSelectedService] = React.useState(null);
@@ -92,8 +92,8 @@ const MapView = ({ technician, onClose }) => {
                 path={serviceData?.map((data: any) => new google.maps.LatLng(data?.shippingAddress?.latitude, data?.shippingAddress?.longitude))}
                 options={{
                   strokeColor: '#0000FF',
-                  strokeOpacity: 0.8,
-                  strokeWeight: 1,
+                  strokeOpacity: 1,
+                  strokeWeight: 2,
                   icons: [{ icon: { path: 'M -2,-2 2,0 M 2,-2 -2,0', strokeOpacity: 1, scale: 1 } }]
                 }}
               />
