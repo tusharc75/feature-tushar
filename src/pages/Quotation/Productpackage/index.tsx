@@ -683,7 +683,10 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
               </MenuItem> */}
               <MenuItem
                 disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
+                onClick={() => {
+                  setIsProductEdit({ open: true, isBulkedit: true })
+                  closeActions();
+                }}
               >
               Bulk Edit
               </MenuItem>
@@ -702,6 +705,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
                       return obj;
                     });
                 setDeleteData(dataToDelete);
+                closeActions();
               }}
               >
               Delete
