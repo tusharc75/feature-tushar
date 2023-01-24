@@ -61,7 +61,7 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => { },
+  onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -257,7 +257,7 @@ export default function ImportExportLinks({
         <Menu id="import-export-links" anchorEl={anchorEl} open={open} onClose={handleClose}>
           {permissions?.isCreate && (
             <MenuItem>
-              <label htmlFor="importFromExcel" className="new-headerbox-button-v1">
+              <label htmlFor="importFromExcel">
                 {ImportInput}
                 Import from Excel
               </label>
@@ -284,8 +284,8 @@ export default function ImportExportLinks({
           {/* <MenuItem>Email a Link</MenuItem> */}
         </Menu>
       )}
-      {(isMobile || isDropDownIconShow) && (
-        <IconButton onClick={handleClick} className={`expand-icon-v1`}>
+      {isMobile && (
+        <IconButton onClick={handleClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
           <IoIosArrowDropdown />
         </IconButton>
       )}

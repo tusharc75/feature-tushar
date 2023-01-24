@@ -43,8 +43,10 @@ function Roadmap({ type, filter }) {
 
   let height = window.innerHeight - 250;
   const today = new Date();
-  let startDate = moment(today).subtract(365, 'days');
-  let endDate = moment(today).add(365, 'days');
+  // let startDate = moment(today).subtract(365, 'days');
+  // let endDate = moment(today).add(365, 'days');
+  let startDate = moment("2021-01-01");
+  let endDate = moment("2023-12-31");
   let totalDay = endDate.diff(startDate, 'days');
 
   var dayPixel = 0;
