@@ -9,19 +9,10 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import Add from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { dateTimeFormat, serviceOrder } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
-import ProductionOrderQty from 'src/pages/ProductionOrder/Productpackage/ProductionOrderQty';
 import SendIcon from '@material-ui/icons/Send'
 import CheckCircleIcon from '@material-ui/icons/CheckCircle'
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
@@ -30,7 +21,6 @@ import moment from 'moment';
 const TechnicianDispatch = ({
     serviceOrderData,
     setNextStep,
-    currencySymbol,
     renderedFrom,
     stepFullScreen,
     allowedToEdit
@@ -39,9 +29,7 @@ const TechnicianDispatch = ({
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
 
-
     const [selectedProducts, setSelectedProducts] = useState([]);
-    const [deleteData, setDeleteData] = useState(null);
     const [isDeleting, setDeleting] = useState(false);
 
     const [addEmployeeMasterDialog, setAddEmployeeMasterDialog] = useState({ open: false });
@@ -172,6 +160,9 @@ const TechnicianDispatch = ({
     };
 
     const fetchData = async () => {
+
+        setNextStep(false);
+        
         var data: any = [];
         const response = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
 
@@ -195,8 +186,12 @@ const TechnicianDispatch = ({
             });
         });
         setRowsData(rowsTechnician);
+
         if (rowsTechnician.some(d => d.status !== 'Completed')) {
             setNextStep(false)
+        }
+        else {
+            setNextStep(true);
         }
         setSelectedProducts([]);
     };
@@ -218,22 +213,6 @@ const TechnicianDispatch = ({
                 fetchData()
             })
             .catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
-    };
-
-    const handleDelete = (rows) => {
-        setDeleting(true);
-        axiosInstance()
-            .put(`${serviceOrder.api}/${serviceOrderData?._id}/technician/delete`, rows)
-            .then(() => {
-                fetchData();
-                setDeleting(false);
-                setDeleteData(null);
-            })
-            .catch((error) => {
-                setDeleting(false);
-                setDeleteData(null);
                 toastConfig.setToastConfig(error);
             });
     };
@@ -260,18 +239,6 @@ const TechnicianDispatch = ({
             .catch((error) => {
                 toastConfig.setToastConfig(error);
             });
-    };
-
-    const handleDeleteMultiple = () => {
-        const obj: any = [];
-        const dataToDelete = selectedProducts && selectedProducts.filter((e) => e.type === 'technician');
-        dataToDelete?.forEach((ele) => {
-            obj.push({ _id: ele._id, technician: ele?.technician });
-        });
-        dataToDelete?.forEach((ele) => {
-            getNestedSubRows(obj, ele);
-        });
-        setDeleteData(obj);
     };
 
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -369,15 +336,6 @@ const TechnicianDispatch = ({
                     )}
                 </Grid>
             </Grid>
-            {deleteData && (
-                <ConfirmationDialog
-                    open={true}
-                    message={`Are you sure you want to delete the record(s)?`}
-                    onClose={() => setDeleteData(null)}
-                    onOk={() => handleDelete(deleteData)}
-                    okBtnLoading={isDeleting}
-                />
-            )}
             {addEmployeeMasterDialog.open && (
                 <AssignEmployeeDialog
                     reference={'service'}

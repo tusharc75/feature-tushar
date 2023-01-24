@@ -275,10 +275,9 @@ const ServiceOrderDetailsPage = () => {
               <TechnicianDispatch
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
-                currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-3`}
                 stepFullScreen={stepFullScreen}
-                allowedToEdit={serviceSteps[currentStep] === 'Invoice' ? false : true}
+                allowedToEdit={true}
               />
             )}
             {serviceSteps[currentStep] === 'Invoice' && serviceOrderData && (
