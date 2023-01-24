@@ -17,7 +17,6 @@ import {
 import { Box, IconButton, Divider, Grid, Badge, Accordion, AccordionDetails, AccordionSummary, Typography, Chip, Checkbox } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
@@ -44,7 +43,7 @@ const TimerComponent = ({ stepData, updateTime = true }) => {
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [stepData]);
 
   return (
     <Box
@@ -637,14 +636,19 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                                 Pass
                               </Button>
                               <Box marginX={1} />
-                              <DeleteButton
-                                text="Fail"
+                              <Button
+                                variant="outlined"
+                                color="secondary"
+                                className={'btn-red-v1'}
                                 disabled={!allowedToEdit}
+                                size="small"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step);
                                 }}
-                              />
+                              >
+                                Fail
+                              </Button>
                             </Box>
                           ) : (
                             <Box display="inline-flex">
