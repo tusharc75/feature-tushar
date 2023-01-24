@@ -4,7 +4,7 @@ import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ThumbDownIcon from "@material-ui/icons/ThumbDown";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { Button, Dialog, Grid, IconButton, Paper, Tooltip, Typography, useMediaQuery, } from "@material-ui/core";
+import { Box, Button, Dialog, Grid, IconButton, Paper, Tooltip, Typography, useMediaQuery, } from "@material-ui/core";
 import { GiAbstract055, GiVintageRobot } from "react-icons/gi";
 import { AiOutlineEye } from "react-icons/ai";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -16,7 +16,8 @@ import {
   gridLoadingTimeout,
   gridPageSizes,
   defaultActivityShow,
-  quoteBuilder
+  quoteBuilder,
+  ACTIVITY_RESOURCE
 } from "../../constants/helpers";
 import { camelCase } from "lodash";
 import { useData } from "../../StateProvider/Provider";
@@ -27,6 +28,7 @@ import DOAReasonDialog from "./DOAReasonDialog"
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ProductBuilder from "../../components/productBuilder";
 import Loader from "../../components/Loader";
+import ActivityButton from "src/components/Activity/ActivityButton";
 
 const DOAApproval = () => {
   const {
@@ -205,223 +207,183 @@ const DOAApproval = () => {
   };
 
   return (
-    <Fragment>
-      <div className="headerbox">
-        <CustomBreadCrumbs
-          routes={[
-            { title: "DOA Requests", path: "/doa-request" },
-            { title: QData?.quoteName || id },
-          ]}
-        />
-      </div>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
-        <div>
-          <Paper className="subContainer">
-            <Grid container className="detailHeader">
-              <Grid
-                item
-                xs={12}
-                md={5}
-                sm={6}
-                className="d-flex align-items-center gap-1"
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs
+            routes={[
+              { title: "DOA Requests", path: "/doa-request" },
+              { title: QData?.quoteName || id },
+            ]}
+          />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            <Button
+              onClick={() => ViewQuote()}
+              variant="outlined"
+              size="small"
+              startIcon={<AiOutlineEye />}
+              color="primary"
+            >
+              View
+            </Button>
+            <Tooltip title="AI Suggestion">
+              <IconButton
+                onClick={() => {
+                  setShowAIDialog(true);
+                }}
               >
-                <GiAbstract055 color="primary" />
-                <span className="listingHeader">DOA Request</span>
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                md={7}
-                sm={6}
-                className="d-flex align-items-center gap-1"
-                container
-                justify="flex-end"
-              >
+                <GiVintageRobot />
+              </IconButton>
+            </Tooltip>
+            {QData && QStatus &&
+              QData?.DOA.requestTo.find((u) => u === currentUser._id) ? (
+              <>
                 <Button
-                  onClick={() => ViewQuote()}
+                  onClick={() => {
+                    QuoteStatusChange("Accepted", "", "")
+                  }}
                   variant="outlined"
                   size="small"
-                  startIcon={<AiOutlineEye />}
+                  startIcon={<ThumbUpIcon />}
                   color="primary"
                 >
-                  View
+                  {buttontext}
                 </Button>
-                <Tooltip title="AI Suggestion">
-                  <IconButton
-                    onClick={() => {
-                      setShowAIDialog(true);
-                    }}
-                  >
-                    <GiVintageRobot />
-                  </IconButton>
-                </Tooltip>
-                {QData && QStatus &&
-                  QData?.DOA.requestTo.find((u) => u === currentUser._id) ? (
-                  <>
-                    <Button
-                      onClick={() => {
-                        QuoteStatusChange("Accepted", "", "")
-                      }}
-                      variant="outlined"
-                      size="small"
-                      startIcon={<ThumbUpIcon />}
-                      color="primary"
-                    >
-                      {buttontext}
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setQuoteStatusChangeData("Rejected")
-                        setShowQuoteStatusChangeDialog(true)
-                      }}
-                      startIcon={<ThumbDownIcon />}
-                      variant="contained"
-                      size="small"
-                      color="primary"
-                    >
-                      Reject
-                    </Button>
-                  </>
-                ) : null}
-              </Grid>
-            </Grid>
-            <Grid container>
-              <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
-                <Grid
-                  item
-                  xs={12}
-                  md={12}
-                  sm={12}
-                  className="d-flex align-items-center gap-1 quotePanel"
+                <Button
+                  onClick={() => {
+                    setQuoteStatusChangeData("Rejected")
+                    setShowQuoteStatusChangeDialog(true)
+                  }}
+                  startIcon={<ThumbDownIcon />}
+                  variant="contained"
+                  size="small"
+                  color="primary"
                 >
-                  {QData && (
-                    <>
-                      <div className="quoteBox">
-                        <span>Total Profit</span>
-                        <span
-                          title={
-                            formatAmountWithCurrency(
-                              quoteData?.currency,
-                              totalProfit
-                            ).fullFormatAmount
-                          }
-                        >
-                          {
-                            formatAmountWithCurrency(
-                              quoteData?.currency,
-                              totalProfit
-                            ).fullFormatAmount || 0
-                          }
-                        </span>
-                      </div>
-                      <div className="quoteBox">
-                        <span>Total Cost Price</span>
-                        <span
-                          title={
-                            formatAmountWithCurrency(
-                              quoteData?.currency,
-                              totalCost
-                            ).fullFormatAmount
-                          }
-                        >
-                          {
-                            formatAmountWithCurrency(
-                              quoteData?.currency,
-                              totalCost
-                            ).fullFormatAmount || 0
-                          }
-                        </span>
-                      </div>
-                      <div className="quoteBox">
-                        <span>Total Selling Price</span>
-                        <span
-                          title={
-                            formatAmountWithCurrency(
-                              quoteData?.currency,
-                              totalSellingPrice
-                            ).fullFormatAmount
-                          }
-                        >
-                          {
-                            formatAmountWithCurrency(
-                              quoteData?.currency,
-                              totalSellingPrice
-                            ).fullFormatAmount || 0
-                          }
-                        </span>
-                      </div>
-                    </>
-                  )}
-                  <div></div>
-                </Grid>
-                {productBuilderId ? (
-                  <ProductBuilder
-                    fromQuote={true}
-                    permissions={permissions[quoteBuilder.qbResource]}
-                    hasPermission={false}
-                    currency={quoteData?.currency.toLowerCase()}
-                    productBuilderId={productBuilderId}
-                    isAddNewProduct={isAddNewProduct}
-                    setIsAddNewProduct={setIsAddNewProduct}
-                    isAddExistingProduct={isAddExistingProduct}
-                    setIsAddExistingProduct={setIsAddExistingProduct}
-                    refreshProducts={productCalculationForDoa}
-                    stage={'product'}
-                    isPriceBuilder={true}
-                    Editable={false}
-                  />
-                ) : (
-                  <Loader style={{ minHeight: 300 }} text="Loading..." />
-                )}
-              </Grid>
-            </Grid>
-          </Paper>
-        </div>
-        <div className="position-relative">
-          {/* {showActivity ?
-            <Paper>
-              {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                <IoIosArrowDropright className="icon" />
-              </span>}
-              <Activity
-                resourceId={QData?.quoteBuilderId}
-                resource="DOA"
-                relatedTo={[
-                  {
-                    type: "DOA",
-                    referenceId: QData?.quoteBuilderId,
-                    access: true,
-                  },
-                ]}
-                handleActivityRefresh={() => { }}
-              />
-            </Paper>
-            :
-            !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-              <IoIosArrowDropleft className="icon" />
-            </span>} */}
+                  Reject
+                </Button>
+              </>
+            ) : null}
+            <ActivityButton referenceId={QData?.quoteBuilderId} resource="DOA" />
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Grid container className="detailHeader">
+          <Grid
+            item
+            xs={12}
+            md={5}
+            sm={6}
+            className="d-flex align-items-center gap-1"
+          >
+            <GiAbstract055 color="primary" />
+            <span className="listingHeader">DOA Request</span>
+          </Grid>
+          <Grid
+            item
+            xs={12}
+            md={7}
+            sm={6}
+            className="d-flex align-items-center gap-1"
+            container
+            justify="flex-end"
+          >
 
-          <Paper>
-            {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
-              {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-            </span>}
-            <div style={{ display: showActivity ? "block" : "none" }}>
-              <Activity
-                resourceId={QData?.quoteBuilderId}
-                resource="DOA"
-                relatedTo={[
-                  {
-                    type: "DOA",
-                    referenceId: QData?.quoteBuilderId,
-                    access: true,
-                  },
-                ]}
-                handleActivityRefresh={() => { }}
+          </Grid>
+        </Grid>
+        <Grid container>
+          <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
+            <Grid
+              item
+              xs={12}
+              md={12}
+              sm={12}
+              className="d-flex align-items-center gap-1 quotePanel"
+            >
+              {QData && (
+                <>
+                  <div className="quoteBox">
+                    <span>Total Profit</span>
+                    <span
+                      title={
+                        formatAmountWithCurrency(
+                          quoteData?.currency,
+                          totalProfit
+                        ).fullFormatAmount
+                      }
+                    >
+                      {
+                        formatAmountWithCurrency(
+                          quoteData?.currency,
+                          totalProfit
+                        ).fullFormatAmount || 0
+                      }
+                    </span>
+                  </div>
+                  <div className="quoteBox">
+                    <span>Total Cost Price</span>
+                    <span
+                      title={
+                        formatAmountWithCurrency(
+                          quoteData?.currency,
+                          totalCost
+                        ).fullFormatAmount
+                      }
+                    >
+                      {
+                        formatAmountWithCurrency(
+                          quoteData?.currency,
+                          totalCost
+                        ).fullFormatAmount || 0
+                      }
+                    </span>
+                  </div>
+                  <div className="quoteBox">
+                    <span>Total Selling Price</span>
+                    <span
+                      title={
+                        formatAmountWithCurrency(
+                          quoteData?.currency,
+                          totalSellingPrice
+                        ).fullFormatAmount
+                      }
+                    >
+                      {
+                        formatAmountWithCurrency(
+                          quoteData?.currency,
+                          totalSellingPrice
+                        ).fullFormatAmount || 0
+                      }
+                    </span>
+                  </div>
+                </>
+              )}
+              <div></div>
+            </Grid>
+            {productBuilderId ? (
+              <ProductBuilder
+                fromQuote={true}
+                permissions={permissions[quoteBuilder.qbResource]}
+                hasPermission={false}
+                currency={quoteData?.currency.toLowerCase()}
+                productBuilderId={productBuilderId}
+                isAddNewProduct={isAddNewProduct}
+                setIsAddNewProduct={setIsAddNewProduct}
+                isAddExistingProduct={isAddExistingProduct}
+                setIsAddExistingProduct={setIsAddExistingProduct}
+                refreshProducts={productCalculationForDoa}
+                stage={'product'}
+                isPriceBuilder={true}
+                Editable={false}
               />
-            </div>
-          </Paper>
-        </div>
-      </div>
+            ) : (
+              <Loader style={{ minHeight: 300 }} text="Loading..." />
+            )}
+          </Grid>
+        </Grid>
+      </Box>
       {
         showAIDialog && (
           <Dialog
@@ -466,7 +428,7 @@ const DOAApproval = () => {
           accepted={quoteStatusChangeData}
         />
       )}
-    </Fragment>
+    </Box>
   );
 };
 
