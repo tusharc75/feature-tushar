@@ -7,7 +7,6 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
@@ -26,6 +25,7 @@ import ProductionOrderQty from 'src/pages/ProductionOrder/Productpackage/Product
 import AddIcon from "@material-ui/icons/Add";
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import moment from 'moment';
+import SendEmail from '../SendEmail';
 
 const Technician = ({
     serviceOrderData,
@@ -33,7 +33,8 @@ const Technician = ({
     currencySymbol,
     renderedFrom,
     stepFullScreen,
-    allowedToEdit
+    allowedToEdit,
+    fromInvoice = false
 }: any) => {
 
     const toastConfig = useContext(CustomToastContext);
@@ -91,6 +92,7 @@ const Technician = ({
                         {row.original.detail}
                         <IconButton
                             size="small"
+                            style={{ marginLeft: "10px" }}
                             onClick={() => {
                                 if (row.original.type === 'service') {
                                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
@@ -107,7 +109,6 @@ const Technician = ({
             {
                 accessor: 'qty',
                 Header: 'Qty',
-                width: 200,
                 Cell: ({ row }) => {
                     return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
                 },
@@ -115,7 +116,6 @@ const Technician = ({
             {
                 accessor: 'unit',
                 Header: 'Unit',
-                width: 200,
                 Cell: ({ row }) => {
                     return row.original['unit'] ? <p className="text-truncate">{row.original.unit}</p> : <NoDataCell />;
                 }
@@ -285,10 +285,15 @@ const Technician = ({
     return (
         <Fragment>
             <Grid container spacing={2}>
-                {allowedToEdit && (
-                    <Grid item xs={12} md={12} sm={12}>
-                        <Box display="flex" justifyContent="space-between" m={1} mb={0}>
-                            <Box display="flex"></Box>
+                <Grid item xs={12} md={12} sm={12}>
+                    <Box display="flex" justifyContent="space-between" m={1} mb={0}>
+                        {fromInvoice && (
+                            <Box display="flex">
+                                <SendEmail
+                                    serviceOrderData={serviceOrderData}
+                                />
+                            </Box>)}
+                        {allowedToEdit && (
                             <Box display="flex">
                                 <Button
                                     variant="contained"
@@ -336,9 +341,9 @@ const Technician = ({
                                     </HtmlTooltip>
                                 </Menu>
                             </Box>
-                        </Box>
-                    </Grid>
-                )}
+                        )}
+                    </Box>
+                </Grid>
                 <Grid item xs={12} md={12} sm={12}>
                     {columns && rowsData ? (
                         <Box

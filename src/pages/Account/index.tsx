@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useReducer } from 'react';
 import { useData } from '../../StateProvider/Provider';
-import { Button, Menu, MenuItem, Tooltip, IconButton, Grid, Chip, MenuList } from '@material-ui/core';
+import { Button, Menu, MenuItem, IconButton, Grid, Chip, MenuList } from '@material-ui/core';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { ExpandMore, AddOutlined } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -51,6 +51,7 @@ import { IoFilterCircle, MdFilterList, MdSort, MdWeb } from 'react-icons/all';
 import { FaSuitcase, FaAddressBook, FaAddressCard } from 'react-icons/fa';
 import { camelCase } from 'lodash';
 import WarhouseList from './Warehouse/WarhouseList';
+import HtmlTooltip from "../../components/CustomTooltipTitle";
 
 const AccTypes = [
   {
@@ -509,7 +510,7 @@ export default function Account(props) {
   const ActionsRenderer = (params) => (
     <>
       {accountPermissions.isCreate ? (
-        <Tooltip title="Clone">
+        <HtmlTooltip title="Clone">
           <IconButton
             size="small"
             aria-label="Clone"
@@ -519,17 +520,17 @@ export default function Account(props) {
           >
             <FileCopyIcon fontSize="small" color="primary" />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create an account">
+        <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create an account">
           <IconButton aria-label="Clone" size="small">
             <FileCopyIcon fontSize="small" />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       )}
 
       {accountPermissions.isUpdate && accountPermissions.approveAccount && params.data.approved ? (
-        <Tooltip title="Disapprove">
+        <HtmlTooltip title="Disapprove">
           <IconButton
             aria-label="Disapprove"
             onClick={() => {
@@ -543,9 +544,9 @@ export default function Account(props) {
           >
             <CancelIcon fontSize="inherit" color="error" />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       ) : (
-        <Tooltip title={params?.data?.approved ? 'Disapprove' : 'Approve'}>
+        <HtmlTooltip title={params?.data?.approved ? 'Disapprove' : 'Approve'}>
           <IconButton
             aria-label={params?.data?.approved ? 'Disapprove' : 'Approve'}
             onClick={() => {
@@ -559,7 +560,7 @@ export default function Account(props) {
           >
             {params?.data?.approved ? <HiBadgeCheck /> : <FcApproval />}
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       )}
 
       <GridDeleteIcon
@@ -576,7 +577,7 @@ export default function Account(props) {
         entity="account"
       />
       {accountPermissions.isUpdate && params.data?.isAllowedToUpdate ? (
-        <Tooltip title="Entity">
+        <HtmlTooltip title="Entity">
           <IconButton
             size="small"
             aria-label="Entity"
@@ -598,13 +599,13 @@ export default function Account(props) {
           >
             <AiOutlineDeploymentUnit fontSize="15" color="primary" />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to update entity">
+        <HtmlTooltip className="cursor-stop" title="You do not have permission to update entity">
           <IconButton aria-label="Clone" size="small">
             <AiOutlineDeploymentUnit fontSize="15" />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       )}
     </>
   );
@@ -646,7 +647,7 @@ export default function Account(props) {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}&filterAccounts=${queryType === 'My Accounts' ? 2 : selectedType}` : '?';
-    
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }

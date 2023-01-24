@@ -29,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ActivityList(props) {
   const classes = useStyles();
+
   const { activity, expanded, selected, handleToggle, handleSelect } = props;
 
   const getTreeNodes = (treeList) => {

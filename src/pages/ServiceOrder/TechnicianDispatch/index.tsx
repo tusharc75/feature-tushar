@@ -7,7 +7,6 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
@@ -70,6 +69,7 @@ const TechnicianDispatch = ({
                         {`${row.original?.technician?.firstName} ${row.original?.technician?.lastName} - (${row.original?.technician?.employeeNumber})`}
                         <IconButton
                             size="small"
+                            style={{ marginLeft: "10px" }}
                             onClick={() => {
                                 window.open(`${routes.employeeMasterDetail.path}/${row.original?.technician?._id}`);
                             }}
@@ -90,6 +90,7 @@ const TechnicianDispatch = ({
                         {row.original?.service?.serviceName}
                         <IconButton
                             size="small"
+                            style={{ marginLeft: "10px" }}
                             onClick={() => {
                                 window.open(`${routes.serviceMasterDetail.path}/${row.original?.service?._id}`);
                             }}

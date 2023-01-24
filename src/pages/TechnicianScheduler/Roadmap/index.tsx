@@ -50,9 +50,8 @@ function Roadmap({ filter }) {
     setLoadingRoadmap(true);
     await axiosInstance()
       .get(`/technician-scheduler/get-schedule`)
-      .then(({ data }) => {
-        setActivity(data?.data);
-        setTreeList(data?.data);
+      .then(({ data: { data } }) => {
+        setActivity(data);
         setLoadingRoadmap(false);
         executeScroll();
       })
@@ -63,8 +62,10 @@ function Roadmap({ filter }) {
 
   let height = window.innerHeight - 220;
   const today = new Date();
-  let startDate = moment(today).subtract(365, 'days');
-  let endDate = moment(today).add(365, 'days');
+  // let startDate = moment(today).subtract(365, 'days');
+  // let endDate = moment(today).add(365, 'days');
+  let startDate = moment("2021-01-01");
+  let endDate = moment("2023-12-31");
   let totalDay = endDate.diff(startDate, 'days');
 
   var dayPixel = 0;
@@ -171,9 +172,12 @@ function Roadmap({ filter }) {
             </Box>
           ) : (
             <Box border={1} width={'100%'} height={'100%'} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
-              <MapView technician={selected} onClose={() => setSelected(null)} />
+              <MapView technician={selected} />
               <IconButton
-                onClick={() => setSelected(null)}
+                onClick={() => {
+                  setSelected(null)
+                  setTimeout(() => executeScroll(), 500);
+                }}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -187,19 +191,20 @@ function Roadmap({ filter }) {
           )}
         </Box>
       </Box>
-      <Box display="flex" justifyContent="flex-end" className="mt-2">
-        <ButtonGroup disableElevation color="primary">
-          <Button size="small" variant={calendarType === 'week' ? 'contained' : 'outlined'} onClick={() => handelChangeCalendarType('week')}>
-            Weeks
-          </Button>
-          <Button size="small" variant={calendarType === 'month' ? 'contained' : 'outlined'} onClick={() => handelChangeCalendarType('month')}>
-            Months
-          </Button>
-          <Button size="small" variant={calendarType === 'quater' ? 'contained' : 'outlined'} onClick={() => handelChangeCalendarType('quater')}>
-            Quaters
-          </Button>
-        </ButtonGroup>
-      </Box>
+      {!selected &&
+        <Box display="flex" justifyContent="flex-end" className="mt-2">
+          <ButtonGroup disableElevation color="primary">
+            <Button size="small" variant={calendarType === 'week' ? 'contained' : 'outlined'} onClick={() => handelChangeCalendarType('week')}>
+              Weeks
+            </Button>
+            <Button size="small" variant={calendarType === 'month' ? 'contained' : 'outlined'} onClick={() => handelChangeCalendarType('month')}>
+              Months
+            </Button>
+            <Button size="small" variant={calendarType === 'quater' ? 'contained' : 'outlined'} onClick={() => handelChangeCalendarType('quater')}>
+              Quaters
+            </Button>
+          </ButtonGroup>
+        </Box>}
     </Box>
   ) : (
     <Loader text="" />

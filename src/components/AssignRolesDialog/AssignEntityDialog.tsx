@@ -124,13 +124,13 @@ const AssignEntityDialog = ({
 
   const handleAccessPortal = () => {
     let payLoad = {
-      [contactResource] : ids,
+      [contactResource]: ids,
       entities: selectedData,
       roles: selectedRole
     }
     axiosInstance()
       .put('/user/create-user-from-contact', payLoad)
-      .then(({data}) => {
+      .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -193,7 +193,7 @@ const AssignEntityDialog = ({
     if (activeStep === 0) {
       resultData = dataConst.filter((data) => {
         if (type === "entity") {
-          return data.address?.toLowerCase().search(value.toLowerCase()) !== -1 || data.entityName?.toLowerCase().search(value.toLowerCase()) !== -1
+          return data.entityName?.toLowerCase().search(value.toLowerCase()) !== -1
         }
         else {
           return data.concatedName?.toLowerCase().search(value.toLowerCase()) !== -1 || data.email?.toLowerCase().search(value.toLowerCase()) !== -1;
@@ -257,7 +257,7 @@ const AssignEntityDialog = ({
               </ListItemIcon>
               <ListItemText
                 primary={type === "entity" ? d.entityName : d.concatedName}
-                secondary={type === "user" ? d.email : d.address || ""}
+                secondary={type === "user" ? d.email : d?.address?.optionLabel || d?.address || ""}
               />
             </ListItem>
           ))}
