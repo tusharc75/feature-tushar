@@ -515,10 +515,10 @@ const Services = ({
           onClose={() => {
             setIsProductEdit({ open: false, data: null });
           }}
-          serviceData={isProductEdit.data}
-          from={routes.serviceOrder.title}
-          currency={serviceOrderData.currency}
-          handleSave={handleSaveData} />
+          rowData={isProductEdit.data}
+          serviceOrderData={serviceOrderData}
+          handleSaveData={handleSaveData}
+        />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
         <AssignServiceDialog
