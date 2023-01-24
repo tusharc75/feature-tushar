@@ -121,7 +121,7 @@ function ServiceOrderViews({ serviceData }) {
       xPosition += 300;
       flow.push({
         id: `${serviceData?._id}_Closed`,
-        type: 'default',
+        type: 'output',
         className: 'dark-node',
         sourcePosition: 'right',
         targetPosition: 'left',
