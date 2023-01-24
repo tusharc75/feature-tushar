@@ -70,6 +70,7 @@ const TechnicianDispatch = ({
                         {`${row.original?.technician?.firstName} ${row.original?.technician?.lastName} - (${row.original?.technician?.employeeNumber})`}
                         <IconButton
                             size="small"
+                            style={{ marginLeft: "10px" }}
                             onClick={() => {
                                 window.open(`${routes.employeeMasterDetail.path}/${row.original?.technician?._id}`);
                             }}
@@ -90,6 +91,7 @@ const TechnicianDispatch = ({
                         {row.original?.service?.serviceName}
                         <IconButton
                             size="small"
+                            style={{ marginLeft: "10px" }}
                             onClick={() => {
                                 window.open(`${routes.serviceMasterDetail.path}/${row.original?.service?._id}`);
                             }}

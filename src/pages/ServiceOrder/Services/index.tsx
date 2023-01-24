@@ -23,6 +23,7 @@ import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManag
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ServiceOrderQty from './ServiceOrderQty';
 import moment from 'moment';
+import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 
 const Services = ({
   serviceOrderData,
@@ -62,8 +63,7 @@ const Services = ({
   }, [columns]);
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get('/field?resource=Service Order Detail&view=true');
-    const serviceFields = response?.data?.data?.map((d: any) => d.fieldData)
+    var { fields: data, allFields } = await fetch_service_order_detail_fields(serviceOrderData?.currency);
     const column: any = [
       {
         accessor: 'srno',
@@ -109,6 +109,7 @@ const Services = ({
             </p>
             <IconButton
               size="small"
+              style={{ marginLeft: "10px" }}
               onClick={() => {
                 if (row.original.type === 'service') {
                   window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
@@ -123,7 +124,7 @@ const Services = ({
         )
       },
     ];
-    serviceFields?.forEach((element) => {
+    allFields?.forEach((element) => {
       if (element.type === 'dateTime') {
         column.push({
           accessor: element.fieldName,
@@ -397,10 +398,7 @@ const Services = ({
               <Box display="flex">
                 {permissions?.serviceMaster?.isRead && (
                   <Button
-                    color="primary"
-                    size="small"
-                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                    style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                    className={'btn-outline-v1'} variant="contained" size="small"
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
                     }}
@@ -411,10 +409,7 @@ const Services = ({
                 <Box mx={isMobile ? 0.5 : 1} />
                 {permissions?.packages?.isRead && (
                   <Button
-                    color="primary"
-                    size="small"
-                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                    style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                    className={'btn-outline-v1'} variant="contained" size="small"
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                     }}
