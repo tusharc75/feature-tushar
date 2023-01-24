@@ -27,6 +27,7 @@ import Technician from './Technician';
 import TechnicianDispatch from './TechnicianDispatch';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ServiceOrderViews from './RoadMapViews';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -103,7 +104,6 @@ const ServiceOrderDetailsPage = () => {
     }
   }, [id]);
 
-
   const fetchServiceOrderData = async () => {
     try {
       let data;
@@ -134,7 +134,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const getServiceOrderFields = async () => {
@@ -294,7 +294,7 @@ const ServiceOrderDetailsPage = () => {
           </ContentFullScreen>
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
-          <Box></Box>
+          <Box>{serviceOrderData && <ServiceOrderViews serviceData={serviceOrderData} />}</Box>
         </TabPanel>
       </Box>
       {showConfirmBox && (

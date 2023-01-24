@@ -111,7 +111,7 @@ const AssignRegionalRolesUserDialog = ({
         });
         setUser(resultUser)
         resultEntity = entityConst.filter((data) => {
-            return data.address?.toLowerCase().search(value.toLowerCase()) !== -1 || data.entityName?.toLowerCase().search(value.toLowerCase()) !== -1
+            return data.entityName?.toLowerCase().search(value.toLowerCase()) !== -1
         });
         setEntity(resultEntity)
     };
@@ -189,7 +189,7 @@ const AssignRegionalRolesUserDialog = ({
                             </ListItemIcon>
                             <ListItemText
                                 primary={d.entityName || ""}
-                                secondary={d.address || ""}
+                                secondary={d?.address?.optionLabel || d?.address || ""}
                             />
                         </ListItem>
                     ))}
