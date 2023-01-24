@@ -3,6 +3,7 @@ import { Box, Tooltip } from '@material-ui/core';
 import { TreeView, TreeItem } from '@material-ui/lab';
 import moment from 'moment';
 import { displayDate } from 'src/constants/helpers';
+import { Fragment } from 'react';
 
 const useStyles = makeStyles((theme) => ({
   label: {
@@ -26,6 +27,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function CalanderList(props) {
+
   const { activity, expanded, selected, handleSelect, startDate, endDate, totalDay, calendarType } = props;
   const classes = useStyles();
 
@@ -39,21 +41,23 @@ export default function CalanderList(props) {
 
       let label = (
         <Box width={'100%'} height={50} className="d-flex align-items-center">
-          <Tooltip title={data.firstName + ' ' + data.lastName + ' - ' + displayDate(data.createDate)} placement="right">
-            <Box
-              minWidth={calendarType !== 'week' ? '100px' : ''}
-              height={45}
-              borderRadius="borderRadius"
-              display="flex"
-              style={{
-                position: 'absolute',
-                left: (100 * moment(data.startDate).diff(startDate, 'days')) / totalDay + '%',
-                right: (100 * endDate.diff(moment(data.dueDate), 'days')) / totalDay + '%'
-              }}
-              bgcolor="secondary.main"
-              color="white"
-            ></Box>
-          </Tooltip>
+          {data?.serviceOrders?.map((item) => {
+            return <Tooltip title={item?.serviceOrder?.serviceOrderNumber} placement="right">
+              <Box
+                minWidth={calendarType !== 'week' ? '100px' : ''}
+                height={45}
+                borderRadius="borderRadius"
+                display="flex"
+                style={{
+                  position: 'absolute',
+                  left: (100 * moment(item.estimateStartDate).diff(startDate, 'days')) / totalDay + '%',
+                  right: (100 * endDate.diff(moment(item.estimateEndDate), 'days')) / totalDay + '%'
+                }}
+                bgcolor="secondary.main"
+                color="white"
+              ></Box>
+            </Tooltip>
+          })}
         </Box>
       );
 
