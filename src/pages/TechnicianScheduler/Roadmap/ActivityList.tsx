@@ -40,7 +40,7 @@ export default function ActivityList(props) {
       }
 
       let label = (
-        <Box width={'100%'} height={50} className="d-flex align-items-center">
+        <Box width={'100%'} height={99} className="d-flex align-items-center">
           <Box width={'100%'} className="d-flex align-items-center">
             <Avatar variant="circle" sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo} />
             <Box ml={2} flex style={{ flexDirection: 'column' }}>
@@ -57,6 +57,7 @@ export default function ActivityList(props) {
           nodeId={data._id.toString()}
           label={label}
           children={children}
+          style={{ borderBottom: '1px solid lightgray' }}
           classes={{
             root: classes.root
           }}
