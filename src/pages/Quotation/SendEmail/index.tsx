@@ -166,7 +166,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
             <Box mx={1} />
             <Button
               variant="outlined"
-              color="primary"
+              className="btn-outline-v1"
               type="button"
               size="small"
               startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
@@ -180,7 +180,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
             <Box mx={1} />
             {!previewOnly && <Button
               variant="outlined"
-              color="primary"
+              className="btn-outline-v1"
               type="button"
               size="small"
               startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
@@ -194,7 +194,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
             <Box mx={1} />
             {isSendEmail && permissions?.purchaseOrder?.isRead && <Button
               variant="outlined"
-              color="primary"
+              className="btn-outline-v1"
               size="small"
               disabled={loading === "email"}
               startIcon={isMobile ? '' : <MdEmail />}
