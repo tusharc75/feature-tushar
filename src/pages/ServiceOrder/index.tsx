@@ -287,7 +287,8 @@ const ServiceOrder = () => {
                 let finalObject: any = prepareDataForGrid(u, user);
                 finalObject["isChecked"] = false;
                 finalObject["allowedToEdit"] = permissions?.serviceOrder?.isUpdate;
-                finalObject["canDelete"] = permissions?.serviceOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete
+                finalObject["canDelete"] = permissions?.serviceOrder?.isDelete && finalObject?.ownerId === user?.user?._id 
+                //&& u?.canDelete
                 return finalObject;
             });
             if (appendRows) {

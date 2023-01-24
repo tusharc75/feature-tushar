@@ -27,8 +27,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function TechnicianScheduler() {
+
   const classes = useStyles();
-  const [filter, setFilter] = useState({ view: '', resource: '', serviceOrder: '' });
+  const [filter, setFilter] = useState({ view: 'Technician View', resource: '', serviceOrder: '' });
   const [serviceOrders, setServiceOrders] = useState([]);
 
   useEffect(() => {
@@ -58,7 +59,8 @@ function TechnicianScheduler() {
                 size="small"
                 fullWidth
                 freeSolo
-                options={['Technician View', 'Order View']}
+                options={['Technician View']}
+                //options={['Technician View', 'Order View']}
                 getOptionLabel={(option) => option}
                 value={filter.view || ''}
                 onChange={(event, newValue) => {
