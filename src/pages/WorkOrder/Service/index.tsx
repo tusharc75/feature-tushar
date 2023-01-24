@@ -458,7 +458,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const isAllowedToServiceEdit = !completed && (allowedToEdit || (selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) && permissions?.workOrder?.isUpdate));
 
   return (
-    <Box p={2}>
+    <Box>
       {serviceSteps ? (
         <Grid container spacing={2}>
           {!mobScreen ? (

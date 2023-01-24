@@ -119,7 +119,6 @@ const getPos = (taskStartDate, taskEndDate, startDate, endDate, totalDay) => {
 };
 
 const RenderServices = ({ name, startDate, endDate, services, handleSelect, totalDay, calendarType, createDate }) => {
-  console.log(services);
 
   const getPriority = () => {
     const priority = ['low', 'medium', 'high'];
@@ -155,25 +154,21 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
             <Tooltip
               title={
                 <>
-                  <p>{name}</p>
-                  <p>{service.serviceOrder.serviceOrderNumber}</p>
-                  <p>{displayDate(createDate)}</p>
-                  {/* <p>{`${displayDate(service.estimateStartDate)} - ${displayDate(service.estimateEndDate)}`}</p> */}
+                  <p>{service?.serviceOrder?.serviceOrderNumber}</p>
                 </>
               }
               placement="top"
             >
               <div>
                 <Typography variant="h6" className={styles.servicesText} title={service?.serviceDetail?.optionLabel}>
-                  Name : <span>{service?.serviceDetail?.optionLabel}</span>
+                  <span>{service?.serviceDetail?.optionLabel}</span>
                 </Typography>
-
                 <span className={`${styles.chip} ${styles[priority]}`}>
                   <Typography component={'span'}>{priority}</Typography>
                 </span>
-                <span className={`${styles.chip} ${styles.success}`}>
+                {/* <span className={`${styles.chip} ${styles.success}`}>
                   <Typography component={'span'}>{service?.status}</Typography>
-                </span>
+                </span> */}
               </div>
             </Tooltip>
           </div>
