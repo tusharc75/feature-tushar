@@ -29,7 +29,6 @@ import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import EntitySelectionsDialog from '../../components/EntitySelections';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import { sidebarResource } from '../../constants/helpers';
-import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
@@ -45,6 +44,7 @@ import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 import WarhouseList from '../Account/Warehouse/WarhouseList';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const ContactTypes = [
   {
@@ -417,7 +417,7 @@ export default function Contact(props) {
 
   const ActionsRenderer = (params) => (
     <>
-      {contactPermissions.isCreate ? (<Tooltip
+      {contactPermissions.isCreate ? (<HtmlTooltip
         title='Clone'
       >
         <IconButton
@@ -429,9 +429,9 @@ export default function Contact(props) {
         >
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
-      </Tooltip>) :
+      </HtmlTooltip>) :
         (
-          <Tooltip
+          <HtmlTooltip
             className='cursor-stop'
             title='You do not have permission to clone/create'
           >
@@ -441,7 +441,7 @@ export default function Contact(props) {
             >
               <FileCopyIcon fontSize="small" color="disabled" />
             </IconButton>
-          </Tooltip>
+          </HtmlTooltip>
         )
       }
       <GridDeleteIcon
@@ -459,7 +459,7 @@ export default function Contact(props) {
       />
 
       {contactPermissions.isUpdate && params.data?.isAllowedToUpdate ? (
-        <Tooltip title="Entity">
+        <HtmlTooltip title="Entity">
           <IconButton
             size="small"
             aria-label="Entity"
@@ -484,13 +484,13 @@ export default function Contact(props) {
           >
             <AiOutlineDeploymentUnit fontSize="15" color="primary" />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to update entity">
+        <HtmlTooltip className="cursor-stop" title="You do not have permission to update entity">
           <IconButton aria-label="Clone" size="small">
             <AiOutlineDeploymentUnit fontSize="15" />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       )}
     </>
   );

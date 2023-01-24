@@ -11,7 +11,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { dateTimeFormat, formatAmountWithCurrency, serviceOrder } from '../../../constants/helpers';
+import { dateTimeFormat, formatAmountWithCurrency, serviceOrder, sidebarResource } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -289,8 +289,8 @@ const Services = ({
       const element: any = {};
       element.materialId = d._id;
       element.type = addExistingProductDialog.type;
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : d.unit ? d.unit : '';
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
+      element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
+      element.pricingMethod = d?.pricingMethodMain && d?.pricingMethodMain?.length ? d.pricingMethodMain[0] : d?.pricingMethod ? d?.pricingMethod : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addExistingProductDialog.parentId;
       element.estimateStartDate = serviceOrderData?.estimateStartDate
@@ -314,9 +314,7 @@ const Services = ({
     rows.forEach((element) => {
       delete element.srno;
       delete element.detail;
-      delete element.serializedProduct;
       delete element.qtyDisplay;
-      delete element.pricingConditionDisplay;
       delete element.isValid;
       delete element.canDelete;
       delete element.assetQty;
@@ -494,15 +492,15 @@ const Services = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType={renderedFrom}
-          onSuccess={(packages) => {
-            handleAdd(packages.map((d) => ({ ...d, detail: d.packageName })));
+          referenceType={"serviceOrder"}
+          onSuccess={(rows) => {
+            handleAdd(rows);
           }}
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           packageType="service"
-          ids={rowsData.filter((d) => d.type === 'pacakge').map((d) => d?.materialId)}
+          ids={[]}
         />
       )}
       {isProductEdit.open && (
@@ -524,7 +522,7 @@ const Services = ({
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
-          ids={rowsData.filter((d) => d.type === 'service').map((d) => d?.materialId)}
+          ids={[]}
         />
       )}
     </Fragment>

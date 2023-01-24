@@ -141,11 +141,11 @@ const PackagesTable = ({ packageId, packageData }) => {
 
   const ActionsRenderer = (params) => <span>{params?.data?.qty}</span>;
 
-  const handleAssignPackage = (ids) => {
+  const handleAssignPackage = (rows) => {
     axiosInstance()
       .post(`${packages.api}/${packageId}/package`, {
         ids: [packageId],
-        packages: [...ids].map((d: any) => ({ packageId: d, qty: Number(1) }))
+        packages: rows?.map((d: any) => ({ packageId: d?._id, qty: d?.qty ? Number(d?.qty) : Number(1) }))
       })
       .then(() => {
         setShowProductAssignDialog(false);
@@ -214,9 +214,9 @@ const PackagesTable = ({ packageId, packageData }) => {
           dataRows={dataRows}
           selectedRecords={[]}
           dispatch={dispatch}
-          onEdit={(data) => {}}
+          onEdit={(data) => { }}
           extraParamsToCheckDelete={true}
-          onDelete={(data) => {}}
+          onDelete={(data) => { }}
           rowCount={rowCount}
           page={page}
           loading={loading}
@@ -232,7 +232,7 @@ const PackagesTable = ({ packageId, packageData }) => {
             setShowProductAssignDialog(true);
           }}
           showClone={true}
-          onClone={(data) => {}}
+          onClone={(data) => { }}
           renderedFrom={renderedFrom}
         />
       ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -261,22 +261,22 @@ const PackagesTable = ({ packageId, packageData }) => {
       )}
       {showProductAssignDialog && (
         <AssignPackageDialog
-          referenceType="product"
+          referenceType="packages"
           handleClose={() => setShowProductAssignDialog(false)}
           ids={[...dataRows?.map((e) => e._id), packageId]}
-          onSuccess={(ids) => {
-            handleAssignPackage(ids);
+          onSuccess={(rows) => {
+            handleAssignPackage(rows);
           }}
           packageType={'Product'}
         />
       )}
       {showServiceAssignDialog && (
         <AssignPackageDialog
-          referenceType="product"
+          referenceType="packages"
           handleClose={() => setShowServiceAssignDialog(false)}
           ids={[...dataRows?.map((e) => e._id), packageId]}
-          onSuccess={(ids) => {
-            handleAssignPackage(ids);
+          onSuccess={(rows) => {
+            handleAssignPackage(rows);
           }}
           packageType={'Service'}
         />

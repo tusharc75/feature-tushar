@@ -37,6 +37,9 @@ import { dateFormat, formatAmountWithCurrency, prepareDataForGrid, quotation, QU
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import SendEmail from '../SendEmail';
+import { startCase } from 'lodash';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+
 
 const QuoteBuilder = ({
   quotationData,
@@ -80,6 +83,31 @@ const QuoteBuilder = ({
     var data = await fetch_quotation_product_fields(quotationData?.currency);
     const coloum: any = [
       {
+        accessor: 'srno',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (<p className="text-truncate">{row.original.srno}</p>),
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        disableFilters: true,
+        sticky: isMobile ? 'none' : 'left',
+        width: 200,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {`${startCase(row.original?.type)} `}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
@@ -96,12 +124,24 @@ const QuoteBuilder = ({
                 <span>({row.original?.subRows?.length})</span>
               </Box>
             )}
-            <Chip
-              className="ml-1"
-              label={`${row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}`}
+            <IconButton
               size="small"
-              color="primary"
-            />
+              onClick={() => {
+                window.open(
+                  `${
+                    row.original.type === 'serializedAsset'
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === 'product'
+                      ? routes.productDetail.path
+                      : row.original.type === 'package'
+                      ? routes.packagesDetail.path
+                      : routes.serviceMasterDetail.path
+                  }/${row.original.materialId}`
+                );
+              }}
+            >
+             <OpenInNewIcon fontSize="small" color="primary" /> 
+            </IconButton>
           </div>
         )
       },
@@ -232,6 +272,7 @@ const QuoteBuilder = ({
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
+      parent.srno = i + 1;
       parent.detail = `${
         parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
@@ -318,7 +359,7 @@ const QuoteBuilder = ({
             <HtmlTooltip title={'Send to customer'}>
               <Button
                 variant="contained"
-                color="primary"
+                className="btn-outline-v1"
                 size="small"
                 disabled={sentToCustomer}
                 onClick={() => {

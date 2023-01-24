@@ -39,6 +39,10 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
     fetchGridColumns();
   }, []);
 
+  const defaultColumns = [
+    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
+  ];
+
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
     if (searchTimeout) {
@@ -70,7 +74,7 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        setColumns([...defaultColumns, ...columns]);
       });
   };
 
@@ -87,6 +91,13 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = false;
           finalObject['id'] = u._id;
+          finalObject['unitMain'] = u?.unit;
+          finalObject['pricingMethodMain'] = u?.pricingMethod;
+          finalObject['qty'] = 1;
+          const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id);
+          if (qtyAdded.length) {
+            finalObject['qty'] = qtyAdded[0].qty;
+          }
           return {
             ...finalObject
           };
@@ -176,31 +187,8 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
                   disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
                   onClick={() => {
                     setAssigning(true);
-                    if (referenceType === routes.productionOrder.title) {
-                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
-                    }
-                    else {
-                      if (packageType === 'service') {
-                        onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.packageType === 'Service'))
-                      }
-                      else {
-                        onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => e._id))
-                      }
-                    if (packageType === 'service') {
-                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.packageType === 'Service'));
-                    } else if (referenceType === 'demandOrder') {
-                      onSuccess(
-                        [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => {
-                          return {
-                            _id: e._id,
-                            unit: e.unit
-                          };
-                        })
-                      );
-                    } else {
-                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => e._id));
-                    }
-                  }}}
+                    onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+                  }}
                   color="primary"
                   size="small"
                   variant="contained"

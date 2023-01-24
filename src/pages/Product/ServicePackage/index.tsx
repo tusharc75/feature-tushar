@@ -239,11 +239,11 @@ const ServicePackage = ({ renderedFrom, productId }) => {
       });
   };
 
-  const handleSubmit = (ids: string[]) => {
+  const handleSubmit = (rows) => {
     setSubmitting(true);
     axiosInstance()
       .post(`${product.api}/${productId}/package`, {
-        package: ids
+        package: rows?.map((e) => e?._id)
       })
       .then(() => {
         fetchData();
@@ -338,8 +338,8 @@ const ServicePackage = ({ renderedFrom, productId }) => {
           referenceType="product"
           handleClose={() => setOpenAddDialog(false)}
           ids={[...dataRows?.map((e) => e._id)]}
-          onSuccess={(ids) => {
-            handleSubmit(ids)
+          onSuccess={(rows) => {
+            handleSubmit(rows)
           }}
           packageType={"Service"}
         />
