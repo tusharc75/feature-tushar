@@ -18,7 +18,8 @@ import {
     DELIVERY_TICKET_REFRENCE_TYPE,
     DELIVERY_FROM_TO_TYPE,
     repairOrder,
-    INVENTORY_STATUS
+    INVENTORY_STATUS,
+    WORK_ORDER_STATUS
 } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -69,8 +70,11 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
                     obj.status = e?.serializedAssetDetail?.status
                     obj.productName = e?.serializedAssetDetail?.product?.optionLabel
                     obj.productId = e?.serializedAssetDetail?.product?.optionValue
+                    obj.workOrderStatus = e?.workOrder?.status
+                    obj.workOrder = e?.workOrder?.optionLabel
+                    obj.workOrderId = e?.workOrder?.optionValue
                     obj.isChecked = false
-                    obj.hideSelection = [INVENTORY_STATUS.inRepair].includes(obj.status)
+                    obj.hideSelection = [WORK_ORDER_STATUS.completed].includes(obj.workOrderStatus) ? false : true
                     material.push(obj)
                 }
             })
@@ -130,6 +134,8 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
                 cellRenderer: cellRenderer
             })
         })
+        column.push({ field: 'workOrder', headerName: 'Work Order', show: true, cellRenderer: 'workOrderRenderer' })
+        column.push({ field: 'workOrderStatus', headerName: 'Work Order Status', show: true, cellRenderer: 'commonRenderer' })
         column.push({
             field: "status",
             headerName: "Status",
@@ -143,6 +149,15 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
     const TicketRenderer = (params) =>
         params?.value ? (
             <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
+                {params.value}
+            </Link>
+        ) : (
+            <NoDataCell />
+        );
+
+    const WorkOrderRenderer = (params) =>
+        params?.value ? (
+            <Link className="link text-truncate" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.workOrderId}`}>
                 {params.value}
             </Link>
         ) : (
@@ -171,6 +186,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
         ticketRenderer: TicketRenderer,
         productNameRenderer: ProductNameRenderer,
         inventoryRenderer: InventoryRenderer,
+        workOrderRenderer: WorkOrderRenderer,
         commonRenderer: CommonRenderer,
     };
 
