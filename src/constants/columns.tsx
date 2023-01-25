@@ -13,10 +13,10 @@ import {
   CheckboxRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
-import { formatAmountWithCurrency, sidebarResourceObjectFromValues } from './helpers';
+import { dateFormat, dateTimeFormat, formatAmountWithCurrency, sidebarResourceObjectFromValues } from './helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { getRenderer } from 'src/components/CustomReactTable/CustomTableRenderer';
 import { flatMapDeep } from 'lodash';
+import moment from 'moment';
 
 const permissions: any = {};
 
@@ -371,7 +371,7 @@ export const genrateColoum = (fields, column, rendererNames, editable, renderedF
   });
 };
 
-export const getCustomColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {
+export const getCustomColumnData = (title, field) => {
   let data = localStorage.getItem('gridMetaData');
 
   let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
@@ -379,8 +379,6 @@ export const getCustomColumnData = (title, field, detailScreenRoute = null, hasP
   if (!gridMetaData) {
     gridMetaData = {};
   }
-
-  let updatedTitle = camelCase(title);
   if (gridMetaData[title]?.hidden && gridMetaData[title]?.hidden.indexOf(field?.fieldName) >= 0) {
     return null;
   } else if (hideColumns.indexOf(field?.fieldName) >= 0) {
@@ -394,90 +392,7 @@ export const getCustomColumnData = (title, field, detailScreenRoute = null, hasP
       disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
       editable: field?.isColumnEditable ?? false
     };
-    // if (field?.fieldName === "firstName" && field?.primaryField === false) {
-    //     let combinedTitle = camelCase(updatedTitle)
-    //     let pathName = detailPagePath[combinedTitle] ? detailPagePath[combinedTitle] :
-    //         routes.userDetail.path ? routes.userDetail.path : ""
-    //     return {
-    //         columnData: {
-    //             ...commonFieldData,
-    //             field: "concatedName",
-    //             cellRenderer: "nameRenderer",
-    //             cellRendererParams: { pathName: pathName }
-    //         },
-    //         rendererName: 'nameRenderer',
-    //     }
-    // }
-    // else
-
-    // if (field?.primaryField === true && detailScreenRoute) {
-    //     return {
-    //         columnData: {
-    //             // pivotIndex: 0,
-    //             lockPosition: true,
-    //             ...commonFieldData,
-    //             disabled: true,
-    //             accessor: field?.fieldName === "firstName" ? "concatedName" : field.fieldName,
-    //             cellRenderer: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
-    //             cellRendererParams: { "pathName": detailScreenRoute, "property": "_id", isForPopup: hasPopup }
-    //         },
-    //         rendererName: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
-    //     }
-    // }
-    // else if (field?.lookup) {
-
-    //     let joinedFieldName = field?.fieldName.indexOf(" ") > 0 ? camelCase(field?.fieldName) : field?.fieldName
-    //     let pathName = ""
-    //     let isForPopup = false
-    //     if (hasDetailPageAsPopup[joinedFieldName]) {
-    //         isForPopup = true
-    //         pathName = `${hasDetailPageAsPopup[joinedFieldName]}`
-    //     }
-    //     else if (field?.lookupResource && popupResources.indexOf(field?.lookupResource) >= 0) {
-    //         pathName = routes[`${camelCase(field?.lookupResource)}`]?.path ?? ""
-    //         isForPopup = true
-    //     }
-    //     else {
-    //         pathName = detailPagePath[joinedFieldName] ? detailPagePath[joinedFieldName] :
-    //             field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path ?
-    //                 routes[`${camelCase(field?.lookupResource)}Detail`]?.path :
-    //                 routes[joinedFieldName]?.path ? routes[joinedFieldName]?.path :
-    //                     routes[`${joinedFieldName}Detail`]?.path ? routes[`${joinedFieldName}Detail`]?.path : ""
-
-    //     }
-    //     return {
-    //         columnData: {
-    //             ...commonFieldData,
-    //             cellRenderer: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
-    //             cellRendererParams: {
-    //                 "pathName": pathName, "property": joinedFieldName + 'Id',
-    //                 isForPopup: isForPopup, "more": `rest${joinedFieldName}`
-    //             }
-    //         },
-    //         rendererName: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
-    //     }
-    // }
-    // else if (isRenderWithCopy(field?.type)) {
-    //     return {
-    //         columnData: {
-    //             ...commonFieldData,
-    //             cellRenderer: 'commonRendererWithCopy'
-    //         },
-    //         rendererName: 'commonRendererWithCopy'
-    //     }
-    // }
-    // else
-    if (field?.type === 'date') {
-      return {
-        ...commonFieldData,
-        Cell: getRenderer('date')
-      };
-    } else {
-      return {
-        ...commonFieldData,
-        Cell: getRenderer('common')
-      };
-    }
+    return commonFieldData;
   }
 };
 
@@ -551,22 +466,73 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, curre
     }
     else {
       if (column.filter((_c) => _c.accessor === ele.fieldName && _c.Header === ele.fieldLabel).length === 0) {
-        let currentColumn: any = getCustomColumnData(renderedFrom ? renderedFrom : routes.productBuilder.title, ele, routes.productBuilder.path, true);
-        if (currentColumn.accessor === 'qty') {
-          currentColumn.accessor = 'qtyDisplay';
-          currentColumn.Footer = (info) => {
-            const qtyTotal = info.rows
-              .filter(
-                (f) => f.original.parentId === null && f.values.hasOwnProperty(currentColumn.accessor) && !isNaN(f.values[currentColumn.accessor])
-              )
-              .reduce((sum, row) => row.values[currentColumn.accessor] + sum, 0);
-            return <>{qtyTotal}</>;
-          };
-        } else if (currentColumn.accessor === 'pricingCondition') {
-          currentColumn.accessor = 'pricingConditionDisplay';
+        let currentColumn: any = getCustomColumnData(renderedFrom, ele);
+        if (ele.type === 'date') {
+          column.push({
+            ...currentColumn,
+            disableFilters: true,
+            width: 200,
+            Cell: ({ row }) =>
+              row.original[ele.fieldName] ? <p>{moment(row.original[ele.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+          });
         }
-
-        column.push(currentColumn);
+        else if (ele.type === 'dateTime') {
+          column.push({
+            ...currentColumn,
+            disableFilters: true,
+            width: 200,
+            Cell: ({ row }) =>
+              row.original[ele.fieldName] ? <p>{moment(row.original[ele.fieldName]).format(dateTimeFormat)}</p> : <NoDataCell />
+          });
+        }
+        else if (ele.type === 'dropDown') {
+          column.push({
+            ...currentColumn,
+            width: 200,
+            Cell: ({ row }) =>
+              row.original[ele.fieldName]?.optionLabel ? <p>{row.original[ele.fieldName]?.optionLabel}</p> : row.original[ele.fieldName] ? <p>{row.original[ele.fieldName]}</p> : <NoDataCell />
+          });
+        }
+        else if (ele.type === 'decimal') {
+          column.push({
+            ...currentColumn,
+            width: 200,
+            Cell: ({ row }) =>
+              row.original[ele.fieldName] ? <p>{row.original[ele.fieldName]}</p> : <NoDataCell />,
+            Footer: (info) => {
+              const qtyTotal = info.rows
+                .filter(
+                  (f) => f.original.parentId === null && f.values.hasOwnProperty(ele.fieldName) && !isNaN(f.values[ele.fieldName])
+                )
+                .reduce((sum, row) => row.values[currentColumn.accessor] + sum, 0);
+              return <>{qtyTotal}</>;
+            }
+          });
+        }
+        else if (ele.type === 'checkBox') {
+          column.push({
+            ...currentColumn,
+            width: 200,
+            Cell: ({ row }) =>
+              row.original[ele.fieldName] ? <p>{Boolean(row.original[ele.fieldName]) ? "Yes" : "No"}</p> : <NoDataCell />
+          });
+        }
+        else if (ele.type === 'multiSelect') {
+          column.push({
+            ...currentColumn,
+            width: 200,
+            Cell: ({ row }) =>
+              row.original[ele.fieldName] ? ele.lookup ? <p className="text-truncate">{row.original[ele.fieldName]?.map(d => d.optionLabel).join()}</p> : <p>{row.original[ele.fieldName]?.join()}</p> : <NoDataCell />
+          });
+        }
+        else {
+          column.push({
+            ...currentColumn,
+            width: 200,
+            Cell: ({ row }) =>
+              row.original[ele.fieldName] ? <p className="text-truncate">{row.original[ele.fieldName]}</p> : <NoDataCell />
+          });
+        }
       }
     }
   });
