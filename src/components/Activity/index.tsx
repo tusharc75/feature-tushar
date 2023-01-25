@@ -33,23 +33,32 @@ import CloseIcon from '@material-ui/icons/Close';
 
 const useStyles = makeStyles(() => ({
   activityBox: {
-    padding: '1px 1px 9px 1px',
-    background: '#f6f6f6'
+    padding: '15px 30px 30px',
+    background: '#ffffff'
   },
   activitySubBox: {
     display: 'flex',
-    padding: '8px',
-    margin: '8px 8px 0 8px',
+    padding: '7px 8px',
+    margin: '0px 0px 12px',
     cursor: 'pointer',
     background: '#fff',
-    borderRadius: '3px',
-    border: '1px solid #c9c0c0',
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0
+    border: '1px solid #E7E7E7',
+    boxShadow: '0px 4px 40px rgba(0, 0, 0, 0.04)',
+    borderRadius: '4px',
+    minHeight: '46px'
   },
   historyButton: {
     width: '100%',
     padding: '4px'
+  },
+  detailsHeader: {
+    padding: '10px',
+    background: '#FFFFFF',
+    borderRadius: '7px 7px 0 0',
+    position: 'sticky',
+    top: '0px',
+    zIndex: 5,
+    boxShadow: '0px 4px 40px rgb(0 0 0 / 6%)'
   }
 }));
 
@@ -190,7 +199,7 @@ const Activity = (props) => {
   return (
     <>
       <Box>
-        <Box className="detailHeader">
+        <Box className={`${classes.detailsHeader} `}>
           <h2 className="listingHeader single">Activities</h2>
           <IconButton onClick={() => close()} className="close-icon-v1">
             <CloseIcon />
@@ -256,7 +265,7 @@ const Activity = (props) => {
             {resourceId && resource ? (
               <Box className={classes.activitySubBox}>
                 <Button className={classes.historyButton} style={{ width: '100%', padding: '2px' }} onClick={() => setShowHistory(true)}>
-                  <AiOutlineHistory className="mr-1" size={20} /> History
+                  History
                 </Button>
               </Box>
             ) : null}
