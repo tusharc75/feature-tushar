@@ -7,7 +7,8 @@ import { VscCalendar } from 'react-icons/vsc';
 import { BsBriefcase } from 'react-icons/bs';
 import { GoNote } from 'react-icons/go';
 import { HiOutlineMail } from 'react-icons/hi';
-import { FiPlusSquare } from 'react-icons/fi';
+
+import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import { AiOutlinePaperClip, AiOutlineHistory } from 'react-icons/ai';
 import { Task } from './Task';
 import { CreateTask } from './Task/CreateTask';
@@ -28,7 +29,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../constants/helpers';
 import HistoryDialog from './History/index';
 import { useData } from './../../StateProvider/Provider';
-import InfoIcon from '@material-ui/icons/Info';
+
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CloseIcon from '@material-ui/icons/Close';
 
 const useStyles = makeStyles(() => ({
@@ -45,7 +47,14 @@ const useStyles = makeStyles(() => ({
     border: '1px solid #E7E7E7',
     boxShadow: '0px 4px 40px rgba(0, 0, 0, 0.04)',
     borderRadius: '4px',
-    minHeight: '46px'
+    minHeight: '46px',
+    color: '#5B5B5B',
+    '& h6': {
+      fontWeight: '500',
+      fontSize: '14px',
+      lineHeight: '17px',
+      color: '#5B5B5B'
+    }
   },
   historyButton: {
     width: '100%',
@@ -217,7 +226,7 @@ const Activity = (props) => {
                           <IconButton size="small">{type === data ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
                         </Box>
                         <Box ml={1} mt={0.5}>
-                          <Typography variant="subtitle2" color="primary" className="d-flex align-items-center">
+                          <Typography variant="subtitle2" className={`d-flex align-items-center `}>
                             {getIcon(data)} {data} ({totalCount[data]})
                           </Typography>
                         </Box>
@@ -228,12 +237,12 @@ const Activity = (props) => {
                         <Grid item xs={4} container justify="flex-end">
                           <Box mr={1} mt={0.5}>
                             <Tooltip title={infoTitle[data]}>
-                              <InfoIcon color="disabled" />
+                              <InfoOutlinedIcon />
                             </Tooltip>
                           </Box>
-                          <IconButton color="primary" size="small" onClick={(event) => handleCreateActivity(event, data)}>
+                          <IconButton size="small" onClick={(event) => handleCreateActivity(event, data)}>
                             {' '}
-                            <FiPlusSquare />
+                            <AddOutlinedIcon />
                           </IconButton>
                         </Grid>
                       )
