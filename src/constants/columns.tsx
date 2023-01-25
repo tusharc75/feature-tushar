@@ -390,7 +390,8 @@ export const getCustomColumnData = (title, field) => {
       Header: fieldHeaderName,
       show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
       disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
-      editable: field?.isColumnEditable ?? false
+      editable: field?.isColumnEditable ?? false,
+      primaryField: field?.primaryField ?? false
     };
     return commonFieldData;
   }
@@ -414,7 +415,8 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
             Cell: ({ row }) => {
               return row?.original[fieldName] ? <p>{row?.original[fieldName]}</p> : <NoDataCell />;
             },
-            editable: Boolean(ele?.isColumnEditable)
+            editable: Boolean(ele?.isColumnEditable),
+            primaryField: ele?.primaryField ?? false
           });
         });
       }
@@ -427,6 +429,7 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
               accessor: fieldName,
               Header: fieldLabel,
               editable: Boolean(ele?.isColumnEditable),
+              primaryField: ele?.primaryField ?? false,
               Cell: ({ row }) => {
                 return row?.original[fieldName] ? (
                   <p>{formatAmountWithCurrency(currency, row?.original[fieldName])?.amountWithouCurrencyCode}</p>
@@ -446,6 +449,7 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
             accessor: fieldName,
             Header: fieldLabel,
             editable: Boolean(ele?.isColumnEditable),
+            primaryField: ele?.primaryField ?? false,
             Cell: ({ row }) => {
               return row?.original[fieldName] ? (
                 <p>{formatAmountWithCurrency(currency, row?.original[fieldName])?.amountWithouCurrencyCode}</p>
@@ -500,13 +504,11 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
           column.push({
             ...currentColumn,
             width: 200,
-            Cell: ({ row }) =>
-              row.original[ele.fieldName] ? <p>{row.original[ele.fieldName]}</p> : <NoDataCell />,
+            Cell: ({ row }) => row.original[ele.fieldName] ? <p>{row.original[ele.fieldName]}</p> : <NoDataCell />,
             Footer: (info) => {
-              const qtyTotal = info.rows
-                .filter(
-                  (f) => f.original.parentId === null && f.values.hasOwnProperty(ele.fieldName) && !isNaN(f.values[ele.fieldName])
-                )
+              const qtyTotal = info.rows.filter(
+                (f) => f.original.parentId === null && f.values.hasOwnProperty(ele.fieldName) && !isNaN(f.values[ele.fieldName])
+              )
                 .reduce((sum, row) => row.values[currentColumn.accessor] + sum, 0);
               return <>{qtyTotal}</>;
             }
@@ -524,8 +526,9 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
           column.push({
             ...currentColumn,
             width: 200,
-            Cell: ({ row }) =>
-              row.original[ele.fieldName] ? ele.lookup ? <p className="text-truncate">{row.original[ele.fieldName]?.map(d => d.optionLabel).join()}</p> : <p>{row.original[ele.fieldName]?.join()}</p> : <NoDataCell />
+            Cell: ({ row }) => row.original[ele.fieldName] ? ele.lookup ?
+              row.original[ele.fieldName]?.length ? <p className="text-truncate">{row.original[ele.fieldName]?.map(d => d.optionLabel)?.join()}</p> : <NoDataCell />
+              : <p>{row.original[ele.fieldName]?.join()}</p> : <NoDataCell />
           });
         }
         else {

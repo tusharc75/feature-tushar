@@ -167,7 +167,6 @@ function ServiceOrderViews({ serviceData }) {
   const onElementClick = (event, element) => {
     switch (element.data.ref_type) {
       case 'purchaseOrder':
-        console.log('purchaseOrder');
         break;
     }
   };

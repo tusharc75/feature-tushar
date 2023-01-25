@@ -301,7 +301,6 @@ export default function ImportExportLinks({
         </div>
       ) : (
         <Menu id="import-export-links" anchorEl={anchorEl} open={open} onClose={handleClose}>
-          {console.log('hi')}
           <MenuItem
             onClick={() => {
               exportToExcel();
