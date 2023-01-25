@@ -334,7 +334,6 @@ export const CHILD_RESOURCE = {
   quotationService: 'Quotation Service',
   repairOrderProduct: 'Repair Order Product',
   serviceOrderDetails: 'Service Order Detail'
-
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -810,21 +809,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1844,22 +1843,118 @@ export const ACTIVITY_RESOURCE = {
   productionOrder: 'productionOrder',
   serviceOrder: 'serviceOrder',
   workOrder: 'workOrder',
-  demandOrder: 'demandOrder',
+  demandOrder: 'demandOrder'
 };
 
 export const REPORT_LIST = [
-  { title: sidebarResource.rentalManagement, permission: 'rentalManagement', key: 'rentalManagement', type: 'dynamic' },
-  { title: sidebarResource.salesOrder, permission: 'salesOrder', key: 'salesOrder', type: 'dynamic' },
-  { title: sidebarResource.serializedAsset, permission: 'serializedAsset', key: 'serializedAsset', type: 'dynamic' },
-  { title: sidebarResource.lead, permission: 'lead', key: 'lead', type: 'dynamic' },
-  { title: sidebarResource.opportunity, permission: 'opportunity', key: 'opportunity', type: 'dynamic' },
-  { title: sidebarResource.quoteBuilder, permission: 'quoteBuilder', key: 'quoteBuilder', type: 'dynamic' },
-  { title: sidebarResource.projectSales, permission: 'projectSales', key: 'projectSales', type: 'dynamic' },
-  { title: sidebarResource.purchaseOrder, permission: 'purchaseOrder', key: 'purchaseOrder', type: 'dynamic' },
-  { title: 'Purchase Order Details', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'purchaseOrderDetails' },
-  { title: 'Inventory Evaluation', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'inventoryEvaluation' },
-  { title: 'Inventory History', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'inventoryHistory' },
-  { title: 'Average Price By Supplier', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'averagePriceBySupplier' }
+  {
+    title: sidebarResource.rentalManagement,
+    permission: 'rentalManagement',
+    key: 'rentalManagement',
+    type: 'dynamic',
+    iconsColor: ['#059825', '#059825 ', '#60D778'],
+    color: '#F9FDEC',
+    text: 'Enable the sales team to close deals faster'
+  },
+  {
+    title: sidebarResource.salesOrder,
+    permission: 'salesOrder',
+    key: 'salesOrder',
+    type: 'dynamic',
+    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
+    color: '#FFEFEE',
+    text: 'Enable the sales team to close deals faster'
+  },
+  {
+    title: sidebarResource.serializedAsset,
+    permission: 'serializedAsset',
+    key: 'serializedAsset',
+    type: 'dynamic',
+    iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
+    color: '#F3F8FF',
+    text: 'Enable the sales team to close deals faster'
+  },
+  {
+    title: sidebarResource.lead,
+    permission: 'lead',
+    key: 'lead',
+    type: 'dynamic',
+    iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6'],
+    color: '#FFFAEC',
+    text: 'Enable the sales team to close deals faster'
+  },
+  {
+    title: sidebarResource.opportunity,
+    permission: 'opportunity',
+    key: 'opportunity',
+    type: 'dynamic',
+    iconsColor: ['#AD14F5', '#6203AC', '#BE74E5'],
+    color: '#F6F1FF',
+    text: 'Enable the sales team to close deals faster'
+  },
+  {
+    title: sidebarResource.quoteBuilder,
+    permission: 'quoteBuilder',
+    key: 'quoteBuilder',
+    type: 'dynamic',
+    iconsColor: ['#FFA800', '#E35200', '#FBC56E'],
+    color: '#FFF7F2',
+    text: 'Enable the sales team to close deals faster'
+  },
+  {
+    title: sidebarResource.projectSales,
+    permission: 'projectSales',
+    key: 'projectSales',
+    type: 'dynamic',
+    iconsColor: ['#059825', '#059825', '#60D778'],
+    color: '#F9FDEC',
+    text: 'Enable the sales team to close deals faster'
+  },
+  {
+    title: sidebarResource.purchaseOrder,
+    permission: 'purchaseOrder',
+    key: 'purchaseOrder',
+    type: 'dynamic',
+    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
+    color: '#FFEFEE',
+    text: 'Enable the sales team to close deals faster'
+  },
+  {
+    title: 'Purchase Order Details',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'purchaseOrderDetails',
+    iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6 '],
+    color: '#FFFAEC',
+    text: 'Enable the sales team to close deals faster'
+  },
+  {
+    title: 'Inventory Evaluation',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'inventoryEvaluation',
+    iconsColor: ['#059825', '#059825', '#60D778'],
+    color: '#F9FDEC',
+    text: 'Enable the sales team to close deals faster'
+  },
+  {
+    title: 'Inventory History',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'inventoryHistory',
+    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
+    color: '#FFEFEE',
+    text: 'Enable the sales team to close deals faster'
+  },
+  {
+    title: 'Average Price By Supplier',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'averagePriceBySupplier',
+    iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
+    color: '#F3F8FF',
+    text: 'Enable the sales team to close deals faster'
+  }
 ];
 
 export const RESOURCE_CALENDAR = [
@@ -1905,8 +2000,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'customer-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'supplier-account':
@@ -1916,8 +2012,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'supplier-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'lead':
