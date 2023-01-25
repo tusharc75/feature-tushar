@@ -151,6 +151,12 @@
 }
 
 .cm-msg-text {
+  --self-bg: #e8fcfb;
+  --self-text: #3e3e3e;
+
+  --bg: #f4f8f6;
+  --color: #484a54;
+
   padding: 5px 15px 5px 15px;
   color: white;
   max-width: 75%;
@@ -160,9 +166,9 @@
   margin-bottom: 20px;
   border-radius: 6px;
   &.user {
-    background: #055c16;
     padding: 5px 15px 5px 15px;
-    color: white;
+    color: var(--color);
+    background-color: var(--bg);
     max-width: 75%;
     float: left;
     margin-left: 10px;
@@ -175,7 +181,7 @@
       width: 0;
       height: 0;
       border-bottom: 18px solid transparent;
-      border-right: 10px solid #055c16;
+      border-right: 10px solid var(--bg);
       left: -6px;
       top: 0;
     }
@@ -183,17 +189,17 @@
 
   &.self {
     float: right;
-    background: #363256;
-    color: white;
+    background: var(--self-bg);
+    color: var(--self-color);
 
     & ::after {
       content: '';
       position: absolute;
       width: 0;
       height: 0;
-      border-top: 0px solid #363256;
+      border-top: 0px solid var(--self-bg);
       border-bottom: 18px solid transparent;
-      border-left: 10px solid #363256;
+      border-left: 10px solid var(--self-bg);
       right: -6px;
       top: 0;
     }
@@ -211,6 +217,6 @@
 .chatTimer {
   margin-top: 10px;
   font-size: 10px;
-  color: white;
+  color: var(--color);
   opacity: 0.3;
 }
