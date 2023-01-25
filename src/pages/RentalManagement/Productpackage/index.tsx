@@ -38,7 +38,6 @@ import { genrateCustomTableColumns, flattenArray } from 'src/constants/columns';
 const Productpackage = ({
   rentalManagementData,
   setNextStep,
-  currencySymbol,
   renderedFrom,
   stepFullScreen,
   allowedToEdit
@@ -90,7 +89,7 @@ const Productpackage = ({
       });
     }
     setAllFields(JSON.parse(JSON.stringify(allFields)));
-    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, currencySymbol, renderedFrom);
+    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay'

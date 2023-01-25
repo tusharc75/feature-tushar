@@ -13,7 +13,7 @@ import {
   CheckboxRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
-import { dateFormat, dateTimeFormat, formatAmountWithCurrency, sidebarResourceObjectFromValues } from './helpers';
+import { dateFormat, dateTimeFormat, formatAmountWithCurrency, sidebarResourceObjectFromValues, getUniqueCurrencies } from './helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { flatMapDeep } from 'lodash';
 import moment from 'moment';
@@ -396,11 +396,14 @@ export const getCustomColumnData = (title, field) => {
   }
 };
 
-export const genrateCustomTableColumns = (fields: any[], currency: string, currencySymbol: string, renderedFrom = null) => {
+export const genrateCustomTableColumns = (fields: any[], currency: string, renderedFrom = null) => {
   let column = [];
   let _fields = fields;
   _fields.forEach((ele) => {
     if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
+
+      const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative
+
       if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
         ele.displayUnits.forEach((_unit) => {
           let fieldName = ele.fieldName + '_' + _unit.toLowerCase();
