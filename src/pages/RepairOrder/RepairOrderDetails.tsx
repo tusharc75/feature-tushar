@@ -70,7 +70,6 @@ const RepairOrderDetails = () => {
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
   const [repairOrderProcessSteps, setRepairOrderProcessSteps] = useState(repairOrderSteps);
   const [quotationVersionData, setQuotationVersionData] = useState(null);
   const [showQuotationConfirmBox, setShowQuotationConfirmBox] = useState(false);
@@ -478,7 +477,6 @@ const RepairOrderDetails = () => {
               <Quotation
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
-                currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-4`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
@@ -500,7 +498,6 @@ const RepairOrderDetails = () => {
               <Quotation
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
-                currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-4`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={false}
