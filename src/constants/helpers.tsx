@@ -1853,8 +1853,7 @@ export const REPORT_LIST = [
     key: 'rentalManagement',
     type: 'dynamic',
     iconsColor: ['#059825', '#059825 ', '#60D778'],
-    color: '#F9FDEC',
-    text: 'Enable the sales team to close deals faster'
+    color: '#F9FDEC'
   },
   {
     title: sidebarResource.salesOrder,
@@ -1862,8 +1861,7 @@ export const REPORT_LIST = [
     key: 'salesOrder',
     type: 'dynamic',
     iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
-    color: '#FFEFEE',
-    text: 'Enable the sales team to close deals faster'
+    color: '#FFEFEE'
   },
   {
     title: sidebarResource.serializedAsset,
@@ -1871,8 +1869,7 @@ export const REPORT_LIST = [
     key: 'serializedAsset',
     type: 'dynamic',
     iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
-    color: '#F3F8FF',
-    text: 'Enable the sales team to close deals faster'
+    color: '#F3F8FF'
   },
   {
     title: sidebarResource.lead,
@@ -1880,8 +1877,7 @@ export const REPORT_LIST = [
     key: 'lead',
     type: 'dynamic',
     iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6'],
-    color: '#FFFAEC',
-    text: 'Enable the sales team to close deals faster'
+    color: '#FFFAEC'
   },
   {
     title: sidebarResource.opportunity,
@@ -1889,8 +1885,7 @@ export const REPORT_LIST = [
     key: 'opportunity',
     type: 'dynamic',
     iconsColor: ['#AD14F5', '#6203AC', '#BE74E5'],
-    color: '#F6F1FF',
-    text: 'Enable the sales team to close deals faster'
+    color: '#F6F1FF'
   },
   {
     title: sidebarResource.quoteBuilder,
@@ -1898,8 +1893,7 @@ export const REPORT_LIST = [
     key: 'quoteBuilder',
     type: 'dynamic',
     iconsColor: ['#FFA800', '#E35200', '#FBC56E'],
-    color: '#FFF7F2',
-    text: 'Enable the sales team to close deals faster'
+    color: '#FFF7F2'
   },
   {
     title: sidebarResource.projectSales,
@@ -1907,8 +1901,7 @@ export const REPORT_LIST = [
     key: 'projectSales',
     type: 'dynamic',
     iconsColor: ['#059825', '#059825', '#60D778'],
-    color: '#F9FDEC',
-    text: 'Enable the sales team to close deals faster'
+    color: '#F9FDEC'
   },
   {
     title: sidebarResource.purchaseOrder,
@@ -1916,8 +1909,7 @@ export const REPORT_LIST = [
     key: 'purchaseOrder',
     type: 'dynamic',
     iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
-    color: '#FFEFEE',
-    text: 'Enable the sales team to close deals faster'
+    color: '#FFEFEE'
   },
   {
     title: 'Purchase Order Details',
@@ -1925,8 +1917,7 @@ export const REPORT_LIST = [
     key: 'purchaseOrderType',
     type: 'purchaseOrderDetails',
     iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6 '],
-    color: '#FFFAEC',
-    text: 'Enable the sales team to close deals faster'
+    color: '#FFFAEC'
   },
   {
     title: 'Inventory Evaluation',
@@ -1934,8 +1925,7 @@ export const REPORT_LIST = [
     key: 'purchaseOrderType',
     type: 'inventoryEvaluation',
     iconsColor: ['#059825', '#059825', '#60D778'],
-    color: '#F9FDEC',
-    text: 'Enable the sales team to close deals faster'
+    color: '#F9FDEC'
   },
   {
     title: 'Inventory History',
@@ -1943,8 +1933,7 @@ export const REPORT_LIST = [
     key: 'purchaseOrderType',
     type: 'inventoryHistory',
     iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
-    color: '#FFEFEE',
-    text: 'Enable the sales team to close deals faster'
+    color: '#FFEFEE'
   },
   {
     title: 'Average Price By Supplier',
@@ -1952,8 +1941,7 @@ export const REPORT_LIST = [
     key: 'purchaseOrderType',
     type: 'averagePriceBySupplier',
     iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
-    color: '#F3F8FF',
-    text: 'Enable the sales team to close deals faster'
+    color: '#F3F8FF'
   }
 ];
 
