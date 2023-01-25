@@ -1,0 +1,78 @@
+.reportGrid {
+  display: grid;
+  gap: 15px;
+  @media all and (min-width: 600px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+  @media all and (min-width: 998px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media all and (min-width: 1200px) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 31px;
+  }
+  @media all and (min-width: 1700px) {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 31px;
+  }
+  @media all and (min-width: 2200px) {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 31px;
+  }
+
+  .singleCard {
+    padding-top: 21px;
+    position: relative;
+    .floatIcon {
+      position: absolute;
+      top: 0;
+      left: 18px;
+    }
+  }
+  .cardInner {
+    padding: 51px 31px 12px 18px;
+    border: 1.75769px solid #ebebeb;
+    box-shadow: 0px 3.51537px 35.1537px rgba(0, 0, 0, 0.08);
+    border-radius: 5.27306px;
+    cursor: pointer;
+    h6 {
+      font-weight: 700;
+      font-size: 15.8192px;
+      line-height: 19px;
+      display: flex;
+      align-items: center;
+      color: #2a3042;
+      margin-bottom: 11px;
+    }
+    p {
+      font-weight: 500;
+      font-size: 12.3038px;
+      line-height: 25px;
+      color: rgba(0, 0, 0, 0.5);
+      min-height: 48px;
+      &.withoutDetails {
+        min-height: 15px;
+      }
+    }
+    a {
+      font-weight: 600;
+      font-size: 15.8192px;
+      line-height: 26px;
+      color: #2a3042;
+      display: flex;
+      align-items: center;
+    }
+    .arrow {
+      margin-left: 14px;
+      width: 12px;
+      transition: margin 0.3s;
+    }
+    &:hover {
+      .arrow {
+        margin-left: 16px;
+      }
+    }
+  }
+}
