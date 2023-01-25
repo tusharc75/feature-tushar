@@ -78,12 +78,12 @@ const ReportMaster = () => {
                     <Box className={styles.cardInner} style={{ backgroundColor: report.color }}>
                       <ReportIcon colors={report.iconsColor} className={styles.floatIcon} />
                       <Typography variant="h6">{report.type === 'dynamic' ? routes[report.key]?.title : report.title}</Typography>
-                      <Typography variant="body2">{report.text}</Typography>
+                      {/* <Typography variant="body2">{report.text}</Typography>
                       <Link
                         to={`/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`}
                       >
                         View All <HiArrowRight className={styles.arrow} />
-                      </Link>
+                      </Link> */}
                     </Box>
                   </Link>
                 </Box>
@@ -104,10 +104,10 @@ const ReportMaster = () => {
                         <Box className={styles.cardInner} style={{ backgroundColor: colorPalette[accessor].color }}>
                           <ReportIcon colors={colorPalette[accessor].iconsColor} className={styles.floatIcon} />
                           <Typography variant="h6">{item.customReportName}</Typography>
-                          <Typography variant="body2" className={styles.withoutDetails}></Typography>
+                          {/* <Typography variant="body2" className={styles.withoutDetails}></Typography>
                           <Link to={`/reports/custom-report/${item._id}`}>
                             View All <HiArrowRight className={styles.arrow} />
-                          </Link>
+                          </Link> */}
                         </Box>
                       </Link>
                     </Box>
