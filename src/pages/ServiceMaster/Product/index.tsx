@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import { Box, Grid, Button } from '@material-ui/core';
-import { Link, useParams, useLocation } from 'react-router-dom';
-import { product, isObjectEmpty, prepareDataForGrid, serviceMaster } from '../../../constants/helpers';
+import { prepareDataForGrid, serviceMaster } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { Delete } from '@material-ui/icons';
@@ -14,8 +13,10 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { camelCase } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { gridLoadingTimeout } from 'src/constants/helpers';
 
 function Product({ id }) {
+  
   const renderedFrom = `${camelCase(routes?.product.title)}_product`;
 
   const {
@@ -41,14 +42,15 @@ function Product({ id }) {
   ];
 
   useEffect(() => {
+    fetchGridColumns();
+  }, [id]);
+
+  useEffect(() => {
     if (id) {
       fetchBOMData();
     }
   }, [id, page, limit, filters, sorting, selectedEntity]);
 
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
 
   const fetchBOMData = () => {
     dispatch({ type: 'loading', loading: true });
@@ -217,7 +219,6 @@ function Product({ id }) {
           pageSizes={pageSizes}
           page={page}
           loading={loading}
-          actionWidth={150}
           renderedFrom={renderedFrom}
           refreshGrid={fetchBOMData}
         />
