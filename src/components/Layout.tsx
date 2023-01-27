@@ -18,8 +18,7 @@ const useStyles = makeStyles(() => ({
     minHeight: 'calc(100vh - 64px)',
     ['@media (max-width:768px)']: {
       minHeight: 'calc(100vh - 108px)'
-    },
-    backgroundColor: '#f8fffe'
+    }
   },
   layout: {
     flexGrow: 1,
@@ -27,7 +26,6 @@ const useStyles = makeStyles(() => ({
     marginInline: 'auto',
 
     height: '100%',
-    backgroundColor: '#f8fffe',
     zIndex: 1,
     ['@media (max-width:900px)']: {
       paddingInline: '13px',
@@ -225,6 +223,7 @@ const Layout = ({ children, width }) => {
           transition={{ duration: 0.3 }}
           exit={{ opacity: 0 }}
           className={classes.content}
+          style={{ backgroundColor: pathname === '/' ? '#ffffff' : '#f8fffe' }}
           onClick={handleToggleState}
         >
           <div className={classes.layout} ref={bodyRef} onScroll={onScroll}>

@@ -76,7 +76,7 @@ const LeadTimeMaster = ({ Id, type }) => {
           <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
             <Grid container>
               <Grid item xs={2}>
-                <Typography variant="body1">#</Typography>
+                <Typography variant="body1">Index</Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body1">Status</Typography>

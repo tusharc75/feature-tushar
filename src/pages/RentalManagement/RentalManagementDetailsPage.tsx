@@ -598,7 +598,6 @@ const RentalManagementDetailsPage = () => {
                 <Productpackage
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
-                  currencySymbol={currencySymbol}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={
@@ -617,7 +616,6 @@ const RentalManagementDetailsPage = () => {
                 <Services
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
-                  currencySymbol={currencySymbol}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={

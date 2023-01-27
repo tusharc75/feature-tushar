@@ -43,7 +43,7 @@ const DaysBetweenDates = function (calendarType, startDate, endDate) {
 };
 
 function Calendar({ calendarType, dayPixel, startDate, endDate }) {
-  // console.log({ calendarType, dayPixel, startDate, endDate });
+  
   const [totalDay, setTotalDay] = React.useState(0);
   const [dates, setDates] = React.useState(null);
   const [calType, setCalType] = React.useState(calendarType);
