@@ -3,9 +3,8 @@ import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Skeleton } from '@material-ui/lab';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { BiEdit } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { useData } from 'src/StateProvider/Provider';
 import { useParams, useHistory } from 'react-router-dom';
@@ -13,7 +12,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { FaWpforms } from 'react-icons/fa';
 import ManageIrtTicket from './ManageIrtTicket';
 import { sidebarResource } from 'src/constants/helpers';
 
@@ -28,7 +26,6 @@ const IrtTicketDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
 
