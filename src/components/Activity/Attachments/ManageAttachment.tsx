@@ -145,6 +145,7 @@ export default function ManageAttachment({
           setCanEdit(data?.canEdit);
           setInitialValues(data);
           setFormValues(data);
+          parentFolder = data?.parentFolder;
           setIsFetching(false);
         })
         .catch((error) => {
@@ -219,7 +220,7 @@ export default function ManageAttachment({
     } else {
       if (attachmentId) {
         axiosInstance()
-          .put(`/attachment/${attachmentId}`, request)
+          .put(`/attachment/folder/${attachmentId}`, request)
           .then(({ data }) => {
             showSuccessMessage(data.message);
             setLoading(false);

@@ -191,7 +191,12 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                             className="cursor-pointer"
                             onClick={() => {
                               setAttachmentId(_attachment._id);
-                              setOpen({ open: true, type: 'file', parentFolder: null, purpose: 'edit' });
+                              setOpen({
+                                open: true,
+                                type: _attachment.attachmentType === 'folder' ? 'folder' : 'file',
+                                parentFolder: null,
+                                purpose: 'edit'
+                              });
                             }}
                           >
                             {_attachment?.name ?? ''}
@@ -227,8 +232,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                                     color="primary"
                                     onClick={() => {
                                       setOpen({ open: true, type: 'file', parentFolder: _attachment._id, purpose: 'add' });
-                                      // setAttachmentId(_attachment._id);
-                                      // setAttachmentData(_attachment);
                                     }}
                                   >
                                     <AddOutlinedIcon />
