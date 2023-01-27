@@ -218,7 +218,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                                 <Tooltip title={'Add Folder'}>
                                   <IconButton
                                     size="small"
-                                    color="primary"
                                     onClick={() => {
                                       setOpen({ open: true, type: 'folder', parentFolder: _attachment._id, purpose: 'add' });
                                     }}
@@ -229,7 +228,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                                 <Tooltip title={'Add File'}>
                                   <IconButton
                                     size="small"
-                                    color="primary"
                                     onClick={() => {
                                       setOpen({ open: true, type: 'file', parentFolder: _attachment._id, purpose: 'add' });
                                     }}
@@ -238,7 +236,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                                   </IconButton>
                                 </Tooltip>
                                 <Tooltip title={'Delete Folder'}>
-                                  <IconButton size="small" color="primary" onClick={() => handleFolderDelete(_attachment._id)}>
+                                  <IconButton size="small" onClick={() => handleFolderDelete(_attachment._id)}>
                                     <MdDelete color="error" />
                                   </IconButton>
                                 </Tooltip>
