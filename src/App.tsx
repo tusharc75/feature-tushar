@@ -181,6 +181,8 @@ import CompetencyMasterDetail from './pages/CompetencyMaster/CompetencyMasterDet
 import TechnicianScheduler from './pages/TechnicianScheduler';
 import BudgetDetail from './pages/Budget/BudgetDetail';
 import MarketSegmentDetail from './pages/MarketSegment/MarketSegmentDetail';
+import IrtTicket from './pages/IrtTicket';
+import IrtTicketDetail from './pages/IrtTicket/IrtTicketDetail';
 
 var notificationInterval: any = null;
 
@@ -912,6 +914,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.technicianScheduler.path}`}>
               <TechnicianScheduler />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.irtTicket.path}`}>
+              <IrtTicket />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.irtTicketDetail.path}/:id`}>
+              <IrtTicketDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

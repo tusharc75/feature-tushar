@@ -47,9 +47,10 @@ const ManageSupportTicket = ({onClose, onSuccess, isClone = false, id = null}) =
               let tempData = data
               if (isClone) {
                 fields = fieldsDataForCreate
-                const { supportTicketNumber, ...rest } = data
+                const { supportTicketNumber, ...rest } = data;
+                rest.supportTicketNumber = `ST_${generateUniqueIdOnly()}`
                 setCloneHeading(supportTicketNumber);
-                tempData = { ...rest, supportTicketNumber }
+                tempData = rest;
               }
               setInitialData({
                 fields: fields,
