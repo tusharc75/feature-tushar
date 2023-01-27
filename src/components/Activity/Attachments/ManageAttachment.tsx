@@ -22,10 +22,16 @@ import ImagePreview from '../Email/ImagePreview';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useData } from '../../../StateProvider/Provider';
+import { Skeleton } from '@material-ui/lab';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const AttachmentSchema = object().shape({
   name: string().required('please add attachment name'),
   fileUrl: string().required('please upload attachment')
+});
+
+const FolderSchema = object().shape({
+  name: string().required('please add folder name')
 });
 
 const fileIcons = [
@@ -68,7 +74,8 @@ export default function ManageAttachment({
   isMinimized,
   onMinimizeMaximize,
   showManimizeMaximize,
-  parentFolder = null
+  parentFolder = null,
+  type = 'file'
 }) {
   const [initialValues, setInitialValues] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -86,6 +93,7 @@ export default function ManageAttachment({
   const [attachmentToDelete, setAttachemnetToDelete] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formValues, setFormValues] = useState({});
+  const [isFetching, setIsFetching] = useState(false);
 
   const {
     state: { permissions }
@@ -100,8 +108,8 @@ export default function ManageAttachment({
   };
 
   const fetchAttachmentDetail = async () => {
-    if (attachmentId) {
-      setLoading(true);
+    setIsFetching(true);
+    if (attachmentId && type === 'file') {
       axiosInstance()
         .get(`/attachment/${attachmentId}`)
         .then(({ data: { data } }) => {
@@ -123,16 +131,35 @@ export default function ManageAttachment({
           }
           setInitialValues(data);
           setFormValues(data);
-          setLoading(false);
+          setIsFetching(false);
           // setInitialValues({ name: data?.name ?? '', fileUrl: data?.fileUrl ?? '' })
         })
         .catch((error) => {
-          setLoading(false);
+          setIsFetching(false);
+          toastConfig.setToastConfig(error);
+        });
+    } else if (attachmentId && type === 'folder') {
+      axiosInstance()
+        .get(`/attachment/folder/${attachmentId}`)
+        .then(({ data: { data } }) => {
+          setCanEdit(data?.canEdit);
+          setInitialValues(data);
+          setFormValues(data);
+          setIsFetching(false);
+        })
+        .catch((error) => {
+          setIsFetching(false);
           toastConfig.setToastConfig(error);
         });
     } else {
-      setInitialValues({ name: '', fileUrl: '' });
-      setFormValues({ name: '', fileUrl: '' });
+      if (type === 'file') {
+        setInitialValues({ name: '', fileUrl: '' });
+        setFormValues({ name: '', fileUrl: '' });
+      } else {
+        setInitialValues({ name: '' });
+        setFormValues({ name: '' });
+      }
+      setIsFetching(false);
     }
   };
 
@@ -145,40 +172,79 @@ export default function ManageAttachment({
   };
 
   const handleSave = (values) => {
-    let request: any = {
-      name: values.name,
-      file: values['fileUrl'] ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments] : [...imageAttachments],
-      relatedTo: relatedTo
-    };
+    let request: any = {};
+    if (type === 'file') {
+      request = {
+        name: values.name,
+        file: values['fileUrl'] ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments] : [...imageAttachments],
+        relatedTo: relatedTo
+      };
+    } else {
+      request = {
+        name: values.name,
+        relatedTo: relatedTo
+      };
+    }
     if (parentFolder) request.parentFolder = parentFolder;
     setLoading(true);
-    if (attachmentId) {
-      axiosInstance()
-        .put(`/attachment/${attachmentId}`, request)
-        .then(({ data }) => {
-          showSuccessMessage(data.message);
-          setLoading(false);
-          // setInitialValues(null)
-          handleClose();
-          if (fetchData) fetchData();
-        })
-        .catch((error) => {
-          setLoading(false);
-          toastConfig.setToastConfig(error);
-        });
+    if (type === 'file') {
+      if (attachmentId) {
+        axiosInstance()
+          .put(`/attachment/${attachmentId}`, request)
+          .then(({ data }) => {
+            showSuccessMessage(data.message);
+            setLoading(false);
+            // setInitialValues(null)
+            handleClose();
+            if (fetchData) fetchData();
+          })
+          .catch((error) => {
+            setLoading(false);
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        axiosInstance()
+          .post(`/attachment`, request)
+          .then(({ data }) => {
+            showSuccessMessage(data.message);
+            setLoading(false);
+            handleClose();
+            if (fetchData) fetchData();
+          })
+          .catch((error) => {
+            setLoading(false);
+            toastConfig.setToastConfig(error);
+          });
+      }
     } else {
-      axiosInstance()
-        .post(`/attachment`, request)
-        .then(({ data }) => {
-          showSuccessMessage(data.message);
-          setLoading(false);
-          handleClose();
-          if (fetchData) fetchData();
-        })
-        .catch((error) => {
-          setLoading(false);
-          toastConfig.setToastConfig(error);
-        });
+      if (attachmentId) {
+        axiosInstance()
+          .put(`/attachment/${attachmentId}`, request)
+          .then(({ data }) => {
+            showSuccessMessage(data.message);
+            setLoading(false);
+            // setInitialValues(null)
+            handleClose();
+            if (fetchData) fetchData();
+          })
+          .catch((error) => {
+            setLoading(false);
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        axiosInstance()
+          .post(`/attachment/folder`, request)
+          .then(({ data }) => {
+            showSuccessMessage(data.message);
+            setLoading(false);
+            handleClose();
+            if (fetchData) fetchData();
+          })
+          .catch((error) => {
+            setLoading(false);
+            toastConfig.setToastConfig(error);
+          });
+      }
     }
   };
 
@@ -330,9 +396,9 @@ export default function ManageAttachment({
     }));
   };
 
-  return (
-    initialValues && (
-      <Formik initialValues={initialValues} validationSchema={AttachmentSchema} onSubmit={handleSave}>
+  return !isFetching ? (
+    initialValues ? (
+      <Formik initialValues={initialValues} validationSchema={type === 'file' ? AttachmentSchema : FolderSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <>
             <CustomDialogHeader
@@ -340,7 +406,7 @@ export default function ManageAttachment({
                 if (isFieldNotTouched(initialValues, formValues)) handleClose();
                 else setShowConfirmDialog(true);
               }}
-              title={`${attachmentId ? 'Edit' : 'New'} Attachment`}
+              title={`${attachmentId ? 'Edit' : 'New'} ${type === 'file' ? 'Attachment' : 'Folder'}`}
               isMinimized={isMinimized}
               onMinimizeMaximize={onMinimizeMaximize}
               showManimizeMaximize={showManimizeMaximize}
@@ -354,7 +420,7 @@ export default function ManageAttachment({
                       <TextField
                         variant="outlined"
                         type="text"
-                        label="Name"
+                        label={type === 'file' ? 'Name' : 'Folder Name'}
                         required={true}
                         disabled={!canEdit}
                         name="name"
@@ -369,32 +435,33 @@ export default function ManageAttachment({
                         }}
                       />
                     </Grid>
-                    <Grid container item xs={12}>
-                      <Grid item xs={10} sm={11} md={11}>
-                        <FormTypes
-                          label="File"
-                          name="fileUrl"
-                          required={true}
-                          type="fileUpload"
-                          values={values}
-                          canEdit={canEdit}
-                          errors={errors}
-                          touched={touched}
-                          size="small"
-                          setFieldValue={(fname, file) => {
-                            setFieldValue('fileUrl', file);
-                            handleValuesChange({ fileUrl: file });
-                            onUploadFile(file);
-                          }}
-                          doNotShowUploadedFile={true}
-                          imageOrFileUploadCompletePercentage={(completePercentage) => {
-                            setUploadingImageOrFileProgress(completePercentage);
-                          }}
-                        />
-                      </Grid>
-                      {renderFileThumbnails}
+                    {type === 'file' && (
+                      <Grid container item xs={12}>
+                        <Grid item xs={10} sm={11} md={11}>
+                          <FormTypes
+                            label="File"
+                            name="fileUrl"
+                            required={true}
+                            type="fileUpload"
+                            values={values}
+                            canEdit={canEdit}
+                            errors={errors}
+                            touched={touched}
+                            size="small"
+                            setFieldValue={(fname, file) => {
+                              setFieldValue('fileUrl', file);
+                              handleValuesChange({ fileUrl: file });
+                              onUploadFile(file);
+                            }}
+                            doNotShowUploadedFile={true}
+                            imageOrFileUploadCompletePercentage={(completePercentage) => {
+                              setUploadingImageOrFileProgress(completePercentage);
+                            }}
+                          />
+                        </Grid>
+                        {renderFileThumbnails}
 
-                      {/* {attachments.length > 0 && 
+                        {/* {attachments.length > 0 && 
                                     <Grid item xs={10} sm={11} md={11}>
                                         <ul>
                                         {attachments.map((attachment, index)=>(
@@ -414,7 +481,7 @@ export default function ManageAttachment({
                                     </Grid>
                                     }
                                      */}
-                      {/* <Grid item xs={2} sm={1} md={1}>
+                        {/* <Grid item xs={2} sm={1} md={1}>
                                         {
                                             attachmentId && values?.fileUrl ?
                                                 (isDownloading ? (
@@ -462,7 +529,8 @@ export default function ManageAttachment({
                                                 </IconButton>) : null
                                         }
                                     </Grid> */}
-                    </Grid>
+                      </Grid>
+                    )}
                   </Grid>
                 </Box>
               </Form>
@@ -482,7 +550,7 @@ export default function ManageAttachment({
                 <CustomButton
                   type="button"
                   color="primary"
-                  disabled={loading || uploadingImageOrFileProgress > 0 || otherAttachments.length === 0}
+                  disabled={loading || ((uploadingImageOrFileProgress > 0 || otherAttachments.length === 0) && type === 'file')}
                   loading={loading}
                   variant="contained"
                   onClick={submitForm}
@@ -531,7 +599,13 @@ export default function ManageAttachment({
           </>
         )}
       </Formik>
-    )
+    ) : null
+  ) : (
+    <div>
+      <Box p={2} height={500} bgcolor="white">
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>
+    </div>
   );
 }
 

@@ -21,7 +21,6 @@ import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { MdDelete } from 'react-icons/md';
 import { Tooltip } from '@material-ui/core';
-import ManageAttachmentFolder from './ManageAttachmentFolder';
 
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState({ open: false, type: 'file', parentFolder: null, purpose: 'add' });
@@ -281,38 +280,39 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               fullScreen={fullScreen || isMobile || isTablet}
               TransitionComponent={CustomDialogTransition}
             >
-              {open.type === 'file' ? (
-                <ManageAttachment
-                  attachmentId={open.purpose === 'add' ? null : attachmentId}
-                  attachmentData={open.purpose === 'add' ? null : attachmentData}
-                  handleClose={() => {
-                    handleClose();
-                    setFullScreen(false);
-                  }}
-                  relatedTo={relatedTo}
-                  isMinimized={!fullScreen}
-                  onMinimizeMaximize={() => {
-                    setFullScreen((prevState) => !prevState);
-                  }}
-                  showManimizeMaximize={true}
-                  parentFolder={open.parentFolder}
-                />
-              ) : open.type === 'folder' ? (
-                <ManageAttachmentFolder
-                  folderId={open.purpose === 'add' ? null : attachmentId}
-                  handleClose={() => {
-                    handleClose();
-                    setFullScreen(false);
-                  }}
-                  relatedTo={relatedTo}
-                  isMinimized={!fullScreen}
-                  onMinimizeMaximize={() => {
-                    setFullScreen((prevState) => !prevState);
-                  }}
-                  showManimizeMaximize={true}
-                  parentFolder={open.parentFolder}
-                />
-              ) : null}
+              <ManageAttachment
+                attachmentId={open.purpose === 'add' ? null : attachmentId}
+                handleClose={() => {
+                  handleClose();
+                  setFullScreen(false);
+                }}
+                relatedTo={relatedTo}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+                parentFolder={open.parentFolder}
+                type={open.type}
+              />
+
+              {/* open.type === 'folder' ? (
+              <ManageAttachmentFolder
+                folderId={open.purpose === 'add' ? null : attachmentId}
+                folderData={open.purpose === 'add' ? null : attachmentData}
+                handleClose={() => {
+                  handleClose();
+                  setFullScreen(false);
+                }}
+                relatedTo={relatedTo}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+                parentFolder={open.parentFolder}
+              />
+              ) : */}
             </Dialog>
           </>
         )

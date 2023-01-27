@@ -33,7 +33,6 @@ import { useData } from './../../StateProvider/Provider';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CloseIcon from '@material-ui/icons/Close';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
-import ManageAttachmentFolder from './Attachments/ManageAttachmentFolder';
 
 const useStyles = makeStyles(() => ({
   activityBox: {
@@ -403,8 +402,8 @@ const Activity = (props) => {
             />
           ) : null}
           {type === 'AttachmentFolder' && (
-            <ManageAttachmentFolder
-              folderId={null}
+            <ManageAttachment
+              attachmentId={null}
               handleClose={() => {
                 handleClose();
                 setFullScreen(false);
@@ -415,6 +414,7 @@ const Activity = (props) => {
                 setFullScreen((prevState) => !prevState);
               }}
               showManimizeMaximize={true}
+              type="folder"
             />
           )}
         </Dialog>
