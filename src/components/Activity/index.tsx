@@ -32,6 +32,8 @@ import { useData } from './../../StateProvider/Provider';
 
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CloseIcon from '@material-ui/icons/Close';
+import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
+import ManageAttachmentFolder from './Attachments/ManageAttachmentFolder';
 
 const useStyles = makeStyles(() => ({
   activityBox: {
@@ -240,6 +242,14 @@ const Activity = (props) => {
                               <InfoOutlinedIcon />
                             </Tooltip>
                           </Box>
+                          {data === 'Attachment' && (
+                            <Tooltip title={'Add Folder'}>
+                              <IconButton size="small" onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}>
+                                {' '}
+                                <CreateNewFolderIcon />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                           <IconButton size="small" onClick={(event) => handleCreateActivity(event, data)}>
                             {' '}
                             <AddOutlinedIcon />
@@ -392,6 +402,21 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           ) : null}
+          {type === 'AttachmentFolder' && (
+            <ManageAttachmentFolder
+              folderId={null}
+              handleClose={() => {
+                handleClose();
+                setFullScreen(false);
+              }}
+              relatedTo={relatedTo}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+            />
+          )}
         </Dialog>
       </Box>
       {showHistory ? <HistoryDialog open={showHistory} resourceId={resourceId} resource={resource} onClose={() => setShowHistory(false)} /> : null}
