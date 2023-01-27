@@ -26,6 +26,8 @@ import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helpe
 import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom'
 import SendEmail from './../SendEmail';
+import { FaEye } from "react-icons/fa";
+import InventoryStatesDialog from "./InventoryStatesDialog";
 
 const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission, updateStatus, checkReceivedProduct }) => {
 
@@ -40,6 +42,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     const [isAddNewProduct, setIsAddNewProduct] = useState(false)
 
     const [showProductDialog, setShowProductDialog] = useState(false)
+    const [showInventoryStatesDialog, setShowInventoryStatesDialog] = useState({ open: false, product: null, warehouse: null })
     const [selectedProductData, setSelectedProductData] = useState(null)
     const [isBulkEdit, setIsBulkEdit] = useState(false)
 
@@ -185,6 +188,17 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     }}
                 >
                     <EditIcon color="primary" />
+                </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip title="Inventory States">
+                <IconButton
+                    size="small"
+                    aria-label="Inventory"
+                    onClick={() => {
+                        setShowInventoryStatesDialog({ open: true, product: params.data?.productDetail?._id, warehouse: purchaseOrderData?.warehouse?.optionValue })
+                    }}
+                >
+                    <FaEye color="primary" />
                 </IconButton>
             </HtmlTooltip>
             {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && <GridDeleteIcon
@@ -462,6 +476,13 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     onOk={handleDelete}
                 />
             }
+            {showInventoryStatesDialog.open && <InventoryStatesDialog
+                open={showInventoryStatesDialog.open}
+                onClose={() => {
+                    setShowInventoryStatesDialog({ open: false, product: null, warehouse: null })
+                }}
+                product={showInventoryStatesDialog.product}
+                warehouse={showInventoryStatesDialog.warehouse} />}
         </Fragment>
     );
 };
