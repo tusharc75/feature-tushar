@@ -1,15 +1,16 @@
-import { Box, Dialog, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
+import { Box, Button, Dialog, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, purchaseOrder } from 'src/constants/helpers';
 
-const InventoryStatesDialog = ({ open, onClose, product, warehouse }) => {
-    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+const InventoryStatesDialog = ({ onClose, product, warehouse, data }) => {
+
+    const [fullScreen, setFullScreen] = useState(true);
     const [inventoryData, setInventoryData] = useState(null);
 
     useEffect(() => {
@@ -24,7 +25,7 @@ const InventoryStatesDialog = ({ open, onClose, product, warehouse }) => {
             fullScreen={fullScreen || isMobile || isTablet}
             TransitionComponent={CustomDialogTransition}
             aria-labelledby="customized-dialog-title"
-            open={open}
+            open={true}
             fullWidth
         >
             <CustomDialogHeader
@@ -44,10 +45,14 @@ const InventoryStatesDialog = ({ open, onClose, product, warehouse }) => {
                             <Table aria-label="customized table">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>Warehouse</TableCell>
+                                        <TableCell>Plant</TableCell>
+                                        <TableCell>PO Qty</TableCell>
                                         <TableCell>Inventory</TableCell>
-                                        <TableCell>Average price</TableCell>
+                                        <TableCell>Average Price</TableCell>
                                         <TableCell>Total Amount</TableCell>
+                                        <TableCell>Inventory Age</TableCell>
+                                        <TableCell>Contact Person</TableCell>
+                                        <TableCell>Action</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -55,9 +60,25 @@ const InventoryStatesDialog = ({ open, onClose, product, warehouse }) => {
                                         inventoryData?.map((item: any, index: any) => (
                                             <TableRow key={index}>
                                                 <TableCell>{item?.warehouse?.optionLabel}</TableCell>
+                                                <TableCell>{data?.qty}</TableCell>
                                                 <TableCell>{item?.qty}</TableCell>
                                                 <TableCell>{item?.price}</TableCell>
                                                 <TableCell>{item?.qty * item?.price}</TableCell>
+                                                <TableCell>{item?.age}</TableCell>
+                                                <TableCell>{item?.managers?.map((e) => e.optionLabel)?.toString()}</TableCell>
+                                                <TableCell>
+                                                    {item?.qty > 0 &&
+                                                        <Button
+                                                            variant={"contained"}
+                                                            color="primary"
+                                                            size="small"
+                                                            onClick={() => {
+                                                            }}
+                                                        >
+                                                            {`Create ${routes.irtTicket.title}`}
+                                                        </Button>
+                                                    }
+                                                </TableCell>
                                             </TableRow>
                                         ))}
                                 </TableBody>

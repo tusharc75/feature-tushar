@@ -21,7 +21,6 @@ import { prepareDataForGrid } from "src/constants/helpers";
 import { getFrameworkComponents, genrateColoum } from "src/constants/columns"
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
-import { RiEditCircleLine } from "react-icons/ri";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom'
@@ -42,7 +41,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     const [isAddNewProduct, setIsAddNewProduct] = useState(false)
 
     const [showProductDialog, setShowProductDialog] = useState(false)
-    const [showInventoryStatesDialog, setShowInventoryStatesDialog] = useState({ open: false, product: null, warehouse: null })
+    const [showInventoryStatesDialog, setShowInventoryStatesDialog] = useState({ open: false, product: null, qty: 0 })
     const [selectedProductData, setSelectedProductData] = useState(null)
     const [isBulkEdit, setIsBulkEdit] = useState(false)
 
@@ -193,9 +192,10 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
             <HtmlTooltip title="Inventory States">
                 <IconButton
                     size="small"
+                    color="primary"
                     aria-label="Inventory"
                     onClick={() => {
-                        setShowInventoryStatesDialog({ open: true, product: params.data?.productDetail?._id, warehouse: purchaseOrderData?.warehouse?.optionValue })
+                        setShowInventoryStatesDialog({ open: true, product: params.data?.productDetail?._id, qty: params.data?.qty })
                     }}
                 >
                     <FaEye color="primary" />
@@ -476,13 +476,15 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     onOk={handleDelete}
                 />
             }
-            {showInventoryStatesDialog.open && <InventoryStatesDialog
-                open={showInventoryStatesDialog.open}
-                onClose={() => {
-                    setShowInventoryStatesDialog({ open: false, product: null, warehouse: null })
-                }}
-                product={showInventoryStatesDialog.product}
-                warehouse={showInventoryStatesDialog.warehouse} />}
+            {showInventoryStatesDialog.open &&
+                <InventoryStatesDialog
+                    onClose={() => {
+                        setShowInventoryStatesDialog({ open: false, product: null, qty: 0 })
+                    }}
+                    product={showInventoryStatesDialog.product}
+                    warehouse={purchaseOrderData?.warehouse?.optionValue}
+                    data={{ qty: showInventoryStatesDialog.qty }}
+                />}
         </Fragment>
     );
 };
