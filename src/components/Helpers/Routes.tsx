@@ -779,7 +779,21 @@ const routes = {
         ? storedRoutes.technicianScheduler?.title
         : RESOURCE_LABEL.technicianScheduler,
     path: '/technician-scheduler'
-  }
+  },
+  irtTicket: {
+    title:
+      storedRoutes && storedRoutes.irtTicket && storedRoutes.irtTicket.title
+        ? storedRoutes.irtTicket?.title
+        : RESOURCE_LABEL.irtTicket,
+    path: '/irt-ticket'
+  },
+  irtTicketDetail: {
+    title:
+      storedRoutes && storedRoutes.irtTicket && storedRoutes.irtTicket.title
+        ? storedRoutes.irtTicket?.title
+        : RESOURCE_LABEL.irtTicket,
+    path: '/irt-ticket/detail'
+  },
 };
 
 export default routes;

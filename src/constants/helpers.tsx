@@ -216,7 +216,8 @@ export const sidebarResource = {
   contactUs: 'Contact Us',
   employeeMaster: 'Employee Master',
   competencyMaster: 'Competency Master',
-  technicianScheduler: 'Technician Scheduler'
+  technicianScheduler: 'Technician Scheduler',
+  irtTicket: 'IRT Ticket'
 };
 
 export const primaryFields = {
@@ -315,7 +316,8 @@ export const RESOURCE_LABEL = {
   demandOrder: 'Demand Order',
   employeeMaster: 'Employee Master',
   competencyMaster: 'Competency Master',
-  technicianScheduler: 'Technician Scheduler'
+  technicianScheduler: 'Technician Scheduler',
+  irtTicket: 'IRT Ticket'
 };
 
 export const CHILD_RESOURCE = {
