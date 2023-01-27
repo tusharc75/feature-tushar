@@ -17,7 +17,6 @@ import EditIcon from '@material-ui/icons/Edit';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import FieldDialog from './FieldDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { ExpandMore } from '@material-ui/icons';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
@@ -25,12 +24,13 @@ import { GrDrag } from 'react-icons/gr';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const Steps = ({ serviceId }) => {
-  const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_stps`;
+
+  const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_steps`;
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const [stepDialog, setStepDialog] = useState({ open: false, stepId: '' });
   const [stepFieldsDialog, setStepFieldsDialog] = useState({ open: false, stepIds: [] });
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, ids: null });
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
     state: { permissions, user, selectedEntity }
@@ -42,15 +42,13 @@ const Steps = ({ serviceId }) => {
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
-  const [columns, setColumns] = useState(null);
-
-  const staticGridColumns = [
+  const [columns, setColumns] = useState([
     { field: 'stepName', headerName: 'Step Name', show: true, cellRenderer: 'stepNameRenderer' },
     { field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' },
     { field: 'leadDay', headerName: 'Lead Day', show: true, cellRenderer: 'commonRenderer' },
     { field: 'price', headerName: 'Price', show: true, cellRenderer: 'commonRenderer' },
     { field: 'fieldCount', headerName: 'Fields', show: true, cellRenderer: 'commonRenderer' }
-  ];
+  ]);
 
   useEffect(() => {
     fetchStepsData();
@@ -58,7 +56,6 @@ const Steps = ({ serviceId }) => {
 
   const fetchStepsData = async () => {
     dispatch({ type: 'loading', loading: true });
-    setColumns(null);
     axiosInstance()
       .get(`${serviceMaster.api}/steps/${serviceId}`)
       .then(({ data: { data } }) => {
@@ -70,12 +67,12 @@ const Steps = ({ serviceId }) => {
           data: data,
           count: data.length
         });
-        dispatch({ type: 'loading', loading: false });
-        setColumns(staticGridColumns);
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       })
       .catch((err) => {
         dispatch({ type: 'loading', loading: false });
-        setColumns(staticGridColumns);
         toastConfig.setToastConfig(err);
       });
   };
@@ -121,46 +118,43 @@ const Steps = ({ serviceId }) => {
   };
 
   const ActionsRenderer = (params) => (
-    <>
-      {' '}
-      {permissions?.serviceMaster?.isUpdate && (
-        <>
-          <HtmlTooltip title="Edit">
-            <IconButton
-              aria-label="setting"
-              onClick={(e) => {
-                setStepDialog({ open: true, stepId: params?.data?._id });
-              }}
-              size="small"
-            >
-              <EditIcon color="primary" fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-          <HtmlTooltip title="Add Fields">
-            <IconButton
-              aria-label="setting"
-              onClick={(e) => {
-                setStepFieldsDialog({ open: true, stepIds: [params?.data?._id] });
-              }}
-              size="small"
-            >
-              <AddCircleOutlineIcon color="primary" fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              onClick={() => {
-                setShowConfirmBox({ open: true, ids: [params?.data?._id] });
-              }}
-            >
-              <DeleteIcon color="error" fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-        </>
-      )}
-    </>
+    permissions?.serviceMaster?.isUpdate && (
+      <>
+        <HtmlTooltip title="Edit">
+          <IconButton
+            aria-label="setting"
+            onClick={(e) => {
+              setStepDialog({ open: true, stepId: params?.data?._id });
+            }}
+            size="small"
+          >
+            <EditIcon color="primary" fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+        <HtmlTooltip title="Add Fields">
+          <IconButton
+            aria-label="setting"
+            onClick={(e) => {
+              setStepFieldsDialog({ open: true, stepIds: [params?.data?._id] });
+            }}
+            size="small"
+          >
+            <AddCircleOutlineIcon color="primary" fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setShowConfirmBox({ open: true, ids: [params?.data?._id] });
+            }}
+          >
+            <DeleteIcon color="error" fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+      </>
+    )
   );
 
   const StepNameRenderer = (params) =>
@@ -304,7 +298,7 @@ const Steps = ({ serviceId }) => {
           limit={limit}
           pageSizes={pageSizes}
           page={page}
-          actionWidth={180}
+          actionWidth={150}
           loading={loading}
           renderedFrom={renderedFrom}
           refreshGrid={fetchStepsData}
