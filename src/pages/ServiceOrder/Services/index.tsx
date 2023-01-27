@@ -24,6 +24,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ServiceOrderQty from './ServiceOrderQty';
 import moment from 'moment';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const Services = ({
   serviceOrderData,
@@ -64,7 +65,12 @@ const Services = ({
 
   const fetchFields = async () => {
     var { fields: data, allFields } = await fetch_service_order_detail_fields(serviceOrderData?.currency);
-    const column: any = [
+    const newColumns = genrateCustomTableColumns(allFields, serviceOrderData?.currency, renderedFrom);
+    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay'
+    }
+    let column: any = [
       {
         accessor: 'srno',
         Header: 'Index',
@@ -124,41 +130,7 @@ const Services = ({
         )
       }
     ];
-    allFields?.forEach((element) => {
-      if (element.type === 'dateTime') {
-        column.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          width: 250,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName]).format(dateTimeFormat)}</p> : <NoDataCell />
-        });
-      }
-      else if (element.type === 'currencyAmount') {
-        element.displayCurrency.forEach((_currency) => {
-          let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-          let fieldLabel = element.fieldLabel + ' ' + _currency;
-          column.push({
-            accessor: fieldName,
-            Header: fieldLabel,
-            Cell: ({ row }) =>
-              row.original[fieldName] ? (
-                <p>{formatAmountWithCurrency(serviceOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-              ) : (
-                <NoDataCell />
-              )
-          });
-        });
-      }
-      else {
-        column.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
-      }
-    })
+    column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
       Header: '',
@@ -233,7 +205,7 @@ const Services = ({
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : '';
-      parent.qty = parent.qty;
+      parent.qtyDisplay = parent.qty;
       parent.canDelete = technician.some(d => d._id === parent._id) ? false : true;
       parent.estimateStartDate = parent.estimateStartDate ? parent.estimateStartDate : serviceOrderData?.estimateStartDate
       parent.estimateEndDate = parent.estimateEndDate ? parent.estimateEndDate : serviceOrderData?.estimateEndDate
@@ -266,7 +238,7 @@ const Services = ({
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
-      _subRow.qty = _subRow.qty;
+      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.canDelete = technician.some(d => d.service.optionValue === _subRow._id) ? false : true;
       _subRow.estimateStartDate = _subRow.estimateStartDate ? _subRow.estimateStartDate : serviceOrderData?.estimateStartDate
       _subRow.estimateEndDate = _subRow.estimateEndDate ? _subRow.estimateEndDate : serviceOrderData?.estimateEndDate
@@ -371,6 +343,9 @@ const Services = ({
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = material.find((d) => d._id === updatedData._id);
+    if (inputField.hasOwnProperty('qtyDisplay')) {
+      inputField['qty'] = inputField['qtyDisplay'];
+    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(material, inputField, allFields, updatedData);
     handleSaveData(rows);
