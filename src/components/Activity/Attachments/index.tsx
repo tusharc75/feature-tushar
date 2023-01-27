@@ -239,7 +239,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                                 </Tooltip>
                                 <Tooltip title={'Delete Folder'}>
                                   <IconButton size="small" color="primary" onClick={() => handleFolderDelete(_attachment._id)}>
-                                    <MdDelete />
+                                    <MdDelete color="error" />
                                   </IconButton>
                                 </Tooltip>
                               </>
