@@ -126,7 +126,7 @@ const IrtTicketDetail = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-      <Tabs
+        <Tabs
           className="new-tab-container-v1"
           value={tabValue}
           onChange={handleMainTabChange}
@@ -141,7 +141,7 @@ const IrtTicketDetail = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-               Header
+                Header
               </div>
             }
             value={0}
@@ -152,7 +152,7 @@ const IrtTicketDetail = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-              Details
+                Details
               </div>
             }
             value={1}
@@ -162,18 +162,19 @@ const IrtTicketDetail = () => {
         </Tabs>
         {tabValue === 0 && (
           <Box>
-        {loading || !fields?.length ? (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
-          </Grid>
-        ) : (
-          <DetailsPage data={irtTicketData} fields={fields} />
+            {loading || !fields?.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={irtTicketData} fields={fields} />
+            )}
+          </Box>
         )}
-        </Box>
-          )}
-          {tabValue === 1 && (
-              <Approver  approver={irtTicketData?.approver}/>
-          )}
+        {tabValue === 1 && (
+          <Approver
+            irtTicketData={irtTicketData} />
+        )}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
