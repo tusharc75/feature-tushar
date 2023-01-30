@@ -110,16 +110,35 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
     } else {
       axiosInstance()
         .post(`${routes?.irtTicket?.path}`, values)
-        .then(({ data }) => {
-          setLoading(false);
-          onSuccess(data.data);
-          setSubmitting(true);
-          history.push(`${routes?.irtTicketDetail?.path}/${data._id}`);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
+        .then(({ data: { data } }) => {
+          if (referenceData) {
+            axiosInstance()
+              .post(`${routes?.irtTicket?.path}/approver/${data._id}`, { approver: referenceData?.approver?.map((e) => { return { user: e } }) })
+              .then(({ data }) => {
+                setLoading(false);
+                onSuccess(data);
+                setSubmitting(true);
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: 'success',
+                  message: data.message
+                });
+              })
+              .catch((error) => {
+                toastConfig.setToastConfig(error);
+              });
+          }
+          else {
+            history.push(`${routes?.irtTicketDetail?.path}/${data._id}`);
+            setLoading(false);
+            onSuccess(data);
+            setSubmitting(true);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
+          }
         })
         .catch((error) => {
           setLoading(false);
