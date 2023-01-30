@@ -507,9 +507,9 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
             Cell: ({ row }) => row.original[ele.fieldName] ? <p>{row.original[ele.fieldName]}</p> : <NoDataCell />,
             Footer: (info) => {
               const qtyTotal = info.rows.filter(
-                (f) => f.original.parentId === null && f.values.hasOwnProperty(ele.fieldName) && !isNaN(f.values[ele.fieldName])
+                (f) => f.original.parentId === null && f.original.hasOwnProperty(ele.fieldName) && !isNaN(f.original[ele.fieldName])
               )
-                .reduce((sum, row) => row.values[currentColumn.accessor] + sum, 0);
+                .reduce((sum, row) => row.original[currentColumn.accessor] + sum, 0);
               return <>{qtyTotal}</>;
             }
           });

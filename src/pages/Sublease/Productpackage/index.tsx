@@ -25,6 +25,7 @@ import { RiEditCircleLine } from 'react-icons/ri';
 import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
 import { ExpandMore } from '@material-ui/icons';
 import styles from '../../Leads/Header.module.scss';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const Productpackage = ({
   subleaseData,
@@ -71,7 +72,12 @@ const Productpackage = ({
   const fetchFields = async () => {
     var data = await fetch_sublease_product_fields(subleaseData.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const coloum: any = [
+    const newColumns = genrateCustomTableColumns(data, subleaseData?.currency, renderedFrom);
+    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay'
+    }
+    let coloum: any = [
       {
         accessor: 'srno',
         Header: 'Index',
@@ -134,79 +140,10 @@ const Productpackage = ({
         }
       }
     ];
-    data.forEach((element) => {
-      if (element.fieldName === 'price' && element.required) {
-        setIsRateRequired(true);
-      }
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(subleaseData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(subleaseData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                ),
-              Footer: (info) => {
-                const total = info?.rows
-                  ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                  .reduce((sum, row) => row.values[fieldName] + sum, 0);
-                return <>{formatAmountWithCurrency(subleaseData?.currency, total)?.amountWithouCurrencyCode ?? total}</>;
-              }
-            });
-          });
-        }
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
-      }
-    });
+    const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    setIsRateRequired(isPriceRequired);
+    coloum = [...coloum, ...newColumns];
+
     coloum.push({
       accessor: 'action',
       Header: '',
