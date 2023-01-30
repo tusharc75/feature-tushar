@@ -14,6 +14,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageIrtTicket from './ManageIrtTicket';
 import { sidebarResource } from 'src/constants/helpers';
+import Approver from './Approver';
 
 const IrtTicketDetail = () => {
   const { id } = useParams();
@@ -28,6 +29,7 @@ const IrtTicketDetail = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
 
   const {
     state: { permissions, user }
@@ -97,6 +99,10 @@ const IrtTicketDetail = () => {
     setOpenUpdateDialog(false);
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -120,6 +126,42 @@ const IrtTicketDetail = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
+      <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              height: 0
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+               Header
+              </div>
+            }
+            value={0}
+            aria-controls="a11y-tabpanel-0"
+            id="a11y-tab-0"
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+              Details
+              </div>
+            }
+            value={1}
+            aria-controls="a11y-tabpanel-1"
+            id="a11y-tab-1"
+          />
+        </Tabs>
+        {tabValue === 0 && (
+          <Box>
         {loading || !fields?.length ? (
           <Grid container spacing={2} style={{ padding: '8px' }}>
             <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -127,6 +169,11 @@ const IrtTicketDetail = () => {
         ) : (
           <DetailsPage data={irtTicketData} fields={fields} />
         )}
+        </Box>
+          )}
+          {tabValue === 1 && (
+              <Approver  approver={irtTicketData?.approver}/>
+          )}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
