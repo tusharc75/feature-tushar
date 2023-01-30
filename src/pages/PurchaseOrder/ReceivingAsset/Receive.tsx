@@ -45,6 +45,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
             inventoryQuantity: parseInt(u?.inventoryQuantity),
             assetQuantity: parseInt(u?.assetQuantity),
             serialNumber: u?.serialNumber,
+            comment: u?.comment,
         }))
         axiosInstance().post(`${purchaseOrder.api}/receive-inventory/${purchaseOrderID}`,
             { products: products, receiveDate: values?.receiveDate }).then(({ data }) => {
@@ -162,6 +163,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                             "assetQuantity": 0,
                             "serializedProduct": d.serializedProduct || false,
                             "serialNumber": [],
+                            "comment": "",
                             "row": d
                         }))
                     }}
@@ -355,6 +357,27 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                             </Grid>
                                                                                         </Box>
                                                                                     }
+                                                                                    <Box mt={2}>
+                                                                                        <Grid item xs={12} md={8}>
+                                                                                            <Field
+                                                                                                fullWidth
+                                                                                                label="Comment"
+                                                                                                variant="outlined"
+                                                                                                type="text"
+                                                                                                size="small"
+                                                                                                component={TextField}
+                                                                                                name="comment"
+                                                                                                placeholder="Comment"
+                                                                                                value={data.comment}
+                                                                                                onChange={(e) => {
+                                                                                                    arrayHelpers.replace(index, {
+                                                                                                        ...values.seriaizedAsset[index],
+                                                                                                        ["comment"]: e.target.value,
+                                                                                                    })
+                                                                                                }}
+                                                                                            />
+                                                                                        </Grid>
+                                                                                    </Box>
                                                                                 </Grid>
                                                                             </Grid>
                                                                         </Box>
@@ -422,10 +445,6 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                     )}
                 </Formik>
             </MuiPickersUtilsProvider>
-
-
-
-
         </Dialog>
     );
 };
