@@ -224,7 +224,7 @@ const RepairOrder = () => {
               });
             }}
           >
-            <DeleteIcon color="error" />
+            <DeleteIcon color="error" style={{ width: '18px' }} />
           </IconButton>
         </HtmlTooltip>
       )}

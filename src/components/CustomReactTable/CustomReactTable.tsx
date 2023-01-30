@@ -591,7 +591,7 @@ export default function CustomReactTable({
             })}
           </TableBody>
           {rows?.length > 0 && (
-            <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer">
+            <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer ">
               {footerGroups.map((group) => (
                 <TableRow {...group.getFooterGroupProps()} className="tr">
                   {group.headers.map((column) => (
