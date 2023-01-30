@@ -15,8 +15,10 @@ import { CustomDialogTransition, generateUniqueIdOnly, isFieldNotTouched } from 
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { useHistory } from "react-router-dom";
+import IrtTicketDetail from './IrtTicketDetail';
 
-const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, purchaseOrderData = null }) => {
   const {
     state: { user }
   }: any = useData();
@@ -28,6 +30,7 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null }) => 
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const ref = useRef(null);
+  const history = useHistory();
 
   useEffect(() => {
     fetchFields();
@@ -62,6 +65,20 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null }) => 
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
+      }
+      else if (purchaseOrderData) {
+        const tempInitialData = getObjKeys('', fieldsDataForCreate);
+        tempInitialData['irtTicketNumber'] = `IRT_${generateUniqueIdOnly()}`;
+        tempInitialData['purchaseOrder'] = purchaseOrderData?.purchaseOrder ?  purchaseOrderData?.purchaseOrder : null ;
+        tempInitialData['warehouse'] = purchaseOrderData?.warehouse ?  purchaseOrderData?.warehouse : null ;
+        tempInitialData['qty'] = purchaseOrderData?.qty && purchaseOrderData?.qty > -1 ?  purchaseOrderData?.qty : null ;
+        tempInitialData['amount'] = purchaseOrderData?.amount ?  purchaseOrderData?.amount : null ;
+        tempInitialData['approver'] = purchaseOrderData?.approver ?  purchaseOrderData?.approver : null ;
+        tempInitialData['collaborator'] = purchaseOrderData?.collaborator ?  purchaseOrderData?.collaborator : null ;
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: tempInitialData
+        });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['irtTicketNumber'] = `IRT_${generateUniqueIdOnly()}`;
@@ -101,6 +118,7 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null }) => 
           setLoading(false);
           onSuccess(data.data);
           setSubmitting(true);
+          history.push(`${routes?.irtTicketDetail?.path}/${data._id}`);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -152,13 +170,12 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null }) => 
                     onClose();
                   }
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.irtTicketNumber ? `(${initialData.values?.irtTicketNumber})` : ''}`
-                    : `Create ${routes?.irtTicket?.title}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.irtTicketNumber ? `(${initialData.values?.irtTicketNumber})` : ''}`
+                  : `Create ${routes?.irtTicket?.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

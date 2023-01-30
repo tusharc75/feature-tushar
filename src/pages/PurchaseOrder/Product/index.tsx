@@ -18,7 +18,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
 import { prepareDataForGrid } from "src/constants/helpers";
-import { getFrameworkComponents, genrateColoum } from "src/constants/columns"
+import { genrateCustomTableColumns } from "src/constants/columns"
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
@@ -27,14 +27,16 @@ import { Link } from 'react-router-dom'
 import SendEmail from './../SendEmail';
 import { FaEye } from "react-icons/fa";
 import InventoryStatesDialog from "./InventoryStatesDialog";
+import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import NoDataCell from "src/components/Helpers/NoDataCell";
+import { calculateRowsField } from "src/components/RentalManagment/helper";
 
 const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission, updateStatus, checkReceivedProduct }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
     const allowedToEdit = hasPermission && permissions?.purchaseOrder.isUpdate
-
-    const [columns, setColumns] = useState([])
 
     const [addProductDialog, setAddProductDialog] = useState(false);
     const [isAddingProducts, setAddingProducts] = useState(false);
@@ -44,16 +46,18 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     const [showInventoryStatesDialog, setShowInventoryStatesDialog] = useState({ open: false, product: null, qty: 0 })
     const [selectedProductData, setSelectedProductData] = useState(null)
     const [isBulkEdit, setIsBulkEdit] = useState(false)
+    const [selectedProducts, setSelectedProducts] = useState([]);
 
-    const [frameWorkComponent, setFrameWorkComponent] = useState(null)
-    const [gridApi, setGridApi] = useState(null);
-    const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
     const [anchorEl, setAnchorEl] = useState(null);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deletePurchaseOrderProduct, setDeletePurchaseOrderProduct] = useState([]);
 
     const [isRateRequired, setIsRateRequired] = useState(false);
+    const [columns, setColumns] = useState(null);
+    const [rowsData, setRowsData] = useState(null);
+    const [allFields, setAllFields] = useState([]);
+    const [material, setMaterial] = useState([]);
+    const [isInlineEdit, setIsInlineEdit] = useState(false);
 
     useEffect(() => {
         fetchFields()
@@ -64,23 +68,92 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     }, [columns]);
 
     const fetchFields = async () => {
+        let columns: any = []
         const productResult = await axiosInstance().get('/field?resource=Product&view=true')
         const productFields = productResult?.data?.data?.filter((e) => ["productName", "productCategory", "productNumber", "productDescription", "serializedProduct"].includes(e?.fieldData?.fieldName));
         productFields?.forEach((e) => {
             if (e?.fieldData?.fieldName === "productName") {
-                columns.push({ field: "productName", headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" })
+                columns.push(
+                    {
+                        accessor: 'productName',
+                        Header: e?.fieldData?.fieldLabel,
+                        minWidth: 300,
+                        width: 300,
+                        sticky: isMobile ? 'none' : 'left',
+                        Cell: ({ row }) => (
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                {!allowedToEdit ? (
+                                    <p> {row.original.productName}</p>
+                                ) : (
+                                    <p
+                                        onClick={() => {
+                                            setShowProductDialog(true)
+                                            setSelectedProductData(row.original)
+                                        }}
+                                        className="link text-truncate"
+                                        title={row.original.detail}
+                                    >
+                                        {row.original.productName}
+                                    </p>
+                                )}
+                                <Box ml={1} />
+                                <IconButton
+                                    size="small"
+                                    onClick={() => {
+                                        window.open(`${routes.productDetail.path}/${row.original?.productId}`);
+                                    }}
+                                >
+                                    <OpenInNewIcon fontSize="small" color="primary" />
+                                </IconButton>
+                            </div>
+                        ),
+                        Footer: () => {
+                            return <>Total</>;
+                        }
+                    })
             }
             if (e?.fieldData?.fieldName === "productNumber") {
-                columns.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+                columns.push(
+                    {
+                        accessor: 'productNumber',
+                        Header: e?.fieldData?.fieldLabel,
+                        width: 200,
+                        Cell: ({ row }) => {
+                            return row.original['productNumber'] ? <p className="text-truncate">{row.original.productNumber}</p> : <NoDataCell />;
+                        }
+                    }
+                )
             }
             if (e?.fieldData?.fieldName === "serializedProduct") {
-                columns.push({ field: "serializedProductView", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+                columns.push(
+                    {
+                        accessor: 'serializedProductView',
+                        Header: e?.fieldData?.fieldLabel,
+                        width: 200,
+                        Cell: ({ row }) => {
+                            return row.original['serializedProductView'] ? <p className="text-truncate">{row.original.serializedProductView}</p> : <NoDataCell />;
+                        }
+                    })
             }
             if (e?.fieldData?.fieldName === "productDescription") {
-                columns.push({ field: "productDescription", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+                columns.push({
+                    accessor: 'productDescription',
+                    Header: e?.fieldData?.fieldLabel,
+                    width: 200,
+                    Cell: ({ row }) => {
+                        return row.original['productDescription'] ? <p className="text-truncate">{row.original.productDescription}</p> : <NoDataCell />;
+                    }
+                })
             }
             if (e?.fieldData?.fieldName === "productCategory") {
-                columns.push({ field: "productCategory", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+                columns.push({
+                    accessor: 'productCategory',
+                    Header: e?.fieldData?.fieldLabel,
+                    width: 200,
+                    Cell: ({ row }) => {
+                        return row.original['productCategory'] ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />;
+                    }
+                })
             }
         })
         const fields = await fetch_po_product_fields(purchaseOrderData?.currency);
@@ -89,42 +162,76 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 setIsRateRequired(true);
             }
         });
-        let rendererNames = [];
-        genrateColoum(fields, columns, rendererNames, false, renderedFrom);
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-        tempFrameworkComponent = {
-            nameRenderer: NameRenderer,
-            commonRenderer: CommonRenderer,
-            checkboxRenderer: CheckboxRenderer,
-            actionsRenderer: ActionsRenderer,
-            ...tempFrameworkComponent,
+        setAllFields(JSON.parse(JSON.stringify(fields)));
+        const newColumns = genrateCustomTableColumns(fields, purchaseOrderData?.currency, renderedFrom);
+        let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+        if (qtyIndex > -1) {
+            newColumns[qtyIndex].accessor = 'qtyDisplay'
         }
-        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...newColumns];
+        columns.push({
+            accessor: 'action',
+            Header: '',
+            minWidth: 50,
+            width: 50,
+            sticky: 'right',
+            disableFilters: true,
+            canDrag: false,
+            Cell: ({ row }) => {
+                return allowedToEdit ? (
+                    <>
+                        <HtmlTooltip title="Inventory States">
+                            <IconButton
+                                size="small"
+                                color="primary"
+                                aria-label="Inventory"
+                                onClick={() => {
+                                    setShowInventoryStatesDialog({ open: true, product: row.original?.productDetail?._id, qty: row.original?.qty })
+                                }}
+                            >
+                                <FaEye color="primary" />
+                            </IconButton>
+                        </HtmlTooltip>
+                        {(row.original?.actualReceived === undefined || row.original?.actualReceived === 0) && <GridDeleteIcon
+                            hasDeletePermission={permissions?.purchaseOrder?.isUpdate}
+                            ownerId={user?.user?._id}
+                            userId={user?.user?._id}
+                            onDelete={() => {
+                                setShowDeleteConfirmBox(true)
+                                setDeletePurchaseOrderProduct([row.original?._id])
+                            }
+                            }
+                            entity="rentalManagement"
+                        />
+                        }
+                    </>
+                ) : null
+            }
+        });
         setColumns([...columns])
     }
 
     const fetchPurchaseOrderProduct = () => {
-        dispatch({ type: "loading", loading: true });
-        if (gridApi) {
-            gridApi.setRowData([]);
-        }
+
         setNextStep(false)
         axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`).then(({ data: { data } }) => {
             setPurchaseOrderProduct(JSON.parse(JSON.stringify(data)))
+            setMaterial(JSON.parse(JSON.stringify(data)))
             let rows = data?.map((item, index) => {
                 let finalObject = prepareDataForGrid(item);
-                finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
+                finalObject["isChecked"] = selectedProducts.some(s => s._id === item._id);
                 finalObject["allowedToEdit"] = allowedToEdit
                 let res: any = {
                     ...finalObject,
                 };
                 res.productName = item.productDetail?.productName
                 res.productNumber = item.productDetail?.productNumber
-                res.productDescription = item.productDetail?.productDescription
+                res.productDescription = item.productDetail?.productDescription || item.productDetail?.productDesc
                 res.serializedProduct = item.productDetail?.serializedProduct
                 res.serializedProductView = item.productDetail?.serializedProduct ? "Yes" : "No"
                 res.productCategory = item.productDetail?.productCategory?.optionLabel
                 res.productDetail = item.productDetail
+                res.parentId = null
                 if (item?.qty === 0) {
                     res.isValid = false;
                 }
@@ -152,69 +259,11 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 setNextStep(true)
             }
             checkReceivedProduct(data)
-            dispatch({ type: "initialize", data: rows, count: rows.length });
-            dispatch({ type: "loading", loading: false });
+            setRowsData(rows);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
-            dispatch({ type: "loading", loading: false });
         });
     };
-
-    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-    if (columnState) {
-        columns.forEach((item) => {
-            columnState.forEach((d) => {
-                if (d.colId === item.field) {
-                    item.show = !d.hide;
-                }
-            });
-        });
-    }
-
-    const NameRenderer = params => (<Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
-        {params.value}
-    </Link>)
-
-    const ActionsRenderer = (params) => (
-        <>
-            <HtmlTooltip title="Edit">
-                <IconButton
-                    size="small"
-                    aria-label="Clone"
-                    onClick={() => {
-                        setShowProductDialog(true)
-                        setSelectedProductData(params.data)
-                    }}
-                >
-                    <EditIcon color="primary" />
-                </IconButton>
-            </HtmlTooltip>
-            <HtmlTooltip title="Inventory States">
-                <IconButton
-                    size="small"
-                    color="primary"
-                    aria-label="Inventory"
-                    onClick={() => {
-                        setShowInventoryStatesDialog({ open: true, product: params.data?.productDetail?._id, qty: params.data?.qty })
-                    }}
-                >
-                    <FaEye color="primary" />
-                </IconButton>
-            </HtmlTooltip>
-            {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && <GridDeleteIcon
-                hasDeletePermission={permissions?.purchaseOrder?.isUpdate}
-                ownerId={user?.user?._id}
-                userId={user?.user?._id}
-                onDelete={() => {
-                    setShowDeleteConfirmBox(true)
-                    setDeletePurchaseOrderProduct([params.data._id])
-                }
-                }
-                entity="rentalManagement"
-            />
-            }
-        </>
-    );
 
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
@@ -272,6 +321,16 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
             });
     }
 
+    const onSaveInlineEdit = async (inputField, updatedData) => {
+        const rowData = material.find((d) => d._id === updatedData._id);
+        if (inputField.hasOwnProperty('qtyDisplay')) {
+            inputField['qty'] = inputField['qtyDisplay'];
+        }
+        let rows: any = [{ ...rowData, ...updatedData }];
+        rows = await calculateRowsField(material, inputField, allFields, updatedData);
+        handleUpdateQty(rows);
+    };
+
     return (
         <Fragment>
             {allowedToEdit && <Box display="flex" justifyContent="space-between" m={1}>
@@ -312,7 +371,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                             color="default"
                             size="small"
                             onClick={openActions}
-                            disabled={selectedRecords.length ? false : true}
+                            disabled={selectedProducts.length ? false : true}
                             aria-controls="action-menu"
                         >
                             {"Actions"}
@@ -331,7 +390,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                         open={Boolean(anchorEl)}
                         onClose={closeActions}
                     >
-                        <MenuItem disabled={selectedRecords.length === 0}
+                        <MenuItem disabled={selectedProducts.length === 0}
                             onClick={() => {
                                 closeActions()
                                 setIsBulkEdit(true)
@@ -342,94 +401,34 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                         {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
                             closeActions()
                             setShowDeleteConfirmBox(true)
-                            setDeletePurchaseOrderProduct(selectedRecords.map(d => d._id))
+                            setDeletePurchaseOrderProduct(selectedProducts.map(d => d._id))
                         }}>Delete</MenuItem>}
                     </Menu>
                 </div>
             </Box>}
-            {columns && frameWorkComponent ? isMobile && !isTablet ?
-                <CustomSwipableList
-                    allowSelection={allowedToEdit}
-                    allowSwipe={allowedToEdit}
-                    permissions={permissions}
-                    primaryField={columns?.find(d => d.field === "productName")}
-                    onClick={(data) => {
-                        setShowProductDialog(true)
-                        setSelectedProductData(data)
-                    }}
-                    dataRows={dataRows}
-                    selectedRecords={selectedRecords}
-                    dispatch={dispatch}
-                    onEdit={(data) => {
-                        setShowProductDialog(true)
-                        setSelectedProductData(data)
-                    }}
-                    extraParamsToCheckDelete={true}
-                    onDelete={(data) => {
-                        setShowDeleteConfirmBox(true)
-                        setDeletePurchaseOrderProduct([data._id])
-                    }}
-                    rowCount={rowCount}
-                    page={page}
-                    loading={loading}
-                    chips={
-                        [{
-                            label: `Quantity: `,
-                            field: "qty",
-                            forceShow: true
-                        }]
-                    }
-                    onCreate={null}
-                    showClone={false}
-                    fullHeight={true}
-                    renderedFrom={renderedFrom}
-                    onClone={() => { }}
-                /> :
-                <CustomAgGridEditable
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameWorkComponent}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    allowAction={allowedToEdit}
-                    actionWidth={150}
-                    allowSelection={allowedToEdit}
-                    isClientSideGrid={true}
-                    loading={loading}
-                    onCellValueChanged={(row) => {
-                        //handleUpdateOrderProduct(row.data)
-                    }}
-                    renderedFrom={renderedFrom}
-                    refreshGrid={fetchPurchaseOrderProduct}
-                    currency={purchaseOrderData?.currency?.toLowerCase()}
-                    fromPurchaseOrderGrid={true}
-                    rowClassRules={{
-                        "scrap-data-row": function (params) {
-                            if (params?.node?.rowPinned) {
-                                return true
-                            }
-                            return false
-                        },
-                        "red-data-row":
-                            function (params) {
-                                if (params?.node?.rowPinned) {
-                                    return false
-                                }
-                                return !params?.data?.isValid
-                            },
-                    }}
-                />
-                : <Box
-                    p={2}
-                    height={500}
-                    bgcolor="white">
+            {columns && rowsData ? (
+                <Box zIndex={5} width={'100%'} height={'calc(100vh - 393px)'}  >
+                    <CustomReactTable
+                        height={'calc(100vh - 393px)'}
+                        columns={columns}
+                        data={rowsData}
+                        setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+                        onSelect={setSelectedProducts}
+                        childrenProperty="subRows"
+                        uniqueKey="_id"
+                        hideSelection={!allowedToEdit}
+                        renderedFrom="purchase_order_product"
+                        isClientSideGrid={true}
+                        onSaveEdit={onSaveInlineEdit}
+                        material={material}
+                        hideExpander={true}
+                    />
+                </Box>
+            ) : (
+                <Box p={2} height={500} bgcolor="white">
                     <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
-            }
+            )}
             {addProductDialog &&
                 <AddExistingProductInventory
                     isAddingProducts={isAddingProducts}
@@ -462,7 +461,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     }}
                     onSubmit={handleUpdateQty}
                     currency={purchaseOrderData?.currency}
-                    productData={!isBulkEdit ? selectedProductData : selectedRecords}
+                    productData={!isBulkEdit ? selectedProductData : selectedProducts}
                     bulkEdit={isBulkEdit}
                     purchaseOrderData={purchaseOrderData}
                 />
@@ -484,6 +483,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     product={showInventoryStatesDialog.product}
                     warehouse={purchaseOrderData?.warehouse?.optionValue}
                     data={{ qty: showInventoryStatesDialog.qty }}
+                    purchaseOrderData={purchaseOrderData}
                 />}
         </Fragment>
     );
