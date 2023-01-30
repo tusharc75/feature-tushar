@@ -1,7 +1,8 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+// import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { FaClone } from 'react-icons/fa';
 import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
 import {
@@ -199,13 +200,13 @@ const RepairOrder = () => {
               setShowManageRepairOrderDialog({ open: true, isClone: true, idToClone: params.data._id });
             }}
           >
-            <FileCopyIcon fontSize="small" color="primary" />
+            <FaClone fontSize="small" style={{ color: 'var(--primary)' }} />
           </IconButton>
         </Tooltip>
       ) : (
         <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
           <IconButton aria-label="Clone" size="small">
-            <FileCopyIcon fontSize="small" />
+            <FaClone fontSize="small" />
           </IconButton>
         </Tooltip>
       )}
@@ -213,6 +214,7 @@ const RepairOrder = () => {
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
+            style={{ marginLeft: '5px' }}
             aria-label="Delete"
             onClick={() => {
               setSingleRepairOrderDelete({
