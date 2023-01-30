@@ -3,13 +3,14 @@ import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flo
 import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { COLOUR_MASTER, WORKORDER_SERVICE_COLOR } from 'src/constants/helpers';
+import { COLOUR_MASTER, WORKORDER_SERVICE_COLOR, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Box, Button, Paper } from '@material-ui/core';
+import _ from 'lodash';
 
 const customNodeStyles = {
   workOrder: { name: 'WorkOrder', ...COLOUR_MASTER.repairJob },
@@ -22,6 +23,23 @@ const customNodeStyles = {
     name: 'Post Work Service',
     background: WORKORDER_SERVICE_COLOR.postWork,
     borderColor: 'green'
+  },
+  stepPassed: {
+    name: 'Step Passed',
+    background: '#ffd65b',
+    borderColor: 'green',
+    cursor: 'pointer'
+  },
+  stepFailed: {
+    name: 'Step Failed',
+    background: '#ffd65b',
+    borderColor: 'red',
+    cursor: 'pointer'
+  },
+  stepSkipped: {
+    name: 'Step Skipped',
+    background: '#ffd65b',
+    borderColor: 'grey'
   },
   step: {
     name: 'Step',
@@ -48,6 +66,13 @@ const WorkOrderViews = (props) => {
   async function fetchViewsData() {
     setLoading(true);
     try {
+      const workOrderData: any = await axiosInstance().get(`${routes.workOrder.path}/${workOrderId}/steps-data`);
+      const stepDatas = {};
+      workOrderData?.data?.data
+        ?.filter((s) => s?.passFailStatus)
+        ?.map((s) => {
+          stepDatas[s?.stepId] = s?.passFailStatus;
+        });
       var xPosition = 0;
       var flow: any[] = [
         {
@@ -65,16 +90,18 @@ const WorkOrderViews = (props) => {
         }
       ];
       var flowEdge: any[] = [];
-      const workOrderServices = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`);
+      const workOrderServices = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}/views`);
       const allServices = workOrderServices?.data?.data || [];
       const allSteps = [];
-
       if (allServices?.length) xPosition += 300;
       let serviceStepIdx = 0;
       allServices?.map((s, sIdx) => {
         allSteps.push(...(s?.steps || []));
+        // all assigned users should output as a single string
+        const allAssignUsers = s?.assignedUsers?.map((u) => u?.optionLabel).join(', ') || '';
+        const serviceId = `${s?._id}_${s?.uniqueId}`;
         flow.push({
-          id: `${s?._id}`,
+          id: `${serviceId}`,
           sourcePosition: 'right',
           targetPosition: 'left',
           type: 'default',
@@ -82,8 +109,14 @@ const WorkOrderViews = (props) => {
             ref_type: 'service',
             ref_id: s?._id,
             label: (
-              <HtmlTooltip arrow placement="top" title={'Service'}>
-                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s?.serviceName || ''}</div>
+              <HtmlTooltip
+                arrow
+                placement="top"
+                title={`${allAssignUsers !== '' ? `Technician: ${allAssignUsers}` : 'Service'}${
+                  s?.serviceStatus ? `, Status: ${s?.serviceStatus}` : ''
+                }`}
+              >
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s?.serviceDetail?.serviceName || ''}</div>
               </HtmlTooltip>
             )
           },
@@ -91,14 +124,15 @@ const WorkOrderViews = (props) => {
           style: s?.preWork ? customNodeStyles.preWorkService : customNodeStyles.postWorkService
         });
         flowEdge.push({
-          id: `workOrder-service-${s._id}`,
+          id: `workOrder-service-${serviceId}-${workOrderId}`,
           source: `${workOrderId}`,
           arrowHeadType: 'arrow',
-          target: `${s._id}`
+          target: `${serviceId}`
         });
         s?.steps?.map((step) => {
+          const stepId = `${step?._id}_${_.random(1000, 9999)}`;
           flow.push({
-            id: `${step?._id}`,
+            id: `${stepId}`,
             sourcePosition: 'right',
             targetPosition: 'left',
             type: 'default',
@@ -106,19 +140,38 @@ const WorkOrderViews = (props) => {
               ref_type: 'step',
               // ref_id: item.inventory,
               label: (
-                <HtmlTooltip arrow placement="top" title={'Step'}>
+                <HtmlTooltip
+                  arrow
+                  placement="top"
+                  title={
+                    stepDatas[step?._id] && stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.passed
+                      ? 'Step Passed'
+                      : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.failed
+                      ? 'Step Failed'
+                      : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.skipped
+                      ? 'Step Skipped'
+                      : 'Step'
+                  }
+                >
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{step?.stepName || ''}</div>
                 </HtmlTooltip>
               )
             },
             position: { x: xPosition + 300, y: serviceStepIdx * 80 },
-            style: customNodeStyles.step
+            style:
+              stepDatas[step?._id] && stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.passed
+                ? customNodeStyles.stepPassed
+                : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.failed
+                ? customNodeStyles.stepFailed
+                : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.skipped
+                ? customNodeStyles?.stepSkipped
+                : customNodeStyles.step
           });
           flowEdge.push({
-            id: `workOrder-service-steps-${step._id}`,
-            source: `${s?._id}`,
+            id: `workOrder-service-steps-${s?._id}_${s?.uniqueId}-${stepId}`,
+            source: `${s?._id}_${s?.uniqueId}`,
             arrowHeadType: 'arrow',
-            target: `${step._id}`
+            target: `${stepId}`
           });
           serviceStepIdx++;
         });

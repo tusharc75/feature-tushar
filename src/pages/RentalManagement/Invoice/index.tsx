@@ -35,14 +35,11 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const Invoice = ({
   rentalManagementData,
-  isTabletScreen,
-  isSmallScreen,
   setNextStep,
   fetchRentalData,
   updateJobStatus,
   statusOptions,
   renderedFrom,
-  showActivity,
   stepFullScreen,
   currencySymbol,
   allowedToEdit
@@ -280,7 +277,8 @@ const Invoice = ({
       } else {
         const resultMaterial = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
         material = resultMaterial?.data?.data?.material;
-        inventory = resultMaterial?.data?.data?.inventory;
+        inventory = resultMaterial?.data?.data?.inventory?.filter((e) => !e.isReplaced);
+
         const resultCost = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
         additionalcost = resultCost?.data?.data;
       }
@@ -315,7 +313,6 @@ const Invoice = ({
               ? parent?.serviceDetail?.serviceName
               : parent.packageDetail?.packageName
           }`;
-        console.log(parent?.productDetail?.productDesc);
         parent.description =
           parent?.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
@@ -490,7 +487,7 @@ const Invoice = ({
             <Fragment>
               <Button
                 variant="outlined"
-                color="primary"
+                className="btn-outline-v1"
                 size="small"
                 disabled={isOffline}
                 onClick={() => {
@@ -505,7 +502,7 @@ const Invoice = ({
           {permissions?.rentalManagement?.isRead && !isMobile && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
+              className="btn-outline-v1"
               type="button"
               size="small"
               style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
@@ -523,7 +520,7 @@ const Invoice = ({
           {permissions?.rentalManagement?.isRead && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
+              className="btn-outline-v1"
               type="button"
               size="small"
               style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
@@ -574,7 +571,7 @@ const Invoice = ({
           {permissions?.rentalManagement?.isRead && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
+              className="btn-outline-v1"
               size="small"
               style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
               disabled={downlodingFile === 'Email' && isLoading ? true : false || isOffline}
@@ -595,17 +592,7 @@ const Invoice = ({
           {columns && rowsData ? (
             <Box
               zIndex={5}
-              width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
-              }
+              width={'100%'}
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 350px)'}
             >
               <CustomReactTable

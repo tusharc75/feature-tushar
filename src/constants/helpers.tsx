@@ -45,7 +45,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 };
 
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
-export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Ready To Invoice'];
+export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Invoice'];
 export const invoiceProcessSteps = ['Add Products', 'Ready To Invoice'];
 export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Send To Customer', 'End'];
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
@@ -63,7 +63,8 @@ export const rentalManagementSteps = [
 export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loading Ticket'];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
-export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Invoice'];
+export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Loading Ticket', 'Invoice'];
+export const demandOrderSteps = ['Add Products'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -201,78 +202,22 @@ export const sidebarResource = {
   serviceMaster: 'Service Master',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
+  serviceOrder: 'Service Order',
   workOrder: 'Work Order',
-  workOrderTechnician: 'Work Order Technician'
-};
-
-export const resourceNames = {
-  customerAccount: 'Customer Account',
-  user: 'User',
-  customerContact: 'Customer Contact',
-  brand: 'Brand',
-  entity: 'Entity',
-  role: 'Role',
-  lead: 'Lead',
-  opportunity: 'Opportunity',
-  field: 'Field',
-  productCategory: 'Product Category',
-  productInventory: 'Product Inventory',
-  serializedAsset: 'Serialized Asset',
-  priceTemplate: 'Price Template',
-  product: 'Product',
-  productTemplate: 'Product Template',
-  doa: 'DOA',
-  termsAndConditions: 'Terms & Conditions',
-  equiptmentRentalMaster: 'Equiptment Rental Master',
-  productBuilder: 'Product Builder',
-  formBuilder: 'Form Builder',
-  currencyConverter: 'Currency Converter',
-  quoteBuilder: 'Quotes',
-  PNQBuilder: 'PNQ Builder',
-  DOARequest: 'DOA Request',
-  task: 'Task',
-  case: 'Case',
-  note: 'Note',
-  event: 'Event',
-  email: 'Email',
-  attachment: 'Attachment',
-  reminder: 'Reminder',
-  calendar: 'Calendar',
-  dashboard: 'Dashboard',
-  budget: 'Budget',
-  marketSegment: 'Market Segment',
-  quotePdfTemplate: 'Quote Pdf Template',
-  warehouse: 'Plant',
-  rentalManagement: 'Rental Management',
-  deliveryTicket: 'Delivery Ticket',
-  pricingCondition: 'Pricing Condition',
-  repairJob: 'Repair Job',
-  salesOrder: 'Sales Order',
-  invoice: 'Invoice',
-  eCommercePolicy: 'e-Commerce Policy',
-  packages: 'Packages',
-  supplierContact: 'Supplier Contact',
-  supplierAccount: 'Supplier Account',
-  pricing: 'Pricing',
-  priceBuilder: 'Price Builder',
-  flags: 'Flags',
-  projectSales: 'Project Sales',
-  purchaseOrder: 'Purchase Order',
-  transferAsset: 'Transfer Asset',
-  sublease: 'Sublease',
-  transferInventory: 'Transfer Inventory',
-  wellMaster: 'Well Master',
-  bulkAssetCreation: 'Bulk Asset Creation',
-  pos: 'Pos',
-  report: 'Report',
-  scheduleReport: 'Schedule Report',
-  resourceCalendar: 'Resource Calendar',
-  cageManagement: 'Cage Management',
-  productAuction: 'Product Auction',
-  quotation: 'Quotation',
-  repairOrder: 'Repair Order',
-  workOrder: 'Work Order',
-  workOrderTechnician: 'Work Order Technician'
+  workOrderSupervisor: 'Work Order Supervisor',
+  workOrderTechnician: 'Work Order Technician',
+  freqentlyAskedQuestion: 'Frequently Asked Question',
+  blog: 'Blog',
+  demandOrder: 'Demand Order',
+  surveys: 'Surveys',
+  supportTicket: 'Support Ticket',
+  eCommerceHome: 'e-Commerce Home',
+  contactUs: 'Contact Us',
+  employeeMaster: 'Employee Master',
+  competencyMaster: 'Competency Master',
+  technicianScheduler: 'Technician Scheduler',
+  irtTicket: 'IRT Ticket'
 };
 
 export const primaryFields = {
@@ -357,9 +302,22 @@ export const RESOURCE_LABEL = {
   serviceMaster: 'Service Master',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
+  serviceOrder: 'Service Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
-  workOrderTechnician: 'Work Order Technician'
+  workOrderTechnician: 'Work Order Technician',
+  freqentlyAskedQuestion: 'Frequently Asked Question',
+  blog: 'Blog',
+  eCommerceHome: 'e-Commerce Home',
+  surveys: 'Surveys',
+  contactUs: 'Contact Us',
+  supportTicket: 'Support Ticket',
+  demandOrder: 'Demand Order',
+  employeeMaster: 'Employee Master',
+  competencyMaster: 'Competency Master',
+  technicianScheduler: 'Technician Scheduler',
+  irtTicket: 'IRT Ticket'
 };
 
 export const CHILD_RESOURCE = {
@@ -376,7 +334,8 @@ export const CHILD_RESOURCE = {
   quotationProduct: 'Quotation Product',
   quotationCost: 'Quotation Cost',
   quotationService: 'Quotation Service',
-  repairOrderProduct: 'Repair Order Product'
+  repairOrderProduct: 'Repair Order Product',
+  serviceOrderDetails: 'Service Order Detail'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -440,6 +399,21 @@ export const repairOrder = {
   api: '/repair-order'
 };
 
+export const productionOrder = {
+  resource: 'productionOrder',
+  api: '/production-order'
+};
+
+export const serviceOrder = {
+  resource: 'serviceOrder',
+  api: '/service-order'
+};
+
+export const employeeMaster = {
+  resource: 'employeeMaster',
+  api: '/employee-master'
+};
+
 export const salesOrder = {
   api: '/sales-order',
   resource: 'sales-order'
@@ -453,6 +427,16 @@ export const invoice = {
 export const quotation = {
   api: '/quotation',
   resource: 'quotation'
+};
+
+export const demandOrder = {
+  api: '/demand-order',
+  resource: 'demandOrder'
+};
+
+export const technicianScheduler = {
+  api: '/technician-scheduler',
+  resource: 'technicianScheduler'
 };
 
 export const packages = {
@@ -547,7 +531,7 @@ export const workOrderSupervisor = {
   route: '/work-order-supervisor',
   permission: 'workOrderSupervisor',
   resource: 'Work Order Supervisor'
-}
+};
 
 export const convertInventory = {
   api: '/convert-inventory-to-asset',
@@ -827,21 +811,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -886,6 +870,8 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'colorPicker') {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
     } else if (input.type === 'multiImageUpload') {
+      schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
+    } else if (input.type === 'multiFileUpload') {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
     } else {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
@@ -1130,7 +1116,7 @@ export const getUniqueCurrencies = () => {
   return uniqBy(currencies, 'currencyCode');
 };
 
-export const formatAmountWithCurrency = (currencyCode, amount) => {
+export const formatAmountWithCurrency = (currencyCode, amount, currencyShow = true) => {
   if ((!currencyCode && !amount) || !amount || isNaN(amount)) {
     return {
       shortFormatAmount: '',
@@ -1221,10 +1207,12 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
     language = currencyData.languages[0];
   }
 
-  let options = {
+  let options: any = {
     style: 'currency',
     currency: currencyCode
   };
+
+  if (currencyShow === false) options.style = 'decimal';
 
   if (Number.isInteger(amount)) {
     options['maximumFractionDigits'] = 0;
@@ -1701,9 +1689,9 @@ export const INVENTORY_STATUS = {
   returned: 'Returned',
   needRepair: 'Need Repair',
   needRecert: 'Need Recert',
-  notApplied: "N/A",
+  inRepair: 'In-Repair',
+  notApplied: 'N/A'
 };
-
 
 export const INVENTORY_HISTORY_TYPE = {
   rental: 'Rental',
@@ -1723,7 +1711,7 @@ export const INVENTORY_HISTORY_TYPE = {
   inventoryToAsset: 'Inventory to Asset',
   quotation: 'Quotation',
   invoice: 'Invoice'
-}
+};
 
 export const DELIVERY_TICKET_STATUS = {
   new: 'New',
@@ -1777,7 +1765,8 @@ export const DELIVERY_TICKET_REFRENCE_TYPE = {
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventory'
+  transferInventory: 'Transfer Inventory',
+  repairOrder: 'Repair Order'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -1790,12 +1779,6 @@ export const SUBLEASE_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   issued: 'Issued',
-  completed: 'Completed'
-};
-
-export const REPAIR_ORDER_STATUS = {
-  new: 'New',
-  inProgress: 'In-Progress',
   completed: 'Completed'
 };
 
@@ -1859,22 +1842,109 @@ export const ACTIVITY_RESOURCE = {
   transferInventory: 'transferInventory',
   quotation: 'quotation',
   repairOrder: 'repairOrder',
-  workOrder: 'workOrder'
+  productionOrder: 'productionOrder',
+  serviceOrder: 'serviceOrder',
+  workOrder: 'workOrder',
+  demandOrder: 'demandOrder'
 };
 
 export const REPORT_LIST = [
-  { title: sidebarResource.rentalManagement, permission: 'rentalManagement', key: 'rentalManagement', type: 'dynamic' },
-  { title: sidebarResource.salesOrder, permission: 'salesOrder', key: 'salesOrder', type: 'dynamic' },
-  { title: sidebarResource.serializedAsset, permission: 'serializedAsset', key: 'serializedAsset', type: 'dynamic' },
-  { title: sidebarResource.lead, permission: 'lead', key: 'lead', type: 'dynamic' },
-  { title: sidebarResource.opportunity, permission: 'opportunity', key: 'opportunity', type: 'dynamic' },
-  { title: sidebarResource.quoteBuilder, permission: 'quoteBuilder', key: 'quoteBuilder', type: 'dynamic' },
-  { title: sidebarResource.projectSales, permission: 'projectSales', key: 'projectSales', type: 'dynamic' },
-  { title: sidebarResource.purchaseOrder, permission: 'purchaseOrder', key: 'purchaseOrder', type: 'dynamic' },
-  { title: 'Purchase Order Details', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'purchaseOrderDetails' },
-  { title: 'Inventory Evaluation', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'inventoryEvaluation' },
-  { title: 'Inventory History', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'inventoryHistory' },
-  { title: 'Average Price By Supplier', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'averagePriceBySupplier' }
+  {
+    title: sidebarResource.rentalManagement,
+    permission: 'rentalManagement',
+    key: 'rentalManagement',
+    type: 'dynamic',
+    iconsColor: ['#059825', '#059825 ', '#60D778'],
+    color: '#F9FDEC'
+  },
+  {
+    title: sidebarResource.salesOrder,
+    permission: 'salesOrder',
+    key: 'salesOrder',
+    type: 'dynamic',
+    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
+    color: '#FFEFEE'
+  },
+  {
+    title: sidebarResource.serializedAsset,
+    permission: 'serializedAsset',
+    key: 'serializedAsset',
+    type: 'dynamic',
+    iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
+    color: '#F3F8FF'
+  },
+  {
+    title: sidebarResource.lead,
+    permission: 'lead',
+    key: 'lead',
+    type: 'dynamic',
+    iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6'],
+    color: '#FFFAEC'
+  },
+  {
+    title: sidebarResource.opportunity,
+    permission: 'opportunity',
+    key: 'opportunity',
+    type: 'dynamic',
+    iconsColor: ['#AD14F5', '#6203AC', '#BE74E5'],
+    color: '#F6F1FF'
+  },
+  {
+    title: sidebarResource.quoteBuilder,
+    permission: 'quoteBuilder',
+    key: 'quoteBuilder',
+    type: 'dynamic',
+    iconsColor: ['#FFA800', '#E35200', '#FBC56E'],
+    color: '#FFF7F2'
+  },
+  {
+    title: sidebarResource.projectSales,
+    permission: 'projectSales',
+    key: 'projectSales',
+    type: 'dynamic',
+    iconsColor: ['#059825', '#059825', '#60D778'],
+    color: '#F9FDEC'
+  },
+  {
+    title: sidebarResource.purchaseOrder,
+    permission: 'purchaseOrder',
+    key: 'purchaseOrder',
+    type: 'dynamic',
+    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
+    color: '#FFEFEE'
+  },
+  {
+    title: 'Purchase Order Details',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'purchaseOrderDetails',
+    iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6 '],
+    color: '#FFFAEC'
+  },
+  {
+    title: 'Inventory Evaluation',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'inventoryEvaluation',
+    iconsColor: ['#059825', '#059825', '#60D778'],
+    color: '#F9FDEC'
+  },
+  {
+    title: 'Inventory History',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'inventoryHistory',
+    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
+    color: '#FFEFEE'
+  },
+  {
+    title: 'Average Price By Supplier',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'averagePriceBySupplier',
+    iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
+    color: '#F3F8FF'
+  }
 ];
 
 export const RESOURCE_CALENDAR = [
@@ -1883,20 +1953,23 @@ export const RESOURCE_CALENDAR = [
 ];
 
 export const PDF_RESOURCE_LIST = [
-  { title: sidebarResource.quoteBuilder, value: resourceNames.quoteBuilder, key: 'quoteBuilder' },
-  { title: sidebarResource.quotation, value: resourceNames.quotation, key: 'quotation' },
-  { title: sidebarResource.rentalManagement, value: resourceNames.rentalManagement, key: 'rentalManagement' },
-  { title: sidebarResource.repairJob, value: resourceNames.repairJob, key: 'repairJob' },
-  { title: sidebarResource.purchaseOrder, value: resourceNames.purchaseOrder, key: 'purchaseOrder' },
-  { title: sidebarResource.deliveryTicket, value: resourceNames.deliveryTicket, key: 'deliveryTicket' },
-  { title: sidebarResource.transferAsset, value: resourceNames.transferAsset, key: 'transferAsset' },
-  { title: sidebarResource.sublease, value: resourceNames.sublease, key: 'sublease' },
-  { title: sidebarResource.bulkAssetCreation, value: resourceNames.bulkAssetCreation, key: 'bulkAssetCreation' },
-  { title: sidebarResource.transferInventory, value: resourceNames.transferInventory, key: 'transferInventory' },
-  { title: sidebarResource.salesOrder, value: resourceNames.salesOrder, key: 'salesOrder' },
-  { title: sidebarResource.repairOrder, value: resourceNames.repairOrder, key: 'repairOrder' },
-  { title: sidebarResource.workOrder, value: resourceNames.workOrder, key: 'workOrder' },
-  { title: sidebarResource.invoice, value: resourceNames.invoice, key: 'invoice' }
+  { title: sidebarResource.quoteBuilder, value: sidebarResource.quoteBuilder, key: 'quoteBuilder' },
+  { title: sidebarResource.quotation, value: sidebarResource.quotation, key: 'quotation' },
+  { title: sidebarResource.rentalManagement, value: sidebarResource.rentalManagement, key: 'rentalManagement' },
+  { title: sidebarResource.repairJob, value: sidebarResource.repairJob, key: 'repairJob' },
+  { title: sidebarResource.purchaseOrder, value: sidebarResource.purchaseOrder, key: 'purchaseOrder' },
+  { title: sidebarResource.deliveryTicket, value: sidebarResource.deliveryTicket, key: 'deliveryTicket' },
+  { title: sidebarResource.transferAsset, value: sidebarResource.transferAsset, key: 'transferAsset' },
+  { title: sidebarResource.sublease, value: sidebarResource.sublease, key: 'sublease' },
+  { title: sidebarResource.bulkAssetCreation, value: sidebarResource.bulkAssetCreation, key: 'bulkAssetCreation' },
+  { title: sidebarResource.transferInventory, value: sidebarResource.transferInventory, key: 'transferInventory' },
+  { title: sidebarResource.salesOrder, value: sidebarResource.salesOrder, key: 'salesOrder' },
+  { title: sidebarResource.repairOrder, value: sidebarResource.repairOrder, key: 'repairOrder' },
+  { title: sidebarResource.workOrder, value: sidebarResource.workOrder, key: 'workOrder' },
+  { title: sidebarResource.invoice, value: sidebarResource.invoice, key: 'invoice' },
+  { title: sidebarResource.demandOrder, value: sidebarResource.demandOrder, key: 'demandOrder' },
+  { title: sidebarResource.productionOrder, value: sidebarResource.productionOrder, key: 'productionOrder' },
+  { title: sidebarResource.serviceOrder, value: sidebarResource.serviceOrder, key: 'serviceOrder' }
 ];
 
 export const getApi = (resource: string) => {
@@ -1917,8 +1990,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'customer-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'supplier-account':
@@ -1928,8 +2002,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'supplier-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'lead':
@@ -2010,6 +2085,31 @@ export const getData = (resource: string, data: any) => {
     case 'quotation':
       return {
         name: `${data.quotationNumber}`,
+        id: data._id
+      };
+    case 'demand-order':
+      return {
+        name: `${data?.demandOrderNumber}`,
+        id: data._id
+      };
+    case 'production-order':
+      return {
+        name: `${data?.productionOrderNumber}`,
+        id: data._id
+      };
+    case 'service-order':
+      return {
+        name: `${data?.serviceOrderNumber}`,
+        id: data._id
+      };
+    case 'repair-order':
+      return {
+        name: `${data?.repairOrderNumber}`,
+        id: data._id
+      };
+    case 'work-order':
+      return {
+        name: `${data?.workOrderNumber}`,
         id: data._id
       };
     default:
@@ -2110,8 +2210,8 @@ export const QUOTATION_STATUS = {
   buildingQuote: 'Building Quote',
   waitingForSupplierPrice: 'Waiting for Supplier Price',
   sentToCustomer: 'Sent to Customer',
-  acceptByCustomer: 'Acceptd by Customer',
-  rejectByCustomer: 'Rejectd by Customer'
+  acceptByCustomer: 'Accepted by Customer',
+  rejectByCustomer: 'Rejected by Customer'
 };
 
 export const WORKORDER_SERVICE_COLOR = {
@@ -2122,20 +2222,116 @@ export const WORKORDER_SERVICE_COLOR = {
 
 export const WORKORDER_SERVICE_STATUS = {
   pending: 'Pending',
+  backlog: 'Backlog',
   inProgress: 'In-Progress',
   completed: 'Completed',
   failed: 'Failed'
 };
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
+  start: 'start',
+  pause: 'pause',
+  end: 'end',
   completed: 'Completed',
   passed: 'Passed',
   failed: 'Failed',
   skipped: 'Skipped',
-  end: 'end',
+  needReperform: 'Need Reperform'
 };
 
 export const REPAIR_ORDER_TYPE = {
   internal: 'Asset Repair',
-  external: 'Customer Owned Asset Repair',
+  external: 'Customer Owned Asset Repair'
 };
+
+export const REPAIR_ORDER_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  preWork: 'Pre-Work In-Progress',
+  postWork: 'Post-Work In-Progress',
+  buildingQuote: 'Building Quote',
+  waitingQuote: 'Waiting On Quote',
+  quoteAccepted: 'Quote Accepted',
+  quoteRejected: 'Quote Rejected',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  completed: 'Completed'
+};
+
+export const PRODUCTION_ORDER_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  preWork: 'Pre-Work In-Progress',
+  postWork: 'Post-Work In-Progress',
+  buildingQuote: 'Building Quote',
+  waitingQuote: 'Waiting On Quote',
+  quoteAccepted: 'Quote Accepted',
+  quoteRejected: 'Quote Rejected',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  completed: 'Completed'
+};
+
+export const WORK_ORDER_STATUS = {
+  new: 'New',
+  preWork: 'Pre-Work In-Progress',
+  // buildingQuote: 'Building Quote',
+  // waitingQuote: 'Waiting On Quote',
+  // quoteAccepted: 'Quote Accepted',
+  // quoteRejected: 'Quote Rejected',
+  postWork: 'Post-Work In-Progress',
+  completed: 'Completed'
+};
+
+export const convertMsToTime = (milliseconds: any) => {
+  function padTo2Digits(num) {
+    num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
+    return num.toString().padStart(2, '0');
+  }
+
+  let seconds = Math.floor(milliseconds / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+
+  seconds = seconds % 60;
+  minutes = minutes % 60;
+
+  let time = '';
+
+  if (hours === 0) {
+    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours === 0 && minutes === 0) {
+    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours > 0 && hours < 24) {
+    time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours >= 24) {
+    time = `${padTo2Digits(hours / 24)}d`;
+  }
+  return time;
+};
+
+export const ECOM_SECTIONS = [
+  {
+    type: 'imageSlider',
+    label: 'Image Slider'
+  },
+  {
+    type: 'image',
+    label: 'Image'
+  },
+  {
+    type: 'menu',
+    label: 'Menu'
+  },
+  {
+    type: 'productCategory',
+    label: 'Product Category'
+  },
+  {
+    type: 'productList',
+    label: 'Product List'
+  }
+];

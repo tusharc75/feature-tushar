@@ -1,96 +1,97 @@
-import activities from "./svg/activities.svg";
-import calendar from "./svg/calender.svg";
-import contact from "./svg/contact.svg";
-import customer from "./svg/customer.svg";
-import dashboard from "./svg/dashboard.svg";
-import doa from "./svg/doa.svg";
-import flags from "./svg/flag.svg";
-import currency from "./svg/dollar.svg";
-import leads from "./svg/leads.svg";
-import entity from "./svg/location.svg";
-import logo from "./svg/logo.svg";
-import opportunities from "./svg/opportunities.svg";
-import pricing from "./svg/pricing.svg";
-import product from "./svg/product.svg";
-import quote_builder from "./svg/quote_builder.svg";
-import reminder from "./svg/reminder.svg";
-import suppliers from "./svg/suppliers.svg";
-import terms_conditions from "./svg/terms_conditions.svg";
-import users from "./svg/users.svg";
-import menu_icon from "./svg/menu_icon.svg";
-import ai_robot from "./svg/artificial_intelligence-pana.svg";
-import contacts_placeholder from "./svg/contacts_placeholder.svg";
-import timeline_placeholder from "./svg/timeline_placeholder.svg";
+import activities from './svg/activities.svg';
+import calendar from './svg/calender.svg';
+import contact from './svg/contact.svg';
+import customer from './svg/customer.svg';
+import dashboard from './svg/dashboard.svg';
+import doa from './svg/doa.svg';
+import flags from './svg/flag.svg';
+import currency from './svg/dollar.svg';
+import leads from './svg/leads.svg';
+import entity from './svg/location.svg';
+import logo from './svg/logo.svg';
+import opportunities from './svg/opportunities.svg';
+import pricing from './svg/pricing.svg';
+import product from './svg/product.svg';
+import quote_builder from './svg/quote_builder.svg';
+import reminder from './svg/reminder.svg';
+import suppliers from './svg/suppliers.svg';
+import terms_conditions from './svg/terms_conditions.svg';
+import users from './svg/users.svg';
+import menu_icon from './svg/menu_icon.svg';
+import ai_robot from './svg/artificial_intelligence-pana.svg';
+import contacts_placeholder from './svg/contacts_placeholder.svg';
+import timeline_placeholder from './svg/timeline_placeholder.svg';
 import logoPng from './svg/logo.png';
 import imgComputer from './svg/bglaptop.svg';
 import total_cost from './svg/total_cost.svg';
 import profit from './svg/profit.svg';
 import booked_value from './svg/booked_value.svg';
 import logoNew from './svg/logoNew.svg';
-
-
+import LogoShort from './svg/logoShort.svg';
 
 export const SVG = (name) => {
   switch (name) {
-    case "Logo":
+    case 'Logo':
       return logo;
-    case "LogoNew":
+    case 'LogoNew':
       return logoNew;
-    case "Menu Icon":
+    case 'LogoNewShort':
+      return LogoShort;
+    case 'Menu Icon':
       return menu_icon;
-    case "Dashboard":
+    case 'Dashboard':
       return dashboard;
-    case "Activities":
+    case 'Activities':
       return activities;
-    case "Customer":
+    case 'Customer':
       return customer;
-    case "Pricing":
+    case 'Pricing':
       return pricing;
-    case "Suppliers":
+    case 'Suppliers':
       return suppliers;
-    case "Product":
+    case 'Product':
       return product;
-    case "Entity":
+    case 'Entity':
       return entity;
-    case "User":
+    case 'User':
       return users;
-    case "Terms & Conditions":
+    case 'Terms & Conditions':
       return terms_conditions;
-    case "DOA":
+    case 'DOA':
       return doa;
-    case "Currency Convertor":
+    case 'Currency Convertor':
       return currency;
-    case "Contacts":
+    case 'Contacts':
       return contact;
-    case "Leads":
+    case 'Leads':
       return leads;
-    case "Opportunities":
+    case 'Opportunities':
       return opportunities;
-    case "Price Builder":
+    case 'Price Builder':
       return currency;
-    case "Quote Builder":
+    case 'Quote Builder':
       return quote_builder;
-    case "Reminder":
+    case 'Reminder':
       return reminder;
-    case "Calendar":
+    case 'Calendar':
       return calendar;
-    case "Flags":
+    case 'Flags':
       return flags;
-    case "AI Robot":
+    case 'AI Robot':
       return ai_robot;
-    case "Contacts Placeholder":
+    case 'Contacts Placeholder':
       return contacts_placeholder;
-    case "Timepline Placeholder":
+    case 'Timepline Placeholder':
       return timeline_placeholder;
-    case "LogoPng":
+    case 'LogoPng':
       return logoPng;
-    case "imgComputer":
+    case 'imgComputer':
       return imgComputer;
-    case "total_cost":
+    case 'total_cost':
       return total_cost;
-    case "profit":
+    case 'profit':
       return profit;
-    case "booked_value":
+    case 'booked_value':
       return booked_value;
     default:
       return;

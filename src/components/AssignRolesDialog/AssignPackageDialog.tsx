@@ -16,11 +16,12 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 let searchTimeout;
 
 const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageType, ids }) => {
-
   const renderedFrom = `${routes.packages.title}_${referenceType}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-  const { state: { permissions, selectedEntity } }: any = useData();
+  const {
+    state: { permissions, selectedEntity }
+  }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
   const [isAssigning, setAssigning] = useState(false);
@@ -38,6 +39,10 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
     fetchGridColumns();
   }, []);
 
+  const defaultColumns = [
+    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
+  ];
+
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
     if (searchTimeout) {
@@ -49,26 +54,28 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
-    axiosInstance().get('/field?resource=Packages&view=true').then(({ data: { data } }) => {
-      let columns = [];
-      let rendererNames = [];
-      data.forEach((o) => {
-        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
+    axiosInstance()
+      .get('/field?resource=Packages&view=true')
+      .then(({ data: { data } }) => {
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
+            }
           }
-        }
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...getStaticFields()];
+        setColumns([...defaultColumns, ...columns]);
       });
-      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-      tempFrameworkComponent = {
-        ...tempFrameworkComponent
-      };
-      setFrameWorkComponent({ ...tempFrameworkComponent });
-      columns = [...columns, ...getStaticFields()];
-      setColumns([...columns]);
-    });
   };
 
   const fetchData = () => {
@@ -77,25 +84,34 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
       gridApi.setRowData([]);
     }
     const queryString = getQueryString();
-    axiosInstance().get(`${packages.api}${queryString}`).then(({ data }) => {
-      let rows = data.data.map((u) => {
-        let finalObject = prepareDataForGrid(u);
-        finalObject['isChecked'] = false;
-        finalObject['id'] = u._id;
-        return {
-          ...finalObject
-        };
-      });
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      dispatch({
-        type: 'selection',
-        selectedRecords: savedRecords
-      });
-      dispatch({ type: 'initialize', data: rows, count: data.count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    })
+    axiosInstance()
+      .get(`${packages.api}${queryString}`)
+      .then(({ data }) => {
+        let rows = data.data.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          finalObject['isChecked'] = false;
+          finalObject['id'] = u._id;
+          finalObject['unitMain'] = u?.unit;
+          finalObject['pricingMethodMain'] = u?.pricingMethod;
+          finalObject['qty'] = 1;
+          const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id);
+          if (qtyAdded.length) {
+            finalObject['qty'] = qtyAdded[0].qty;
+          }
+          return {
+            ...finalObject
+          };
+        });
+        const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+        dispatch({
+          type: 'selection',
+          selectedRecords: savedRecords
+        });
+        dispatch({ type: 'initialize', data: rows, count: data.count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -114,7 +130,7 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
     const updatedFilters = [];
     if (packageType) {
       updatedFilters.push({
-        field: "packageType",
+        field: 'packageType',
         term: packageType
       });
     }
@@ -158,42 +174,28 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
   };
 
   return (
-    <Dialog
-      fullWidth
-      maxWidth="md"
-      fullScreen={true}
-      open={true}
-      onClose={handleClose}
-      aria-labelledby="assign-roles-dialog">
-      <CustomDialogHeader
-        title={`Assign ${routes.packages.title}`}
-        showManimizeMaximize={false}
-        showRequiredLabel={false}
-        onClose={handleClose}
-      />
+    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
+      <CustomDialogHeader title={`Assign ${routes.packages.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={6} className="d-flex align-items-center gap-1">
-            </Grid>
+            <Grid item xs={6} className="d-flex align-items-center gap-1"></Grid>
             <Grid item xs={6} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
                   disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
-                  onClick={() => { 
-                    if(packageType === 'service'){
-                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.packageType === 'Service')) 
-                    } else {
-                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => e._id)) 
-                    }
+                  onClick={() => {
+                    setAssigning(true);
+                    onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                   }}
                   color="primary"
                   size="small"
                   variant="contained"
                   endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
                 >
-                  Add{' '}  {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
+                  Add{' '}
+                  {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
                     ? '(' + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ')'
                     : ''}
                 </Button>

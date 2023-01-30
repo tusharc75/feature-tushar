@@ -1,12 +1,11 @@
-import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
+import { useState, useEffect, useContext, Fragment } from 'react';
+import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Menu, MenuItem, Typography, IconButton } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -18,26 +17,26 @@ import {
   REPAIR_ORDER_STATUS,
   repairOrderSteps,
   REPAIR_ORDER_TYPE,
-  QUOTATION_STATUS
+  QUOTATION_STATUS,
+  WORKORDER_SERVICE_STATUS
 } from 'src/constants/helpers';
-import Activity from 'src/components/Activity';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairOrder from './ManageRepairOrder';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import TabPanel from 'src/components/TabPanel';
-import HideWhenOffline from 'src/components/HideWhenOffline';
-import { defaultActivityShow } from 'src/constants/helpers';
 import Steps from '../RentalManagement/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Productpackage from './Productpackage';
 import Quotation from './Quotation';
 import WorkOrder from './WorkOrder';
+import LoadingTicket from './LoadingTicket';
+import { ExpandMore } from '@material-ui/icons';
+import { GrStatusInfo } from 'react-icons/gr';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 function a11yProps(index: any) {
   return {
@@ -49,8 +48,7 @@ function a11yProps(index: any) {
 const RepairOrderDetails = () => {
   const renderedFrom = camelCase(routes?.repairOrder.title);
   const toastConfig = useContext(CustomToastContext);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
+
   const { id } = useParams();
   const history = useHistory();
 
@@ -60,7 +58,7 @@ const RepairOrderDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const [hasAssetsAdded, setHasAssetsAdded] = useState(false)
+  const [hasAssetsAdded, setHasAssetsAdded] = useState(false);
   const [repairOrderData, setRepairOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -69,17 +67,17 @@ const RepairOrderDetails = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
   const [repairOrderProcessSteps, setRepairOrderProcessSteps] = useState(repairOrderSteps);
-
   const [quotationVersionData, setQuotationVersionData] = useState(null);
   const [showQuotationConfirmBox, setShowQuotationConfirmBox] = useState(false);
-
   const [quoteClonning, setQuoteClonning] = useState(false);
+  const [isAnyMaterial, setisAnyMaterial] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [statusOptions, setStatusOptions] = useState([]);
+  const [enableStatusChange, setEnableStatusChange] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -113,6 +111,7 @@ const RepairOrderDetails = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= repairOrderProcessSteps.length) {
+      fetchQuotationData();
       updateProcessStatus(repairOrderProcessSteps[currentStep]);
     }
     if (['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep])) fetchQuotationData();
@@ -123,6 +122,12 @@ const RepairOrderDetails = () => {
       .get(`/field?resource=${sidebarResource.repairOrder}`)
       .then(({ data: { data } }) => {
         setRepairOrderFields(data);
+        data.some((o) => {
+          if (o?.fieldData?.fieldName === 'status') {
+            setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue !== 'Deleted')]);
+            return true;
+          }
+        });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -130,22 +135,45 @@ const RepairOrderDetails = () => {
   };
 
   const fetchRepairOrderData = () => {
+    setRepairOrderData(null);
     axiosInstance()
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        setRepairOrderData({ ...data });
+        setisAnyMaterial(data?.canDelete ? false : true);
         setCurrentStep(repairOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? repairOrderProcessSteps.indexOf(data?.processStatus) : 0);
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
-          setRepairOrderProcessSteps(repairOrderSteps.filter((d) => !['Quotation', `Post Work Service`, `Invoice`]?.includes(d)));
+          setRepairOrderProcessSteps(repairOrderSteps.filter((d) => !['Quotation', `Post Work Service`, 'Loading Ticket', `Invoice`]?.includes(d)));
         }
-        setAllowedToDelete(data.owner.optionValue === user?.user?._id);
+        setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+        setRepairOrderData({ ...data });
         if (permissions?.repairOrder?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
           params.delete('openEdit');
           history.push({ search: params.toString() });
+        }
+        if (data?.type === REPAIR_ORDER_TYPE.internal && data?.status !== REPAIR_ORDER_STATUS.completed) {
+          checkStatusChange();
+        } else {
+          setEnableStatusChange(false);
+        }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const checkStatusChange = () => {
+    axiosInstance()
+      .get(`${repairOrder.api}/${id}/work-order/service`)
+      .then(({ data: { data } }) => {
+        if (data?.material?.length) {
+          const material = data?.material?.filter((e) => !e.parentId);
+          if (material?.filter((e) => e?.workOrder?.status === WORKORDER_SERVICE_STATUS.completed)?.length === material?.length) {
+            setEnableStatusChange(true);
+          }
         }
       })
       .catch((err) => {
@@ -158,7 +186,7 @@ const RepairOrderDetails = () => {
       .put(`${repairOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(routes.repairOrder.path);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -177,24 +205,26 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const fetchQuotationData = (versionNumber = null) => {
     axiosInstance()
-      .get(`${repairOrder.api}/${repairOrderData?._id}/repairorder/quotation`)
+      .get(`${repairOrder.api}/${id}/check/quotation`)
       .then(({ data: { data } }) => {
-        let keys = Object.keys(data?.versions);
-        let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1]);
-        setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] });
+        if (data) {
+          let keys = Object.keys(data?.versions);
+          let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1]);
+          setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] });
+        }
       });
   };
 
   const createNewVersionQuote = () => {
     setQuoteClonning(true);
     axiosInstance()
-      .post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`)
+      .post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`, { updateProcessStatus: false })
       .then(() => {
         setShowQuotationConfirmBox(false);
         fetchQuotationData();
@@ -208,255 +238,278 @@ const RepairOrderDetails = () => {
       });
   };
 
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
+  const handleStatusChange = (o) => {
+    if (o.optionValue && repairOrderData?.status !== o.optionValue) {
+      updateOrderStatus(o.optionValue);
     }
-  }, [isSmallScreen, tabValue]);
+  };
+
+  const updateOrderStatus = (status) => {
+    axiosInstance()
+      .patch(`${repairOrder.api}/status/${repairOrderData._id}`, { status: status })
+      .then(({ data: { data } }) => {
+        fetchRepairOrderData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
 
   return (
-    <>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.repairOrder, { title: repairOrderData?.repairOrderNumber }]} />
-      </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-        <div>
-          <div>
-            <Paper>
-              {repairOrderData ? (
-                <DetailsPageHeader heading={repairOrderData?.repairOrderNumber} mainPoints={null} showHeading={true}>
-                  {['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep]) &&
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={[routes.repairOrder, { title: repairOrderData?.repairOrderNumber }]} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {repairOrderData ? (
+              <>
+                {permissions?.repairOrder?.isUpdate &&
+                  allowedToEdit &&
+                  [REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced].includes(repairOrderData?.status) && (
+                    <Fragment>
+                      <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                        endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                      >
+                        {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        {statusOptions?.map((o, index) => {
+                          return (
+                            <MenuItem
+                              disabled={index <= statusOptions.findIndex((d) => d.optionLabel === repairOrderData?.status)}
+                              onClick={() => {
+                                closeActions();
+                                handleStatusChange(o);
+                              }}
+                              value={o}
+                            >
+                              {o?.optionLabel}
+                            </MenuItem>
+                          );
+                        })}
+                      </Menu>
+                    </Fragment>
+                  )}
+                {permissions?.repairOrder?.isUpdate &&
+                  allowedToEdit &&
+                  ['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep]) &&
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    quotationVersionData?.status
+                  ) && (
+                    <Button
+                      className="buttonStyleBigScreen"
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        createNewVersionQuote();
+                      }}
+                    >
+                      Create New Version
+                    </Button>
+                  )}
+
+                {permissions?.repairOrder?.isUpdate &&
+                  allowedToEdit &&
+                  !(
                     [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                       quotationVersionData?.status
-                    ) && (
-                      <Button
-                        className="buttonStyleBigScreen"
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          createNewVersionQuote();
-                        }}
-                      >
-                        Create New Version
-                      </Button>
-                    )}
-                  {permissions?.repairOrder?.isUpdate &&
-                    allowedToEdit &&
-                    !(
-                      [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                        quotationVersionData?.status
-                      ) && ['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep])
-                    ) && (
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        onClick={() => setOpenUpdateDialog(true)}
-                        className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                        style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                      >
-                        {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                      </Button>
-                    )}
-                  {permissions?.repairOrder?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                </DetailsPageHeader>
-              ) : (
-                <Skeleton variant="text" width="150px" height="40px" />
-              )}
-              <Tabs
-                className="quote-tab"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    display: 'none'
-                  }
-                }}
-              >
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 1 ? 'white' : '',
-                    color: tabValue === 1 ? '#163340' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                    </div>
-                  }
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 2 ? 'white' : '',
-                    color: '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                    </div>
-                  }
-                  {...a11yProps(1)}
-                />
-              </Tabs>
-              <TabPanel value={tabValue} index={0}>
-                <Box>
-                  {repairOrderData && repairOrderFields.length ? (
-                    <DetailsPage data={repairOrderData} fields={repairOrderFields} />
-                  ) : (
-                    <Grid container spacing={2} style={{ padding: '8px' }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
+                    ) && ['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep])
+                  ) && (
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      onClick={() => setOpenUpdateDialog(true)}
+                      className={'btn-outline-v1'}
+                    >
+                      {isMobile ? <BiEdit size={20} /> : 'Edit'}
+                    </Button>
                   )}
-                </Box>
-              </TabPanel>
-              <TabPanel value={tabValue} index={1}>
-                <Paper>
-                  <Steps
-                    isNextStep={false}
-                    nextStep={nextStep}
-                    steps={repairOrderProcessSteps}
-                    currentStep={currentStep}
-                    setCurrentStep={setCurrentStep}
-                    isStepEnded={[REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status)}
-                    setStepFullScreen={() => setStepFullScreen(true)}
-                    handlePrev={() => {
-                      if (
-                        [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationVersionData?.status
-                        ) &&
-                        repairOrderProcessSteps[currentStep] === 'Quotation'
-                      ) {
-                        setShowQuotationConfirmBox(true);
-                      } else {
-                        setCurrentStep((prevStep) => {
-                          const newStep = prevStep - 1;
-                          return newStep;
-                        });
-                      }
-                    }}
-                  />
-                  <ContentFullScreen title={repairOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                    {repairOrderProcessSteps[currentStep] === 'Add Assets' && repairOrderData && (
-                      <Productpackage
-                        repairOrderData={repairOrderData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
-                        renderedFrom={`${renderedFrom}_grid-1`}
-                        stepFullScreen={stepFullScreen}
-                        setHasAssetsAdded={setHasAssetsAdded}
-                        allowedToEdit={
-                          [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                            quotationVersionData?.status
-                          )
-                            ? false
-                            : allowedToEdit
-                        }
-                        allowedToDelete={allowedToDelete}
-                      />
-                    )}
-                    {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') &&
-                      repairOrderData && (
-                        <WorkOrder
-                          repairOrderData={repairOrderData}
-                          setNextStep={setNextStep}
-                          isSmallScreen={isSmallScreen}
-                          isTabletScreen={isTabletScreen}
-                          showActivity={showActivity}
-                          stepFullScreen={stepFullScreen}
-                          allowedToEdit={
-                            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                              quotationVersionData?.status
-                            )
-                              ? false
-                              : allowedToEdit
-                          }
-                          allowedToDelete={allowedToDelete}
-                          isPostWorkService={Boolean(currentStep === 3)}
-                        />
-                      )}
-                    {repairOrderProcessSteps[currentStep] === 'Quotation' && repairOrderData && (
-                      <Quotation
-                        repairOrderData={repairOrderData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        showActivity={showActivity}
-                        renderedFrom={`${renderedFrom}_grid-4`}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={allowedToEdit}
-                        allowedToDelete={allowedToDelete}
-                        setQuotationVersionData={setQuotationVersionData}
-                      />
-                    )}
-                    {repairOrderProcessSteps[currentStep] === 'Invoice' && repairOrderData && (
-                      <Quotation
-                        repairOrderData={repairOrderData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        showActivity={showActivity}
-                        renderedFrom={`${renderedFrom}_grid-4`}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={false}
-                        allowedToDelete={false}
-                        invoiceStep={true}
-                        setQuotationVersionData={setQuotationVersionData}
-                      />
-                    )}
-                  </ContentFullScreen>
-                </Paper>
-              </TabPanel>
-            </Paper>
-          </div>
-          <Box my={1} />
-        </div>
-        <div className="position-relative">
-          <HideWhenOffline>
-            <Paper>
-              {!isSmallScreen && (
-                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={() => setActivityShow(!showActivity)}>
-                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                </span>
-              )}
-              <div style={{ display: showActivity ? 'block' : 'none' }}>
-                <Grid container>
-                  <Grid item xs={12}>
-                    {repairOrderData && (
-                      <div>
-                        <Activity
-                          resourceId={repairOrderData._id}
-                          resource={ACTIVITY_RESOURCE.repairOrder}
-                          restrictedAddActivities={
-                            permissions && permissions[`${ACTIVITY_RESOURCE.repairOrder}`] && permissions[`${ACTIVITY_RESOURCE.repairOrder}`].isUpdate
-                              ? []
-                              : ['Attachment', 'Case']
-                          }
-                          relatedTo={[
-                            {
-                              type: ACTIVITY_RESOURCE.repairOrder,
-                              referenceId: repairOrderData._id,
-                              access: true
-                            }
-                          ]}
-                          handleActivityRefresh={() => {}}
-                          emails={[]}
-                        />
-                      </div>
-                    )}
-                  </Grid>
-                </Grid>
+                {permissions?.repairOrder?.isDelete && allowedToDelete && repairOrderData?.canDelete && (
+                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                )}
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
+            <ActivityButton referenceId={repairOrderData?._id} resource={ACTIVITY_RESOURCE.repairOrder} />
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
               </div>
-            </Paper>
-          </HideWhenOffline>
-        </div>
-      </div>
+            }
+            {...a11yProps(0)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
+            }
+            {...a11yProps(1)}
+          />
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          <Box>
+            {repairOrderData && repairOrderFields.length ? (
+              <DetailsPage data={repairOrderData} fields={repairOrderFields} />
+            ) : (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            )}
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Steps
+            isNextStep={false}
+            nextStep={nextStep}
+            steps={repairOrderProcessSteps}
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
+            isStepEnded={[REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status)}
+            setStepFullScreen={() => setStepFullScreen(true)}
+            handlePrev={() => {
+              if (
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  quotationVersionData?.status
+                ) &&
+                repairOrderProcessSteps[currentStep] === 'Quotation' &&
+                allowedToEdit
+              ) {
+                setShowQuotationConfirmBox(true);
+              } else {
+                setCurrentStep((prevStep) => {
+                  const newStep = prevStep - 1;
+                  return newStep;
+                });
+              }
+            }}
+          />
+          <ContentFullScreen title={repairOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            {repairOrderProcessSteps[currentStep] === 'Add Assets' && repairOrderData && (
+              <Productpackage
+                fetchRepairOrderData={fetchRepairOrderData}
+                repairOrderData={repairOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-1`}
+                stepFullScreen={stepFullScreen}
+                setHasAssetsAdded={setHasAssetsAdded}
+                allowedToEdit={
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    quotationVersionData?.status
+                  )
+                    ? false
+                    : allowedToEdit
+                }
+                allowedToDelete={allowedToDelete}
+              />
+            )}
+            {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') &&
+              repairOrderData && (
+                <WorkOrder
+                  repairOrderData={repairOrderData}
+                  setNextStep={setNextStep}
+                  stepFullScreen={stepFullScreen}
+                  allowedToEdit={
+                    currentStep === 3
+                      ? allowedToEdit
+                      : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                        quotationVersionData?.status
+                      )
+                        ? false
+                        : allowedToEdit
+                  }
+                  allowedToDelete={allowedToDelete}
+                  isPostWorkService={Boolean(currentStep === 3)}
+                  setCurrentStep={setCurrentStep}
+                />
+              )}
+            {repairOrderProcessSteps[currentStep] === 'Quotation' && repairOrderData && (
+              <Quotation
+                repairOrderData={repairOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-4`}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={allowedToEdit}
+                allowedToDelete={allowedToDelete}
+                setQuotationVersionData={setQuotationVersionData}
+                invoiceStep={false}
+                updateOrderStatus={updateOrderStatus}
+              />
+            )}
+            {repairOrderProcessSteps[currentStep] === 'Loading Ticket' && repairOrderData && (
+              <LoadingTicket
+                repairOrderData={repairOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-5`}
+                allowedToEdit={allowedToEdit}
+              />
+            )}
+            {repairOrderProcessSteps[currentStep] === 'Invoice' && repairOrderData && (
+              <Quotation
+                repairOrderData={repairOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-4`}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={false}
+                allowedToDelete={false}
+                invoiceStep={true}
+                setQuotationVersionData={setQuotationVersionData}
+                updateOrderStatus={updateOrderStatus}
+              />
+            )}
+          </ContentFullScreen>
+        </TabPanel>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -491,6 +544,7 @@ const RepairOrderDetails = () => {
       )}
       {openUpdateDialog && (
         <ManageRepairOrder
+          isAnyMaterial={isAnyMaterial}
           isEditable={!hasAssetsAdded}
           isClone={false}
           repairOrderId={id}
@@ -503,7 +557,7 @@ const RepairOrderDetails = () => {
           }}
         />
       )}
-    </>
+    </Box>
   );
 };
 

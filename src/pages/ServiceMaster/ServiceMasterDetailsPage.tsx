@@ -5,7 +5,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -13,12 +12,12 @@ import { serviceMaster } from '../../constants/helpers';
 import ManageServiceMaster from './ManageServiceMaster';
 import { BiEdit } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import LeadTimeMaster from '../../components/LeadTime';
 import Steps from './Steps';
 import Product from './Product';
+import { Skeleton } from '@material-ui/lab';
 
 const ServiceMasterDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -81,48 +80,52 @@ const ServiceMasterDetailsPage = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.serviceMaster, { title: `${serviceMasterDetailData?.serviceName || ''}` }]} />
-      </Grid>
-      <Grid container spacing={1} className="detail-container">
-        <Grid item xs={12} sm={12} md={8} lg={8}>
-          <Paper style={{ height: '650px' }}>
-            <DetailsPageHeader heading={serviceMasterDetailData?.serviceName || ''} mainPoints={null} showHeading={true}>
-              {permissions?.product?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  color="primary"
-                  size="small"
-                  onClick={() => {
-                    setOpenUpdateDialog(true);
-                  }}
-                  className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                </Button>
-              )}
-              {permissions?.serviceMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            </DetailsPageHeader>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={[routes.serviceMaster, { title: `${serviceMasterDetailData?.serviceName || ''}` }]} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {!serviceMasterDetailData ? (
+              <Skeleton variant="text" width="150px" height="32px" />
+            ) : (
+              <>
+                {permissions?.product?.isUpdate && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={() => {
+                      setOpenUpdateDialog(true);
+                    }}
+                  >
+                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  </Button>
+                )}
+                {permissions?.serviceMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              </>
+            )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Grid container spacing={2}>
+          <Grid item xs={permissions?.leadTimeMaster?.isRead ? 8 : 12}>
             <Tabs
-              variant="scrollable"
-              scrollButtons="auto"
-              className="oms-tab"
+              className="new-tab-container-v1"
               value={tabValue}
               onChange={handleMainTabChange}
-              indicatorColor="primary"
               textColor="primary"
-              aria-label="Product Details Tab"
               TabIndicatorProps={{
                 style: {
                   height: 0
                 }
               }}
             >
-              <Tab label="Details" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-              <Tab label="Steps" value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
-              <Tab label="Consumables" value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
+              <Tab label={<div className='tab-font'>Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+              <Tab label={<div className='tab-font'>Steps</div>} value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className={'tabLayout'} />
+              <Tab label={<div className='tab-font'>Consumables</div>} value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className={'tabLayout'} />
             </Tabs>
             {tabValue === 0 && (
               <Box>
@@ -135,20 +138,19 @@ const ServiceMasterDetailsPage = () => {
                 )}
               </Box>
             )}
-            {tabValue === 1 &&
-              <Steps serviceId={id} />}
-            {tabValue === 2 &&
-              <Product id={id} />}
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={12} md={4} lg={4}>
+            {tabValue === 1 && <Steps serviceId={id} />}
+            {tabValue === 2 && <Product id={id} />}
+
+          </Grid>
           {permissions?.leadTimeMaster?.isRead && (
-            <Box mb={2}>
-              <LeadTimeMaster Id={id} type={'service'} />
-            </Box>
+            <Grid item xs={4}>
+              <Box mb={2}>
+                <LeadTimeMaster Id={id} type={'service'} />
+              </Box>
+            </Grid>
           )}
         </Grid>
-      </Grid>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -170,7 +172,7 @@ const ServiceMasterDetailsPage = () => {
           }}
         />
       )}
-    </Fragment>
+    </Box>
   );
 };
 

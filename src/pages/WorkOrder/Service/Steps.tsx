@@ -3,6 +3,7 @@ import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
 import {
+  convertMsToTime,
   dateTimeFormat,
   getObjKeys,
   getObjKeysWithValues,
@@ -13,61 +14,36 @@ import {
   WORKORDER_SERVICE_STEP_STATUS,
   yupSchema
 } from 'src/constants/helpers';
-import { Box, Divider, Grid, Badge, Accordion, AccordionDetails, AccordionSummary, Typography, Chip, Checkbox } from '@material-ui/core';
+import { Box, IconButton, Divider, Grid, Badge, Accordion, AccordionDetails, AccordionSummary, Typography, Chip, Checkbox } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import StepFieldsDialog from './StepFieldsDialog';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import CompleteDialog from './CompleteDialog';
-import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import { useData } from 'src/StateProvider/Provider';
-
-function convertMsToTime(milliseconds) {
-  milliseconds = Math.abs(milliseconds);
-  function padTo2Digits(num) {
-    num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
-    return num.toString().padStart(2, '0');
-  }
-  let seconds = Math.floor(milliseconds / 1000);
-  let minutes = Math.floor(seconds / 60);
-  let hours = Math.floor(minutes / 60);
-
-  seconds = seconds % 60;
-  minutes = minutes % 60;
-
-  let time = '';
-
-  if (hours === 0) {
-    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-  }
-  if (hours === 0 && minutes === 0) {
-    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-  }
-  if (hours > 0 && hours < 24) {
-    time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-  }
-  if (hours >= 24) {
-    time = `${padTo2Digits(hours / 24)}d`;
-  }
-  return time;
-}
+import SettingsIcon from '@material-ui/icons/Settings';
+import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 
 const TimerComponent = ({ stepData, updateTime = true }) => {
+
   const [time, setTime] = useState(null);
   useEffect(() => {
-    if (!updateTime) setTime(convertMsToTime(new Date(stepData?.endDate).getTime() - new Date(stepData?.startDate).getTime()));
-    else setTime(convertMsToTime(new Date().getTime() - new Date(stepData?.startDate).getTime()));
+    if (!updateTime) {
+      setTime(convertMsToTime(stepData?.duration || 0));
+    }
+    else {
+      setTime(convertMsToTime(stepData?.duration || 0));
+    }
     const interval = setInterval(() => {
-      if (updateTime) setTime(convertMsToTime(new Date(stepData?.startDate).getTime() - new Date().getTime()));
+      if (updateTime) setTime(convertMsToTime((stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())));
     }, 1000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [stepData]);
 
   return (
     <Box
@@ -179,76 +155,64 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '' }) => {
+const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '', handelClose = null }) => {
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
-  const [stepList, setStepList] = useState([]);
   const [serviceDetails, setServiceDetails] = useState(null);
-  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, values: null });
+  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, values: null, type: '' });
   const [selectedStep, setSelectedStep] = useState(null);
-  const [inSteps, setInSteps] = useState(false);
   const [stepState, setStepState] = useState(null);
   const [serviceData, setServiceData] = useState([]);
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
-  const [openFieldDialog, setOpenFieldDialog] = useState(false);
-  const [addStepFields, setAddStepFields] = useState({ fields: [], section: [] });
   const {
     state: {
       user: { user }
     }
   } = useData();
+  const [viewStep, setViewStep] = React.useState({ open: false, step: null });
+  const [isAllStepDone, setIsAllStepDone] = React.useState(false);
 
   useEffect(() => {
-    getServiceData();
-  }, []);
+    fetchServiceData();
+  }, [selectedService]);
 
-  useEffect(() => {
-    if (addServiceConfirmation.open) return;
-    axiosInstance()
-      .get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`)
-      .then(({ data: { data } }) => {
-        setServiceDetails(data);
-        const steps = data?.steps?.map((d) => d.stepName);
-        setStepList(steps);
-        const completedSteps = serviceData.filter(
-          (d) =>
-            d.uniqueId === selectedService?.uniqueId &&
-            d.serviceId === selectedService._id &&
-            [
-              WORKORDER_SERVICE_STEP_STATUS.passed,
-              WORKORDER_SERVICE_STEP_STATUS.completed,
-              WORKORDER_SERVICE_STEP_STATUS.failed,
-              WORKORDER_SERVICE_STEP_STATUS.skipped,
-              WORKORDER_SERVICE_STEP_STATUS.end
-            ].includes(d?.passFailStatus)
-        );
+  const fetchServiceData = async () => {
 
-        const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
-        setDisableCompleteFail(!allStepsDone);
+    const stepDataResponse = await axiosInstance().get(`${workOrder.api}/${workOrderId}/steps-data`);
+    const stepsData = stepDataResponse?.data?.data || [];
+    setServiceData(stepsData);
+    const serviceDetailResponse = await axiosInstance().get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`);
+    const serviceDetail = serviceDetailResponse?.data?.data;
+    setServiceDetails(serviceDetail);
 
-        if (inSteps && allStepsDone && selectedService.status === WORKORDER_SERVICE_STATUS.inProgress) {
-          setOpenCompleteDialog(true);
-          setInSteps(false);
-        }
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  }, [addServiceConfirmation, selectedService, serviceData]);
+    if (serviceDetail?.steps?.length) {
+      const completedSteps = stepsData.filter(
+        (d) =>
+          d.uniqueId === selectedService?.uniqueId &&
+          d.serviceId === selectedService._id &&
+          [
+            WORKORDER_SERVICE_STEP_STATUS.passed,
+            WORKORDER_SERVICE_STEP_STATUS.completed,
+            WORKORDER_SERVICE_STEP_STATUS.failed,
+            WORKORDER_SERVICE_STEP_STATUS.skipped,
+            WORKORDER_SERVICE_STEP_STATUS.end
+          ].includes(d?.passFailStatus)
+      );
 
-  const getServiceData = () => {
-    axiosInstance()
-      .get(`${workOrder.api}/${workOrderId}/steps-data`)
-      .then(({ data: { data } }) => {
-        setServiceData(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
+      const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), serviceDetail?.steps?.map((d) => d._id).sort());
+
+      setDisableCompleteFail(!allStepsDone);
+      setIsAllStepDone(allStepsDone);
+
+      if (allStepsDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status)) {
+        setOpenCompleteDialog(true);
+      }
+    }
+  }
 
   const updateServiceStatus = (uniqueId, status) => {
     axiosInstance()
@@ -269,7 +233,6 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   };
 
   const handleAddStep = (values: any) => {
-    values.fields = addStepFields?.fields;
     axiosInstance()
       .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
       .then(({ data }) => {
@@ -279,9 +242,8 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
           severity: 'success'
         });
         setAssignSteps(false);
-        getServiceData();
+        fetchServiceData();
         fetchService();
-        setAddStepFields({ fields: [], section: [] });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -293,16 +255,16 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
     data.serviceIds = ids;
     if (selectedService?.uniqueId) {
       data.aboveServiceUniqueId = selectedService?.uniqueId;
-      data.createdFrom = selectedService?.uniqueId;
+      data.createdFromStep = step?._id;
     }
     axiosInstance()
       .post(`${workOrder.api}/service/${workOrderId}`, data)
       .then(() => {
         if (forMinMax) {
           const type = automatePassFail(values, step);
-          handlePassFail(type, step?._id);
+          handlePassFail(type, step);
         }
-        setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
+        setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });
         fetchService();
       })
       .catch((err) => {
@@ -313,11 +275,8 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   const getFields = (step) => {
     let stepData = null;
     let fieldData = { fields: [], formsData: [], values: {} };
-
     let fieldsDataForCreate = step?.fields ? step?.fields : [];
-    let tempServiceData = serviceData.find(
-      (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === step?._id
-    );
+    let tempServiceData = serviceData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id);
 
     if (tempServiceData) {
       stepData = tempServiceData;
@@ -374,7 +333,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
           message: data.message
         });
         setSelectedStep(null);
-        getServiceData();
+        fetchServiceData();
         fetchService();
         const serviceIds = determinServiceDialog(values, step);
         if (serviceIds.length > 0) {
@@ -382,11 +341,16 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
           });
           if (services.length > 0) {
-            setAddServiceConfirmation({ open: true, status: '', services, step, values });
+            if (referencType === "workOrderTechnician") {
+              handleAddService(services?.map((e) => e._id), false, step);
+            }
+            else {
+              setAddServiceConfirmation({ open: true, status: '', services, step, values, type: '' });
+            }
           }
         } else if (step?.isPassFail) {
           const type = automatePassFail(values, step);
-          handlePassFail(type, step?._id);
+          handlePassFail(type, step);
         }
       })
       .catch((error) => {
@@ -445,7 +409,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
           type: 'success',
           message: data.message
         });
-        getServiceData();
+        fetchServiceData();
         fetchService();
       })
       .catch((error) => {
@@ -453,32 +417,50 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
       });
   };
 
-  const handlePassFail = (type, stepId) => {
-    setInSteps(true);
+  const handlePassFail = (type, step) => {
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/step/pass-fail`, {
         uniqueId: selectedService?.uniqueId,
         serviceId: selectedService._id,
-        stepId: stepId,
+        stepId: step._id,
         passFailStatus: type
       })
       .then(({ data }) => {
         const result = data?.data;
-
         if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isPassAddon && result?.passAddon?.length) {
-          const services = result?.passAddon.filter((s) => {
-            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
-          });
-
-          if (services.length > 0) {
-            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.passed, open: true, services }));
+          if (referencType === "workOrderTechnician") {
+            handleAddService(result?.passAddon?.map((e) => e._id), false, step);
           }
-        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isFailAddon && result?.failAddon?.length) {
-          const services = result?.failAddon.filter((s) => {
-            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
-          });
-          if (services.length > 0) {
-            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, services }));
+          else {
+            setAddServiceConfirmation({ open: true, status: WORKORDER_SERVICE_STEP_STATUS.passed, services: result?.passAddon, step: step, values: null, type: '' });
+          }
+        }
+        else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isFailAddon && result?.failAddon?.length) {
+          if (referencType === "workOrderTechnician") {
+            handleAddService(result?.failAddon?.map((e) => e._id), false, step);
+          }
+          else {
+            setAddServiceConfirmation({ open: true, status: WORKORDER_SERVICE_STEP_STATUS.failed, services: result?.failAddon, step: step, values: null, type: '' });
+          }
+        }
+        else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isJumpStepPass && result?.jumpStepsPass?.length) {
+          if (referencType !== "workOrderTechnician") {
+            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.passed, open: true, type: 'jumpStep' }));
+          }
+        }
+        else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isJumpStepFail && result?.jumpStepsFail?.length) {
+          if (referencType !== "workOrderTechnician") {
+            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'jumpStep' }));
+          }
+        }
+        else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isQuoteRevisionOnFail) {
+          if (referencType !== "workOrderTechnician") {
+            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'isQuoteRevisionOnFail' }));
+          }
+        }
+        else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isReturnToStepOnFail && result?.returnToStepOnFail) {
+          if (referencType !== "workOrderTechnician") {
+            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'returnToStepOnFail' }));
           }
         }
         toastConfig.setToastConfig({
@@ -486,7 +468,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
           type: 'success',
           message: data.message
         });
-        getServiceData();
+        fetchServiceData();
         fetchService();
       })
       .catch((error) => {
@@ -494,27 +476,75 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
       });
   };
 
-  return stepList ? (
-    stepList?.length ? (
+  const handlePauseResume = (statusType, stepData) => {
+    axiosInstance()
+      .put(`${workOrder.api}/${workOrderId}/step/pause-resume`, {
+        uniqueId: stepData?.uniqueId,
+        id: stepData?._id,
+        serviceId: stepData?.serviceId,
+        stepId: stepData?.stepId,
+        status: statusType
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchServiceData();
+        fetchService();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleUpdateStep = (values: any) => {
+    axiosInstance().put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/update-step`, values)
+      .then(({ data }) => {
+        setViewStep({ open: false, step: null });
+        fetchService()
+      })
+      .catch((err) => {
+      });
+  };
+
+  let startIdx = 0;
+  return serviceDetails ? (
+    serviceDetails?.steps?.length ? (
       <Box
         className={classes.mainContainer}
         sx={{ position: 'relative', overflow: 'hidden' }}
         style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }}
       >
         <div className={classes.root}>
-          {serviceDetails?.steps
-            ?.sort((a, b) => a?.order - b?.order)
+          {serviceDetails?.steps?.sort((a, b) => a?.order - b?.order)
             ?.map((step, index) => {
               const { stepData, isStepValid } = getFields(step);
+              if (referencType === 'workOrderTechnician' && stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) {
+                return ''
+              }
               let isPrevStepDone: any = false;
-              const isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) || false;
+              let isAnyTechnician = selectedService?.assignedUsers?.length ? true : false;
+              let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) || false;
+              let isSameStartStep = false;
               if (index > 0) {
-                const pD = getFields(serviceDetails?.steps?.sort((a, b) => a?.order - b?.order)[index - 1]);
+                const prevStep = serviceDetails?.steps?.sort((a, b) => a?.order - b?.order)[index - 1];
+                const pD = getFields(prevStep);
                 isPrevStepDone = pD?.stepData?.passFailStatus ? true : stepData?.passFailStatus ? true : false;
               }
+              if (startIdx === step?.order) {
+                isSameStartStep = true;
+              } else {
+                isSameStartStep = false;
+              }
+              if (referencType === 'workOrderTechnician') {
+                isMeTechnician = true;
+              }
+              startIdx = step?.order || 0;
               return (
                 <Box
-                  key={step._id}
+                  key={`${step._id}_${selectedService?.uniqueId}}`}
                   border={1}
                   borderColor={'grey.300'}
                   style={{
@@ -522,32 +552,20 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                     transition: 'background .5s ease',
                     backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                   }}
-                  className={`${classes.accordionHeading}  ${
-                    Boolean(stepData?.passFailStatus)
-                      ? `${
-                          Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                            ? classes.green
-                            : ''
-                        } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
-                      : classes.white
-                  }`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!stepData?.status) return;
-                    setSelectedStep(step);
-                    setStepState(stepData);
-                  }}
+                  className={`${classes.accordionHeading}  ${Boolean(stepData?.passFailStatus)
+                    ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                      ? classes.green
+                      : ''
+                    } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+                    : classes.white
+                    }`}
                 >
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
                     <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px' }}>
                       <Box>
                         <Chip
                           color="primary"
-                          label={
-                            referencType === 'workOrderTechnician'
-                              ? index + 1
-                              : `${serviceSteps.findIndex((item) => item?._id === selectedService?._id) + 1}.${index + 1}`
-                          }
+                          label={referencType === 'workOrderTechnician' ? index + 1 : `${selectedService?.order}.${index + 1}`}
                         />
                       </Box>
                       <Box ml={1}>
@@ -556,13 +574,32 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                         </Typography>
                       </Box>
                     </Box>
-                    {(isPrevStepDone || index === 0) && isMeTechnician && (
+                    {(isSameStartStep || isPrevStepDone || index === 0) && (
                       <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto', display: 'flex' }}>
-                        {stepData?.startDate && !stepData?.endDate && <TimerComponent stepData={stepData} />}
-                        {stepData?.startDate && stepData?.endDate && <TimerComponent stepData={stepData} updateTime={false} />}
-
-                        {!stepData?.startDate ? (
-                          <Box>
+                        {stepData?.startDate &&
+                          <TimerComponent stepData={stepData} updateTime={stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? true : false} />}
+                        {([WORKORDER_SERVICE_STEP_STATUS.start, WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) && (
+                          <Box mr={1}>
+                            <Button
+                              variant="outlined"
+                              color="secondary"
+                              size="small"
+                              disabled={!allowedToEdit}
+                              onClick={(e) => {
+                                if ([WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) {
+                                  handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
+                                } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+                                  handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.pause, stepData);
+                                }
+                              }}
+                            >
+                              {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause ? 'Resume' :
+                                stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? 'Pause' : 'Restart'}
+                            </Button>
+                          </Box>
+                        )}
+                        {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
+                          <Box ml={1}>
                             <Button
                               variant="outlined"
                               color="secondary"
@@ -573,7 +610,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                                 if (selectedService.status === WORKORDER_SERVICE_STATUS.pending) {
                                   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
                                 }
-                                handleStartEnd('start', step._id);
+                                handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, step._id);
                               }}
                             >
                               Start
@@ -583,28 +620,35 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                           <Box ml={1}>
                             <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
                           </Box>
-                        ) : stepData?.status === 'start' && isStepValid ? (
+                        ) : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && isStepValid && (isMeTechnician || !isAnyTechnician) ? (
                           step?.isPassFail ? (
-                            <Box display="inline-flex">
+                            <Box display="inline-flex" ml={1}>
                               <Button
                                 variant="outlined"
                                 color="secondary"
+                                disabled={!allowedToEdit}
                                 size="small"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step._id);
+                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step);
                                 }}
                               >
                                 Pass
                               </Button>
                               <Box marginX={1} />
-                              <DeleteButton
-                                text="Fail"
+                              <Button
+                                variant="outlined"
+                                color="secondary"
+                                className={'btn-red-v1'}
+                                disabled={!allowedToEdit}
+                                size="small"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step._id);
+                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step);
                                 }}
-                              />
+                              >
+                                Fail
+                              </Button>
                             </Box>
                           ) : (
                             <Box display="inline-flex">
@@ -612,9 +656,10 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                                 variant="outlined"
                                 color="secondary"
                                 size="small"
+                                disabled={!allowedToEdit}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step._id);
+                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
                                 }}
                               >
                                 Complete
@@ -622,33 +667,109 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                             </Box>
                           )
                         ) : null}
+                        {stepData?.status
+                          && ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)
+                          && ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus)
+                          && (isMeTechnician || !isAnyTechnician) ? (
+                          [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.failed, WORKORDER_SERVICE_STEP_STATUS.completed]?.includes(stepData?.passFailStatus) ?
+                            <>
+                              <Box marginX={1} />
+                              <Box>
+                                <Button
+                                  variant="outlined"
+                                  color="inherit"
+                                  size="small"
+                                  disabled={!allowedToEdit}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleStartEnd("reopen", step._id);
+                                  }}
+                                >
+                                  Re-open
+                                </Button>
+                              </Box>
+                            </> :
+                            step?.fields?.length ?
+                              <>
+                                <Box marginX={1} />
+                                <Box>
+                                  <Button
+                                    variant="outlined"
+                                    color="inherit"
+                                    size="small"
+                                    disabled={!allowedToEdit}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedStep(step);
+                                      setStepState(stepData);
+                                    }}
+                                  >
+                                    Enter Value
+                                  </Button>
+                                </Box>
+                              </> : null
+                        ) : null}
                       </Box>
                     )}
+                    {referencType !== 'workOrderTechnician' &&
+                      <Box ml={1}>
+                        <IconButton
+                          aria-label="close"
+                          onClick={() => {
+                            setViewStep({ open: true, step: step });
+                          }}
+                          size="small"
+                          color="inherit"
+                        >
+                          <SettingsIcon color="inherit" fontSize='small' />
+                        </IconButton></Box>}
                   </Box>
                 </Box>
               );
             })}
+          {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) &&
+            <Box pt={2}>
+              <Grid container justify="flex-end">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={(e) => {
+                    setOpenCompleteDialog(true);
+                  }}
+                >
+                  Complete
+                </Button>
+              </Grid>
+            </Box>}
         </div>
-        <StepFieldsDialog
-          isOpen={Boolean(selectedStep)}
-          workOrderId={workOrderId}
-          fieldData={getFields(selectedStep)?.fieldData}
-          isStepValid={getFields(selectedStep)?.isStepValid}
-          handleClose={() => {
-            setSelectedStep(null);
-            getServiceData();
-          }}
-          handleSubmit={handleSubmit}
-          selectedService={selectedService}
-          step={selectedStep}
-          stepData={stepState}
-        />
+        {Boolean(selectedStep) ?
+          <StepFieldsDialog
+            workOrderId={workOrderId}
+            fieldData={getFields(selectedStep)?.fieldData}
+            isStepValid={getFields(selectedStep)?.isStepValid}
+            handleClose={() => {
+              setSelectedStep(null);
+              fetchServiceData();
+            }}
+            referencType={referencType}
+            handleSubmit={handleSubmit}
+            selectedService={selectedService}
+            allowedToEdit={allowedToEdit}
+            step={selectedStep}
+            stepData={stepState}
+          /> : null}
         {openCompleteDialog && (
           <CompleteDialog
             serviceName={selectedService?.serviceName}
             comment={comment}
             setComment={setComment}
-            updateStatus={() => updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed)}
+            updateStatus={() => {
+              updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed)
+              if (handelClose) {
+                handelClose()
+              }
+            }}
             handleClose={() => {
               setComment('');
               setOpenCompleteDialog(false);
@@ -659,35 +780,57 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
           <ConfirmationDialog
             open={true}
             message={
-              addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                ? `Since the previous step was failed, the service requested in the add-on service will then be added. ` +
-                  addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
-                ? `On pass, a new service has been added in compliance with the configuration ` +
-                  addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                : `You have to add addional services based on your recent action`
+              addServiceConfirmation.type === 'returnToStepOnFail'
+                ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()}. Do you want to continue ?`
+                : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
+                  ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                  : addServiceConfirmation.type === 'jumpStep'
+                    ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
-              setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
+              setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });
             }}
             onOk={() => {
-              handleAddService(
-                addServiceConfirmation.services?.map((e) => e._id),
-                addServiceConfirmation.status === '' ? true : false,
-                addServiceConfirmation.step,
-                addServiceConfirmation.values
-              );
-              setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
+              if (addServiceConfirmation.type === '') {
+                handleAddService(
+                  addServiceConfirmation.services?.map((e) => e._id),
+                  addServiceConfirmation.status === '' ? true : false,
+                  addServiceConfirmation.step,
+                  addServiceConfirmation.values
+                );
+              }
+              setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });
             }}
+          />
+        )}
+        {viewStep.open && (
+          <StepDialog
+            handleClose={() => {
+              setViewStep({ open: false, step: null });
+            }}
+            handleSucess={(data) => {
+              handleUpdateStep(data)
+            }}
+            stepId={viewStep.step?._id}
+            stepData={viewStep.step}
+            notEditable={viewStep.step?.customStep === true ? false : true}
+            steps={serviceDetails?.steps}
+            reference={'workOrder'}
+            workOrderId={workOrderId}
+            serviceId={selectedService?._id}
+            uniqueId={selectedService?.uniqueId}
           />
         )}
       </Box>
     ) : (
       <>
         <Box p={2} height={500} bgcolor="rgba(242, 243, 247, 0.6)" textAlign="center">
-          <Button variant="contained" color="primary" onClick={() => setAssignSteps(true)}>
-            Add Step
-          </Button>
+          {referencType !== 'workOrderTechnician' &&
+            <Button variant="contained" color="primary" onClick={() => setAssignSteps(true)}>
+              Add Step
+            </Button>
+          }
         </Box>
         {assignSteps && (
           <StepDialog
@@ -698,7 +841,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
               handleAddStep(data);
             }}
             stepId={''}
-            steps={selectedService?.steps}
+            steps={serviceDetails?.steps}
             reference={'workOrder'}
             workOrderId={workOrderId}
             serviceId={selectedService?._id}
@@ -713,4 +856,5 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
     </Box>
   );
 };
+
 export default Service;

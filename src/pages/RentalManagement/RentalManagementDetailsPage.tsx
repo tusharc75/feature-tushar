@@ -15,7 +15,6 @@ import {
   getUniqueCurrencies,
   gridLoadingTimeout,
   rentalManagement,
-  defaultActivityShow,
   RENTAL_STATUS,
   rentalManagementSteps,
   ACTIVITY_RESOURCE,
@@ -25,20 +24,16 @@ import {
   DELIVERY_TICKET_TYPE
 } from '../../constants/helpers';
 import Steps from './Steps';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRentalManagementDialog from './ManageRental';
-import Activity from '../../components/Activity';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import HideWhenOffline from '../../components/HideWhenOffline';
 import ContentFullScreen from '../../components/ContentFullScreen';
-import DeleteButton from '../../components/Helpers/DeleteButton';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { RiFlowChart } from 'react-icons/ri';
 import TabPanel from '../../components/TabPanel';
 import Menu from '@material-ui/core/Menu';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { GrStatusInfo } from 'react-icons/all';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -56,6 +51,7 @@ import Quotation from './Quotation';
 import ProgressiveBilling from './ProgressiveBilling';
 import Services from './Services';
 import Consumables from './Consumables';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -70,17 +66,15 @@ const RentalManagementDetailsPage = () => {
   const {
     state: { user, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
+
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
+
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState(null);
   const [currentStep, setCurrentStep] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [isProcessor, setIsProcessor] = useState(false);
 
@@ -96,11 +90,10 @@ const RentalManagementDetailsPage = () => {
 
   const [quotationData, setQuotationData] = useState(null);
   const [currentVersion, setCurrentVersion] = useState(null);
+  const [isDisableCustomerAccount, setIsDisableCustomerAccount] = useState(false);
 
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
-
-  const [disabledEditButton, setDisabledEditButton] = useState(false);
 
   const [rentalSteps, setRentalSteps] = useState(
     user?.role?.selectedEntity?.policy?.isQuotationRentalManagement
@@ -109,20 +102,7 @@ const RentalManagementDetailsPage = () => {
   );
 
   const [versionNotClonned, setVersionNotClonned] = useState(false);
-
-  useEffect(() => {
-    if (quotationData) {
-      const keys = Object.keys(quotationData?.versions);
-
-      keys.forEach((k) => {
-        if (quotationData?.versions[k].status?.includes('Customer')) {
-          setDisabledEditButton(true);
-        } else {
-          setDisabledEditButton(false);
-        }
-      });
-    }
-  }, [quotationData]);
+  const [reOpening, setReOpening] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -144,9 +124,6 @@ const RentalManagementDetailsPage = () => {
     });
   }, [locationKeys]);
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -159,14 +136,6 @@ const RentalManagementDetailsPage = () => {
       'aria-controls': `main-tabpanel-${index}`
     };
   }
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
 
   useEffect(() => {
     if (id) {
@@ -215,6 +184,17 @@ const RentalManagementDetailsPage = () => {
           } else {
             setVersionNotClonned(false);
           }
+
+          for (let i = 0; i < keys.length; i++) {
+            if (
+              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                data?.versions[keys[i]]?.status
+              )
+            ) {
+              setIsDisableCustomerAccount(true);
+              break;
+            }
+          }
         }
       });
   };
@@ -232,7 +212,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -242,10 +222,6 @@ const RentalManagementDetailsPage = () => {
     }
   }, [currentStep]);
 
-  const handleMainPoints = (data) => {
-    let mainPoint = {};
-    setMainPoints(mainPoint);
-  };
 
   const fetchRentalManagementData = async () => {
     try {
@@ -257,7 +233,6 @@ const RentalManagementDetailsPage = () => {
         data = await findOne(objectStore.rentalManagement, id);
       }
       setCurrentStep(rentalSteps.indexOf(data?.processStatus) !== -1 ? rentalSteps.indexOf(data?.processStatus) : 0);
-      handleMainPoints(data);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
@@ -352,8 +327,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
+        .then(({ data }) => { })
+        .catch((error) => { });
     }
   };
 
@@ -391,100 +366,50 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleRentalReOpen = () => {
+    setReOpening(true);
     axiosInstance()
       .patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: RENTAL_STATUS.inProgress })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => {
+        setReOpening(false);
+        fetchRentalManagementData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to In-Progress`
+        });
+      })
+      .catch((error) => {
+        setReOpening(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
     <>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.rentalManagement, { title: `${rentalManagementData ? rentalManagementData?.rentalJobName : ''}` }]} />
-      </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-        <div>
-          <div>
-            <Paper>
-              {!rentalManagementData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    <Box marginX={1} />
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  </Box>
-                </div>
-              ) : (
-                <DetailsPageHeader heading={rentalManagementData?.rentalJobName} mainPoints={mainPoints} showHeading={true}>
-                  <Fragment>
-                    {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]) && versionNotClonned && (
-                      <Button
-                        disabled={!versionNotClonned}
-                        className="buttonStyleBigScreen"
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setVersionNotClonned(false);
-                          cloneVersion();
-                        }}
-                      >
-                        Create New Version
-                      </Button>
-                    )}
-                    {user?.role?.selectedEntity?.policy?.isRentalReopen && rentalManagementData?.status === RENTAL_STATUS.closed && (
-                      <Button
-                        className="buttonStyleBigScreen"
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          handleRentalReOpen();
-                        }}
-                      >
-                        Re-Open
-                      </Button>
-                    )}
-                    {permissions?.rentalManagement?.isUpdate &&
-                      allowedToEdit &&
-                      !isOffline &&
-                      ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) &&
-                      !(
-                        [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationData?.versions[currentVersion]?.status
-                        ) && ['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep])
-                      ) && (
-                        <Fragment>
-                          <Button
-                            disabled={disabledEditButton}
-                            className="buttonStyleBigScreen"
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={handleOpenUpdateDialog}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            className="buttonStyleSmallScreen"
-                            variant="text"
-                            color="primary"
-                            size="small"
-                            onClick={handleOpenUpdateDialog}
-                            style={isMobile ? { color: '#43aeaa' } : {}}
-                          >
-                            <BiEdit size={20} />
-                          </Button>
-                        </Fragment>
-                      )}
-                  </Fragment>
-                  {/* {permissions?.rentalManagement?.isUpdate &&
-                    [RENTAL_STATUS.new, RENTAL_STATUS.inProgress].includes(rentalManagementData?.status) && (
-                      <Button variant="outlined" color="primary" size="small" onClick={() => setShowCancelConfirmBox(true)}>
-                        {'Cancel ' + routes.rentalManagement.title}
-                      </Button>
-                    )} */}
+      <Box className="main-container-v1">
+        <Box className="headerbox-v1">
+          <Box className="nav-v1">
+            <CustomBreadCrumbs routes={[routes.rentalManagement, { title: `${rentalManagementData ? rentalManagementData?.rentalJobName : ''}` }]} />
+          </Box>
+          <Box className="controls-v1">
+            <Box className="control-buttons-v1">
+              <>
+                <Fragment>
+                  {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]) && versionNotClonned && (
+                    <Button
+                      disabled={!versionNotClonned}
+                      className="buttonStyleBigScreen"
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        setVersionNotClonned(false);
+                        cloneVersion();
+                      }}
+                    >
+                      Create New Version
+                    </Button>
+                  )}
                   {permissions?.rentalManagement?.isUpdate &&
                     !isOffline &&
                     [RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) &&
@@ -529,363 +454,336 @@ const RentalManagementDetailsPage = () => {
                         </Menu>
                       </Fragment>
                     )}
-                </DetailsPageHeader>
+                  {user?.role?.selectedEntity?.policy?.isRentalReopen && rentalManagementData?.status === RENTAL_STATUS.closed && (
+                    <Button
+                      className="buttonStyleBigScreen"
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      endIcon={reOpening ? <CircularProgress size={20} /> : null}
+                      disabled={reOpening}
+                      onClick={() => {
+                        handleRentalReOpen();
+                      }}
+                    >
+                      Re-Open
+                    </Button>
+                  )}
+                  {permissions?.rentalManagement?.isUpdate &&
+                    allowedToEdit &&
+                    !isOffline &&
+                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) &&
+                    !(
+                      [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                        quotationData?.versions[currentVersion]?.status
+                      ) && ['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep])
+                    ) && (
+                      <Fragment>
+                        <Button variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          className={'btn-outline-v1'}
+                          onClick={handleOpenUpdateDialog}>
+                          Edit
+                        </Button>
+                        <Button
+                          className="buttonStyleSmallScreen"
+                          variant="text"
+                          color="primary"
+                          size="small"
+                          onClick={handleOpenUpdateDialog}
+                          style={isMobile ? { color: '#43aeaa' } : {}}
+                        >
+                          <BiEdit size={20} />
+                        </Button>
+                      </Fragment>
+                    )}
+                </Fragment>
+                {/* {permissions?.rentalManagement?.isUpdate &&
+                    [RENTAL_STATUS.new, RENTAL_STATUS.inProgress].includes(rentalManagementData?.status) && (
+                      <Button variant="outlined" color="primary" size="small" onClick={() => setShowCancelConfirmBox(true)}>
+                        {'Cancel ' + routes.rentalManagement.title}
+                      </Button>
+                    )} */}
+                <ActivityButton referenceId={rentalManagementData?._id} resource={ACTIVITY_RESOURCE.rentalManagement} />
+              </>
+            </Box>
+          </Box>
+        </Box>
+        <Box className={`detail-container-v1`}>
+          <Tabs
+            className="new-tab-container-v1"
+            value={tabValue}
+            onChange={handleMainTabChange}
+            textColor="primary"
+            TabIndicatorProps={{
+              style: {
+                display: 'none'
+              }
+            }}
+          >
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                </div>
+              }
+              {...a11yProps(0)}
+            />
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                </div>
+              }
+              {...a11yProps(1)}
+            />
+            {displayProgressiveBillingTab && (
+              <Tab
+                className={'tabLayout'}
+                label={
+                  <div className="d-flex align-items-center tab-font">
+                    <RiFlowChart className="mr-1" fontSize="inherit" /> Progressive Billing
+                  </div>
+                }
+                {...a11yProps(2)}
+              />
+            )}
+            {!isOffline && (
+              <Tab
+                className={'tabLayout'}
+                label={
+                  <div className="d-flex align-items-center tab-font">
+                    <RiFlowChart className="mr-1" fontSize="inherit" />
+                    Views
+                  </div>
+                }
+                {...a11yProps(3)}
+              />
+            )}
+          </Tabs>
+          <TabPanel value={tabValue} index={0}>
+            <Box>
+              {!loadingDetails && rentalManagementData && rentalManagementFields.length > 0 ? (
+                <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
+              ) : null}
+            </Box>
+          </TabPanel>
+          <TabPanel value={tabValue} index={1}>
+            <Steps
+              isNextStep={false}
+              nextStep={nextStep}
+              steps={rentalSteps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              handlePrev={() => {
+                if (
+                  (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ||
+                    quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer) &&
+                  rentalSteps[currentStep] === 'Quotation'
+                ) {
+                  setShowCancelConfirmBox({ open: true, isQuote: true });
+                } else {
+                  setCurrentStep((prevStep) => {
+                    const newStep = prevStep - 1;
+                    return newStep;
+                  });
+                }
+              }}
+              isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
+              setStepFullScreen={() => setStepFullScreen(true)}
+            />
+            <ContentFullScreen title={rentalSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+              {rentalSteps[currentStep] === 'Add Products' && rentalManagementData && (
+                <Productpackage
+                  rentalManagementData={rentalManagementData}
+                  setNextStep={setNextStep}
+                  renderedFrom={`${renderedFrom}_grid-1`}
+                  stepFullScreen={stepFullScreen}
+                  allowedToEdit={
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      ? false
+                      : allowedToEdit
+                  }
+                />
               )}
-              <Tabs
-                className="quote-tab"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    display: 'none'
+              {rentalSteps[currentStep] === 'Add Services' && rentalManagementData && (
+                <Services
+                  rentalManagementData={rentalManagementData}
+                  setNextStep={setNextStep}
+                  renderedFrom={`${renderedFrom}_grid-1`}
+                  stepFullScreen={stepFullScreen}
+                  allowedToEdit={
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      ? false
+                      : allowedToEdit
                   }
-                }}
-              >
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 1 ? 'white' : '',
-                    color: tabValue === 1 ? '#163340' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                    </div>
-                  }
-                  {...a11yProps(0)}
                 />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 2 ? 'white' : '',
-                    color: '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                    </div>
-                  }
-                  {...a11yProps(1)}
-                />
-                {displayProgressiveBillingTab && (
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 3 ? 'white' : '',
-                      color: '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <RiFlowChart className="mr-1" fontSize="inherit" /> Progressive Billing
-                      </div>
-                    }
-                    {...a11yProps(2)}
-                  />
-                )}
-                {!isOffline && (
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 4 ? 'white' : '',
-                      color: '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <RiFlowChart className="mr-1" fontSize="inherit" />
-                        Views
-                      </div>
-                    }
-                    {...a11yProps(3)}
-                  />
-                )}
-                <div className={'uio'}></div>
-              </Tabs>
-              <TabPanel value={tabValue} index={0}>
-                <Box>
-                  {!loadingDetails && rentalManagementData && rentalManagementFields.length > 0 ? (
-                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
-                  ) : null}
-                </Box>
-              </TabPanel>
-              <TabPanel value={tabValue} index={1}>
-                <Paper>
-                  <Steps
-                    isNextStep={false}
-                    nextStep={nextStep}
-                    steps={rentalSteps}
-                    currentStep={currentStep}
-                    setCurrentStep={setCurrentStep}
-                    handlePrev={() => {
-                      if (
-                        (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ||
-                          quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer) &&
-                        rentalSteps[currentStep] === 'Quotation'
-                      ) {
-                        setShowCancelConfirmBox({ open: true, isQuote: true });
-                      } else {
-                        setCurrentStep((prevStep) => {
-                          const newStep = prevStep - 1;
-                          return newStep;
-                        });
-                      }
-                    }}
-                    isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
-                    setStepFullScreen={() => setStepFullScreen(true)}
-                  />
-                  <ContentFullScreen title={rentalSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                    {rentalSteps[currentStep] === 'Add Products' && rentalManagementData && (
-                      <Productpackage
-                        rentalManagementData={rentalManagementData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
-                        renderedFrom={`${renderedFrom}_grid-1`}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={
-                          [
-                            QUOTATION_STATUS.acceptByCustomer,
-                            QUOTATION_STATUS.rejectByCustomer,
-                            QUOTATION_STATUS.sentToCustomer,
-                            QUOTATION_STATUS.waitingForSupplierPrice
-                          ].includes(quotationData?.versions[currentVersion]?.status)
-                            ? false
-                            : allowedToEdit
-                        }
-                      />
-                    )}
-                    {rentalSteps[currentStep] === 'Add Services' && rentalManagementData && (
-                      <Services
-                        rentalManagementData={rentalManagementData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
-                        renderedFrom={`${renderedFrom}_grid-1`}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={
-                          [
-                            QUOTATION_STATUS.acceptByCustomer,
-                            QUOTATION_STATUS.rejectByCustomer,
-                            QUOTATION_STATUS.sentToCustomer,
-                            QUOTATION_STATUS.waitingForSupplierPrice
-                          ].includes(quotationData?.versions[currentVersion]?.status)
-                            ? false
-                            : allowedToEdit
-                        }
-                      />
-                    )}
-                    {/* {rentalSteps[currentStep] === 'Add Consumables' && rentalManagementData && (
+              )}
+              {/* {rentalSteps[currentStep] === 'Add Consumables' && rentalManagementData && (
                       <Consumables
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
                         currencySymbol={currencySymbol}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-2`}
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={allowedToEdit}
                       />
                     )} */}
-                    {rentalSteps[currentStep] === 'Add-on' && rentalManagementData && (
-                      <AdditionalCost
-                        rentalManagementData={rentalManagementData}
-                        setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-2`}
-                        allowedToEdit={
-                          [
-                            QUOTATION_STATUS.acceptByCustomer,
-                            QUOTATION_STATUS.rejectByCustomer,
-                            QUOTATION_STATUS.sentToCustomer,
-                            QUOTATION_STATUS.waitingForSupplierPrice
-                          ].includes(quotationData?.versions[currentVersion]?.status)
-                            ? false
-                            : allowedToEdit
-                        }
-                      />
-                    )}
-                    {rentalSteps[currentStep] === 'Quotation' && rentalManagementData && (
-                      <Quotation
-                        rentalManagementData={rentalManagementData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={allowedToEdit}
-                        allowedToDelete={allowedToDelete}
-                        fetchQuotationData={fetchQuotationData}
-                        quotationData={quotationData}
-                        currentVersion={currentVersion}
-                        setCurrentVersion={setCurrentVersion}
-                      />
-                    )}
-                    {rentalSteps[currentStep] === 'Serialized Asset' && rentalManagementData && (
-                      <SerializedAsset
-                        rentalManagementData={rentalManagementData}
-                        setNextStep={setNextStep}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
-                        currencySymbol={currencySymbol}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={allowedToEdit}
-                      />
-                    )}
-                    {rentalSteps[currentStep] === 'Loading Ticket' && rentalManagementData && (
-                      <LoadingTicket
-                        fetchRentalData={fetchRentalManagementData}
-                        rentalManagementData={rentalManagementData}
-                        currentStep={currentStep}
-                        setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-3`}
-                        allowedToEdit={allowedToEdit}
-                        isProcessor={isProcessor}
-                        allowUpdateStatus={allowUpdateStatus}
-                        checkProgressiveBilling={checkProgressiveBilling}
-                      />
-                    )}
-                    {rentalSteps[currentStep] === 'Receiving Ticket' && rentalManagementData && (
-                      <ReceivingTicket
-                        fetchRentalData={fetchRentalManagementData}
-                        rentalManagementData={rentalManagementData}
-                        currentStep={currentStep}
-                        setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-4`}
-                        allowedToEdit={allowedToEdit}
-                        isProcessor={isProcessor}
-                        allowUpdateStatus={allowUpdateStatus}
-                      />
-                    )}
-                    {rentalSteps[currentStep] === 'Final Slip' && rentalManagementData && (
-                      <Invoice
-                        rentalManagementData={rentalManagementData}
-                        setNextStep={setNextStep}
-                        fetchRentalData={fetchRentalManagementData}
-                        updateJobStatus={updateJobStatus}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        statusOptions={statusOptions}
-                        renderedFrom={`${renderedFrom}_grid-5`}
-                        showActivity={showActivity}
-                        currencySymbol={currencySymbol}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={allowedToEdit}
-                      />
-                    )}
-                  </ContentFullScreen>
-                </Paper>
-              </TabPanel>
-              <TabPanel value={tabValue} index={2}>
-                <Box>
-                  {displayProgressiveBillingTab ? (
-                    <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} currencySymbol={currencySymbol} />
-                  ) : (
-                    <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
-                  )}
-                </Box>
-              </TabPanel>
-              <TabPanel value={tabValue} index={3}>
-                <Box>
-                  <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
-                </Box>
-              </TabPanel>
-            </Paper>
-          </div>
-          <Box my={1} />
-        </div>
-        <div className="position-relative">
-          <HideWhenOffline>
-            <Paper>
-              {!isSmallScreen && (
-                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                </span>
+              {rentalSteps[currentStep] === 'Add-on' && rentalManagementData && (
+                <AdditionalCost
+                  rentalManagementData={rentalManagementData}
+                  setNextStep={setNextStep}
+                  renderedFrom={`${renderedFrom}_grid-2`}
+                  allowedToEdit={
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      ? false
+                      : allowedToEdit
+                  }
+                />
               )}
-              <div style={{ display: showActivity ? 'block' : 'none' }}>
-                <Grid container>
-                  <Grid item xs={12}>
-                    {rentalManagementData && (
-                      <div>
-                        <Activity
-                          resourceId={rentalManagementData._id}
-                          resource={ACTIVITY_RESOURCE.rentalManagement}
-                          restrictedAddActivities={
-                            permissions &&
-                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] &&
-                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate
-                              ? []
-                              : ['Attachment', 'Case']
-                          }
-                          relatedTo={[
-                            {
-                              type: `${ACTIVITY_RESOURCE.rentalManagement}`,
-                              referenceId: rentalManagementData._id,
-                              access: true
-                            }
-                          ]}
-                          handleActivityRefresh={() => {}}
-                          emails={[]}
-                        />
-                      </div>
-                    )}
-                  </Grid>
-                </Grid>
-              </div>
-            </Paper>
-          </HideWhenOffline>
-        </div>
-      </div>
-      {showConfirmBox && (
-        <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ?`}
-          onClose={() => {
-            setShowConfirmBox(false);
-          }}
-          onOk={handleDelete}
-        />
-      )}
-      {showCancelConfirmBox.open && (
-        <ConfirmationDialog
-          open={showCancelConfirmBox.open}
-          message={
-            showCancelConfirmBox.isQuote
-              ? 'Do you want to create a new version of the quote?'
-              : `Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`
-          }
-          onClose={() => {
-            setShowCancelConfirmBox({ open: false, isQuote: false });
-            if (showCancelConfirmBox.isQuote) {
-              setCurrentStep((prevStep) => {
-                const newStep = prevStep - 1;
-                return newStep;
-              });
+              {rentalSteps[currentStep] === 'Quotation' && rentalManagementData && (
+                <Quotation
+                  rentalManagementData={rentalManagementData}
+                  setNextStep={setNextStep}
+                  currencySymbol={currencySymbol}
+                  stepFullScreen={stepFullScreen}
+                  allowedToEdit={allowedToEdit}
+                  allowedToDelete={allowedToDelete}
+                  fetchQuotationData={fetchQuotationData}
+                  quotationData={quotationData}
+                  currentVersion={currentVersion}
+                  setCurrentVersion={setCurrentVersion}
+                />
+              )}
+              {rentalSteps[currentStep] === 'Serialized Asset' && rentalManagementData && (
+                <SerializedAsset
+                  rentalManagementData={rentalManagementData}
+                  setNextStep={setNextStep}
+                  currencySymbol={currencySymbol}
+                  stepFullScreen={stepFullScreen}
+                  allowedToEdit={allowedToEdit}
+                />
+              )}
+              {rentalSteps[currentStep] === 'Loading Ticket' && rentalManagementData && (
+                <LoadingTicket
+                  fetchRentalData={fetchRentalManagementData}
+                  rentalManagementData={rentalManagementData}
+                  currentStep={currentStep}
+                  setNextStep={setNextStep}
+                  renderedFrom={`${renderedFrom}_grid-3`}
+                  allowedToEdit={allowedToEdit}
+                  isProcessor={isProcessor}
+                  allowUpdateStatus={allowUpdateStatus}
+                  checkProgressiveBilling={checkProgressiveBilling}
+                />
+              )}
+              {rentalSteps[currentStep] === 'Receiving Ticket' && rentalManagementData && (
+                <ReceivingTicket
+                  fetchRentalData={fetchRentalManagementData}
+                  rentalManagementData={rentalManagementData}
+                  currentStep={currentStep}
+                  setNextStep={setNextStep}
+                  renderedFrom={`${renderedFrom}_grid-4`}
+                  allowedToEdit={allowedToEdit}
+                  isProcessor={isProcessor}
+                  allowUpdateStatus={allowUpdateStatus}
+                />
+              )}
+              {rentalSteps[currentStep] === 'Final Slip' && rentalManagementData && (
+                <Invoice
+                  rentalManagementData={rentalManagementData}
+                  setNextStep={setNextStep}
+                  fetchRentalData={fetchRentalManagementData}
+                  updateJobStatus={updateJobStatus}
+                  statusOptions={statusOptions}
+                  renderedFrom={`${renderedFrom}_grid-5`}
+                  currencySymbol={currencySymbol}
+                  stepFullScreen={stepFullScreen}
+                  allowedToEdit={allowedToEdit}
+                />
+              )}
+            </ContentFullScreen>
+          </TabPanel>
+          <TabPanel value={tabValue} index={2}>
+            <Box>
+              {displayProgressiveBillingTab ? (
+                <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} currencySymbol={currencySymbol} />
+              ) : (
+                <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
+              )}
+            </Box>
+          </TabPanel>
+          <TabPanel value={tabValue} index={3}>
+            <Box>
+              <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
+            </Box>
+          </TabPanel>
+        </Box>
+
+        {showConfirmBox && (
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ?`}
+            onClose={() => {
+              setShowConfirmBox(false);
+            }}
+            onOk={handleDelete}
+          />
+        )}
+        {showCancelConfirmBox.open && (
+          <ConfirmationDialog
+            open={showCancelConfirmBox.open}
+            message={
+              showCancelConfirmBox.isQuote
+                ? 'Do you want to create a new version of the quote?'
+                : `Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`
             }
-          }}
-          onOk={() => (showCancelConfirmBox.isQuote ? cloneVersion() : handleCancelRentalJob())}
-          forwardText={showCancelConfirmBox.isQuote ? 'Yes' : null}
-          cancelText={showCancelConfirmBox.isQuote ? 'No' : null}
-        />
-      )}
-      {openUpdateDialog && (
-        <ManageRentalManagementDialog
-          isClone={false}
-          open={openUpdateDialog}
-          rentalManagementId={id}
-          rentalManagementData={rentalManagementData}
-          onClose={() => setOpenUpdateDialog(false)}
-          onSuccess={() => {
-            setOpenUpdateDialog(false);
-            fetchRentalManagementData();
-          }}
-        />
-      )}
+            onClose={() => {
+              setShowCancelConfirmBox({ open: false, isQuote: false });
+              if (showCancelConfirmBox.isQuote) {
+                setCurrentStep((prevStep) => {
+                  const newStep = prevStep - 1;
+                  return newStep;
+                });
+              }
+            }}
+            onOk={() => (showCancelConfirmBox.isQuote ? cloneVersion() : handleCancelRentalJob())}
+            forwardText={showCancelConfirmBox.isQuote ? 'Yes' : null}
+            cancelText={showCancelConfirmBox.isQuote ? 'No' : null}
+          />
+        )}
+        {openUpdateDialog && (
+          <ManageRentalManagementDialog
+            isClone={false}
+            open={openUpdateDialog}
+            rentalManagementId={id}
+            rentalManagementData={rentalManagementData}
+            onClose={() => setOpenUpdateDialog(false)}
+            onSuccess={() => {
+              setOpenUpdateDialog(false);
+              fetchRentalManagementData();
+            }}
+            isDisableCustomerAccount={isDisableCustomerAccount}
+          />
+        )}
+      </Box>
+
     </>
   );
 };

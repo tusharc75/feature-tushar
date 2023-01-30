@@ -5,7 +5,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { Grid, Paper, Button, Divider, Typography } from '@material-ui/core'
+import { Grid, Paper, Button, Divider, Typography, Box } from '@material-ui/core'
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { useData } from "../../StateProvider/Provider";
 import { userType } from '../../constants/helpers'
@@ -78,64 +78,47 @@ export default function BrandConfiguration() {
             });
     }
 
-    return <>
-        {
-            openUpdateDialog && (
-                <UpdateDetailsDialog
-                    title="Update Brand"
-                    openDialog={openUpdateDialog}
-                    onClose={closeUpdateDIalog}
-                    data={brandDetails}
-                    fields={brandFields.filter(o => o?.fieldData?.fieldName !== "servicesAccess")}
-                    isUpdating={isUpdating}
-                    handleUpdate={handleUpdate}
-                />
-            )
-        }
-        <Fragment>
-            <Grid container className="headerbox">
+    return <Box className="main-container-v1">
+        <Box className="headerbox-v1">
+            <Box className="nav-v1">
                 <CustomBreadCrumbs routes={[routes.brandConfiguration]} />
-            </Grid>
-            <Grid container spacing={1} className="detail-container">
-                <Grid item xs={12} sm={12} lg={12} >
-                    <Paper>
-                        {
-                            user?.user?.userType === userType.brandAdmin ?
-                                loading || !brandFields.length || !brandDetails ? (
-                                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                                ) : (<>
-                                    <div style={{ padding: '13px 10px', display: 'flex', justifyContent: 'space-between' }}>
-                                        <Typography
-                                            className="text-capitalize"
-                                            style={{ display: "inline-block" }}
-                                            variant="h6"
-                                            component="h2"
-                                            color="primary"
-                                        >
-                                            <span className="d-flex align-items-center gap-2"><span className="listingHeader">
-                                                {brandDetails?.companyName ?? ""}
-                                            </span>
-                                            </span></Typography>
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            size="small"
-                                            onClick={handleOpenUpdateDialog}>Edit</Button>
-                                    </div>
-                                    <Divider />
-                                    <DetailsPage data={brandDetails} fields={brandFields} />
-                                </>
-                                ) : <Paper style={{ minHeight: '300px', textAlign: 'center' }}> <Typography
-                                    className="text-capitalize"
-                                    style={{ display: "inline-block" }}
-                                    variant="h6"
-                                    component="h2"
-                                    color="primary">You don't have permission</Typography>
-                                </Paper>
-                        }
+            </Box>
+            <Box className="controls-v1">
+                <Box className="control-buttons-v1">
+                    <Button
+                        variant="contained"
+                        size="small"
+                        className={'btn-outline-v1'}
+                        onClick={handleOpenUpdateDialog}>Edit</Button>
+                </Box>
+            </Box>
+        </Box>
+        <Box className={`detail-container-v1`}>
+            <Grid item xs={12} sm={12} lg={12} >
+                {user?.user?.userType === userType.brandAdmin ?
+                    loading || !brandFields.length || !brandDetails ? (
+                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                    ) : (<DetailsPage data={brandDetails} fields={brandFields} />
+                    ) : <Paper style={{ minHeight: '300px', textAlign: 'center' }}> <Typography
+                        className="text-capitalize"
+                        style={{ display: "inline-block" }}
+                        variant="h6"
+                        component="h2"
+                        color="primary">You don't have permission</Typography>
                     </Paper>
-                </Grid>
+                }
             </Grid>
-        </Fragment>
-    </>
+        </Box>
+        {openUpdateDialog && (<UpdateDetailsDialog
+            title="Update Brand"
+            openDialog={openUpdateDialog}
+            onClose={closeUpdateDIalog}
+            data={brandDetails}
+            fields={brandFields.filter(o => o?.fieldData?.fieldName !== "servicesAccess")}
+            isUpdating={isUpdating}
+            handleUpdate={handleUpdate}
+        />
+        )}
+    </Box>
+
 }

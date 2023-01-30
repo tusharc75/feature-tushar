@@ -26,7 +26,21 @@ import { VscVersions } from 'react-icons/vsc';
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnly = false, allowedToEdit, versionId, allColumn, columns, setShowAllVersionStatus, setShowQuotationSummaryDialog, currentVersion }) => {
+const SendEmail = ({
+  quotationData,
+  versionData,
+  isSendEmail = false,
+  previewOnly = false,
+  allowedToEdit,
+  versionId,
+  allColumn,
+  columns,
+  setShowAllVersionStatus,
+  setShowQuotationSummaryDialog,
+  currentVersion,
+  hideSummary = false,
+  hideVersions = false
+}) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -68,13 +82,13 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
     attachments.push({
       base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(',') + 1)),
       contentType: pdfFileBase64.split(';')[0].split(':')[1],
-      name: `Rental Order-${quotationData.quotationNumber}`
+      name: `Quote-${quotationData?.quotationNumber}`
     });
   }
 
   const fetchEmailAttachment = () => {
     axiosInstance()
-      .get(`${quotation.api}/${quotationData?._id}/pdf/${versionData._id}`)
+      .get(`${quotation.api}/${quotationData?._id}/pdf/${versionData._id}/detail`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -122,9 +136,11 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
       setLoading('view');
     }
     axiosInstance()
-      .get(PDFType === "Detail" ?
-        `${quotation.api}/${quotationData._id}/pdf/${versionData._id}/detail`
-        : `${quotation.api}/${quotationData._id}/pdf/${versionData._id}`)
+      .get(
+        PDFType === 'Detail'
+          ? `${quotation.api}/${quotationData._id}/pdf/${versionData._id}/detail`
+          : `${quotation.api}/${quotationData._id}/pdf/${versionData._id}`
+      )
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -193,36 +209,40 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
       <Box display="flex" justifyContent="space-between">
         <Box display="flex" alignItems="center">
           <Box display="flex">
-            <Button
-              onClick={() => {
-                setShowQuotationSummaryDialog(true);
-              }}
-              variant="outlined"
-              size="small"
-              className="mx-1"
-              startIcon={<GiReceiveMoney />}
-              color="primary"
-            >
-              Summary
-            </Button>
+            {!hideSummary && (
+              <Button
+                onClick={() => {
+                  setShowQuotationSummaryDialog(true);
+                }}
+                variant="outlined"
+                size="small"
+                className="mx-1"
+                startIcon={<GiReceiveMoney />}
+                color="primary"
+              >
+                Summary
+              </Button>
+            )}
+            {!hideVersions && (
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="primary"
+                size="small"
+                className={'btn-outline-v1 mx-1'}
+                onClick={() => {
+                  setShowAllVersionStatus(true);
+                }}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                startIcon={isMobile && !isTablet ? null : <VscVersions />}
+              >
+                {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
+              </Button>
+            )}
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
               color="primary"
               size="small"
-              className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
-              onClick={() => {
-                setShowAllVersionStatus(true);
-              }}
-              style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-              startIcon={isMobile && !isTablet ? null : <VscVersions />}
-            >
-              {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-            </Button>
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
-              size="small"
-              className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
+              className={'btn-outline-v1 mx-1'}
               onClick={() => {
                 setShowExcelArrangeColumns(true);
               }}
@@ -234,22 +254,24 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
             <Box mx={0.5} />
             <Button
               variant="outlined"
+              className="btn-outline-v1"
               color="primary"
               type="button"
               size="small"
               startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
               disabled={loading === 'view'}
               onClick={(e) => {
-                setDownlodingFile("Preview");
+                setDownlodingFile('Preview');
                 handleClick(e);
               }}
             >
               {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : loading === 'view' ? 'Please wait...' : 'Preview'}
             </Button>
-            {!previewOnly &&
+            {!previewOnly && (
               <>
                 <Box mx={0.5} />
                 <Button
+                  className="btn-outline-v1"
                   variant="outlined"
                   color="primary"
                   type="button"
@@ -257,14 +279,14 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
                   startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
                   disabled={loading === 'download'}
                   onClick={(e) => {
-                    setDownlodingFile("Download");
-                    handleClick(e)
+                    setDownlodingFile('Download');
+                    handleClick(e);
                   }}
                 >
                   {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === 'download' ? 'Please wait...' : 'Download'}
                 </Button>
               </>
-            }
+            )}
             <Menu
               id="simple-menu"
               anchorEl={anchorEl}
@@ -274,38 +296,49 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
               getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: 'bottom',
-                horizontal: 'right',
+                horizontal: 'right'
               }}
               transformOrigin={{
                 vertical: 'top',
-                horizontal: 'right',
+                horizontal: 'right'
               }}
             >
-              <MenuItem onClick={() => {
-                setAnchorEl(null)
-                handleViewPdf(downlodingFile, "Regular")
-              }}>Regular</MenuItem>
-              <MenuItem onClick={() => {
-                setAnchorEl(null)
-                handleViewPdf(downlodingFile, "Detail")
-              }}>Detail</MenuItem>
-            </Menu>
-            {isSendEmail && <>
-              <Box mx={0.5} />
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                disabled={loading === "email"}
-                startIcon={isMobile ? '' : <MdEmail />}
+              <MenuItem
                 onClick={() => {
-                  setLoading("email")
-                  fetchEmailAttachment()
+                  setAnchorEl(null);
+                  handleViewPdf(downlodingFile, 'Regular');
                 }}
               >
-                {isMobile && !isTablet ? <MdEmail size={20} /> : loading === "email" ? "Please wait..." : `Send Email`}
-              </Button>
-            </>}
+                Regular
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setAnchorEl(null);
+                  handleViewPdf(downlodingFile, 'Detail');
+                }}
+              >
+                Detail
+              </MenuItem>
+            </Menu>
+            {isSendEmail && (
+              <>
+                <Box mx={0.5} />
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                  className="btn-outline-v1"
+                  disabled={loading === 'email'}
+                  startIcon={isMobile ? '' : <MdEmail />}
+                  onClick={() => {
+                    setLoading('email');
+                    fetchEmailAttachment();
+                  }}
+                >
+                  {isMobile && !isTablet ? <MdEmail size={20} /> : loading === 'email' ? 'Please wait...' : `Send Email`}
+                </Button>
+              </>
+            )}
           </Box>
         </Box>
       </Box>
@@ -400,7 +433,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
                           style={{ marginRight: 8 }}
                           checked={
                             showExcelArrangeColumns &&
-                              ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
+                            ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
                               ? true
                               : selected
                           }

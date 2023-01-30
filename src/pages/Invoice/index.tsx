@@ -181,8 +181,8 @@ const Invoice = () => {
         </Tooltip>
       )}
 
-      <GridDeleteIcon
-        hasDeletePermission={permissions?.invoice?.isDelete}
+      {params?.data?.canDelete && <GridDeleteIcon
+        hasDeletePermission={params?.data?.canDelete}
         ownerId={user?.user?._id}
         userId={user?.user?._id}
         onDelete={() =>
@@ -193,7 +193,7 @@ const Invoice = () => {
           })
         }
         entity="invoice"
-      />
+      />}
     </>
   );
 
@@ -295,7 +295,8 @@ const Invoice = () => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
           finalObject['allowedToEdit'] = permissions?.invoice?.isUpdate;
-          finalObject['canDelete'] = permissions?.invoice?.isDelete;
+          finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
+
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

@@ -67,7 +67,6 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
           size="small"
           aria-label="Clone"
           onClick={() => {
-            console.log(params.data);
             setAddOpen({ open: true, invoiceData: params.data });
           }}
         >
@@ -99,7 +98,6 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
   );
 
   const handleDelete = async (removeIds) => {
-    console.log(removeIds);
     axiosInstance()
       .put(`${purchaseOrder.api}/invoice/${purchaseOrderData?._id}/remove`, { ids: removeIds })
       .then(({ data }) => {
@@ -111,7 +109,6 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
         });
       })
       .catch((err) => {
-        console.log(err);
         toastConfig.setToastConfig(err);
       });
   };

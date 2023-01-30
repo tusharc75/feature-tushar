@@ -1,5 +1,5 @@
 .MuiToolbar-root {
-  min-height: 55px !important;
+  min-height: 64px !important;
   @media all and (max-width: 768px) {
     min-height: 0px !important;
   }
@@ -179,7 +179,7 @@ Button.MuiButtonBase-root:not(.MuiFab-root) {
 //   padding: 0 10px !important;
 // }
 .stepper-box {
-  background: #eeeeee;
+  //background: #eeeeee;
   padding: 4px;
 
   & .mainview {
@@ -456,9 +456,12 @@ Button.MuiButtonBase-root:not(.MuiFab-root) {
   }
 }
 .MuiButton-containedPrimary {
+  background-color: #298b88 !important;
   color: white !important;
 }
-
+.MuiOutlinedInput-adornedStart {
+  padding-left: 11px !important;
+}
 .properties_dialog_height {
   .MuiDialog-paper {
     overflow-y: hidden !important;

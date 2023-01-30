@@ -66,6 +66,7 @@ const Report = () => {
     const {
       data: { data }
     }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}`);
+
     if (resourceStartCase === 'Serialized Asset') {
       const {
         data: { data: lookupResource }
@@ -78,7 +79,32 @@ const Report = () => {
         });
       }
     }
-    setResourceColumns(data);
+    const resourceColumns = [...data];
+    if (resourceStartCase === 'Purchase Order') {
+      resourceColumns.push({
+        fieldData: {
+          _id: '630dc2429ec41861052355a9',
+          fieldLabel: 'Received Date',
+          type: 'date',
+          option: [],
+          required: false,
+          isTooltip: false,
+          tooltipMessage: '',
+          editAble: true,
+          deletAble: true,
+          order: 6,
+          fieldName: 'receivedDate',
+          sectionName: 'PO Information',
+          resource: 'Purchase Order',
+          brand: data[0]?.fieldData?.brand,
+          timeFrame: 'custom'
+        },
+        isCreate: true,
+        isRead: true,
+        isUpdate: true
+      });
+    }
+    setResourceColumns(resourceColumns);
     setLoadingColumns(false);
     let columns = [];
     let rendererNames = [];
@@ -247,12 +273,12 @@ const Report = () => {
         return 'product.optionLabel';
       case 'warehouse':
         return 'warehouse.optionLabel';
-      case "projectManager":
-        return "projectManager.optionLabel";
-      case "rentalJob":
-        return "rentalJob.optionLabel";
-      case "pDFTemplate":
-        return "pDFTemplate.optionLabel";
+      case 'projectManager':
+        return 'projectManager.optionLabel';
+      case 'rentalJob':
+        return 'rentalJob.optionLabel';
+      case 'pDFTemplate':
+        return 'pDFTemplate.optionLabel';
       default:
         return field;
     }
@@ -487,7 +513,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => { }}
+                      onEdit={() => {}}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -502,8 +528,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => { }}
-                      onClone={(data) => { }}
+                      onDelete={(data) => {}}
+                      onClone={(data) => {}}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (

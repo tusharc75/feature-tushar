@@ -11,7 +11,7 @@ import { orderBy } from 'lodash';
 import { checkStaticField, staticColumns } from '../../constants/columns';
 import { GridApi } from 'ag-grid-community';
 import { uniqBy } from 'lodash';
-import { useData } from '../../StateProvider/Provider';
+import { useData } from 'src/StateProvider/Provider';
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -159,7 +159,7 @@ export default function CustomAgGrid({
   customGridOptions = null,
   actionLabel = null,
   actionEditable = false,
-  onCellValueChanged = () => {},
+  onCellValueChanged = () => { },
   showOnlyShowFilteredRecordSwitch = false,
   idProperty = '_id',
   allowHeaderSelection = true,
@@ -170,20 +170,31 @@ export default function CustomAgGrid({
   isMultipleSelection = true,
   reportSave = false
 }) {
+  const [columns, setColumns] = useState([]);
+  const [columnApi, setColumnApi] = useState(null);
+
   const {
     state: { searchQuery }
   }: any = useData();
 
   useEffect(() => {
+    let timer;
     if (searchQuery) {
-      dispatch({ type: 'search', search: searchQuery });
-    } else {
-      dispatch({ type: 'search', search: '' });
+      timer = setTimeout(() => {
+        let query = searchQuery?.trim();
+        if (query !== '') {
+          dispatch({ type: 'search', search: query });
+        }
+      }, 300);
     }
+    // else {
+    //   timer = setTimeout(() => {
+    //     dispatch({ type: 'search', search: '' });
+    //     dispatch({ type: 'loading', loading: false });
+    //   }, 300);
+    // }
+    return () => clearTimeout(timer);
   }, [searchQuery]);
-
-  const [columns, setColumns] = useState([]);
-  const [columnApi, setColumnApi] = useState(null);
 
   const [currentGridApi, setCurrentGridApi] = useState<GridApi | any>(null);
   const enableRowDrag = cols.some((d) => d.rowDrag);
@@ -329,8 +340,8 @@ export default function CustomAgGrid({
           width={actionWidth}
           field="actions"
           headerName={actionLabel ? actionLabel : 'Actions'}
-          pinned={isMobile || isTablet ? false : 'right'}
-          lockPinned={isMobile || isTablet ? false : true}
+          pinned={'right'}
+          lockPinned={true}
           resizable={true}
           sortable={false}
           editable={actionEditable}
@@ -367,15 +378,15 @@ export default function CustomAgGrid({
                 ? true
                 : checkStaticField(renderedFrom, column.field)
               : column.hasOwnProperty('show') && !column?.show
-              ? true
-              : false
+                ? true
+                : false
           }
           floatingFilterComponent="customFloatingFilter"
           valueGetter={column.valueGetter ?? null}
-          // floatingFilterComponent={column.floatingFilterComponent ?? null}
-          // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-          //   suppressFilterButton: true,
-          // }}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
         ></AgGridColumn>
       )
     ) : column.isAction ? (
@@ -401,18 +412,18 @@ export default function CustomAgGrid({
               ? true
               : checkStaticField(renderedFrom, column.field)
             : column.hasOwnProperty('show') && !column?.show
-            ? true
-            : false
+              ? true
+              : false
         }
         comparator={() => {
           return 0;
         }}
         floatingFilterComponent="customFloatingFilter"
         valueGetter={column.valueGetter ?? null}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+      // floatingFilterComponent={column.floatingFilterComponent ?? null}
+      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+      //   suppressFilterButton: true,
+      // }}
       ></AgGridColumn>
     );
   });

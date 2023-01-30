@@ -15,13 +15,12 @@ import { fetch_invoice_product_fields } from '../../../components/Invoice/helper
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import InvoiceFacility from './InvoiceFacility';
 
-const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, statusOptions, stepFullScreen, showActivity, renderedFrom }) => {
+const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, statusOptions, stepFullScreen, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
+  
   const [sendEmail, setSendEmail] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
@@ -186,7 +185,7 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.detail = `${
-        parent.type === 'serializedAsset'
+        parent.type === 'asset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
           ? parent.productDetail?.productName
@@ -214,7 +213,7 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
+        _subRow.type === 'asset'
           ? _subRow.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
@@ -239,39 +238,15 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
     return subRows;
   };
 
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
-  };
-
   return (
     <>
       <InvoiceFacility invoiceData={invoiceData} />
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns && rowsData ? (
           <>
-            <Box
-              p="6px"
-              zIndex={5}
-              width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
-                  ? 'calc(100vw)'
-                  : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 100px)'
-              }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-            >
+            <Box p="6px" zIndex={5}>
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}

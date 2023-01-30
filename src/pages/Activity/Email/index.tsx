@@ -40,8 +40,6 @@ const tabs = {
   Sent: 2
 };
 
-
-
 const Email = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -110,7 +108,7 @@ const Email = () => {
   const [resourceOptions, setResourceOptions] = useState([]);
 
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions))
+    setResourceOptions(get_activity_resource(permissions));
   }, []);
 
   useEffect(() => {
@@ -126,9 +124,8 @@ const Email = () => {
         .catch((err) => {
           toastConfig.setToastConfig(err);
         });
-    }
-    else {
-      setFilter([])
+    } else {
+      setFilter([]);
     }
   }, [referenceId]);
 
@@ -162,11 +159,8 @@ const Email = () => {
   }, [resource]);
 
   const redirectToResource = (type, id) => {
-    history.push(
-      type === "quote" ? `${routes["quoteBuilder"].path}/detail/${id}`
-        : `${routes[type].path}/detail/${id}`
-    )
-  }
+    history.push(type === 'quote' ? `${routes['quoteBuilder'].path}/detail/${id}` : `${routes[type].path}/detail/${id}`);
+  };
 
   const fetchEmails = async () => {
     const queryString = getQueryString();
@@ -188,7 +182,7 @@ const Email = () => {
             createdByDate: obj?.createdBy?.date ?? '',
             createdByUser: obj?.createdBy?.user,
             isCreatedByMe,
-            isChecked: false,
+            isChecked: false
           };
           inboxEmailsData.push(currentObject);
           // if (isCreatedByMe) sentEmails.push(currentObject);
@@ -228,19 +222,19 @@ const Email = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions.email.isDelete ?
-        (<Tooltip title="Delete">
+      {permissions.email.isDelete ? (
+        <Tooltip title="Delete">
           <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(params.data)}>
             <DeleteIcon fontSize="small" color="error" />
           </IconButton>
-        </Tooltip>)
-        : (
-          <Tooltip className="cursor-stop" title="You don't have the permissions to delete">
-            <IconButton size="small" aria-label="Delete">
-              <DeleteIcon fontSize="small" color="disabled" />
-            </IconButton>
-          </Tooltip>
-        )}
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You don't have the permissions to delete">
+          <IconButton size="small" aria-label="Delete">
+            <DeleteIcon fontSize="small" color="disabled" />
+          </IconButton>
+        </Tooltip>
+      )}
     </>
   );
 
@@ -277,26 +271,21 @@ const Email = () => {
   );
 
   const ReferenceRenderer = (params) => (
-    <>{params.value && params.value?.length > 0 ? params.value.map(d => {
-      return (
-        <>
-          <Link
-            className="link text-truncate"
-            onClick={() => redirectToResource(d?.type, d?.referenceId)}
-
-          >
-            {d?.salutation ? `${d?.saluation} ${d?.name}` : d?.name}
-          </Link>
-          <Chip
-            className="ml-3"
-            color="primary"
-            label={`${routes[d?.type]?.title}`}
-          />
-        </>
-      )
-    })
-      : <NoDataCell />
-    }
+    <>
+      {params.value && params.value?.length > 0 ? (
+        params.value.map((d) => {
+          return (
+            <>
+              <Link className="link text-truncate" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
+                {d?.salutation ? `${d?.saluation} ${d?.name}` : d?.name}
+              </Link>
+              <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
+            </>
+          );
+        })
+      ) : (
+        <NoDataCell />
+      )}
     </>
   );
 
@@ -422,7 +411,7 @@ const Email = () => {
       </Grid>
 
       <CustomContainer>
-        {filter &&
+        {filter && (
           <div className="header-panel">
             <Grid container className={styles.filter_side_container}>
               <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
@@ -430,15 +419,14 @@ const Email = () => {
                 <Autocomplete
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}
-                  style={{ width: "250px" }}
+                  style={{ width: '250px' }}
                   value={resource}
                   onChange={(event, newValue) => {
                     setResource(newValue);
                     if (newValue) {
-                      setFilter((prevState) => ([...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]))
-                    }
-                    else {
-                      setFilter([])
+                      setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
+                    } else {
+                      setFilter([]);
                     }
                   }}
                   size="small"
@@ -456,15 +444,14 @@ const Email = () => {
                     options={resourceData}
                     getOptionLabel={(option: any) => option.name}
                     getOptionSelected={(option: any, value: any) => option.name === value.name}
-                    style={{ width: "250px" }}
+                    style={{ width: '250px' }}
                     value={selectedResourceData}
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
                       if (newValue?.id) {
-                        setFilter((prevState) => ([...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]))
-                      }
-                      else {
-                        setFilter([])
+                        setFilter((prevState) => [...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]);
+                      } else {
+                        setFilter([]);
                       }
                     }}
                     size="small"
@@ -474,12 +461,8 @@ const Email = () => {
               </Grid>
               <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
                 <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Grid style={{ width: '100%', display: 'flex' }}>
-                    <SearchFilter
-                      handleChangeFilter={handleChangeFilter}
-                      filter={filter}
-                      chip={{ size: 'large' }}
-                      activityName="email" />
+                  <Grid>
+                    <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'large' }} activityName="email" />
                   </Grid>
                   <Grid style={{ display: 'flex', gap: '5px' }}>
                     {
@@ -535,7 +518,7 @@ const Email = () => {
               </Grid>
             </Grid>
           </div>
-        }
+        )}
         {isMobile && !isTablet ? (
           <CustomSwipableList
             allowSelection={true}
@@ -610,7 +593,7 @@ const Email = () => {
             maxWidth="md"
             onClose={(e, reason) => {
               if (reason !== 'backdropClick') {
-                handleClose()
+                handleClose();
                 setFullScreen(false);
               }
             }}
@@ -625,10 +608,10 @@ const Email = () => {
               fetchData={fetchEmails}
               relatedTo={[
                 {
-                  type: resource && selectedResourceData ? resource.optionValue : "user",
+                  type: resource && selectedResourceData ? resource.optionValue : 'user',
                   referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
-                  access: true,
-                },
+                  access: true
+                }
               ]}
               options={emailUsersOptions}
               isMinimized={!fullScreen}

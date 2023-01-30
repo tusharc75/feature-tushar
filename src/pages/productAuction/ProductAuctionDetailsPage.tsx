@@ -14,12 +14,12 @@ import { productAuction } from '../../constants/helpers';
 import ManageProductAuction from './ManageProductAuction';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import Products from '../Packages/Products';
 import { FaWpforms } from 'react-icons/fa';
 import { camelCase } from 'lodash';
 import BidsPage from './Bids';
+import { Skeleton } from '@material-ui/lab';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -45,7 +45,6 @@ function a11yProps(index: any) {
 }
 
 const ProductAuctionDetailsPage = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -106,98 +105,96 @@ const ProductAuctionDetailsPage = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.productAuction, { title: `${productAuctionData?.auctionNumber}` }]} />
-      </Grid>
-      <Grid container spacing={1} className="detail-container">
-        <Grid item xs={12} sm={12} md={12} lg={12}>
-          <Paper style={{ height: '650px' }}>
-            <DetailsPageHeader heading={productAuctionData?.auctionNumber} mainPoints={null} showHeading={true}>
-              {permissions?.product?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  color="primary"
-                  size="small"
-                  onClick={() => {
-                    setOpenUpdateDialog(true);
-                  }}
-                  className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                </Button>
-              )}
-              {permissions?.productAuction?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            </DetailsPageHeader>
-            {/* <Box>
-              {' '}
-              {productAuctionData && fields.length ? (
-                <DetailsPage data={productAuctionData} fields={fields} />
-              ) : (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              )}
-            </Box> */}
-            <Box>
-              {productAuctionData && fields.length ? (
-                <>
-                  <Tabs
-                    className="quote-tab"
-                    value={tabValue}
-                    onChange={handleMainTabChange}
-                    textColor="primary"
-                    TabIndicatorProps={{
-                      style: {
-                        display: 'none'
-                      }
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={[routes.productAuction, { title: `${productAuctionData?.auctionNumber}` }]} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {!productAuctionData ? (
+              <div>
+                <Skeleton variant="text" width="150px" height="40px" />
+                <Box display="flex">
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                  <Box marginX={1} />
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                </Box>
+              </div>
+            ) : (
+              <>
+                {permissions?.product?.isUpdate && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    size="small"
+                    onClick={() => {
+                      setOpenUpdateDialog(true);
                     }}
+                    className={`btn-outline-v1`}
                   >
-                    <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 1 ? 'white' : '',
-                        color: tabValue === 1 ? '#163340' : '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                        </div>
-                      }
-                      {...a11yProps(0)}
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 2 ? 'white' : '',
-                        color: tabValue === 2 ? 'blue' : '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Bids
-                        </div>
-                      }
-                      {...a11yProps(1)}
-                    />
-                    <div className={'uio'}> </div>
-                  </Tabs>
-                  <TabPanel value={tabValue} index={0}>
-                    <DetailsPage data={productAuctionData} fields={fields} />
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={1}>
-                    <BidsPage bids={bids} />
-                  </TabPanel>
-                </>
-              ) : (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              )}
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  </Button>
+                )}
+                {permissions?.productAuction?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              </>
+            )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        {productAuctionData && fields.length ? (
+          <>
+            <Tabs
+              className="new-tab-container-v1"
+              value={tabValue}
+              onChange={handleMainTabChange}
+              textColor="primary"
+              TabIndicatorProps={{
+                style: {
+                  display: 'none'
+                }
+              }}
+            >
+              <Tab
+                className={'tabLayout'}
+                style={{
+                  background: tabValue === 1 ? 'white' : '',
+                  color: tabValue === 1 ? '#163340' : '#163340'
+                }}
+                label={
+                  <div className="d-flex align-items-center tab-font">
+                    <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                  </div>
+                }
+                {...a11yProps(0)}
+              />
+              <Tab
+                className={'tabLayout'}
+                style={{
+                  background: tabValue === 2 ? 'white' : '',
+                  color: tabValue === 2 ? 'blue' : '#163340'
+                }}
+                label={
+                  <div className="d-flex align-items-center tab-font">
+                    <BiFoodMenu className="mr-1" fontSize="inherit" /> Bids
+                  </div>
+                }
+                {...a11yProps(1)}
+              />
+            </Tabs>
+            <TabPanel value={tabValue} index={0}>
+              <DetailsPage data={productAuctionData} fields={fields} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              <BidsPage bids={bids} />
+            </TabPanel>
+          </>
+        ) : (
+          <Grid container spacing={2} style={{ padding: '8px' }}>
+            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+          </Grid>
+        )}
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -219,7 +216,7 @@ const ProductAuctionDetailsPage = () => {
           }}
         />
       )}
-    </Fragment>
+    </Box>
   );
 };
 

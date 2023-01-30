@@ -4,7 +4,6 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
-import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -39,6 +38,7 @@ import { useHistory } from 'react-router-dom';
 import MobileSortDialog from "src/components/MobileSortDialog"
 import MobileFilterDialog from "src/components/MobileFilterDialog"
 import { camelCase } from 'lodash'
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const AddressResource = () => {
   const renderedFrom = camelCase(routes?.warehouse.title)
@@ -223,7 +223,7 @@ const AddressResource = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      <Tooltip className={warehousePermissions.isCreate ? "" : "cursor-stop"}
+      <HtmlTooltip className={warehousePermissions.isCreate ? "" : "cursor-stop"}
         title={warehousePermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
         <span>
           <IconButton
@@ -237,9 +237,9 @@ const AddressResource = () => {
             <FileCopyIcon fontSize="small" color={warehousePermissions.isCreate ? "primary" : "inherit"} />
           </IconButton>
         </span>
-      </Tooltip>
+      </HtmlTooltip>
       {warehousePermissions.isDelete ? (
-        <Tooltip title="Delete">
+        <HtmlTooltip title="Delete">
           <IconButton
             aria-label="Delete"
             onClick={() => {
@@ -249,16 +249,16 @@ const AddressResource = () => {
           >
             <DeleteIcon fontSize="small" color="error" />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       ) : (
-        <Tooltip className="cursor-stop" title={`You do not have permission to delete `}>
+        <HtmlTooltip className="cursor-stop" title={`You do not have permission to delete `}>
           <IconButton aria-label="Delete">
             <DeleteIcon fontSize="small" />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       )}
       {warehousePermissions.isUpdate && params.data?.isAllowedToUpdate ?
-        <Tooltip title="Entity">
+        <HtmlTooltip title="Entity">
           <IconButton
             size="small"
             aria-label="Entity"
@@ -279,12 +279,12 @@ const AddressResource = () => {
             }}>
             <AiOutlineDeploymentUnit fontSize="15" color="primary" />
           </IconButton>
-        </Tooltip> : (
-          <Tooltip className="cursor-stop" title="You do not have permission to update entity">
+        </HtmlTooltip> : (
+          <HtmlTooltip className="cursor-stop" title="You do not have permission to update entity">
             <IconButton aria-label="Clone" size="small">
               <AiOutlineDeploymentUnit fontSize="15" />
             </IconButton>
-          </Tooltip>
+          </HtmlTooltip>
         )
       }
     </>
@@ -418,9 +418,6 @@ const AddressResource = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-              <div className="d-flex align-items-center">
-                <FaWarehouse size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.warehouse.title}</span>
-              </div>
               {isMobile && !isTablet &&
                 <div className="d-flex ">
                   <Button

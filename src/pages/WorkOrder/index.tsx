@@ -30,6 +30,8 @@ import { Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import { AddOutlined } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import DeleteIcon from '@material-ui/icons/Delete';
+import HtmlTooltip from "src/components/CustomTooltipTitle";
 
 let workOrderTimeout;
 
@@ -119,6 +121,7 @@ const WorkOrder = () => {
           ...prepareDataForGrid(u, user)
         };
         res["isChecked"] = false;
+        res['canDelete'] = permissions?.workOrder?.isDelete && u?.canDelete;
         return res;
       });
       if (appendRows) {
@@ -152,7 +155,7 @@ const WorkOrder = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions?.workOrder?.isCreate ? (
+      {/* {permissions?.workOrder?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
@@ -170,17 +173,17 @@ const WorkOrder = () => {
             <FileCopyIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-      )}
-      <GridDeleteIcon
-        hasDeletePermission={permissions?.workOrder?.isDelete}
-        ownerId={params.data.ownerId}
-        userId={user?.user?._id}
-        onDelete={() => {
-          setDeleteRecord(params.data);
-          setIsConformDialogVisible(true);
-        }}
-        entity="Work Order"
-      />
+      )} */}
+      {params?.data?.canDelete && !params?.data?.deleted &&
+        <HtmlTooltip title="Delete">
+          <IconButton size="small" aria-label="Delete" onClick={() => {
+            setDeleteRecord(params.data);
+            setIsConformDialogVisible(true);
+          }} >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </HtmlTooltip >
+      }
     </>
   );
 
@@ -327,10 +330,6 @@ const WorkOrder = () => {
       <div className="header-panel">
         <Grid container className={isMobile ? styles.mobile_filter_side_container_workOrder_ticket : styles.filter_side_container_workOrder_ticket}>
           <Grid item xs={isMobile && !isTablet ? 12 : 6} className="d-flex align-items-center gap-1">
-            <Grid>
-              <GiAbstract055 className="headerLogo" />
-              <span className="listingHeader">{routes.workOrder.title} </span>
-            </Grid>
             <HideWhenOffline>
               <div className={`align-items-center gap-1 layout-for-mobile `}>
                 {WorkOrderType && (
@@ -359,7 +358,7 @@ const WorkOrder = () => {
                   style={isMobile ? { flex: 1 } : {}}
                 />
               </Grid>
-              {permissions?.workOrder?.isCreate &&
+              {/* {permissions?.workOrder?.isCreate &&
                 <Button
                   className={styles.add_submit_btn}
                   onClick={() => setShowManageWorkOrder({ open: true, isClone: false, idToClone: null })}
@@ -368,7 +367,7 @@ const WorkOrder = () => {
                   color="primary"
                   startIcon={<AddOutlined />}>
                   Add</Button>
-              }
+              } */}
               {permissions?.workOrder?.isDelete &&
                 <Button
                   className={styles.action_submit_btn}
@@ -393,10 +392,17 @@ const WorkOrder = () => {
                 open={Boolean(anchorEl)}
                 onClose={closeActions}
               >
-                <MenuItem onClick={() => {
-                  setIsConformDialogVisible(true)
-                  closeActions()
-                }}>Delete</MenuItem>
+                <MenuItem
+                  disabled={permissions?.workOrder?.isDelete
+                    && selectedRecords?.filter((e) => !e.deleted)?.length === selectedRecords?.length ? false : true}
+                  onClick={() => {
+                    if (selectedRecords.find((d) => d.canDelete === false)) {
+                      setShowDeleteWarningConfirmBox(true);
+                    } else {
+                      setIsConformDialogVisible(true);
+                    }
+                    closeActions()
+                  }}>Delete</MenuItem>
               </Menu>
             </Box>
           </Grid>
@@ -449,6 +455,12 @@ const WorkOrder = () => {
           renderedFrom={renderedFrom}
           refreshGrid={fetchWorkOrder}
           showOnlyShowFilteredRecordSwitch={true}
+          rowClassRules={{
+            "red-data-row":
+              function (params) {
+                return params.data.deleted;
+              },
+          }}
         />
       ) : null}
       {showDeleteWarningConfirmBox ? (

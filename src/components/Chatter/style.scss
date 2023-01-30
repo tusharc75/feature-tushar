@@ -8,8 +8,10 @@
 // }
 
 .chat-box {
-  background: #efefef;
+  background: #ffffff;
   position: relative;
+  box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.06);
+  border-radius: 0px 0px 4px 4px;
   /* right:30px;
   bottom:50px;  
   width:350px;
@@ -25,20 +27,25 @@
   cursor: pointer;
 }
 .chat-box-header {
-  background: #53ac65;
-  height: 55px;
-  color: white;
-  text-align: center;
-  font-size: 20px;
+  background: #298b88;
+  height: 46px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 16px;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+.chatbox-footer {
+  padding: 10px 18px;
+  background: #ffffff;
+  box-shadow: 0px -4px 40px rgba(0, 0, 0, 0.06);
+  border-radius: 0px 0px 4px 4px;
+  position: relative;
+}
 .chat-box-body {
   position: relative;
-  height: 370px;
-  height: auto;
-  border: 1px solid #ccc;
   overflow: hidden;
 }
 .chat-box-body:after {
@@ -107,11 +114,12 @@
 }
 .chat-logs {
   padding: 15px;
-  height: calc(100vh - 24vh);
-  overflow-y: scroll;
+  min-height: 262px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column-reverse;
   scroll-behavior: smooth;
+  background-color: white;
 }
 
 .chat-logs::-webkit-scrollbar-track {
@@ -143,6 +151,12 @@
 }
 
 .cm-msg-text {
+  --self-bg: #e8fcfb;
+  --self-text: #3e3e3e;
+
+  --bg: #f4f8f6;
+  --color: #484a54;
+
   padding: 5px 15px 5px 15px;
   color: white;
   max-width: 75%;
@@ -152,9 +166,9 @@
   margin-bottom: 20px;
   border-radius: 6px;
   &.user {
-    background: #055c16;
     padding: 5px 15px 5px 15px;
-    color: white;
+    color: var(--color);
+    background-color: var(--bg);
     max-width: 75%;
     float: left;
     margin-left: 10px;
@@ -167,7 +181,7 @@
       width: 0;
       height: 0;
       border-bottom: 18px solid transparent;
-      border-right: 10px solid #055c16;
+      border-right: 10px solid var(--bg);
       left: -6px;
       top: 0;
     }
@@ -175,17 +189,17 @@
 
   &.self {
     float: right;
-    background: #363256;
-    color: white;
+    background: var(--self-bg);
+    color: var(--self-color);
 
     & ::after {
       content: '';
       position: absolute;
       width: 0;
       height: 0;
-      border-top: 0px solid #363256;
+      border-top: 0px solid var(--self-bg);
       border-bottom: 18px solid transparent;
-      border-left: 10px solid #363256;
+      border-left: 10px solid var(--self-bg);
       right: -6px;
       top: 0;
     }
@@ -203,6 +217,6 @@
 .chatTimer {
   margin-top: 10px;
   font-size: 10px;
-  color: white;
+  color: var(--color);
   opacity: 0.3;
 }

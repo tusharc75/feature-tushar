@@ -1,4 +1,4 @@
-import React, { useContext, Fragment } from 'react';
+import React, { useContext, Fragment, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
@@ -73,19 +73,29 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     margin: '2px',
-    borderRadius: '12px 40px 40px 50px',
+    // borderRadius: '12px 40px 40px 50px',
+    borderRadius: '0px 46.3853px 46.3853px 65px',
     border: '1px solid #d6d5d5',
     [theme.breakpoints.down('xs')]: {
       width: '50%',
       padding: '2px'
+    },
+    '& .MuiStepLabel-label': {
+      fontWeight: '600'
     }
   },
   inActive: {
     flex: '1',
     background: '#E5E5E5',
-    border: '2px solid #258C89',
+    // border: '2px solid #258C89',
+    border: '1px solid #B5B5B5',
     '& .MuiStepLabel-label': {
-      color: '#000 !important'
+      color: '#5B5B5B !important'
+    },
+    '& .MuiStepLabel-iconContainer': {
+      '& svg': {
+        color: '#5B5B5B'
+      }
     }
   },
   currentStep: {
@@ -95,13 +105,18 @@ const useStyles = makeStyles((theme) => ({
     color: '#FFF',
     fontWeight: 600,
     '& .MuiStepLabel-label': {
-      color: '#000 !important',
+      color: '#3B3B3B !important',
       fontWeight: '600'
     },
-    '& .MuiIconButton-label': {
+    '& .MuiStepLabel-iconContainer': {
       '& svg': {
-        fill: '#258C89',
-        stroke: '#258C89'
+        border: '1px solid #298B88',
+        borderRadius: '100vmax',
+        fill: 'transparent',
+        stroke: '#298B88',
+        '& circle': {
+          display: 'none'
+        }
       }
     },
     '& svg': {
@@ -154,6 +169,21 @@ const useStyles = makeStyles((theme) => ({
         display: 'none'
       }
     }
+  },
+  overflowX: {
+    overflowX: 'auto'
+  },
+  tabletClass: {
+    minWidth: '32.73333%',
+    flex: 'unset'
+  },
+  tabletStepContainer: {
+    '& .MuiStepConnector-root': {
+      display: 'none'
+    },
+    justifyContent: 'flex-start',
+    paddingBlockEnd: '9px !important',
+    overflowX: 'auto'
   }
 }));
 
@@ -171,6 +201,8 @@ const Steps = (props) => {
     handleNext = null,
     handlePrev = null
   } = props;
+
+  const containerRef = useRef(null);
 
   const classes = useStyles();
   let activeStep = currentStep;
@@ -201,6 +233,25 @@ const Steps = (props) => {
       }
       return newStep;
     });
+  };
+
+  React.useEffect(() => {
+    handleScroll();
+  }, [activeStep]);
+
+  const handleScroll = () => {
+    if (containerRef.current && isTablet) {
+      const container = containerRef.current;
+      const element = container.querySelector('div.MuiStep-root');
+      if (element) {
+        const scrollpos = activeStep * (element?.clientWidth + 4);
+        container.scroll({
+          top: 0,
+          left: scrollpos,
+          behavior: 'smooth'
+        });
+      }
+    }
   };
 
   return (
@@ -314,17 +365,21 @@ const Steps = (props) => {
                   </Grid>
                 </Grid>
 
-                <Stepper className={`${classes.pbStepper} stepper-responsive mt-2`} activeStep={isStepEnded ? steps.length + 1 : activeStep}>
+                <Stepper
+                  ref={containerRef}
+                  className={`${classes.pbStepper} ${isTablet && classes.tabletStepContainer} stepper-responsive mt-2`}
+                  activeStep={isStepEnded ? steps.length + 1 : activeStep}
+                >
                   {steps.map((label, i) => (
                     <Step
                       key={label}
-                      className={clsx(classes.step, {
+                      className={clsx(classes.step, isTablet && classes.tabletClass, {
                         [classes.active]: currentStep > i || isStepEnded,
                         [classes.currentStep]: currentStep === i,
                         [classes.inActive]: currentStep !== i
                       })}
                     >
-                      <StepLabel style={{ color: '#555' }} className={'currentStepColor'}>
+                      <StepLabel style={{ color: '#5B5B5B' }} className={'currentStepColor'}>
                         {label}
                         {!isStepEnded && setStepFullScreen && currentStep === i && (
                           <HtmlTooltip title={`Full Screen`}>

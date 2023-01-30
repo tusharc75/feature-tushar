@@ -32,7 +32,6 @@ import ParentProduct from './ParentProduct';
 import NonSerializedAssetProductInventory from './inventory';
 import ProductRepairType from './RepairType';
 import { MdDelete } from 'react-icons/md';
-import accountClass from '../Account/account.module.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit } from 'react-icons/bi';
 import InventoryHistory from './InventoryHistory';
@@ -41,6 +40,7 @@ import ServiceMaster from './ServiceMaster';
 import LeadTimeMaster from '../../components/LeadTime';
 import Package from './Package';
 import ServicePackage from './ServicePackage';
+import Digital from './Digital';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -65,7 +65,6 @@ const ProductDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [productFields, setProductFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [inventoriesData, setInventoriesData] = useState([]);
   const [inventoriesWarehouse, setWarehouseInventories] = useState([]);
@@ -111,12 +110,6 @@ const ProductDetailsPage = () => {
     }
   }, [selectedWarehouse]);
 
-  const handleMainPoints = (data) => {
-    let mainPoint = {};
-    mainPoint['Quantity'] = data?.qty || '';
-    setMainPoints(mainPoint);
-  };
-
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
@@ -151,7 +144,6 @@ const ProductDetailsPage = () => {
               newField.push({ fieldData: _f });
             });
             setProductFields(newField.filter((d) => !ignoreField.includes(d?.fieldData?.fieldName)));
-            handleMainPoints(data.productData);
             setHeadingLabel(
               data.productData?.productNumber
                 ? `${data.productData?.productName} - ${data.productData?.productNumber}`
@@ -242,103 +234,122 @@ const ProductDetailsPage = () => {
       });
   };
 
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
+
   return (
-    <>
-      <Fragment>
-        <Grid container className="headerbox">
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
           <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Paper>
-              {!productData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    <Box marginX={1} />
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  </Box>
-                </div>
-              ) : (
-                <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                  {permissions?.product?.isUpdate && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                      onClick={handleOpenUpdateDialog}
-                    >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
-                  )}
-                  {permissions?.product?.isDelete && (
-                    <DeleteButton
-                      text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                      onClick={() => setShowConfirmBox(true)}
-                    />
-                  )}
-                </DetailsPageHeader>
-              )}
-              <Tabs
-                variant="scrollable"
-                scrollButtons="auto"
-                className="oms-tab"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                indicatorColor="primary"
-                textColor="primary"
-                aria-label="Product Details Tab"
-                TabIndicatorProps={{
-                  style: {
-                    height: 0
-                  }
-                }}
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {permissions?.product?.isUpdate && (
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                className={'btn-outline-v1'}
+                size="small"
+                onClick={handleOpenUpdateDialog}
               >
-                <Tab label="Details" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-                {permissions?.serializedAsset && <Tab label="Child Product" value={1} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
-                {permissions?.serviceMaster && <Tab label="Services" value={2} aria-controls="a11y-tabpanel-6" id="a11y-tab-6" />}
-                {permissions?.serviceMaster && <Tab label="Service Packages" value={8} aria-controls="a11y-tabpanel-6" id="a11y-tab-6" />}
-                {permissions?.repairType && <Tab label="Repair Types" value={3} aria-controls="a11y-tabpanel-5" id="a11y-tab-5" />}
-                {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && (
-                  <Tab value={4} label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              </Button>
+            )}
+            {permissions?.product?.isDelete && (
+              <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
+            )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Grid container spacing={1}>
+          <Grid item xs={12} sm={12} md={8} lg={8}>
+            <Tabs
+              className="new-tab-container-v1"
+              variant="scrollable"
+              scrollButtons="auto"
+              value={tabValue}
+              onChange={handleMainTabChange}
+              indicatorColor="primary"
+              textColor="primary"
+              aria-label="Product Details Tab"
+              TabIndicatorProps={{
+                style: {
+                  height: 0
+                }
+              }}
+            >
+              <Tab className={'tabLayout'} value={0} label={<div className="d-flex align-items-center tab-font">Details</div>} {...a11yProps(0)} />
+
+              {permissions?.serializedAsset && (
+                <Tab className={'tabLayout'} value={1} label={<div className="d-flex align-items-center tab-font">Child Product</div>} {...a11yProps(1)} />
+              )}
+
+              {permissions?.serviceMaster && (
+                <Tab className={'tabLayout'} value={2} label={<div className="d-flex align-items-center tab-font">Services</div>} {...a11yProps(2)} />
+              )}
+
+              {permissions?.serviceMaster && (
+                <Tab className={'tabLayout'} value={3} label={<div className="d-flex align-items-center tab-font">Service Packages</div>} {...a11yProps(3)} />
+              )}
+
+              {permissions?.repairType && (
+                <Tab className={'tabLayout'} value={4} label={<div className="d-flex align-items-center tab-font">Repair Types</div>} {...a11yProps(4)} />
+              )}
+
+              {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && (
+                <Tab className={'tabLayout'} value={5} label={<div className="d-flex align-items-center tab-font">Product Images</div>} {...a11yProps(5)} />
+              )}
+
+              {permissions?.packages && (
+                <Tab className={'tabLayout'} value={6} label={<div className="d-flex align-items-center tab-font">Product Packages</div>} {...a11yProps(6)} />
+              )}
+
+              {permissions?.serializedAsset && (
+                <Tab className={'tabLayout'} value={7} label={<div className="d-flex align-items-center tab-font">Parent Product</div>} {...a11yProps(7)} />
+              )}
+
+              {permissions?.productInventory?.isRead && (
+                <Tab className={'tabLayout'} value={8} label={<div className="d-flex align-items-center tab-font">History</div>} {...a11yProps(8)} />
+              )}
+
+              {productData?.digitalProduct && (
+                <Tab className={'tabLayout'} value={9} label={<div className="d-flex align-items-center tab-font">Digital</div>} {...a11yProps(9)} />
+              )}
+            </Tabs>
+            {tabValue === 0 && (
+              <Box>
+                {loading || !productFields.length ? (
+                  <Grid container spacing={2} style={{ padding: '8px' }}>
+                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  </Grid>
+                ) : (
+                  <div className="pb-3">
+                    <DetailsPage data={productData} fields={productFields} />
+                  </div>
                 )}
-                {permissions?.packages && <Tab label="Product Packages" value={5} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />}
-                {permissions?.serializedAsset && <Tab label="Parent Product" value={6} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
-                {permissions?.productInventory?.isRead && <Tab label="History" value={7} aria-controls="a11y-tabpanel-7" id="a11y-tab-7" />}
-              </Tabs>
-              {tabValue === 0 && (
-                <Box>
-                  {loading || !productFields.length ? (
-                    <Grid container spacing={2} style={{ padding: '8px' }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  ) : (
-                    <div className="pb-3">
-                      <DetailsPage data={productData} fields={productFields} />
-                    </div>
-                  )}
-                </Box>
-              )}
-              {tabValue === 1 && <Parts id={id} />}
-              {tabValue === 2 && <ServiceMaster id={id} renderedFrom={`${renderedFrom}_grid-2`} />}
-              {tabValue === 3 && <ProductRepairType id={id} renderedFrom={`${renderedFrom}_grid-3`} />}
-              {tabValue === 4 && (
-                <ProductConfiguration
-                  productFields={productFields.map((_f: any) => _f.fieldData)}
-                  productData={productData}
-                  id={id}
-                  renderedFrom={`${renderedFrom}_grid-4`}
-                />
-              )}
-              {tabValue === 5 && <Package renderedFrom={`${renderedFrom}_grid-5`} productId={id} />}
-              {tabValue === 6 && <ParentProduct renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
-              {tabValue === 7 && <InventoryHistory id={id} />}
-              {tabValue === 8 && <ServicePackage renderedFrom={`${renderedFrom}_grid-8`} productId={id} />}
-            </Paper>
+              </Box>
+            )}
+            {tabValue === 1 && <Parts id={id} />}
+            {tabValue === 2 && <ServiceMaster id={id} renderedFrom={`${renderedFrom}_grid-2`} />}
+            {tabValue === 3 && <ServicePackage renderedFrom={`${renderedFrom}_grid-3`} productId={id} />}
+            {tabValue === 4 && <ProductRepairType id={id} renderedFrom={`${renderedFrom}_grid-4`} />}
+            {tabValue === 5 && (
+              <ProductConfiguration
+                productFields={productFields.map((_f: any) => _f.fieldData)}
+                productData={productData}
+                id={id}
+                renderedFrom={`${renderedFrom}_grid-5`}
+              />
+            )}
+            {tabValue === 6 && <Package renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
+            {tabValue === 7 && <ParentProduct renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
+            {tabValue === 8 && <InventoryHistory id={id} />}
+            {tabValue === 9 && <Digital renderedFrom={`${renderedFrom}_grid-8`} productId={id} />}
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
             {permissions?.productInventory?.isRead && (
@@ -573,7 +584,7 @@ const ProductDetailsPage = () => {
             )}
           </Grid>
         </Grid>
-      </Fragment>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -623,7 +634,7 @@ const ProductDetailsPage = () => {
           />
         )
       ) : null}
-    </>
+    </Box>
   );
 };
 

@@ -5,14 +5,9 @@ import {
   Box,
   Button,
   IconButton,
-  CircularProgress,
   Menu,
   MenuItem,
-  Chip,
   MenuList,
-  ListItemIcon,
-  ListItemText,
-  Tooltip,
   Popover
 } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -26,29 +21,23 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import moment from 'moment';
-import { rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency } from '../../../constants/helpers';
+import { rentalManagement } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import RentalJobQtyDialog from './RentalJobQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
-import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
-import { calculatePrice, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import { startCase } from 'lodash';
-import InfoIcon from '@material-ui/icons/InfoOutlined';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
+import { genrateCustomTableColumns, flattenArray } from 'src/constants/columns';
 
 const Productpackage = ({
   rentalManagementData,
   setNextStep,
-  currencySymbol,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity,
   renderedFrom,
   stepFullScreen,
   allowedToEdit
@@ -70,29 +59,42 @@ const Productpackage = ({
   const [isDeleting, setDeleting] = useState(false);
 
   const [material, setMaterial] = useState([]);
+  const [isInlineEdit, setIsInlineEdit] = useState(false);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
-
-  const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null, });
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
+  const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
+
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [allowedToEdit]);
 
   useEffect(() => {
     fetchProductInventory();
   }, [columns]);
 
   const fetchFields = async () => {
+    setColumns(null);
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    if (!allowedToEdit) {
+      allFields?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
+    }
     setAllFields(JSON.parse(JSON.stringify(allFields)));
-    const coloum: any = [
+    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
+    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay'
+    }
+    let column: any = [
       {
         accessor: 'srno',
         Header: 'Index',
@@ -113,9 +115,17 @@ const Productpackage = ({
           row.original['type'] ? (
             <p>
               {`${startCase(row.original?.type)} `}
-              {row.original['type'] === 'product' ? row.original?.productDetail?.serializedProduct ? '(Serialized)' : '(Non-Serialized)' :
-                row.original?.type === 'package' ? row.original?.packageDetail.packageType === 'Product' ? '(Product)' : '(Service)' :
-                  row.original.type === 'service' ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})` : ''}
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
+                : row.original?.type === 'package'
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -174,7 +184,7 @@ const Productpackage = ({
                   }
                 }}
               >
-                <InfoIcon fontSize="small" color="primary" />
+                <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
             )}
           </div>
@@ -185,146 +195,54 @@ const Productpackage = ({
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ?
-            <p className="text-truncate">
-              {row.original.description}</p>
-            : (
-              <NoDataCell />
-            )
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
-      },
+      }
     ];
-
-    data.forEach((element) => {
-      if (element.fieldName === 'price' && element.required) {
-        setIsRateRequired(true);
-      }
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) => {
-            return row.original[element.fieldName] && isNaN(row.original[element.fieldName]) ? (
-              <p>{moment(row.original[element.fieldName]?.slice(0, 10)).format(dateFormat)}</p>
-            ) : (
-              <NoDataCell />
-            );
-          }
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                ),
-              Footer: (info) => {
-                const total = info?.rows
-                  ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                  .reduce((sum, row) => row.values[fieldName] + sum, 0);
-                return (
-                  <>
-                    {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
-                  </>
-                );
-              }
-            });
-          });
-        }
-      }
-      else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
-        if (element.fieldName === 'pricingCondition') {
-          element.fieldName = 'pricingConditionDisplay';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
+    const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    setIsRateRequired(isPriceRequired);
+    column = [...column, ...newColumns];
+    column.push({
+      accessor: 'action',
+      Header: '',
+      minWidth: 50,
+      width: 50,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => {
+        return allowedToEdit ? (
+          row.original.hideSelection ? (
+            <HtmlTooltip title={'Asset is already assigned'}>
+              <span>
+                <IconButton size="small" aria-label="Details" disabled={true}>
+                  <DeleteIcon fontSize="small" color={'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          ) : (
+            <HtmlTooltip title={'Delete'}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                    getNestedSubRows(obj, row.original);
+                    setDeleteData(obj);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color={'error'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          )
+        ) : (
+          ''
+        );
       }
     });
-    {
-      isMobile ? (
-        <Box display={'none'} />
-      ) : (
-        coloum.push({
-          accessor: 'action',
-          Header: '',
-          minWidth: 50,
-          width: 50,
-          sticky: 'right',
-          disableFilters: true,
-          canDrag: false,
-          Cell: ({ row }) =>
-            !row.original.hideSelection &&
-            allowedToEdit && (
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                  getNestedSubRows(obj, row.original);
-                  setDeleteData(obj);
-                }}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-            )
-        })
-      );
-    }
-    coloum.forEach((element) => {
-      if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
-        element.editable = allowedToEdit;
-      }
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
-    setColumns(coloum);
+    setColumns(column);
   };
 
   const fetchProductInventory = async () => {
@@ -340,7 +258,7 @@ const Productpackage = ({
       const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
       data = response?.data?.data;
       setMaterial(JSON.parse(JSON.stringify(data.material)));
-      inventory = data.inventory;
+      inventory = data.inventory?.filter((e) => !e.isReplaced);
       nonSerializeAsset = data.nonSerializeAsset;
     }
     let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== 'service');
@@ -351,15 +269,24 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service' ? parent.serviceDetail ? parent.serviceDetail?.serviceName : parent.packageDetail?.packageName
-        : parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
-      parent.description = parent.type === 'service' ? parent?.serviceDetail?.serviceDescription || ''
-        : parent.type === 'product' ? parent?.productDetail?.productDesc || ''
-          : parent.type === 'package' ? parent?.packageDetail?.packageDescription || '' : '';
+      parent.detail = `${parent.type === 'service'
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.packageDetail?.packageName
+        }`;
+      parent.description =
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceDescription || ''
+          : parent.type === 'product'
+            ? parent?.productDetail?.productDesc || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
-      parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
-      parent.pricingCondition = parent.pricingCondition?.optionValue;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length
@@ -373,7 +300,6 @@ const Productpackage = ({
     } else {
       setNextStep(true);
     }
-
     setRowsData(rows);
     setSelectedProducts([]);
   };
@@ -382,17 +308,24 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'service' ? _subRow.serviceDetail?.serviceName :
-        _subRow.type === 'package' ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'product' ? _subRow.productDetail?.productName
-            : ''} `;
-      _subRow.description = _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceDescription || ''
-        : _subRow.type === 'product' ? _subRow?.productDetail?.productDesc || ''
-          : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription || '' : '';
+      _subRow.detail = `${_subRow.type === 'service'
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'package'
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === 'product'
+            ? _subRow.productDetail?.productName
+            : ''
+        } `;
+      _subRow.description =
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product'
+            ? _subRow?.productDetail?.productDesc || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
-      _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
-      _subRow.pricingCondition = _subRow.pricingCondition?.optionValue;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
@@ -409,22 +342,13 @@ const Productpackage = ({
     return subRows;
   };
 
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
-  };
-
   const handleAdd = async (rows) => {
     setAddingProducts(true);
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
-      element.detail = d.type === "product" ? d?.productName : d.type === "package" ? d?.packageName : "";
+      element.detail = d.type === 'product' ? d?.productName : d.type === 'package' ? d?.packageName : '';
       element.type = addExistingProductDialog.type;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -444,55 +368,19 @@ const Productpackage = ({
       material.push(element);
     });
     if (material.filter((d) => d.listPrice === null).length === 0) {
-      AddMaterial(material, [])
+      AddMaterial(material, []);
+    } else {
+      setPriceDataDialog({ open: true, material: material });
     }
-    else {
-      setPriceDataDialog({ open: true, material: material })
-    }
-    // const priceData: any = await calculatePrice(
-    //   rentalManagementData,
-    //   material.filter((d) => d.listPrice === null)
-    // );
-    // material.forEach((element) => {
-    //   const rateResult = priceData?.filter(
-    //     (e) =>
-    //       e.materialId === element.materialId &&
-    //       e.materialType === element.type &&
-    //       e.unit === element.unit &&
-    //       e.pricingMethod === element.pricingMethod
-    //   );
-    //   if (element.listPrice) {
-    //     const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-    //     element[priceFieldName] = element.listPrice;
-    //     const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
-    //     Object.assign(element, calValues);
-    //   } else if (rateResult.length && rateResult[0].mrp) {
-    //     const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-    //     element[priceFieldName] = rateResult[0].mrp;
-    //     const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-    //     Object.assign(element, calValues);
-    //   }
-    // });
-
-    // axiosInstance()
-    //   .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material })
-    //   .then(() => {
-    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
-    //     fetchProductInventory();
-    //     setAddingProducts(false);
-    //   })
-    //   .catch((error) => {
-    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
-    //     toastConfig.setToastConfig(error);
-    //     setAddingProducts(false);
-    //   });
   };
 
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {
-        const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
+        const rateResult = priceData?.filter(
+          (e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit
+        );
         if (element.listPrice) {
           const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
           element[priceFieldName] = element.listPrice;
@@ -501,8 +389,8 @@ const Productpackage = ({
         } else if (rateResult.length && rateResult[0].mrp) {
           const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
           element[priceFieldName] = rateResult[0].mrp;
-          element["pricingCondition"] = rateResult[0].conditionId;
-          element["pricingMethod"] = rateResult[0].pricingMethod?.trim();
+          element['pricingCondition'] = rateResult[0].conditionId;
+          element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
           Object.assign(element, calValues);
         }
@@ -514,13 +402,13 @@ const Productpackage = ({
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
         setAddingProducts(false);
-        setPriceDataDialog({ open: false, material: null })
+        setPriceDataDialog({ open: false, material: null });
       })
       .catch((error) => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
-        setPriceDataDialog({ open: false, material: null })
+        setPriceDataDialog({ open: false, material: null });
       });
   };
 
@@ -599,6 +487,59 @@ const Productpackage = ({
     setDeleteData(obj);
   };
 
+  const onSaveInlineEdit = (inputField, updatedData) => {
+    setIsInlineEdit(true);
+    const currency = rentalManagementData?.currency.toLowerCase();
+    const requiredItems = [];
+    allFields.forEach(({ fieldName, required, type }) => {
+      fieldName = type === 'currencyAmount' ? `${fieldName}_${currency}` : fieldName;
+      if (required) {
+        if (isNaN(updatedData[fieldName]) && !updatedData[fieldName]) {
+          requiredItems.push(fieldName);
+        } else if (!isNaN(updatedData[fieldName]) && updatedData[fieldName] <= 0) {
+          requiredItems.push(fieldName);
+        }
+      }
+    });
+
+    if (requiredItems.length > 0) {
+      handleOpen({
+        ...updatedData,
+        detail: updatedData.type === 'product' ? updatedData?.productDetail?.productName : updatedData?.packageDetail?.packageName
+      });
+    } else {
+      onConfirmSave(inputField, updatedData);
+    }
+  };
+
+  const onConfirmSave = async (inputField, updatedData) => {
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    if (rowData.parentId && !showConfirmationDialog.open) {
+      setShowConfirmationDialog({
+        open: true,
+        data: {
+          inputField,
+          updatedData
+        }
+      });
+    } else {
+      if (inputField.hasOwnProperty('qtyDisplay')) {
+        inputField['qty'] = inputField['qtyDisplay'];
+        if (rowData.hideSelection && inputField['qty'] < rowData?.assetQty) {
+          toastConfig.setToastConfig({
+            open: true, type: "error", message: "The quantity is less than what was assigned."
+          });
+          setShowConfirmationDialog({ open: false, data: {} });
+          return;
+        }
+      }
+      let rows: any = [{ ...rowData, ...updatedData }];
+      rows = await calculateRowsField(material, inputField, allFields, updatedData);
+      handleSaveData(rows);
+      setShowConfirmationDialog({ open: false, data: {} });
+    }
+  };
+
   return (
     <Fragment>
       <Grid container spacing={2}>
@@ -608,11 +549,10 @@ const Productpackage = ({
               <Box display="flex">
                 {permissions?.product?.isRead && (
                   <Button
-                    color="primary"
+                    className="btn-outline-v1"
                     size="small"
                     disabled={isOffline}
-                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                    style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                    variant={'contained'}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
                     }}
@@ -623,10 +563,9 @@ const Productpackage = ({
                 <Box mx={isMobile ? 0.5 : 1} />
                 {permissions?.packages?.isRead && (
                   <Button
-                    color="primary"
+                    className="btn-outline-v1"
                     size="small"
-                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                    style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                    variant='contained'
                     disabled={isOffline}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
@@ -663,7 +602,13 @@ const Productpackage = ({
                     horizontal: 'right'
                   }}
                 >
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) ? 'Bulk edit selected records' : 'Select records to edit'}>
+                  <HtmlTooltip
+                    title={
+                      Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                        ? 'Bulk edit selected records'
+                        : 'Select records to edit'
+                    }
+                  >
                     <MenuItem
                       onClick={() => {
                         setIsProductEdit({ open: true, isBulkedit: true });
@@ -673,7 +618,13 @@ const Productpackage = ({
                       Bulk Edit
                     </MenuItem>
                   </HtmlTooltip>
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) ? 'Delete selected records' : 'Select records to delete'}>
+                  <HtmlTooltip
+                    title={
+                      Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                        ? 'Delete selected records'
+                        : 'Select records to delete'
+                    }
+                  >
                     <MenuItem
                       disabled={isDeleting}
                       onClick={() => {
@@ -691,23 +642,9 @@ const Productpackage = ({
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
-              }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-            >
+            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}  >
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
@@ -717,10 +654,7 @@ const Productpackage = ({
                 hideSelection={isOffline || !allowedToEdit}
                 renderedFrom="rental_management_product_package"
                 isClientSideGrid={true}
-                onSaveEdit={(inputField, updatedData) => {
-                  let rows = calculateRowsField(material, inputField, allFields, updatedData);
-                  handleSaveData(rows);
-                }}
+                onSaveEdit={onSaveInlineEdit}
                 material={material}
               />
             </Box>
@@ -745,6 +679,10 @@ const Productpackage = ({
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false });
             setRecordToUpdate(null);
+
+            if (isInlineEdit) {
+              setIsInlineEdit(false);
+            }
           }}
           isBulkedit={isProductEdit.isBulkedit}
           handleSaveData={handleSaveData}
@@ -753,7 +691,8 @@ const Productpackage = ({
           material={material}
           selectedProducts={selectedProducts.filter((e) => !e.hideSelection)}
           loading={isUpdating}
-          from={"product"}
+          from={'product'}
+          isInlineEdit={isInlineEdit}
         />
       )}
       {addExistingProductDialog.open && (
@@ -815,19 +754,31 @@ const Productpackage = ({
           </MenuList>
         </Popover>
       )}
-      {priceDataDialog.open &&
+      {showConfirmationDialog.open && (
+        <ConfirmationDialog
+          open={true}
+          message="Would you prefer to override the product-level price configuration?"
+          onOk={() => {
+            onConfirmSave(showConfirmationDialog.data?.inputField, showConfirmationDialog.data?.updatedData);
+          }}
+          onClose={() => {
+            setShowConfirmationDialog({ open: false, data: {} });
+          }}
+        />
+      )}
+      {priceDataDialog.open && (
         <CalculatePriceDialog
           referenceData={rentalManagementData}
           material={priceDataDialog.material}
           handleSucess={(data) => {
-            AddMaterial(priceDataDialog.material, data)
+            AddMaterial(priceDataDialog.material, data);
           }}
           onClose={() => {
-            AddMaterial(priceDataDialog.material, null)
+            AddMaterial(priceDataDialog.material, null);
             setPriceDataDialog({ open: false, material: null });
           }}
         />
-      }
+      )}
     </Fragment>
   );
 };

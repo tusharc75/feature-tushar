@@ -471,10 +471,8 @@ function CustomReactTable({
     const rowData = Object.keys(rowState[currentRowEditing.id].cellState).filter((k) => rowState[currentRowEditing.id].cellState[k].isEditing);
     const updatedData = data.map((row: any) => {
       if (row._id == currentRowEditing?.original._id) {
-        console.log(cellValue)
         row[rowData[0]] = cellValue;
       }
-
       return row;
     });
     dispatch({

@@ -28,7 +28,7 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { useHistory } from 'react-router-dom';
-import InfoIcon from '@material-ui/icons/Info';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
@@ -36,13 +36,11 @@ import { ExpandMore } from '@material-ui/icons';
 import AddNonSerializeAssets from './AddNonSerializeAssets';
 import { removeAssetsInRental } from '../rentalOfflineHelper';
 import WarningIcon from '@material-ui/icons/Warning';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const SerializedAsset = ({
   rentalManagementData,
-  isTabletScreen,
-  isSmallScreen,
   setNextStep,
-  showActivity,
   currencySymbol,
   stepFullScreen,
   allowedToEdit
@@ -84,9 +82,10 @@ const SerializedAsset = ({
   }, []);
 
   const fetchFields = async () => {
-    setNextStep(false)
+    setNextStep(false);
     var { fields: data } = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
-    const coloum: any = [
+    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, "");
+    let coloum: any = [
       {
         accessor: 'srno',
         Header: 'Index',
@@ -165,7 +164,7 @@ const SerializedAsset = ({
                     });
                   }}
                 >
-                  <InfoIcon fontSize="small" color={'primary'} />
+                  <OpenInNewIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -179,7 +178,7 @@ const SerializedAsset = ({
                     });
                   }}
                 >
-                  <InfoIcon fontSize="small" color={'primary'} />
+                  <OpenInNewIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -193,7 +192,7 @@ const SerializedAsset = ({
                     });
                   }}
                 >
-                  <InfoIcon fontSize="small" color={'primary'} />
+                  <OpenInNewIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -208,8 +207,7 @@ const SerializedAsset = ({
             )}
             {row.original?.type === 'asset' && (
               <span className="d-flex align-items-center gap-2">
-                {(row.original.status === INVENTORY_STATUS.reserved ||
-                  [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(row.original.status)) &&
+                {[INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.reserved].includes(row.original.status) &&
                   !row?.original?.rentalAssetStatus &&
                   allowedToEdit && (
                     <HtmlTooltip title={`Remove`}>
@@ -222,7 +220,7 @@ const SerializedAsset = ({
                           ]);
                         }}
                       >
-                        <Delete fontSize="small" color="error" />
+                        <Delete fontSize="small" color={'error'} />
                       </IconButton>
                     </HtmlTooltip>
                   )}
@@ -238,7 +236,7 @@ const SerializedAsset = ({
                         });
                       }}
                     >
-                      <InfoIcon fontSize="small" color={'primary'} />
+                      <OpenInNewIcon fontSize="small" color={'primary'} />
                     </IconButton>
                   </HtmlTooltip>
                 )}
@@ -266,97 +264,10 @@ const SerializedAsset = ({
         Cell: ({ row }) => getAssetAssignedValues(row)
       }
     ];
-    data.forEach((element) => {
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                ),
-              Footer: (info) => {
-                const total = info?.rows
-                  ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                  .reduce((sum, row) => row.values[fieldName] + sum, 0);
-                return (
-                  <>
-                    {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
-                  </>
-                );
-              }
-            });
-          });
-        }
-      } else {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) =>
-            row.original[element.fieldName]?.optionLabel ? (
-              <p>{row.original[element.fieldName].optionLabel}</p>
-            ) : row.original[element.fieldName] ? (
-              <p>{row.original[element.fieldName]}</p>
-            ) : (
-              <NoDataCell />
-            )
-        });
-      }
-    });
-    coloum.forEach((element) => {
-      if (element.accessor === 'qty') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
+    coloum = [...coloum, ...newColumns];
     setColumns(coloum);
     fetchProductInventory();
-    setNextStep(true)
+    setNextStep(true);
   };
 
   const fetchProductInventory = async () => {
@@ -387,6 +298,7 @@ const SerializedAsset = ({
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
         data = response?.data?.data;
+        data.inventory = data.inventory?.filter((e) => !e.isReplaced);
         offlineAssetErrorLog = data?.offlineAssetErrorLog;
 
         const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`);
@@ -411,17 +323,13 @@ const SerializedAsset = ({
       }
 
       let rows = data.material.filter((e) => e.parentId === null);
-      // let products = rows.filter((e) => e.type === 'product' && !e?.isConsumbale);
-      // let packages = rows.filter((e) => e.type === 'package' && e?.packageDetail?.packageType !== 'Service');
-      // rows = [...products, ...packages];
-
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
         parent.detail = `${parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
-            ? parent?.productDetail?.productName
-            : parent?.packageDetail?.packageName
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'product'
+              ? parent?.productDetail?.productName
+              : parent?.packageDetail?.packageName
           }`;
         parent.description =
           parent.type === 'service'
@@ -457,12 +365,33 @@ const SerializedAsset = ({
           bulkAssetCreationProduct,
           offlineAssetErrorLog
         );
-        parent.assetQty = parent.subRows.filter((d) => d.type !== 'asset').length === 0 ? parent.assetQty : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
-        parent.assetAssignedQty = parent.subRows.filter((d) => d.type !== 'asset').length === 0 ? parent.assetAssignedQty : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0);
-        parent.isValid = parent.serializedProduct ? (parent.assetAssignedQty === parent.assetQty ? true : false)
-          : parent.subRows.length !== 0 ? parent.assetAssignedQty === parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) || parent.subRows.every(d => d.isValid)
+        parent.assetQty =
+          parent.subRows.filter((d) => d.type !== 'asset').length === 0
+            ? parent.assetQty
+            : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
+        parent.assetAssignedQty =
+          parent.subRows.filter((d) => d.type !== 'asset').length === 0
+            ? parent.assetAssignedQty
+            : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0);
+        parent.isValid = parent.serializedProduct
+          ? parent.assetAssignedQty === parent.assetQty
+            ? true
+            : false
+          : parent.subRows.length !== 0
+            ? parent.assetAssignedQty ===
+            parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+            parent.subRows.every((d) => d.isValid)
             : true;
+
+        if (parent.subRows.length && parent.isValid) {
+          if (parent.subRows.every((d) => d.isValid)) {
+            parent.isValid = true;
+          } else {
+            parent.isValid = false;
+          }
+        }
       });
+
       if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
         setNextStep(false);
       } else {
@@ -589,8 +518,12 @@ const SerializedAsset = ({
         ? _subRow.assetAssignedQty === _subRow.assetQty
           ? true
           : false
-        : _subRow.assetAssignedQty ===
-        tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0);
+        : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
+          ? true
+          : _subRow.assetAssignedQty ===
+            tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+            ? true
+            : false;
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
@@ -616,7 +549,7 @@ const SerializedAsset = ({
   };
 
   const handleAddSerializedAsset = (assets) => {
-    setNextStep(false)
+    setNextStep(false);
     var data = [];
     var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === 'product');
     flatArray = uniqBy(flatArray, '_id');
@@ -653,18 +586,18 @@ const SerializedAsset = ({
             type: 'success',
             message: data.message
           });
-          setNextStep(true)
+          setNextStep(true);
         })
         .catch((error) => {
           setAdding(false);
           toastConfig.setToastConfig(error);
-          setNextStep(true)
+          setNextStep(true);
         });
     }
   };
 
   const handleRemoveInventory = async () => {
-    setNextStep(false)
+    setNextStep(false);
     if (deleteData.length >= 1) {
       if (isOffline) {
         setDeleting(true);
@@ -685,13 +618,13 @@ const SerializedAsset = ({
             fetchProductInventory();
             setDeleteData(null);
             setShowConfirmBox(false);
-            setNextStep(true)
+            setNextStep(true);
           })
           .catch((error) => {
             setDeleting(false);
             toastConfig.setToastConfig(error);
             setDeleteData(null);
-            setNextStep(true)
+            setNextStep(true);
           });
       }
     }
@@ -888,7 +821,7 @@ const SerializedAsset = ({
                     closeActions();
                   }}
                 >
-                  {`Remove Asset/Inventory`}
+                  {`Remove Asset/Serial Number`}
                 </MenuItem>
               </Menu>
               {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
@@ -962,21 +895,11 @@ const SerializedAsset = ({
           {columns && rowsData ? (
             <Box
               zIndex={5}
-              width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
-              }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 350px)'}
+              width={'100%'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             >
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 365px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => {

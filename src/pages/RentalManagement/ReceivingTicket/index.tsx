@@ -57,6 +57,8 @@ import ConsumeProduct from '../../../components/RentalManagment/ConsumeProduct';
 import { useData } from '../../../StateProvider/Provider';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import ReturnTicketDialog from './ReturnTicketDialog';
+import Edit from '@material-ui/icons/Edit';
+import ChangeActualDateDialog from './ChangeActualDateDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -91,6 +93,7 @@ const ReceivingTicket = ({
 
   const [showConformationConsume, setShowConformationConsume] = useState({ open: false, type: 'add' });
   const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
+  const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
 
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
@@ -124,7 +127,8 @@ const ReceivingTicket = ({
   const [seletedProducts, setSeletedProducts] = useState([]);
   const [columnHeader, setColumnHeader] = useState(null);
 
-  const [invoiceQtyData, setInvoiceQtyData] = useState(null);
+  const [invoiceData, setInvoiceData] = useState(null);
+  const [openDateDialog, setOpenDateDialog] = useState({ open: false, data: null, loading: false })
 
   const {
     state: { user, permissions, selectedEntity }
@@ -149,21 +153,12 @@ const ReceivingTicket = ({
   useEffect(() => {
     getColumn();
     fetchRecords();
-    fetchInvoiceQty();
     if (!isOffline) {
       if (permissions?.repairJob?.isRead) {
         fetchRepairJob();
       }
     }
   }, []);
-
-  const fetchInvoiceQty = async () => {
-    await axiosInstance()
-      .get(`/rental-management/${rentalManagementData._id}/invoice/material-invoice-qty`)
-      .then((res) => {
-        setInvoiceQtyData(res?.data?.data);
-      });
-  };
 
   const fetchRecords = async () => {
     setLoadingData(true);
@@ -181,6 +176,8 @@ const ReceivingTicket = ({
       var nonSerializeAsset: any = [];
       var consumeProducts: any = [];
 
+      var invoiceData: any = [];
+
       if (isOffline) {
         productAssets = await getRentalProductAssets(rentalManagementData._id);
         productAssets = productAssets?.map((u) => ({
@@ -193,7 +190,11 @@ const ReceivingTicket = ({
           warehouseId: u?.warehouse?.optionValue,
           currentOwner: u?.currentOwner,
           currentLocation: u?.currentLocation?.optionValue,
-          rentalAssetStatus: u?.status
+          rentalAssetStatus: u?.status,
+          startDate: u?.actualStartDate,
+          endDate: u?.actualEndDate,
+          manualStartDate: u?.manualStartDate,
+          manualEndDate: u?.manualEndDate,
         }));
 
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id);
@@ -204,15 +205,19 @@ const ReceivingTicket = ({
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
         productAssets = productAssets
-          .map((d) => ({
-            ...d.inventory,
-            rentalAssetStatus: d.status,
-            startDate: d.startDate,
-            endDate: d.endDate,
-            isReplaced: d.isReplaced,
-            replaceReason: d.replaceReason,
-            replaceAsset: d.replaceAsset
-          }))
+          .map((d) => {
+            return ({
+              ...d.inventory,
+              rentalAssetStatus: d.status,
+              startDate: d.actualStartDate || d.startDate,
+              endDate: d.actualEndDate || d.endDate,
+              manualStartDate: d.manualStartDate,
+              manualEndDate: d.manualEndDate,
+              isReplaced: d.isReplaced,
+              replaceReason: d.replaceReason,
+              replaceAsset: d?.replaceAsset ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset : ""
+            })
+          })
           .map((u) => ({
             ...u,
             type: 'Asset',
@@ -223,7 +228,11 @@ const ReceivingTicket = ({
             warehouse: u?.warehouse?.optionLabel,
             warehouseId: u?.warehouse?.optionValue,
             currentOwner: u?.currentOwner,
-            currentLocation: u?.currentLocation?.optionValue
+            currentLocation: u?.currentLocation?.optionValue,
+            startDate: u?.startDate,
+            endDate: u?.endDate,
+            manualStartDate: u?.manualStartDate,
+            manualEndDate: u?.manualEndDate,
           }));
 
         const result = await axiosInstance().get(
@@ -235,6 +244,11 @@ const ReceivingTicket = ({
         material = productResponse?.data?.data?.material;
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
         consumeProducts = productResponse?.data?.data?.consumeProducts;
+
+        const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`)
+        invoiceData = invoiceResponse?.data?.data?.material || []
+
+        setInvoiceData(invoiceData);
       }
 
       const loadingTicketProducts = [];
@@ -259,7 +273,6 @@ const ReceivingTicket = ({
           });
         }
       });
-      console.log(returnTicketProducts);
 
       products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'));
       products?.forEach((element) => {
@@ -272,10 +285,8 @@ const ReceivingTicket = ({
           });
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         ticketProduct?.forEach((ele) => {
-          console.log(element);
           const obj: any = {};
           obj.uniqueId = element._id;
-          // this is the material id
           obj.serialized = element?.productDetail?.serializedProduct;
           obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
           obj.materialId = element?.productDetail?._id;
@@ -311,10 +322,13 @@ const ReceivingTicket = ({
             : element?.status;
           obj.startDate = element?.actualStartDate;
           obj.endDate = element?.actualEndDate;
+          obj.manualStartDate = element?.manualStartDate;
+          obj.manualEndDate = element?.manualEndDate;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
           obj.loadingTicket = ele?.loadingTicket;
           obj.loadingTicketId = ele?.loadingTicketId;
           obj.loadingTicketStatus = ele?.loadingTicketStatus;
+          obj.currentLocation = element?.currentLocation?.optionValue || rentalManagementData?.shippingAddress?.optionValue || rentalManagementData?.billingAddress?.optionValue
           productAssets.push(obj);
           qty = qty - ele.qty;
         });
@@ -354,6 +368,8 @@ const ReceivingTicket = ({
                   ? 'Returned'
                   : ''
             : element?.status;
+          obj.currentLocation = element?.currentLocation?.optionValue || rentalManagementData?.shippingAddress?.optionValue || rentalManagementData?.billingAddress?.optionValue
+
           productAssets.push(obj);
         }
       });
@@ -403,29 +419,41 @@ const ReceivingTicket = ({
       });
 
       productAssets.forEach((d) => {
+        d['parentName'] = d?.hasOwnProperty('parentName') && d?.parentName !== '' ? d?.parentName : d?.productName;
+        d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.productId;
         d['isChecked'] = false;
-        d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
+        d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved
+          || d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered ? false : true;
+
+        const invoiceMaterial = invoiceData?.find(obj => obj?._id === d?._id || obj?._id === d?.uniqueId)
+        d['isAllowedStartDate'] = d?.manualStartDate && !invoiceMaterial ? true : false
+        d['isAllowedEndDate'] = d?.manualEndDate ? true : false
+        if (d['isAllowedEndDate'] && invoiceMaterial) {
+          d['minEndDate'] = new Date(invoiceMaterial?.endDate)
+        }
       });
 
-      if (
-        productAssets.filter(
-          (e) =>
-            [
-              INVENTORY_STATUS.underReview,
-              INVENTORY_STATUS.available,
-              INVENTORY_STATUS.repair,
-              INVENTORY_STATUS.scrap,
-              INVENTORY_STATUS.lost
-            ].includes(e.status) ||
-            [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
-              e.rentalAssetStatus
-            )
-        ).length === productAssets.length
+      if (productAssets.filter((e) =>
+        [
+          INVENTORY_STATUS.underReview,
+          INVENTORY_STATUS.available,
+          INVENTORY_STATUS.repair,
+          INVENTORY_STATUS.scrap,
+          INVENTORY_STATUS.lost,
+          INVENTORY_STATUS.notApplied
+        ].includes(e.status) ||
+        [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
+          e.rentalAssetStatus
+        )
+      ).length === productAssets.length
       ) {
         setNextStep(true);
       }
 
       setUniqueReceivingTicket([...new Set(productAssets.filter((d) => d.receivingTicketId !== undefined).map((d) => d.receivingTicketId))]);
+
+      productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)]
+
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -488,8 +516,8 @@ const ReceivingTicket = ({
         </Box>
       )}
       {params?.data?.isReplaced && (
-        <Box ml={1} mt={1}>
-          <HtmlTooltip title={`This asset has replaced ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}>
+        <Box ml={1}>
+          <HtmlTooltip title={`This Asset has been Replaced by ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}>
             <InfoIcon fontSize="small" color={'primary'} />
           </HtmlTooltip>
         </Box>
@@ -541,6 +569,24 @@ const ReceivingTicket = ({
       <NoDataCell />
     );
 
+  const ActionRenderer = (params) => (
+    allowedToEdit ?
+      <HtmlTooltip title={(params?.data?.isAllowedStartDate === false && params?.data?.isAllowedEndDate === false) ? `Invoice created cannot update start date` :
+        params?.data?.isAllowedEndDate === false && params?.data?.isAllowedStartDate !== true ? `Can change the end date after received` : 'Update start date / end date'}>
+        <span>
+          <IconButton
+            size='small'
+            disabled={(params?.data?.isAllowedStartDate || params?.data?.isAllowedEndDate) ? false : true}
+            onClick={() => {
+              setOpenDateDialog({ ...openDateDialog, open: true, data: params?.data })
+            }}>
+            <Edit fontSize='small'
+              color={(params?.data?.isAllowedStartDate || params?.data?.isAllowedEndDate) ? 'primary' : 'inherit'} />
+          </IconButton>
+        </span>
+      </HtmlTooltip> : ""
+  )
+
   const frameworkComponents = {
     receivingTicketRenderer: ReceivingTicketRenderer,
     deliveryTicketRenderer: DeliveryTicketRenderer,
@@ -550,7 +596,8 @@ const ReceivingTicket = ({
     parentNameRenderer: ParentNameRenderer,
     warehouseRenderer: WarehouseRenderer,
     commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer
+    dateRenderer: DateRenderer,
+    actionsRenderer: ActionRenderer
   };
 
   const getColumn = async () => {
@@ -594,9 +641,6 @@ const ReceivingTicket = ({
         ) {
           return { backgroundColor: COLOUR_MASTER.lostAssets.background };
         }
-        if (params?.data?.isReplaced) {
-          return { backgroundColor: COLOUR_MASTER.replaceAssetColor.background };
-        }
         return null;
       }
     },
@@ -617,10 +661,12 @@ const ReceivingTicket = ({
     { field: 'returnTicket', headerName: 'Return Ticket', show: true, cellRenderer: 'returnTicketRenderer' },
     { field: 'returnQty', headerName: 'Returned Qty', show: true, cellRenderer: 'returnTicketRenderer' },
     { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'startDate', headerName: 'Actual Start Date', show: true, cellRenderer: 'dateRenderer' },
-    { field: 'endDate', headerName: 'Actual End Date', show: true, cellRenderer: 'dateRenderer' },
+    { field: 'manualStartDate', headerName: 'Start Date', show: true, cellRenderer: 'dateRenderer' },
+    { field: 'manualEndDate', headerName: 'End Date', show: true, cellRenderer: 'dateRenderer' },
+    { field: 'startDate', headerName: 'System Start Date', show: false, cellRenderer: 'dateRenderer' },
+    { field: 'endDate', headerName: 'System End Date', show: false, cellRenderer: 'dateRenderer' },
     { field: 'rentalAssetStatus', headerName: 'Rental Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' },
   ];
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
@@ -888,6 +934,31 @@ const ReceivingTicket = ({
       });
   };
 
+  const handelRevertTickets = () => {
+    const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
+    if (receivingTicketIds.length) {
+      let data = [];
+      receivingTicketIds?.forEach((receivingTicketId) => {
+        const ele: any = {};
+        ele._id = receivingTicketId;
+        ele.products = selectedRecords?.filter((e) => e?.receivingTicketId === receivingTicketId && e?.type === "Product")?.map((e) => e?.productId);
+        ele.assets = selectedRecords?.filter((e) => e?.receivingTicketId === receivingTicketId && e?.type === "Asset")?.map((e) => e?._id);
+        data.push(ele);
+      })
+      axiosInstance().put(`${deliveryTicket.api}/revert-partially`, data).then(({ data: { data } }) => {
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Reverted Successfully`
+        });
+      })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
   useEffect(() => {
     const product = selectedRecords?.filter((e) => e.type === 'Product');
     if (product.length) {
@@ -908,6 +979,35 @@ const ReceivingTicket = ({
       setSeletedProducts([]);
     }
   }, [selectedRecords]);
+
+
+  const handleSubmitChangeDates = (values) => {
+    if (!openDateDialog.data) return
+    setOpenDateDialog({ ...openDateDialog, loading: true })
+    const data: any = {
+      "material": openDateDialog?.data?.displayType !== "Asset" ? openDateDialog?.data?.uniqueId : "",
+      "inventory": openDateDialog?.data?.displayType === "Asset" ? openDateDialog?.data?._id : "",
+    }
+    if (values.manualStartDate) {
+      data.startDate = values.manualStartDate;
+    }
+    if (values.manualEndDate) {
+      data.endDate = values.manualEndDate;
+    }
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
+      .then(() => {
+        toastConfig.setToastConfig({
+          open: true,
+          message: "Dates Updated Successfully",
+          type: "success"
+        })
+        setOpenDateDialog({ open: false, data: null, loading: false })
+        fetchRecords()
+      }).catch((err) => {
+        toastConfig.setToastConfig(err)
+        setOpenDateDialog({ open: false, data: null, loading: false })
+      })
+  }
 
   return (
     <>
@@ -1106,7 +1206,8 @@ const ReceivingTicket = ({
                     f.hasOwnProperty('receivingTicketId') ||
                     f.hasOwnProperty('returnTicketId') ||
                     [INVENTORY_STATUS.lost].includes(f.status) ||
-                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.notApplied].includes(f.status)
+                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair,
+                    INVENTORY_STATUS.needRecert, INVENTORY_STATUS.notApplied].includes(f.status)
                 )
               }
             >
@@ -1116,10 +1217,7 @@ const ReceivingTicket = ({
             <MenuItem
               disabled={
                 selectedRecords?.length === 0 ||
-                selectedRecords?.filter(
-                  (e: any) =>
-                    e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.indTransit
-                )?.length !== selectedRecords?.length ||
+                selectedRecords?.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length !== selectedRecords?.length ||
                 anchorActionEl === null
               }
               onClick={() => {
@@ -1201,7 +1299,7 @@ const ReceivingTicket = ({
               <MenuItem onClick={() => setShowRepairOrderDialog(true)}>Create Repair Order</MenuItem>
             ) : null}
 
-            <MenuItem
+            {/* <MenuItem
               onClick={() => {
                 const products = [];
                 selectedRecords?.forEach((element) => {
@@ -1233,10 +1331,26 @@ const ReceivingTicket = ({
               }
             >
               Replace Products
-            </MenuItem>
+            </MenuItem> */}
+
+            {selectedRecords.length &&
+              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length ===
+              selectedRecords?.length ? (
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setShowConformationRevertTicket(true)
+                }}
+              >
+                Revert Receiving Ticket
+              </MenuItem>
+            ) : null}
 
             {selectedRecords?.filter(
-              (f) => f.type === 'Product' && f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
+              (f) => f.type === 'Product'
+                && f.hasOwnProperty('loadingTicketId')
+                && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
+                && Number(f?.consumeQty) + Number(f?.returnQty) < Number(f?.qty)
             ).length === selectedRecords.length && (
                 <MenuItem
                   onClick={() => {
@@ -1382,12 +1496,19 @@ const ReceivingTicket = ({
               limit={limit}
               pageSizes={pageSizes}
               page={page}
-              allowAction={false}
+              allowAction={true}
               loading={loading || loadingData}
               isClientSideGrid={true}
               renderedFrom={renderedFrom}
               allowSelection={allowedToEdit || isProcessor}
               refreshGrid={fetchRecords}
+              actionWidth={80}
+              rowClassRules={{
+                "light-grey-data-row":
+                  function (params) {
+                    return params?.data?.isReplaced;
+                  },
+              }}
             />
           )
         ) : (
@@ -1426,9 +1547,9 @@ const ReceivingTicket = ({
       )}
       {showQtyDialog.open && (
         <ReturnTicketDialog
-          productList={selectedRecords.filter((d: any) => d?.type === 'Product')}
+          products={selectedRecords.filter((d: any) => d?.type === 'Product')}
           onSuccess={(data) => {
-            setShowQtyDialog({ data: data?.products, open: false });
+            setShowQtyDialog({ data: data, open: false });
             setShowTicketDialog((ps: any) => ({ ...ps, open: true }));
             fetchRecords();
             fetchRentalData();
@@ -1437,7 +1558,7 @@ const ReceivingTicket = ({
             setShowQtyDialog({ open: false, data: null });
             setShowTicketDialog({ open: false, ticketType: '', data: {} });
           }}
-          invoiceQtyData={invoiceQtyData}
+          invoiceQtyData={invoiceData}
         />
       )}
       {isExistingRentalJob && (
@@ -1627,6 +1748,31 @@ const ReceivingTicket = ({
             handleConsumProduct(null);
           }}
           okBtnLoading={okBtnLoading}
+        />
+      )}
+      {showConformationRevertTicket && (
+        <ConfirmationDialog
+          open={showConformationRevertTicket}
+          message={`Are you sure you want to revert receiving ticket?`}
+          onClose={() => {
+            setShowConformationRevertTicket(false);
+          }}
+          onOk={() => {
+            handelRevertTickets();
+            setShowConformationRevertTicket(false);
+          }}
+          okBtnLoading={okBtnLoading}
+        />
+      )}
+      {openDateDialog.open && (
+        <ChangeActualDateDialog
+          data={openDateDialog.data}
+          open={openDateDialog.open}
+          loading={openDateDialog.loading}
+          onClose={() => {
+            setOpenDateDialog({ open: false, data: null, loading: false })
+          }}
+          handleSubmit={handleSubmitChangeDates}
         />
       )}
     </>

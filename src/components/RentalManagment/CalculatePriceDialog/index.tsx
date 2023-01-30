@@ -30,7 +30,7 @@ const CalculatePriceDialog = ({
     const fetchCalculatePrice = () => {
         const data: any = {};
         data.conditionType = ['Rent'];
-        data.material = material.filter((d) => d.parentId === null &&(d.listPrice === null || d.listPrice === undefined || d.listPrice === 0)).map((ele) => ({
+        data.material = material.filter((d) => d.parentId === null && (d.listPrice === null || d.listPrice === undefined || d.listPrice === 0)).map((ele) => ({
             materialId: ele?.materialId,
             materialType: ele?.type,
             qty: ele?.qty,
@@ -43,28 +43,29 @@ const CalculatePriceDialog = ({
         data.warehouse = [referenceData?.warehouse?.optionValue];
         axiosInstance().post(pricingCondition.api + `/calculatePrice`, data).then(({ data: { data } }) => {
             data = data.filter(d => d.mrp !== undefined && d.mrp !== null)
-            let products = uniq(map(data, 'materialId'));
-            if (products.length === data.length) {
-                handleSucess(data)
-            }
-            else {
-                let customData = products.map((materialId) => {
-                    let pricingConditionList = data.filter((field) => field.materialId === materialId);
-                    if (pricingConditionList.length === 1) {
-                        setSubmitData((prevState) => {
-                            return [...prevState, ...pricingConditionList];
-                        });
-                    }
-                    else {
-                        let tempDetail = material.find((d) => d.materialId === materialId)?.detail;
-                        let productData = { materialId: materialId, detail: tempDetail }
-                        return { productData, pricingConditionList };
-                    }
-                }).filter(d => d);
-                setValue(customData.reduce((obj, item) => Object.assign(obj, { [item.productData?.materialId]: item.pricingConditionList[0] }), {}))
-                setDisplayData(customData)
-                setPricingConditionData(data);
-            }
+            handleSucess(data)
+            //let products = uniq(map(data, 'materialId'));
+            // if (products.length === data.length) {
+            //     handleSucess(data)
+            // }
+            // else {
+            //     let customData = products.map((materialId) => {
+            //         let pricingConditionList = data.filter((field) => field.materialId === materialId);
+            //         if (pricingConditionList.length === 1) {
+            //             setSubmitData((prevState) => {
+            //                 return [...prevState, ...pricingConditionList];
+            //             });
+            //         }
+            //         else {
+            //             let tempDetail = material.find((d) => d.materialId === materialId)?.detail;
+            //             let productData = { materialId: materialId, detail: tempDetail }
+            //             return { productData, pricingConditionList };
+            //         }
+            //     }).filter(d => d);
+            //     setValue(customData.reduce((obj, item) => Object.assign(obj, { [item.productData?.materialId]: item.pricingConditionList[0] }), {}))
+            //     setDisplayData(customData)
+            //     setPricingConditionData(data);
+            // }
         })
     };
 
@@ -109,7 +110,7 @@ const CalculatePriceDialog = ({
                                                             [`${obj.productData?.materialId}`]: val
                                                         }))
                                                     }}
-                                                    renderInput={(params) => <TextField {...params} label={`select Pricing condition`} variant="outlined" />}
+                                                    renderInput={(params) => <TextField {...params} label={`Select Pricing Condition`} variant="outlined" />}
                                                 />
                                             </Grid>
                                         </Grid>

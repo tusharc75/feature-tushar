@@ -12,15 +12,17 @@ import { BiRefresh, BiMinus } from 'react-icons/bi';
 import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill } from 'react-icons/bs';
 import moment from 'moment';
 import { FaUser as UserIcon } from 'react-icons/fa';
+import { MdBolt } from 'react-icons/md';
 
-const Logs = ({ handleClose, workOrderId = null }) => {
-  const {
-    state: { selectedEntity }
-  }: any = useData();
+const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) => {
+
+  const { state: { selectedEntity } }: any = useData();
+
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState(null);
   const [rows, setRows] = useState(null);
   const [keys, setKeys] = useState(null);
+
 
   useEffect(() => {
     fetchData();
@@ -37,9 +39,14 @@ const Logs = ({ handleClose, workOrderId = null }) => {
 
   const fetchData = () => {
     axiosInstance()
-      .get(`${routes.workOrder.path}/${workOrderId}/log`)
+      .get(`${routes.workOrder.path}/${workOrderId}/log?uniqueId=${uniqueId}`)
       .then(({ data: { data } }) => {
-        setData(data);
+        if (data && data?.length) {
+          setData(data);
+        }
+        else {
+          setData([])
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -91,6 +98,10 @@ const Logs = ({ handleClose, workOrderId = null }) => {
         break;
       case operations.valueUpdated:
         icon = <BiRefresh />;
+        break;
+      case operations.consumed:
+        icon = <MdBolt />;
+        break;
     }
     return icon;
   };
@@ -124,30 +135,34 @@ const Logs = ({ handleClose, workOrderId = null }) => {
 
   const getHeadMessage = (row: any = 'Fail') => {
     let message;
+    const serviceName = row?.service?.optionLabel ? row?.service?.optionLabel : '';
+    const stepName = row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : '';
+    const consumedProd = row?.data?.products?.map((item) => item.productName);
+
     switch (row?.operation) {
       default:
-        message = `<span>Updated value</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Updated value</span> ${stepName} ${serviceName}`;
         break;
       case operations.completed:
-        message = `<span>Completed</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Completed</span> ${stepName} ${serviceName}`;
         break;
       case operations.start:
-        message = `<span>Started</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Started</span> ${stepName} ${serviceName}`;
         break;
       case operations.passed:
-        message = `<span>Passed</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Passed</span> ${stepName} ${serviceName}`;
         break;
       case operations.failed:
-        message = `<span>Failed</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Failed</span> ${stepName} ${serviceName}`;
         break;
       case operations.valueAdded:
-        message = `<span>Added value</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Added value</span> ${stepName} ${serviceName}`;
         break;
       case operations.consumed:
-        message = `<span>Consumed</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Consumed</span> <br><strong>Products: </strong>${consumedProd.join(', ')}`;
         break;
       case operations.valueUpdated:
-        message = `<span>Updated value</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Updated value</span> ${stepName} ${serviceName}`;
         break;
     }
     return message;
@@ -155,7 +170,13 @@ const Logs = ({ handleClose, workOrderId = null }) => {
 
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="logs-dialog">
-      <CustomDialogHeader title={`Logs`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
+      <CustomDialogHeader
+        title={`${serviceName ? serviceName : ''} Logs`}
+        showManimizeMaximize={false}
+        showRequiredLabel={false}
+        onClose={handleClose}
+        style={{ textTransform: 'capitalize' }}
+      />
       <CustomDialogContent>
         {keys ? (
           keys?.length > 0 ? (

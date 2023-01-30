@@ -30,6 +30,8 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import MobileSortDialog from "../../components/MobileSortDialog";
 import MobileFilterDialog from "../../components/MobileFilterDialog"
 import { camelCase } from 'lodash';
+import { Link } from 'react-router-dom';
+
 
 
 
@@ -124,18 +126,33 @@ function Budget() {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.budget.path, true);
+          if (o?.fieldData?.primaryField === true) {
+            columns = [
+              ...columns,
+              {
+                field: o?.fieldData?.fieldName,
+                headerName: o?.fieldData?.fieldLabel,
+                show: true,
+                disabled: true,
+                cellRenderer: 'nameRenderer',
+                primaryField: true
+              }
+            ];
+          } else{
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.budget.path, true);
 
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
+            if (currentColumn !== null) {
+              columns = [...columns, currentColumn?.columnData];
+              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                rendererNames.push(currentColumn?.rendererName);
+              }
             }
-          }
+          }  
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
+          nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -156,20 +173,12 @@ function Budget() {
     });
   }
   const NameRenderer = (params) => (
-    <>
-      {permissions.budget.isUpdate ? (
-        <span
-          className="link"
-          onClick={() => {
-            setShowManageBudgetDialog({ show: true, id: params.data.id, isClone: false });
-          }}
-        >
-          <CustomRenderCell value={params?.value} />
-        </span>
-      ) : (
-        params?.value
-      )}
-    </>
+      <span className=" d-flex gap-2 align-items-center">
+        <Link className="link" to={`${routes.budget.path}/detail/${params.data._id}`}>
+          {params.value}
+        </Link>
+      </span>
+  
   );
 
   const ActionsRenderer = (params) => (

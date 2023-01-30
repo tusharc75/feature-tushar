@@ -26,7 +26,7 @@ const Chatter = (props: any) => {
   const [loading, setLoading] = useState(false);
   const [socket, setSocket] = useState<Socket>(null);
   const [isFocused, setFocused] = useState(false);
-  const [isSending, setSending] = useState(false)
+  const [isSending, setSending] = useState(false);
 
   const getChatter = () => {
     setLoading(true);
@@ -57,7 +57,7 @@ const Chatter = (props: any) => {
   useEffect(() => {
     if (!token || !chatterId) return;
 
-    const s = io(`${backendApi?.replace("/api", "")}/chatter`, {
+    const s = io(`${backendApi?.replace('/api', '')}/chatter`, {
       path: backendApi?.includes('/api') ? '/api/socket.io' : '/socket.io',
       auth: {
         token
@@ -94,10 +94,10 @@ const Chatter = (props: any) => {
 
   const sendMessage = async (e) => {
     e.preventDefault();
-    setSending(true)
+    setSending(true);
     try {
       await axiosInstance().put(`/chatter/${chatterId}`, { message });
-      setSending(false)
+      setSending(false);
 
       // setMessages((prevState) => [
       //   {
@@ -109,20 +109,20 @@ const Chatter = (props: any) => {
       //   ...prevState
       // ]);
     } catch (error) {
-      setSending(false)
+      setSending(false);
       setToastConfig(error);
     }
     setMessage('');
   };
 
   return (
-    <Box p={1}>
+    <Box>
       <div className="chat-box" id="chatList">
         <div className="chat-box-header">
           <Typography variant="h6"> Chatter</Typography>
         </div>
         <div className="chat-box-body">
-          <div className="chat-logs" style={{ height: 300 }}>
+          <div className="chat-logs" style={{ height: 250 }}>
             {loading ? (
               <Box height="100%" display="flex" flexDirection="column" justifyContent="flex-end">
                 {[100, 180, 120, 160].map((i) => (
@@ -165,9 +165,9 @@ const Chatter = (props: any) => {
           </div>
         </div>
 
-        <Box component="form" onSubmit={sendMessage}>
-          <Box style={{ padding: '8px 10px' }} display="flex" alignItems="center" boxShadow={1}>
-            <Box border="1px solid #aaa" borderRadius={20} width="100%" height={34} borderColor={isFocused ? '#555' : '#aaa'}>
+        <Box component="form" onSubmit={sendMessage} className="chatbox-footer">
+          <Box display="flex" alignItems="center">
+            <Box border="1px solid #aaa" borderRadius={20} width="100%" borderColor={isFocused ? '#555' : '#aaa'}>
               <InputBase
                 style={{ padding: '0 10px' }}
                 value={message}

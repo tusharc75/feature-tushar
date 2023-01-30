@@ -7,7 +7,8 @@ import { VscCalendar } from 'react-icons/vsc';
 import { BsBriefcase } from 'react-icons/bs';
 import { GoNote } from 'react-icons/go';
 import { HiOutlineMail } from 'react-icons/hi';
-import { FiPlusSquare } from 'react-icons/fi';
+
+import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import { AiOutlinePaperClip, AiOutlineHistory } from 'react-icons/ai';
 import { Task } from './Task';
 import { CreateTask } from './Task/CreateTask';
@@ -28,33 +29,52 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../constants/helpers';
 import HistoryDialog from './History/index';
 import { useData } from './../../StateProvider/Provider';
-import InfoIcon from '@material-ui/icons/Info';
+
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import CloseIcon from '@material-ui/icons/Close';
+import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 
 const useStyles = makeStyles(() => ({
   activityBox: {
-    padding: '1px 1px 9px 1px',
-    background: '#f6f6f6'
+    padding: '15px 30px 30px',
+    background: '#ffffff'
   },
   activitySubBox: {
     display: 'flex',
-    padding: '8px',
-    margin: '8px 8px 0 8px',
+    padding: '7px 8px',
+    margin: '0px 0px 12px',
     cursor: 'pointer',
     background: '#fff',
-    borderRadius: '3px',
-    border: '1px solid #c9c0c0',
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0
+    border: '1px solid #E7E7E7',
+    boxShadow: '0px 4px 40px rgba(0, 0, 0, 0.04)',
+    borderRadius: '4px',
+    minHeight: '46px',
+    color: '#5B5B5B',
+    '& h6': {
+      fontWeight: '500',
+      fontSize: '14px',
+      lineHeight: '17px',
+      color: '#5B5B5B'
+    }
   },
   historyButton: {
     width: '100%',
     padding: '4px'
+  },
+  detailsHeader: {
+    padding: '10px',
+    background: '#FFFFFF',
+    borderRadius: '7px 7px 0 0',
+    position: 'sticky',
+    top: '0px',
+    zIndex: 5,
+    boxShadow: '0px 4px 40px rgb(0 0 0 / 6%)'
   }
 }));
 
 const Activity = (props) => {
   const classes = useStyles();
-  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '' } = props;
+  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => {} } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [type, setType] = useState(null);
@@ -189,8 +209,11 @@ const Activity = (props) => {
   return (
     <>
       <Box>
-        <Box className="detailHeader">
+        <Box className={`${classes.detailsHeader} `}>
           <h2 className="listingHeader single">Activities</h2>
+          <IconButton onClick={() => close()} className="close-icon-v1">
+            <CloseIcon />
+          </IconButton>
         </Box>
         <Box className={` ${classes.activityBox}`}>
           <>
@@ -204,7 +227,7 @@ const Activity = (props) => {
                           <IconButton size="small">{type === data ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
                         </Box>
                         <Box ml={1} mt={0.5}>
-                          <Typography variant="subtitle2" color="primary" className="d-flex align-items-center">
+                          <Typography variant="subtitle2" className={`d-flex align-items-center `}>
                             {getIcon(data)} {data} ({totalCount[data]})
                           </Typography>
                         </Box>
@@ -215,12 +238,20 @@ const Activity = (props) => {
                         <Grid item xs={4} container justify="flex-end">
                           <Box mr={1} mt={0.5}>
                             <Tooltip title={infoTitle[data]}>
-                              <InfoIcon color="disabled" />
+                              <InfoOutlinedIcon />
                             </Tooltip>
                           </Box>
-                          <IconButton color="primary" size="small" onClick={(event) => handleCreateActivity(event, data)}>
+                          {data === 'Attachment' && (
+                            <Tooltip title={'Add Folder'}>
+                              <IconButton size="small" onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}>
+                                {' '}
+                                <CreateNewFolderIcon />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                          <IconButton size="small" onClick={(event) => handleCreateActivity(event, data)}>
                             {' '}
-                            <FiPlusSquare />
+                            <AddOutlinedIcon />
                           </IconButton>
                         </Grid>
                       )
@@ -252,7 +283,7 @@ const Activity = (props) => {
             {resourceId && resource ? (
               <Box className={classes.activitySubBox}>
                 <Button className={classes.historyButton} style={{ width: '100%', padding: '2px' }} onClick={() => setShowHistory(true)}>
-                  <AiOutlineHistory className="mr-1" size={20} /> History
+                  History
                 </Button>
               </Box>
             ) : null}
@@ -370,6 +401,22 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           ) : null}
+          {type === 'AttachmentFolder' && (
+            <ManageAttachment
+              attachmentId={null}
+              handleClose={() => {
+                handleClose();
+                setFullScreen(false);
+              }}
+              relatedTo={relatedTo}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+              type="folder"
+            />
+          )}
         </Dialog>
       </Box>
       {showHistory ? <HistoryDialog open={showHistory} resourceId={resourceId} resource={resource} onClose={() => setShowHistory(false)} /> : null}

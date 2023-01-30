@@ -62,7 +62,7 @@ export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => 
             materialType: ele?.type,
             qty: ele?.qty,
             pricingMethod: ele?.pricingMethod,
-            unit: ele?.unit,
+            unit: [ele?.unit].flat(1).pop(),
             currency: rentalManagementData?.currency
         }));
         data.supplier = [];
@@ -81,8 +81,9 @@ export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => 
     }
 };
 
-const sumOnParent = (parent, child, fields) => {
+export const sumOnParent = (parent, child, fields) => {
     const resetFields = []
+    var currency = "USD";
     fields.forEach((element) => {
         if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
             if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
@@ -120,15 +121,17 @@ const sumOnParent = (parent, child, fields) => {
                 row[ele.fieldName] = sumValues[ele.fieldName];
             }
             else {
-                row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / parent.length).toFixed(2));
+                //row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / (sumCount[ele.fieldName] || 1)).toFixed(2));
+                var percentValue: any = sumValues[`${ele.fieldName?.replace("Percentage", "")}_${currency.toLowerCase()}`]
+                var totalPriceValue: any = sumValues[`totalPrice_${currency.toLowerCase()}`]
+                row[ele.fieldName] = parseFloat(((percentValue * 100) / totalPriceValue).toFixed(2))
             }
         })
     })
-
     return parent;
 }
 
-const resetValueZero = (rows, fields) => {
+export const resetValueZero = (material, fields, _id) => {
     const resetFields = []
     fields.forEach((element) => {
         if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
@@ -154,25 +157,50 @@ const resetValueZero = (rows, fields) => {
             resetFields.push(element.fieldName)
         }
     })
-    rows.forEach((row) => {
+    const result = [];
+    material?.filter((e) => e.parentId === _id)?.forEach((child) => {
         resetFields.forEach((fieldName) => {
-            row[fieldName] = 0;
+            child[fieldName] = 0;
+        })
+        result.push(child)
+        material?.filter((e) => e?.parentId === child?._id)?.forEach((subChild) => {
+            resetFields.forEach((fieldName) => {
+                subChild[fieldName] = 0;
+            })
+            result.push(subChild)
         })
     })
+    return result;
 }
 
-export const calculateRowsField = (material: any[], values: any, fields: any[], rowData: any) => {
+const calculateParentRows = (material: any[], rows: any, fields: any[], rowData: any, parent) => {
+    let tempParent: any = material.filter((e) => e._id === rowData.parentId)
+    const sameParent: any = material.filter((e) => e.parentId === rowData.parentId && e._id !== rowData._id)
+    tempParent = sumOnParent(tempParent, [...sameParent, ...rows], fields)
+    parent.push(tempParent[0])
+    if (tempParent[0].parentId) {
+        calculateParentRows(material, tempParent, fields, tempParent[0], parent)
+    }
+};
+
+export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any) => {
     let rows: any = []
     const calValues = autoCalculateSpecificFields(values, { ...values, ...rowData }, fields)
     rows.push({ ...rowData, ...calValues })
-
     if (rowData.parentId) {
-        let parent: any = material.filter((e) => e._id === rowData.parentId)
-        const sameParent: any = material.filter((e) => e.parentId === rowData.parentId && e._id !== rowData._id)
-        parent = sumOnParent(parent, [...sameParent, ...rows], fields)
+        let parent: any = []
+        await calculateParentRows(material, rows, fields, rowData, parent)
         rows = [...rows, ...parent]
     }
-    const child = material.filter((e) => e.parentId === rowData._id)
-    resetValueZero(child, fields)
+    const child = resetValueZero(material, fields, rowData._id)
     return [...rows, ...child];
+};
+
+export const getNestedSubRows = (obj, original) => {
+    if (original?.subRows?.length) {
+        original?.subRows.forEach((element) => {
+            obj.push({ id: element._id, type: element.type, materialId: element.materialId });
+            getNestedSubRows(obj, element);
+        });
+    }
 };

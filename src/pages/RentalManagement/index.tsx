@@ -1,61 +1,50 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import { Grid, Chip, IconButton, Tooltip } from "@material-ui/core";
+import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { Grid, Chip, IconButton, Tooltip } from '@material-ui/core';
 import queryString from 'query-string';
-import { useData } from "../../StateProvider/Provider";
-import axiosInstance from "../../axios/axiosInstance";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import MessageDialog from "../../components/Helpers/MessageDialog";
-import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
-import routes from "./../../components/Helpers/Routes";
-import { getLocalStorageArrayData, prepareDataForGrid, removeLocalStorage } from "../../constants/helpers"
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { FaRegistered, FaSuitcase, FaAddressBook, FaAddressCard } from "react-icons/fa";
-import { SiStatuspage } from "react-icons/all";
-import {
-  isObjectEmpty,
-  customerAccount,
-  supplierAccount,
-  gridLoadingTimeout,
-  rentalManagement,
-} from "../../constants/helpers";
-import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import CustomContainer from "../../components/CustomContainer";
-import { useHistory } from "react-router-dom";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CustomAgGrid, {
-  reducer,
-  intialState,
-} from "../../components/AgGridComponents/CustomAgGrid";
-import RentalManagementHeader from "./RentalManagementHeader";
-import ManageRentalManagementDialog from "./ManageRental";
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import { getLocalStorageArrayData, prepareDataForGrid, removeLocalStorage } from '../../constants/helpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { FaRegistered, FaSuitcase, FaAddressBook, FaAddressCard } from 'react-icons/fa';
+import { SiStatuspage } from 'react-icons/all';
+import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, rentalManagement } from '../../constants/helpers';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import CustomContainer from '../../components/CustomContainer';
+import { useHistory } from 'react-router-dom';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import RentalManagementHeader from './RentalManagementHeader';
+import ManageRentalManagementDialog from './ManageRental';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
-import { camelCase } from "lodash";
-import { isMobile, isTablet } from 'react-device-detect'
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
+import { camelCase } from 'lodash';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { setUpindexDB, objectStore, insertUpdate, findAll, findOne } from '../../constants/indexdbhelper';
 import { CheckboxRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import HideWhenOffline from '../../components/HideWhenOffline';
 
-
 let rentalManagementTimeout;
 
 const RentalManagement = () => {
-
   const RentalManagementType = [
     {
       key: `All ${routes.rentalManagement.title}`,
-      value: 1,
+      value: 1
     },
     {
       key: `My ${routes.rentalManagement.title}`,
-      value: 2,
-    },
+      value: 2
+    }
   ];
   const renderedFrom = camelCase(`${routes.rentalManagement.title}`);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, isSynch } = useContext(CustomOfflineContext);
@@ -63,112 +52,111 @@ const RentalManagement = () => {
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
 
-  const { state: { user, permissions, selectedEntity } }: any = useData();
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
   const { getColumnData } = useColumns();
-  const [locationKeys, setLocationKeys] = useState([])
+  const [locationKeys, setLocationKeys] = useState([]);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false)
-  const [frameWorkComponent, setFrameWorkComponent] = useState({})
-  const [columns, setColumns] = useState([])
+  const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
+  const [columns, setColumns] = useState([]);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [showManageRentalManagementDialog, setShowManageRentalManagementDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
-    useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [singleRentalManagementDelete, setSingleRentalManagementDelete] = useState({
     id: null,
     show: false,
-    rentalJobName: "",
+    rentalJobName: ''
   });
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
-    resource: history.location?.state?.resource,
+    resource: history.location?.state?.resource
   });
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
   useEffect(() => {
-    setUpindexDB()
-    fetchGridColumns()
-  }, [])
+    setUpindexDB();
+    fetchGridColumns();
+  }, []);
 
   const extraColumns = [
-    { field: "subleaseAssets", headerName: "Sublease Assets", show: true, filter: false, sortable: false, cellRenderer: "checkboxRenderer" },
+    { field: 'subleaseAssets', headerName: 'Sublease Assets', show: true, filter: false, sortable: false, cellRenderer: 'checkboxRenderer' }
   ];
 
   useEffect(() => {
-    return history.listen(location => {
+    return history.listen((location) => {
       const { type }: any = queryString.parse(history.location.search);
       if (history.action === 'PUSH') {
-        setLocationKeys([location.key])
+        setLocationKeys([location.key]);
       }
       if (history.action === 'POP') {
         if (locationKeys[1] === location.key) {
-          setLocationKeys(([_, ...keys]) => keys)
+          setLocationKeys(([_, ...keys]) => keys);
           // Handle forward event
-          setSelectedType(type ? parseInt(type) : 1)
-
+          setSelectedType(type ? parseInt(type) : 1);
         } else {
-          setLocationKeys((keys) => [location.key, ...keys])
+          setLocationKeys((keys) => [location.key, ...keys]);
           // Handle back event
-          setSelectedType(type ? parseInt(type) : 1)
-
+          setSelectedType(type ? parseInt(type) : 1);
         }
       }
-    })
-  }, [locationKeys])
+    });
+  }, [locationKeys]);
 
   const fetchGridColumns = async () => {
-    let data
+    let data;
     if (isOffline) {
-      data = await findOne(objectStore.resource, objectStore.rentalManagement)
-    }
-    else {
-      const response = await axiosInstance().get(`/field?resource=Rental Management&entity=${selectedEntity}&view=true`)
-      data = response?.data?.data
+      data = await findOne(objectStore.resource, objectStore.rentalManagement);
+    } else {
+      const response = await axiosInstance().get(`/field?resource=Rental Management&entity=${selectedEntity}&view=true`);
+      data = response?.data?.data;
       try {
         insertUpdate(objectStore.resource, objectStore.rentalManagement, data);
       } catch (ex) {
-        console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`)
+        console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`);
       }
     }
-    let columns = []
-    let rendererNames = []
-    data.forEach(o => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.rentalManagementDetail.path)
+    let columns = [];
+    let rendererNames = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.rentalManagementDetail.path);
       if (currentColumn !== null) {
         if (isOffline) {
-          currentColumn.columnData["filter"] = false
-          currentColumn.columnData["sortable"] = false
+          currentColumn.columnData['filter'] = false;
+          currentColumn.columnData['sortable'] = false;
         }
-        columns = [...columns, currentColumn?.columnData]
+        columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName)
+          rendererNames.push(currentColumn?.rendererName);
         }
       }
-      return o?.fieldData
-    })
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+      return o?.fieldData;
+    });
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
       checkboxRenderer: CheckboxRenderer,
       actionsRenderer: ActionsRenderer
-    }
-    setFrameWorkComponent({ ...tempFrameworkComponent })
-    let staticFields = getStaticFields()
+    };
+    setFrameWorkComponent({ ...tempFrameworkComponent });
+    let staticFields = getStaticFields();
     if (permissions?.sublease) {
-      staticFields = [...extraColumns, ...staticFields]
+      staticFields = [...extraColumns, ...staticFields];
     }
-    staticFields.forEach(field => {
-      columns.push(checkStaticField(renderedFrom, field))
-    })
-    setColumns([...columns])
-  }
+    staticFields.forEach((field) => {
+      columns.push(checkStaticField(renderedFrom, field));
+    });
+    setColumns([...columns]);
+  };
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -187,23 +175,23 @@ const RentalManagement = () => {
   }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, isOffline, showFilteredRecordsOnly]);
 
   const handleSingleDeleteRentalManagement = async () => {
-    dispatch({ type: "loading", loading: true });
+    dispatch({ type: 'loading', loading: true });
     axiosInstance()
       .put(`${rentalManagement.api}/remove`, {
-        ids: [singleRentalManagementDelete.id],
+        ids: [singleRentalManagementDelete.id]
       })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
         fetchRentalManagement();
-        dispatch({ type: "loading", loading: false });
-        setSingleRentalManagementDelete({ id: null, show: false, rentalJobName: "" });
+        dispatch({ type: 'loading', loading: false });
+        setSingleRentalManagementDelete({ id: null, show: false, rentalJobName: '' });
       })
       .catch((error) => {
-        dispatch({ type: "loading", loading: false });
+        dispatch({ type: 'loading', loading: false });
         toastConfig.setToastConfig(error);
       });
   };
@@ -216,7 +204,7 @@ const RentalManagement = () => {
             size="small"
             aria-label="Clone"
             onClick={() => {
-              setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: params.data._id })
+              setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: params.data._id });
             }}
           >
             <FileCopyIcon fontSize="small" color="primary" />
@@ -229,7 +217,7 @@ const RentalManagement = () => {
           </IconButton>
         </Tooltip>
       )}
-      {params.data.canDelete ?
+      {params.data.canDelete ? (
         <HideWhenOffline>
           <Tooltip title="Delete">
             <IconButton
@@ -239,23 +227,24 @@ const RentalManagement = () => {
                 setSingleRentalManagementDelete({
                   show: true,
                   id: params.data._id,
-                  rentalJobName: `${params.data.rentalJobName}`,
-                })
+                  rentalJobName: `${params.data.rentalJobName}`
+                });
               }}
             >
               <DeleteIcon fontSize="small" color="error" />
             </IconButton>
           </Tooltip>
-        </HideWhenOffline> : null}
+        </HideWhenOffline>
+      ) : null}
     </>
   );
 
   const replaceFieldName = (field) => {
     switch (field) {
-      case "createdBy":
-        return "createdBy.user.concatedName";
-      case "updatedBy":
-        return "updatedBy.user.concatedName";
+      case 'createdBy':
+        return 'createdBy.user.concatedName';
+      case 'updatedBy':
+        return 'updatedBy.user.concatedName';
       default:
         return field;
     }
@@ -265,14 +254,14 @@ const RentalManagement = () => {
     const updatedField = replaceFieldName(field);
     if (field !== updatedField) return updatedField;
     switch (field) {
-      case "owner":
-        return "owner.optionLabel";
+      case 'owner':
+        return 'owner.optionLabel';
 
-      case "customerAccount":
-        return "customerAccount.optionLabel";
+      case 'customerAccount':
+        return 'customerAccount.optionLabel';
 
-      case "supplierAccountName":
-        return "supplierAccountName.optionLabel";
+      case 'supplierAccountName':
+        return 'supplierAccountName.optionLabel';
 
       default:
         return field;
@@ -288,23 +277,23 @@ const RentalManagement = () => {
       if (accountDetails.resource === customerAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
           {
-            field: replaceFieldName("customerAccount"),
-            term: accountDetails.accountId,
-          },
+            field: replaceFieldName('customerAccount'),
+            term: accountDetails.accountId
+          }
         ])}`;
       } else if (accountDetails.resource === supplierAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
           {
-            field: replaceFieldName("supplierAccountName"),
-            term: { $in: [accountDetails.accountId] },
-          },
+            field: replaceFieldName('supplierAccountName'),
+            term: { $in: [accountDetails.accountId] }
+          }
         ])}`;
       }
     }
 
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
     if (!isObjectEmpty(filters)) {
@@ -312,18 +301,14 @@ const RentalManagement = () => {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: encodeURI(filters[field].filter),
+          term: encodeURI(filters[field].filter)
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(
-        updatedFilters
-      )}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(
-        sorting[0].colId
-      )}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {
@@ -334,62 +319,65 @@ const RentalManagement = () => {
   };
 
   const fetchRentalManagement = async () => {
-    dispatch({ type: "loading", loading: true });
+    dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     if (gridApi) {
       gridApi.setRowData([]);
     }
     try {
-      let data: any = [], count;
+      let data: any = [],
+        count;
       if (!isOffline) {
         const response: any = await axiosInstance().get(`${rentalManagement.api}${queryString}`);
         data = response?.data?.data;
         count = response?.data?.count;
-      }
-      else {
+      } else {
         data = await findAll(objectStore.rentalManagement);
         count = data?.length || 0;
       }
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
-        finalObject["canDelete"] = permissions?.rentalManagement?.isDelete && finalObject?.ownerId === user?.user?._id && u?.material?.length === 0;
-        finalObject["isChecked"] = false;
-        finalObject["allowedToEdit"] = permissions?.rentalManagement?.isUpdate;
-        finalObject["owerCollaboratorInitialsOrImages"] = [];
-        if (finalObject["owner"])
-          finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] }); finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
-            if (f.initials) {
-              f.initials = f.initials.split(" ").map((i) => i[0]).join("");
-            }
-          })
+        finalObject['canDelete'] = permissions?.rentalManagement?.isDelete && finalObject?.ownerId === user?.user?._id && u?.material?.length === 0;
+        finalObject['isChecked'] = false;
+        finalObject['allowedToEdit'] = permissions?.rentalManagement?.isUpdate;
+        finalObject['owerCollaboratorInitialsOrImages'] = [];
+        if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
+        finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
+          if (f.initials) {
+            f.initials = f.initials
+              .split(' ')
+              .map((i) => i[0])
+              .join('');
+          }
+        });
         return finalObject;
       });
       if (appendRows) {
-        dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+        dispatch({ type: 'initialize', data: [...dataRows, ...rows], count: count });
       } else {
-        dispatch({ type: "initialize", data: rows, count: count });
+        dispatch({ type: 'initialize', data: rows, count: count });
       }
       setTimeout(() => {
-        dispatch({ type: "loading", loading: false });
+        dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
     } catch (error) {
-      dispatch({ type: "loading", loading: false });
+      dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
     }
-  }
+  };
 
   const handleSearch = (e) => {
-    dispatch({ type: "search", search: e.target.value });
-  }
+    dispatch({ type: 'search', search: e.target.value });
+  };
 
   const handleRentalManagementTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`)
-  }
+    history.push(`?type=${filterValues}`);
+  };
 
   const handleTransferEntityDialog = () => {
-    setShowTransferEntityDialog(true)
-  }
+    setShowTransferEntityDialog(true);
+  };
 
   const showConfirmBox = (row) => {
     if (row) {
@@ -421,14 +409,14 @@ const RentalManagement = () => {
     if (recordsToDelete.length > 0) {
       axiosInstance()
         .put(`${rentalManagement.api}/remove`, {
-          ids: recordsToDelete,
+          ids: recordsToDelete
         })
         .then(({ data }) => {
-          removeLocalStorage(localStorageSelectedRecords)
+          removeLocalStorage(localStorageSelectedRecords);
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
@@ -442,7 +430,6 @@ const RentalManagement = () => {
         });
     }
   };
-
 
   return (
     <>
@@ -471,8 +458,8 @@ const RentalManagement = () => {
                         : []
                     }
                     onExportToExcelSuccess={() => {
-                      if (gridApi) gridApi.deselectAll()
-                      else fetchRentalManagement()
+                      if (gridApi) gridApi.deselectAll();
+                      else fetchRentalManagement();
                     }}
                     additionalParams={getQueryString(true)}
                   />
@@ -515,83 +502,87 @@ const RentalManagement = () => {
                     setAccountDetails({
                       accountId: null,
                       accountName: null,
-                      resource: null,
+                      resource: null
                     });
                   }}
                 />
               )}
             </RentalManagementHeader>
           </div>
-          {
-            Object.keys(frameWorkComponent).length > 0 ?
-              isMobile && !isTablet ?
-                <CustomSwipableList
-                  allowSelection={true}
-                  allowSwipe={true}
-                  permissions={permissions?.rentalManagement}
-                  primaryField={columns?.find(d => d.primaryField)}
-                  onClick={(data) => {
-                    history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
-                  }}
-                  dataRows={dataRows}
-                  selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
-                  dispatch={dispatch}
-                  onEdit={(data) => {
-                    history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
-                  }}
-                  extraParamsToCheckDelete={true}
-                  onDelete={(data) => {
-                    setSingleRentalManagementDelete({
-                      show: true,
-                      id: data._id,
-                      rentalJobName: `${data.rentalJobName}`,
-                    })
-                  }}
-                  rowCount={rowCount}
-                  page={page}
-                  loading={loading}
-                  chips={[
-                    {
-                      icon: <SiStatuspage />,
-                      label: "Status: ",
-                      field: "status",
-                    },
-                    {
-                      label: "Plant: ",
-                      field: "warehouse",
-                    },
-                  ]}
-                  additionalDetails={[
-                    {
-                      icon: <FaSuitcase size={18} />,
-                      field: "customerAccount"
-                    },
-                  ]}
-                  owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                  onCreate={false}
-                  showClone={true}
-                  onClone={(data) => { setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: data._id }) }}
-                  renderedFrom={renderedFrom}
-                /> :
-                <CustomAgGrid
-                  columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameWorkComponent}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  actionWidth={100}
-                  loading={loading}
-                  renderedFrom={renderedFrom}
-                  allowSelection={!isOffline}
-                  isClientSideGrid={isOffline}
-                  refreshGrid={fetchRentalManagement}
-                  showOnlyShowFilteredRecordSwitch={true}
-                /> : null
-          }
+          {Object.keys(frameWorkComponent).length > 0 ? (
+            isMobile && !isTablet ? (
+              <CustomSwipableList
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={permissions?.rentalManagement}
+                primaryField={columns?.find((d) => d.primaryField)}
+                onClick={(data) => {
+                  history.push(`${routes.rentalManagementDetail.path}/${data._id}`);
+                }}
+                dataRows={dataRows}
+                selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
+                dispatch={dispatch}
+                onEdit={(data) => {
+                  history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`);
+                }}
+                extraParamsToCheckDelete={true}
+                onDelete={(data) => {
+                  setSingleRentalManagementDelete({
+                    show: true,
+                    id: data._id,
+                    rentalJobName: `${data.rentalJobName}`
+                  });
+                }}
+                rowCount={rowCount}
+                page={page}
+                loading={loading}
+                chips={[
+                  {
+                    icon: <SiStatuspage />,
+                    label: 'Status: ',
+                    field: 'status'
+                  },
+                  {
+                    label: 'Plant: ',
+                    field: 'warehouse'
+                  }
+                ]}
+                additionalDetails={[
+                  {
+                    icon: <FaSuitcase size={18} />,
+                    field: 'customerAccount'
+                  }
+                ]}
+                owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                onCreate={false}
+                showClone={true}
+                onClone={(data) => {
+                  setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: data._id });
+                }}
+                renderedFrom={renderedFrom}
+              />
+            ) : (
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                actionWidth={100}
+                loading={loading}
+                renderedFrom={renderedFrom}
+                allowSelection={!isOffline}
+                isClientSideGrid={isOffline}
+                refreshGrid={fetchRentalManagement}
+                showOnlyShowFilteredRecordSwitch={true}
+              />
+            )
+          ) : null}
+
           {showDeleteWarningConfirmBox ? (
             <MessageDialog
               open={showDeleteWarningConfirmBox}
@@ -615,12 +606,14 @@ const RentalManagement = () => {
           {singleRentalManagementDelete.show ? (
             <ConfirmationDialog
               open={singleRentalManagementDelete.show}
-              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : "" : ""}?`}
+              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
+                singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+              }?`}
               onClose={() =>
                 setSingleRentalManagementDelete({
                   id: null,
                   show: false,
-                  rentalJobName: "",
+                  rentalJobName: ''
                 })
               }
               onOk={handleSingleDeleteRentalManagement}
@@ -628,21 +621,20 @@ const RentalManagement = () => {
           ) : null}
         </CustomContainer>
       </Fragment>
-      {
-        showManageRentalManagementDialog.open && (
-          <ManageRentalManagementDialog
-            isClone={showManageRentalManagementDialog.isClone}
-            open={showManageRentalManagementDialog.open}
-            rentalManagementId={showManageRentalManagementDialog.idToClone}
-            onClose={() => setShowManageRentalManagementDialog({ open: false, isClone: false, idToClone: null })}
-            onSuccess={() => {
-              if (!isOffline) {
-                fetchRentalManagement();
-              }
-              setShowManageRentalManagementDialog({ open: false, isClone: false, idToClone: null });
-            }}
-          />
-        )}
+      {showManageRentalManagementDialog.open && (
+        <ManageRentalManagementDialog
+          isClone={showManageRentalManagementDialog.isClone}
+          open={showManageRentalManagementDialog.open}
+          rentalManagementId={showManageRentalManagementDialog.idToClone}
+          onClose={() => setShowManageRentalManagementDialog({ open: false, isClone: false, idToClone: null })}
+          onSuccess={() => {
+            if (!isOffline) {
+              fetchRentalManagement();
+            }
+            setShowManageRentalManagementDialog({ open: false, isClone: false, idToClone: null });
+          }}
+        />
+      )}
     </>
   );
 };

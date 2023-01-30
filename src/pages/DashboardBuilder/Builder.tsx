@@ -295,6 +295,14 @@ const Builder = (props: Props) => {
             </RadioGroup>
           </FormControl>
         </Box>
+        <Box mt={2}>
+          <FormGroup row>
+            <FormControlLabel
+              control={<Checkbox checked={formValues.currency} onChange={(e) => handleChange('currency', e.target.checked)} />}
+              label="Currency"
+            />
+          </FormGroup>
+        </Box>
       </div>
 
       <Box>

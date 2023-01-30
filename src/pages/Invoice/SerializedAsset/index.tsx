@@ -20,7 +20,7 @@ import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
 import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
 
-const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol, renderedFrom }) => {
+const SerializedAsset = ({ salesOrderData, setNextStep, currencySymbol, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -414,13 +414,7 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
         {columns && rowsData ?
           <Box
             zIndex={5}
-            width={
-              isTabletScreen
-                ? "calc(100vw)"
-                : isSmallScreen
-                  ? "calc(100vw)"
-                  : showActivity ? "100%" : "calc(100vw - 100px)"
-            }
+            width={'100%'}
             height="calc(100vh - 350px)"
           >
             <CustomReactTable

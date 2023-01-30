@@ -15,7 +15,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import styles from '../../Leads/Header.module.scss';
 import { AiOutlinePaperClip } from 'react-icons/ai';
 import { AddOutlined } from '@material-ui/icons';
-import { Button, Tooltip, IconButton, MenuItem, Menu, TextField, Chip, Link } from '@material-ui/core';
+import { Button, Tooltip, IconButton, MenuItem, Menu, TextField, Chip, Link, Popover, MenuList } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, getApi, getData, gridLoadingTimeout } from '../../../constants/helpers';
@@ -27,11 +27,12 @@ import { GoArrowDown } from 'react-icons/go';
 import { ExpandMore } from '@material-ui/icons';
 import routes from '../../../components/Helpers/Routes';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
-import { MdAdd } from "react-icons/all";
+import { MdAdd } from 'react-icons/all';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
+import Add from '@material-ui/icons/Add';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -129,7 +130,7 @@ export default function Attachment() {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(null);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState({ open: false, type: null });
   const [attachmentData, setAttachmentData] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isConfirmDialogVisible, setIsConfirmDialogVisible] = useState(false);
@@ -149,6 +150,8 @@ export default function Attachment() {
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
+  const [parentFolder, setParentFolder] = useState(null);
+  const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
 
   const [columns, setColumns] = useState([
     { field: 'name', headerName: 'Name', primaryField: true, show: true, disabled: true, cellRenderer: 'nameRenderer' },
@@ -182,7 +185,7 @@ export default function Attachment() {
   }
 
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions))
+    setResourceOptions(get_activity_resource(permissions));
   }, []);
 
   useEffect(() => {
@@ -194,9 +197,8 @@ export default function Attachment() {
         .catch((err) => {
           toastConfig.setToastConfig(err);
         });
-    }
-    else {
-      setFilter([])
+    } else {
+      setFilter([]);
     }
   }, [referenceId]);
 
@@ -230,54 +232,60 @@ export default function Attachment() {
   }, [resource]);
 
   const redirectToResource = (type, id) => {
-    history.push(
-      type === "quote" ? `${routes["quoteBuilder"].path}/detail/${id}`
-        : `${routes[type].path}/detail/${id}`
-    )
-  }
+    history.push(type === 'quote' ? `${routes['quoteBuilder'].path}/detail/${id}` : `${routes[type].path}/detail/${id}`);
+  };
 
   const NameRenderer = (params) => (
-    <a className={permissions?.attachment?.isUpdate ? "link cursor-pointer" : ""} onClick={() => handleActivityOpen(params.data)}>
-      {params.data.name}
-    </a >
+    <>
+      <a className={permissions?.attachment?.isUpdate ? 'link cursor-pointer' : ''} onClick={() => handleActivityOpen(params.data)}>
+        {params.data.name}
+      </a>{' '}
+      {params.data.attachmentType === 'folder' && (
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            setAddchildDialog({ open: true, parentId: params.data._id, top: e.clientY, bottom: e.clientY });
+          }}
+        >
+          <AddOutlined fontSize="small" />
+        </IconButton>
+      )}
+    </>
   );
 
   const ReferenceRenderer = (params) => (
-    <>{params.value && params.value?.length > 0 ? params.value.map(d => {
-      return (
-        <>
-          <Link
-            className="link text-truncate"
-            onClick={() => redirectToResource(d?.type, d?.referenceId)}
-          >
-            {d.name}
-          </Link>
-          <Chip
-            className="ml-3"
-            color="primary"
-            label={`${routes[d?.type]?.title}`}
-          />
-        </>
-      )
-    })
-      : <NoDataCell />
-    }
+    <>
+      {params.value && params.value?.length > 0 ? (
+        params.value.map((d) => {
+          return (
+            <>
+              <Link className="link text-truncate" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
+                {d.name}
+              </Link>
+              <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
+            </>
+          );
+        })
+      ) : (
+        <NoDataCell />
+      )}
     </>
   );
-  
+
   const downloadFile = (data1) => {
-    const file = data1?.file
+    const file = data1?.file;
     setIsDownloading(true);
     if (file?.length === 1) {
-      axiosInstance().get(`user/download?fileName=${file[0].url}`, {
-        responseType: 'blob',
-      })
+      axiosInstance()
+        .get(`user/download?fileName=${file[0].url}`, {
+          responseType: 'blob'
+        })
         .then(({ data }) => {
           const url = window.URL.createObjectURL(new Blob([data]));
           const link = document.createElement('a');
           link.href = url;
           var fileExt = file[0].url?.split('.').pop();
-          link.setAttribute('download', file[0].name + "." + fileExt);
+          link.setAttribute('download', file[0].name + '.' + fileExt);
           document.body.appendChild(link);
           link.click();
           setTimeout(() => setIsDownloading(false), 2000);
@@ -286,19 +294,23 @@ export default function Attachment() {
           toastConfig.setToastConfig(err);
           setIsDownloading(false);
         });
-    }
-    else {
-      const fileUrl = file.map(f => f.url)
-      axiosInstance().put(`user/download`, {
-        files: fileUrl
-      }, {
-        responseType: 'blob',
-      })
+    } else {
+      const fileUrl = file.map((f) => f.url);
+      axiosInstance()
+        .put(
+          `user/download`,
+          {
+            files: fileUrl
+          },
+          {
+            responseType: 'blob'
+          }
+        )
         .then(({ data }) => {
           const url = window.URL.createObjectURL(new Blob([data]));
           const link = document.createElement('a');
           link.href = url;
-          link.setAttribute('download', attachmentData?.name ? `${attachmentData?.name}.zip` : "download.zip");
+          link.setAttribute('download', attachmentData?.name ? `${attachmentData?.name}.zip` : 'download.zip');
           document.body.appendChild(link);
           link.click();
           setTimeout(() => setIsDownloading(false), 2000);
@@ -312,17 +324,13 @@ export default function Attachment() {
 
   const ActionsRenderer = (params) => (
     <>
-      <Tooltip title="Download">
-        <IconButton
-          size="small"
-          aria-label="Download"
-          color="primary"
-          disabled={isDownloading}
-          onClick={() => downloadFile(params.data)}
-        >
-          <GoArrowDown size={26} />
-        </IconButton>
-      </Tooltip>
+      {!params.data?.attachmentType && (
+        <Tooltip title="Download">
+          <IconButton size="small" aria-label="Download" color="primary" disabled={isDownloading} onClick={() => downloadFile(params.data)}>
+            <GoArrowDown size={26} />
+          </IconButton>
+        </Tooltip>
+      )}
       {params.data.canEdit && permissions.attachment.isDelete ? (
         <Tooltip title="Delete">
           <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(params.data)}>
@@ -330,7 +338,10 @@ export default function Attachment() {
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip className="cursor-stop" title={permissions.quoteBuilder.isRead ? "Signed Quote Attachment can not be deleted" : "You don't have permission to delete attachment"}>
+        <Tooltip
+          className="cursor-stop"
+          title={permissions.quoteBuilder.isRead ? 'Signed Quote Attachment can not be deleted' : "You don't have permission to delete attachment"}
+        >
           <IconButton size="small" aria-label="Delete">
             <DeleteIcon fontSize="small" color="disabled" />
           </IconButton>
@@ -400,7 +411,7 @@ export default function Attachment() {
               canEdit: u.canEdit,
               createdByDate: u.createdBy.date ?? '',
               updatedByDate: u?.updatedBy?.date ?? '',
-              isChecked: false,
+              isChecked: false
             };
           });
           dispatch({ type: 'initialize', data: rows, count: count });
@@ -420,11 +431,11 @@ export default function Attachment() {
   };
 
   const handleActivityOpen = (data) => {
-    setOpen(true);
+    setOpen({ open: true, type: data?.attachmentType ? data.attachmentType : 'file' });
     setAttachmentData(data);
   };
   const handleClose = () => {
-    setOpen(false);
+    setOpen({ open: false, type: null });
     setAttachmentData(null);
   };
   const showConfirmBox = (row) => {
@@ -467,30 +478,29 @@ export default function Attachment() {
     setAnchorEl(null);
   };
 
-
   return (
     <Fragment>
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={[{ title: routes.attachment.title }]} />
       </Grid>
       <CustomContainer>
-        {filter &&
+        {filter && (
           <div className="header-panel">
             <Grid container className={styles.filter_side_container}>
               <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
-                <AiOutlinePaperClip className="headerLogo" /> <span className="listingHeader">{routes.attachment.title} </span>
+                <AiOutlinePaperClip className="headerLogo" />
+                <span className="listingHeader">{routes.attachment.title} </span>
                 <Autocomplete
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}
-                  style={{ width: "250px" }}
+                  style={{ width: '250px' }}
                   value={resource}
                   onChange={(event, newValue) => {
                     setResource(newValue);
                     if (newValue) {
-                      setFilter((prevState) => ([...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]))
-                    }
-                    else {
-                      setFilter([])
+                      setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
+                    } else {
+                      setFilter([]);
                     }
                   }}
                   size="small"
@@ -508,15 +518,14 @@ export default function Attachment() {
                     options={resourceData}
                     getOptionLabel={(option: any) => option.name}
                     getOptionSelected={(option: any, value: any) => option.name === value.name}
-                    style={{ width: "250px" }}
+                    style={{ width: '250px' }}
                     value={selectedResourceData}
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
                       if (newValue?.id) {
-                        setFilter((prevState) => ([...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]))
-                      }
-                      else {
-                        setFilter([])
+                        setFilter((prevState) => [...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]);
+                      } else {
+                        setFilter([]);
                       }
                     }}
                     size="small"
@@ -526,36 +535,32 @@ export default function Attachment() {
               </Grid>
               <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
                 <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Grid style={{ width: "90%", display: "flex" }}>
-                    <SearchFilter
-                      handleChangeFilter={handleChangeFilter}
-                      filter={filter}
-                      chip={{ size: 'small' }}
-                      activityName="attachment"
-                    />
+                  <Grid style={{ width: '90%', display: 'flex' }}>
+                    <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="attachment" />
                   </Grid>
-                  <Grid style={{ display: "flex", gap: "5px" }}>
-                    {<Button
-                      variant={isMobile && !isTablet ? "text" : "contained"}
-                      color="primary"
-                      size="small"
-                      onClick={() => setOpen(true)}
-                      className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
-                    </Button>
+                  <Grid style={{ display: 'flex', gap: '5px' }}>
+                    {
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        color="primary"
+                        size="small"
+                        onClick={() => setOpen({ open: true, type: 'file' })}
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                      >
+                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                      </Button>
                     }
                     <Button
-                      variant={isMobile && !isTablet ? "text" : "outlined"}
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
                       color="default"
                       size="small"
                       onClick={openActions}
                       aria-controls="action-menu"
                       disabled={selectedRecords.length > 0 ? false : true}
-                      className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                     >
-                      {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
                     </Button>
                     <Menu
                       anchorEl={anchorEl}
@@ -579,33 +584,27 @@ export default function Attachment() {
                         Delete
                       </MenuItem>
                     </Menu>
-
                   </Grid>
                 </Box>
               </Grid>
             </Grid>
           </div>
-        }
-        {
-          isMobile && !isTablet ? <CustomSwipableList
+        )}
+        {isMobile && !isTablet ? (
+          <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}
             permissions={permissions.attachment}
-            primaryField={columns?.find(d => d.primaryField)}
+            primaryField={columns?.find((d) => d.primaryField)}
             onClick={(data) => {
-              handleActivityOpen(data)
+              handleActivityOpen(data);
             }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={(data) => {
-            }}
-            additionalDetails={[
-
-            ]}
-            chips={[
-
-            ]}
+            onEdit={(data) => {}}
+            additionalDetails={[]}
+            chips={[]}
             extraParamsToCheckDelete={true}
             onDelete={(data) => {
               showConfirmBox(data);
@@ -615,34 +614,83 @@ export default function Attachment() {
             loading={loading}
             onCreate={false}
             showClone={false}
-            onClone={() => { }}
-            renderedFrom={"attachmentPage"} /> :
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={150}
-              loading={loading}
-              renderedFrom="attachmentPage"
-              refreshGrid={fetchAttachments}
-            />
-        }
-        {open ? (
+            onClone={() => {}}
+            renderedFrom={'attachmentPage'}
+          />
+        ) : (
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={150}
+            loading={loading}
+            renderedFrom="attachmentPage"
+            refreshGrid={fetchAttachments}
+          />
+        )}
+
+        {addchildDialog.open && (
+          <Popover
+            anchorReference="anchorPosition"
+            anchorPosition={{ top: addchildDialog.top, left: addchildDialog.bottom }}
+            anchorOrigin={{
+              vertical: 'center',
+              horizontal: 'left'
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'left'
+            }}
+            open={addchildDialog.open}
+            onClose={() => {
+              setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+            }}
+          >
+            <MenuList>
+              <MenuItem
+                onClick={() => {
+                  setOpen({ open: true, type: 'folder' });
+                  setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+                }}
+              >
+                Add Folder
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setOpen({ open: true, type: 'file' });
+                  setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+                }}
+              >
+                Add File
+              </MenuItem>
+              {/* <MenuItem
+              onClick={() => {
+                setAddExistingProductDialog({ open: true, type: 'service', parentId: addchildDialog.parentId })
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
+              }
+              }
+            >
+              Services
+            </MenuItem> */}
+            </MenuList>
+          </Popover>
+        )}
+        {open.open ? (
           <Dialog
-            open={open}
-            fullScreen={fullScreen || (isMobile || isTablet)}
+            open={open.open}
+            fullScreen={fullScreen || isMobile || isTablet}
             TransitionComponent={CustomDialogTransition}
             aria-labelledby="customized-dialog-title"
             maxWidth={'md'}
             onClose={(e, reason) => {
               if (reason !== 'backdropClick') {
-                handleClose()
+                handleClose();
                 setFullScreen(false);
               }
             }}
@@ -652,22 +700,24 @@ export default function Attachment() {
               attachmentId={attachmentData?.id}
               relatedTo={[
                 {
-                  type: resource && selectedResourceData ? resource.optionValue : "user",
+                  type: resource && selectedResourceData ? resource.optionValue : 'user',
                   referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
-                  access: true,
-                },
+                  access: true
+                }
               ]}
               handleClose={() => {
-                handleClose()
+                handleClose();
                 setFullScreen(false);
               }}
               attachmentData={attachmentData}
               fetchData={fetchAttachments}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
-                setFullScreen(prevState => !prevState)
+                setFullScreen((prevState) => !prevState);
               }}
               showManimizeMaximize={true}
+              type={open.type}
+              parentFolder={parentFolder}
             />
           </Dialog>
         ) : null}

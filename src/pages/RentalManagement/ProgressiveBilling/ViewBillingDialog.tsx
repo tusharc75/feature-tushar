@@ -5,7 +5,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { useData } from 'src/StateProvider/Provider';
-import { fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
+import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
@@ -18,34 +18,30 @@ import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { Add, Delete, Edit, ExpandMore } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { MuiPickersUtilsProvider, KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
-import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import InvoiceFacility from 'src/pages/Invoice/Invoice/InvoiceFacility';
 import { startCase } from 'lodash';
-import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, estimateStartDate, onClose, onSuccess }) => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [material, setMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [isRateRequired, setIsRateRequired] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+
   const [allFields, setAllFields] = useState([]);
   const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
-  const [actionAnchorEl, setActionAnchorEl] = useState(null);
-  // const [anchorActionEl, setAnchorActionEl] = useState(null);
+  const [viewBillDialogConfirm, setViewBillDialogConfirm] = useState({ open: false, rows: [] });
 
   useEffect(() => {
     fetchFields();
@@ -106,22 +102,24 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
               <p className="text-truncate" title={row.original?.detail}>
                 {row.original?.detail}
               </p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'asset') {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <InfoIcon fontSize="small" color="primary" />
-              </IconButton>
+              {row.original['type'] !== 'additionalCost' && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === 'service') {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'product') {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'asset') {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              )}
             </div>
           )
         },
@@ -222,30 +220,36 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             sticky: 'right',
             disableFilters: true,
             canDrag: false,
-            Cell: ({ row }) =>
-              row.original.isEditable && (
-                <Grid container spacing={1}>
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      setIsProductEdit({ open: true, rowData: row.original });
-                    }}
-                  >
-                    <EditIcon color="primary" />
-                  </IconButton>
-                  <Box ml={1} />
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      handleDeleteData([row.original]);
-                    }}
-                  >
-                    <Delete color="error" />
-                  </IconButton>
-                </Grid>
-              )
+            Cell: ({ row }) => (
+              <Grid container spacing={1}>
+                {row.original.isEditable && row.original.qty > 1 && (
+                  <>
+                    <IconButton
+                      size="small"
+                      aria-label="Details"
+                      onClick={() => {
+                        setIsProductEdit({ open: true, rowData: row.original });
+                      }}
+                    >
+                      <EditIcon color="primary" />
+                    </IconButton>
+                    <Box ml={1} />
+                  </>
+                )}
+                <IconButton
+                  disabled={!invoiceData?.isLatestInvoice}
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                    getNestedSubRows(obj, row.original);
+                    setViewBillDialogConfirm({ open: true, rows: obj });
+                  }}
+                >
+                  <Delete color={invoiceData?.isLatestInvoice ? 'error' : 'disabled'} />
+                </IconButton>
+              </Grid>
+            )
           })
         );
       }
@@ -256,7 +260,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         if (element.Header === 'Actual End Date') {
           element.Header = 'Bill End Date';
         }
-
 
         if (element.accessor === 'qtyDisplay') {
           element['Footer'] = (info) => {
@@ -290,6 +293,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     const response = await axiosInstance().get(`${invoice.api}/productpackage/${invoiceData._id}`);
     data = response?.data?.data;
 
+    const responseAdditionalCostData = await axiosInstance().get(`${invoice.api}/${invoiceData._id}/additional-cost`);
+    let additionalCostData = responseAdditionalCostData?.data?.data;
+
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
@@ -297,7 +303,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         ? parent.productDetail?.productName
         : parent.type === 'package'
           ? parent.packageDetail?.packageName
-          : parent.serviceDetail?.serviceName
+          : parent.type === 'asset'
+            ? parent.inventoryDetail?.assetNumber
+            : parent.serviceDetail?.serviceName
         }`;
       parent.description =
         parent.type === 'service'
@@ -311,6 +319,17 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
+    if (additionalCostData?.length > 0) {
+      additionalCostData?.forEach((element) => {
+        element.srno = rows.length + 1;
+        element.detail = element.costType;
+        element.type = 'additionalCost';
+        element.qtyDisplay = element.qty;
+        element.materialId = element?._id;
+        element.parentId = null;
+        rows.push(element);
+      });
+    }
     setRowsData(rows);
     setSelectedProducts([]);
   };
@@ -323,7 +342,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         ? _subRow?.productDetail?.productName
         : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
-          : _subRow?.serviceDetail?.serviceName
+          : _subRow?.type === 'asset'
+            ? _subRow?.inventoryDetail?.assetNumber
+            : _subRow?.serviceDetail?.serviceName
         }`;
       _subRow.description =
         _subRow.type === 'service'
@@ -333,7 +354,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
-      _subRow.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(_subRow?.pricingMethod) ? false : true;
+      _subRow.isEditable = false;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -372,13 +393,13 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
   const handleDeleteData = async (rows) => {
     const data = {
       invoiceId: invoiceData?._id,
-      materialIds: selectedProducts?.map((e) => e.materialId) || []
+      materialIds: rows?.map((e) => e.materialId) || []
     };
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/remove`, data)
       .then((res) => {
         fetchProductInventory();
-        onSuccess();
+        setViewBillDialogConfirm({ open: false, rows: [] });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -400,7 +421,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   size="small"
                   onClick={handleClick}
                   aria-controls="action-menu"
-                  disabled={selectedProducts?.length === 0}
+                  disabled={selectedProducts?.length ? false : true}
                 >
                   Actions <ExpandMore />
                 </Button>
@@ -423,7 +444,14 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   <MenuItem
                     onClick={() => {
                       setAnchorEl(null);
-                      handleDeleteData(selectedProducts);
+                      const obj: any = [];
+                      selectedProducts?.forEach((ele) => {
+                        obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
+                      });
+                      selectedProducts?.forEach((ele) => {
+                        getNestedSubRows(obj, ele);
+                      });
+                      setViewBillDialogConfirm({ open: true, rows: obj });
                     }}
                   >
                     Delete
@@ -481,6 +509,20 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           isQtyOnly={true}
         />
       )}
+
+      {viewBillDialogConfirm.open ? (
+        <ConfirmationDialog
+          open={viewBillDialogConfirm.open}
+          message={`Are you sure you want to delete ?`}
+          onClose={() => {
+            setViewBillDialogConfirm({ open: false, rows: [] });
+          }}
+          okBtnLoading={null}
+          onOk={() => {
+            handleDeleteData(viewBillDialogConfirm.rows);
+          }}
+        />
+      ) : null}
     </Fragment>
   );
 };

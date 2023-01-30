@@ -1,16 +1,11 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid, IconButton } from '@material-ui/core';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import routes from 'src/components/Helpers/Routes';
 import { checkStaticField, getColumnData, getFrameworkComponents, getStaticFields } from 'src/constants/columns';
-import {
-  gridLoadingTimeout,
-  invoice,
-  isObjectEmpty,
-  prepareDataForGrid,
-} from 'src/constants/helpers';
+import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from 'src/constants/helpers';
 import useColumns from 'src/constants/useColumns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -19,9 +14,11 @@ import { Link, useHistory } from 'react-router-dom';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ViewBillingDialog from './ViewBillingDialog';
 import { camelCase } from 'lodash';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@material-ui/icons/Delete';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) => {
-
   const renderedFrom = camelCase(routes?.invoice?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -30,7 +27,9 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
   const [createBillDialog, setCreateBillDialog] = useState({ open: false });
   const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
   const [invoiceData, setInvoiceData] = useState(null);
-  const { state: { user, permissions, selectedEntity } }: any = useData();
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -38,6 +37,9 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState({});
   const [columns, setColumns] = useState(null);
+  const [deleteRecord, setDeleteRecord] = useState<any>({});
+  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -77,7 +79,8 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
-      invoiceMaterialRenderer: InvoiceMaterialRenderer
+      invoiceMaterialRenderer: InvoiceMaterialRenderer,
+      actionsRenderer: ActionsRenderer
     };
     setFrameworkComponent({ ...tempFrameworkComponent });
     let staticFields = getStaticFields();
@@ -101,6 +104,25 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
     >
       <CustomRenderCell value={params?.value} />
     </span>
+  );
+
+  const ActionsRenderer = (params) => (
+    <>
+      {params?.data?.canDelete && (
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(params.data);
+              setIsConformDialogVisible(true);
+            }}
+          >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </HtmlTooltip>
+      )}
+    </>
   );
 
   useEffect(() => {
@@ -172,9 +194,11 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
     await axiosInstance()
       .get(`${invoice.api}${queryString}`)
       .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
+        let rows = data.map((u, idx) => {
           let finalObject = prepareDataForGrid(u, user);
+          finalObject['isLatestInvoice'] = idx === 0 ? true : false;
           finalObject['isChecked'] = false;
+          finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
           return finalObject;
         });
         if (data?.length) {
@@ -191,17 +215,43 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
       });
   };
 
+  const handleDeleteInvoice = async () => {
+    setDeleteLoading(true);
+    let recordsToDelete = [];
+    if (deleteRecord?._id) {
+      recordsToDelete.push(deleteRecord?._id);
+    } else {
+      recordsToDelete = selectedRecords.map((o) => o._id);
+    }
+    if (recordsToDelete.length > 0) {
+      axiosInstance()
+        .put(`${invoice.api}/remove`, {
+          ids: recordsToDelete
+        })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setIsConformDialogVisible(false);
+          setDeleteLoading(false);
+          if (deleteRecord) setDeleteRecord({});
+          fetchBilling();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setIsConformDialogVisible(false);
+          setDeleteLoading(false);
+        });
+    }
+  };
+
   return (
     <>
       <Box display="flex" justifyContent="flex-end">
         <Box display="flex" alignItems="center" pt={2} pr={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => setCreateBillDialog({ open: true })}
-            aria-controls="action-menu"
-          >
+          <Button variant="contained" color="primary" size="small" onClick={() => setCreateBillDialog({ open: true })} aria-controls="action-menu">
             Create Billing
           </Button>
         </Box>
@@ -222,7 +272,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
             loading={loading}
             renderedFrom={renderedFrom}
             allowSelection={false}
-            allowAction={false}
+            allowAction={true}
             isClientSideGrid={true}
           />
         ) : (
@@ -260,6 +310,18 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
           }}
         />
       )}
+      {isConfirmDialogVisible ? (
+        <ConfirmationDialog
+          open={isConfirmDialogVisible}
+          message={`Are you sure you want to delete ${routes?.invoice?.title?.toLowerCase()} ${deleteRecord?.invoice || ''} ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setIsConformDialogVisible(false);
+          }}
+          okBtnLoading={deleteLoading}
+          onOk={handleDeleteInvoice}
+        />
+      ) : null}
     </>
   );
 };

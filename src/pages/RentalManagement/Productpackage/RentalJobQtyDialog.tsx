@@ -4,7 +4,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from "../../../axios/axiosInstance";
-import { groupBy, uniqBy } from 'lodash';
+import { groupBy, unionBy, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
@@ -18,7 +18,7 @@ import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
-import { calculatePrice, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField, fetch_rental_product_fields, resetValueZero } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { object, number } from 'yup';
 
@@ -33,6 +33,57 @@ interface EditDialogProps {
   loading: any
   from?: any
   isQtyOnly?: Boolean
+  isInlineEdit?: Boolean
+}
+
+export const sumOnParent = (packages, product, allFields, currency) => {
+  const resetFields = []
+  allFields.forEach((element) => {
+    if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
+      if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+        element.displayUnits.forEach((_unit) => {
+          resetFields.push({ fieldName: element.fieldName + "_" + _unit.toLowerCase(), type: "amount" })
+        })
+      }
+      else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+        element.displayUnits.forEach((_unit) => {
+          element.displayCurrency.forEach((_currency) => {
+            resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(), type: "amount" })
+          })
+        })
+      }
+      else if (element.type === "currencyAmount") {
+        element.displayCurrency.forEach((_currency) => {
+          resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase(), type: "amount" })
+        })
+      }
+    }
+    else if (element.type === "percent") {
+      resetFields.push({ fieldName: element.fieldName, type: "percent" })
+    }
+  })
+  const sumValues: any = {}
+  resetFields.forEach((_field: any) => {
+    sumValues[_field.fieldName] = 0;
+    product.forEach(element => {
+      sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
+    });
+  });
+  packages.forEach((row) => {
+    resetFields.forEach((ele) => {
+      if (ele.type === "amount") {
+        row[ele.fieldName] = sumValues[ele.fieldName];
+      }
+      else {
+        if (ele.fieldName === "discountPercentage") {
+          row[ele.fieldName] = parseFloat(((sumValues[`discount_${currency}`] / sumValues[`totalPrice_${currency}`]) * 100)?.toFixed(2));
+        }
+        if (ele.fieldName === "taxPercentage") {
+          row[ele.fieldName] = parseFloat(((sumValues[`tax_${currency}`] / (sumValues[`totalPrice_${currency}`] - sumValues[`discount_${currency}`])) * 100)?.toFixed(2));
+        }
+      }
+    })
+  })
 }
 
 const rateChangeFields = ["unit", "pricingMethod", "pricingCondition"]
@@ -48,7 +99,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     isBulkedit,
     loading,
     isQtyOnly = false,
-    from
+    from,
+    isInlineEdit = false
   }) => {
 
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
@@ -92,6 +144,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       });
       const unitOptions: any = arrayToDropwdownOption(unit)
       const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
+
       data.forEach((element) => {
         if (element.fieldName === "unit") {
           element.option = unitOptions;
@@ -99,6 +152,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         if (element.fieldName === "pricingMethod") {
           element.option = pricingMethodOptions;
         }
+
+
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;
@@ -106,7 +161,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
       setInitialData({
         fields: data,
-        values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", estimateJobDuration: "", actualJobDuration: "" },
+        values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", estimateJobDuration: "", actualJobDuration: "" }
       });
     }
     else {
@@ -128,7 +183,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           element.option = pricingMethodOptions;
         }
         if (element.fieldName === "pricingCondition") {
-          element.option = pricingConditionOptions;
+          if (Array.isArray(pricingConditionOptions)) {
+            element.option = pricingConditionOptions;
+          }
         }
         // if (element.fieldName === "qty" && rowData?.serializedProduct === false && rowData?.hideSelection) {
         //   element.isUneditable = true;
@@ -138,13 +195,46 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         data = data.filter((e) => !["actualStartDate", "actualEndDate", "actualJobDuration"].includes(e.fieldName))
       }
 
-      setInitialData({
-        fields: data,
-        values: getObjKeysWithValues(rowData, data),
-      });
+      let initialValues = getObjKeysWithValues(rowData, data)
+      const priceFieldName = "price_" + rentalManagementData?.currency?.toLowerCase();
+
+      if (rowData[priceFieldName]) {
+        getPricing({ ...initialValues, [priceFieldName]: rowData[priceFieldName] }).then((price: any) => {
+          const result = autoCalculateSpecificFields({ [priceFieldName]: price, [priceFieldName]: rowData[priceFieldName] }, initialValues, data)
+          initialValues = { ...initialValues, ...result }
+          setInitialData({
+            fields: data,
+            values: initialValues
+          });
+        })
+      } else {
+        setInitialData({
+          fields: data,
+          values: initialValues
+        });
+      }
     }
     EvaluteproductFields(data);
   }
+
+  useEffect(() => {
+    if (ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
+      const { setErrors, setTouched } = ref.current
+      let errors: any = {}
+      let touched: any = {}
+      initialData.fields.forEach(({ fieldName, required, fieldLabel }) => {
+
+        if (required && !initialData.values[fieldName]) {
+          errors[fieldName] = fieldLabel + " is a required field"
+          touched[fieldName] = true
+        }
+      })
+      setErrors(errors)
+      setTouched(touched)
+
+    }
+
+  }, [initialData, ref.current, isInlineEdit])
 
   const EvaluteproductFields = (fields) => {
     if (isQtyOnly) {
@@ -174,90 +264,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     }
   }
 
-  const resetValueZero = (rows) => {
-    const resetFields = []
-    allFields.forEach((element) => {
-      if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
-        if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            resetFields.push(element.fieldName + "_" + _unit.toLowerCase())
-          })
-        }
-        else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              resetFields.push(element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase())
-            })
-          })
-        }
-        else if (element.type === "currencyAmount") {
-          element.displayCurrency.forEach((_currency) => {
-            resetFields.push(element.fieldName + "_" + _currency.toLowerCase())
-          })
-        }
-      }
-      else if (element.type === "percent") {
-        resetFields.push(element.fieldName)
-      }
-    })
-    rows.forEach((row) => {
-      resetFields.forEach((fieldName) => {
-        row[fieldName] = 0;
-      })
-    })
-  }
-
-  const sumOnParent = (packages, product) => {
-    const resetFields = []
-    allFields.forEach((element) => {
-      if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
-        if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            resetFields.push({ fieldName: element.fieldName + "_" + _unit.toLowerCase(), type: "amount" })
-          })
-        }
-        else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(), type: "amount" })
-            })
-          })
-        }
-        else if (element.type === "currencyAmount") {
-          element.displayCurrency.forEach((_currency) => {
-            resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase(), type: "amount" })
-          })
-        }
-      }
-      else if (element.type === "percent") {
-        resetFields.push({ fieldName: element.fieldName, type: "percent" })
-      }
-    })
-    const sumValues: any = {}
-    resetFields.forEach((_field: any) => {
-      sumValues[_field.fieldName] = 0;
-      product.forEach(element => {
-        sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
-      });
-    });
-    packages.forEach((row) => {
-      resetFields.forEach((ele) => {
-        if (ele.type === "amount") {
-          row[ele.fieldName] = sumValues[ele.fieldName];
-        }
-        else {
-          const cur = rentalManagementData?.currency?.toLowerCase();
-          if (ele.fieldName === "discountPercentage") {
-            row[ele.fieldName] = parseFloat(((sumValues[`discount_${cur}`] / sumValues[`totalPrice_${cur}`]) * 100)?.toFixed(2));
-          }
-          if (ele.fieldName === "taxPercentage") {
-            row[ele.fieldName] = parseFloat(((sumValues[`tax_${cur}`] / (sumValues[`totalPrice_${cur}`] - sumValues[`discount_${cur}`])) * 100)?.toFixed(2));
-          }
-        }
-      })
-    })
-  }
-
   const handleSubmit = async (values) => {
     const currency = rentalManagementData?.currency?.toLowerCase();
     if (isBulkedit) {
@@ -285,7 +291,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         priceData = await calculatePrice(rentalManagementData, material);
       }
 
-      selectedProducts.forEach(element => {
+      selectedProducts.filter(d => !selectedProducts.some(obj => obj._id === d.parentId)).forEach(element => {
 
         const rateResult = priceData?.filter((e) => e.materialId === element.materialId &&
           e.materialType === element.type && e.unit === (values["unit"] || element.unit) && e.pricingMethod === (values["pricingMethod"] || element.pricingMethod))
@@ -298,18 +304,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, fieldAll)
         rows.push({ ...element, ...calValues })
 
+        const child: any = resetValueZero(material, allFields, element._id)
+        rows = [...rows, ...child]
         if (element.parentId) {
-          const parent: any = material.filter((e) => e._id === element.parentId)
-          const sameParent: any = material.filter((e) => e.parentId === element.parentId)
-          sameParent.forEach((element) => {
-            if (element._id === element._id) {
-              for (var key in values) {
-                element[key] = values[key];
-              }
-            }
-          })
-
-          sumOnParent(parent, sameParent)
+          const parent: any = unionBy(rows, material, '_id').filter((e) => e._id === element.parentId)
+          const sameParent: any = unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId && e._id !== element._id)
+          sumOnParent(parent, [...sameParent, { ...element, ...calValues }], allFields, currency)
           rows = [...rows, ...parent]
         }
 
@@ -331,7 +331,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
               }
             }
           })
-          sumOnParent(packages, product)
+          sumOnParent(packages, product, allFields, currency)
           rows = [...rows, ...packages]
         })
       }
@@ -342,34 +342,14 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         setShowConfirmationDialog(true);
       }
       else {
-        let rows: any = [{ ...rowData, ...values }]
-        if (rowData.type === "package") {
-          const product = material.filter((e) => e.parentId === rowData._id)
-          resetValueZero(product)
-          rows = [...rows, ...product]
-        }
-        else if (rowData.type === "product" && rowData.parentId) {
-          if (values[`totalPrice_${currency}`] !== rowData[`totalPrice_${currency}`]) {
-            const packages: any = material.filter((e) => e._id === rowData.parentId)
-            const product: any = material.filter((e) => e.parentId === rowData.parentId)
-            product.forEach((element) => {
-              if (element._id === rowData._id) {
-                for (var key in values) {
-                  element[key] = values[key];
-                }
-              }
-            })
-            sumOnParent(packages, product)
-            rows = [...rows, ...packages]
-          }
-        }
+        const rows = await calculateRowsField(material, values, allFields, rowData)
         handleSaveData(rows)
         setShowConfirmationDialog(false);
       }
     }
   };
 
-  const getPricing = async (values: any, pricingMethodOptions: any = null) => {
+  async function getPricing(values: any, pricingMethodOptions: any = null) {
     if (rowData) {
       if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
         const priceData: any = await calculatePrice(rentalManagementData, [{
@@ -388,6 +368,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         }), 'optionValue'))
         if (pricingMethodOptions) {
           setPriceConditionListConst(tempPriceData)
+          setPriceMethodList(tempPriceData.filter(d => d.conditionId === rowData["pricingCondition"]).map(d => {
+            return {
+              "optionLabel": d?.pricingMethod,
+              "optionValue": d?.pricingMethod
+            }
+          }))
           return uniqBy(tempPriceData.map(d => {
             return {
               "optionLabel": d?.conditionName,
@@ -433,6 +419,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     }
     if (isQtyOnly && rowData && values.qty > rowData.qty) {
       errors['qty'] = `Quantity can not be greater than ${rowData?.qty}`;
+    }
+    if (isQtyOnly && rowData && values.qty <= 0) {
+      errors['qty'] = `Quantity should be greater than 0`;
     }
     return errors;
   }
@@ -535,32 +524,41 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                         const value = val && val.optionValue ? val.optionValue : '';
                                         if (field.fieldName === "pricingCondition") {
                                           setFieldValue("pricingMethod", "");
-                                          setPriceMethodList(priceConditionListConst.filter(d => d.conditionId === value).map(d => {
+                                          setPriceMethodList(priceConditionListConst?.filter(d => d.conditionId === value).map(d => {
                                             return {
                                               "optionLabel": d?.pricingMethod,
                                               "optionValue": d?.pricingMethod
                                             }
                                           }))
-                                        }
-                                        getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
-                                          // if (price) {
                                           let priceFieldName = "price_" + rentalManagementData?.currency?.toLowerCase()
-                                          const result = autoCalculateSpecificFields({ [priceFieldName]: price, [field.fieldName]: value }, values, initialData.fields)
+                                          const result = autoCalculateSpecificFields({ [priceFieldName]: 0, [field.fieldName]: value }, values, initialData.fields)
                                           if (Object.keys(result).length >= 1) {
                                             for (var x in result) {
                                               setFieldValue(x, result[x]);
                                             }
                                           }
-                                          // }
-                                          // else {
-                                          //   const result = handleAutoCalculation(field, initialData.fields, values, field.fieldName, '', '', value);
-                                          //   if (Object.keys(result).length >= 1) {
-                                          //     for (var x in result) {
-                                          //       setFieldValue(x, result[x]);
-                                          //     }
-                                          //   }
-                                          // }
-                                        });
+                                        }
+                                        else {
+                                          getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
+                                            // if (price) {
+                                            let priceFieldName = "price_" + rentalManagementData?.currency?.toLowerCase()
+                                            const result = autoCalculateSpecificFields({ [priceFieldName]: price, [field.fieldName]: value }, values, initialData.fields)
+                                            if (Object.keys(result).length >= 1) {
+                                              for (var x in result) {
+                                                setFieldValue(x, result[x]);
+                                              }
+                                            }
+                                            // }
+                                            // else {
+                                            //   const result = handleAutoCalculation(field, initialData.fields, values, field.fieldName, '', '', value);
+                                            //   if (Object.keys(result).length >= 1) {
+                                            //     for (var x in result) {
+                                            //       setFieldValue(x, result[x]);
+                                            //     }
+                                            //   }
+                                            // }
+                                          });
+                                        }
                                       }}
                                       required={field.required}
                                       fullWidth

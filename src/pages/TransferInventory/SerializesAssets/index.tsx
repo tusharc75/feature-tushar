@@ -21,9 +21,6 @@ const SerialzedAssets = ({
   setNextStep,
   renderedFrom,
   stepFullScreen,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity,
   canLoad
 }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -252,12 +249,7 @@ const SerialzedAssets = ({
       }
       <Box
         zIndex={5}
-        width={
-          stepFullScreen ? "100%" :
-            isTabletScreen ? "calc(100vw)"
-              : isSmallScreen ? "calc(100vw)"
-                : showActivity ? "100%" : "calc(100vw - 103px)"
-        }
+        width={'100%'}
         height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 350px)"}
       >
         {rowsData ? (

@@ -60,15 +60,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, updateJobStatus }) => {
+const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol, renderedFrom, stepFullScreen, updateJobStatus }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
     state: { user, permissions }
   }: any = useData();
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [isUpdating, setUpdating] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -305,7 +303,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.detail = `${
-        parent.type === 'serializedAsset'
+        parent.type === 'asset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
           ? parent.productDetail?.productName
@@ -334,7 +332,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
+        _subRow.type === 'asset'
           ? _subRow.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
@@ -357,15 +355,6 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
-  };
-
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
   };
 
   const openActions = (event) => {
@@ -690,16 +679,9 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
       </Box>
       {columns && rowsData ? (
         <>
-          <Box
-            p="6px"
-            zIndex={5}
-            width={
-              stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 100px)'
-            }
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-          >
+          <Box p="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}

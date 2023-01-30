@@ -624,39 +624,52 @@ const routes = {
     title: storedRoutes && storedRoutes.repairOrder && storedRoutes.repairOrder.title ? storedRoutes.repairOrder?.title : RESOURCE_LABEL.repairOrder,
     path: '/repair-order/detail'
   },
-  workOrder: {
+  productionOrder: {
     title:
-      storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title
-        ? storedRoutes.workOrder?.title
-        : RESOURCE_LABEL.workOrder,
+      storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title
+        ? storedRoutes.productionOrder?.title
+        : RESOURCE_LABEL.productionOrder,
+    path: '/production-order'
+  },
+  productionOrderDetail: {
+    title:
+      storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title
+        ? storedRoutes.productionOrder?.title
+        : RESOURCE_LABEL.productionOrder,
+    path: '/production-order/detail'
+  },
+  serviceOrder: {
+    title:
+      storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
+    path: '/service-order'
+  },
+  serviceOrderDetail: {
+    title:
+      storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
+    path: '/service-order/detail'
+  },
+  workOrder: {
+    title: storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title ? storedRoutes.workOrder?.title : RESOURCE_LABEL.workOrder,
     path: '/work-order'
   },
   workOrderDetail: {
-    title:
-      storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title
-        ? storedRoutes.workOrder?.title
-        : RESOURCE_LABEL.workOrder,
+    title: storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title ? storedRoutes.workOrder?.title : RESOURCE_LABEL.workOrder,
     path: '/work-order/detail'
   },
   invoice: {
-    title:
-      storedRoutes && storedRoutes.invoice && storedRoutes.invoice.title
-        ? storedRoutes.invoice?.title
-        : RESOURCE_LABEL.invoice,
+    title: storedRoutes && storedRoutes.invoice && storedRoutes.invoice.title ? storedRoutes.invoice?.title : RESOURCE_LABEL.invoice,
     path: '/invoice'
   },
   invoiceDetail: {
-    title:
-      storedRoutes && storedRoutes.invoice && storedRoutes.invoice.title
-        ? storedRoutes.invoice?.title
-        : RESOURCE_LABEL.invoice,
+    title: storedRoutes && storedRoutes.invoice && storedRoutes.invoice.title ? storedRoutes.invoice?.title : RESOURCE_LABEL.invoice,
     path: '/invoice/detail'
   },
-  workOrderSupervisor:{
-    title:  storedRoutes && storedRoutes.workOrderSupervisor && storedRoutes.workOrderSupervisor.title
-    ? storedRoutes.workOrderSupervisor?.title
-    : RESOURCE_LABEL.workOrderSupervisor,
-    path:'/work-order-supervisor'
+  workOrderSupervisor: {
+    title:
+      storedRoutes && storedRoutes.workOrderSupervisor && storedRoutes.workOrderSupervisor.title
+        ? storedRoutes.workOrderSupervisor?.title
+        : RESOURCE_LABEL.workOrderSupervisor,
+    path: '/work-order-supervisor'
   },
   workOrderTechnician: {
     title:
@@ -664,6 +677,122 @@ const routes = {
         ? storedRoutes.workOrderTechnician?.title
         : RESOURCE_LABEL.workOrderTechnician,
     path: '/work-order-technician'
+  },
+  frequentlyAskedQuestion: {
+    title:
+      storedRoutes && storedRoutes.frequentlyAskedQuestion && storedRoutes.frequentlyAskedQuestion.title
+        ? storedRoutes.frequentlyAskedQuestion?.title
+        : RESOURCE_LABEL.freqentlyAskedQuestion,
+    path: '/frequently-asked-question'
+  },
+  frequentlyAskedQuestionDetail: {
+    title:
+      storedRoutes && storedRoutes.frequentlyAskedQuestion && storedRoutes.frequentlyAskedQuestion.title
+        ? storedRoutes.frequentlyAskedQuestion?.title
+        : RESOURCE_LABEL.freqentlyAskedQuestion,
+    path: '/frequently-asked-question/detail'
+  },
+  blog: {
+    title: storedRoutes && storedRoutes.blog && storedRoutes.blog.title ? storedRoutes.blog?.title : RESOURCE_LABEL.blog,
+    path: '/blog'
+  },
+  blogDetail: {
+    title: storedRoutes && storedRoutes.blog && storedRoutes.blog.title ? storedRoutes.blog?.title : RESOURCE_LABEL.blog,
+    path: '/blog/detail'
+  },
+  eCommerceHome: {
+    title:
+      storedRoutes && storedRoutes.eCommerceHome && storedRoutes.eCommerceHome.title
+        ? storedRoutes.eCommerceHome?.title
+        : RESOURCE_LABEL?.eCommerceHome,
+    path: '/e-commerce-home'
+  },
+  surveys: {
+    title: storedRoutes && storedRoutes.surveys && storedRoutes.surveys.title ? storedRoutes.surveys?.title : RESOURCE_LABEL?.surveys,
+    path: '/surveys'
+  },
+  surveysDetail: {
+    title: storedRoutes && storedRoutes.surveys && storedRoutes.surveys.title ? storedRoutes.surveys?.title : RESOURCE_LABEL.surveys,
+    path: '/surveys/detail'
+  },
+  contactUs: {
+    title: storedRoutes && storedRoutes.contactUs && storedRoutes.contactUs.title ? storedRoutes.contactUs?.title : RESOURCE_LABEL?.contactUs,
+    path: '/contact-us'
+  },
+  contactUsDetail: {
+    title: storedRoutes && storedRoutes.contactUs && storedRoutes.contactUs.title ? storedRoutes.contactUs?.title : RESOURCE_LABEL?.contactUs,
+    path: '/contact-us/detail'
+  },
+  supportTicket: {
+    title:
+      storedRoutes && storedRoutes.supportTicket && storedRoutes.supportTicket.title
+        ? storedRoutes.supportTicket?.title
+        : RESOURCE_LABEL?.supportTicket,
+    path: '/support-ticket'
+  },
+  supportTicketDetail: {
+    title:
+      storedRoutes && storedRoutes.supportTicket && storedRoutes.supportTicket.title
+        ? storedRoutes.supportTicket?.title
+        : RESOURCE_LABEL?.supportTicket,
+    path: '/support-ticket/detail'
+  },
+  demandOrder: {
+    title: storedRoutes && storedRoutes.demandOrder && storedRoutes.demandOrder.title ? storedRoutes.demandOrder?.title : RESOURCE_LABEL.demandOrder,
+    path: '/demand-order'
+  },
+  demandOrderDetail: {
+    title: storedRoutes && storedRoutes.demandOrder && storedRoutes.demandOrder.title ? storedRoutes.demandOrder?.title : RESOURCE_LABEL.demandOrder,
+    path: '/demand-order/detail'
+  },
+  employeeMaster: {
+    title:
+      storedRoutes && storedRoutes.employeeMaster && storedRoutes.employeeMaster.title
+        ? storedRoutes.employeeMaster?.title
+        : RESOURCE_LABEL?.employeeMaster,
+    path: '/employee-master'
+  },
+  employeeMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.employeeMaster && storedRoutes.employeeMaster.title
+        ? storedRoutes.employeeMaster?.title
+        : RESOURCE_LABEL?.employeeMaster,
+    path: '/employee-master/detail'
+  },
+  competencyMaster: {
+    title:
+      storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title
+        ? storedRoutes.competencyMaster?.title
+        : RESOURCE_LABEL.competencyMaster,
+    path: '/competency-master'
+  },
+  competencyMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title
+        ? storedRoutes.competencyMaster?.title
+        : RESOURCE_LABEL.competencyMaster,
+    path: '/competency-master/detail'
+  },
+  technicianScheduler: {
+    title:
+      storedRoutes && storedRoutes.technicianScheduler && storedRoutes.technicianScheduler.title
+        ? storedRoutes.technicianScheduler?.title
+        : RESOURCE_LABEL.technicianScheduler,
+    path: '/technician-scheduler'
+  },
+  irtTicket: {
+    title:
+      storedRoutes && storedRoutes.irtTicket && storedRoutes.irtTicket.title
+        ? storedRoutes.irtTicket?.title
+        : RESOURCE_LABEL.irtTicket,
+    path: '/irt-ticket'
+  },
+  irtTicketDetail: {
+    title:
+      storedRoutes && storedRoutes.irtTicket && storedRoutes.irtTicket.title
+        ? storedRoutes.irtTicket?.title
+        : RESOURCE_LABEL.irtTicket,
+    path: '/irt-ticket/detail'
   },
 };
 

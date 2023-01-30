@@ -2,12 +2,14 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import {
+  convertMsToTime,
   QUOTATION_STATUS,
   repairOrder,
   REPAIR_ORDER_TYPE,
   workOrder,
   WORKORDER_SERVICE_STATUS,
-  WORKORDER_SERVICE_STEP_STATUS
+  WORKORDER_SERVICE_STEP_STATUS,
+  WORK_ORDER_STATUS
 } from 'src/constants/helpers';
 import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -37,57 +39,42 @@ import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
+import { reverse } from 'lodash';
 
-function convertMsToTime(milliseconds) {
-  milliseconds = Math.abs(milliseconds);
+const getTotalTime = (stepTimes: any) => {
+  let totalTimes = 0;
+  let shouldTimerRun = stepTimes?.filter((e) => e.status === WORKORDER_SERVICE_STEP_STATUS.start)?.length ? true : false;
+  stepTimes.forEach((item) => {
+    totalTimes += item?.duration || 0;
+    if (item.startDate && item.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+      totalTimes += (new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime());
+    }
+  });
+  stepTimes.forEach((item) => {
+  });
+  return { shouldTimerRun, totalTimes };
+};
 
-  function padTo2Digits(num) {
-    num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
-    return num.toString().padStart(2, '0');
-  }
-  let seconds = Math.floor(milliseconds / 1000);
-  let minutes = Math.floor(seconds / 60);
-  let hours = Math.floor(minutes / 60);
-
-  seconds = seconds % 60;
-  minutes = minutes % 60;
-
-  let time = '';
-
-  if (hours === 0) {
-    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-  }
-  if (hours === 0 && minutes === 0) {
-    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-  }
-  if (hours > 0 && hours < 24) {
-    time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-  }
-  if (hours >= 24) {
-    time = `${padTo2Digits(hours / 24)}d`;
-  }
-  return time;
-}
-
-const RenderTotalTime = ({ steps, startTimes, endTimes }) => {
+const RenderTotalTime = ({ stepTimes }: any) => {
   const [time, setTime] = useState(null);
   useEffect(() => {
-    startTimes = startTimes.filter((item) => !isNaN(item));
-    endTimes = endTimes.filter((item) => !isNaN(item));
-    const min = Math.min(...startTimes);
-    const max = Math.max(...endTimes);
-    if (startTimes.length !== endTimes.length) {
-      const interval = setInterval(() => {
-        setTime(convertMsToTime(new Date().getTime() - min));
+    const { shouldTimerRun, totalTimes } = getTotalTime(stepTimes);
+    let interval;
+    if (shouldTimerRun) {
+      let currentDifference = totalTimes;
+      interval = setInterval(() => {
+        currentDifference += 1000;
+        setTime(convertMsToTime(currentDifference));
       }, 1000);
-      return () => {
-        clearInterval(interval);
-      };
     } else {
-      setTime(convertMsToTime(max - min));
+      setTime(convertMsToTime(totalTimes));
     }
-  }, [startTimes, endTimes]);
-  if (startTimes.length === 0) return <></>;
+    return () => {
+      clearInterval(interval);
+    };
+  }, [stepTimes]);
+
+  if (stepTimes.length === 0) return <></>;
   return (
     <Box
       style={{
@@ -106,15 +93,15 @@ const RenderTotalTime = ({ steps, startTimes, endTimes }) => {
   );
 };
 
-const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
+const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
-      user: { user }
+      user: { user }, permissions
     }
   } = useData();
   const [serviceSteps, setServiceSteps] = useState(null);
-  const [disabledServicesOrder, setDisabledServicesOrder] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
   const [serviceData, setServiceData] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -125,119 +112,120 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const [logsDialog, setLogsDialog] = useState(false);
   const [isColapsed, setIsColapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
-  const [quotationData, setQuotationData] = useState(null);
   const [disableCompleteFail, setDisableCompleteFail] = useState(false);
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [comment, setComment] = useState('');
   const [bottomBarOpen, setBottomBarOpen] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
-  const [isQuotationStep, setIsQuotationStep] = useState(false);
-  const isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id);
+  const [quotationData, setQuotationData] = useState(null);
 
   useEffect(() => {
     fetchRepairOrderData();
   }, []);
 
-  const fetchRepairOrderData = () => {
-    axiosInstance()
-      .get(`${routes.workOrder.path}/${workOrderId}`)
-      .then(({ data: { data } }) => {
-        if (data.type === 'Repair Order') {
-          let tempRepairOrderId = data?.repairOrder?.optionValue;
-          axiosInstance()
-            .get(`${repairOrder.api}/${tempRepairOrderId}`)
-            .then(({ data: { data } }) => {
-              if (data.type !== REPAIR_ORDER_TYPE.internal) {
-                setIsQuotationStep(true);
-                axiosInstance()
-                  .get(`${repairOrder.api}/${tempRepairOrderId}/workorder/quotation`)
-                  .then(({ data: { data } }) => {
-                    if (data) {
-                      let keys = Object.keys(data?.versions);
-                      if (keys?.length) {
-                        const version = data.versions[parseInt(keys[keys.length - 1])];
-                        setQuotationData({
-                          _id: data?._id,
-                          versionId: version?._id,
-                          quotationNumber: data?.quotationNumber,
-                          status: version?.status
-                        });
-                      }
-                    }
-                  });
-                fetchService(true);
-              } else {
-                fetchService(false);
+  const fetchRepairOrderData = async () => {
+
+    var quotation: any = null;
+    var isQuotation: any = false;
+
+
+    if (workOrderData.type === 'Repair Order' && workOrderData?.repairOrder?.optionValue) {
+
+      const repairOrderResponse = await axiosInstance().get(`${repairOrder.api}/${workOrderData?.repairOrder?.optionValue}`);
+      const repairOrderData: any = repairOrderResponse?.data?.data;
+
+      if (repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
+        isQuotation = true;
+        const quotationResponse = await axiosInstance().get(`${repairOrder.api}/${workOrderData?.repairOrder?.optionValue}/check/quotation`);
+        if (quotationResponse?.data?.data) {
+          let keys = Object.keys(quotationResponse?.data?.data?.versions);
+          if (keys?.length) {
+            const version = quotationResponse?.data?.data?.versions[parseInt(keys[keys.length - 1])];
+            quotation = {
+              _id: quotationResponse?.data?.data?._id,
+              versionId: version?._id,
+              quotationNumber: quotationResponse?.data?.data?.quotationNumber,
+              status: version?.status
+            };
+            setQuotationData(quotation);
+          }
+        }
+      }
+    }
+
+    const stepDataResponse = await axiosInstance().get(`${workOrder.api}/${workOrderId}/steps-data`);
+    setServiceData(stepDataResponse?.data?.data || []);
+
+    const serviceDataResponse = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`);
+    const data: any = serviceDataResponse?.data?.data;
+
+    if (data?.length) {
+
+      data?.forEach((e) => { e.type = 'service' });
+      const preWorkService = data?.filter((e) => e.preWork)?.sort((a, b) => (a.order > b.order ? 1 : -1));
+      const postWorkService = data?.filter((e) => !e.preWork)?.sort((a, b) => (a.order > b.order ? 1 : -1));
+      const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
+      const services = isQuotation ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
+
+      if (services?.length) {
+        let pendingServiceIndex = services?.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
+        if (pendingServiceIndex === -1) {
+          let tempServiceSortedArray = reverse([...services]);
+          pendingServiceIndex = tempServiceSortedArray.findIndex((d) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status));
+          if (pendingServiceIndex === -1) {
+            pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
+          }
+          else {
+            pendingServiceIndex = (services?.length - pendingServiceIndex);
+            if (services[pendingServiceIndex]?.type === 'quotation') {
+              pendingServiceIndex = pendingServiceIndex + 1;
+            }
+          }
+        }
+        pendingServiceIndex = pendingServiceIndex > -1 ? pendingServiceIndex : 0;
+        const order = services[pendingServiceIndex]?.order;
+        services?.forEach((element, index) => {
+          if (element?.type === "service") {
+            if (element.order === order || index <= pendingServiceIndex) {
+              if (!completed && (allowedToEdit || (element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) && permissions?.workOrder?.isUpdate))) {
+                element.clickable = true;
               }
-            });
-        } else {
-          fetchService(false);
-        }
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-
-  const fetchService = (isQuote: any = isQuotationStep) => {
-    getServiceData();
-    axiosInstance()
-      .get(`${routes.workOrder.path}/service/${workOrderId}`)
-      .then(({ data: { data } }) => {
-        if (data?.length) {
-          data?.forEach((e) => {
-            e.type = 'service';
-          });
-          const preWorkService = data?.filter((e) => e.preWork);
-          const postWorkService = data?.filter((e) => !e.preWork);
-          const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
-          const services = isQuote ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
-          setServiceSteps(services);
-          if (services?.length) {
-            let pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
-            if (pendingServiceIndex === -1) {
-              pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
+              else {
+                element.clickable = false;
+              }
             }
-            setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
-          }
-          let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
-          let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
-            [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
-          );
-          if (tempServiceIndex > -1) {
-            tempServiceSortedArray[tempServiceIndex - 1]
-              ? setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
-              : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order);
-          } else {
-            setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
-          }
-          if (
-            preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status))?.length ===
-              preWorkService?.length &&
-            postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length
-          ) {
-            if (isQuote && services.findIndex((d) => d.type === 'quotation') > -1) {
-              setSelectedService(services[services.findIndex((d) => d.type === 'quotation')]);
+            else {
+              element.clickable = false;
             }
           }
-        } else {
-          setServiceSteps([]);
+        })
+        if (isQuotation) {
+          if ((quotation && quotation?.status === QUOTATION_STATUS.acceptByCustomer)) {
+          }
+          else {
+            services?.forEach((element) => {
+              if (!element?.preWork) {
+                element.clickable = false;
+              }
+            })
+          }
         }
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-
-  const getServiceData = () => {
-    axiosInstance()
-      .get(`${workOrder.api}/${workOrderId}/steps-data`)
-      .then(({ data: { data } }) => {
-        setServiceData(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+        if (selectedService) {
+          setSelectedService(services?.find((e) => e?.uniqueId === selectedService?.uniqueId) || null);
+        }
+        else {
+          setSelectedService(services[pendingServiceIndex]);
+        }
+      }
+      setServiceSteps(services);
+      if ((services.filter((e) => e.type === 'service'
+        && e.status === WORKORDER_SERVICE_STATUS.completed)?.length === services.filter((e) => e.type === 'service')?.length)
+        && workOrderData?.status !== WORK_ORDER_STATUS.completed) {
+        fetchWorkOrderData()
+      }
+    } else {
+      setServiceSteps([]);
+    }
   };
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -258,7 +246,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     axiosInstance()
       .put(`${workOrder.api}/service/${workOrderId}/order`, { data: rows || [] })
       .then(({ data }) => {
-        fetchService();
+        fetchRepairOrderData();
         setArrangeView(false);
         toastConfig.setToastConfig({
           open: true,
@@ -275,7 +263,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     axiosInstance()
       .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status, comment })
       .then(({ data: { data } }) => {
-        fetchService();
+        fetchRepairOrderData();
         if (openCompleteDialog) {
           setOpenCompleteDialog(false);
         }
@@ -301,7 +289,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
           createNewVersionQuote();
         } else {
-          fetchService();
+          fetchRepairOrderData();
         }
       })
       .catch((err) => {
@@ -323,7 +311,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
           createNewVersionQuote();
         } else {
-          fetchService();
+          fetchRepairOrderData();
         }
         if (id === selectedService?.uniqueId) {
           setSelectedService(null);
@@ -355,7 +343,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     }
   }, [mobScreen]);
 
-  const isAllowedToServiceEdit = allowedToEdit || selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id);
 
   const stylesForEveryTab = (selectedService, data) => {
     if (data?.type === 'quotation' && selectedService?.type !== 'quotation') {
@@ -367,8 +354,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           quotationData?.status === QUOTATION_STATUS.acceptByCustomer
             ? '#E9FFE8'
             : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-            ? '#FFE9EA'
-            : 'white',
+              ? '#FFE9EA'
+              : 'white',
         cursor: 'pointer',
         borderRadius: '3px'
       };
@@ -381,36 +368,39 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           quotationData?.status === QUOTATION_STATUS.acceptByCustomer
             ? '#E9FFE8'
             : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-            ? '#FFE9EA'
-            : 'white',
+              ? '#FFE9EA'
+              : 'white',
         cursor: 'pointer',
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
       };
-    } else if (
-      data?.order > disabledServicesOrder ||
-      (isQuotationStep && data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
-    ) {
+    } else if (!data?.clickable) {
       return {
         borderWidth: '1px',
         borderStyle: 'solid',
         borderColor: 'rgba(25, 24, 24, 0.19)',
-        cursor: 'not-allowed',
+        backgroundColor:
+          data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
+            ? '#E9FFE8'
+            : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
+              ? '#FFE9EA'
+              : 'white',
+        cursor: allowedToEdit ? 'pointer' : 'not-allowed',
         PointerEvent: 'none',
         opacity: '.5'
       };
     }
-    if (selectedService?._id == data?._id) {
+    if (selectedService?.uniqueId == data?.uniqueId) {
       return {
         borderColor: '#329592',
         borderWidth: '1px',
         borderStyle: 'solid',
         backgroundColor:
-          data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
+          data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
             ? '#E9FFE8'
-            : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-            ? '#FFE9EA'
-            : 'white',
+            : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
+              ? '#FFE9EA'
+              : 'white',
         cursor: 'pointer',
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
@@ -420,11 +410,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         borderWidth: '1px',
         borderStyle: 'solid',
         backgroundColor:
-          data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
+          data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
             ? '#E9FFE8'
-            : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-            ? '#FFE9EA'
-            : 'white',
+            : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
+              ? '#FFE9EA'
+              : 'white',
         borderColor: 'rgb(224, 224, 224)',
         cursor: 'pointer'
       };
@@ -451,15 +441,24 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   };
 
   const getFieldsWithOtherDetails = (step: any, serviceData) => {
-    const id = step?._id;
-    const steps = serviceData?.filter((item: any) => item.serviceId === id);
-    let startTimes = steps.map((item) => new Date(item?.startDate).getTime());
-    let endTimes = steps.map((item) => new Date(item?.endDate).getTime());
-    return { steps, startTimes, endTimes };
+    const steps = serviceData?.filter((item: any) => item?.uniqueId === step?.uniqueId);
+    const stepTimes = [];
+    steps.forEach((item) => {
+      let obj: any = {};
+      obj.startDate = item?.startDate;
+      obj.endDate = item?.endDate;
+      obj.pauseDate = item?.pauseDate;
+      obj.duration = item?.duration || 0;
+      obj.status = item?.status;
+      stepTimes.push(obj);
+    });
+    return stepTimes;
   };
 
+  const isAllowedToServiceEdit = !completed && (allowedToEdit || (selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) && permissions?.workOrder?.isUpdate));
+
   return (
-    <Box p={2}>
+    <Box>
       {serviceSteps ? (
         <Grid container spacing={2}>
           {!mobScreen ? (
@@ -480,7 +479,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                   <>
                     <Box>
                       <Button
-                        disabled={!allowedToEdit}
+                        disabled={allowedToEdit && !completed ? false : true}
                         variant="outlined"
                         color="primary"
                         size="small"
@@ -491,7 +490,12 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                     </Box>
                     {serviceSteps?.length > 0 && (
                       <Box marginX={2}>
-                        <Button disabled={!allowedToEdit} variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                        <Button
+                          disabled={allowedToEdit && !completed ? false : true}
+                          variant="outlined"
+                          color="primary"
+                          size="small"
+                          onClick={() => setArrangeView(true)}>
                           <GrDrag fontSize="small" color="primary" className="mr-1" />
                           Arrange
                         </Button>
@@ -522,137 +526,138 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 >
                   {serviceSteps?.map((data, index) => {
                     const style = stylesForEveryTab(selectedService, data);
-                    const { steps, startTimes, endTimes } = getFieldsWithOtherDetails(data, serviceData);
+                    const stepTimes = getFieldsWithOtherDetails(data, serviceData);
                     return (
-                      Boolean(allowedToEdit || data?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) && (
-                        <Grid item xs={12} key={index}>
-                          <Box
-                            style={{
-                              ...style,
-                              transition: '.3s'
-                            }}
-                            p={2}
-                            onClick={() => {
-                              if (
-                                !(
-                                  data?.type !== 'service' ||
-                                  data?.order > disabledServicesOrder ||
-                                  (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
-                                )
-                              ) {
-                                setSelectedService(data);
-                              }
-                            }}
-                          >
-                            <Grid container>
-                              <Grid item xs={10}>
-                                <Box
-                                  display="flex"
-                                  style={{
-                                    flexWrap: 'wrap',
-                                    alignItems: 'center',
-                                    position: 'relative',
-                                    paddingLeft: !isColapsed && data?.type !== 'quotation' ? '20px' : '',
-                                    gap: '5px'
-                                  }}
-                                >
-                                  {data?.type === 'service' ? (
-                                    <Box
-                                      style={{
-                                        backgroundColor: 'var(--primary)',
-                                        color: 'white',
-                                        width: '20px',
-                                        height: '20px',
-                                        borderRadius: '50%',
-                                        lineHeight: '21px',
-                                        textAlign: 'center',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '10px',
-                                        flexShrink: 0,
-                                        top: '4px',
-                                        left: 0
-                                      }}
-                                      sx={{ position: !isColapsed ? 'absolute' : '' }}
-                                    >
-                                      <span>{data?.order}</span>
+                      <Grid item xs={12} key={index}>
+                        <Box
+                          style={{
+                            ...style,
+                            transition: '.3s'
+                          }}
+                          p={2}
+                          onClick={() => {
+                            if (data?.type === 'service') {
+                              setSelectedService(data);
+                            }
+                          }}
+                        >
+                          <Grid container>
+                            <Grid item xs={10}>
+                              <Box
+                                display="flex"
+                                style={{
+                                  flexWrap: 'wrap',
+                                  alignItems: 'center',
+                                  position: 'relative',
+                                  paddingLeft: !isColapsed && data?.type !== 'quotation' ? '20px' : '',
+                                  gap: '5px'
+                                }}
+                              >
+                                {data?.type === 'service' ? (
+                                  <Box
+                                    style={{
+                                      backgroundColor: 'var(--primary)',
+                                      color: 'white',
+                                      width: '20px',
+                                      height: '20px',
+                                      borderRadius: '50%',
+                                      lineHeight: '21px',
+                                      textAlign: 'center',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      fontSize: '10px',
+                                      flexShrink: 0,
+                                      top: '4px',
+                                      left: 0
+                                    }}
+                                    sx={{ position: !isColapsed ? 'absolute' : '' }}
+                                  >
+                                    <span>{data?.order}</span>
+                                  </Box>
+                                ) : (
+                                  data?.type === 'quotation' && <FormatQuoteIcon />
+                                )}
+                                {!isColapsed && (
+                                  <>
+                                    <Box ml={'10px'}>
+                                      <Typography>{data?.serviceName}</Typography>
                                     </Box>
-                                  ) : (
-                                    data?.type === 'quotation' && <FormatQuoteIcon />
-                                  )}
-                                  {!isColapsed && (
-                                    <>
-                                      <Box ml={'10px'}>
-                                        <Typography>{data?.serviceName}</Typography>
-                                      </Box>
-                                      {data?.type === 'service' && (
-                                        <Box ml={1}>
-                                          {data?.preWork ? (
-                                            <HtmlTooltip title="Pre Work Service">
-                                              <span>
-                                                <PreWorkIcon style={{ verticalAlign: 'middle' }} />
-                                              </span>
-                                            </HtmlTooltip>
-                                          ) : (
-                                            <HtmlTooltip title="Post Work Service">
-                                              <span>
-                                                <PostWorkIcon style={{ verticalAlign: 'middle' }} />
-                                              </span>
-                                            </HtmlTooltip>
-                                          )}
-                                        </Box>
-                                      )}
-                                      {data?.type === 'service' && (
-                                        <Box ml={1}>
-                                          <Chip label={data?.status} variant="outlined" color="primary" />
-                                        </Box>
-                                      )}
-                                      {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
-                                        <Box ml={1}>
-                                          <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                            <PeopleIcon />
+                                    {data?.type === 'service' && (
+                                      <Box ml={1}>
+                                        {data?.preWork ? (
+                                          <HtmlTooltip title="Pre Work Service">
+                                            <span>
+                                              <PreWorkIcon style={{ verticalAlign: 'middle' }} />
+                                            </span>
                                           </HtmlTooltip>
-                                        </Box>
-                                      )}
-                                      {data?.type === 'quotation' && quotationData && (
-                                        <Box ml={1}>
-                                          <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />
-                                        </Box>
-                                      )}
-                                      <RenderTotalTime steps={steps} startTimes={startTimes} endTimes={endTimes} />
-                                    </>
-                                  )}
-                                </Box>
-                              </Grid>
-                              {!isColapsed && (
-                                <>
-                                  {!(
-                                    data?.type !== 'service' ||
-                                    data?.order > disabledServicesOrder ||
-                                    (isQuotationStep && data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
-                                  ) && (
-                                    <Grid item xs={2} container justify="flex-end">
-                                      <IconButton
-                                        size="small"
-                                        color="primary"
-                                        aria-label="delete"
-                                        disabled={!isAllowedToServiceEdit}
-                                        onClick={(event) => {
-                                          handleOpenMenu(event);
-                                          setSelectedService(data);
-                                        }}
-                                      >
-                                        <MoreHorizIcon />
-                                      </IconButton>
-                                    </Grid>
-                                  )}
-                                </>
-                              )}
+                                        ) : (
+                                          <HtmlTooltip title="Post Work Service">
+                                            <span>
+                                              <PostWorkIcon style={{ verticalAlign: 'middle' }} />
+                                            </span>
+                                          </HtmlTooltip>
+                                        )}
+                                      </Box>
+                                    )}
+                                    {data?.type === 'service' && data?.serviceStatus && (
+                                      <Box ml={1}>
+                                        <Chip
+                                          label={data?.serviceStatus}
+                                          variant="outlined"
+                                          color={data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed ? 'default' : 'primary'}
+                                          style={{
+                                            borderColor: data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? 'red' : 'green',
+                                            color: data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? 'red' : 'green'
+                                          }}
+                                        />
+                                      </Box>
+                                    )}
+                                    {data?.type === 'service' && (
+                                      <Box ml={1}>
+                                        <Chip label={data?.status} variant="outlined" color="primary" />
+                                      </Box>
+                                    )}
+                                    {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
+                                      <Box ml={1}>
+                                        <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                                          <PeopleIcon />
+                                        </HtmlTooltip>
+                                      </Box>
+                                    )}
+                                    {data?.type === 'quotation' && quotationData && (
+                                      <Box ml={1}>
+                                        <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />
+                                      </Box>
+                                    )}
+                                    <RenderTotalTime stepTimes={stepTimes} />
+                                  </>
+                                )}
+                              </Box>
                             </Grid>
-                          </Box>
-                        </Grid>
-                      )
+                            {!isColapsed && (
+                              <>
+                                {data?.type === 'service' && (
+                                  <Grid item xs={2} container justify="flex-end">
+                                    <IconButton
+                                      size="small"
+                                      color="primary"
+                                      aria-label="delete"
+                                      disabled={!isAllowedToServiceEdit}
+                                      onClick={(event) => {
+                                        handleOpenMenu(event);
+                                        setSelectedService(data);
+                                      }}
+                                    >
+                                      <MoreHorizIcon />
+                                    </IconButton>
+                                  </Grid>
+                                )}
+                              </>
+                            )}
+                          </Grid>
+                        </Box>
+                      </Grid>
                     );
                   })}
                 </Grid>
@@ -666,117 +671,107 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               <Box>
                 <Tabs aria-label="scrollable Tabs">
                   {serviceSteps?.map((data, index) => {
+                    let isTechnician = data?.assignedUsers?.some((u: any) => u?.optionValue === user?._id);
                     const style = stylesForEveryTab(selectedService, data);
-                    return (
-                      Boolean(allowedToEdit || data?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) && (
-                        <Tab
-                          key={index}
-                          content={
-                            <Box
-                              style={{
-                                ...style,
-                                transition: '.3s',
-                                borderRadius: '20px',
-                                height: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                padding: '5px 8px'
-                              }}
-                              onClick={() => {
-                                if (
-                                  !(
-                                    data?.type !== 'service' ||
-                                    data?.order > disabledServicesOrder ||
-                                    (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
-                                  )
-                                ) {
-                                  setSelectedService(data);
-                                }
-                              }}
-                            >
-                              <Box style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                {data?.type === 'service' ? (
-                                  <Box
-                                    style={{
-                                      backgroundColor: 'var(--primary)',
-                                      color: 'white',
-                                      width: '18px',
-                                      height: '18px',
-                                      borderRadius: '50%',
-                                      lineHeight: '18px',
-                                      textAlign: 'center',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      fontSize: '10px',
-                                      flexShrink: 0,
-                                      top: '4px',
-                                      left: 0
-                                    }}
-                                  >
-                                    <span>{data?.order}</span>
-                                  </Box>
-                                ) : (
-                                  <div style={{ width: '18px', height: '18px' }}>{data?.type === 'quotation' && <FormatQuoteIcon />}</div>
-                                )}
-                                <Box>
-                                  <Typography style={{ fontSize: '12px', fontWeight: '600', lineHeight: '1.2' }}> {data?.serviceName}</Typography>
-                                  {data?.type === 'service' && (
-                                    <Typography style={{ fontSize: '11px', lineHeight: '1.2' }}>{data?.status}</Typography>
-                                  )}
-                                  {data?.type === 'quotation' && quotationData && (
-                                    <>
-                                      <Typography style={{ fontSize: '11px', lineHeight: '1.2' }}>{`Status : ${quotationData?.status}`}</Typography>
-                                    </>
-                                  )}
-                                  <Box display={'flex'} style={{ gap: '10px', flexWrap: 'wrap' }}>
-                                    {data?.type === 'service' &&
-                                      (data?.preWork ? (
-                                        <HtmlTooltip title="Pre Work Service">
-                                          <span>
-                                            <PreWorkIcon style={{ verticalAlign: 'middle' }} />
-                                          </span>
-                                        </HtmlTooltip>
-                                      ) : (
-                                        <HtmlTooltip title="Post Work Service">
-                                          <span>
-                                            <PostWorkIcon style={{ verticalAlign: 'middle' }} />
-                                          </span>
-                                        </HtmlTooltip>
-                                      ))}
-                                    {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
-                                      <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                        <PeopleIcon style={{ width: '15px', height: '15px' }} />
-                                      </HtmlTooltip>
-                                    )}
-                                  </Box>
+                    return (Boolean(allowedToEdit || isTechnician) && (
+                      <Tab
+                        key={index}
+                        content={
+                          <Box
+                            style={{
+                              ...style,
+                              transition: '.3s',
+                              borderRadius: '20px',
+                              height: '100%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              padding: '5px 8px'
+                            }}
+                            onClick={() => {
+                              if (data?.type === 'service') {
+                                setSelectedService(data);
+                              }
+                            }}
+                          >
+                            <Box style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                              {data?.type === 'service' ? (
+                                <Box
+                                  style={{
+                                    backgroundColor: 'var(--primary)',
+                                    color: 'white',
+                                    width: '18px',
+                                    height: '18px',
+                                    borderRadius: '50%',
+                                    lineHeight: '18px',
+                                    textAlign: 'center',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '10px',
+                                    flexShrink: 0,
+                                    top: '4px',
+                                    left: 0
+                                  }}
+                                >
+                                  <span>{data?.order}</span>
                                 </Box>
-                                {!(
-                                  data?.type !== 'service' ||
-                                  data?.order > disabledServicesOrder ||
-                                  (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
-                                ) ? (
-                                  <IconButton
-                                    style={{ width: '18px', height: '25px' }}
-                                    size="small"
-                                    color="primary"
-                                    aria-label="delete"
-                                    disabled={!isAllowedToServiceEdit}
-                                    onClick={(event) => {
-                                      handleOpenMenu(event);
-                                      setSelectedService(data);
-                                    }}
-                                  >
-                                    <MoreVertIcon />
-                                  </IconButton>
-                                ) : (
-                                  <div style={{ width: '18px', height: '25px' }}></div>
+                              ) : (
+                                <div style={{ width: '18px', height: '18px' }}>{data?.type === 'quotation' && <FormatQuoteIcon />}</div>
+                              )}
+                              <Box>
+                                <Typography style={{ fontSize: '12px', fontWeight: '600', lineHeight: '1.2' }}> {data?.serviceName}</Typography>
+                                {data?.type === 'service' && (
+                                  <Typography style={{ fontSize: '11px', lineHeight: '1.2' }}>{data?.status}</Typography>
                                 )}
+                                {data?.type === 'quotation' && quotationData && (
+                                  <>
+                                    <Typography style={{ fontSize: '11px', lineHeight: '1.2' }}>{`Status : ${quotationData?.status}`}</Typography>
+                                  </>
+                                )}
+                                <Box display={'flex'} style={{ gap: '10px', flexWrap: 'wrap' }}>
+                                  {data?.type === 'service' &&
+                                    (data?.preWork ? (
+                                      <HtmlTooltip title="Pre Work Service">
+                                        <span>
+                                          <PreWorkIcon style={{ verticalAlign: 'middle' }} />
+                                        </span>
+                                      </HtmlTooltip>
+                                    ) : (
+                                      <HtmlTooltip title="Post Work Service">
+                                        <span>
+                                          <PostWorkIcon style={{ verticalAlign: 'middle' }} />
+                                        </span>
+                                      </HtmlTooltip>
+                                    ))}
+                                  {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
+                                    <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                                      <PeopleIcon style={{ width: '15px', height: '15px' }} />
+                                    </HtmlTooltip>
+                                  )}
+                                </Box>
                               </Box>
+                              {data?.type === 'service' ? (
+                                <IconButton
+                                  style={{ width: '18px', height: '25px' }}
+                                  size="small"
+                                  color="primary"
+                                  aria-label="delete"
+                                  disabled={!isAllowedToServiceEdit}
+                                  onClick={(event) => {
+                                    handleOpenMenu(event);
+                                    setSelectedService(data);
+                                  }}
+                                >
+                                  <MoreVertIcon />
+                                </IconButton>
+                              ) : (
+                                <div style={{ width: '18px', height: '25px' }}></div>
+                              )}
                             </Box>
-                          }
-                        ></Tab>
-                      )
+                          </Box>
+                        }
+                      ></Tab>
+                    )
                     );
                   })}
                 </Tabs>
@@ -808,10 +803,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               </Box>
             </Box>
           )}
-
           {anchorEl && (
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-              {!isMeTechnician && (
+              {allowedToEdit && (
                 <MenuItem
                   disabled={!allowedToEdit}
                   onClick={() => {
@@ -840,16 +834,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               >
                 Add Step
               </MenuItem>
-              {isMeTechnician && (
-                <MenuItem
-                  onClick={() => {
-                    setConsumablesDialog(true);
-                    setAnchorEl(null);
-                  }}
-                >
-                  Consume
-                </MenuItem>
-              )}
+              <MenuItem
+                onClick={() => {
+                  setConsumablesDialog(true);
+                  setAnchorEl(null);
+                }}
+              >
+                Consume Products
+              </MenuItem>
               <MenuItem
                 disabled={
                   disableCompleteFail || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(selectedService?.status)
@@ -861,7 +853,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               >
                 Complete
               </MenuItem>
-              <MenuItem
+              {/* <MenuItem
                 disabled={
                   disableCompleteFail || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(selectedService?.status)
                 }
@@ -871,9 +863,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 }}
               >
                 Fail
-              </MenuItem>
+              </MenuItem> */}
               <MenuItem
-                disabled={!allowedToEdit}
+                disabled={!allowedToEdit || selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
                 onClick={() => {
                   handleRemoveService(selectedService?.uniqueId);
                   setAnchorEl(null);
@@ -881,16 +873,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               >
                 Remove
               </MenuItem>
-              {
-                <MenuItem
-                  onClick={() => {
-                    setLogsDialog(true);
-                    setAnchorEl(null);
-                  }}
-                >
-                  Logs
-                </MenuItem>
-              }
+              <MenuItem
+                onClick={() => {
+                  setLogsDialog(true);
+                  setAnchorEl(null);
+                }}
+              >
+                Logs
+              </MenuItem>
             </Menu>
           )}
           <Grid
@@ -908,15 +898,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
             {selectedService && (
               <Box>
                 {selectedService?.type === 'service' ? (
-                  allowedToEdit ||
-                  (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
+                  allowedToEdit || (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
                     <Steps
                       workOrderId={workOrderId}
                       selectedService={selectedService}
                       serviceSteps={serviceSteps}
-                      allowedToEdit={isAllowedToServiceEdit}
+                      allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                       setDisableCompleteFail={setDisableCompleteFail}
-                      fetchService={fetchService}
+                      fetchService={fetchRepairOrderData}
                     />
                   ) : (
                     <Box textAlign="center">
@@ -949,7 +938,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           }}
           handleSucess={() => {
             setUserAssignDialog(false);
-            fetchService();
+            fetchRepairOrderData();
           }}
         />
       )}
@@ -958,7 +947,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           reference="workorder"
           referenceId={workOrderId}
           handleClose={() => setServiceDialog({ open: false, uniqueId: null, preWork: null })}
-          ids={serviceSteps?.filter((e) => e.type === 'service')?.map((e) => e._id)}
+          ids={[]}
           onSuccess={(data) => {
             handleAddService(
               data?.map((e) => e.service),
@@ -988,6 +977,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         <ConsumablesDialog
           onSuccess={() => {
             setConsumablesDialog(false);
+            fetchRepairOrderData();
           }}
           handleClose={() => {
             setConsumablesDialog(false);
@@ -999,6 +989,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
       {logsDialog && (
         <Logs
           workOrderId={workOrderId}
+          serviceId={selectedService?._id}
+          uniqueId={selectedService?.uniqueId}
+          serviceName={selectedService?.serviceName}
           handleClose={() => {
             setLogsDialog(false);
           }}
@@ -1035,4 +1028,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     </Box>
   );
 };
+
 export default Service;
+
+

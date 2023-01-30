@@ -157,6 +157,32 @@ import Invoice from './pages/Invoice';
 import InvoiceDetails from './pages/Invoice/InvoiceDetails';
 import WorkOrderSupervisor from './pages/WorkOrderSupervisor';
 import WorkOrderTechnician from './pages/WorkOrderTechnician';
+import FrequentlyAskedQuestion from './pages/FrequentlyAskedQuestion';
+import FrequencyAskedQuestionDetail from './pages/FrequentlyAskedQuestion/FrequencyAskedQuestionDetail';
+import Blog from './pages/Blog';
+import BlogDetail from './pages/Blog/BlogDetail';
+import EcommerceHome from './pages/EcommerceHome';
+import Survey from './pages/Surveys';
+import SurveysDetail from './pages/Surveys/SurveysDetail';
+import ProductionOrder from './pages/ProductionOrder';
+import ProductionOrderDetails from './pages/ProductionOrder/ProductionOrderDetails';
+import ContactUs from './pages/ContactUs';
+import ContactUsDetail from './pages/ContactUs/ContactUsDetail';
+import SupportTicket from './components/SupportTicket';
+import SupportTicketDetail from './components/SupportTicket/SupportTicketDetail';
+import DemandOrder from './pages/DemandOrder';
+import DemandOrderDetails from './pages/DemandOrder/DemandOrderDetails';
+import ServiceOrder from './pages/ServiceOrder';
+import ServiceOrderDetailsPage from './pages/ServiceOrder/ServiceOrderDetailsPage';
+import EmployeeMaster from './pages/EmployeeMaster';
+import EmployeeMasterDetail from './pages/EmployeeMaster/EmployeeMasterDetail';
+import CompetencyMaster from './pages/CompetencyMaster';
+import CompetencyMasterDetail from './pages/CompetencyMaster/CompetencyMasterDetail';
+import TechnicianScheduler from './pages/TechnicianScheduler';
+import BudgetDetail from './pages/Budget/BudgetDetail';
+import MarketSegmentDetail from './pages/MarketSegment/MarketSegmentDetail';
+import IrtTicket from './pages/IrtTicket';
+import IrtTicketDetail from './pages/IrtTicket/IrtTicketDetail';
 
 var notificationInterval: any = null;
 
@@ -262,7 +288,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -631,6 +657,9 @@ function App() {
             <PrivateRoute exact path={routes.budget.path}>
               <Budget />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.budget.path}/detail/:id`}>
+              <BudgetDetail />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.pricingCondition.path}>
               <PricingConditions />
             </PrivateRoute>
@@ -639,6 +668,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.marketSegment.path}>
               <MarketSegment />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.marketSegment.path}/detail/:id`}>
+              <MarketSegmentDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.deliveryTicket.path}>
               <DeliveryTicket />
@@ -805,6 +837,18 @@ function App() {
             <PrivateRoute exact path={`${routes.repairOrderDetail.path}/:id`}>
               <RepairOrderDetails />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.productionOrder.path}>
+              <ProductionOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productionOrderDetail.path}/:id`}>
+              <ProductionOrderDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.serviceOrder.path}>
+              <ServiceOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serviceOrderDetail.path}/:id`}>
+              <ServiceOrderDetailsPage />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.workOrder.path}>
               <WorkOrder />
             </PrivateRoute>
@@ -816,6 +860,66 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.workOrderTechnician.path}`}>
               <WorkOrderTechnician />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.frequentlyAskedQuestion.path}`}>
+              <FrequentlyAskedQuestion />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.frequentlyAskedQuestionDetail.path}/:id`}>
+              <FrequencyAskedQuestionDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.blog.path}`}>
+              <Blog />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.blogDetail.path}/:id`}>
+              <BlogDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.eCommerceHome.path}>
+              <EcommerceHome />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.surveys.path}>
+              <Survey />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.surveysDetail.path}/:id`}>
+              <SurveysDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.contactUs.path}>
+              <ContactUs />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.contactUsDetail.path}/:id`}>
+              <ContactUsDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.supportTicket.path}>
+              <SupportTicket />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.supportTicketDetail.path}/:id`}>
+              <SupportTicketDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.demandOrder.path}>
+              <DemandOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.demandOrderDetail.path}/:id`}>
+              <DemandOrderDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.employeeMaster.path}>
+              <EmployeeMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.employeeMasterDetail.path}/:id`}>
+              <EmployeeMasterDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.competencyMaster.path}`}>
+              <CompetencyMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.competencyMasterDetail.path}/:id`}>
+              <CompetencyMasterDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.technicianScheduler.path}`}>
+              <TechnicianScheduler />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.irtTicket.path}`}>
+              <IrtTicket />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.irtTicketDetail.path}/:id`}>
+              <IrtTicketDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

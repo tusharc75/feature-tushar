@@ -56,7 +56,7 @@ export default function StepDialog({
     const thisStep = steps?.find((e: any) => e._id == stepId);
     const options = [];
     steps?.forEach((e: any) => {
-      if (e._id !== stepId && e?.order > thisStep?.order) {
+      if (e._id !== stepId && e?.order > (thisStep?.order || -1)) {
         options.push({ optionValue: e._id, optionLabel: e.stepName });
       }
     });
@@ -90,7 +90,7 @@ export default function StepDialog({
         leadDay: stepData?.leadDay || 0,
         costPrice: stepData?.costPrice || 0,
         listPrice: stepData?.listPrice || 0,
-        currency: stepData?.currency || '',
+        currency: stepData?.currency || user?.brandCurrency || '',
         isPassFail: stepData?.isPassFail,
         isFailAddon: stepData?.isFailAddon,
         failAddon: stepData?.failAddon,
@@ -115,7 +115,7 @@ export default function StepDialog({
             leadDay: data?.leadDay || 0,
             costPrice: data?.costPrice || 0,
             listPrice: data?.listPrice || 0,
-            currency: data?.currency || '',
+            currency: data?.currency || user?.brandCurrency || '',
             isPassFail: data?.isPassFail,
             isFailAddon: data?.isFailAddon,
             failAddon: data?.failAddon,
@@ -139,7 +139,7 @@ export default function StepDialog({
         leadDay: 0,
         costPrice: 0,
         listPrice: 0,
-        currency: reference === 'workOrder' ? user?.currency : '',
+        currency: user?.currency || user?.brandCurrency,
         isPassFail: false,
         isFailAddon: false,
         failAddon: [],
@@ -259,7 +259,7 @@ export default function StepDialog({
           <Formik initialValues={stepDetails} onSubmit={handleSubmit} validateOnMount validate={validate}>
             {({ submitForm, touched, errors, setFieldValue, values }) => (
               <Form autoComplete="off" autoCorrect="off" noValidate>
-                <CustomDialogContent>
+                <CustomDialogContent style={{ minHeight: fullScreen ? 'calc(100vh - 112px)' : '' }}>
                   <Grid container spacing={2}>
                     <Grid xs={12} md={6} sm={6} item>
                       <Field
@@ -411,6 +411,7 @@ export default function StepDialog({
                                   checked={values['isPassAddon']}
                                   onChange={(e) => {
                                     setFieldValue('isPassAddon', e.target.checked);
+                                    setFieldValue('passAddon', []);
                                   }}
                                   color="primary"
                                 />
@@ -422,7 +423,7 @@ export default function StepDialog({
                             {values['isPassAddon'] && (
                               <Autocomplete
                                 options={[
-                                  { optionValue: 'all', optionLabel: 'Select All' },
+                                  { optionValue: 'all', optionLabel: 'Select All Consequent Services' },
                                   ...services?.filter((data: any) => data.optionValue !== serviceId)
                                 ]}
                                 fullWidth
@@ -459,6 +460,7 @@ export default function StepDialog({
                                   checked={values['isFailAddon']}
                                   onChange={(e) => {
                                     setFieldValue('isFailAddon', e.target.checked);
+                                    setFieldValue('failAddon', []);
                                   }}
                                   color="primary"
                                 />
@@ -469,7 +471,10 @@ export default function StepDialog({
                           <Grid item xs={6}>
                             {values['isFailAddon'] && (
                               <Autocomplete
-                                options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...services]}
+                                options={[
+                                  { optionValue: 'all', optionLabel: 'Select All Consequent Services' },
+                                  ...services?.filter((data: any) => data.optionValue !== serviceId)
+                                ]}
                                 fullWidth
                                 multiple
                                 disabled={notEditable}
@@ -479,7 +484,9 @@ export default function StepDialog({
                                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                 onChange={(_, newVal: any) => {
                                   const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
-                                  const values = isAll ? services.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
+                                  const values = isAll
+                                    ? [...services?.filter((data: any) => data.optionValue !== serviceId)].map((o) => o.optionValue)
+                                    : newVal?.map((val) => val.optionValue);
 
                                   setFieldValue('failAddon', values);
                                 }}
@@ -503,6 +510,7 @@ export default function StepDialog({
                                   checked={values?.isJumpStepPass}
                                   onChange={(e) => {
                                     setFieldValue('isJumpStepPass', e.target.checked);
+                                    setFieldValue('jumpStepsPass', []);
                                   }}
                                   color="primary"
                                 />
@@ -513,7 +521,7 @@ export default function StepDialog({
                           <Grid item xs={6}>
                             {values['isJumpStepPass'] && (
                               <Autocomplete
-                                options={[{ optionValue: 'all', optionLabel: 'Select All Consequent Steps' }, ...stepOption]}
+                                options={[{ optionValue: 'all', optionLabel: 'Select All Consequent Steps' }, ...allFollowingStepToJump]}
                                 fullWidth
                                 multiple
                                 disabled={notEditable}
@@ -525,7 +533,9 @@ export default function StepDialog({
                                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                 onChange={(_, newVal: any) => {
                                   const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
-                                  const values = isAll ? stepOption.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
+                                  const values = isAll
+                                    ? [...allFollowingStepToJump].map((o) => o.optionValue)
+                                    : newVal?.map((val) => val.optionValue);
 
                                   setFieldValue('jumpStepsPass', values);
                                 }}
@@ -549,6 +559,7 @@ export default function StepDialog({
                                   checked={values?.isJumpStepFail}
                                   onChange={(e) => {
                                     setFieldValue('isJumpStepFail', e.target.checked);
+                                    setFieldValue('jumpStepsFail', []);
                                   }}
                                   color="primary"
                                 />
@@ -615,6 +626,7 @@ export default function StepDialog({
                                   checked={values?.isReturnToStepOnFail}
                                   onChange={(e) => {
                                     setFieldValue('isReturnToStepOnFail', e.target.checked);
+                                    setFieldValue('returnToStepOnFail', '');
                                   }}
                                   color="primary"
                                 />
@@ -661,6 +673,7 @@ export default function StepDialog({
                                   checked={values?.isReturnToServiceOnFail}
                                   onChange={(e) => {
                                     setFieldValue('isReturnToServiceOnFail', e.target.checked);
+                                    setFieldValue('returnToServiceOnFail', '');
                                   }}
                                   color="primary"
                                 />
@@ -708,22 +721,22 @@ export default function StepDialog({
                     </Box>
                   )}
                 </CustomDialogContent>
-                {!notEditable && (
-                  <CustomDialogFooter>
-                    <Button
-                      size="small"
-                      color="primary"
-                      onClick={() => {
-                        handleClose();
-                      }}
-                    >
-                      Cancel
-                    </Button>
+                <CustomDialogFooter>
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={() => {
+                      handleClose();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  {reference === 'workOrder' && notEditable ? null : (
                     <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit">
                       Save
                     </CustomButton>
-                  </CustomDialogFooter>
-                )}
+                  )}
+                </CustomDialogFooter>
               </Form>
             )}
           </Formik>
@@ -755,8 +768,8 @@ export default function StepDialog({
             setOpenFieldDialog(false);
           }}
           handleSucess={(data: any) => {
-            setOpenFieldDialog(false);
             setFields(data);
+            setOpenFieldDialog(false);
           }}
         />
       )}

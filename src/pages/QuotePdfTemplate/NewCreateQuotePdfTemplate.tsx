@@ -19,7 +19,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete } from '@material-ui/lab';
 import { useData } from '../../StateProvider/Provider';
-import { quoteBuilder, RESOURCE_LABEL, resourceNames, PDF_RESOURCE_LIST } from '../../constants/helpers';
+import { quoteBuilder, PDF_RESOURCE_LIST } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomTable from './customTable/customTable';
 import { useLocation } from 'react-router-dom';

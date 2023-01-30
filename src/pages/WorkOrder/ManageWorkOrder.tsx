@@ -45,7 +45,9 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
     const [ownerData, setOwnerData] = useState([]);
     const [collaboratorData, setCollaboratorData] = useState([]);
     const [disableOwnerSelection, setDisableOwnerSelection] = useState(false);
-
+    const [assetOptions, setAssetOptions] = useState([])
+    const [productOptions, setProductOptions] = useState([])
+    const [assetOptionsData, setAssetOptionData] = useState([])
     const ref = useRef(null);
 
     useEffect(() => {
@@ -75,26 +77,41 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
         fetchFields()
     }, [workOrderId, refrenceData]);
 
+
     const fetchFields = async () => {
         try {
             let data;
             const response = await axiosInstance().get(`/field?resource=${sidebarResource["workOrder"]}`)
             data = response?.data?.data
             let serializedAssetFieldIndex = data.findIndex((obj) => obj?.fieldData.fieldName === 'serializedAsset');
+            let productFieldIndex = data.findIndex((obj) => obj?.fieldData.fieldName === 'product');
             if (serializedAssetFieldIndex > -1) {
                 const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${serializedAsset.resource}`);
                 if (lookupResource["Serialized Asset"]) {
                     data[serializedAssetFieldIndex].fieldData.option = lookupResource["Serialized Asset"]
                 }
             }
+            if(productFieldIndex > -1){
+                const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Product`);
+                if (lookupResource["Product"]) {
+                    data[productFieldIndex].fieldData.option = lookupResource["Product"]
+                }
+            }
             let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
+            const productOptionsData = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData.option?.filter((obj)=>obj?.serializedProduct  === true);
+            const assetOptionsData = data.find((obj) => obj?.fieldData.fieldName === 'serializedAsset')?.fieldData.option;
+            setProductOptions(productOptionsData);
+            setAssetOptionData(assetOptionsData);
+            
             if (workOrderId) {
                 let data;
                 const response = await axiosInstance().get(`${workOrder.api}/${workOrderId}`)
                 data = response?.data?.data
                 setWorkOrderData(data)
                 setDisableOwnerSelection(workOrderId && user.user._id !== data?.owner?.optionValue);
+                setAssetOptions(assetOptionsData.filter((i)=>i.warehouse === data?.warehouse?.optionValue))
                 if (isClone) {
                     const { _id, createdBy, updatedBy, workOrderNumber, status, ...rest } = data
                     rest['workOrderNumber'] = `WO_${generateUniqueIdOnly()}`;
@@ -357,7 +374,79 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                                                                 );
                                                                             }}
                                                                         />
-                                                                    ) : <FormTypes
+                                                                    ): field.fieldName === "warehouse" ? (
+                                                                     <FormTypes
+                                                                        {...field}
+                                                                        fieldData={field}
+                                                                        isNew={!Boolean(workOrderId)}
+                                                                        disabled={(refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)) || (refrenceData?.warehouse && field.fieldName === 'warehouse') || Boolean(workOrderId) && field.disableOnEdit}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={(name, value) => {
+                                                                            setFieldValue(name, value)
+                                                                            let data = assetOptionsData.filter((i)=>i.warehouse === value)
+                                                                            setAssetOptions(data);
+                                                                        }}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                        imageOrFileUploadCompletePercentage={null}
+                                                                    />
+                                                                    ) :  field.fieldName === "product" ? (
+                                                                        <FormTypes
+                                                                           {...field}
+                                                                           fieldData={field}
+                                                                           isNew={!Boolean(workOrderId)}
+                                                                           disabled={(refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)) || (refrenceData?.product && field.fieldName === 'product') || Boolean(workOrderId) && field.disableOnEdit}
+                                                                           values={values}
+                                                                           errors={errors}
+                                                                           touched={touched}
+                                                                           label={field.fieldLabel}
+                                                                           name={field.fieldName}productOptions
+                                                                           type={field.type}
+                                                                           options={productOptions}
+                                                                           setFieldValue={(name, value) => {
+                                                                               setFieldValue(name, value)
+                                                                           }}
+                                                                           required={field.required}
+                                                                           fullWidth
+                                                                           isTooltip={field?.isTooltip || false}
+                                                                           tooltipMessage={field?.tooltipMessage}
+                                                                           size="small"
+                                                                           imageOrFileUploadCompletePercentage={null}
+                                                                       />
+                                                                       ) : field.fieldName === "serializedAsset" ? (
+                                                                        <FormTypes
+                                                                           {...field}
+                                                                           fieldData={field}
+                                                                           isNew={!Boolean(workOrderId)}
+                                                                           disabled={(refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)) || (refrenceData?.serializedAsset && field.fieldName === 'serializedAsset') || Boolean(workOrderId) && field.disableOnEdit}
+                                                                           values={values}
+                                                                           errors={errors}
+                                                                           touched={touched}
+                                                                           label={field.fieldLabel}
+                                                                           name={field.fieldName}
+                                                                           type={field.type}
+                                                                           options={assetOptions}
+                                                                           setFieldValue={(name, value) => {
+                                                                               setFieldValue(name, value)
+                                                                           }}
+                                                                           required={field.required}
+                                                                           fullWidth
+                                                                           isTooltip={field?.isTooltip || false}
+                                                                           tooltipMessage={field?.tooltipMessage}
+                                                                           size="small"
+                                                                           imageOrFileUploadCompletePercentage={null}
+                                                                       />
+                                                                       )                                              
+                                                                    : <FormTypes
                                                                         {...field}
                                                                         fieldData={field}
                                                                         isNew={!Boolean(workOrderId)}

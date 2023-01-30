@@ -10,12 +10,13 @@ interface Props {
   currency: string;
   type: string;
   selectedDashboard: string;
+  isCurrency?: boolean;
 }
 
-const TableView = ({ id, chartData, isScreenSmall, currency, selectedDashboard }: Props) => {
-  const [tableData, setTableData] = useState([])
+const TableView = ({ id, chartData, isScreenSmall, isCurrency, currency, selectedDashboard }: Props) => {
+  const [tableData, setTableData] = useState([]);
   useEffect(() => {
-    if(!chartData || chartData.length === 0) return;
+    if (!chartData || chartData.length === 0) return;
 
     const col = Object.keys(chartData[0])
       .map((k) => {
@@ -69,7 +70,7 @@ const TableView = ({ id, chartData, isScreenSmall, currency, selectedDashboard }
                     ? data[key].toFixed(2)
                     : selectedDashboard && selectedDashboard.includes('Asset')
                     ? data[key]
-                    : formatAmountWithCurrency(currency, Number(data[key]) ? data[key] : '00').fullFormatAmount}
+                    : formatAmountWithCurrency(currency, Number(data[key]) ? data[key] : '00', isCurrency).fullFormatAmount}
                 </TableCell>
               ))}
             </TableRow>

@@ -8,28 +8,28 @@ const RentalStatus = Object.keys(INVENTORY_STATUS).map((key) => ({
 
 const openCloseStatus = [
   {
-    optionValue: "open",
-    optionLabel: "Open",
+    optionValue: 'open',
+    optionLabel: 'Open'
   },
   {
-    optionValue: "close",
-    optionLabel: "Close",
-  },
-]
+    optionValue: 'close',
+    optionLabel: 'Close'
+  }
+];
 
 const quotesStatus = [
   { optionLabel: 'Open', optionValue: 'open' },
   { optionLabel: 'Won', optionValue: 'won' },
   { optionLabel: 'Lost', optionValue: 'lost' },
   { optionLabel: 'Offered', optionValue: 'offered' }
-]
+];
 
 export const periodOption = [
-  { optionLabel: "Monthly", optionValue: "monthly" },
-  { optionLabel: "Quarterly", optionValue: "quaterly" },
-]
+  { optionLabel: 'Monthly', optionValue: 'monthly' },
+  { optionLabel: 'Quarterly', optionValue: 'quaterly' }
+];
 
-export const GRAPH_TYPES = ['Chart', 'Table', 'Map', "Custom"];
+export const GRAPH_TYPES = ['Chart', 'Table', 'Map', 'Custom'];
 
 export const CHART_TYPES = ['Line', 'Bar', 'Pie', 'Doughnut'];
 
@@ -45,7 +45,7 @@ export const FILTERS_OPTIONS = [
   { title: 'Country Sell To', key: 'countrySellTo' },
   { title: 'Country', key: 'country' },
   { title: 'Status', key: 'status' },
-  { title: 'Period', key: 'period' },
+  { title: 'Period', key: 'period' }
 ];
 
 export const baseURL = '/dashboard-master';
@@ -57,24 +57,24 @@ export type IFilterType = {
 };
 
 export type KPIListType = {
-  id: string | number,
-  graphType: string[],
-  chartType?: string[],
+  id: string | number;
+  graphType: string[];
+  chartType?: string[];
   name: string;
   kpi: string;
   resource: string;
   custom?: boolean;
-  horizontalBar?: false
+  horizontalBar?: false;
   currencyConverter?: boolean;
-  filters: IFilterType[]
+  filters: IFilterType[];
 };
 
 export const statuses = {
-  "asset/location-base-assets": RentalStatus,
-  "asset/customer-in-rental": openCloseStatus,
-  "quote/quote-customer-account": quotesStatus,
-  "quote/sales-rep": quotesStatus
-}
+  'asset/location-base-assets': RentalStatus,
+  'asset/customer-in-rental': openCloseStatus,
+  'quote/quote-customer-account': quotesStatus,
+  'quote/sales-rep': quotesStatus
+};
 
 // export const kpiList: KPIListType[] = [
 //   {
@@ -159,6 +159,7 @@ export interface IFormDataType {
   filters?: IFilterType[];
   kpi: KPIListType;
   statusOptions?: { optionValue: string; optionLabel: string }[];
+  currency?: boolean;
 }
 
 export const defaultFormConfigs: IFormDataType = {
@@ -166,10 +167,11 @@ export const defaultFormConfigs: IFormDataType = {
   graphType: '',
   chartType: '',
   chartTitle: '',
-  kpi: { name: "", kpi: "", resource: "", id: 0, graphType: [], chartType: [], filters: [] },
+  kpi: { name: '', kpi: '', resource: '', id: 0, graphType: [], chartType: [], filters: [] },
   hasFilters: false,
   hasTableView: false,
   hasExport: false,
   statusOptions: [],
-  filters: []
+  filters: [],
+  currency: false
 };
