@@ -22,8 +22,6 @@ import { genrateCustomTableColumns } from "src/constants/columns"
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
-import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
-import { Link } from 'react-router-dom'
 import SendEmail from './../SendEmail';
 import { FaEye } from "react-icons/fa";
 import InventoryStatesDialog from "./InventoryStatesDialog";
@@ -57,7 +55,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     const [rowsData, setRowsData] = useState(null);
     const [allFields, setAllFields] = useState([]);
     const [material, setMaterial] = useState([]);
-    const [isInlineEdit, setIsInlineEdit] = useState(false);
 
     useEffect(() => {
         fetchFields()
@@ -180,18 +177,20 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
             Cell: ({ row }) => {
                 return allowedToEdit ? (
                     <>
-                        <HtmlTooltip title="Inventory States">
-                            <IconButton
-                                size="small"
-                                color="primary"
-                                aria-label="Inventory"
-                                onClick={() => {
-                                    setShowInventoryStatesDialog({ open: true, product: row.original?.productDetail?._id, qty: row.original?.qty })
-                                }}
-                            >
-                                <FaEye color="primary" />
-                            </IconButton>
-                        </HtmlTooltip>
+                        {permissions?.irtTicket?.isCreate &&
+                            <HtmlTooltip title="Inventory States">
+                                <IconButton
+                                    size="small"
+                                    color="primary"
+                                    aria-label="Inventory"
+                                    onClick={() => {
+                                        setShowInventoryStatesDialog({ open: true, product: row.original?.productDetail?._id, qty: row.original?.qty })
+                                    }}
+                                >
+                                    <FaEye color="primary" />
+                                </IconButton>
+                            </HtmlTooltip>
+                        }
                         {(row.original?.actualReceived === undefined || row.original?.actualReceived === 0) && <GridDeleteIcon
                             hasDeletePermission={permissions?.purchaseOrder?.isUpdate}
                             ownerId={user?.user?._id}
@@ -212,7 +211,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     }
 
     const fetchPurchaseOrderProduct = () => {
-
         setNextStep(false)
         axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`).then(({ data: { data } }) => {
             setPurchaseOrderProduct(JSON.parse(JSON.stringify(data)))
@@ -407,7 +405,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 </div>
             </Box>}
             {columns && rowsData ? (
-                <Box zIndex={5} width={'100%'} height={'calc(100vh - 393px)'}  >
+                <Box zIndex={5} mt={2} width={'100%'} height={'calc(100vh - 393px)'}  >
                     <CustomReactTable
                         height={'calc(100vh - 393px)'}
                         columns={columns}

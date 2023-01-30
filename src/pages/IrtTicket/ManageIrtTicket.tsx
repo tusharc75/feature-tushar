@@ -18,10 +18,9 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import { useHistory } from "react-router-dom";
 import IrtTicketDetail from './IrtTicketDetail';
 
-const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, purchaseOrderData = null }) => {
-  const {
-    state: { user }
-  }: any = useData();
+const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
+
+  const { state: { user } }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
@@ -66,22 +65,19 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, purch
             toastConfig.setToastConfig(error);
           });
       }
-      else if (purchaseOrderData) {
+      else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['irtTicketNumber'] = `IRT_${generateUniqueIdOnly()}`;
-        tempInitialData['purchaseOrder'] = purchaseOrderData?.purchaseOrder ?  purchaseOrderData?.purchaseOrder : null ;
-        tempInitialData['warehouse'] = purchaseOrderData?.warehouse ?  purchaseOrderData?.warehouse : null ;
-        tempInitialData['qty'] = purchaseOrderData?.qty && purchaseOrderData?.qty > -1 ?  purchaseOrderData?.qty : null ;
-        tempInitialData['amount'] = purchaseOrderData?.amount ?  purchaseOrderData?.amount : null ;
-        tempInitialData['approver'] = purchaseOrderData?.approver ?  purchaseOrderData?.approver : null ;
-        tempInitialData['collaborator'] = purchaseOrderData?.collaborator ?  purchaseOrderData?.collaborator : null ;
-        setInitialData({
-          fields: fieldsDataForCreate,
-          values: tempInitialData
-        });
-      } else {
-        const tempInitialData = getObjKeys('', fieldsDataForCreate);
-        tempInitialData['irtTicketNumber'] = `IRT_${generateUniqueIdOnly()}`;
+
+        if (referenceData) {
+          tempInitialData['irtTicketNumber'] = `IRT_${generateUniqueIdOnly()}`;
+          tempInitialData['purchaseOrder'] = referenceData?.purchaseOrder;
+          tempInitialData['warehouse'] = referenceData?.warehouse;
+          tempInitialData['qty'] = referenceData?.qty;
+          tempInitialData['amount'] = referenceData?.amount;
+          tempInitialData['product'] = referenceData?.product;
+          tempInitialData['collaborator'] = referenceData?.collaborator;
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData

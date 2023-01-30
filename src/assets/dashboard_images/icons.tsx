@@ -1,8 +1,8 @@
-import { ReactComponent as Hero } from './eQuip-t_dashboard.svg';
-import { ReactComponent as HeroTextIcon } from './heroTextIcon.svg';
-import { ReactComponent as SidebarCogIcon } from './sidebarCogIcon.svg';
-import { ReactComponent as ColabIcon } from './colab.svg';
-import { ReactComponent as SetupsIcon } from './setups.svg';
+import Hero from './eQuip-t_dashboard.svg';
+import HeroTextIcon from './heroTextIcon.svg';
+import SidebarCogIcon from './sidebarCogIcon.svg';
+import ColabIcon from './colab.svg';
+import SetupsIcon from './setups.svg';
 import { IMAGE_HEIGHT, IMAGE_WIDTH } from 'src/assets/dashboard_images';
 
 const HERO = () => {
