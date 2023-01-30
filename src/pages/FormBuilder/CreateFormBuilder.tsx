@@ -18,6 +18,7 @@ import { RiCloseCircleFill, RiSaveFill } from 'react-icons/all';
 import TextField from '@material-ui/core/TextField';
 import { camelCase } from 'lodash';
 import { Autocomplete } from '@material-ui/lab';
+import History from "./History"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
   linksContainer: {
     display: 'flex',
     justifyContent: 'flex-end',
-    ['@media (max-width: 960px)']: {
+    '@media (max-width: 960px)': {
       display: 'none'
     }
   },
@@ -75,7 +76,6 @@ const CreateFormBuilder = () => {
   });
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
-
   const history = useHistory();
   const { resource } = useParams();
   const toastConfig = useContext(CustomToastContext);
@@ -88,6 +88,7 @@ const CreateFormBuilder = () => {
   const [resourceLabel, setResourceLabel] = useState('');
   const [homePageLabel, setHomePageLabel] = useState('');
   const [sectionName, setsectionName] = useState('');
+  const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
 
   const sectionNameList = ['CRM +', 'ROM', 'Accounts', 'Product Setup', 'Activities', 'Admin Portal'];
 
@@ -110,6 +111,15 @@ const CreateFormBuilder = () => {
     window.history.pushState(null, null, window.location.pathname);
     if (formBuilderPermissions.isUpdate) setShowConfirmDialog(true);
   };
+
+  const handleOpenHistoryDialog = () => {
+    setOpenHistoryDialog(true);
+  };
+
+  const closeHistoryDialog = () => {
+    setOpenHistoryDialog(false);
+  };
+
 
   useEffect(() => {
     window.history.pushState(null, null, window.location.pathname);
@@ -168,7 +178,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => { });
+          .catch((error) => {});
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -230,46 +240,33 @@ const CreateFormBuilder = () => {
     reader.readAsBinaryString(f);
   };
 
-  return (<Fragment>
-    <Box className="main-container-v1">
-      <Box className="headerbox-v1">
-        <Box className="nav-v1">
-          <CustomBreadCrumbs
-            routes={[routes.formBuilder, { title: resource }]}
-            isConfirmBeforeClick={true}
-            onBreadCrumbClick={(path) => {
-              if (!isEqual(orisection, section) && formBuilderPermissions.isUpdate) {
-                setShowConfirmDialog(true);
-              } else history.push({ pathname: path });
-            }}
-          />
-        </Box>
-        <Box className="controls-v1">
-          <Box className="control-buttons-v1">
-            <div className={classes.linksContainer} style={{ display: 'none' }}>
-              <label htmlFor="importField" className="cursor-pointer mr-3">
-                Import Fields
-                <input
-                  onClick={(e: any) => (e.target.value = null)}
-                  id="importField"
-                  name="importField"
-                  onChange={handleImportFields}
-                  style={{
-                    opacity: '0',
-                    position: 'absolute',
-                    zIndex: -1
-                  }}
-                  type="file"
-                />
-              </label>
-              <label className="cursor-pointer" onClick={handleExportFields}>
-                Export Fields
-              </label>
-              <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
-            </div>
-            <Menu id="importField" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-              <MenuItem>
-                <label htmlFor="importField" className="cursor-pointer">
+  return (
+    <Fragment>
+      <Box className="main-container-v1">
+        <Box className="headerbox-v1">
+          <Box className="nav-v1">
+            <CustomBreadCrumbs
+              routes={[routes.formBuilder, { title: resource }]}
+              isConfirmBeforeClick={true}
+              onBreadCrumbClick={(path) => {
+                if (!isEqual(orisection, section) && formBuilderPermissions.isUpdate) {
+                  setShowConfirmDialog(true);
+                } else history.push({ pathname: path });
+              }}
+            />
+          </Box>
+          <Box className="controls-v1">
+            <Box className="control-buttons-v1">
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                size="small"
+                className={'btn-outline-v1'}
+                onClick={handleOpenHistoryDialog}
+              >
+                History
+              </Button>
+              <div className={classes.linksContainer} style={{ display: 'none' }}>
+                <label htmlFor="importField" className="cursor-pointer mr-3">
                   Import Fields
                   <input
                     onClick={(e: any) => (e.target.value = null)}
@@ -284,147 +281,171 @@ const CreateFormBuilder = () => {
                     type="file"
                   />
                 </label>
-              </MenuItem>
-              <MenuItem onClick={handleExportFields}>Export Fields</MenuItem>
-            </Menu>
-            {isMobile && (
-              <IconButton onClick={handleClick} className={classes.menuButtonList}>
-                <IoIosArrowDropdown className={classes.expandIcon} />
-              </IconButton>
-            )}
+                <label className="cursor-pointer" onClick={handleExportFields}>
+                  Export Fields
+                </label>
+                <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
+              </div>
+              <Menu id="importField" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+                <MenuItem>
+                  <label htmlFor="importField" className="cursor-pointer">
+                    Import Fields
+                    <input
+                      onClick={(e: any) => (e.target.value = null)}
+                      id="importField"
+                      name="importField"
+                      onChange={handleImportFields}
+                      style={{
+                        opacity: '0',
+                        position: 'absolute',
+                        zIndex: -1
+                      }}
+                      type="file"
+                    />
+                  </label>
+                </MenuItem>
+                <MenuItem onClick={handleExportFields}>Export Fields</MenuItem>
+              </Menu>
+              {isMobile && (
+                <IconButton onClick={handleClick} className={classes.menuButtonList}>
+                  <IoIosArrowDropdown className={classes.expandIcon} />
+                </IconButton>
+              )}
+            </Box>
           </Box>
         </Box>
-      </Box>
-      <Box className={`detail-container-v1`}>
-        {section ? (
-          <Fragment>
-            <Box p={1} pb={0} ml={1} bgcolor="white">
-              <Grid container spacing={1}>
-                <Grid item xs={2}>
-                  <Typography variant="caption">Resource</Typography>
-                  <Typography variant="body1">{resource}</Typography>
-                </Grid>
-                <Grid item xs={3}>
-                  <TextField
-                    variant="outlined"
-                    type="text"
-                    label="Resource Label"
-                    required={true}
-                    name="name"
-                    fullWidth
-                    margin="dense"
-                    value={resourceLabel}
-                    onChange={(e) => {
-                      setResourceLabel(e.target.value.trimStart());
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <TextField
-                    variant="outlined"
-                    type="text"
-                    label="Home Page Label"
-                    name="homePageLabel"
-                    fullWidth
-                    margin="dense"
-                    value={homePageLabel}
-                    onChange={(e) => {
-                      setHomePageLabel(e.target.value.trimStart());
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={2}>
-                  <Autocomplete
-                    id="section-name"
-                    freeSolo
-                    autoSelect
-                    options={sectionNameList}
-                    getOptionLabel={(option) => option}
-                    renderInput={(params) =>
-                      <TextField {...params}
-                        label="Section Name"
-                        variant="outlined"
-                        margin="dense"
-                        fullWidth />
-                    }
-                    value={sectionName}
-                    onChange={(e, value) => {
-                      setsectionName(value);
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={2} container justifyContent="flex-end">
-                  <Box>
-                    {formBuilderPermissions.isUpdate && (
-                      <Button
-                        disabled={isUpdating}
-                        color="primary"
-                        size="small"
-                        onClick={handleSave}
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        style={isMobile && !isTablet ? { color: 'var(--success)' } : {}}
-                      >
-                        {isMobile && !isTablet ? <RiSaveFill size={24} /> : 'Save'}
-                        {isUpdating && <CircularProgress size={24} />}
-                      </Button>
-                    )}
-                  </Box>
-                  <Box ml={1}>
-                    <Button
-                      color="primary"
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      style={isMobile && !isTablet ? { color: 'var(--error)' } : {}}
-                      onClick={() => {
-                        if (!isEqual(orisection, section) && formBuilderPermissions.isUpdate) {
-                          setShowConfirmDialog(true);
-                        } else {
-                          history.push({ pathname: routes.formBuilder.path });
-                        }
+        <Box className={`detail-container-v1`}>
+          {section ? (
+            <Fragment>
+              <Box p={1} pb={0} ml={1} bgcolor="white">
+                <Grid container spacing={1}>
+                  <Grid item xs={2}>
+                    <Typography variant="caption">Resource</Typography>
+                    <Typography variant="body1">{resource}</Typography>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <TextField
+                      variant="outlined"
+                      type="text"
+                      label="Resource Label"
+                      required={true}
+                      name="name"
+                      fullWidth
+                      margin="dense"
+                      value={resourceLabel}
+                      onChange={(e) => {
+                        setResourceLabel(e.target.value.trimStart());
                       }}
-                    >
-                      {' '}
-                      {isMobile && !isTablet ? <RiCloseCircleFill size={24} /> : 'Close'}
-                    </Button>
-                  </Box>
+                    />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <TextField
+                      variant="outlined"
+                      type="text"
+                      label="Home Page Label"
+                      name="homePageLabel"
+                      fullWidth
+                      margin="dense"
+                      value={homePageLabel}
+                      onChange={(e) => {
+                        setHomePageLabel(e.target.value.trimStart());
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={2}>
+                    <Autocomplete
+                      id="section-name"
+                      freeSolo
+                      autoSelect
+                      options={sectionNameList}
+                      getOptionLabel={(option) => option}
+                      renderInput={(params) => <TextField {...params} label="Section Name" variant="outlined" margin="dense" fullWidth />}
+                      value={sectionName}
+                      onChange={(e, value) => {
+                        setsectionName(value);
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={2} container justifyContent="flex-end">
+                    <Box>
+                      {formBuilderPermissions.isUpdate && (
+                        <Button
+                          disabled={isUpdating}
+                          color="primary"
+                          size="small"
+                          onClick={handleSave}
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          style={isMobile && !isTablet ? { color: 'var(--success)' } : {}}
+                        >
+                          {isMobile && !isTablet ? <RiSaveFill size={24} /> : 'Save'}
+                          {isUpdating && <CircularProgress size={24} />}
+                        </Button>
+                      )}
+                    </Box>
+                    <Box ml={1}>
+                      <Button
+                        color="primary"
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        size="small"
+                        style={isMobile && !isTablet ? { color: 'var(--error)' } : {}}
+                        onClick={() => {
+                          if (!isEqual(orisection, section) && formBuilderPermissions.isUpdate) {
+                            setShowConfirmDialog(true);
+                          } else {
+                            history.push({ pathname: routes.formBuilder.path });
+                          }
+                        }}
+                      >
+                        {' '}
+                        {isMobile && !isTablet ? <RiCloseCircleFill size={24} /> : 'Close'}
+                      </Button>
+                    </Box>
+                  </Grid>
                 </Grid>
-              </Grid>
+              </Box>
+              <Box>
+                <FormBuilder
+                  section={section}
+                  setSection={setSection}
+                  deleteField={deleteField}
+                  setDeleteField={setDeleteField}
+                  isCustomField={false}
+                  extraFields={[]}
+                  module="form-builder"
+                  resource={resource}
+                />
+              </Box>
+              {showConfirmDialog ? (
+                <ConfirmCancelDialog
+                  close={() => setShowConfirmDialog(false)}
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false);
+                    handleSave();
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false);
+                    history.push({ pathname: routes.formBuilder.path });
+                  }}
+                />
+              ) : null}
+            </Fragment>
+          ) : (
+            <Box p={2} height={500} bgcolor="white">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
-            <Box>
-              <FormBuilder
-                section={section}
-                setSection={setSection}
-                deleteField={deleteField}
-                setDeleteField={setDeleteField}
-                isCustomField={false}
-                extraFields={[]}
-                module="form-builder"
-                resource={resource}
-              />
-            </Box>
-            {showConfirmDialog ? (
-              <ConfirmCancelDialog
-                close={() => setShowConfirmDialog(false)}
-                open={showConfirmDialog}
-                onSave={() => {
-                  setShowConfirmDialog(false);
-                  handleSave();
-                }}
-                onClose={() => {
-                  setShowConfirmDialog(false);
-                  history.push({ pathname: routes.formBuilder.path });
-                }}
-              />
-            ) : null}
-          </Fragment>
-        ) : (
-          <Box p={2} height={500} bgcolor="white">
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
+          )}
+        </Box>
       </Box>
-    </Box>
-  </Fragment>
+      {openHistoryDialog && (
+        <History 
+        onClose={() =>closeHistoryDialog()}
+         open={openHistoryDialog}
+         resource={resource}
+        />
+      )
+      }
+    </Fragment>
   );
 };
 

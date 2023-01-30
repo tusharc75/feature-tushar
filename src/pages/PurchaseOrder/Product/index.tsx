@@ -21,11 +21,12 @@ import { prepareDataForGrid } from "src/constants/helpers";
 import { getFrameworkComponents, genrateColoum } from "src/constants/columns"
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
-import { RiEditCircleLine } from "react-icons/ri";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom'
 import SendEmail from './../SendEmail';
+import { FaEye } from "react-icons/fa";
+import InventoryStatesDialog from "./InventoryStatesDialog";
 
 const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission, updateStatus, checkReceivedProduct }) => {
 
@@ -40,6 +41,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     const [isAddNewProduct, setIsAddNewProduct] = useState(false)
 
     const [showProductDialog, setShowProductDialog] = useState(false)
+    const [showInventoryStatesDialog, setShowInventoryStatesDialog] = useState({ open: false, product: null, qty: 0 })
     const [selectedProductData, setSelectedProductData] = useState(null)
     const [isBulkEdit, setIsBulkEdit] = useState(false)
 
@@ -185,6 +187,18 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     }}
                 >
                     <EditIcon color="primary" />
+                </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip title="Inventory States">
+                <IconButton
+                    size="small"
+                    color="primary"
+                    aria-label="Inventory"
+                    onClick={() => {
+                        setShowInventoryStatesDialog({ open: true, product: params.data?.productDetail?._id, qty: params.data?.qty })
+                    }}
+                >
+                    <FaEye color="primary" />
                 </IconButton>
             </HtmlTooltip>
             {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && <GridDeleteIcon
@@ -462,6 +476,15 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     onOk={handleDelete}
                 />
             }
+            {showInventoryStatesDialog.open &&
+                <InventoryStatesDialog
+                    onClose={() => {
+                        setShowInventoryStatesDialog({ open: false, product: null, qty: 0 })
+                    }}
+                    product={showInventoryStatesDialog.product}
+                    warehouse={purchaseOrderData?.warehouse?.optionValue}
+                    data={{ qty: showInventoryStatesDialog.qty }}
+                />}
         </Fragment>
     );
 };

@@ -44,6 +44,7 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import DemandOrderQTYDialog from './DemandOrderDetailDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -138,13 +139,21 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
 
     var data = fieldsToShow || [];
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const coloum: any = [
+    const newColumns = genrateCustomTableColumns(data, "", "");
+    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay'
+    }
+    let coloum: any = [
       {
         accessor: 'srno',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
       },
       {
         accessor: 'type',
@@ -196,82 +205,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
         )
       }
     ];
-    data.forEach((element: any) => {
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-        });
-      } else if (element.fieldName === 'supplierAccount') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? (
-              <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
-            ) : (
-              <NoDataCell />
-            )
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                )
-            });
-          });
-        }
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qty';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />),
-          editable: element.fieldName === 'qty' ? true : false
-        });
-      }
-    });
+    coloum = [...coloum, ...newColumns];
     {
       isMobile ? (
         <Box display={'none'} />
@@ -302,33 +236,16 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
         })
       );
     }
-    coloum.forEach((element) => {
-      if (element.accessor.includes('detail')) {
-        element['Footer'] = () => {
-          return <>Total</>;
-        };
-      } else if (element.accessor === 'qty') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
-
     setColumns(coloum);
-    fetchProductInventory();
+    fetchDemandOrderProduct();
   };
 
-  const fetchProductInventory = async () => {
+  const fetchDemandOrderProduct = async () => {
     setNextStep(false);
     var data: any = [];
-    var inventory: any = [];
     const response = await axiosInstance().get(`${demandOrder.api}/productpackage/${salesOrderData._id}`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
-    inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
@@ -340,11 +257,9 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
             ? parent.serviceDetail?.serviceName
             : parent.packageDetail?.packageName
         }`;
-      parent.qty = parent.qty;
+      parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
-      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
-      parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
-      parent.subRows = generateNestedData(data.material, inventory, parent);
+      parent.subRows = generateNestedData(data.material, parent);
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(true);
@@ -355,7 +270,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
     setSelectedProducts([]);
   };
 
-  const generateNestedData = (material, inventory, parent) => {
+  const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     let productIndex = 0;
     subRows.forEach((_subRow, j) => {
@@ -368,11 +283,9 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
             ? _subRow.serviceDetail?.serviceName
             : _subRow.packageDetail?.packageName
         }`;
-      _subRow.qty = _subRow.qty;
+      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
-      _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
-      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
-      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+      _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -400,7 +313,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
       .post(`${demandOrder.api}/productpackage/${salesOrderData._id}`, { material })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        fetchProductInventory();
+        fetchDemandOrderProduct();
         setAddingProducts(false);
       })
       .catch((error) => {
@@ -417,7 +330,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
-        fetchProductInventory();
+        fetchDemandOrderProduct();
       })
       .catch((error) => {
         setUpdating(false);
@@ -431,7 +344,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
       .put(`${demandOrder.api}/productpackage/${salesOrderData?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
-        fetchProductInventory();
+        fetchDemandOrderProduct();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -448,8 +361,8 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = material.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qty')) {
-      inputField['qty'] = inputField['qty'];
+    if (inputField.hasOwnProperty('qtyDisplay')) {
+      inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(material, inputField, allFields, updatedData);
