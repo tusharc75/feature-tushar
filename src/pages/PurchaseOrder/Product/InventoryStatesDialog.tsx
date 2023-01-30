@@ -9,10 +9,10 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, purchaseOrder } from 'src/constants/helpers';
 import { useHistory } from 'react-router-dom';
-import IrtTicket from 'src/pages/IrtTicket';
 import ManageIrtTicket from 'src/pages/IrtTicket/ManageIrtTicket';
 
 const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrderData }) => {
+
     const history = useHistory();
     const [fullScreen, setFullScreen] = useState(true);
     const [irtTicketDialog, setIrtTicketDialog] = useState({ open: false, data: null });
@@ -80,13 +80,13 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
                                                 <TableCell>{item?.age}</TableCell>
                                                 <TableCell>{item?.managers?.map((e) => e.optionLabel)?.toString()}</TableCell>
                                                 <TableCell>
-                                                    {irtTicketData.find(d => d.warehouse?.optionValue === item?.warehouse?.optionValue) ?
+                                                    {irtTicketData?.find(d => d.warehouse?.optionValue === item?.warehouse?.optionValue) ?
                                                         <Button
                                                             variant={"contained"}
                                                             color="primary"
                                                             size="small"
                                                             onClick={() => {
-                                                                history.push(`${routes.irtTicketDetail.path}/${irtTicketData.find(d => d.warehouse?.optionValue === item?.warehouse?.optionValue)._id}`)
+                                                                history.push(`${routes.irtTicketDetail.path}/${irtTicketData.find(d => d.warehouse?.optionValue === item?.warehouse?.optionValue)?._id}`)
                                                             }}
                                                             startIcon={<FaEye />}
                                                         >
@@ -101,10 +101,7 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
                                                             }}
                                                         >
                                                             {`Create ${routes.irtTicket.title}`}
-                                                        </Button>
-
-
-                                                    }
+                                                        </Button>}
                                                 </TableCell>
                                             </TableRow>
                                         ))}
@@ -122,12 +119,14 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
             {irtTicketDialog.open && (
                 <ManageIrtTicket
                     onClose={() => setIrtTicketDialog({ open: false, data: null })}
-                    purchaseOrderData={{ purchaseOrder: purchaseOrderData?._id,
-                     warehouse: irtTicketDialog.data?.warehouse?.optionValue,
-                     qty: data?.qty > irtTicketDialog.data?.qty ? irtTicketDialog.data?.qty :  data?.qty,
-                     amount: data?.qty > irtTicketDialog.data?.qty ? irtTicketDialog.data?.qty * irtTicketDialog.data?.price :  data?.qty * irtTicketDialog.data?.price,
-                     approver: irtTicketDialog.data?.managers?.map((e) => e.optionValue),
-                     collaborator: irtTicketDialog.data?.contactPerson?.map((e) => e.optionValue),
+                    referenceData={{
+                        purchaseOrder: purchaseOrderData?._id,
+                        product: purchaseOrderData?._id,
+                        warehouse: irtTicketDialog.data?.warehouse?.optionValue,
+                        qty: data?.qty > irtTicketDialog.data?.qty ? irtTicketDialog.data?.qty : data?.qty,
+                        amount: data?.qty > irtTicketDialog.data?.qty ? irtTicketDialog.data?.qty * irtTicketDialog.data?.price : data?.qty * irtTicketDialog.data?.price,
+                        approver: irtTicketDialog.data?.managers?.map((e) => e.optionValue),
+                        collaborator: irtTicketDialog.data?.managers?.map((e) => e.optionValue),
                     }}
                     onSuccess={() => {
                         setIrtTicketDialog({ open: false, data: null })
