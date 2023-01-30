@@ -15,11 +15,12 @@ import { CustomDialogTransition, generateUniqueIdOnly, isFieldNotTouched } from 
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { useHistory } from "react-router-dom";
+import IrtTicketDetail from './IrtTicketDetail';
 
-const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null }) => {
-  const {
-    state: { user }
-  }: any = useData();
+const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
+
+  const { state: { user } }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
@@ -28,6 +29,7 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null }) => 
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const ref = useRef(null);
+  const history = useHistory();
 
   useEffect(() => {
     fetchFields();
@@ -62,9 +64,20 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null }) => 
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
-      } else {
+      }
+      else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['irtTicketNumber'] = `IRT_${generateUniqueIdOnly()}`;
+
+        if (referenceData) {
+          tempInitialData['irtTicketNumber'] = `IRT_${generateUniqueIdOnly()}`;
+          tempInitialData['purchaseOrder'] = referenceData?.purchaseOrder;
+          tempInitialData['warehouse'] = referenceData?.warehouse;
+          tempInitialData['qty'] = referenceData?.qty;
+          tempInitialData['amount'] = referenceData?.amount;
+          tempInitialData['product'] = referenceData?.product;
+          tempInitialData['collaborator'] = referenceData?.collaborator;
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -101,6 +114,7 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null }) => 
           setLoading(false);
           onSuccess(data.data);
           setSubmitting(true);
+          history.push(`${routes?.irtTicketDetail?.path}/${data._id}`);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -152,13 +166,12 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null }) => 
                     onClose();
                   }
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.irtTicketNumber ? `(${initialData.values?.irtTicketNumber})` : ''}`
-                    : `Create ${routes?.irtTicket?.title}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.irtTicketNumber ? `(${initialData.values?.irtTicketNumber})` : ''}`
+                  : `Create ${routes?.irtTicket?.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
