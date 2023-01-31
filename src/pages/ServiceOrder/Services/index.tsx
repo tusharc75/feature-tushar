@@ -25,6 +25,7 @@ import ServiceOrderQty from './ServiceOrderQty';
 import moment from 'moment';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 import { genrateCustomTableColumns } from 'src/constants/columns';
+import CustomEditableGrid from 'src/components/CustomEditableGrid';
 
 const Services = ({
   serviceOrderData,
@@ -54,6 +55,7 @@ const Services = ({
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
+  const [openBulkEdit, setOpenBulkEdit] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -65,6 +67,7 @@ const Services = ({
 
   const fetchFields = async () => {
     var { fields: data, allFields } = await fetch_service_order_detail_fields(serviceOrderData?.currency);
+    setAllFields(allFields)
     const newColumns = genrateCustomTableColumns(allFields, serviceOrderData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
     if (qtyIndex > -1) {
@@ -412,6 +415,15 @@ const Services = ({
                       Delete
                     </MenuItem>
                   </HtmlTooltip>
+                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+                    <MenuItem
+                      onClick={() => {
+                        setOpenBulkEdit(true);
+                      }}
+                    >
+                      Bulk Edit
+                    </MenuItem>
+                  </HtmlTooltip>
                 </Menu>
               </Box>
             </Box>
@@ -485,6 +497,9 @@ const Services = ({
           ids={[]}
         />
       )}
+      {openBulkEdit &&
+        <CustomEditableGrid onClose={()=> setOpenBulkEdit(false)} data={selectedProducts} fields={allFields}/>
+      }
     </Fragment>
   );
 };
