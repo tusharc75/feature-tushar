@@ -445,7 +445,12 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     productId={null}
                     handleClose={() => setIsAddNewProduct(false)}
                     isAddInBuilder={true}
-                    addProductInBuilder={handleAddProduct}
+                    addProductInBuilder={(rows: any) => {
+                        rows?.forEach((element) => {
+                            element.unitMain = element?.unit;
+                        });
+                        handleAddProduct(rows)
+                    }}
                     openFrom="builder"
                     fromQuote={true}
                 />
