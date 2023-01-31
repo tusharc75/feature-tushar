@@ -11,7 +11,8 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const AssignUserDialog = ({ handleClose, open, onSuccess, id }) => {
+const AssignUserDialog = ({ handleClose, onSuccess, id }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const [userList, setUserList] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -32,7 +33,7 @@ const AssignUserDialog = ({ handleClose, open, onSuccess, id }) => {
   };
 
   const handleAssignUser = () => {
-    let values = selectedUsers.map((i) => i?.optionValue);
+    let values = selectedUsers?.map((i) => { return { user: i?.optionValue } });
     let body = { approver: values };
     axiosInstance()
       .post(`${routes?.irtTicket?.path}/approver/${id}`, body)
@@ -42,7 +43,7 @@ const AssignUserDialog = ({ handleClose, open, onSuccess, id }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: 'Added successfully'
+          message: 'Added Successfully'
         });
       })
       .catch((error) => {
@@ -56,7 +57,7 @@ const AssignUserDialog = ({ handleClose, open, onSuccess, id }) => {
       fullScreen={isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
-      open={open}
+      open={true}
       fullWidth
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
@@ -89,12 +90,12 @@ const AssignUserDialog = ({ handleClose, open, onSuccess, id }) => {
           variant="contained"
           color="primary"
           type="submit"
+          disabled={selectedUsers?.length > 0 ? false : true}
           onClick={(e) => {
             e.preventDefault();
             handleAssignUser();
           }}
         >
-          {' '}
           Save
         </CustomButton>
       </CustomDialogFooter>

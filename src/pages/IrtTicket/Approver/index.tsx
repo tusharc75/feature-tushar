@@ -33,7 +33,7 @@ const Approver = ({ irtTicketData }) => {
               flexDirection: 'column'
             }}
           >
-            <Box marginX={2}>
+            <Box pl={1} pb={2}>
               <Button
                 variant="outlined"
                 color="primary"
@@ -58,7 +58,7 @@ const Approver = ({ irtTicketData }) => {
                       transition: '.3s'
                     }}
                     p={2}
-                    onClick={() => {}}
+                    onClick={() => { }}
                   >
                     <Box display="flex" flexDirection="row">
                       <Box>
@@ -86,11 +86,10 @@ const Approver = ({ irtTicketData }) => {
         </Grid>
       </Grid>
       {openDialog && (
-     <AssignUserDialog 
-        open={openDialog} 
-        handleClose={() => setOpenDialog(false)} 
-        onSuccess={() => fetchData()} 
-        id={irtTicketData?._id}/>
+        <AssignUserDialog
+          handleClose={() => setOpenDialog(false)}
+          onSuccess={() => fetchData()}
+          id={irtTicketData?._id} />
       )}
     </Box>
   );
