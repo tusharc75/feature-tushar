@@ -103,6 +103,7 @@ const LoadingTicket = ({
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
+  const [showConformationCancleTicket, setShowConformationCancleTicket] = useState(false);
 
   useEffect(() => {
     fetchRecords();
@@ -590,6 +591,23 @@ const LoadingTicket = ({
     }
   }
 
+  const handelCancleTickets = () => {
+    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
+    if (loadingTicketIds.length) {
+      axiosInstance().put(`${deliveryTicket.api}/revert`, { ids: loadingTicketIds }).then(({ data: { data } }) => {
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Cancelled Successfully`
+        });
+      })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
   return (
     <>
       <Box display="flex" justifyContent="flex-end" pt={1}>
@@ -729,17 +747,27 @@ const LoadingTicket = ({
                   Delivered to Customer
                 </MenuItem>
                 {selectedRecords.length &&
-                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length === selectedRecords?.length ? (
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      setShowConformationRevertTicket(true);
-                    }}
-                  >
-                    Revert Loading Ticket
-                  </MenuItem>
+                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId')
+                    && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length === selectedRecords?.length ? (
+                  <Fragment>
+                    <MenuItem
+                      onClick={() => {
+                        closeActions();
+                        setShowConformationRevertTicket(true);
+                      }}
+                    >
+                      Revert Loading Ticket
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        closeActions();
+                        setShowConformationCancleTicket(true);
+                      }}
+                    >
+                      Cancel Loading Ticket
+                    </MenuItem>
+                  </Fragment>
                 ) : null}
-
                 {selectedRecords.length &&
                   selectedRecords?.filter((f) =>
                     f.hasOwnProperty('loadingTicketId')
@@ -1059,6 +1087,20 @@ const LoadingTicket = ({
           onOk={() => {
             handelRevertTickets();
             setShowConformationRevertTicket(false);
+          }}
+          okBtnLoading={okBtnLoading}
+        />
+      )}
+      {showConformationCancleTicket && (
+        <ConfirmationDialog
+          open={showConformationCancleTicket}
+          message={`Are you sure you want to cancel loading ticket?`}
+          onClose={() => {
+            setShowConformationCancleTicket(false);
+          }}
+          onOk={() => {
+            handelCancleTickets();
+            setShowConformationCancleTicket(false);
           }}
           okBtnLoading={okBtnLoading}
         />
