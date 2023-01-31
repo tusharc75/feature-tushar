@@ -28,7 +28,7 @@ const Approver = ({ irtTicketData }) => {
 
   const handleDelete = (id) => {
     axiosInstance()
-    .put(`${routes?.irtTicket?.path}/approver/${irtTicketData?._id}/remove`,{ids:[id]})
+    .put(`${routes?.irtTicket?.path}/approver/remove/${irtTicketData?._id}`,{ids:[id]})
       .then(({ data: { data } }) => {
        fetchData()
        toastConfig.setToastConfig({
