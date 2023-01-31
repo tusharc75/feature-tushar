@@ -1,14 +1,18 @@
-import { Box, Button, Chip, Grid, IconButton, Typography, useMediaQuery } from '@material-ui/core';
-import { useEffect, useState } from 'react';
+import { Box, Button, Chip, Grid, IconButton, Tooltip, Typography, useMediaQuery } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import PersonIcon from '@material-ui/icons/Person';
 import AssignUserDialog from './AssignUserDialog';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+
 
 const Approver = ({ irtTicketData }) => {
   const [approver, setAapprover] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     fetchData();
@@ -21,6 +25,22 @@ const Approver = ({ irtTicketData }) => {
         setAapprover(data);
       });
   };
+
+  const handleDelete = (id) => {
+    axiosInstance()
+    .put(`${routes?.irtTicket?.path}/approver/${irtTicketData?._id}/remove`,{ids:[id]})
+      .then(({ data: { data } }) => {
+       fetchData()
+       toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Deleted Successfully'
+      });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   return (
     <Box>
@@ -58,7 +78,7 @@ const Approver = ({ irtTicketData }) => {
                       transition: '.3s'
                     }}
                     p={2}
-                    onClick={() => { }}
+                    onClick={() => {}}
                   >
                     <Box display="flex" flexDirection="row">
                       <Box>
@@ -69,6 +89,18 @@ const Approver = ({ irtTicketData }) => {
                       </Box>
                       <Box ml={2}>
                         <Chip color="primary" label={item?.status} />
+                      </Box>
+                      <Box ml={2}>
+                        <Tooltip title="Delete">
+                          <IconButton
+                            aria-label="Delete"
+                            onClick={() => {
+                              handleDelete(item?._id)
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" color="error" />
+                          </IconButton>
+                        </Tooltip>
                       </Box>
                     </Box>
                   </Box>
@@ -85,12 +117,7 @@ const Approver = ({ irtTicketData }) => {
           <Box textAlign="center"></Box>
         </Grid>
       </Grid>
-      {openDialog && (
-        <AssignUserDialog
-          handleClose={() => setOpenDialog(false)}
-          onSuccess={() => fetchData()}
-          id={irtTicketData?._id} />
-      )}
+      {openDialog && <AssignUserDialog handleClose={() => setOpenDialog(false)} onSuccess={() => fetchData()} id={irtTicketData?._id} />}
     </Box>
   );
 };
