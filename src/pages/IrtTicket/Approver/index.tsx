@@ -4,77 +4,96 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import PersonIcon from '@material-ui/icons/Person';
+import AssignUserDialog from './AssignUserDialog';
 
 const Approver = ({ irtTicketData }) => {
+  const [approver, setAapprover] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
 
-    const [approver, setAapprover] = useState(null);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-    useEffect(() => {
-        fetchData()
-    }, []);
+  const fetchData = () => {
+    axiosInstance()
+      .get(`${routes?.irtTicket?.path}/approver/${irtTicketData?._id}`)
+      .then(({ data: { data } }) => {
+        setAapprover(data);
+      });
+  };
 
-    const fetchData = () => {
-        axiosInstance().get(`${routes?.irtTicket?.path}/approver/${irtTicketData?._id}`).then(({ data: { data } }) => {
-            setAapprover(data)
-        })
-    }
-
-    return (
-        <Box>
-            <Grid container spacing={2}>
-                <Grid item xs={12} sm={5} md={4} lg={3}>
-                    <Grid
-                        container
-                        spacing={2}
-                        style={{
-                            flexDirection: 'column'
-                        }}
-                    >
-                        {approver ? (
-                            approver?.map((item, index) => (
-                                <Grid item xs={12} key={index}>
-                                    <Box
-                                        style={{
-                                            borderWidth: '1px',
-                                            borderStyle: 'solid',
-                                            backgroundColor: 'white',
-                                            borderColor: 'rgb(224, 224, 224)',
-                                            cursor: 'pointer',
-                                            transition: '.3s'
-                                        }}
-                                        p={2}
-                                        onClick={() => { }}
-                                    >
-                                        <Box display="flex" flexDirection="row">
-                                            <Box >
-                                               <PersonIcon/>
-                                            </Box>
-                                            <Box ml={2}>
-                                                <Typography>{item?.user?.optionLabel}</Typography>
-                                            </Box>
-                                            <Box ml={2}>
-                                                <Chip color="primary" label={item?.status} />
-                                            </Box>
-                                        </Box>
-                                    </Box>
-                                </Grid>
-                            ))
-                        ) : (
-                            <Box p={2} height={500} bgcolor="white">
-                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                            </Box>
-                        )}
-                    </Grid>
-
-                </Grid>
-                <Grid item xs={12} sm={7} md={8} lg={9}>
-                    <Box textAlign="center">
-
+  return (
+    <Box>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={5} md={4} lg={3}>
+          <Grid
+            container
+            spacing={2}
+            style={{
+              flexDirection: 'column'
+            }}
+          >
+            <Box marginX={2}>
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={() => {
+                  setOpenDialog(true);
+                }}
+              >
+                Add Approver
+              </Button>
+            </Box>
+            {approver ? (
+              approver?.map((item, index) => (
+                <Grid item xs={12} key={index}>
+                  <Box
+                    style={{
+                      borderWidth: '1px',
+                      borderStyle: 'solid',
+                      backgroundColor: 'white',
+                      borderColor: 'rgb(224, 224, 224)',
+                      cursor: 'pointer',
+                      transition: '.3s'
+                    }}
+                    p={2}
+                    onClick={() => {}}
+                  >
+                    <Box display="flex" flexDirection="row">
+                      <Box>
+                        <PersonIcon />
+                      </Box>
+                      <Box ml={2}>
+                        <Typography>{item?.user?.optionLabel}</Typography>
+                      </Box>
+                      <Box ml={2}>
+                        <Chip color="primary" label={item?.status} />
+                      </Box>
                     </Box>
+                  </Box>
                 </Grid>
-            </Grid>
-        </Box>
-    );
+              ))
+            ) : (
+              <Box p={2} height={500} bgcolor="white">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>
+            )}
+          </Grid>
+        </Grid>
+        <Grid item xs={12} sm={7} md={8} lg={9}>
+          <Box textAlign="center"></Box>
+        </Grid>
+      </Grid>
+      {openDialog && (
+     <AssignUserDialog 
+        open={openDialog} 
+        handleClose={() => setOpenDialog(false)} 
+        onSuccess={() => fetchData()} 
+        id={irtTicketData?._id}/>
+      )}
+    </Box>
+  );
 };
 
 export default Approver;
