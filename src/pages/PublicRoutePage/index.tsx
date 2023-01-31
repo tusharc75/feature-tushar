@@ -10,6 +10,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import QuotationSupplierPrice from './QuotationSupplierPrice';
 import QuotationCustomerAccept from './QuotationCustomer/QuotationCustomerAccept';
 import RJCustomerAccept from './RentalManagement/RentalCustomerAccept';
+import IrtTicket from './IrtTicket';
+import { sidebarResource } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   header: {
@@ -69,14 +71,15 @@ const PublicRoutePage = () => {
 
   const fetchLinkData = async () => {
     setLoading(true);
-    axios
-      .get(backendApi + `/public/check-link/${id}`)
+    axios.get(backendApi + `/public/check-link/${id}`)
       .then(async ({ data }) => {
         setReferenceType(data?.data?.referenceType);
-        document.title =
-          data?.data?.referenceType === 'QuotationCustomer' || data?.data?.referenceType === 'RentalJob'
-            ? 'Equipt Customer Portal'
-            : 'Equipt Supplier Portal';
+        if (data?.data?.referenceType === 'QuotationCustomer' || data?.data?.referenceType === 'RentalJob') {
+          document.title = 'Equipt Customer Portal'
+        }
+        else {
+          document.title = 'Equipt Supplier Portal'
+        }
         if (data?.data?.valid) {
           if (data?.data?.protected) {
             setPasswordVerification(true);
@@ -96,11 +99,8 @@ const PublicRoutePage = () => {
     let tempData = {
       id: id
     };
-
     if (password) tempData['password'] = password;
-
-    axios
-      .post(backendApi + `/public/get-data`, tempData)
+    axios.post(backendApi + `/public/get-data`, tempData)
       .then(async ({ data }) => {
         setResourceData(data.data);
         setReferenceType(data?.data?.referenceIdType);
@@ -180,6 +180,8 @@ const PublicRoutePage = () => {
           <QuotationCustomerAccept openAuthId={id} />
         ) : resourceData?.referenceIdType === 'RentalJob' ? (
           <RJCustomerAccept openAuthId={id} />
+        ) : resourceData?.referenceIdType === sidebarResource.irtTicket ? (
+          <IrtTicket openAuthId={id} openAuthData={resourceData?.data} />
         ) : (
           <Box p={2} bgcolor="white">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
