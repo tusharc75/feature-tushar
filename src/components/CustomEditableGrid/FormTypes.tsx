@@ -5,7 +5,7 @@ import {
 } from '@material-ui/core';
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { dateFormatForInputControl } from 'src/constants/helpers';
+import { dateFormatForInputControl, getUniqueCurrencies } from 'src/constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
 
 const FormTypes = (props) => {
@@ -20,9 +20,10 @@ const FormTypes = (props) => {
         required,
         fieldData,
         touched,
+        currency,
         ...rest
     } = props;
-
+    console.log(values)
     return type === 'singleLine' ? (
         <TextField
             {...rest}
@@ -35,7 +36,7 @@ const FormTypes = (props) => {
             value={values[name]}
             error={touched[name] && Boolean(errors[name])}
             helperText={touched[name] && errors[name]}
-            onChange={onChange}
+            onChange={(e) => onChange(name, e.target.value.trimStart())}
         />
     ) : type === 'multiLine' ? (
         <TextField
@@ -50,7 +51,7 @@ const FormTypes = (props) => {
             value={values[name]}
             error={touched[name] && Boolean(errors[name])}
             helperText={touched[name] && errors[name]}
-            onChange={onChange}
+            onChange={(e) => onChange(name, e.target.value)}
         />
     ) : type === 'percent' ? (
         <TextField
@@ -68,7 +69,7 @@ const FormTypes = (props) => {
                 inputProps: { min: 0 },
                 readOnly: fieldData && fieldData.isUneditable ? true : false
             }}
-            onChange={onChange}
+            onChange={(e) => onChange(name, parseFloat(e.target.value))}
         />
     ) : type === "currencyAmount" ? (
         <TextField
@@ -80,9 +81,9 @@ const FormTypes = (props) => {
             name={name}
             value={values[name]}
             InputProps={{
-                startAdornment: '%',
+                startAdornment: getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative,
             }}
-            onChange={onChange}
+            onChange={(e) => onChange(name, parseFloat(e.target.value))}
         />
     ) : type === 'dropDown' ? (
         <Autocomplete
@@ -90,11 +91,13 @@ const FormTypes = (props) => {
             size="small"
             fullWidth
             options={options}
-            value={values[name]}
+            value={
+                options.find((data) => data.optionValue === values[name]) ? options.find((data) => data.optionValue === values[name]) : ''
+            }
             getOptionLabel={(option: any) => option.optionLabel || ''}
-            getOptionSelected={(option: any, val) => (option ? option.optionLabel === val.optionLabel : false)}
-            onChange={onChange}
-            renderInput={(params) => <TextField {...params} label={name} variant="outlined" />}
+            getOptionSelected={(option: any, val) => (option ? option.optionValue == val : false)}
+            onChange={(e,val) => onChange(name, val)}
+            renderInput={(params) => <TextField {...params} label={label} variant="outlined" />}
         />
     ) : type === 'decimal' ? (
         <TextField
@@ -105,7 +108,7 @@ const FormTypes = (props) => {
             required={required}
             name={name}
             value={values[name]}
-            onChange={onChange}
+            onChange={(e) => onChange(name, parseFloat(e.target.value))}
             InputProps={{
                 inputProps: { min: 0 },
                 readOnly: fieldData && fieldData.isUneditable ? true : false
@@ -119,7 +122,7 @@ const FormTypes = (props) => {
                     required={required}
                     name={name}
                     checked={values[name]}
-                    onChange={onChange}
+                    onChange={(e) => onChange(name, e.target.value)}
                     color="secondary"
                 />
             }
@@ -138,7 +141,7 @@ const FormTypes = (props) => {
                 value={values[name]}
                 name={name}
                 label={label}
-                onChange={onChange}
+                onChange={(date) => onChange(name, date)}
                 format={dateFormatForInputControl}
                 InputLabelProps={{
                     shrink: true
@@ -158,9 +161,8 @@ const FormTypes = (props) => {
                 value={values[name]}
                 name={name}
                 label={label}
-                onChange={onChange}
+                onChange={(date) => onChange(name, date)}
                 onError={console.error}
-                disablePast
                 format="yyyy/MM/dd HH:mm"
                 InputLabelProps={{
                     shrink: true

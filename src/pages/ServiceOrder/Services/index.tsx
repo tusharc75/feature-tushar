@@ -419,6 +419,7 @@ const Services = ({
                     <MenuItem
                       onClick={() => {
                         setOpenBulkEdit(true);
+                        handleClose();
                       }}
                     >
                       Bulk Edit
@@ -498,7 +499,15 @@ const Services = ({
         />
       )}
       {openBulkEdit &&
-        <CustomEditableGrid onClose={()=> setOpenBulkEdit(false)} data={selectedProducts} fields={allFields}/>
+        <CustomEditableGrid
+          onClose={() => setOpenBulkEdit(false)}
+          data={selectedProducts}
+          fields={allFields}
+          currency={serviceOrderData?.currency}
+          handleSave={(rows) => {
+            handleSaveData(rows)
+            setOpenBulkEdit(false)
+          }} />
       }
     </Fragment>
   );

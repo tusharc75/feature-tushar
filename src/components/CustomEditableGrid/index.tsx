@@ -4,21 +4,32 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition, getObjKeysWithValues } from 'src/constants/helpers';
+import { arrayToDropwdownOption, CustomDialogTransition, getObjKeysWithValues } from 'src/constants/helpers';
+import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
+import CustomButton from '../Helpers/CustomButton';
 import FormTypes from './FormTypes';
 
-const CustomEditableGrid = ({ onClose, data, fields }) => {
+const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => {
 
     const [fullScreen, setFullScreen] = useState(true);
     const [rows, setRows] = useState([]);
 
     useEffect(() => {
-        let tempRows = data.map(d => {
+        const tempRows = data.map(d => {
             let tempFieldData = getObjKeysWithValues(d, fields)
             return { ...d, ...tempFieldData }
         })
         setRows(tempRows)
     }, []);
+
+    const updateData = (row, inputField, value) => {
+        setRows((prevState) => {
+            let tempIndex = prevState.findIndex((obj => obj._id === row._id));
+            prevState[tempIndex][inputField] = value
+            return [...prevState]
+        });
+
+    }
 
 
     return (
@@ -50,7 +61,7 @@ const CustomEditableGrid = ({ onClose, data, fields }) => {
                                         <TableCell width={200}>Details</TableCell>
                                         {fields &&
                                             fields?.map((field: any, index: any) => (
-                                                <TableCell width={300} >{field?.fieldLabel}</TableCell>
+                                                <TableCell width={300} >{field.type === 'currencyAmount' ? field.fieldLabel + ' ' + currency : field?.fieldLabel}</TableCell>
                                             ))}
                                         <TableCell>Action</TableCell>
                                     </TableRow>
@@ -67,12 +78,17 @@ const CustomEditableGrid = ({ onClose, data, fields }) => {
                                                                 {...field}
                                                                 fieldData={field}
                                                                 values={row}
-                                                                label={field.fieldLabel}
-                                                                name={field.fieldName}
+                                                                label={field.type === 'currencyAmount' ? field.fieldLabel + ' ' + currency : field?.fieldLabel}
+                                                                name={field.type === 'currencyAmount' ? field.fieldName + '_' + currency.toLowerCase() : field.fieldName}
                                                                 type={field.type}
-                                                                options={field.option}
+                                                                options={field.fieldName === 'unit' ? arrayToDropwdownOption(row?.[`${row.type}Detail`].unit) :
+                                                                    field.fieldName === 'pricingMethod' ? arrayToDropwdownOption(row?.[`${row.type}Detail`].pricingMethod) :
+                                                                        field.option}
                                                                 required={field.required}
-                                                                onChange={() => { }}
+                                                                currency={currency}
+                                                                onChange={(inputField, val) => {
+                                                                    updateData(row, inputField, val)
+                                                                }}
                                                                 size="small"
                                                             />
                                                         </TableCell>
@@ -101,6 +117,21 @@ const CustomEditableGrid = ({ onClose, data, fields }) => {
                         </Box>}
                 </div>
             </CustomDialogContent>
+            <CustomDialogFooter>
+                <Button
+                    size="small"
+                    color="primary"
+                    onClick={onClose}
+                >{"Close"}</Button>
+                <CustomButton
+                    loading={false}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={() => { handleSave(rows) }}
+                > Save
+                </CustomButton>
+            </CustomDialogFooter>
         </Dialog>
     );
 };
