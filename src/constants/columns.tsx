@@ -209,12 +209,12 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
         pathName = detailPagePath[joinedFieldName]
           ? detailPagePath[joinedFieldName]
           : field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-            ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-            : routes[joinedFieldName]?.path
-              ? routes[joinedFieldName]?.path
-              : routes[`${joinedFieldName}Detail`]?.path
-                ? routes[`${joinedFieldName}Detail`]?.path
-                : '';
+          ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+          : routes[joinedFieldName]?.path
+          ? routes[joinedFieldName]?.path
+          : routes[`${joinedFieldName}Detail`]?.path
+          ? routes[`${joinedFieldName}Detail`]?.path
+          : '';
       }
       return {
         columnData: {
@@ -402,8 +402,7 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
   let _fields = fields;
   _fields.forEach((ele) => {
     if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
-
-      const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative
+      const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
 
       if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
         ele.displayUnits.forEach((_unit) => {
@@ -419,8 +418,7 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
             primaryField: ele?.primaryField ?? false
           });
         });
-      }
-      else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+      } else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
         ele.displayUnits.forEach((_unit) => {
           ele.displayCurrency.forEach((_currency) => {
             let fieldName = ele.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
@@ -440,8 +438,7 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
             });
           });
         });
-      }
-      else if (ele.type === 'currencyAmount') {
+      } else if (ele.type === 'currencyAmount') {
         ele.displayCurrency.forEach((_currency) => {
           let fieldName = ele.fieldName + '_' + _currency.toLowerCase();
           let fieldLabel = ele.fieldLabel + ' ' + _currency;
@@ -470,8 +467,7 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
           });
         });
       }
-    }
-    else {
+    } else {
       if (column.filter((_c) => _c.accessor === ele.fieldName && _c.Header === ele.fieldLabel).length === 0) {
         let currentColumn: any = getCustomColumnData(renderedFrom, ele);
         if (ele.type === 'date') {
@@ -482,61 +478,68 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
             Cell: ({ row }) =>
               row.original[ele.fieldName] ? <p>{moment(row.original[ele.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
           });
-        }
-        else if (ele.type === 'dateTime') {
+        } else if (ele.type === 'dateTime') {
           column.push({
             ...currentColumn,
             disableFilters: true,
             width: 200,
-            Cell: ({ row }) =>
-              row.original[ele.fieldName] ? <p>{moment(row.original[ele.fieldName]).format(dateTimeFormat)}</p> : <NoDataCell />
+            Cell: ({ row }) => (row.original[ele.fieldName] ? <p>{moment(row.original[ele.fieldName]).format(dateTimeFormat)}</p> : <NoDataCell />)
           });
-        }
-        else if (ele.type === 'dropDown') {
+        } else if (ele.type === 'dropDown') {
           column.push({
             ...currentColumn,
             width: 200,
             Cell: ({ row }) =>
-              row.original[ele.fieldName]?.optionLabel ? <p>{row.original[ele.fieldName]?.optionLabel}</p> : row.original[ele.fieldName] ? <p>{row.original[ele.fieldName]}</p> : <NoDataCell />
-          });
-        }
-        else if (ele.type === 'decimal') {
-          column.push({
-            ...currentColumn,
-            width: 200,
-            Cell: ({ row }) => row.original[ele.fieldName] ? <p>{row.original[ele.fieldName]}</p> : <NoDataCell />,
-            Footer: (info) => {
-              const qtyTotal = info.rows.filter(
-                (f) => f.original.parentId === null && f.original.hasOwnProperty(ele.fieldName) && !isNaN(f.original[ele.fieldName])
+              row.original[ele.fieldName]?.optionLabel ? (
+                <p>{row.original[ele.fieldName]?.optionLabel}</p>
+              ) : row.original[ele.fieldName] ? (
+                <p>{row.original[ele.fieldName]}</p>
+              ) : (
+                <NoDataCell />
               )
+          });
+        } else if (ele.type === 'decimal') {
+          column.push({
+            ...currentColumn,
+            width: 200,
+            Cell: ({ row }) => (row.original[ele.fieldName] ? <p>{row.original[ele.fieldName]}</p> : <NoDataCell />),
+            Footer: (info) => {
+              const qtyTotal = info.rows
+                .filter((f) => f.original.parentId === null && f.original.hasOwnProperty(ele.fieldName) && !isNaN(f.original[ele.fieldName]))
                 .reduce((sum, row) => row.original[currentColumn.accessor] + sum, 0);
               return <>{qtyTotal}</>;
             }
           });
-        }
-        else if (ele.type === 'checkBox') {
+        } else if (ele.type === 'checkBox') {
+          column.push({
+            ...currentColumn,
+            width: 200,
+            Cell: ({ row }) => (row.original[ele.fieldName] ? <p>{Boolean(row.original[ele.fieldName]) ? 'Yes' : 'No'}</p> : <NoDataCell />)
+          });
+        } else if (ele.type === 'multiSelect') {
           column.push({
             ...currentColumn,
             width: 200,
             Cell: ({ row }) =>
-              row.original[ele.fieldName] ? <p>{Boolean(row.original[ele.fieldName]) ? "Yes" : "No"}</p> : <NoDataCell />
+              row.original[ele.fieldName] ? (
+                ele.lookup ? (
+                  row.original[ele.fieldName]?.length ? (
+                    <p className="text-truncate">{row.original[ele.fieldName]?.map((d) => d.optionLabel)?.join()}</p>
+                  ) : (
+                    <NoDataCell />
+                  )
+                ) : (
+                  <p>{row.original[ele.fieldName]?.join()}</p>
+                )
+              ) : (
+                <NoDataCell />
+              )
           });
-        }
-        else if (ele.type === 'multiSelect') {
+        } else {
           column.push({
             ...currentColumn,
             width: 200,
-            Cell: ({ row }) => row.original[ele.fieldName] ? ele.lookup ?
-              row.original[ele.fieldName]?.length ? <p className="text-truncate">{row.original[ele.fieldName]?.map(d => d.optionLabel)?.join()}</p> : <NoDataCell />
-              : <p>{row.original[ele.fieldName]?.join()}</p> : <NoDataCell />
-          });
-        }
-        else {
-          column.push({
-            ...currentColumn,
-            width: 200,
-            Cell: ({ row }) =>
-              row.original[ele.fieldName] ? <p className="text-truncate">{row.original[ele.fieldName]}</p> : <NoDataCell />
+            Cell: ({ row }) => (row.original[ele.fieldName] ? <p className="text-truncate">{row.original[ele.fieldName]}</p> : <NoDataCell />)
           });
         }
       }
@@ -553,8 +556,8 @@ const getMembers = (mem) => {
     return member;
   }
   return [member, flatMapDeep(mem.subRows, getMembers)];
-}
+};
 
 export function flattenArray(array) {
-  return flatMapDeep(array, getMembers)
+  return flatMapDeep(array, getMembers);
 }

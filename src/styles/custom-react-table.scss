@@ -84,7 +84,7 @@ $isAppliedBill: #a8ec9c;
     }
 
     .td {
-      padding: 5px 10px;
+      padding: 5px 8px;
       //border-bottom: 1px solid #ddd;
       //border-right: 1px solid #ddd;
 
@@ -263,7 +263,7 @@ $isAppliedBill: #a8ec9c;
       opacity: 0;
     }
   }
-  &.custom-react-table .table {
+  & .table {
     @media all and (min-width: 768px) {
       --last-child-width: 115px;
     }

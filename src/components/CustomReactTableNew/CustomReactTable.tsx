@@ -492,7 +492,7 @@ function CustomReactTable({
 
   // Render the UI for your table
   return (
-    <>
+    <div className="custom-react-table">
       <CustomReactTableHeaderOptions
         columns={baseColumns}
         // setSelectedReportView={setSelectedReportView}
@@ -521,7 +521,7 @@ function CustomReactTable({
           // overflowY: "hidden",
           // borderBottom: "1px solid black"
         }}
-        className="border custom-react-table"
+        className="border "
       >
         {loading && (
           <Box
@@ -669,7 +669,7 @@ function CustomReactTable({
           rowsPerPageOptions={gridPageSizes}
         />
       )}
-    </>
+    </div>
   );
 }
 

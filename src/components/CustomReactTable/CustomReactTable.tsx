@@ -427,7 +427,7 @@ export default function CustomReactTable({
   };
   // Render the UI for your table
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative' }} className="custom-react-table-v1">
       {displayCustomReactTableHeaderOptions && (
         <CustomReactTableHeaderOptions
           columns={allColumns}
@@ -458,7 +458,7 @@ export default function CustomReactTable({
           // overflowY: "hidden",
           // borderBottom: "1px solid black"
         }}
-        className="border custom-react-table custom-react-table-v1"
+        className="border custom-react-table "
       >
         <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
           <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">

@@ -9,7 +9,8 @@ import { disabledColumns, getSortedColumns } from '../../constants/columns';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import ArrangeViewDialog from './ArrangeViewDialog';
 import ReportArrangeView from './ReportArrangeView';
-// import {BsArrowLeftRight} from 'react-icons/bs';
+import { BiFilterAlt } from 'react-icons/bi';
+import { BsArrowLeftRight } from 'react-icons/bs';
 
 let timeout;
 export default function CustomGridHeaderOptions({
@@ -25,7 +26,8 @@ export default function CustomGridHeaderOptions({
   selectedRecords = [],
   selectedReportView = null,
   setSelectedReportView = null,
-  reportSave = false
+  reportSave = false,
+  handleFilterOpen = () => {}
 }) {
   const [disableSelectionSwitch, setDisableSelectionSwitch] = useState(true);
 
@@ -102,22 +104,22 @@ export default function CustomGridHeaderOptions({
 
   return (
     <>
-      <Box className="ag-grid-listing-grid-header-options d-flex gap-2 justify-content-space-between">
+      <Box className="ag-grid-listing-grid-header-options d-flex gap-2 justify-content-space-between" style={{ marginBottom: 0, flexWrap: 'wrap' }}>
         <div className="d-flex gap-2">
-          <Button
-            aria-describedby="columnSelection"
-            size="small"
-            className="px-2"
-            // disabled={isOffline}
-            startIcon={<ViewWeekIcon />}
-            color="primary"
-            onClick={(event) => {
-              setOpenColumnSelection(true);
-              setOpenColumnSelectionAnchorEl(event.currentTarget);
-            }}
-          >
-            Arrange View
-          </Button>
+          <Tooltip title="Arrange View" placement="top">
+            <IconButton
+              aria-describedby="columnSelection"
+              size="small"
+              className="px-2  arrange-view-v2"
+              color="primary"
+              onClick={(event) => {
+                setOpenColumnSelection(true);
+                setOpenColumnSelectionAnchorEl(event.currentTarget);
+              }}
+            >
+              <BsArrowLeftRight />
+            </IconButton>
+          </Tooltip>
 
           {/* <Popover
             id="columnSelection"
@@ -231,7 +233,7 @@ export default function CustomGridHeaderOptions({
                   }
                 }}
                 control={<Switch size="small" color="primary" disabled={disableSelectionSwitch} />}
-                style={{ fontSize: '0.8rem' }}
+                style={{ fontSize: '0.8rem', marginLeft: 0 }}
                 label="Show Only Selected"
                 labelPlacement="end"
               />
@@ -239,7 +241,11 @@ export default function CustomGridHeaderOptions({
           )}
         </div>
 
-        <div>
+        <div style={{ marginLeft: 'auto' }}>
+          <Button startIcon={<BiFilterAlt />} size={'small'} className="btn-outline-v1 " onClick={handleFilterOpen}>
+            Filter
+          </Button>
+
           {refreshGrid && (
             <>
               {/* <Divider orientation="vertical" flexItem /> */}
