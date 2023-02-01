@@ -23,16 +23,7 @@ import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 
-interface PurchaseOrderQtyDialogProps {
-  onClose: VoidFunction | any;
-  currency: string;
-  onSubmit: VoidFunction | any;
-  productData?: object | any;
-  purchaseOrderData?: object | any;
-  bulkEdit?: boolean | any;
-}
-
-const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, currency, onSubmit, productData, bulkEdit, purchaseOrderData }) => {
+const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purchaseOrderData, nextRowData }) => {
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
@@ -266,6 +257,15 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
                   onClose()
                 }}
               >{"Close"}</Button>
+              {nextRowData &&
+                <CustomButton
+                  loading={loading}
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  onClick={submitForm}
+                > Save & Next
+                </CustomButton>}
               <CustomButton
                 loading={loading}
                 variant="contained"
