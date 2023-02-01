@@ -85,6 +85,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
       .post(`${routes.irtTicket.path}/approver/public/forwardApprover/${irtTicketData?._id}`, data)
       .then(({ data }) => {
         setSelectedUsers([])
+        setIsSubmited(true);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
