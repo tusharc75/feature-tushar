@@ -32,7 +32,6 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
         toastConfig.setToastConfig(err);
       });
   };
-  console.log(userList);
 
   const submitResponce = (status) => {
     const data = {
@@ -64,7 +63,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
       users: users
     }
     axiosInstance()
-    .post(`${routes.irtTicket.path}/approver/public/forwardApprover`, data)
+    .post(`${routes.irtTicket.path}/approver/public/forwardApprover/${irtTicketData?._id}`, data)
     .then(({ data }) => {
       toastConfig.setToastConfig({
         open: true,
