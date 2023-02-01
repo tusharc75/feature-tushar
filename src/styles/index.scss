@@ -2902,6 +2902,10 @@ body {
       background-color: rgba(0, 0, 0, 0.04) !important;
     }
   }
+  .btn-primary-v1 {
+    padding: var(--button-v1-padding);
+    border: 1px solid #298b88 !important;
+  }
 
   .btn-outline-red-v1 {
     background: #ffffff !important;

@@ -285,6 +285,7 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
               applyFilter();
               handleClose();
             }}
+            className={'btn-primary-v1'}
             color="primary"
             variant="contained"
           >
@@ -317,6 +318,7 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
             }}
             color="primary"
             variant="contained"
+            className={'btn-primary-v1'}
           >
             Confirm
           </Button>
