@@ -453,7 +453,7 @@ const Product = ({
               >
                 {isMobile && !isTablet ? 'Existing' : `Add Existing Product`}
               </MenuItem>
-              <MenuItem
+              {/* <MenuItem
                 onClick={() => {
                   closeAddActions();
                   setShowCostDialog(true);
@@ -461,7 +461,7 @@ const Product = ({
                 }}
               >
                 Add Cost
-              </MenuItem>
+              </MenuItem> */}
             </Menu>
           </Box>
           <div className="d-flex gap-2">
