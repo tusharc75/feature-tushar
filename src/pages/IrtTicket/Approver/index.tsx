@@ -91,21 +91,26 @@ const Approver = ({ irtTicketData }) => {
                       <Box ml={2}>
                         <Typography>{item?.user?.optionLabel}</Typography>
                       </Box>
+                      <Box ml={2}>
+                        <Chip color="primary" label={item?.type} />
+                      </Box>
                       <Box ml={2} flexGrow={1}>
                         <Chip color="primary" label={item?.status} />
                       </Box>
                       <Box ml={2} >
-                        <Tooltip title="Delete">
-                          <IconButton
-                            aria-label="Delete"
-                            size="small"
-                            onClick={() => {
-                              handleDelete(item?._id)
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" color="error" />
-                          </IconButton>
-                        </Tooltip>
+                        {item?.status === "Send" &&
+                          <Tooltip title="Delete">
+                            <IconButton
+                              aria-label="Delete"
+                              size="small"
+                              onClick={() => {
+                                handleDelete(item?._id)
+                              }}
+                            >
+                              <DeleteIcon fontSize="small" color="error" />
+                            </IconButton>
+                          </Tooltip>
+                        }
                       </Box>
                     </Box>
                   </Box>
@@ -131,6 +136,7 @@ const Approver = ({ irtTicketData }) => {
                 <Box key={index}>
                   <Typography variant="body1">{item?.detail}</Typography>
                   <Typography variant="body2">{moment(item?.date).format('MMM DD YYYY hh:mm A')}</Typography>
+                  {item?.reason && <Typography variant="body2">{item?.reason}</Typography>}
                   <br />
                   <hr />
                   <br />
