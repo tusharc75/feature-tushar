@@ -1,17 +1,8 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import {
-  Grid,
   Box,
   Button,
-  Paper,
-  Typography,
   IconButton,
-  Tab,
-  Tabs,
-  ButtonGroup,
-  Container,
-  InputAdornment,
-  TextField,
   MenuItem,
   Menu
 } from '@material-ui/core';
@@ -20,17 +11,12 @@ import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { purchaseOrder, PURCHASE_ORDER_STATUS } from 'src/constants/helpers';
-import EditIcon from '@material-ui/icons/Edit';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import { purchaseOrder } from 'src/constants/helpers';
 import AddExistingProductInventory from '../../Sublease/Productpackage/AddExistingProductInventory';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import CreateProduct from 'src/components/Product/CreateProduct';
-import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { genrateCustomTableColumns } from 'src/constants/columns';
@@ -44,21 +30,20 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import ServiceDialog from '../Service/ServiceDialog';
+import CostDialog from './CostDialog';
+import AddIcon from '@material-ui/icons/Add';
 
 const Product = ({
   purchaseOrderData,
   setNextStep,
-  setPurchaseOrderProduct,
   renderedFrom,
   allowedToEdit: hasPermission,
-  updateStatus,
   checkReceivedProduct
 }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
+  const { state: { user, permissions } }: any = useData();
+
   const allowedToEdit = hasPermission && permissions?.purchaseOrder.isUpdate;
 
   const [addProductDialog, setAddProductDialog] = useState(false);
@@ -67,8 +52,13 @@ const Product = ({
 
   const [showProductDialog, setShowProductDialog] = useState(false);
   const [showInventoryStatesDialog, setShowInventoryStatesDialog] = useState({ open: false, product: null, qty: 0 });
-  const [showServiceDialog, setShowServiceDialog] = useState(false);
-  const [selectedServiceData, setSelectedServiceData] = useState(null);
+
+  const [showCostDialog, setShowCostDialog] = useState(false);
+  const [selectedCostData, setSelectedCostData] = useState(null);
+  const [showCostDeleteConfirmBox, setShowCostDeleteConfirmBox] = useState(false);
+  const [deletePurchaseOrderCost, setDeletePurchaseOrderCost] = useState([]);
+
+
   const [selectedProductData, setSelectedProductData] = useState(null);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -76,9 +66,7 @@ const Product = ({
   const [anchorEl, setAnchorEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [showServiceDeleteConfirmBox, setShowServiceDeleteConfirmBox] = useState(false);
   const [deletePurchaseOrderProduct, setDeletePurchaseOrderProduct] = useState([]);
-  const [deletePurchaseOrderService, setDeletePurchaseOrderService] = useState([]);
 
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [columns, setColumns] = useState(null);
@@ -91,7 +79,7 @@ const Product = ({
   }, []);
 
   useEffect(() => {
-    fetchPurchaseOrderProduct();
+    fetchData();
   }, [columns]);
 
   const fetchFields = async () => {
@@ -105,7 +93,7 @@ const Product = ({
         columns.push({
           accessor: 'type',
           Header: 'Type',
-          width: 200,
+          width: 100,
           sticky: isMobile ? 'none' : 'left',
           Cell: ({ row }) => {
             return row.original['type'] ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
@@ -123,8 +111,8 @@ const Product = ({
               ) : (
                 <p
                   onClick={() => {
-                    row.original.type === 'Product' ? setShowProductDialog(true) : setShowServiceDialog(true);
-                    row.original.type === 'Product' ? setSelectedProductData(row.original) : setSelectedServiceData(row.original);
+                    row.original.type === 'Product' ? setShowProductDialog(true) : setShowCostDialog(true);
+                    row.original.type === 'Product' ? setSelectedProductData(row.original) : setSelectedCostData(row.original);
                   }}
                   className="link text-truncate"
                   title={row.original.detail}
@@ -200,10 +188,6 @@ const Product = ({
     });
     setAllFields(JSON.parse(JSON.stringify(fields)));
     const newColumns = genrateCustomTableColumns(fields, purchaseOrderData?.currency, renderedFrom);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     columns = [...columns, ...newColumns];
     columns.push({
       accessor: 'action',
@@ -240,10 +224,12 @@ const Product = ({
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
                 onDelete={() => {
-                  {row.original.type === 'Product' ? setShowDeleteConfirmBox(true) : setShowServiceDeleteConfirmBox(true)};
-                  {row.original.type === 'Product'
-                    ? setDeletePurchaseOrderProduct([row.original?._id])
-                    : setDeletePurchaseOrderService([row.original?._id])};
+                  { row.original.type === 'Product' ? setShowDeleteConfirmBox(true) : setShowCostDeleteConfirmBox(true) };
+                  {
+                    row.original.type === 'Product'
+                      ? setDeletePurchaseOrderProduct([row.original?._id])
+                      : setDeletePurchaseOrderCost([row.original?._id])
+                  };
                 }}
                 entity="rentalManagement"
               />
@@ -255,57 +241,57 @@ const Product = ({
     setColumns([...columns]);
   };
 
-  const fetchPurchaseOrderProduct = async () => {
+  const fetchData = async () => {
+
     setNextStep(false);
-    const services: any = await axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`);
-    axiosInstance()
-      .get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`)
-      .then(({ data: { data } }) => {
-        setPurchaseOrderProduct(JSON.parse(JSON.stringify(data)));
-        setMaterial(JSON.parse(JSON.stringify(data)));
-        let rows = [...data, ...services?.data?.data]?.map((item, index) => {
-          let finalObject = prepareDataForGrid(item);
-          finalObject['isChecked'] = selectedProducts.some((s) => s._id === item._id);
-          finalObject['allowedToEdit'] = allowedToEdit;
-          let res: any = {
-            ...finalObject
-          };
-          res.productName = item.productDetail?.productName || item?.description;
-          res.type = item.productDetail ? 'Product' : 'Cost';
-          res.productNumber = item.productDetail?.productNumber;
-          res.productDescription = item.productDetail?.productDescription || item.productDetail?.productDesc;
-          res.serializedProduct = item.productDetail?.serializedProduct;
-          res.serializedProductView = item.productDetail?.serializedProduct ? 'Yes' : 'No';
-          res.productCategory = item.productDetail?.productCategory?.optionLabel;
-          res.productDetail = item.productDetail;
-          res.parentId = null;
-          if (item?.qty === 0) {
-            res.isValid = false;
-          } else if (isRateRequired) {
-            if (item['finalPrice_' + purchaseOrderData?.currency?.toLowerCase()]) {
-              res.isValid = true;
-            } else {
-              res.isValid = false;
-            }
-          } else {
-            res.isValid = true;
-          }
-          res.hideSelection = item.actualReceived || item.rejectQuantity ? true : false;
-          return res;
-        });
-        if (rows.length === 0) {
-          setNextStep(false);
-        } else if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
-          setNextStep(false);
+
+    const productResponce: any = await axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`);
+    const costResponce: any = await axiosInstance().get(`${purchaseOrder.api}/cost/${purchaseOrderData._id}`);
+
+    const data = [...productResponce?.data?.data?.map((e: any) => { return { ...e, type: "Product" } }) || [],
+    ...costResponce?.data?.data?.map((e: any) => { return { ...e, type: "Cost" } }) || []]
+
+    setMaterial(JSON.parse(JSON.stringify(data)));
+    
+    let rows = data?.map((item, index) => {
+      let finalObject = prepareDataForGrid(item);
+      finalObject['isChecked'] = selectedProducts.some((s) => s._id === item._id);
+      finalObject['allowedToEdit'] = allowedToEdit;
+      let res: any = {
+        ...finalObject
+      };
+      res.productName = item.type === "Product" ? item.productDetail?.productName : item?.description;
+      res.productNumber = item.productDetail?.productNumber;
+      res.productDescription = item.productDetail?.productDescription || item.productDetail?.productDesc;
+      res.serializedProduct = item.productDetail?.serializedProduct;
+      res.serializedProductView = item.productDetail?.serializedProduct ? 'Yes' : 'No';
+      res.productCategory = item.productDetail?.productCategory?.optionLabel;
+      res.productDetail = item.productDetail;
+      res.parentId = null;
+      if (item?.qty === 0) {
+        res.isValid = false;
+      }
+      else if (isRateRequired) {
+        if (item['finalPrice_' + purchaseOrderData?.currency?.toLowerCase()]) {
+          res.isValid = true;
         } else {
-          setNextStep(true);
+          res.isValid = false;
         }
-        checkReceivedProduct(data);
-        setRowsData(rows);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+      } else {
+        res.isValid = true;
+      }
+      res.hideSelection = item.actualReceived || item.rejectQuantity ? true : false;
+      return res;
+    });
+    if (rows.length === 0) {
+      setNextStep(false);
+    } else if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
+      setNextStep(false);
+    } else {
+      setNextStep(true);
+    }
+    checkReceivedProduct(data);
+    setRowsData(rows);
   };
 
   const openActions = (event) => {
@@ -337,7 +323,7 @@ const Product = ({
       .post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { orderDetails: tempProductArray })
       .then(() => {
         setAddProductDialog(false);
-        fetchPurchaseOrderProduct();
+        fetchData();
         setAddingProducts(false);
       })
       .catch((error) => {
@@ -352,7 +338,7 @@ const Product = ({
       .put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
       .then(() => {
         setAddProductDialog(false);
-        fetchPurchaseOrderProduct();
+        fetchData();
         setSelectedProductData(null);
         setAddingProducts(false);
         setShowProductDialog(false);
@@ -369,7 +355,7 @@ const Product = ({
     axiosInstance()
       .post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/delete`, { ids: deletePurchaseOrderProduct })
       .then(() => {
-        fetchPurchaseOrderProduct();
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeletePurchaseOrderProduct([]);
       })
@@ -378,36 +364,37 @@ const Product = ({
       });
   };
 
-  const handleAddService = (rows) => {
+  const handleAddCost = (rows) => {
     axiosInstance()
-      .post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/add`, { services: rows })
+      .post(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/add`, { additionalCost: rows })
       .then(() => {
-        fetchPurchaseOrderProduct();
-        setShowServiceDialog(false);
+        fetchData();
+        setShowCostDialog(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
-  const handleUpdateService = (rows) => {
+  const handleUpdateCost = (rows) => {
     axiosInstance()
-      .put(`${purchaseOrder.api}/service/${purchaseOrderData._id}/update`, { services: rows })
+      .put(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/update`, { additionalCost: rows })
       .then(() => {
-        fetchPurchaseOrderProduct();
-        setShowServiceDialog(false);
+        fetchData();
+        setShowCostDialog(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
-  const handleDeleteService = () => {
+
+  const handleDeleteCost = () => {
     axiosInstance()
-      .post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/delete`, { ids: deletePurchaseOrderService })
+      .post(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/delete`, { ids: deletePurchaseOrderCost })
       .then(() => {
-        fetchPurchaseOrderProduct();
-        setShowServiceDeleteConfirmBox(false);
-        setDeletePurchaseOrderService([]);
+        fetchData();
+        setShowCostDeleteConfirmBox(false);
+        setDeletePurchaseOrderCost([]);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -416,9 +403,6 @@ const Product = ({
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = material.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(material, inputField, allFields, updatedData);
     handleUpdateQty(rows);
@@ -429,12 +413,16 @@ const Product = ({
       {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" m={1}>
           <Box display="flex" alignItems="center">
-            <HtmlTooltip title="Add Products and Services">
-              <Button variant={'outlined'} color="default" size="small" onClick={openAddActions} aria-controls="add-menu">
-                {'Add'}
-                <ExpandMore fontSize="small" />
-              </Button>
-            </HtmlTooltip>
+            <Button
+              variant={'outlined'}
+              color="primary"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={openAddActions}
+              aria-controls="add-menu">
+              {'Add'}
+              <ExpandMore fontSize="small" />
+            </Button>
             <Menu
               anchorEl={addAnchorEl}
               keepMounted
@@ -468,11 +456,11 @@ const Product = ({
               <MenuItem
                 onClick={() => {
                   closeAddActions();
-                  setShowServiceDialog(true);
-                  setSelectedServiceData(null);
+                  setShowCostDialog(true);
+                  setSelectedCostData(null);
                 }}
               >
-                Add Services and Consumables
+                Add Cost
               </MenuItem>
             </Menu>
           </Box>
@@ -589,23 +577,22 @@ const Product = ({
             setSelectedProductData(null);
           }}
           onSubmit={handleUpdateQty}
-          // currency={purchaseOrderData?.currency}
-          nextRowData={purchaseOrderData?.currency}
           productData={!isBulkEdit ? selectedProductData : selectedProducts}
           bulkEdit={isBulkEdit}
           purchaseOrderData={purchaseOrderData}
+          nextRowData={null}
         />
       )}
-      {showServiceDialog && (
-        <ServiceDialog
+      {showCostDialog && (
+        <CostDialog
           onClose={() => {
-            setShowServiceDialog(false);
-            setSelectedServiceData(null);
+            setShowCostDialog(false);
+            setSelectedCostData(null);
           }}
-          handleAddService={handleAddService}
-          handleUpdateService={handleUpdateService}
-          currency={purchaseOrderData?.currency}
-          serviceData={selectedServiceData}
+          handleAddCost={handleAddCost}
+          handleUpdateCost={handleUpdateCost}
+          purchaseOrderData={purchaseOrderData}
+          costData={selectedCostData}
         />
       )}
       {showDeleteConfirmBox && (
@@ -616,12 +603,12 @@ const Product = ({
           onOk={handleDelete}
         />
       )}
-      {showServiceDeleteConfirmBox && (
+      {showCostDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showServiceDeleteConfirmBox}
+          open={true}
           message={`Are you sure you want to delete  ? `}
-          onClose={() => setShowServiceDeleteConfirmBox(false)}
-          onOk={handleDeleteService}
+          onClose={() => setShowCostDeleteConfirmBox(false)}
+          onOk={handleDeleteCost}
         />
       )}
       {showInventoryStatesDialog.open && (
