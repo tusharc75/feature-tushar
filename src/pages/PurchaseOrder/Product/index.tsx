@@ -463,10 +463,10 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                         setSelectedProductData(null)
                     }}
                     onSubmit={handleUpdateQty}
-                    currency={purchaseOrderData?.currency}
                     productData={!isBulkEdit ? selectedProductData : selectedProducts}
                     bulkEdit={isBulkEdit}
                     purchaseOrderData={purchaseOrderData}
+                    nextRowData={null}
                 />
             }
             {
