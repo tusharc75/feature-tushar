@@ -18,7 +18,7 @@ import { getFrameworkComponents, genrateColoum } from "src/constants/columns"
 import { prepareDataForGrid } from "src/constants/helpers";
 import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
 import { Link } from "react-router-dom";
-import { fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
+import { fetch_po_product_fields, fetch_po_cost_fields } from '../../../components/PurchaseOrder/helper';
 
 
 const IssuPO = ({ purchaseOrderData, handleViewPdf, updateStatus, setCurrentStep, currentStep, handleAttachments, statusOptions, renderedFrom }) => {
@@ -56,7 +56,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, updateStatus, setCurrentStep
 
     const fetchFields = async () => {
         let fields_product = await fetch_po_product_fields(purchaseOrderData?.currency);
-        let fields_service = await fetch_po_service_fields(purchaseOrderData?.currency);
+        let fields_service = await fetch_po_cost_fields(purchaseOrderData?.currency);
         const fields = [...fields_product, ...fields_service]
         let rendererNames = [];
         genrateColoum(fields, columns, rendererNames, false, renderedFrom);
