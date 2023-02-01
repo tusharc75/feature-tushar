@@ -458,6 +458,9 @@ Button.MuiButtonBase-root:not(.MuiFab-root) {
 .MuiButton-containedPrimary {
   background-color: #298b88 !important;
   color: white !important;
+  &:hover {
+    background-color: rgb(15, 35, 44) !important;
+  }
 }
 .MuiOutlinedInput-adornedStart {
   padding-left: 11px !important;

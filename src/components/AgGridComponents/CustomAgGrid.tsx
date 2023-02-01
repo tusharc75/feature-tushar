@@ -12,6 +12,7 @@ import { checkStaticField, staticColumns } from '../../constants/columns';
 import { GridApi } from 'ag-grid-community';
 import { uniqBy } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
+import GridFilters from './GridFilters';
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -172,6 +173,11 @@ export default function CustomAgGrid({
 }) {
   const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setIsFilterOpen(true);
+  };
 
   const {
     state: { searchQuery }
@@ -430,7 +436,7 @@ export default function CustomAgGrid({
 
   return (
     <>
-      <div className="ag-grid-main custom-react-table">
+      <div className="ag-grid-main custom-react-table-v1">
         {loading ? (
           <div className="loader">
             <span>Loading</span>
@@ -453,8 +459,16 @@ export default function CustomAgGrid({
             dispatch={dispatch}
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
             selectedRecords={selectedRecords}
+            handleFilterOpen={handleClickOpen}
           />
-
+          <GridFilters
+            open={isFilterOpen}
+            setOpen={setIsFilterOpen}
+            currentGridApi={currentGridApi}
+            columnApi={columnApi}
+            columns={columns}
+            tableSource={renderedFrom}
+          />
           <div id="grid-listing" className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
             <AgGridReact
               onFirstDataRendered={onFirstDataRendered}
