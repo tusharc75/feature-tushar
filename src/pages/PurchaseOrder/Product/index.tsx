@@ -24,7 +24,6 @@ import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import SendEmail from './../SendEmail';
-import { FaEye } from 'react-icons/fa';
 import InventoryStatesDialog from './InventoryStatesDialog';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -32,6 +31,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import CostDialog from './CostDialog';
 import AddIcon from '@material-ui/icons/Add';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 const Product = ({
   purchaseOrderData,
@@ -201,10 +201,10 @@ const Product = ({
         return allowedToEdit ? (
           <>
             {permissions?.irtTicket?.isCreate && (
-              <HtmlTooltip title="Inventory States">
+              <HtmlTooltip title="Explore Inventory">
                 <IconButton
-                  size="small"
                   color="primary"
+                  size="small"
                   aria-label="Inventory"
                   onClick={() => {
                     setShowInventoryStatesDialog({
@@ -214,7 +214,7 @@ const Product = ({
                     });
                   }}
                 >
-                  <FaEye color="primary" />
+                  <VisibilityIcon color="primary" />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -252,7 +252,7 @@ const Product = ({
     ...costResponce?.data?.data?.map((e: any) => { return { ...e, type: "Cost" } }) || []]
 
     setMaterial(JSON.parse(JSON.stringify(data)));
-    
+
     let rows = data?.map((item, index) => {
       let finalObject = prepareDataForGrid(item);
       finalObject['isChecked'] = selectedProducts.some((s) => s._id === item._id);

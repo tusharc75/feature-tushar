@@ -53,7 +53,7 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
                 }}
                 showManimizeMaximize={true}
                 showRequiredLabel={false}
-                title={"Inventory States"}
+                title={"Explore Inventory"}
                 onClose={onClose}
             />
             <CustomDialogContent>
