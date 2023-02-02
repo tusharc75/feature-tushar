@@ -65,7 +65,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Your response has been submitted successfully.`
+          message: `Thank you for your submission`
         });
         setIsSubmited(true);
         setComment('')
