@@ -108,7 +108,7 @@ export const userType = {
 
 export const AgGridHeaderHeight = 40;
 export const AgGridRowHeight = 40;
-export const AgGridFloatingFiltersHeight = 0;
+export const AgGridFloatingFiltersHeight = 38;
 
 export const gridPageSizes = [25, 50, 75];
 export const gridLoadingTimeout = 500;
