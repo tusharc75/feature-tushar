@@ -2282,7 +2282,7 @@ export const WORK_ORDER_STATUS = {
 };
 
 export const IRT_APPROVER_STATUS = {
-  send: "Send",
+  send: "Email Sent",
   approved: "Approved",
   declined: "Declined"
 }
