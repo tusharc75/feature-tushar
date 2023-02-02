@@ -13,8 +13,8 @@ import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
 const customNodeStyles = {
   irtTicketNumber: {
     name: 'Irt Ticket Number',
-    background: '#EAF6FD',
-    borderColor: '#71B2EF'
+    background: '#E6E8F5',
+    borderColor: '#9789F0'
   },
   purchaseOrder: {
     name: 'Purchase Order',
