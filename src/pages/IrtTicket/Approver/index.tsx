@@ -8,6 +8,7 @@ import AssignUserDialog from './AssignUserDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import moment from 'moment';
+import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
 
 
 const Approver = ({ irtTicketData }) => {
@@ -74,7 +75,8 @@ const Approver = ({ irtTicketData }) => {
                     style={{
                       borderWidth: '1px',
                       borderStyle: 'solid',
-                      backgroundColor: 'white',
+                      backgroundColor: item.status === IRT_APPROVER_STATUS.send ? '#E2F8FF' :
+                        item.status === IRT_APPROVER_STATUS.approved ? '#EDFFE1' : item.status === IRT_APPROVER_STATUS.declined ? '#FFEAEA' : 'white',
                       borderColor: selected?._id === item?._id ? '#329592' : 'rgb(224, 224, 224)',
                       cursor: 'pointer',
                       transition: '.3s'
