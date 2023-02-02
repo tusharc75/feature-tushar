@@ -160,7 +160,7 @@ const IrtTicketDetail = () => {
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
           />
-            <Tab
+          <Tab
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
@@ -188,7 +188,9 @@ const IrtTicketDetail = () => {
             irtTicketData={irtTicketData} />
         )}
         {tabValue === 2 && (
-          <IrtTicketView irtTicketData={irtTicketData} />
+          <IrtTicketView
+            id={id}
+          />
         )}
       </Box>
       {showConfirmBox && (

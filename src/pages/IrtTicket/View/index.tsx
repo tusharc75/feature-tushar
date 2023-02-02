@@ -1,7 +1,6 @@
-import { Box, Button, Paper } from '@material-ui/core';
-import  { Fragment, useContext, useEffect, useState } from 'react';
+import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useHistory } from 'react-router-dom';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flow-renderer';
@@ -9,9 +8,14 @@ import { MdZoomOutMap } from 'react-icons/md';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
 
 const customNodeStyles = {
-  irtTicketNumber: { name: 'Irt Ticket Number', background: '#c3d5e6', borderColor: '#6c89a6' },
+  irtTicketNumber: {
+    name: 'Irt Ticket Number',
+    background: '#c3d5e6',
+    borderColor: '#6c89a6'
+  },
   purchaseOrder: {
     name: 'Purchase Order',
     background: '#97c9bf',
@@ -22,200 +26,214 @@ const customNodeStyles = {
     background: 'rgb(255, 214, 91)',
     borderColor: '#C0C0C0'
   },
-  approver: {
-    name: 'Approver',
-    background: 'rgba(222, 249, 255, 1)',
-    borderColor: 'green'
+  send: {
+    name: 'Approver-Send',
+    background: '#E2F8FF',
+    borderColor: '#E2F8FF'
   },
-  approvedStatus: {
-    name: 'Approved Status',
-    background: '#cfdb7f',
-    borderColor: '#aeb86e'
+  approve: {
+    name: 'Approver-Approved',
+    background: '#EDFFE1',
+    borderColor: '#EDFFE1'
   },
-  closed: {
-    name: 'Closed',
-    background: '#e6c6e6',
-    borderColor: '#b38fb3'
+  decline: {
+    name: 'Approver-Declined',
+    background: '#FFEAEA',
+    borderColor: '#FFEAEA'
   }
 };
 
-const IrtTicketView = ({ irtTicketData }) => {
+const IrtTicketView = ({ id }) => {
+
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
   const [flowData, setFlowData] = useState([]);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
-  const { _id, irtTicketNumber, product, purchaseOrder } = irtTicketData;
 
   useEffect(() => {
     fetchData();
-  }, [irtTicketData]);
+  }, [id]);
 
-  const fetchData = () => {
+  const fetchData = async () => {
+
     setLoading(true);
-    axiosInstance()
-      .get(`${routes?.irtTicket?.path}/approver/${irtTicketData?._id}`)
-      .then(({ data: { data } }) => {
-        var xPosition = 0;
-        var flow: any = [
-          {
-            id: `${_id}`,
-            type: 'input',
-            className: 'dark-node',
-            sourcePosition: 'right',
-            data: {
-              ref_type: 'irtTicketNumber',
-              ref_id: _id,
-              label: (
-                <HtmlTooltip arrow placement="top" title={'Irt Ticket Number'}>
-                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{irtTicketNumber ?? ''}</div>
-                </HtmlTooltip>
-              )
-            },
-            position: { x: xPosition, y: 70 },
-            style: customNodeStyles.irtTicketNumber
-          }
-        ];
-        var flowEdge: any[] = [];
-        xPosition += 300;
-        flow.push({
-          id: `${purchaseOrder?.optionValue}`,
-          type: 'default',
-          className: 'dark-node',
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          data: {
-            ref_type: 'purchaseOrder',
-            ref_id: purchaseOrder?.optionValue,
-            label: (
-              <HtmlTooltip arrow placement="top" title={'Purchase Order'}>
-                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{purchaseOrder?.optionLabel}</div>
-              </HtmlTooltip>
-            )
-          },
-          position: { x: xPosition, y: 0 * 80 },
-          style: customNodeStyles.purchaseOrder
-        });
-        flowEdge.push({
-          id: `${_id}_edge`,
-          source: `${_id}`,
-          target: `${purchaseOrder?.optionValue}`
-        });
-        xPosition += 300;
-        flow.push({
-          id: `${product?.optionValue}`,
-          type: 'default',
-          className: 'dark-node',
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          data: {
-            ref_type: 'product',
-            ref_id: product?.optionValue,
-            label: (
-              <HtmlTooltip arrow placement="top" title={'Product'}>
-                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product?.optionLabel}</div>
-              </HtmlTooltip>
-            )
-          },
-          position: { x: xPosition, y: 0 * 80 },
-          style: customNodeStyles.product
-        });
-        flowEdge.push({
-          id: `${purchaseOrder.optionValue}_edge`,
-          source: `${purchaseOrder.optionValue}`,
-          target: `${product?.optionValue}`
-        });
-        xPosition += 300;
-        data?.map((s, sidx) => {
-          const flowId = `${sidx}_${s?.user?.optionValue}`;
-          const flowIdStatus = `${sidx}_${s?.user?.optionValue}_${s?.user?.status}`;
-          flow.push({
-            id: flowId,
-            type: 'default',
-            className: 'dark-node',
-            sourcePosition: 'right',
-            targetPosition: 'left',
-            data: {
-              ref_type: 'approver',
-              ref_id: s?.user?.optionValue,
-              label: (
-                <HtmlTooltip arrow placement="top" title={'Approver'}>
-                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s?.user.optionLabel}</div>
-                </HtmlTooltip>
-              )
-            },
-            position: { x: xPosition, y: sidx * 80 },
-            style: customNodeStyles.approver
-          });
-          flowEdge.push({
-            id: `${s._id}_edge`,
-            source: `${product.optionValue}`,
-            target: flowId
-          });
-          flow.push({
-            id: flowIdStatus,
-            type: 'default',
-            className: 'dark-node',
-            sourcePosition: 'right',
-            targetPosition: 'left',
-            data: {
-              ref_type: 'approvedStatus',
-              ref_id: s?._id,
-              label: (
-                <HtmlTooltip arrow placement="top" title={'Approved Status'}>
-                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s?.status}</div>
-                </HtmlTooltip>
-              )
-            },
-            position: { x: xPosition + 300, y: sidx * 80 },
-            style: customNodeStyles.approvedStatus
-          });
-          flowEdge.push({
-            id: `${s._id}_edge_status`,
-            source: flowId,
-            target: flowIdStatus
-          });
-          if (sidx === 0) {
-            flow.push({
-              id: 'closed',
-              type: 'default',
-              className: 'dark-node',
-              sourcePosition: 'right',
-              targetPosition: 'left',
-              data: {
-                ref_type: 'closed',
-                ref_id: 'closed',
-                label: (
-                  <HtmlTooltip arrow placement="top" title={'Closed'}>
-                    <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Closed</div>
-                  </HtmlTooltip>
-                )
-              },
-              position: { x: xPosition + 600, y: sidx * 80 },
-              style: customNodeStyles.closed
-            });
-          }
-          flowEdge.push({
-            id: `closed`,
-            source: flowIdStatus,
-            target: 'closed'
-          });
-          sidx++;
-        });
 
-        setFlowData([...flow, ...flowEdge]);
-        setLoading(false);
+    const irtTicketResponce: any = await axiosInstance().get(`${routes?.irtTicket?.path}/${id}`);
+    const approverResponce: any = await axiosInstance().get(`${routes?.irtTicket?.path}/approver/${id}`);
+
+    const irtTicketData: any = irtTicketResponce?.data?.data;
+    const approver: any = approverResponce?.data?.data;
+
+    var xPosition = 0;
+    var flow: any = [
+      {
+        id: irtTicketData?._id,
+        type: 'input',
+        className: 'dark-node',
+        sourcePosition: 'right',
+        data: {
+          ref_type: 'irtTicketNumber',
+          ref_id: irtTicketData?._id,
+          label: (
+            <HtmlTooltip arrow placement="top" title={'IRT Ticket'}>
+              <div>
+                <Typography variant='body2'>IRT Ticket</Typography>
+                <Typography variant='subtitle2'>{irtTicketData?.irtTicketNumber}</Typography>
+              </div>
+            </HtmlTooltip>
+          )
+        },
+        position: { x: xPosition, y: 70 },
+        style: customNodeStyles.irtTicketNumber
+      }
+    ];
+
+    var flowEdge: any[] = [];
+    xPosition += 300;
+    flow.push({
+      id: irtTicketData?.purchaseOrder?.optionValue,
+      type: 'default',
+      className: 'dark-node',
+      sourcePosition: 'right',
+      targetPosition: 'left',
+      data: {
+        ref_type: 'purchaseOrder',
+        ref_id: irtTicketData?.purchaseOrder?.optionValue,
+        label: (
+          <HtmlTooltip arrow placement="top" title={'Purchase Order'}>
+            <div>
+              <Typography variant='body2'>Purchase Order</Typography>
+              <Typography variant='subtitle2'>{irtTicketData?.purchaseOrder?.optionLabel}</Typography>
+            </div>
+          </HtmlTooltip>
+        )
+      },
+      position: { x: xPosition, y: 70 },
+      style: customNodeStyles.purchaseOrder
+    });
+
+    flowEdge.push({
+      id: `${irtTicketData?._id}_edge`,
+      source: irtTicketData?._id,
+      target: irtTicketData?.purchaseOrder?.optionValue
+    });
+
+    xPosition += 300;
+    flow.push({
+      id: irtTicketData?.product?.optionValue,
+      type: 'default',
+      className: 'dark-node',
+      sourcePosition: 'right',
+      targetPosition: 'left',
+      data: {
+        ref_type: 'product',
+        ref_id: irtTicketData?.product?.optionValue,
+        label: (
+          <HtmlTooltip arrow placement="top" title={'Product'}>
+            <div>
+              <Typography variant='body2'>Product/Part</Typography>
+              <Typography variant='subtitle2'>{irtTicketData?.product?.optionLabel}</Typography>
+              <Typography variant='body2'>{`Qty : ${irtTicketData?.qty}`}</Typography>
+              <Typography variant='body2'>{`PO Amount : $ ${irtTicketData?.amount}`}</Typography>
+            </div>
+          </HtmlTooltip>
+        )
+      },
+      position: { x: xPosition, y: 50 },
+      style: customNodeStyles.product
+    });
+
+    flowEdge.push({
+      id: `${irtTicketData?.purchaseOrder?.optionValue}_edge`,
+      source: irtTicketData?.purchaseOrder?.optionValue,
+      target: irtTicketData?.product?.optionValue
+    });
+
+    xPosition += 300;
+    approver?.map((s, index) => {
+
+      const flowId = `${index}_${s?.user?.optionValue}`;
+
+      flow.push({
+        id: flowId,
+        type: 'default',
+        className: 'dark-node',
+        sourcePosition: 'right',
+        targetPosition: 'left',
+        data: {
+          ref_type: 'user',
+          ref_id: s?.user?.optionValue,
+          label: (
+            <HtmlTooltip arrow placement="top" title={'Approver'}>
+              <div>
+                <Typography variant='subtitle2'>{s?.type}</Typography>
+                <Typography variant='subtitle2'>{s?.user.optionLabel}</Typography>
+                <Typography variant='subtitle2'>{s?.status}</Typography>
+              </div>
+            </HtmlTooltip>
+          )
+        },
+        position: { x: xPosition, y: index * 120 },
+        style: s?.status === IRT_APPROVER_STATUS.send ? customNodeStyles.send :
+          s?.status === IRT_APPROVER_STATUS.approved ? customNodeStyles.approve : customNodeStyles.decline
       });
+
+      flowEdge.push({
+        id: `${s._id}_edge`,
+        source: `${irtTicketData?.product?.optionValue}`,
+        target: flowId
+      });
+
+      if (index === 0 && [IRT_APPROVER_STATUS.approved, IRT_APPROVER_STATUS.declined]?.includes(irtTicketData?.status)) {
+        flow.push({
+          id: 'closed',
+          type: 'output',
+          className: 'dark-node',
+          targetPosition: 'left',
+          data: {
+            ref_type: 'closed',
+            ref_id: 'closed',
+            label: (
+              <HtmlTooltip arrow placement="top" title={'IRT Ticket'}>
+                <div>
+                  <Typography variant='body2'>IRT Ticket</Typography>
+                  <Typography variant='subtitle2'>{irtTicketData?.status}</Typography>
+                </div>
+              </HtmlTooltip>
+            )
+          },
+          position: { x: xPosition + 300, y: 70 },
+          style: irtTicketData?.status === IRT_APPROVER_STATUS.approved ? customNodeStyles.approve : customNodeStyles.decline
+        });
+      }
+
+      flowEdge.push({
+        id: `closed`,
+        source: flowId,
+        target: 'closed'
+      });
+
+      index++;
+    });
+
+    setFlowData([...flow, ...flowEdge]);
+    setLoading(false);
   };
 
   const onLoad = (reactFlowInstance) => {
     reactFlowInstance.fitView({ padding: 0.1 });
   };
+
   const onElementClick = (event, element) => {
-    switch (element.data.ref_type) {
-      case 'irtTicketNumber':
-        history.push(`${routes.irtTicketDetail.path}/${irtTicketData?._id}`);
-        break;
+    if (element?.data?.ref_type === "purchaseOrder") {
+      history.push(`${routes.purchaseOrderDetail.path}/${element?.data?.ref_id}`)
+    }
+    else if (element?.data?.ref_type === "product") {
+      history.push(`${routes.productDetail.path}/${element?.data?.ref_id}`)
+    }
+    else if (element?.data?.ref_type === "user") {
+      history.push(`${routes.userDetail.path}/${element?.data?.ref_id}`)
     }
   };
 
