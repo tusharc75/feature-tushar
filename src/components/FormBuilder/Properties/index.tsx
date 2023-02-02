@@ -382,9 +382,19 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     }
 
     if (values.isWarningTooltip && !values.warningTooltipMessage) {
-      errors["warningTooltipMessage"] = "Please enter warning message."
+      errors['warningTooltipMessage'] = 'Please enter warning message.';
     }
-
+    if (values?.isMinMaxValue) {
+      if (!values?.minValue) {
+        errors["minValue"] = "Please enter min value";
+      }
+      if (!values?.maxValue) {
+        errors["maxValue"] = "Please enter max value";
+      }
+      if (values?.minValue > values?.maxValue) {
+        errors["minValue"] = "Please enter valid min value";
+      }
+    }
     return errors;
   }
 
