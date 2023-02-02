@@ -13,33 +13,33 @@ import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
 const customNodeStyles = {
   irtTicketNumber: {
     name: 'Irt Ticket Number',
-    background: '#c3d5e6',
-    borderColor: '#6c89a6'
+    background: '#EAF6FD',
+    borderColor: '#71B2EF'
   },
   purchaseOrder: {
     name: 'Purchase Order',
-    background: '#97c9bf',
-    borderColor: '#70948d'
+    background: '#DFFBF5',
+    borderColor: '#66CDB7'
   },
   product: {
     name: 'Product',
-    background: 'rgb(255, 214, 91)',
-    borderColor: '#C0C0C0'
+    background: '#FFF7D9',
+    borderColor: '#FDD33E'
   },
   send: {
     name: 'Approver-Send',
     background: '#E2F8FF',
-    borderColor: '#E2F8FF'
+    borderColor: '#8BCBDF'
   },
   approve: {
     name: 'Approver-Approved',
     background: '#EDFFE1',
-    borderColor: '#EDFFE1'
+    borderColor: '#86DB71'
   },
   decline: {
     name: 'Approver-Declined',
     background: '#FFEAEA',
-    borderColor: '#FFEAEA'
+    borderColor: '#FFA0A0'
   }
 };
 
