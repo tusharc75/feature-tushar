@@ -276,7 +276,7 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
               handleClose();
             }}
             disabled={isFieldsDisabled}
-            className="btn-outline-v1"
+            className="btn-outline-v1 light"
           >
             {isEditing ? 'Update Filter' : 'Save Filter'}
           </Button>
@@ -306,7 +306,7 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
             onClick={() => {
               handleSaveDialogClose();
             }}
-            className="btn-outline-v1"
+            className="btn-outline-v1 light"
           >
             Cancel
           </Button>
@@ -341,6 +341,7 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
         colsWithFilterValue={colsWithFilterValue}
         handleClearSelectedFilter={handleClearSelectedFilter}
         handleClearSingleFilter={handleClearSingleFilter}
+        handleOpen={() => setOpen(true)}
       />
     </div>
   );
@@ -380,7 +381,7 @@ const ConfirmarionDialog = ({ head, body, onConfirm, open, setOpen }) => {
 };
 
 // <<<<<<<<<<<<<<<<<<<<<<<<< DISPLAY APPLIED FILTERS CHIP >>>>>>>>>>>>>>>>>>>>>>>>>
-const DisplayFilters = ({ gridApi, selectedFilter, colsWithFilterValue, handleClearSelectedFilter, handleClearSingleFilter }) => {
+const DisplayFilters = ({ gridApi, selectedFilter, colsWithFilterValue, handleClearSelectedFilter, handleClearSingleFilter, handleOpen }) => {
   const [filters, setFilters] = useState(null);
   const [appliedFilter, setAppliedFilter] = useState(null);
   const [hiddenItems, setHiddenItems] = useState(0);
@@ -435,24 +436,33 @@ const DisplayFilters = ({ gridApi, selectedFilter, colsWithFilterValue, handleCl
   };
 
   return (
-    <div className="chip-container">
+    <>
       {appliedFilter ? (
-        <Chip className={'filter-chip'} deleteIcon={<CloseIcon />} label={appliedFilter?.title} onDelete={clearFilterAll} />
+        <div className="chip-container">
+          <Chip onClick={handleOpen} className={'filter-chip'} deleteIcon={<CloseIcon />} label={appliedFilter?.title} onDelete={clearFilterAll} />
+        </div>
       ) : (
-        <>
-          <div className={'chip-group'} ref={containerRef}>
-            {filters?.map((filter) => (
-              <Chip
-                className={'filter-chip'}
-                deleteIcon={<CloseIcon />}
-                label={`${filter.title}=${filter.value}`}
-                onDelete={() => clearSingleFilter(filter.name)}
-              />
-            ))}
+        filters?.length > 0 && (
+          <div className="chip-container">
+            <div className={'chip-group'} ref={containerRef}>
+              {filters?.map((filter) => (
+                <Chip
+                  onClick={handleOpen}
+                  className={'filter-chip'}
+                  deleteIcon={<CloseIcon />}
+                  label={`${filter.title}=${filter.value}`}
+                  onDelete={() => clearSingleFilter(filter.name)}
+                />
+              ))}
+            </div>
+            {hiddenItems !== 0 && (
+              <div style={{ cursor: 'pointer' }} onClick={handleOpen}>
+                +{hiddenItems} more
+              </div>
+            )}
           </div>
-          {hiddenItems !== 0 && <div>+{hiddenItems} more</div>}
-        </>
+        )
       )}
-    </div>
+    </>
   );
 };
