@@ -4,15 +4,18 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { arrayToDropwdownOption, CustomDialogTransition, getObjKeysWithValues } from 'src/constants/helpers';
+import { arrayToDropwdownOption, CustomDialogTransition, getObjKeysWithValues, getUniqueCurrencies } from 'src/constants/helpers';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomButton from '../Helpers/CustomButton';
 import FormTypes from './FormTypes';
+
+const cellWidth = 250;
 
 const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => {
 
     const [fullScreen, setFullScreen] = useState(true);
     const [rows, setRows] = useState([]);
+    const [columns, setColummns] = useState([]);
 
     useEffect(() => {
         const tempRows = data.map(d => {
@@ -20,7 +23,24 @@ const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => 
             return { ...d, ...tempFieldData }
         })
         setRows(tempRows)
-    }, []);
+        generateColumnField()
+    }, [fields]);
+
+    const generateColumnField = () => {
+        let column = [];
+        let _fields = fields;
+        _fields.forEach((ele) => {
+            if (ele.type === 'currencyAmount') {
+                ele.fieldLabel = ele.fieldLabel + ' ' + currency
+                ele.fieldName = ele.fieldName + '_' + currency.toLowerCase()
+                column.push(ele)
+            }
+            else {
+                column.push(ele)
+            }
+        });
+        setColummns(column)
+    };
 
     const updateData = (row, inputField, value) => {
         setRows((prevState) => {
@@ -46,9 +66,9 @@ const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => 
                 onMinimizeMaximize={() => {
                     setFullScreen((prevState) => !prevState);
                 }}
-                showManimizeMaximize={true}
+                showManimizeMaximize={false}
                 showRequiredLabel={false}
-                title={"Inventory States"}
+                title={`Bulk Edit `}
                 onClose={onClose}
             />
             <CustomDialogContent>
@@ -58,10 +78,10 @@ const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => 
                             <Table aria-label="customized table">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell width={200}>Details</TableCell>
-                                        {fields &&
-                                            fields?.map((field: any, index: any) => (
-                                                <TableCell width={300} >{field.type === 'currencyAmount' ? field.fieldLabel + ' ' + currency : field?.fieldLabel}</TableCell>
+                                        <TableCell width={cellWidth}>Details</TableCell>
+                                        {columns &&
+                                            columns?.map((field: any, index: any) => (
+                                                <TableCell width={cellWidth} >{field?.fieldLabel}</TableCell>
                                             ))}
                                         <TableCell>Action</TableCell>
                                     </TableRow>
@@ -70,21 +90,13 @@ const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => 
                                     {rows &&
                                         rows?.map((row: any, index: any) => (
                                             <TableRow key={index}>
-                                                <TableCell>{row?.detail}</TableCell>
-                                                {fields &&
-                                                    fields?.map((field: any, index: any) => (
-                                                        <TableCell>
+                                                <TableCell width={cellWidth}>{row?.detail}</TableCell>
+                                                {columns &&
+                                                    columns?.map((field: any, index: any) => (
+                                                        <TableCell width={cellWidth}>
                                                             <FormTypes
-                                                                {...field}
                                                                 fieldData={field}
                                                                 values={row}
-                                                                label={field.type === 'currencyAmount' ? field.fieldLabel + ' ' + currency : field?.fieldLabel}
-                                                                name={field.type === 'currencyAmount' ? field.fieldName + '_' + currency.toLowerCase() : field.fieldName}
-                                                                type={field.type}
-                                                                options={field.fieldName === 'unit' ? arrayToDropwdownOption(row?.[`${row.type}Detail`].unit) :
-                                                                    field.fieldName === 'pricingMethod' ? arrayToDropwdownOption(row?.[`${row.type}Detail`].pricingMethod) :
-                                                                        field.option}
-                                                                required={field.required}
                                                                 currency={currency}
                                                                 onChange={(inputField, val) => {
                                                                     updateData(row, inputField, val)
