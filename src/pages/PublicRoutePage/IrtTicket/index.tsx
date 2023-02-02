@@ -7,6 +7,7 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DetailsPage from '../../../components/Shared/DetailsPage';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
 
 const resaonList = [
   "Inventory physically not here to release.  Action:  Complete paperwork and cycle count to correct inventory accuracy. ",
@@ -51,12 +52,11 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
 
   const submitResponce = () => {
     const data: any = {
-      user: openAuthData?.user,
+      openAuthId: openAuthId,
       status: status,
       comment: comment,
-      openAuthId: openAuthId
     };
-    if (status === "Declined") {
+    if (status === IRT_APPROVER_STATUS.declined) {
       data.reason = reason;
     }
     axiosInstance()
@@ -118,11 +118,11 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                           onChange={(event) => {
                             setStatus(event.target.value);
                           }}>
-                          <FormControlLabel value="Approved" control={<Radio />} label="Approve" />
-                          <FormControlLabel value="Declined" control={<Radio />} label="Decline" />
+                          <FormControlLabel value={IRT_APPROVER_STATUS.approved} control={<Radio />} label="Approve" />
+                          <FormControlLabel value={IRT_APPROVER_STATUS.declined} control={<Radio />} label="Decline" />
                         </RadioGroup>
                       </Box>
-                      {status === "Declined" &&
+                      {status === IRT_APPROVER_STATUS.declined &&
                         <Box mt={2}>
                           <FormControl variant="outlined" fullWidth margin="dense">
                             <Autocomplete
