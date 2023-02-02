@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Dialog, Box, Grid, Button, Typography, IconButton } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { FaDiceOne } from 'react-icons/fa';
@@ -13,11 +13,13 @@ import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import SettingsIcon from '@material-ui/icons/Settings';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrderId, stepData, isStepValid, referencType, allowedToEdit, selectedService = null }) => {
 
   const [isEditing, setEditing] = React.useState(false);
   const [viewStep, setViewStep] = React.useState(false);
+  const toastConfig = useContext(CustomToastContext);
 
   const steps = selectedService?.steps || [];
 
@@ -77,12 +79,19 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrde
   };
 
   const handleUpdateStep = (values: any) => {
+    values.order = step?.order
     axiosInstance().put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/update-step`, values)
       .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         setViewStep(false);
         handleClose()
       })
-      .catch((err) => {
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   };
 
