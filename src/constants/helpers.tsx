@@ -108,7 +108,7 @@ export const userType = {
 
 export const AgGridHeaderHeight = 40;
 export const AgGridRowHeight = 40;
-export const AgGridFloatingFiltersHeight = 38;
+export const AgGridFloatingFiltersHeight = 0;
 
 export const gridPageSizes = [25, 50, 75];
 export const gridLoadingTimeout = 500;
@@ -324,7 +324,7 @@ export const CHILD_RESOURCE = {
   rentalManagementProduct: 'Rental Management Product',
   rentalManagementCost: 'Rental Management Cost',
   purchaseOrderProduct: 'Purchase Order Product',
-  purchaseOrderService: 'Purchase Order Service',
+  purchaseOrderCost: 'Purchase Order Cost',
   bulkAssetCreationProduct: 'Bulk Asset Creation Product',
   repairJobAsset: 'Repair Job Asset',
   invoiceProduct: 'Invoice Product',

@@ -2871,7 +2871,7 @@ svg.MuiSvgIcon-root {
 }
 
 body {
-  --button-v1-padding: 6px 16px !important;
+  --button-v1-padding: 4px 16px !important;
 
   .btn-secondary-v1 {
     background: #eeeeee !important;
@@ -2901,6 +2901,10 @@ body {
     &:hover {
       background-color: rgba(0, 0, 0, 0.04) !important;
     }
+  }
+  .btn-primary-v1 {
+    padding: var(--button-v1-padding);
+    border: 1px solid #298b88 !important;
   }
 
   .btn-outline-red-v1 {
@@ -3030,6 +3034,100 @@ body {
         background: #f8f8f8;
         color: #a7a7a7 !important;
       }
+    }
+  }
+}
+.white-bg {
+  background-color: white !important;
+}
+
+.table-filter-v1 {
+  .filter-chip {
+    font-weight: 400;
+    font-size: 12px !important;
+    line-height: 14px !important;
+    color: #162d40 !important;
+    padding: 8px 3px !important;
+    background-color: #effbf9 !important;
+    border-radius: 3.09998px !important;
+  }
+
+  .chip-group {
+    display: flex;
+    max-width: 700px;
+    overflow: hidden;
+    flex-grow: 1;
+    & > div {
+      margin-left: 8px;
+      &:first-of-type {
+        margin-left: 0;
+      }
+    }
+  }
+  .chip-container {
+    margin-top: 10px;
+    margin-bottom: 15px;
+    min-height: 27px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+.custom-react-table-v1 {
+  th,
+  .ag-header-cell-label,
+  .th {
+    & > * {
+      font-weight: 500 !important;
+      font-size: 12.6448px !important;
+      line-height: 18px !important;
+      color: #1d1d1d !important;
+    }
+  }
+  td,
+  .ag-cell,
+  td {
+    & > * {
+      font-weight: 400 !important;
+      font-size: 12px !important;
+      line-height: 19px !important;
+    }
+  }
+  .ag-filter-icon {
+    display: none;
+  }
+  .arrange-view-v1 {
+    z-index: 2;
+    width: 38px;
+    height: 40px;
+    position: absolute;
+    background: white;
+    right: 1px;
+    top: 1px;
+    padding: 11px;
+    border-left: 1px solid rgb(229, 229, 229);
+    border-radius: 0px;
+  }
+  .arrange-view-v2 {
+    z-index: 2;
+    width: 38px;
+    height: 40px;
+    position: absolute;
+    background: white;
+    right: 1px;
+    top: 86px;
+    padding: 11px;
+    border-left: 1px solid #e5e5e5;
+  }
+}
+.table-header-container-v1 {
+  position: relative;
+  @media all and (min-width: 950px) {
+    .header-inner-right-v1 {
+      position: absolute;
+      right: 123px;
+      bottom: -51px;
     }
   }
 }
