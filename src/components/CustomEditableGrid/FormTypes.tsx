@@ -5,163 +5,158 @@ import {
 } from '@material-ui/core';
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { dateFormatForInputControl, getUniqueCurrencies } from 'src/constants/helpers';
+import { arrayToDropwdownOption, dateFormatForInputControl, getUniqueCurrencies } from 'src/constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
+import { useEffect, useState } from 'react';
 
 const FormTypes = (props) => {
     const {
-        type,
-        label,
-        name,
-        errors,
         values,
-        options,
         onChange,
-        required,
         fieldData,
-        touched,
         currency,
-        ...rest
     } = props;
-    console.log(values)
-    return type === 'singleLine' ? (
+
+    const [options, setOptions] = useState([]);
+
+    useEffect(() => {
+        if (fieldData?.fieldName === 'unit') {
+            setOptions(arrayToDropwdownOption(values?.[`${values.type}Detail`].unit))
+        }
+        else if (fieldData?.fieldName === 'pricingMethod') {
+            setOptions(arrayToDropwdownOption(values?.[`${values.type}Detail`].pricingMethod))
+        }
+        else {
+            setOptions(fieldData?.option)
+        }
+
+    }, [fieldData?.fieldName]);
+
+
+    return fieldData?.type === 'singleLine' ? (
         <TextField
-            {...rest}
-            disabled={fieldData?.isUneditable || rest?.disabled}
+            disabled={fieldData?.isUneditable}
             variant="outlined"
             type="text"
-            label={label}
-            required={required}
-            name={name}
-            value={values[name]}
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
-            onChange={(e) => onChange(name, e.target.value.trimStart())}
+            label={fieldData?.fieldLabel}
+            required={fieldData?.required}
+            name={fieldData?.fieldName}
+            value={values[fieldData?.fieldName]}
+
+            onChange={(e) => onChange(fieldData?.fieldName, e.target.value.trimStart())}
         />
-    ) : type === 'multiLine' ? (
+    ) : fieldData?.type === 'multiLine' ? (
         <TextField
-            {...rest}
             variant="outlined"
             type="text"
             multiline
-            label={label}
-            name={name}
-            required={required}
+            label={fieldData?.label}
+            name={fieldData?.fieldName}
+            required={fieldData?.required}
             rows={3}
-            value={values[name]}
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
-            onChange={(e) => onChange(name, e.target.value)}
+            value={values[fieldData?.fieldName]}
+            onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
         />
-    ) : type === 'percent' ? (
+    ) : fieldData?.type === 'percent' ? (
         <TextField
-            {...rest}
             type="number"
             variant="outlined"
-            label={label}
-            required={required}
-            name={name}
-            value={values[name]}
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
+            label={fieldData?.label}
+            required={fieldData?.required}
+            name={fieldData?.fieldName}
+            value={values[fieldData?.fieldName]}
             InputProps={{
                 endAdornment: '%',
                 inputProps: { min: 0 },
-                readOnly: fieldData && fieldData.isUneditable ? true : false
+                readOnly: fieldData && fieldData?.isUneditable ? true : false
             }}
-            onChange={(e) => onChange(name, parseFloat(e.target.value))}
+            onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
         />
-    ) : type === "currencyAmount" ? (
+    ) : fieldData?.type === "currencyAmount" ? (
         <TextField
-            {...rest}
             type="number"
             variant="outlined"
-            label={label}
-            required={required}
-            name={name}
-            value={values[name]}
+            label={fieldData?.label}
+            required={fieldData?.required}
+            name={fieldData?.fieldName}
+            value={values[fieldData?.fieldName]}
             InputProps={{
                 startAdornment: getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative,
             }}
-            onChange={(e) => onChange(name, parseFloat(e.target.value))}
+            onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
         />
-    ) : type === 'dropDown' ? (
+    ) : fieldData?.type === 'dropDown' ? (
         <Autocomplete
-            {...rest}
             size="small"
             fullWidth
             options={options}
             value={
-                options.find((data) => data.optionValue === values[name]) ? options.find((data) => data.optionValue === values[name]) : ''
+                options.find((data) => data.optionValue === values[fieldData?.fieldName]) ? options.find((data) => data.optionValue === values[fieldData?.fieldName]) : ''
             }
             getOptionLabel={(option: any) => option.optionLabel || ''}
-            getOptionSelected={(option: any, val) => (option ? option.optionValue == val : false)}
-            onChange={(e,val) => onChange(name, val)}
-            renderInput={(params) => <TextField {...params} label={label} variant="outlined" />}
+            getOptionSelected={(option: any, val) => (option ? option.optionValue == val.optionValue : false)}
+            onChange={(e, val) => onChange(fieldData?.fieldName, val.optionValue)}
+            renderInput={(params) => <TextField {...params} label={fieldData?.label} variant="outlined" />}
         />
-    ) : type === 'decimal' ? (
+    ) : fieldData?.type === 'decimal' ? (
         <TextField
-            {...rest}
             variant="outlined"
             type="number"
-            label={label}
-            required={required}
-            name={name}
-            value={values[name]}
-            onChange={(e) => onChange(name, parseFloat(e.target.value))}
+            label={fieldData?.label}
+            required={fieldData?.required}
+            name={fieldData?.fieldName}
+            value={values[fieldData?.fieldName]}
+            onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
             InputProps={{
                 inputProps: { min: 0 },
-                readOnly: fieldData && fieldData.isUneditable ? true : false
+                readOnly: fieldData && fieldData?.isUneditable ? true : false
             }}
         />
-    ) : type === 'checkBox' ? (
+    ) : fieldData?.type === 'checkBox' ? (
         <FormControlLabel
             control={
                 <Checkbox
-                    {...rest}
-                    required={required}
-                    name={name}
-                    checked={values[name]}
-                    onChange={(e) => onChange(name, e.target.value)}
+                    required={fieldData?.required}
+                    name={fieldData?.fieldName}
+                    checked={values[fieldData?.fieldName]}
+                    onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
                     color="secondary"
                 />
             }
-            label={label}
+            label={fieldData?.label}
         />
-    ) : type === 'date' ? (
+    ) : fieldData?.type === 'date' ? (
         <MuiPickersUtilsProvider utils={DateUtils}>
             <KeyboardDatePicker
-                {...rest}
-                disabled={fieldData?.isUneditable || rest?.disabled}
+                disabled={fieldData?.isUneditable}
                 clearable
                 autoOk
-                required={required}
+                required={fieldData?.required}
                 variant="inline"
                 inputVariant="outlined"
-                value={values[name]}
-                name={name}
-                label={label}
-                onChange={(date) => onChange(name, date)}
+                value={values[fieldData?.fieldName]}
+                name={fieldData?.fieldName}
+                label={fieldData?.label}
+                onChange={(date) => onChange(fieldData?.fieldName, date)}
                 format={dateFormatForInputControl}
                 InputLabelProps={{
                     shrink: true
                 }}
             />
         </MuiPickersUtilsProvider>
-    ) : type === 'dateTime' ? (
+    ) : fieldData?.type === 'dateTime' ? (
         <MuiPickersUtilsProvider utils={DateUtils}>
             <KeyboardDateTimePicker
-                {...rest}
                 autoOk
                 clearable
-                required={required}
+                required={fieldData?.required}
                 variant="inline"
                 inputVariant="outlined"
                 ampm={false}
-                value={values[name]}
-                name={name}
-                label={label}
-                onChange={(date) => onChange(name, date)}
+                value={values[fieldData?.fieldName]}
+                name={fieldData?.fieldName}
+                label={fieldData?.label}
+                onChange={(date) => onChange(fieldData?.fieldName, date)}
                 onError={console.error}
                 format="yyyy/MM/dd HH:mm"
                 InputLabelProps={{
@@ -173,3 +168,4 @@ const FormTypes = (props) => {
 };
 
 export default FormTypes;
+

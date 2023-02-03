@@ -393,7 +393,7 @@ export default function ManageAttachment({
                                 }
                               </IconButton>
                             </Tooltip>
-                            {permissions.attachment.isRead && _.endsWith(attachment?.url, '.pdf') && (
+                            {_.endsWith(attachment?.url, '.pdf') && (
                               <Tooltip title="Preview">
                                 <IconButton>
                                   <PreviewIcon
