@@ -427,6 +427,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     }
 
     if (values?.isMinMaxValue) {
+
       if (!values?.minValue) {
         errors["minValue"] = "Please enter min value";
       }
@@ -436,6 +437,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       if (values?.minValue > values?.maxValue) {
         errors["minValue"] = "Please enter valid min value";
       }
+      
     }
 
     return errors;
