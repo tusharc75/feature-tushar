@@ -429,11 +429,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       if (!values?.maxValue) {
         errors["maxValue"] = "Please enter max value";
       }
-      if (values?.minValue >= values?.maxValue) {
+      if (values?.minValue > values?.maxValue) {
         errors["minValue"] = "Please enter valid min value";
       }
     }
-
     return errors;
   }
 
