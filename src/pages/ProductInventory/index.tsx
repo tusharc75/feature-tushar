@@ -45,8 +45,7 @@ const InventoryProduct = () => {
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } =
-    state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
   const [plantId, setPlantId] = useState(null);
   const [plantOptions, setPlantOptions] = useState([]);
   const [frameworkComponents, setFrameworkComponents] = useState({});
@@ -227,8 +226,11 @@ const InventoryProduct = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
     }
 
-    //const updatedFilters = [{ field: "serializedProduct", term: "No" }];
     const updatedFilters = [];
+    if (!user?.user?.brandPolicy?.showSerializedProduct) {
+      updatedFilters.push({ field: "serializedProduct", term: "No" })
+    }
+
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
