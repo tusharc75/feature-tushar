@@ -9,6 +9,12 @@ const ERROR_CODE = {
 };
 Object.freeze(ERROR_CODE);
 
+const generateFakeResponse: any = () => {
+    return new Promise((resolve, reject) => {
+        resolve({ data: {}, status: 200, message: "Api call stopped on offline mode" });
+    })
+}
+
 export default (history = null, passedHeaders = null) => {
     let headers: any = passedHeaders ? passedHeaders : {};
 
@@ -67,6 +73,13 @@ export default (history = null, passedHeaders = null) => {
         new Promise((resolve, reject) => {
             resolve(response);
         }), (error) => {
+
+            if (!navigator.onLine) {
+                new Promise((resolve, reject) => {
+                    resolve({ data: {}, status: 200, message: "Api call stopped on offline mode" });
+                })
+            }
+
             if (error.request.responseType === 'blob' && error.response.data.type.toLowerCase().indexOf('json') != -1) {
                 return new Promise(async (resolve, reject) => {
                     const bufferArray = await error.response.data.text()
@@ -81,13 +94,13 @@ export default (history = null, passedHeaders = null) => {
                 return new Promise((resolve, reject) => reject({ open: true, type: "error", message: err.error, }));
             }
 
-            if (error.message == "Network Error") {
-                if (navigator.onLine) {
-                    return new Promise((resolve, reject) => {
-                        reject({ open: true, type: "error", message: "Api Not Working" });
-                    })
-                }
-            }
+            // if (error.message == "Network Error") {
+            //     if (navigator.onLine) {
+            //         return new Promise((resolve, reject) => {
+            //             reject({ open: true, type: "error", message: "Api Not Working" });
+            //         })
+            //     }
+            // }
 
             if (!error.response) {
                 return new Promise((resolve, reject) => {
@@ -96,14 +109,15 @@ export default (history = null, passedHeaders = null) => {
             }
 
             if (error.response.data && error.response.data.code && Object.values(ERROR_CODE).some(s => s === error.response.data.code)) {
-                
-
                 if (window.confirm((`${error.response.data.error}\n\nPress Ok to redirect to home\nPress Cancel to stay here`))) {
                     localStorage.removeItem("selectedEntity");
                     //@ts-ignore
                     window.location = "/";
                 }
-                
+            } else if (error.response.status === 511) {
+                localStorage.clear();
+                //@ts-ignore
+                window.location = "/";
             } else if (error.response.data && error.response.data.code && error.response.data.code === "1005") {
                 return new Promise((resolve, reject) => {
                     reject({ open: true, type: "notFoundError", message: "" });
@@ -122,14 +136,23 @@ export default (history = null, passedHeaders = null) => {
                 }
                 else {
                     return new Promise((resolve, reject) => {
-                        reject({ open: true, type: "error", message: error.response.data.error || error.response.data.message });
+                        reject({ open: true, type: "error", message: error.response.data.error || error.response.data.message, data: error.response.data });
                     })
                 }
             }
-
             // reject(error);
         }
     );
+
+    // if (!navigator.onLine) {
+    //     return {
+    //         get: () => generateFakeResponse(),
+    //         delete: () => generateFakeResponse(),
+    //         post: () => generateFakeResponse(),
+    //         put: () => generateFakeResponse(),
+    //         patch: () => generateFakeResponse(),
+    //     }
+    // }
 
     return axiosInstance;
 }

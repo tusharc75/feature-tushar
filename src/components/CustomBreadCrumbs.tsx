@@ -2,17 +2,19 @@ import { Breadcrumbs, Typography } from "@material-ui/core";
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
 
-const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadCrumbClick = null }) => {
+const CustomBreadCrumbs = ({
+  routes = [], isConfirmBeforeClick = false,
+  onBreadCrumbClick = null, onRouteClick = null }) => {
 
   return <Breadcrumbs separator="›" aria-label="breadcrumb">
     {
       isConfirmBeforeClick ?
         <Typography
-          className="cursor-pointer"
+          className={`${"cursor-pointer"} ${"setLink"}`}
           onClick={() => onBreadCrumbClick('/')}>
           Home
         </Typography>
-        : <Link to="/" className="cursor-pointer">
+        : <Link to="/" className={`${"cursor-pointer"} ${"setLink"}`}>
           Home
         </Link>
     }
@@ -23,7 +25,7 @@ const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadC
           isConfirmBeforeClick ?
             <Typography
               key={index}
-              className="cursor-pointer"
+              className="cursor-pointer setLink"
               onClick={() => onBreadCrumbClick(route.path)}>
               {route.title}
             </Typography>
@@ -31,10 +33,17 @@ const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadC
             <Link
               key={index}
               to={route.path}
-              className="cursor-pointer" >
+              className="cursor-pointer setLink"
+            >
               {route.title}
             </Link>
-        ) : <Typography key={index}>
+
+        ) : <Typography
+          onClick={() => {
+            if (route?.hasOnClick) {
+              onRouteClick()
+            }
+          }} key={index} className="setLink text-truncate detail-heading-bread-crumb">
           {route.title}
         </Typography>
 

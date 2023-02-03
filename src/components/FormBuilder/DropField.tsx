@@ -1,4 +1,4 @@
-import React, { useRef, useContext } from 'react';
+import React, { useRef, useContext, Fragment } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
@@ -12,6 +12,8 @@ import { Properties } from './Properties';
 import { checkFieldDependency } from '../../constants/formulaUtility';
 import FieldList from './FieldList';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import HtmlTooltip from "../CustomTooltipTitle";
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
 const style = {
   backgroundColor: 'white',
@@ -40,14 +42,15 @@ export const DropField = ({
   data,
   addDeleteField,
   extraFields,
-  onAddRemoveField
+  onAddRemoveField,
+  isCalculativeField
 }) => {
   const ref = useRef(null);
   const toastConfig = useContext(CustomToastContext);
 
-  const [{}, drop] = useDrop({
+  const [{ }, drop] = useDrop({
     accept: ['fieldmove', 'field'],
-    drop: () => {},
+    drop: () => { },
     hover: (item: any, monitor) => {
       if (!ref.current) {
         return;
@@ -178,6 +181,7 @@ export const DropField = ({
         row.field.splice(index + 1, 0, {
           ...fieldData,
           editAble: true,
+          deletAble: true,
           _id: parseInt((Math.random() * 100000).toString()),
           fieldLabel: fieldData.type,
           fieldName: fieldData.type
@@ -224,17 +228,25 @@ export const DropField = ({
               </Grid>
               <Grid item xs={5}>
                 <Box pt={1} color="text.secondary">
-                  <Typography variant="body2">{FieldList[data.type.toUpperCase()].label}</Typography>
+                  <Typography variant="body2">{FieldList[data?.type?.toUpperCase()]?.label}</Typography>
                 </Box>
               </Grid>
               <Grid item xs={2} container justify="flex-end">
+                <Box mt={1} style={{ cursor: "pointer" }} onClick={() => { navigator.clipboard.writeText(data?.fieldName) }}>
+                  <HtmlTooltip title={`Field Name - ${data?.fieldName}`}>
+                    <InfoOutlinedIcon fontSize="small" color='primary' />
+                  </HtmlTooltip>
+                </Box>
                 <IconButton aria-label="setting" onClick={handleClick}>
                   <MoreHorizIcon fontSize="small" />
                 </IconButton>
                 <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-                  <MenuItem onClick={() => handleClickOpenPropertie(data)}>Edit Properties</MenuItem>
-                  <MenuItem onClick={() => handleClone(data)}>Clone</MenuItem>
-                  {data.editAble && <MenuItem onClick={() => deleteField(data._id)}>Delete</MenuItem>}
+                  <Fragment>
+                    <MenuItem onClick={() => handleClickOpenPropertie(data)}>Edit Properties</MenuItem>
+                    <MenuItem onClick={() => handleClone(data)}>Clone</MenuItem>
+                  </Fragment>
+                  {((["product-template", "price-template"].includes(module) && data.editAble) ||
+                    ["form-builder-master"].includes(module) || data.deletAble || true) && <MenuItem onClick={() => deleteField(data._id)}>Delete</MenuItem>}
                 </Menu>
                 {propertie_open ? (
                   <Properties
@@ -245,6 +257,7 @@ export const DropField = ({
                     setSection={setSection}
                     module={module}
                     extraFields={extraFields}
+                    isCalculativeField={isCalculativeField}
                   />
                 ) : null}
               </Grid>

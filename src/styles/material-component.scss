@@ -1,5 +1,13 @@
 .MuiToolbar-root {
   min-height: 55px !important;
+  @media all and (max-width: 768px) {
+    min-height: 0px !important;
+  }
+}
+@media all and (max-width: 768px) {
+  .MuiButtonBase-root.MuiListItem-root.list-item.MuiListItem-gutters.MuiListItem-button.Mui-selected {
+    margin-top: 106px;
+  }
 }
 
 .MuiButton-root {
@@ -81,7 +89,7 @@
   border: none;
 }
 
-.MuiAutocomplete-inputRoot[class*="MuiOutlinedInput-root"] .MuiAutocomplete-endAdornment {
+.MuiAutocomplete-inputRoot[class*='MuiOutlinedInput-root'] .MuiAutocomplete-endAdornment {
   .MuiIconButton-root {
     padding: 2px !important;
   }
@@ -107,8 +115,6 @@
 }
 
 .MuiOutlinedInput-root {
-  border-radius: 0 !important;
-
   .MuiInputAdornment-positionEnd {
     .MuiIconButton-root {
       padding: 2px !important;
@@ -125,7 +131,7 @@
 .MuiOutlinedInput-input {
   font-size: 0.9rem !important;
 }
-Button.MuiButtonBase-root {
+Button.MuiButtonBase-root:not(.MuiFab-root) {
   border-radius: 0.2rem;
   // text-transform: capitalize !important;
 }
@@ -214,14 +220,14 @@ Button.MuiButtonBase-root {
   }
 
   .MuiStepLabel-label {
-    color: #bab9b9 !important;
+    color: #bab9b9;
     font-weight: 500 !important;
     &.MuiStepLabel-completed {
-      color: white !important;
+      color: white;
     }
 
     &.MuiStepLabel-active {
-      color: var(--primary) !important;
+      color: var(--primary);
     }
   }
 
@@ -328,6 +334,92 @@ Button.MuiButtonBase-root {
     }
   }
 }
+
+@mixin style-accordianSupplierAskPrice($color) {
+  // margin: 15px 0 !important;
+  & .detailCard {
+    box-shadow: none !important;
+  }
+  & .MuiAccordionSummary-root {
+    // color: $color;
+    // border-top: 3px solid $color;
+    box-shadow: 1px 0px 5px #a6a6a6;
+    background: #f6f6f6;
+    & .MuiIconButton-root {
+      color: var(--primary);
+    }
+    h6 {
+      color: var(--primary);
+      font-weight: 500;
+    }
+  }
+  .btn-view {
+    background: white !important;
+    color: #898582;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    left: 49%;
+    bottom: -2.5vh;
+    padding: 0;
+    border-radius: 50%;
+  }
+  & .detailListing {
+    // padding: 12px;
+    padding-bottom: 0 !important;
+    background: #e6e6e6;
+
+    &.userCard {
+      min-height: 112px;
+      display: flex;
+      align-items: center;
+    }
+    .MuiListItemAvatar-root {
+      min-width: 20px !important;
+      color: #515557;
+    }
+    & .amount {
+      color: var(--secondary) !important;
+    }
+    & span {
+      font-size: 0.8rem;
+    }
+
+    & .role {
+      font-weight: 500;
+      margin-left: 10px;
+      margin-left: 2px;
+      font-style: italic;
+      opacity: 0.6;
+    }
+    & .detailName {
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .MuiListItem-gutters {
+      padding: 0;
+      padding-left: 0px !important;
+      padding-right: 0px !important;
+    }
+    .MuiTypography-colorTextSecondary {
+      color: #8f88888a;
+      text-transform: uppercase;
+      font-size: 0.6rem;
+      font-weight: 500;
+    }
+    .cardDetail {
+      color: #64615d;
+      text-transform: capitalize !important;
+      font-size: 0.8rem !important;
+      font-weight: 500;
+      // padding: 6px 0;
+    }
+    .MuiList-padding {
+      padding: 0;
+    }
+  }
+}
 .omsAccordian {
   &.accordOpportunity {
     @include style-accordian(var(--colorOpportunity));
@@ -350,6 +442,9 @@ Button.MuiButtonBase-root {
   &.accordQuotes {
     @include style-accordian(var(--colorProject));
   }
+  &.accordSupplierAskPrice {
+    @include style-accordianSupplierAskPrice(var(--colorProject));
+  }
 }
 .MuiAutocomplete-tag {
   margin: 1px 2px !important;
@@ -368,4 +463,10 @@ Button.MuiButtonBase-root {
   .MuiDialog-paper {
     overflow-y: hidden !important;
   }
+}
+
+.fab-position-b-r {
+  position: fixed !important;
+  bottom: 10px !important;
+  right: 20px !important;
 }

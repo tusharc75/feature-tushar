@@ -1,40 +1,80 @@
-import { useState, useEffect } from "react";
-import { Box, Grid, Typography, TextField } from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
-import { makeStyles } from "@material-ui/core/styles";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { TouchBackend } from "react-dnd-touch-backend";
-import { isEqual, kebabCase } from "lodash";
-import { isMobile, isTablet } from "react-device-detect";
-
-import statusList from "../../Helpers/statusList";
-import { GetBoard } from "../../../../axios/activity";
-
-import { BoardList } from "./BoardList";
-import axiosInstance from "../../../../axios/axiosInstance";
+import { useState, useEffect } from 'react';
+import { Box, Grid, Typography, Tooltip, Dialog, TextField, IconButton } from '@material-ui/core';
+import { Autocomplete } from '@material-ui/lab';
+import { makeStyles } from '@material-ui/core/styles';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
+import { isEqual, kebabCase } from 'lodash';
+import { isMobile, isTablet } from 'react-device-detect';
+import { camelCase } from 'lodash';
+import statusList from '../../Helpers/statusList';
+import { GetBoard } from '../../../../axios/activity';
+import { useData } from '../../../../StateProvider/Provider';
+import { Add } from '@material-ui/icons';
+import { BoardList } from './BoardList';
+import { CustomDialogTransition } from '../../../../constants/helpers';
+import axiosInstance from '../../../../axios/axiosInstance';
+import { CreateTask } from '../../Task/CreateTask';
+import { CreateCase } from '../../Case/CreateCase';
+import { getApi, getData } from '../../../../constants/helpers';
+import { get_activity_resource } from '../../../Activity/Helpers/utils';
 
 const useStyles = makeStyles((theme) => ({
   block: {
-    background: "#f0f0f0",
-    borderRadius: "4px",
-    minHeight: "calc(100vh - 33.5vh)",
-    height: "100%",
+    background: '#f0f0f0',
+    borderRadius: '4px',
+    minHeight: 'calc(100vh - 33.5vh)',
+    height: '100%'
   },
   activityMainBlock: {
-    height: "calc(100vh - 32vh)",
-    overflow: "auto",
+    height: 'calc(100vh - 32vh)',
+    overflow: 'auto'
   },
+  '.MuiGrid-spacing-xs-1': {
+    width: 'calc(100vw + 14px)'
+  },
+  mediumDevice: {
+    ['@media (min-width:600px)']: {
+      flexGrow: '0',
+      maxWidth: '50%',
+      flexBasis: '50%'
+    },
+    ['@media (min-width:768px)']: {
+      flexGrow: '0',
+      maxWidth: '33.333333%',
+      flexBasis: '33.333333%'
+    },
+    ['@media (min-width:1100px)']: {
+      flexGrow: '0',
+      maxWidth: '25%',
+      flexBasis: '25%'
+    }
+  }
 }));
 
 const Board = ({ type, filter }) => {
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState([]);
   const classes = useStyles();
-  const [resource, setResource] = useState("");
+  const {
+    state: {
+      user: { user },
+      permissions
+    }
+  }: any = useData();
+  const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
+  const [resourceOptions, setResourceOptions] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [click, setClick] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  useEffect(() => {
+    setResourceOptions(get_activity_resource(permissions));
+  }, []);
 
   useEffect(() => {
     fetchBoard();
@@ -51,45 +91,44 @@ const Board = ({ type, filter }) => {
       });
   };
 
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    fetchBoard();
+  };
+
   // Data for Autocomplete
   useEffect(() => {
-    if (!resource) return;
-    setLoadingResources(true);
-    axiosInstance()
-      .get(`${getApi(resource)}?limit=100`)
-      .then(({ data: { data } }) => {
-        if (data.length) {
-          const mappedData = data.map((_d) => getData(resource, _d));
-          setResourceData(mappedData || []);
-        }
-        setLoadingResources(false);
-      })
-      .catch((error) => {
-        setLoadingResources(false);
-      });
+    if (resource && resource?.optionValue) {
+      setLoadingResources(true);
+      axiosInstance()
+        .get(`${getApi(resource?.optionValue)}?limit=100`)
+        .then(({ data: { data } }) => {
+          if (data.length) {
+            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
+            setResourceData(mappedData || []);
+          }
+          setLoadingResources(false);
+        })
+        .catch((error) => {
+          setLoadingResources(false);
+        });
 
-    return () => {
-      setSelectedResourceData(null);
-      setResourceData(null);
-    };
-    // eslint-disable-next-line
+      return () => {
+        setSelectedResourceData(null);
+        setResourceData(null);
+      };
+    }
   }, [resource]);
 
-  const handleChangeStatus = (
-    activityId: string,
-    status: string,
-    newIndex: string
-  ) => {
+  const handleChangeStatus = (activityId: string, status: string, newIndex: string) => {
     const filterdByStatus = activities.filter((a) => a.status === status);
-    const activityIndex = filterdByStatus.findIndex(
-      (a) => a._id === activityId
-    );
+    const activityIndex = filterdByStatus.findIndex((a) => a._id === activityId);
 
     const updatedState = activities.map((activity: any) => {
       if (activity._id === activityId && activity.status !== status) {
         return {
           ...activity,
-          status,
+          status
         };
       }
 
@@ -107,164 +146,155 @@ const Board = ({ type, filter }) => {
   const updateStatus = (id: string, updatedData: any) => {
     axiosInstance()
       .put(`${type}/${id}`, { status: updatedData.status })
-      .then(({ data }) => { })
-      .catch((err) => { });
-  };
-
-  const resourceOptions = [
-    "Customer Account",
-    "Customer Contact",
-    "Supplier Account",
-    "Supplier Contact",
-    "Lead",
-    "Opportunity",
-    "Quote",
-    "Rental Management",
-    "Loading Ticket",
-    "Project Sales",
-  ];
-
-  const getApi = (resource: string) => {
-    switch (kebabCase(resource)) {
-      case "loading-ticket":
-        return "delivery-ticket";
-        case "quote":
-          return "quote-builder";
-      default:
-        return kebabCase(resource);
-    }
-  };
-
-  const getData = (resource: string, data: any) => {
-    switch (kebabCase(resource)) {
-      case "lead":
-        return {
-          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-          id: data._id,
-        };
-      case "opportunity":
-        return {
-          name: `${data.opportunityName}`,
-          id: data._id,
-        };
-      case "customer-account":
-        return {
-          name: `${data.accountName}`,
-          id: data._id,
-        };
-      case "supplier-account":
-        return {
-          name: `${data.accountName}`,
-          id: data._id,
-        };
-      case "customer-contact":
-        return {
-          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-          id: data._id,
-        };
-      case "supplier-contact":
-        return {
-          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-          id: data._id,
-        };
-      case "loading-ticket":
-        return {
-          name: `${data.deliveryJobName}`,
-          id: data._id,
-        };
-      case "quote":
-        return {
-          name: `${data.quoteName}`,
-          id: data._id,
-        };
-      case "rental-management":
-        return {
-          name: `${data.rentalJobName}`,
-          id: data._id,
-        };
-      case "project-sales":
-        return {
-          name: `${data.projectName}`,
-          id: data._id,
-        };
-      default:
-        break;
-    }
+      .then(({ data }) => {})
+      .catch((err) => {
+        fetchBoard();
+      });
   };
 
   return (
     <>
-      <Box display="flex" pb={1}>
+      <Box display="flex" style={{ paddingBottom: '18px' }} pb={1}>
         <Autocomplete
           options={resourceOptions}
-          getOptionLabel={(option) => option}
-          style={{ width: 200 }}
+          getOptionLabel={(option) => option.optionLabel}
+          style={{ width: isMobile && !isTablet ? '100%' : '50%' }}
           value={resource}
           onChange={(event, newValue) => {
             setResource(newValue);
           }}
           size="small"
-          renderInput={(params) => (
-            <TextField {...params} label="Select Resource" variant="outlined" />
-          )}
+          renderInput={(params) =>
+            isMobile && !isTablet ? (
+              <TextField {...params} label="Select Resource" size="small" variant="outlined" className={isMobile ? 'serchBox' : ''} />
+            ) : (
+              <TextField {...params} label="Select Resource" variant="outlined" />
+            )
+          }
         />
-        <Box mx={1} />
-        {Boolean(resource) && resourceData && (
+        <Box mx={isMobile ? 0 : 1} />
+        {resource && resourceData && (
           <Autocomplete
             disabled={loadingResources}
             options={resourceData}
             getOptionLabel={(option: any) => option.name}
-            getOptionSelected={(option: any, value: any) =>
-              option.name === value.name
-            }
-            style={{ width: 250 }}
+            getOptionSelected={(option: any, value: any) => option.name === value.name}
+            style={{ width: '50%' }}
             value={selectedResourceData}
             onChange={(event, newValue) => {
               setSelectedResourceData(newValue);
             }}
             size="small"
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label={`Select ${resource}`}
-                variant="outlined"
-              />
-            )}
+            renderInput={(params) => <TextField {...params} label={`Select ${resource.optionLabel}`} variant="outlined" />}
           />
         )}
       </Box>
       <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-        <Grid container spacing={1} className={classes.activityMainBlock}>
-          {statusList.map((data, index) => (
-            <Grid item md={3} xs={12} sm={4} key={index}>
-              <div className={classes.block}>
-                {!loading && (
-                  <Box p={1}>
-                    <Typography variant="subtitle2">
-                      {data.status.toUpperCase()}
-                      {" (" +
-                        activities.filter(function (o) {
-                          return o.status === data.status;
-                        }).length +
-                        ")"}
-                    </Typography>
-                  </Box>
-                )}
-                <BoardList
-                  loading={loading}
-                  selectedResource={selectedResourceData}
-                  resource={resource}
-                  status={data.status}
-                  activity={activities.filter(function (o) {
-                    return o.status === data.status;
-                  })}
-                  fetchBoard={fetchBoard}
-                  type={type}
-                  handleChangeStatus={handleChangeStatus}
-                />
-              </div>
-            </Grid>
-          ))}
+        <Grid container spacing={2} className={` ${classes.activityMainBlock}`}>
+          {statusList.map((data, index) => {
+            return (
+              <Grid item md={3} xs={12} sm={4} style={{ paddingTop: '0px' }} key={index} className={classes.mediumDevice}>
+                <div className={classes.block}>
+                  {!loading && (
+                    <Box p={1} className="fixedBoardHeader">
+                      <Typography variant="subtitle2" style={{ width: '50%' }}>
+                        {data.status.toUpperCase()}
+                        {' (' +
+                          activities.filter(function (o) {
+                            return o.status === data.status;
+                          }).length +
+                          ')'}
+                      </Typography>
+                      {permissions && permissions[type?.toLowerCase()]?.isCreate ? (
+                        <Tooltip title={`Create ${type}`}>
+                          <IconButton
+                            size="small"
+                            style={{ float: 'right', marginTop: '-25px' }}
+                            onClick={() => {
+                              setSelectedStatus(data.status);
+                              setOpenDialog(true);
+                              setFullScreen(false);
+                            }}
+                          >
+                            <Add fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      ) : null}
+                    </Box>
+                  )}
+                  <BoardList
+                    loading={loading}
+                    selectedResource={selectedResourceData}
+                    resource={resource?.optionValue}
+                    status={data.status}
+                    activity={activities.filter(function (o) {
+                      return o.status === data.status;
+                    })}
+                    fetchBoard={fetchBoard}
+                    type={type}
+                    handleChangeStatus={handleChangeStatus}
+                  />
+                </div>
+              </Grid>
+            );
+          })}
+          <Dialog
+            open={openDialog}
+            onClose={(e, reason) => {
+              if (reason !== 'backdropClick') {
+                handleCloseDialog()
+                setFullScreen(false);
+              }
+            }}
+            fullWidth
+            maxWidth="md"
+            fullScreen={fullScreen || isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+          >
+            {type === 'task' ? (
+              <CreateTask
+                status={selectedStatus}
+                taskId={null}
+                relatedTo={[
+                  {
+                    type: resource?.optionValue && selectedResourceData ? camelCase(resource?.optionValue) : 'user',
+                    referenceId: resource?.optionValue && selectedResourceData ? selectedResourceData.id : user._id,
+                    access: true
+                  }
+                ]}
+                handleClose={() => {
+                  handleCloseDialog();
+                  setFullScreen(false);
+                }}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              />
+            ) : type === 'case' ? (
+              <CreateCase
+                status={selectedStatus}
+                caseId={null}
+                relatedTo={[
+                  {
+                    type: resource?.optionValue && selectedResourceData ? camelCase(resource?.optionValue) : 'user',
+                    referenceId: resource?.optionValue && selectedResourceData ? selectedResourceData.id : user._id,
+                    access: true
+                  }
+                ]}
+                handleClose={() => {
+                  handleCloseDialog();
+                  setFullScreen(false);
+                }}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              />
+            ) : null}
+          </Dialog>
         </Grid>
       </DndProvider>
     </>

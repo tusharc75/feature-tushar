@@ -109,6 +109,11 @@ const FieldList = {
     type: "fileUpload",
     icon: "far fa-calendar-check",
   },
+  MULTIFILEUPLOAD: {
+    label: " Multiple File Upload",
+    type: "multiFileUpload",
+    icon: "far fa-calendar-check",
+  },
   IMAGEUPLOAD: {
     label: "Image Upload",
     type: "imageUpload",
@@ -142,6 +147,16 @@ const FieldList = {
   MULTIIMAGEUPLOAD: {
     label: "Multi Image Upload",
     type: "multiImageUpload",
+    icon: "far fa-calendar-check",
+  },
+  RICHTEXTEDITOR: {
+    label: "Rich Text Editor",
+    type: "richTextEditor",
+    icon: "far fa-calendar-check",
+  },
+  SIGNATURE: {
+    label: "Signature",
+    type: "signature",
     icon: "far fa-calendar-check",
   },
 };

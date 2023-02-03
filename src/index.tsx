@@ -10,6 +10,7 @@ import { init } from '@sentry/react';
 import 'ag-grid-community/dist/styles/ag-grid.min.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './styles/index.scss';
+import './styles/custom-react-table.scss';
 import './styles/common-styles.scss';
 import './styles/material-component.scss';
 import './styles/responsive-styles.scss';
@@ -22,11 +23,11 @@ import './components/Chatter/style.scss';
 import { CustomChatNotificationCountProvider } from './StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { GlobalChatProvider } from './StateProvider/GlobalChatContext';
 import { CustomOfflineProvider } from './StateProvider/OfflineContext/OfflineContext';
-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+// import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import { version } from '../package.json';
 
 // @ts-ignore
-if (process.env.REACT_APP_ENV !== 'local') {
+if (process.env.REACT_APP_ENV !== 'local' && navigator.onLine) {
   init({
     environment: process.env.REACT_APP_ENV,
     release: version,
@@ -66,4 +67,4 @@ ReactDOM.render(
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://cra.link/PWA
-serviceWorkerRegistration.register();
+// serviceWorkerRegistration.register();

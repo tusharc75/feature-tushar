@@ -16,7 +16,6 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { object, string } from "yup";
 import { Formik, Form } from "formik";
-import { camelCase } from "./../../../constants/helpers";
 import { Vlookup } from "./vlookup";
 import { Formula } from "./formula";
 import { Converter } from "./converter";
@@ -27,6 +26,7 @@ import { CustomDialogTransition } from "../../../constants/helpers";
 import axiosInstance from "../../../axios/axiosInstance";
 import { checkFormula } from "../../../constants/formulaUtility";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+import { camelCase } from 'lodash';
 
 const FieldSchema = object().shape({
   type: string()
@@ -209,6 +209,7 @@ export const AddField = (props) => {
         errors["vlookupInputFields"] = "Please select input parameters";
       }
     }
+ 
     return errors;
   }
 
@@ -456,6 +457,7 @@ export const AddField = (props) => {
           {
             showConfirmDialog ?
               <ConfirmCancelDialog
+                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false)

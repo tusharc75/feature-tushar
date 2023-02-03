@@ -13,7 +13,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { gridLoadingTimeout, isObjectEmpty, processFieldName } from '../../constants/helpers';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import { HiUserGroup } from 'react-icons/hi';
-import { lead } from '../../constants/helpers';
+import { lead, prepareDataForGrid } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import { SiConvertio } from 'react-icons/si';
@@ -23,8 +23,13 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import './style.scss';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { getColumnData, getStaticFields, getFrameworkComponents } from "../../constants/columns"
-import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
+import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { FcProcess } from 'react-icons/fc';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BsBuilding, AiFillMail } from 'react-icons/all';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const LeadTypes = [
   {
@@ -43,8 +48,9 @@ const Leads = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, searchQuery }
   }: any = useData();
+  const { getColumnData } = useColumns();
   const { leadResource, leadApi } = lead;
   const [selectedType, setSelectedType] = useState(1);
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
@@ -60,29 +66,21 @@ const Leads = () => {
   });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const { isOffline, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
+  const { isOffline, offlineGridData, offlineFieldsData, updateOfflineGridData, updateFieldsData } = useContext(CustomOfflineContext);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
   const columnState = JSON.parse(localStorage.getItem(leadResource));
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
-  const [columns, setColumns] = useState([
-    // { field: 'concatedName', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
-    // { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
-    // { field: 'title', headerName: 'Title', show: true, cellRenderer: 'commonRenderer' },
-    // { field: 'company', headerName: 'Company', show: true, cellRenderer: 'commonRenderer' },
-    // { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-    // { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' },
-    // { field: 'phone', headerName: 'Phone', show: true, cellRenderer: 'commonRendererWithCopy' },
-    // { field: 'mobile', headerName: 'Mobile', show: true, cellRenderer: 'commonRendererWithCopy' },
-    // { field: 'email', headerName: 'Email', show: true, cellRenderer: 'commonRendererWithCopy' },
-    // { field: 'owner', headerName: 'Owner Alies', show: true, cellRenderer: 'commonRenderer' }
-  ]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [columns, setColumns] = useState([]);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
+
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [clonedData, setClonedData] = useState([]);
+  const localStorageSelectedRecords = `${leadResource}_selected`;
 
   if (columnState) {
     columns.map((item) => {
@@ -108,9 +106,10 @@ const Leads = () => {
       setLeadsPermissions(permissions[leadResource]);
     }
   }, [permissions]);
+
   useEffect(() => {
-    fetchGridColumns()
-  }, [])
+    fetchGridColumns();
+  }, []);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -129,48 +128,107 @@ const Leads = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=Lead&entity=${selectedEntity}`)
-      .then(({ data: { data } }) => {
-        let columns = []
-        let rendererNames = []
-        data.forEach(o => {
+  const fetchGridColumns = async () => {
+    let data;
+    if (isOffline) {
+      data = offlineFieldsData['lead'] ?? [];
+    } else {
+      if (selectedEntity) {
+        const response = await axiosInstance().get(`/field?resource=Lead&entity=${selectedEntity}&view=true`);
 
-          let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path)
+        data = response?.data?.data;
+      } else {
+        data = [];
+      }
 
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData]
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName)
-            }
+      try {
+        updateFieldsData('lead', data);
+      } catch (ex) {
+        console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`);
+      }
+    }
+
+    let columns = [];
+    let rendererNames = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path);
+
+      if (['concatedName'].find((d) => d === o?.fieldData?.fieldName)) {
+        columns = [
+          ...columns,
+          {
+            disabled: true,
+            field: 'concatedName',
+            headerName: 'Lead Name',
+            pivotIndex: 0,
+            show: true,
+            cellRenderer: 'nameRenderer',
+            primaryField: true
           }
-        })
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
+        ];
+      } else if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName);
         }
-        setFrameWorkComponent({ ...tempFrameworkComponent })
-        columns = [...columns, ...getStaticFields()]
-        setColumns([...columns])
-      })
-  }
+      }
+    });
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      relatedOpportunityRenderer: RelatedOpportunityRenderer,
+      actionsRenderer: ActionsRenderer
+    };
+    setFrameWorkComponent({ ...tempFrameworkComponent });
+    columns = [
+      ...columns,
+      { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
+      ...getStaticFields()
+    ];
+    setColumns([...columns]);
+  };
+
+  const NameRenderer = (params) => (
+    <span className="d-flex gap-2 align-items-center">
+      <Link className="text-truncate link" title={params.value} to={`${routes.leadDetail.path}/${params.data._id}`}>
+        {params.value}
+      </Link>
+    </span>
+  );
+
+  const RelatedOpportunityRenderer = (params) => (
+    <>
+      {params.value ? (
+        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
+          {params.value}
+        </Link>
+      ) : (
+        <NoDataCell />
+      )}
+    </>
+  );
 
   const ActionsRenderer = (params) => (
     <>
-      <Tooltip
-        className={leadsPermissions.isCreate ? "" : "cursor-stop"}
-        title={leadsPermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setIsOpen({ open: true, isClone: true, idToClone: params.data._id })
-          }}>
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
+      {leadsPermissions.isCreate ? (
+        <HtmlTooltip title={'Clone'}>
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setIsOpen({ open: true, isClone: true, idToClone: params.data._id });
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+      ) : (
+        <HtmlTooltip className={'cursor-stop'} title={'You do not have permission to clone/create'}>
+          <IconButton size="small" aria-label="Clone">
+            <FileCopyIcon fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+      )}
       {hasPermissionToConvertInOpportunity && generateLeadToOpportunityButton(params.data)}
 
       <GridDeleteIcon
@@ -213,8 +271,12 @@ const Leads = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterLeads=${selectedType}`;
+
+    if (isExport) {
+      deepFilter = `filterLeads=${selectedType}`;
+    }
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -229,7 +291,7 @@ const Leads = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -237,7 +299,7 @@ const Leads = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
 
     return deepFilter;
@@ -252,7 +314,6 @@ const Leads = () => {
         gridApi.setRowData([]);
       }
       try {
-
         let data, count;
 
         if (!isOffline) {
@@ -260,8 +321,7 @@ const Leads = () => {
 
           data = response?.data?.data;
           count = response?.data?.count;
-        }
-        else {
+        } else {
           data = offlineGridData[leadResource] || [];
           count = offlineGridData[leadResource]?.length || 0;
         }
@@ -269,44 +329,78 @@ const Leads = () => {
         try {
           updateOfflineGridData(leadResource, data);
         } catch (ex) {
-          console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`)
+          console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`);
         }
 
         let rows = data.map((u) => {
           const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
 
+          let finalObject = prepareDataForGrid(u);
+
+          finalObject['canDelete'] = u.owner?.optionValue === user?.user._id;
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
+
+          finalObject['owerCollaboratorInitialsOrImages'] = [];
+          if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
+
+          finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
+            if (f.initials) {
+              f.initials = f.initials
+                .split(' ')
+                .map((i) => i[0])
+                .join('');
+            }
+          });
+
           let res = {
-            ...restProperties,
-            id: u._id,
-
-            owner: u.owner?.optionLabel,
-            ownerId: u.owner?.optionValue,
-            subMarketSegment: u?.subMarketSegment?.optionLabel,
-            subMarketSegmentId: u?.subMarketSegment?.optionValue,
-
-            marketSegment: u.marketSegment?.optionLabel,
-            marketSegmentId: u.marketSegment?.optionValue,
+            ...finalObject,
             isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id),
-
             convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
             relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,
-            relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id,
-
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
+            relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id
           };
           return res;
         });
+        setIsAllChecked(false);
+        setClonedData(data);
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count,
+            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
+          });
+        }
+
+        if (gridApi) {
+          try {
+            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
+              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
+              : [];
+            if (oldSelectedRecords.length > 0) {
+              gridApi.forEachNode(function (node) {
+                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
+              });
+            }
+          } catch (ex) {
+            console.error('Error in getting selected records from local storage');
+          }
+        }
 
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-
       } catch (error) {
-        dispatch({ type: "loading", loading: false });
+        dispatch({ type: 'loading', loading: false });
         toastConfig.setToastConfig(error);
       }
     }
@@ -492,9 +586,10 @@ const Leads = () => {
             recordsToExport={selectedRecords.length}
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll()
-              else fetchLeads()
+              if (gridApi) gridApi.deselectAll();
+              else fetchLeads();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
@@ -502,10 +597,13 @@ const Leads = () => {
       <CustomContainer>
         <div className="header-panel">
           <LeadsHeader
+            filters={filters}
             userId={user?.user?._id}
             selectedType={selectedType}
             onTypeChange={handleLeadTypeSel}
             options={LeadTypes}
+            columns={columns}
+            dispatch={dispatch}
             onSearch={handleSearch}
             searchVal={search}
             leadPermissions={leadsPermissions}
@@ -529,8 +627,56 @@ const Leads = () => {
           />
         </div>
 
-        {
-          Object.keys(frameWorkComponent).length > 0 ?
+        {Object.keys(frameWorkComponent).length > 0 ? (
+          isMobile && !isTablet ? (
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions[leadResource]}
+              primaryField={columns?.find((d) => d.primaryField)}
+              onClick={(data) => {
+                history.push(`${routes.leadDetail.path}/${data._id}`);
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(data) => {
+                history.push(`${routes.leadDetail.path}/${data._id}?openEdit=true`);
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => {
+                showConfirmBox(data);
+              }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              additionalDetails={[
+                {
+                  icon: <FcProcess size={18} />,
+                  field: 'process'
+                }
+              ]}
+              chips={[
+                {
+                  icon: <BsBuilding />,
+                  label: 'Company: ',
+                  field: 'company'
+                },
+                {
+                  icon: <AiFillMail />,
+                  label: 'Email',
+                  field: 'email'
+                }
+              ]}
+              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+              onCreate={false}
+              showClone={true}
+              onClone={(data) => {
+                setIsOpen({ open: true, isClone: true, idToClone: data._id });
+              }}
+              renderedFrom={leadResource}
+            />
+          ) : (
             <CustomAgGrid
               columns={columns}
               dataRows={dataRows}
@@ -545,8 +691,9 @@ const Leads = () => {
               loading={loading}
               renderedFrom={leadResource}
               refreshGrid={fetchLeads}
-            /> : null
-        }
+            />
+          )
+        ) : null}
 
         {isOpen?.open && (
           <ManageLeadDialog

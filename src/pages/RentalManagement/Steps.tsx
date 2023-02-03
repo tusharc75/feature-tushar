@@ -1,327 +1,402 @@
-import React, { useContext } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import Stepper from "@material-ui/core/Stepper";
-import Step from "@material-ui/core/Step";
-import StepLabel from "@material-ui/core/StepLabel";
-import Button from "@material-ui/core/Button";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import clsx from "clsx";
-import { GiBackwardTime } from "react-icons/gi";
+import React, { useContext, Fragment, useRef } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import Stepper from '@material-ui/core/Stepper';
+import Step from '@material-ui/core/Step';
+import StepLabel from '@material-ui/core/StepLabel';
+import Button from '@material-ui/core/Button';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import clsx from 'clsx';
+import { GiBackwardTime } from 'react-icons/gi';
 import IconButton from '@material-ui/core/IconButton';
-import {
-    StepIconProps,
-    Grid,
-} from "@material-ui/core";
-import {
-    IoIosArrowDroprightCircle,
-    IoIosArrowDropleftCircle,
-} from "react-icons/io";
-import { GoPencil } from "react-icons/go";
-import { BsCheckCircle } from "react-icons/bs";
-import { AiOutlineCloseCircle } from "react-icons/ai";
-import { FaHourglassHalf } from "react-icons/fa";
-import styles from "./Retal.module.scss";
-
-import { isMobile } from "react-device-detect";
+import { StepIconProps, Grid } from '@material-ui/core';
+import { IoIosArrowDroprightCircle, IoIosArrowDropleftCircle } from 'react-icons/io';
+import { GoPencil } from 'react-icons/go';
+import { BsCheckCircle } from 'react-icons/bs';
+import { AiOutlineCloseCircle, AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
+import { FaHourglassHalf } from 'react-icons/fa';
+import styles from './Retal.module.scss';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+import { isMobile, isTablet } from 'react-device-detect';
+import { RiShareForwardFill } from 'react-icons/ri';
+import { TiArrowBack } from 'react-icons/ti';
+import MobileStepper from '@material-ui/core/MobileStepper';
+import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import CustomMobileStepperOpportunities from '../../components/CustomMobileStepperOpportunities';
+import { FiMaximize2 } from 'react-icons/fi';
+import transitions from '@material-ui/core/styles/transitions';
 
 const useStyles = makeStyles((theme) => ({
-
-    backButton: {
-        marginRight: theme.spacing(1),
+  backButton: {
+    marginRight: theme.spacing(1)
+  },
+  BlackSvg: {
+    userSelect: 'none',
+    '& svg': {
+      fill: '#000',
+      transition: 'fill .4s, opacity .4s'
     },
-    instructions: {
-        fontWeight: "bold",
+    '&:hover svg': {
+      fill: 'var(--primary)'
     },
-    pStepper: {
-        padding: "10px 4px",
-        borderRadius: "4px",
-        [theme.breakpoints.down("xs")]: {
-            padding: "4px",
-        },
+    '&.Mui-disabled': {
+      PointerEvents: 'none',
+      '& svg': {
+        opacity: '0.3'
+      }
+    }
+  },
+  instructions: {
+    fontWeight: 'bold'
+  },
+  pStepper: {
+    padding: '10px 4px',
+    borderRadius: '4px',
+    [theme.breakpoints.down('xs')]: {
+      padding: '4px'
+    }
+  },
+  pbStepper: {
+    overflow: 'none',
+    justifyContent: 'space-evenly',
+    [theme.breakpoints.down('xs')]: {
+      overflow: 'auto'
+    }
+  },
+  step: {
+    paddingLeft: '8px',
+    paddingRight: '8px',
+    padding: '10px 8px',
+    width: '20%',
+    textAlign: 'center',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '2px',
+    borderRadius: '12px 40px 40px 50px',
+    border: '1px solid #d6d5d5',
+    [theme.breakpoints.down('xs')]: {
+      width: '50%',
+      padding: '2px'
+    }
+  },
+  inActive: {
+    flex: '1',
+    background: '#E5E5E5',
+    border: '2px solid #258C89',
+    '& .MuiStepLabel-label': {
+      color: '#000 !important'
+    }
+  },
+  currentStep: {
+    flex: '1',
+    border: '2px solid #258C89',
+    backgroundColor: '#ffffff',
+    color: '#FFF',
+    fontWeight: 600,
+    '& .MuiStepLabel-label': {
+      color: '#000 !important',
+      fontWeight: '600'
     },
+    '& .MuiIconButton-label': {
+      '& svg': {
+        fill: '#258C89',
+        stroke: '#258C89'
+      }
+    },
+    '& svg': {
+      fill: 'rgba(37, 140, 137, 0.26)',
+      fontSize: '20px !important',
+      '& text': {
+        fill: '#000'
+      }
+    }
+  },
+  active: {
+    flex: '1',
+    background: '#c8e9ce',
+    color: '#378280 !important',
+    border: '2px solid #258C89',
+    backgroundColor: '#258C89',
+    '& .MuiStepLabel-label': {
+      color: '#fff !important',
+      fontWeight: '600'
+    },
+    '& .MuiIconButton-label': {
+      '& svg': {
+        fill: '#fff',
+        stroke: '#fff'
+      }
+    },
+    '& svg': {
+      fill: '#fff',
+      fontSize: '20px !important',
+      '& text': {
+        fill: '#000'
+      }
+    }
+  },
+  sent: {
+    color: '#00acc1',
+    fontWeight: 'bold'
+  },
+  approved: {
+    color: '#6ca826',
+    fontWeight: 'bold'
+  },
+  rejected: {
+    color: '#d60f0f',
+    fontWeight: 'bold'
+  },
+  '@media only screen and (max-width: 1160px)': {
     pbStepper: {
-        overflow: "none",
-        justifyContent:"space-evenly",
-        [theme.breakpoints.down("xs")]: {
-            overflow: "auto"
-        },
+      '& .MuiStepLabel-iconContainer': {
+        display: 'none'
+      }
+    }
+  },
+  overflowX: {
+    overflowX: 'auto'
+  },
+  tabletClass: {
+    minWidth: '32.73333%',
+    flex: 'unset'
+  },
+  tabletStepContainer: {
+    '& .MuiStepConnector-root': {
+      display: 'none'
     },
-    step: {
-        paddingLeft: "8px",
-        paddingRight: "8px",
-        padding: "5px 8px",
-        width: "20%",
-        textAlign: "center",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        margin: "2px",
-        borderRadius: "4px",
-        border: "1px solid #d6d5d5",
-        [theme.breakpoints.down("xs")]: {
-            width: "50%",
-            padding: "2px"
-        },
-    },
-    inActive: {
-        flex: "1",
-        background: "#ebebeb",
-    },
-    currentStep: {
-        flex: "1",
-        background: "#ffffff",
-
-    },
-    active: {
-        flex: "1",
-        background: "#53ac65",
-    },
-    sent: {
-        color: "#00acc1",
-        fontWeight: "bold",
-    },
-    approved: {
-        color: "#6ca826",
-        fontWeight: "bold",
-    },
-    rejected: {
-        color: "#d60f0f",
-        fontWeight: "bold",
-    },
-}));
-
-const useColorlibStepIconStyles = makeStyles((theme) => ({
-    root: {
-
-        color: "#d1c4c4",
-        width: 30,
-        height: 30,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    active: {
-
-        color: "#047d1c !important",
-    },
-    completed: {
-        color: "#3f3f02 !important",
-    },
-    rejected: {
-        color: "#b3a6a6 !important",
-    },
+    justifyContent: 'flex-start',
+    paddingBlockEnd: '9px !important',
+    overflowX: 'auto'
+  }
 }));
 
 const Steps = (props) => {
-    const {
-        isNextStep,
-        steps,
-        currentStep,
-        setCurrentStep
-    } = props;
-    const classes = useStyles();
-    let activeStep = currentStep;
-    const toastConfig = useContext(CustomToastContext);
-    const ColorlibStepIcon = (props: StepIconProps) => {
-        const classes = useColorlibStepIconStyles();
-        var { active, completed } = props;
-        var rejected = false;
-        let status = 1;
-        if (active) {
-            status = 1;
-            active = true;
-            completed = false;
-            rejected = false;
-        }
-        if (props.icon === steps.length && props.active) {
+  const {
+    nextStep,
+    isNextStep,
+    steps,
+    currentStep,
+    setCurrentStep,
+    isStepEnded,
+    setStepFullScreen = null,
+    updateStatus = null,
+    isPrevStep = true,
+    handleNext = null,
+    handlePrev = null
+  } = props;
 
-            status = 4;
-            active = false;
-            completed = false;
-            rejected = true;
+  const containerRef = useRef(null);
 
-        }
+  const classes = useStyles();
+  let activeStep = currentStep;
 
-        const icons: { [index: string]: React.ReactElement } = {
-            1: <GiBackwardTime size={20} />,
-            2: <GoPencil size={20} />,
-            3: <BsCheckCircle size={20} />,
-            4: <AiOutlineCloseCircle size={20} color={rejected ? "red" : ""} />,
-            5: <FaHourglassHalf size={20} />,
-        };
+  const goNext = () => {
+    if (handleNext) {
+      handleNext();
+      return;
+    }
+    setCurrentStep((prevStep) => {
+      const newStep = prevStep + 1;
+      if (updateStatus) {
+        updateStatus(newStep);
+      }
+      return newStep;
+    });
+  };
 
-        return (
-            <div
-                className={clsx(classes.root, {
-                    [classes.active]: active,
-                    [classes.completed]: completed,
-                    [classes.rejected]: rejected,
-                })}
+  const goPrev = () => {
+    if (handlePrev) {
+      handlePrev();
+      return;
+    }
+    setCurrentStep((prevStep) => {
+      const newStep = prevStep - 1;
+      if (updateStatus) {
+        updateStatus(newStep);
+      }
+      return newStep;
+    });
+  };
+
+  React.useEffect(() => {
+    handleScroll();
+  }, [activeStep]);
+
+  const handleScroll = () => {
+    if (containerRef.current && isTablet) {
+      const container = containerRef.current;
+      const element = container.querySelector('div.MuiStep-root');
+      if (element) {
+        const scrollpos = activeStep * (element?.clientWidth + 4);
+        container.scroll({
+          top: 0,
+          left: scrollpos,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
+
+  return (
+    <div>
+      {isMobile && !isTablet ? (
+        // <MobileStepper
+        //     style={{ background: "#dee2e6" }}
+        //     variant="dots"
+        //     steps={steps.length}
+        //     position="bottom"
+        //     activeStep={currentStep}
+        //     nextButton={
+        //         <Button size="small"
+        //             color="primary"
+        //             disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || isStepEnded} variant="contained"
+        //             endIcon={<KeyboardArrowRight />}
+        //             onClick={goNext}
+        //          >
+        //             {steps[currentStep + 1] ?? ""}
+        //         </Button>
+        //     }
+        //     backButton={
+        //         <Button size="small" variant="contained" color={"primary"} startIcon={<KeyboardArrowLeft />}
+        //             disabled={currentStep === steps.length || currentStep === 0 || isStepEnded}
+        //             onClick={() => {
+        //                 setCurrentStep(currentStep - 1)
+        //             }}
+        //         >
+        //             {steps[currentStep - 1] ?? ""}
+        //         </Button>
+        //     }
+        // />
+        <CustomMobileStepperOpportunities
+          stepName={activeStep + 1 + '/' + steps.length + ' ' + steps[currentStep] ?? ''}
+          nextButton={
+            <Button
+              size="small"
+              variant="text"
+              color="primary"
+              disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || isStepEnded}
+              endIcon={<AiOutlineRight />}
+              className="ml-1 MobileStep-next-back-button"
+              onClick={goNext}
             >
-                {icons["3"]}
-            </div>
-        );
-    };
-
-
-
-    return (
-        <div>
-            <div className="position-relative">
-                {/* {!versionStatus.includes("Accepted by Customer") &&
-                    approvedQuote.approved && approvedQuote.versionApproved === version && (
-                        <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                            <Typography className={classes.approved}>
-                                Quote version - {approvedQuote.versionApproved} of this quote has
-                                been Approved
-                            </Typography>
+              {'Next'}
+            </Button>
+          }
+          backButton={
+            <Button
+              size="small"
+              variant="text"
+              color={'primary'}
+              startIcon={<AiOutlineLeft />}
+              disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep}
+              className={`mr-1 MobileStep-next-back-button `}
+              onClick={goPrev}
+            >
+              {'Back'}
+            </Button>
+          }
+        />
+      ) : (
+        <div className="position-relative">
+          <Grid container className={styles.main_step_box} xs={12}>
+            <Grid item xs={12} sm={isMobile ? 12 : 1} md={1} className="d-flex align-items-center justify-content-center mt-2">
+              {!isMobile && !isStepEnded && (
+                <IconButton
+                  disabled={currentStep === steps.length || currentStep === 0 || !isPrevStep}
+                  className={`stepperButton ${classes.BlackSvg}`}
+                  onClick={goPrev}
+                >
+                  <TiArrowBack size={30} />
+                </IconButton>
+              )}
+            </Grid>
+            <Grid item xs={12} sm={isMobile ? 12 : 10} md={10} style={isMobile ? { padding: '0 10px' } : {}}>
+              <div className={classes.pStepper}>
+                <Grid container>
+                  <Grid item xs={6} className="d-flex align-items-center justify-content-start ">
+                    {isMobile && (
+                      <>
+                        <div>
+                          <IconButton
+                            color="primary"
+                            disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep}
+                            onClick={goPrev}
+                            size="small"
+                          >
+                            <TiArrowBack size={24} />
+                          </IconButton>
                         </div>
-                    )} */}
-                <Grid container className={styles.main_step_box} xs={10}>
-                    <Grid
-                        item
-                        xs={12}
-                        sm={2}
-                        md={1}
-                        className="d-flex align-items-center justify-content-center mt-2"
-                    >
-                        {!isMobile && (
-                            <>
-                                <div>
-                                    {(
-                                        <div>
-                                            <Button
-                                                disabled={currentStep === 4 || currentStep === 0}
-                                                onClick={() => {
-                                                    setCurrentStep(currentStep - 1)
-                                                }}
-                                                size="large"
-                                                startIcon={<IoIosArrowDropleftCircle />}
-                                            >
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-                            </>
-                        )}
-                    </Grid>
-                    <Grid item xs={12} sm={8} md={10}>
-                        <div className={classes.pStepper}>
-                            <Grid container>
-                                <Grid
-                                    item
-                                    xs={6}
-                                    // className="d-flex align-items-center justify-content-start "
-                                >
-                                    {isMobile && (
-                                        <>
-                                            <div>
-                                                {(
-                                                    <div>
-                                                        <IconButton
-                                                            color="primary"
-                                                            disabled={currentStep === 4}
-                                                            onClick={() => {
-                                                                setCurrentStep(currentStep + 1)
-                                                            }}
-                                                            size="small"
-                                                        >
-                                                            <IoIosArrowDropleftCircle />
-                                                        </IconButton>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </>
-                                    )}
-                                </Grid>
-                                <Grid
-                                    item
-                                    xs={6}
-                                    className="d-flex align-items-center justify-content-end mt-1 mb-1"
-                                >
-                                    {isMobile && (
-                                        <>
-                                            <div>
-                                                {(
-                                                    <div>
-                                                        {(
-                                                            <IconButton
-                                                                color="primary"
-                                                                onClick={() => {
-                                                                    setCurrentStep(currentStep + 1)
-                                                                }}
-                                                                size="small"
-                                                                disabled={currentStep === 4}
-                                                            >
-                                                                Next
-                                                            </IconButton>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </>
-                                    )}
-                                </Grid>
-                            </Grid>
-                            <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={activeStep}>
-                                {steps.map((label, i) => (
-                                    <Step
-                                        key={label}
-                                        className={clsx(classes.step, {
-                                            [classes.active]:
-                                                currentStep > i ||
-                                                steps[currentStep] === "End",
-                                            [classes.currentStep]: currentStep === i,
-                                            [classes.inActive]: currentStep !== i,
-                                        })}
-                                    >
-                                        <StepLabel
-                                            style={{ color: "#555" }}
-                                            StepIconComponent={ColorlibStepIcon}
-                                            className={"currentStepColor"}
-                                        >
-                                            {label}
-                                        </StepLabel>
-                                    </Step>
-                                ))}
-                            </Stepper>
-                        </div>
-                    </Grid>
-                    <Grid
-                        item
-                        xs={12}
-                        sm={2}
-                        md={1}
-                        className="d-flex align-items-center justify-content-center mt-2 "
-                    >
-                        {!isMobile && (
-                          <>
-                            <div>
-                              {(
-                                <div>
-                                  {(
-                                    <Button
+                      </>
+                    )}
+                  </Grid>
 
-                                        onClick={() => {
-                                            setCurrentStep(currentStep + 1)
-                                        }}
-                                        size="large"
-                                        disabled={currentStep >=3 || (currentStep === 0 && isNextStep)}
-                                        endIcon={<IoIosArrowDroprightCircle />}
-                                    >
-                                    </Button>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </>
-                        )}
-                    </Grid>
+                  <Grid item xs={6} className="d-flex align-items-center justify-content-end">
+                    {isMobile && (
+                      <>
+                        <div>
+                          <IconButton
+                            color="primary"
+                            onClick={goNext}
+                            size="small"
+                            disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || isStepEnded}
+                          >
+                            <RiShareForwardFill size={20} />
+                          </IconButton>
+                        </div>
+                      </>
+                    )}
+                  </Grid>
                 </Grid>
-            </div>
 
+                <Stepper
+                  ref={containerRef}
+                  className={`${classes.pbStepper} ${isTablet && classes.tabletStepContainer} stepper-responsive mt-2`}
+                  activeStep={isStepEnded ? steps.length + 1 : activeStep}
+                >
+                  {steps.map((label, i) => (
+                    <Step
+                      key={label}
+                      className={clsx(classes.step, isTablet && classes.tabletClass, {
+                        [classes.active]: currentStep > i || isStepEnded,
+                        [classes.currentStep]: currentStep === i,
+                        [classes.inActive]: currentStep !== i
+                      })}
+                    >
+                      <StepLabel style={{ color: '#555' }} className={'currentStepColor'}>
+                        {label}
+                        {!isStepEnded && setStepFullScreen && currentStep === i && (
+                          <HtmlTooltip title={`Full Screen`}>
+                            <IconButton aria-label="Full Screen" onClick={setStepFullScreen} size="small" className="ml-2 p-0">
+                              <FiMaximize2 />
+                            </IconButton>
+                          </HtmlTooltip>
+                        )}
+                      </StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+              </div>
+            </Grid>
+            <Grid item xs={12} sm={isMobile ? 12 : 1} md={1} className="d-flex align-items-center justify-content-center mt-2 ">
+              {!isMobile && !isStepEnded && (
+                <Fragment>
+                  <IconButton
+                    onClick={goNext}
+                    disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep}
+                    className={`stepperButtonNext ${classes.BlackSvg}`}
+                  >
+                    <RiShareForwardFill />
+                  </IconButton>
+                </Fragment>
+              )}
+            </Grid>
+          </Grid>
         </div>
-    );
+      )}
+    </div>
+  );
 };
 
 export default Steps;

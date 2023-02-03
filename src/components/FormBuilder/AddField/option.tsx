@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import Box from "@material-ui/core/Box";
@@ -16,15 +16,38 @@ import update from "immutability-helper";
 import { DragIndicator } from "@material-ui/icons";
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
+import axiosInstance from '../../../axios/axiosInstance'
+import { FixedSizeList } from 'react-window';
+import SortIcon from '@material-ui/icons/Sort';
+import { orderBy } from "lodash";
 
 export const Option = ({ values, setFieldValue, fields, _id }) => {
 
   const defaultOption = [{ "optionLabel": "Option 1", "optionValue": "Option 1" }];
   const [options, setOptions] = useState(values.option ? values.option.length == 0 ? defaultOption : values.option : defaultOption);
+  const [lookupOption, setlookupOption] = useState([]);
+  const [isUpdate, setUpdate] = useState(false);
+  const [isAsc, setIsAsc] = useState(true);
+
+  useEffect(() => {
+    if (values["isDependentDropdown"] && values["dropdowDependentOn"]) {
+      GetLookupOption(values["dropdowDependentOn"])
+    }
+  }, []);
+
+  useEffect(() => {
+    setFieldValue("option", options);
+  }, [options]);
+
+  useEffect(() => {
+    setlookupOption([...lookupOption])
+  }, [options]);
+
+  useEffect(() => {
+    setUpdate(!isUpdate);
+  }, [lookupOption]);
 
   const onChangeValue = (index, field, value) => {
     let data = [...values["option"]];
@@ -35,7 +58,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
       data[index][field] = value;
     }
     setFieldValue("option", data);
-    setOptions(data);
+    //setOptions(data);
   };
 
   const AddRemoveValue = (type, index) => {
@@ -52,12 +75,12 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
     }
     setFieldValue("option", data);
     setOptions(data);
+    setUpdate(!isUpdate);
   };
 
   const handleImportExcel = (e) => {
     e.preventDefault();
-    var files = e.target.files,
-      f = files[0];
+    var files = e.target.files, f = files[0];
     var reader = new FileReader();
     reader.onload = function (e) {
       var data = e.target.result;
@@ -72,18 +95,26 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
           let rowInsert = {};
           rowInsert["optionLabel"] = row[0] ? row[0].toString() : "";
           rowInsert["optionValue"] = row[0] ? row[0].toString() : "";
-          if (
-            values["isDependentDropdown"] &&
-            values["dropdowDependentOn"] !== ""
-          ) {
-            rowInsert[values["dropdowDependentOn"]] = row[1]
-              ? row[1].toString()
-              : "";
+          if (values["isDependentDropdown"] && values["dropdowDependentOn"] && values["dropdowDependentOn"] !== "") {
+            const value = row[1] ? row[1].toString() : "";
+            if (lookupOption.length) {
+              const resultFilter = lookupOption.filter((e) => e.optionLabel.toLowerCase() === value.toLowerCase());
+              if (resultFilter.length) {
+                rowInsert[values["dropdowDependentOn"]] = resultFilter[0].optionValue;
+              }
+              else {
+                rowInsert[values["dropdowDependentOn"]] = "";
+              }
+            }
+            else {
+              rowInsert[values["dropdowDependentOn"]] = value;
+            }
           }
           option.push(rowInsert);
         });
         setFieldValue("option", option);
         setOptions(option);
+        setUpdate(!isUpdate);
       }
     };
     reader.readAsBinaryString(f);
@@ -95,18 +126,46 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
     export_json.forEach((_d) => {
       let ele: any = {};
       ele.option = _d.optionLabel;
-      if (
-        values["isDependentDropdown"] &&
-        values["dropdowDependentOn"] !== ""
-      ) {
-        ele[values["dropdowDependentOn"]] = _d[values["dropdowDependentOn"]];
+      if (values["isDependentDropdown"] && values["dropdowDependentOn"] && values["dropdowDependentOn"] !== "") {
+        if (lookupOption.length) {
+          const resultFilter = lookupOption.filter((e) => e.optionValue === _d[values["dropdowDependentOn"]]);
+          if (resultFilter.length) {
+            ele[values["dropdowDependentOn"]] = resultFilter[0].optionLabel;
+          }
+          else {
+            ele[values["dropdowDependentOn"]] = _d[values["dropdowDependentOn"]];
+          }
+        }
+        else {
+          ele[values["dropdowDependentOn"]] = _d[values["dropdowDependentOn"]];
+        }
       }
       json_data.push(ele);
     });
+    const header = []
+    if (json_data.length) {
+      for (var key in json_data[0]) {
+        if (key === "option") {
+          header.push(values["fieldLabel"]);
+        }
+        else {
+          const filter = fields.filter((_f) => _f.fieldName === key)
+          if (filter.length) {
+            header.push(filter[0]["fieldLabel"]);
+          }
+          else {
+            header.push(key);
+          }
+        }
+      }
+    }
     var ws = utils.json_to_sheet(json_data);
+    if (header.length) {
+      utils.sheet_add_aoa(ws, [header]);
+    }
     var wb = utils.book_new();
     utils.book_append_sheet(wb, ws, "Sheet1");
-    writeFile(wb, "dropdown options.xlsx");
+    writeFile(wb, `${values["fieldLabel"]} Dropdown Options.xlsx`);
   };
 
   const moveCard = useCallback(
@@ -120,191 +179,222 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
           ],
         })
       );
-    },
-
-    [options]
+    }, [options]
   );
 
-  useEffect(() => {
-    setFieldValue("option", options);
-  }, [options]);
+  const GetLookupOption = async (dropdowDependentOn) => {
+    const _filter = fields.filter((_f) => _f.fieldName === dropdowDependentOn)
+    if (_filter.length) {
+      if (_filter[0].lookup) {
+        axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=` + _filter[0].lookupResource).then(({ data: { data } }) => {
+          setlookupOption(data[_filter[0].lookupResource])
+        })
+      }
+      else {
+        setlookupOption([])
+      }
+    }
+  }
 
-  return (<DndProvider backend={HTML5Backend}>
-    <Box pt={2} pb={2}>
-      {values["type"] === "dropDown" && (
-        <Grid spacing={3} container>
-          <Grid item xs={12} sm={6} md={6}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="isDependentDropdown"
-                  checked={values["isDependentDropdown"]}
-                  onChange={(e) =>
-                    setFieldValue("isDependentDropdown", e.target.checked)
-                  }
-                  color="primary"
-                />
-              }
-              label="Dependent Dropdown"
-            />
-          </Grid>
-          {values["isDependentDropdown"] && (
-            <Grid item xs={12} sm={6} md={6}>
-              <Autocomplete
-                id="tags-filled"
-                options={
-                  fields &&
-                  fields.filter(
-                    (_f) => _f._id !== _id && _f.type === "dropDown" && !_f.lookup
-                  )
-                }
-                getOptionLabel={(option: any) =>
-                  option ? option.fieldLabel : ""
-                }
-                getOptionSelected={(option: any, val) =>
-                  option.fieldName === val
-                }
-                value={
-                  fields &&
-                    fields.filter(
-                      (data) => data.fieldName === values["dropdowDependentOn"]
-                    ).length
-                    ? fields &&
-                    fields.filter(
-                      (data) =>
-                        data.fieldName === values["dropdowDependentOn"]
-                    )[0]
-                    : ""
-                }
-                onChange={(e, val) => {
-                  setFieldValue(
-                    "dropdowDependentOn",
-                    val && val.fieldName ? val.fieldName : ""
-                  );
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    margin="dense"
-                    variant="outlined"
-                    label="Dropdow Dependent On"
-                    placeholder="Dropdow Dependent On"
-                  />
-                )}
-              />
-            </Grid>
-          )}
-        </Grid>
-      )}
+  const Row = React.useMemo(() => {
+    return React.forwardRef((props2: any, ref2: any) => (
+      <div style={props2.style} ref={ref2}>
+        {values['option'] && values['option'][props2.index] &&
+          <Card
+            key={props2.index}
+            index={props2.index}
+            id={props2.index}
+            data={values['option'][props2.index]}
+            moveCard={moveCard}
+            onChangeValue={onChangeValue}
+            values={values}
+            AddRemoveValue={AddRemoveValue}
+            fields={fields}
+            lookupOption={lookupOption}
+          />
+        }
+      </div>
+    ));
+  }, [isUpdate]);
+
+  const sortOptions = () => {
+    let _option = values["option"];
+    _option = orderBy(_option, ['optionLabel'], [isAsc ? 'asc' : "desc"]);
+    setFieldValue("option", _option);
+    setUpdate(!isUpdate);
+    setIsAsc(!isAsc)
+  }
+
+  const clearAll = () => {
+    setOptions(defaultOption)
+  }
+
+  return (<Box pt={2} pb={2}>
+    {(values["type"] === "dropDown" || values["type"] === "multiSelect") && (
       <Grid spacing={3} container>
         <Grid item xs={12} sm={6} md={6}>
-          <Typography variant="body2">Options</Typography>
-        </Grid>
-        <Grid item xs={12} sm={6} md={6} container justify="flex-end">
-          <label
-            htmlFor="optionimportFromExcel"
-            className={`cursor-pointer mr-3`}
-          >
-            Import from Excel
-          </label>
-          <input
-            onClick={(e: any) => (e.target.value = null)}
-            id="optionimportFromExcel"
-            name="optionimportFromExcel"
-            onChange={handleImportExcel}
-            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-            style={{
-              opacity: "0",
-              position: "absolute",
-              zIndex: -1,
-            }}
-            type="file"
-          />
-          <label className={`cursor-pointer`} onClick={handleExportExcel}>
-            Export to Excel
-          </label>
-        </Grid>
-      </Grid>
-      <Box
-        border={1}
-        mt={1}
-        p={1}
-        bgcolor="grey.100"
-        borderColor="grey.300"
-        maxHeight={300}
-        style={{ overflow: "auto" }}
-      >
-        {options.length > 0 &&
-          options.map((data, index) => (
-            <Card
-              key={index}
-              index={index}
-              id={index}
-              data={data}
-              moveCard={moveCard}
-              onChangeValue={onChangeValue}
-              values={values}
-              AddRemoveValue={AddRemoveValue}
-              fields={fields}
-            />
-          ))}
-      </Box>
-      {values["type"] === "dropDown" && !values["lookup"] && (
-        <Box mt={1}>
-          <Autocomplete
-            id="tags-filled"
-            options={values["option"] && values["option"]}
-            getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
-            getOptionSelected={(option: any, val) => option.optionValue === val}
-            value={
-              values["option"] &&
-                values["option"].filter(
-                  (data) => data.optionValue === values["defaultDropdownOption"]
-                ).length
-                ? values["option"] &&
-                values["option"].filter(
-                  (data) =>
-                    data.optionValue === values["defaultDropdownOption"]
-                )[0]
-                : ""
-            }
-            onChange={(e, val) => {
-              setFieldValue(
-                "defaultDropdownOption",
-                val && val.optionValue ? val.optionValue : ""
-              );
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                margin="dense"
-                variant="outlined"
-                label="Default Option"
-                placeholder="Default Option"
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="isDependentDropdown"
+                checked={values["isDependentDropdown"]}
+                onChange={(e) => {
+                  setFieldValue("isDependentDropdown", e.target.checked)
+                  setUpdate(!isUpdate);
+                }}
+                color="primary"
               />
-            )}
+            }
+            label="Dependent Dropdown"
           />
-        </Box>
-      )}
-      {values['isConverter'] || values['type'] === "converter" && (
-        <Grid item xs={12} sm={4} md={4}>
-          <FormControl fullWidth margin="dense" variant="outlined">
-            <InputLabel id="dropdownOnConverter">Dropdown applied on converter</InputLabel>
-            <Select
-              labelId="dropdownOnConverter"
-              id="dropdownOnConverter"
-              value={values['dropdownOnConverter']}
-              onChange={(e) => setFieldValue('dropdownOnConverter', e.target.value)}
-              label="Dropdown applied on converter"
-              name="dropdownOnConverter"
-            >
-              {values['formulaUnits'] && values['formulaUnits'].map((_unit) => <MenuItem value={_unit}>{_unit}</MenuItem>)}
-            </Select>
-          </FormControl>
         </Grid>
-      )}
+        {values["isDependentDropdown"] && (
+          <Grid item xs={12} sm={6} md={6}>
+            <Autocomplete
+              id="tags-filled"
+              options={fields && fields.filter((_f) => _f._id !== _id && _f.type === "dropDown")}
+              getOptionLabel={(option: any) =>
+                option ? option.fieldLabel : ""
+              }
+              getOptionSelected={(option: any, val) =>
+                option.fieldName === val
+              }
+              value={fields && fields.filter((data) => data.fieldName === values["dropdowDependentOn"]).length
+                ? fields && fields.filter((data) => data.fieldName === values["dropdowDependentOn"])[0] : ""
+              }
+              onChange={(e, val) => {
+                setFieldValue("dropdowDependentOn", val && val.fieldName ? val.fieldName : "");
+                GetLookupOption(val && val.fieldName ? val.fieldName : "")
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  margin="dense"
+                  variant="outlined"
+                  label="Dropdow Dependent On"
+                  placeholder="Dropdow Dependent On"
+                />
+              )}
+            />
+          </Grid>
+        )}
+      </Grid>
+    )}
+    <Grid spacing={3} container>
+      <Grid item xs={12} sm={6} md={6}>
+        <Box display="flex">
+          <Box>
+            <Typography variant="body2">Options
+              <IconButton className="ml-2 p-0" color="primary" size="small" onClick={sortOptions}  >
+                <SortIcon fontSize="small" />
+              </IconButton>
+            </Typography>
+          </Box>
+          <Box ml={2}>
+            <Typography variant="body2" className="cursor-pointer" onClick={clearAll}>Clear All
+            </Typography>
+          </Box>
+        </Box>
+      </Grid>
+      <Grid item xs={12} sm={6} md={6} container justify="flex-end">
+        <label
+          htmlFor="optionimportFromExcel"
+          className={`cursor-pointer mr-3`}
+        >
+          Import from Excel
+        </label>
+        <input
+          onClick={(e: any) => (e.target.value = null)}
+          id="optionimportFromExcel"
+          name="optionimportFromExcel"
+          onChange={handleImportExcel}
+          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          style={{
+            opacity: "0",
+            position: "absolute",
+            zIndex: -1,
+          }}
+          type="file"
+        />
+        <label className={`cursor-pointer`} onClick={handleExportExcel}>
+          Export to Excel
+        </label>
+      </Grid>
+    </Grid>
+    <Box
+      border={1}
+      mt={1}
+      bgcolor="grey.100"
+      borderColor="grey.300"
+    >
+      <FixedSizeList
+        height={300}
+        width={'100%'}
+        itemSize={60}
+        itemData={values['option'] && values['option']}
+        itemCount={values['option'] && values['option'].length}
+      >
+        {Row}
+      </FixedSizeList>
+      {/* {options.length > 0 &&
+        options.map((data, index) => (
+          <Card
+            key={index}
+            index={index}
+            id={index}
+            data={data}
+            moveCard={moveCard}
+            onChangeValue={onChangeValue}
+            values={values}
+            AddRemoveValue={AddRemoveValue}
+            fields={fields}
+            lookupOption={lookupOption}
+          />
+        ))} */}
     </Box>
-  </DndProvider>
+    {values["type"] === "dropDown" && !values["lookup"] && (
+      <Box mt={1}>
+        <Autocomplete
+          id="tags-filled"
+          options={values["option"] && values["option"]}
+          getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
+          getOptionSelected={(option: any, val) => option.optionValue === val}
+          value={values["option"] && values["option"].filter((data) => data.optionValue === values["defaultDropdownOption"]).length
+            ? values["option"] && values["option"].filter((data) => data.optionValue === values["defaultDropdownOption"])[0] : ""
+          }
+          onChange={(e, val) => {
+            setFieldValue("defaultDropdownOption", val && val.optionValue ? val.optionValue : "");
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              margin="dense"
+              variant="outlined"
+              label="Default Option"
+              placeholder="Default Option"
+            />
+          )}
+        />
+      </Box>
+    )}
+    {values['isConverter'] || values['type'] === "converter" && (
+      <Grid item xs={12} sm={4} md={4}>
+        <FormControl fullWidth margin="dense" variant="outlined">
+          <InputLabel id="dropdownOnConverter">Dropdown applied on converter</InputLabel>
+          <Select
+            labelId="dropdownOnConverter"
+            id="dropdownOnConverter"
+            value={values['dropdownOnConverter']}
+            onChange={(e) => setFieldValue('dropdownOnConverter', e.target.value)}
+            label="Dropdown applied on converter"
+            name="dropdownOnConverter"
+          >
+            {values['formulaUnits'] && values['formulaUnits'].map((_unit) => <MenuItem value={_unit}>{_unit}</MenuItem>)}
+          </Select>
+        </FormControl>
+      </Grid>
+    )}
+  </Box>
   );
 };
 
@@ -314,9 +404,9 @@ interface DragItem {
   type: string;
 }
 
-const Card = (props) => {
-  const { index, id, data, moveCard, onChangeValue, values, AddRemoveValue, fields } = props;
 
+const Card = (props) => {
+  const { index, id, data, moveCard, onChangeValue, values, AddRemoveValue, fields, lookupOption } = props;
   const ref = useRef<HTMLDivElement>(null);
   const [{ handlerId }, drop] = useDrop({
     accept: "card",
@@ -331,13 +421,11 @@ const Card = (props) => {
       }
       const dragIndex = item.index;
       const hoverIndex = index;
-
       if (dragIndex === hoverIndex) {
         return;
       }
       const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
       const clientOffset = monitor.getClientOffset();
       const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
       if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
@@ -350,7 +438,6 @@ const Card = (props) => {
       item.index = hoverIndex;
     },
   });
-
   const [{ isDragging }, drag] = useDrag({
     type: "card",
     item: () => {
@@ -360,9 +447,7 @@ const Card = (props) => {
       isDragging: monitor.isDragging(),
     }),
   });
-
   const opacity = isDragging ? 0.4 : 1;
-
   drag(drop(ref));
   return (
     <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
@@ -386,34 +471,35 @@ const Card = (props) => {
               }
             />
           </Grid>
-          {values["isDependentDropdown"] &&
-            values["dropdowDependentOn"] !== "" && (
-              <Grid item xs={4}>
-                <Select
-                  id="demo-simple-select-outlined"
-                  fullWidth
-                  variant="outlined"
-                  margin="dense"
-                  value={data[values["dropdowDependentOn"]]}
-                  onChange={(e) =>
-                    onChangeValue(
-                      index,
-                      values["dropdowDependentOn"],
-                      e.target.value
-                    )
-                  }
-                >
-                  {(values["dropdowDependentOn"] && fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"]).length) &&
-                    fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"])[0].option &&
-                    fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"])[0].option.map((_option) => {
+          {values["isDependentDropdown"] && values["dropdowDependentOn"] && values["dropdowDependentOn"] !== "" && (
+            <Grid item xs={4}>
+              <Select
+                id="demo-simple-select-outlined"
+                fullWidth
+                variant="outlined"
+                margin="dense"
+                value={data && data[values["dropdowDependentOn"]] && data[values["dropdowDependentOn"]]}
+                onChange={(e) => onChangeValue(index, values["dropdowDependentOn"], e.target.value)}
+              >
+                {(values["dropdowDependentOn"] && fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"]).length) ?
+                  fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"])[0].lookup ?
+                    lookupOption && lookupOption.map((_option) => {
+                      return (<MenuItem key={_option.optionLabel} value={_option.optionValue}>
+                        {_option.optionLabel}
+                      </MenuItem>
+                      )
+                    })
+                    : fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"])[0].option
+                    && fields.filter((_f) => _f.fieldName === values["dropdowDependentOn"])[0].option.map((_option) => {
                       return (<MenuItem key={_option.optionLabel} value={_option.optionLabel}>
                         {_option.optionLabel}
                       </MenuItem>
                       );
                     })
-                  }
-                </Select>
-                {/* <TextField
+                  : null
+                }
+              </Select>
+              {/* <TextField
                   id="standard-basic"
                   variant="outlined"
                   margin="dense"
@@ -428,8 +514,8 @@ const Card = (props) => {
                     )
                   }
                 /> */}
-              </Grid>
-            )}
+            </Grid>
+          )}
           <Grid item xs={2}>
             <IconButton
               aria-label="setting"

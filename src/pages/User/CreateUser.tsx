@@ -18,7 +18,7 @@ import InputField from "../../components/Helpers/InputField";
 import { getObjKeys, yupSchema, isFieldNotTouched } from "../../constants/helpers";
 import { useLocation, useHistory } from "react-router-dom";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
-
+import { isMobile , isTablet } from 'react-device-detect';
 interface InitialData {
   fields: any[];
   values: object;
@@ -27,7 +27,6 @@ interface InitialData {
 const CreateUser = ({ open, close, fetchData }) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState<InitialData>({
@@ -38,6 +37,7 @@ const CreateUser = ({ open, close, fetchData }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const location = useLocation();
   const history = useHistory();
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const getInitialData = useCallback(() => {
     setLoading(true);
@@ -95,7 +95,7 @@ const CreateUser = ({ open, close, fetchData }) => {
       open={open}
       maxWidth="md"
       fullWidth
-      fullScreen={isMobile}
+      fullScreen={fullScreen || (isMobile || isTablet)}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
           setShowConfirmDialog(true)
@@ -105,7 +105,13 @@ const CreateUser = ({ open, close, fetchData }) => {
       <CustomDialogHeader title="CCCreate New User"
         onClose={() => {
           setShowConfirmDialog(true)
-        }} />
+        }}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={true}
+      />
 
       {loading || !initialData.fields.length ? (
         <>
@@ -176,6 +182,7 @@ const CreateUser = ({ open, close, fetchData }) => {
               {
                 showConfirmDialog ?
                   <ConfirmCancelDialog
+                  close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false)

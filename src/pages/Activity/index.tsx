@@ -10,10 +10,12 @@ import { GetReferenceName } from "../../axios/activity";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
+import { useData } from "../../StateProvider/Provider";
 import "./style.scss";
+import { isMobile } from "react-device-detect";
 
 const capitalize = (string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1);
+  return string?.charAt(0)?.toUpperCase() + string?.slice(1);
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -24,18 +26,21 @@ const useStyles = makeStyles((theme) => ({
     background: "#dfdfdf",
     margin: "6px 6px",
     borderRadius: "6px",
+    "& .MuiGrid-spacing-xs-1": {
+      width: "calc(100% + 14px)"
+    }
   },
 }));
 
 const Activity = ({ type }) => {
+
   const classes = useStyles();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { referenceType, referenceId } = parsed;
-
+  const { state: { user, permissions } }: any = useData();
   const [viewType, setViewType] = useState(0);
-  const [filter, setFilter] = useState([]);
-
+  const [filter, setFilter] = useState(null);
 
   useEffect(() => {
     if (referenceType) {
@@ -46,6 +51,9 @@ const Activity = ({ type }) => {
           ]);
         })
         .catch((err) => { });
+    }
+    else {
+      setFilter([])
     }
   }, [type, referenceId]);
 
@@ -64,33 +72,37 @@ const Activity = ({ type }) => {
           <CustomBreadCrumbs routes={[{ title: capitalize(routes[type].title) }]} />
         </Grid>
       </Grid>
-      <CustomContainer styles={{ width: "100%" }}>
-        <Box className={classes.activityHeader}>
-          <Paper elevation={4} style={{ marginBottom: 20 }}>
-            <Grid container>
-              <Grid item xs={12} md={5} sm={7}>
-                <Box display="flex" justifyContent="center">
-                  <CustomTabs
-                    value={viewType}
-                    setValue={setViewType}
-                    tabs={tabs}
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={7} sm={5}>
-                <SearchFilter
-                  handleChangeFilter={handleChangeFilter}
-                  filter={filter}
-                  activityName={type}
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-        </Box>
-        <Box className={classes.activityContainer}>
-          {viewType === 0 && <Board type={type} filter={filter} />}
-          {viewType === 1 && <Roadmap type={type} filter={filter} />}
-        </Box>
+      <CustomContainer >
+        {filter &&
+          <Fragment>
+            <Box className={classes.activityHeader}>
+              <Paper elevation={isMobile ? 0 : 4} style={{ marginBottom: 20 }} >
+                <Grid container>
+                  <Grid item xs={12} md={5} sm={7}>
+                    <Box display="flex" justifyContent="center">
+                      <CustomTabs
+                        value={viewType}
+                        setValue={setViewType}
+                        tabs={tabs}
+                      />
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} md={7} sm={5}>
+                    <SearchFilter
+                      handleChangeFilter={handleChangeFilter}
+                      filter={filter}
+                      activityName={type}
+                    />
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Box>
+            <Box className={classes.activityContainer}>
+              {viewType === 0 && <Board type={type} filter={filter} />}
+              {viewType === 1 && <Roadmap type={type} filter={filter} />}
+            </Box>
+          </Fragment>
+        }
       </CustomContainer>
     </Fragment>
   );

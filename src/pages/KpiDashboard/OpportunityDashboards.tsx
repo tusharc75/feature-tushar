@@ -1,12 +1,27 @@
 import { useState, useCallback, useEffect } from 'react';
 import Chart from 'react-chartjs-2';
-import { Grid, Box, Paper, Typography, CircularProgress } from '@material-ui/core';
+import { Grid, Box, Paper, Typography, CircularProgress, FormControl, InputLabel, Select, MenuItem, Button, Popover, TextField } from '@material-ui/core';
 
 import axiosInstance from '../../axios/axiosInstance';
 import OpportunityTable from './OpportunityDashboardTable';
+import { FilterList } from '@material-ui/icons';
+import { Autocomplete } from '@material-ui/lab';
+import Countries from "../../constants/Country.json"
+import { useData } from '../../StateProvider/Provider';
 
 const OpportunityDashboards = (props) => {
-  const { currency, status, filterCurrency, salesFilter, getExchangeRates, moment } = props;
+  const {
+    state: { selectedEntity }
+  } = useData();
+  const { moment, currency, filterCurrency, getExchangeRates, salesFilter, marketSegments,
+    productCategory,
+    salesReps,
+    customerAccounts } = props;
+  const [quoteStatus, setQuoteStatus] = useState('open');
+  const [opp1Status, setOpp1Status] = useState('open');
+  const [opp2Status, setOpp2Status] = useState('open');
+  const [currentFilter, setCurrentFilter] = useState('');
+  const [subMarketSegments, setSubMarketSegments] = useState([]);
 
   const [openQuoteData, setOpenQuoteData] = useState({
     all: 0,
@@ -22,10 +37,41 @@ const OpportunityDashboards = (props) => {
     datasets: []
   });
 
+  const [filterAnchor, setFilterAnchor] = useState(null);
+  const [openFilter, setOpenFilter] = useState(false);
+
+  const [salesRepFilter, setSalesRepFilter] = useState({
+    marketSegment: {},
+    customerAccount: {},
+    subMarketSegment: {},
+    countrySellTo: {},
+    countryBillTo: {}
+  });
+
+  const [customerAccountFilter, setCustomerAccountFilter] = useState({
+    marketSegment: {},
+    customerAccount: {},
+    subMarketSegment: {},
+    countrySellTo: {},
+    countryBillTo: {}
+  });
+
+  const [qouteFilter, setQouteFilter] = useState({
+    marketSegment: {},
+    customerAccount: {},
+    subMarketSegment: {},
+    countrySellTo: {},
+    countryBillTo: {}
+  });
   const fetchOpportunitySalesRep = useCallback(() => {
     let params = {
-      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
-      status,
+      entity: selectedEntity || '',
+      status: opp2Status,
+      marketSegment: salesRepFilter.marketSegment ? salesRepFilter.marketSegment['id'] : '',
+      subMarketSegment: salesRepFilter.subMarketSegment ? salesRepFilter.subMarketSegment['id'] : '',
+      customerAccount: salesRepFilter.customerAccount ? salesRepFilter.customerAccount['id'] : '',
+      countrySellTo: salesRepFilter.countrySellTo ? salesRepFilter.countrySellTo["optionValue"] : '',
+      countryBillTo: salesRepFilter.countryBillTo ? salesRepFilter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -44,13 +90,17 @@ const OpportunityDashboards = (props) => {
       }
     }
     axiosInstance()
-      .get(`/dashboard/opportunities/sales-rep${url}`)
+      .get(`/dashboard/quote/sales-rep${url}`)
       .then(({ data: { data } }) => {
         const labels = [];
         const datasets = [];
 
         for (let d of data) {
-          labels.push(`${d.user.firstName} ${d.user.lastName}`);
+          if (d?.user?.firstName && d?.user?.lastName) {
+            labels.push(`${d.user.firstName} ${d.user.lastName}`);
+          } else {
+            labels.push('Deleted User')
+          }
           datasets.push(d.count);
         }
 
@@ -82,16 +132,21 @@ const OpportunityDashboards = (props) => {
         });
       })
       .catch((err) => { });
-  }, [salesFilter.entity, salesFilter.between, status]);
+  }, [selectedEntity, salesRepFilter, opp2Status, salesFilter]);
 
   useEffect(() => {
     fetchOpportunitySalesRep();
   }, [fetchOpportunitySalesRep]);
 
-  const fetchOpportunityContact = useCallback(() => {
+  const fetchOpportunityAccount = useCallback(() => {
     let params = {
-      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
-      status,
+      entity: selectedEntity || '',
+      status: opp1Status,
+      marketSegment: customerAccountFilter.marketSegment ? customerAccountFilter.marketSegment['id'] : '',
+      subMarketSegment: customerAccountFilter.subMarketSegment ? customerAccountFilter.subMarketSegment['id'] : '',
+      customerAccount: customerAccountFilter.customerAccount ? customerAccountFilter.customerAccount['id'] : '',
+      countrySellTo: customerAccountFilter.countrySellTo ? customerAccountFilter.countrySellTo["optionValue"] : '',
+      countryBillTo: customerAccountFilter.countryBillTo ? customerAccountFilter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -148,16 +203,21 @@ const OpportunityDashboards = (props) => {
         });
       })
       .catch((err) => { });
-  }, [salesFilter.entity, salesFilter.between, status]);
+  }, [selectedEntity, customerAccountFilter, opp1Status, salesFilter]);
 
   useEffect(() => {
-    fetchOpportunityContact();
-  }, [fetchOpportunityContact]);
+    fetchOpportunityAccount();
+  }, [fetchOpportunityAccount]);
 
   const fetchOpenQuote = useCallback(() => {
     let params = {
-      status: status === 'open' || status === 'lost' ? 'open' : 'won',
-      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      status: quoteStatus,
+      entity: selectedEntity ? selectedEntity : '',
+      marketSegment: qouteFilter.marketSegment ? qouteFilter.marketSegment['id'] : '',
+      subMarketSegment: qouteFilter.subMarketSegment ? qouteFilter.subMarketSegment['id'] : '',
+      customerAccount: qouteFilter.customerAccount ? qouteFilter.customerAccount['id'] : '',
+      countrySellTo: qouteFilter.countrySellTo ? qouteFilter.countrySellTo["optionValue"] : '',
+      countryBillTo: qouteFilter.countryBillTo ? qouteFilter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -186,7 +246,7 @@ const OpportunityDashboards = (props) => {
         });
       })
       .catch((err) => { });
-  }, [salesFilter.entity, salesFilter.between, status]);
+  }, [selectedEntity, qouteFilter, quoteStatus, salesFilter.between]);
 
   useEffect(() => {
     fetchOpenQuote();
@@ -197,12 +257,157 @@ const OpportunityDashboards = (props) => {
     won: 'Won',
     lost: 'Lost'
   };
+
+  const handleClickFilter = (event) => {
+    setFilterAnchor(event.currentTarget);
+    setOpenFilter((prev) => !prev);
+  };
+
+
   return (
     <>
       <Grid container spacing={2}>
+        <Popover
+          open={openFilter}
+          anchorEl={filterAnchor}
+          onClose={handleClickFilter}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center'
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center'
+          }}
+        >
+          <Box p={2}>
+            <Box width="250px">
+              <FormControl size="small" variant="outlined" fullWidth>
+                <InputLabel id="status">Status</InputLabel>
+                <Select labelId="status" id="status"
+                  fullWidth value={currentFilter === "quote" ? quoteStatus : currentFilter === "customerAccount" ? opp1Status : opp2Status}
+                  onChange={(e) => {
+                    currentFilter === "quote" ? setQuoteStatus(e.target.value.toString())
+                      : currentFilter === "customerAccount" ? setOpp1Status(e.target.value.toString())
+                        : setOpp2Status(e.target.value.toString())
+                  }}>
+                  <MenuItem value={'won'}>Won</MenuItem>
+                  <MenuItem value={'open'}>Open</MenuItem>
+                  {currentFilter !== "quote" && <MenuItem value={'lost'}>Lost</MenuItem>}
+                </Select>
+              </FormControl>
+              <Box mt={1} />
+              {currentFilter !== "customerAccount" && <Autocomplete
+                size="small"
+                fullWidth
+                options={customerAccounts}
+                autoHighlight
+                value={currentFilter === "customerAccount" ? customerAccountFilter.customerAccount : currentFilter === "quote" ? qouteFilter.customerAccount : salesRepFilter.customerAccount}
+                getOptionLabel={(option: any) => option.name || ''}
+                getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+                onChange={(_, val) => {
+                  let tempFilter = currentFilter === "customerAccount" ? customerAccountFilter : currentFilter === "quote" ? qouteFilter : salesRepFilter
+                  let data = { ...tempFilter, customerAccount: val }
+                  if (val?.countryBillTo) {
+                    let foundCountry = Countries.find(o => o.optionValue === val?.countryBillTo)
+                    if (foundCountry) {
+                      data.countryBillTo = foundCountry
+                    }
+                  }
+                  if (val?.countrySellTo) {
+                    let foundCountry = Countries.find(o => o.optionValue === val?.countrySellTo)
+                    if (foundCountry) {
+                      data.countrySellTo = foundCountry
+                    }
+                  }
+                  currentFilter === "customerAccount" ? setCustomerAccountFilter({ ...data }) : currentFilter === "quote" ? setQouteFilter({ ...data }) : setSalesRepFilter({ ...data })
+                }}
+                renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
+              />}
+              <Box mt={1} />
+              <Autocomplete
+                size="small"
+                fullWidth
+                options={marketSegments.filter(d => !d.parentSegment)}
+                autoHighlight
+                value={currentFilter === "customerAccount" ? customerAccountFilter.marketSegment : currentFilter === "quote" ? qouteFilter.marketSegment : salesRepFilter.marketSegment}
+                getOptionLabel={(option: any) => option.name || ''}
+                getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+                onChange={(_, val) => {
+                  let tempFilter = currentFilter === "customerAccount" ? customerAccountFilter : currentFilter === "quote" ? qouteFilter : salesRepFilter
+                  currentFilter === "customerAccount" ? setCustomerAccountFilter({ ...tempFilter, marketSegment: val }) : currentFilter === "quote" ? setQouteFilter({ ...tempFilter, marketSegment: val }) : setSalesRepFilter({ ...tempFilter, marketSegment: val })
+                  if (val) {
+                    setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
+                  } else {
+                    setSubMarketSegments([]);
+                  }
+                }}
+                renderInput={(params) => <TextField {...params} label="Market Segment" variant="outlined" />}
+              />
+              <Box mt={1} />
+              <Autocomplete
+                size="small"
+                fullWidth
+                options={subMarketSegments}
+                autoHighlight
+                value={currentFilter === "customerAccount" ? customerAccountFilter.subMarketSegment : currentFilter === "quote" ? qouteFilter.subMarketSegment : salesRepFilter.subMarketSegment}
+                getOptionLabel={(option: any) => option.name || ''}
+                getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+                onChange={(_, val) => {
+                  let tempFilter = currentFilter === "customerAccount" ? customerAccountFilter : currentFilter === "quote" ? qouteFilter : salesRepFilter
+                  currentFilter === "customerAccount" ? setCustomerAccountFilter({ ...tempFilter, subMarketSegment: val }) : currentFilter === "quote" ? setQouteFilter({ ...tempFilter, subMarketSegment: val }) : setSalesRepFilter({ ...tempFilter, subMarketSegment: val })
+                }}
+                renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
+              />
+              <Box mt={1} />
+              <Autocomplete
+                size="small"
+                fullWidth
+                options={Countries}
+                autoHighlight
+                value={currentFilter === "customerAccount" ? customerAccountFilter.countrySellTo : currentFilter === "quote" ? qouteFilter.countrySellTo : salesRepFilter.countrySellTo}
+                getOptionLabel={(option: any) => option.optionLabel || ''}
+                getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
+                onChange={(_, val) => {
+                  let tempFilter = currentFilter === "customerAccount" ? customerAccountFilter : currentFilter === "quote" ? qouteFilter : salesRepFilter
+                  currentFilter === "customerAccount" ? setCustomerAccountFilter({ ...tempFilter, countrySellTo: val }) : currentFilter === "quote" ? setQouteFilter({ ...tempFilter, countrySellTo: val }) : setSalesRepFilter({ ...tempFilter, countrySellTo: val })
+                }}
+                renderInput={(params) => <TextField {...params} label="Country Sell To" variant="outlined" />}
+              />
+              <Box mt={1} />
+
+              <Autocomplete
+                size="small"
+                fullWidth
+                options={Countries}
+                autoHighlight
+                value={currentFilter === "customerAccount" ? customerAccountFilter.countryBillTo : currentFilter === "quote" ? qouteFilter.countryBillTo : salesRepFilter.countryBillTo}
+                getOptionLabel={(option: any) => option.optionLabel || ''}
+                getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
+                onChange={(_, val) => {
+                  let tempFilter = currentFilter === "customerAccount" ? customerAccountFilter : currentFilter === "quote" ? qouteFilter : salesRepFilter
+                  currentFilter === "customerAccount" ? setCustomerAccountFilter({ ...tempFilter, countryBillTo: val }) : currentFilter === "quote" ? setQouteFilter({ ...tempFilter, countryBillTo: val }) : setSalesRepFilter({ ...tempFilter, countryBillTo: val })
+                }}
+                renderInput={(params) => <TextField {...params} label="Country Bill To" variant="outlined" />}
+              />
+            </Box>
+          </Box>
+        </Popover>
         <Grid item xs={12} sm={4}>
-          <Paper>
-            <Box mb={2} p={2} display="flex" alignItems="center">
+          <Paper style={{ padding: '10px', marginBottom: '16px' }}>
+            <Box>
+              <Button
+                onClick={(event) => {
+                  handleClickFilter(event)
+                  setCurrentFilter("quote")
+                }}
+                color="primary"
+                endIcon={<FilterList />}>
+                Filters
+              </Button>
+
+            </Box>
+            <Box my={2} display="flex" >
               <Box flex={0.5}>
                 <Box position="relative" display="inline-flex">
                   <CircularProgress style={{ width: 100, height: 100 }} variant="determinate" value={openQuoteData.percent} />
@@ -214,9 +419,10 @@ const OpportunityDashboards = (props) => {
                 </Box>{' '}
               </Box>
 
-              <Box flex={0.5}>
+              <Box flex={statusText[quoteStatus] === 'Won' ? 0.7 : 0.5} >
                 <Typography variant="h6" color="secondary">
-                  {statusText[status] !== 'Lost' ? statusText[status] : 'Open'} Quotes
+                  {statusText[quoteStatus] === 'Won' ? "Success Rate in" :
+                    statusText[quoteStatus] !== 'Lost' ? statusText[quoteStatus] : 'Open'} Quotes
                 </Typography>
                 <Box display="flex" alignItems="center">
                   {openQuoteData.open &&
@@ -234,8 +440,17 @@ const OpportunityDashboards = (props) => {
             </Box>
           </Paper>
           <Paper elevation={2}>
-            <Box p={2} textAlign="center">
-              <Typography variant="h6">{statusText[status]} Opportunities by Customer Account</Typography>
+            <Box p={2} >
+              <Button
+                onClick={(event) => {
+                  handleClickFilter(event)
+                  setCurrentFilter("customerAccount")
+                }}
+                color="primary"
+                endIcon={<FilterList />}>
+                Filters
+              </Button>
+              <Typography variant="h6">{statusText[opp1Status]} Opportunities by Customer Account</Typography>
               <Chart
                 type="bar"
                 options={{
@@ -272,16 +487,35 @@ const OpportunityDashboards = (props) => {
         </Grid>
         <Grid item xs={12} sm={4}>
           <Paper elevation={2}>
-            <Box p={2} textAlign="center">
-              <Typography variant="h6">{statusText[status]} Opportunities by Sales Rep</Typography>
-              <Chart type="pie" data={oppSalesRep} />
+            <Box p={2}>
+              <Button
+                onClick={(event) => {
+                  handleClickFilter(event)
+                  setCurrentFilter("salesRep")
+                }}
+                color="primary"
+                endIcon={<FilterList />}>
+                Filters
+              </Button>
+              <Box textAlign="center">
+                <Typography variant="h6">{statusText[opp2Status]} Quotes by Sales Rep</Typography>
+                {oppSalesRep.labels.length > 0
+                  ? <Chart type="pie" data={oppSalesRep} />
+                  : <Box minHeight={515}>
+                    <Typography>No Data</Typography>
+                  </Box>}
+              </Box>
             </Box>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={4}>
           <OpportunityTable
-            moment={moment}
             salesFilter={salesFilter}
+            selectedEntity={selectedEntity}
+            moment={moment}
+            customerAccounts={customerAccounts}
+            marketSegments={marketSegments}
+            salesReps={salesReps}
             filterCurrency={filterCurrency}
             currency={currency}
             getExchangeRates={getExchangeRates}

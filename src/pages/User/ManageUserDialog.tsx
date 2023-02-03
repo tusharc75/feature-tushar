@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback } from "react";
+import { useEffect, useState, useContext, useCallback } from "react";
 import {
   Dialog,
   Button,
@@ -20,14 +20,13 @@ import {
   yupSchema,
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
-  isFieldNotTouched,
-  userType
-} from "../../constants/helpers";
+  isFieldNotTouched} from "../../constants/helpers";
 import { useLocation, useHistory } from "react-router-dom";
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { useData } from "../../StateProvider/Provider";
-
+import { isTablet } from 'react-device-detect';
+import {FaDiceOne} from "react-icons/fa";
 interface InitialData {
   fields: any[];
   values: object;
@@ -42,6 +41,7 @@ export default function ManageUserDialog({
   dataToUpdate,
   isClone = false,
   redirectToDetailsScreen = true,
+  isUserSetupPermission = false
 }) {
   const {
     state: { user, permissions },
@@ -63,6 +63,8 @@ export default function ManageUserDialog({
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
     useState(0);
   const [formValues, setFormValues] = useState(dataToUpdate ? dataToUpdate : {})
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [cloneHeadingName,setCloneHeadingName] = useState('');
 
   const getInitialData = useCallback(() => {
     setLoading(true);
@@ -86,6 +88,7 @@ export default function ManageUserDialog({
                 : getObjKeysWithValues({ ...rest }, newFields),
             });
             setFormValues(isNew ? getObjKeys("", newFields) : getObjKeysWithValues({ ...rest }, newFields))
+            setCloneHeadingName(firstName)
           })
         }
         else {
@@ -149,7 +152,7 @@ export default function ManageUserDialog({
           // if (redirectToDetailsScreen) {
           history.push({
             pathname: `/user/detail/${newId}`,
-            search: user?.user?.userType === userType.brandAdmin ? '?userSetup=true' : '',
+            search: isUserSetupPermission ? '?userSetup=true' : '',
             state: { location: location },
           });
           close();
@@ -173,6 +176,7 @@ export default function ManageUserDialog({
           });
           setSubmitting(false);
           onSuccess(data);
+              
         })
         .catch((error) => {
           setToastConfig(error);
@@ -207,7 +211,7 @@ export default function ManageUserDialog({
       open={open}
       maxWidth="md"
       fullWidth
-      fullScreen={isMobile}
+      fullScreen={fullScreen || (isMobile || isTablet)}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
           setShowConfirmDialog(true)
@@ -216,7 +220,7 @@ export default function ManageUserDialog({
     >
       <CustomDialogHeader
         title={
-          isClone ? "Clone" :
+          isClone ? `Clone User - ${cloneHeadingName}` :
             isNew
               ? "Create New User"
               : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName]
@@ -230,6 +234,11 @@ export default function ManageUserDialog({
           }, formValues)) close()
           else setShowConfirmDialog(true)
         }}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={true}
       />
 
       {loading || !initialData.fields.length ? (
@@ -273,12 +282,15 @@ export default function ManageUserDialog({
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                  {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
 
                   {formsData &&
                     formsData.map((form, i) => (
                       <div key={i}>
-                        <h2 className="form-label-style">{form.name}</h2>
+                        <div className={"detail-box-content"}>
+                          <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                          <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                        </div>
                         <Box marginY={2}>
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field) => (
@@ -389,6 +401,7 @@ export default function ManageUserDialog({
               {
                 showConfirmDialog ?
                   <ConfirmCancelDialog
+                  close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false)

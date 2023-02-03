@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List } from '@material-ui/core';
+import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List, useMediaQuery, Dialog } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { Skeleton } from '@material-ui/lab';
@@ -11,7 +11,16 @@ import { useData } from '../../StateProvider/Provider';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import axiosInstance from './../../axios/axiosInstance';
 import Activity from '../../components/Activity';
-import { getObjKeysWithValues, isObjectEmpty, sidebarResource, customerAccount, processFieldName, defaultActivityShow } from './../../constants/helpers';
+import {
+  getObjKeysWithValues,
+  isObjectEmpty,
+  sidebarResource,
+  customerAccount,
+  processFieldName,
+  defaultActivityShow,
+  userType,
+  customerContact
+} from './../../constants/helpers';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageContact from './ManageContact/index';
@@ -25,7 +34,7 @@ import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
 import { AiOutlineMail } from 'react-icons/ai';
-import { BiPhone } from 'react-icons/bi';
+import { BiEdit, BiPhone } from 'react-icons/bi';
 import { FiStar } from 'react-icons/fi';
 import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
 import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
@@ -35,25 +44,39 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import routes from '../../components/Helpers/Routes';
+import queryString from 'query-string';
+import AddReportsToContact from './AddReportsToContact';
+import { MdDelete, MdEdit } from 'react-icons/md';
+import accountClass from '../Account/account.module.scss';
+import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import Warehouse from '../Account/Warehouse';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { camelCase } from 'lodash';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
+  const { isOffline } = useContext(CustomOfflineContext);
+
   const {
     contact: { contactApi, contactResource, contactRoute },
-    account: { accountResource },
+    account: { accountResource, accountApi },
     contactBreadcrumb
   } = props;
   const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
   const {
-    state: { user, permissions, selectedEntity, tour }, dispatch
+    state: { user, permissions, selectedEntity, tour },
+    dispatch
   }: any = useData();
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [headingLbl, setHeadingLbl] = useState('');
   const [contactData, setContactData] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [contactFields, setContactFields] = useState([]);
   const [mainPoints, setMainPoints] = useState({});
-  const [, setAllowedToEdit] = useState(false);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -77,6 +100,13 @@ const ContactDetailsPage = (props) => {
   const [opportunities, setOpportunities] = useState([]);
   const [projectSales, setProjectSales] = useState([]);
   const [quotes, setQuotes] = useState([]);
+  const [contactsList, setContactsList] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [showAddContact, setShowAddContact] = useState(false);
+  const [showEntityRoleDialog, setShowEntityRoleDialog] = useState(false);
+  const [entityAccess, setEntityAccess] = useState([]);
+  const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
 
   let { id } = useParams();
 
@@ -96,8 +126,16 @@ const ContactDetailsPage = (props) => {
     if (id) {
       fetchContactData();
       fetchRelatedData();
+      fetchLoggedInUserRole();
+      fetchLoggedInUserEntities();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setActivityShow(true);
+    }
+  }, [isSmallScreen]);
 
   useEffect(() => {
     if (steps.length > 0) {
@@ -115,17 +153,39 @@ const ContactDetailsPage = (props) => {
   }, [steps]);
 
   useEffect(() => {
-
-    if (tour.start && tour.path === "/customer-contact/detail"
-      || tour.path === "/supplier-contact/detail") {
+    if ((tour.start && tour.path === '/customer-contact/detail') || tour.path === '/supplier-contact/detail') {
       if (tour.stepIndex === 5) {
-        setCurrentTabIndex(0)
+        setCurrentTabIndex(0);
       } else if (tour.stepIndex === 6) {
-        setCurrentTabIndex(1)
+        setCurrentTabIndex(1);
       }
     }
+  }, [tour]);
 
-  }, [tour])
+  const fetchLoggedInUserRole = async () => {
+    let roleIds = [];
+    await axiosInstance()
+      .get(`/user/${user.user?._id}`)
+      .then(({ data: { data } }) => {
+        data.entities.map((item) => {
+          item.role.forEach((role) => {
+            if (roleIds.includes(role?._id)) {
+            } else {
+              roleIds.push(role?._id);
+            }
+          });
+        });
+        setRoleAccessOfLoggedInUser(roleIds);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const fetchLoggedInUserEntities = async () => {
+    const entityIds = user.entity?.map((e) => e._id);
+    setEntityAccess(entityIds);
+  };
 
   const fetchContactData = async () => {
     setLoading(true);
@@ -152,8 +212,10 @@ const ContactDetailsPage = (props) => {
 
         let orgChartData = [];
 
+        let excludeContacts = [];
         if (data.parentHierarchy && data.parentHierarchy.length > 0) {
           data.parentHierarchy.map((d) => {
+            excludeContacts.push(d._id);
             orgChartData.push({
               id: d._id,
               name: [d.firstName, d.middleName, d.lastName].filter((d) => d).join(' '),
@@ -165,6 +227,8 @@ const ContactDetailsPage = (props) => {
             });
           });
         }
+        excludeContacts.push(data._id);
+        getContacts(excludeContacts, data);
 
         orgChartData.push({
           id: data._id,
@@ -176,11 +240,89 @@ const ContactDetailsPage = (props) => {
           current: true
         });
 
+        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        setAllowedToEdit(isAllowedToEdit);
+
+        if (isAllowedToEdit && openEdit === 'true') {
+          setOpenUpdateDialog(true);
+          const params = new URLSearchParams();
+          params.delete('openEdit');
+          history.push({ search: params.toString() });
+        }
         setOrgChartData(orgChartData);
       })
       .catch((err) => {
         setLoading(false);
       });
+  };
+
+  const getContacts = (excludeContacts = [], contactData) => {
+    axiosInstance()
+      .get(`${contactApi}?entity=${selectedEntity}`)
+      .then(({ data: { data } }) => {
+        let rows = data.map((u) => {
+          if (excludeContacts.indexOf(u._id) >= 0) {
+            u.isExclude = true;
+          } else {
+            u.isExclude = false;
+          }
+          return u;
+        });
+        let name = [contactData.firstName, contactData.middleName, contactData.lastName].filter((d) => d).join(' ');
+
+        if (contactData?.salutation?.optionLabel) {
+          name = contactData.salutation.optionLabel + name;
+        }
+        let currentContact = {
+          ...contactData,
+          isExclude: true,
+          concatedName: name
+        };
+        contactData &&
+          setContactsList([currentContact, ...rows].filter((d) => d?.accountName?.optionValue === contactData?.accountName?.optionValue));
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleUpdateOrgData = ({ addContact, reportsToContact }) => {
+    if (addContact?._id && reportsToContact?._id) {
+      const contactFieldData = contactFields.map((f) => {
+        return f.fieldData;
+      });
+      const updatedData = {
+        ...getObjKeysWithValues(addContact, contactFieldData),
+        reportsTo: reportsToContact?._id,
+        _id: addContact?._id
+      };
+      handleUpdateContact(updatedData, true);
+    }
+  };
+
+  const handleUpdateChart = (draggedNode, dropNode) => {
+    let draggedNodeData = {};
+    contactsList.forEach((o) => {
+      if (draggedNode.id === o._id) {
+        draggedNodeData = {
+          ...o,
+          reportsTo: dropNode.id
+        };
+      }
+    });
+
+    const contactFieldData = contactFields.map((f) => {
+      return f.fieldData;
+    });
+
+    const updatedData = {
+      ...getObjKeysWithValues(draggedNodeData, contactFieldData),
+      _id: draggedNodeData['_id']
+    };
+    if (updatedData && updatedData['reportsTo'] && updatedData['reportsTo'] === '0') {
+      delete updatedData['reportsTo'];
+    }
+    handleUpdateContact(updatedData, true);
   };
 
   const fetchRelatedData = () => {
@@ -360,8 +502,8 @@ const ContactDetailsPage = (props) => {
   };
 
   const handleActivityHideShow = () => {
-    setActivityShow(!showActivity)
-  }
+    setActivityShow(!showActivity);
+  };
   const handleOpneUpdateDialog = () => {
     if (activeStep === steps.length - 1) {
       setShowAtLast(true);
@@ -437,47 +579,87 @@ const ContactDetailsPage = (props) => {
     }
   };
 
-  const handleUpdateContact = (values) => {
+  const handleUpdateContact = (values, isUpdateReportsTo = false, isFetch = true) => {
     if (values.employees) {
       values.employees = parseInt(values.employees);
     }
-    const updatedData = {
-      ...values,
-      _id: contactData._id
-    };
+    let updatedData = { ...values };
 
+    if (!isUpdateReportsTo) {
+      updatedData = {
+        ...updatedData,
+        _id: contactData._id
+      };
+    }
+    setIsSubmitting(true);
     axiosInstance()
       .put(`/${contactApi}`, updatedData)
       .then(({ data }) => {
-        fetchContactData();
+        if (isFetch) fetchContactData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
+        if (showAddContact) setShowAddContact(false);
         setOpenUpdateDialog(false);
+        setIsSubmitting(false);
       })
       .catch((error) => {
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
 
   const handleEntityChange = (id) => {
     dispatch({ type: SET_SELECTED_ENTITY, payload: id });
-  }
+  };
 
   const hasAccessToEntity = (id) => {
     const entityList = user.entity?.map((entity) => entity._id);
     return entityList.includes(id);
-  }
+  };
+
+  const handlePortalAccess = () => {
+    setShowEntityRoleDialog(true);
+  };
+
+  const handleEcommerceAccess = async () => {
+    axiosInstance()
+      .put('/user/eCommerce-access', {
+        eCommerceAccess: true,
+        ids: [id]
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchContactData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   let filteredContactFields = contactFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
 
-  const tourPaths = ["/customer-contact/detail", "/supplier-contact/detail"]
-
+  const tourPaths = ['/customer-contact/detail', '/supplier-contact/detail'];
 
   return (
     <>
+      {showAddContact ? (
+        <AddReportsToContact
+          onClose={() => {
+            setShowAddContact(false);
+          }}
+          open={showAddContact}
+          contactsList={contactsList}
+          isSubmitting={isSubmitting}
+          onSubmit={handleUpdateOrgData}
+        />
+      ) : null}
       {openUpdateDialog && showAtLast ? (
         // <UpdateDetailsDialog
         //     title={`Editing  ${contactData.firstName}`}
@@ -542,13 +724,10 @@ const ContactDetailsPage = (props) => {
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={customizedRoutes} />
       </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}
+      <div
+        className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}
         style={{
-          height:
-            tour.start && tourPaths.includes(tour.path)
-              && tour.stepIndex > 0 && tour.stepIndex < 9
-              ? "auto"
-              : "calc(100vh - 98px)"
+          height: tour.start && tourPaths.includes(tour.path) && tour.stepIndex > 0 && tour.stepIndex < 9 ? 'auto' : 'calc(100vh - 98px)'
         }}
       >
         <div>
@@ -560,9 +739,39 @@ const ContactDetailsPage = (props) => {
               // style={{ marginTop: "150px", minHeight: "200px" }}
               showHeading={true}
             >
+              {permissions.eCommercePolicy?.isRead && contactResource === customerContact.contactResource && (
+                <Button
+                  color="primary"
+                  size="small"
+                  variant={isMobile ? 'text' : 'contained'}
+                  disabled={contactData.relatedUser?.eCommerceAccess}
+                  onClick={handleEcommerceAccess}
+                >
+                  E-Commerce Access
+                </Button>
+              )}
+              {permissions.eCommercePolicy?.isRead && user.user?.userType === userType.brandAdmin && (
+                <Button
+                  color="primary"
+                  size="small"
+                  variant={isMobile ? 'text' : 'contained'}
+                  disabled={contactData?.isUserExist}
+                  onClick={handlePortalAccess}
+                >
+                  Give Portal Access
+                </Button>
+              )}
               {contactPermissions.isUpdate && canEdit ? (
-                <Button id="detailEditButton" variant="contained" color="primary" size="small" onClick={handleOpneUpdateDialog}>
-                  Edit
+                <Button
+                  id="detailEditButton"
+                  variant={isMobile ? 'text' : 'contained'}
+                  color="primary"
+                  size="small"
+                  onClick={handleOpneUpdateDialog}
+                  className={isMobile ? accountClass.mobile_button_layout : ''}
+                  style={isMobile ? { color: '#43aeaa' } : {}}
+                >
+                  {isMobile ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               ) : null}
 
@@ -570,7 +779,13 @@ const ContactDetailsPage = (props) => {
                 contactData?.owner?.optionValue &&
                 user?.user?._id &&
                 contactData.owner.optionValue === user.user._id ? (
-                <DeleteButton id="detailDeleteButton" text="Delete" size="small" onClick={() => setShowConfirmBox(true)} />
+                <DeleteButton
+                  id="detailDeleteButton"
+                  text={isMobile ? <MdDelete size={20} /> : 'Delete'}
+                  size="small"
+                  onClick={() => setShowConfirmBox(true)}
+                  className={isMobile ? accountClass.mobile_button_layout : ''}
+                />
               ) : null}
             </DetailsPageHeader>
             <ProcessFlow
@@ -593,7 +808,7 @@ const ContactDetailsPage = (props) => {
               ) : (
                 <>
                   <Tabs
-                    className="oms-tab"
+                    className={`oms-tab`}
                     value={currentTabIndex}
                     onChange={(index, newValue) => {
                       setCurrentTabIndex(newValue);
@@ -602,8 +817,11 @@ const ContactDetailsPage = (props) => {
                     textColor="primary"
                     aria-label="icon tabs example"
                   >
-                    <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-                    <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
+                    <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
+                    <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className="tabLayout" />
+                    {(!isOffline && contactResource === 'customerContact' && permissions?.productInventory) && (
+                      <Tab label="Plants" aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
+                    )}
                   </Tabs>
                   <Box hidden={currentTabIndex !== 0}>
                     {showAtLast ? (
@@ -619,14 +837,22 @@ const ContactDetailsPage = (props) => {
                       onClick={(id) => {
                         history.push(`/${contactApi}/detail/${id}`);
                       }}
+                      updateChart={handleUpdateChart}
+                      setShowAddContact={setShowAddContact}
+                      isInContact={true}
                     />
                   </Box>
+                  {(!isOffline && contactResource === 'customerContact' && permissions?.productInventory) && (
+                    <Box hidden={currentTabIndex !== 2}>
+                      <Warehouse reference={contactResource} api={contactApi} id={id} accountId={contactData?.accountName?.optionValue} />
+                    </Box>
+                  )}
                 </>
               )}
             </Box>
-            <div className="p-3">
+            <div className={`p-3 modified_style_of_accordion`}>
               {permissions?.opportunity?.isRead && (
-                <span id='opportunityAccordion'>
+                <span id={`opportunityAccordion `}>
                   <OpportunityInAccordian
                     opportunityPermissions={permissions.opportunity}
                     opportunities={opportunities}
@@ -644,7 +870,7 @@ const ContactDetailsPage = (props) => {
                   />
                 </span>
               )}
-              {permissions?.projectStrategy?.isRead && accountResource === customerAccount.accountResource && (
+              {permissions?.projectSales?.isRead && accountResource === customerAccount.accountResource && (
                 <span id="projectsAccordion">
                   <ProjectInAccordion
                     recordsPerLine={3}
@@ -654,6 +880,9 @@ const ContactDetailsPage = (props) => {
                     permissions={permissions}
                     isAddProjectSale={true}
                     isAllowedToEdit={contactPermissions.isUpdate && canEdit}
+                    accountId={contactData?.accountName?.optionValue}
+                    accountName={contactData?.accountName?.optionLabel}
+                    resource={accountResource}
                   />
                 </span>
               )}
@@ -666,6 +895,8 @@ const ContactDetailsPage = (props) => {
                     quoteBuilderPermission={permissions.quoteBuilder}
                     accountId={contactData?.accountName?.optionValue}
                     contactId={id}
+                    contactName={[`${contactData?.firstName}`, `${contactData?.middleName}`, `${contactData?.lastName}`].filter((d) => d).join(' ')}
+                    contactResource={contactResource}
                     accountResource={accountResource}
                     isRenderedInCustomerContact={true}
                     isRenderedFromCustomerAccount={true}
@@ -683,7 +914,7 @@ const ContactDetailsPage = (props) => {
           </Paper>
         </div>
         <div id="activitiesSidebar" className="position-relative">
-          {showActivity ?
+          {/* {showActivity ?
             <Paper>
               {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropright className="icon" />
@@ -781,23 +1012,7 @@ const ContactDetailsPage = (props) => {
                             </List>
                           </CardContent>
                         </Card>
-                        {/* <Card>
-                            <CardContent className="detailListing">
-                              <Grid container className="detailCardHeader">
-                                <Grid item xs={12} sm={12}>
-                                  <Link className="link f_size"
-                                    to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
-                                    {contactData?.staticData?.lead?.firstName || ''} {contactData?.staticData?.lead?.lastName || ''}
-                                  </Link>
-                                </Grid>
-                              </Grid>
-                              <Grid container>
-                                <Grid item xs={12} sm={6}>
-                                  <DisplayData label='Title' value={contactData?.staticData?.lead?.title || '-'} icon={< BiFace size={20} />} />
-                                </Grid>
-                              </Grid>
-                            </CardContent>
-                          </Card> */}
+                        
                       </Box>
                     </div>
                   </BoxWithBorder>
@@ -806,9 +1021,118 @@ const ContactDetailsPage = (props) => {
             </Paper> :
             !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
               <IoIosArrowDropleft className="icon" />
-            </span>}
+            </span>} */}
+
+          <Paper>
+            {!isSmallScreen && (
+              <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+              </span>
+            )}
+            <div style={{ display: showActivity ? 'block' : 'none' }}>
+              {!isObjectEmpty(contactData) && (
+                <div>
+                  <Activity
+                    resourceId={contactData._id}
+                    resource={contactRoute}
+                    restrictedAddActivities={contactPermissions.isUpdate && canEdit ? [] : ['Attachment', 'Case']}
+                    relatedTo={[
+                      {
+                        type: contactResource,
+                        referenceId: contactData._id,
+                        access: true
+                      }
+                    ]}
+                    handleActivityRefresh={() => { }}
+                    emails={[contactData?.email ?? '']}
+                  />
+                </div>
+              )}
+              <QuickLinks quickLinks={quickLinks} />
+              {contactData?.staticData?.lead && permissions && permissions.lead && permissions.lead.isRead && (
+                <Grid item xs={12}>
+                  <BoxWithBorder style={{ marginTop: '3%', padding: '0px' }}>
+                    <div className={`${contactClass.detail_page_div3}`}>
+                      <div className={`${contactClass.leads_data}`}>
+                        <Typography color="primary" variant="h6" style={{ margin: '0 10px' }}>
+                          Related Lead
+                        </Typography>
+                      </div>
+                      <Box className={`${contactClass.custom_box1}`}>
+                        <Card className="contactCard">
+                          <CardContent className="detailListing">
+                            <List>
+                              <ListItem>
+                                <ListItemAvatar>
+                                  <div
+                                    data-initials={[
+                                      contactData?.staticData?.lead?.firstName?.charAt(0).toUpperCase(),
+                                      contactData?.staticData?.lead?.lastName?.charAt(0).toUpperCase()
+                                    ]
+                                      .filter((f) => f)
+                                      .join('')}
+                                  ></div>
+                                </ListItemAvatar>
+                                <ListItemText
+                                  className="ml-2"
+                                  primary={
+                                    contactData?.staticData?.lead?.entity === selectedEntity ? (
+                                      <Link className="link f_size p-l2" to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
+                                        {contactData?.staticData?.lead?.concatedName}
+                                      </Link>
+                                    ) : hasAccessToEntity(contactData?.staticData?.lead?.entity) ? (
+                                      <Link
+                                        className="link f_size p-l2"
+                                        onClick={() => {
+                                          handleEntityChange(contactData?.staticData?.lead?.entity);
+                                          history.push(`/lead/detail/${contactData?.staticData?.lead?._id}`);
+                                        }}
+                                      >
+                                        {contactData?.staticData?.lead?.concatedName}
+                                      </Link>
+                                    ) : (
+                                      <span>{contactData?.staticData?.lead?.concatedName}</span>
+                                    )
+                                  }
+                                  secondary={
+                                    <React.Fragment>
+                                      <Typography component="p" variant="body2" className="cardDetail">
+                                        {contactData?.staticData?.lead?.title && (
+                                          <span className="d-flex gap-2 align-items-center">
+                                            <FiStar size="15" />
+                                            {contactData?.staticData?.lead?.title}
+                                          </span>
+                                        )}
+                                        {contactData?.staticData?.lead?.email && (
+                                          <span className="d-flex gap-2 align-items-center">
+                                            <AiOutlineMail size="15" />
+                                            {contactData?.staticData?.lead?.email}
+                                          </span>
+                                        )}
+                                        {contactData?.staticData?.lead?.phone && (
+                                          <span className="d-flex gap-2 align-items-center">
+                                            <BiPhone size="15" />
+                                            {contactData?.staticData?.lead?.phone}
+                                          </span>
+                                        )}
+                                      </Typography>
+                                    </React.Fragment>
+                                  }
+                                />
+                              </ListItem>
+                            </List>
+                          </CardContent>
+                        </Card>
+                      </Box>
+                    </div>
+                  </BoxWithBorder>
+                </Grid>
+              )}
+            </div>
+          </Paper>
         </div>
       </div>
+
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -829,11 +1153,38 @@ const ContactDetailsPage = (props) => {
           <OrgChartContainer
             data={orgChartData}
             onClick={(id) => {
-              setOrgChartInFullScreenDialog(false);
               history.push(`/${contactApi}/detail/${id}`);
             }}
+            setShowAddContact={setShowAddContact}
+            updateChart={handleUpdateChart}
           />
         </FullScreenDialog>
+      )}
+      {showEntityRoleDialog && (
+        <Dialog
+          fullWidth
+          maxWidth="xs"
+          open={showEntityRoleDialog}
+          onClose={() => setShowEntityRoleDialog(false)}
+          aria-labelledby="assign-roles-dialog"
+        >
+          <AssignEntityDialog
+            entitiesDialogOpen={showEntityRoleDialog}
+            onSuccess={() => {
+              setShowEntityRoleDialog(false);
+              fetchContactData();
+            }}
+            handleCloseDialog={() => setShowEntityRoleDialog(false)}
+            assignedEntity={[]}
+            ids={[id]}
+            isRenderedFromContact={true}
+            regionalRole={false}
+            type="entity"
+            entityAccessIds={entityAccess}
+            roleAccessIds={roleAccessOfLoggedInUser}
+            contactResource={contactResource}
+          />
+        </Dialog>
       )}
       {openAdditionalDialog && (
         // <Dialog

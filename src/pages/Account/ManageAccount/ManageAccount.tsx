@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Box, Button, Grid } from "@material-ui/core";
+import { Box, Button, Grid, IconButton } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import {
   CustomDialogTransition,
+  formFieldNames,
   getCollaboratorDropdownDataSource,
   getOwnerDropdownDataSource,
   setFieldsInAscendingOrder,
@@ -17,8 +18,16 @@ import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFoo
 import Dialog from "@material-ui/core/Dialog";
 import { useData } from "../../../StateProvider/Provider";
 import CustomButton from "../../../components/Helpers/CustomButton";
+import Tooltip from '../../../components/CustomTooltipTitle'
 import { isMobile, isTablet } from "react-device-detect";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+import AddIcon from "@material-ui/icons/AddCircle";
+import InfoIcon from "@material-ui/icons/Info";
+import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDialog";
+import { FaDiceOne } from "react-icons/fa";
+import ManageAccountDialog from "./index";
+import ManageAddressDialog from "../../../components/Address/ManageAddressDialog";
+import routes from "src/components/Helpers/Routes";
 
 const arr = [...Array(9).keys()];
 
@@ -35,15 +44,27 @@ export default function ManageAccount(props) {
     fromProject,
     accountId = null,
     formValues = {},
-    handleValuesChange = null
+    handleValuesChange = null,
+    marketSegmentId = null,
+    isClone,
+    accountNameForClone,
+    accountResource,
+    accountApi,
+    handleAddressDataSource = null
   } = props;
 
+
   const {
-    state: { user },
+    state: { user, permissions },
   }: any = useData();
   const [disableOwnerSelection] = useState(
     !isNew && user.user._id !== accountData.initialValues.owner
   );
+
+  const formikRef = {
+    current: null
+  }
+
 
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
@@ -58,13 +79,24 @@ export default function ManageAccount(props) {
   const [additionalFieldName, setAdditionalFieldName] = useState("")
 
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
-
+  const [addressDataSource, setAddressDataSource] = useState([]);
+  const [showAddAddresstDialog, setShowAddAddresstDialog] = useState(false);
+  const [showAddMarketSegmentDialog, setShowAddMarketSegmentDialog] = useState(false);
+  const [mainMarketSegmentDataSource, setMainMarketSegmentDataSource] = useState([]);
+  const [marketSegmentDataSource, setMarketSegmentDataSource] = useState([]);
+  const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
+  const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
+  const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [isAccDialogVisible, setIsAccDialogVisible] = useState(false)
+  const [addressType, setAddressType] = useState(null);
+  const [isShippingSameAsBilling, setIsShippingSameAsBilling] = useState(false)
   useEffect(() => {
-
     if (isNew) {
       const processSteps = accountData.fields.find(
         (d) => d.type.toLowerCase() === "process"
       );
+
       if (processSteps) {
         accountData.fields.map((d) => {
           if (d.sectionName == processSteps?.additionalInfoSection) {
@@ -74,20 +106,22 @@ export default function ManageAccount(props) {
       }
     }
 
-    if (fromProject) {
-      setOwnerCollaboratorCommonDataSource(owners);
-      setOwnerDataSource(owners);
-      setCollaboratorDataSource(collaborators);
-    } else {
-      let ownerCollaboratorDropdownData = accountData.fields.filter(
-        (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
-      );
-      if (ownerCollaboratorDropdownData.length > 0) {
-        setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
-        setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
-        setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
-      }
+    let ownerCollaboratorDropdownData = accountData.fields.filter(
+      (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
+    );
+    if (ownerCollaboratorDropdownData.length > 0) {
+      setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
+      setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
+      setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
     }
+
+    // if (fromProject) {
+    //   setOwnerCollaboratorCommonDataSource(owners);
+    //   setOwnerDataSource(owners);
+    //   setCollaboratorDataSource(collaborators);
+    // } else {
+
+    // }
 
     const parentAccountDropdownData = accountData.fields.find(
       (d) => d.fieldName === "parentAccount"
@@ -102,7 +136,50 @@ export default function ManageAccount(props) {
       );
     }
 
+
     setFormsData(setFieldsInAscendingOrder(accountData.fields));
+
+    //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
+    const marketSegmentDropdownData = accountData.fields.find(
+      (d) => d.fieldName === formFieldNames.marketSegment
+    );
+    if (marketSegmentDropdownData) {
+      setMainMarketSegmentDataSource(marketSegmentDropdownData.option);
+
+      let initializeMarketSegmentDataSource = [];
+      marketSegmentDropdownData.option.forEach(option => {
+        if (option.parentMarketSegment === "" || marketSegmentDropdownData.option.some(s => s.parentMarketSegment === option.optionValue)) {
+          initializeMarketSegmentDataSource.push(option);
+        }
+      })
+      setMarketSegmentDataSource(initializeMarketSegmentDataSource);
+    }
+
+
+    if (!isNew && marketSegmentDropdownData) {
+      setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === accountData.initialValues.marketSegment));
+    }
+
+    if (accountData?.initialValues?.marketSegment && marketSegmentDropdownData) {
+      setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === accountData?.initialValues?.marketSegment));
+    }
+
+    if (marketSegmentId && marketSegmentDropdownData) {
+      setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === marketSegmentId));
+    }
+
+    const addressDataDropdown = accountData.fields.find(
+      (d) => d.fieldName === "billingAddress"
+    );
+
+
+
+    // if (addressDataDropdown) {
+    //   setAddressDataSource(addressDataDropdown.option.filter(d => accountData?.initialValues?.billingAddress?.includes(d.optionValue) || accountData?.initialValues?.shippingAddress?.includes(d.optionValue)))
+    // }
+    if (addressDataDropdown) {
+      setAddressDataSource(addressDataDropdown.option)
+    }
 
     return () => {
       setOwnerCollaboratorCommonDataSource([]);
@@ -110,6 +187,10 @@ export default function ManageAccount(props) {
       setCollaboratorDataSource([]);
     };
   }, [accountData.fields]);
+
+  useEffect(() => {
+    handleAddressDataSource(addressDataSource)
+  }, [addressDataSource]);
 
   const onOwnerDropdownOpen = (selectedCollaborator, selectedEntity) => {
     if (selectedEntity?.length > 0) {
@@ -182,28 +263,63 @@ export default function ManageAccount(props) {
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
     if (err.length) {
-      const input = document.querySelector(
+      const input: any = document.querySelectorAll(
         `input[name=${err[0]}]`,
       );
-
-      input.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'start',
-      });
+      input?.forEach((_i) => {
+        _i.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'start',
+        });
+      })
     }
   }
 
   const isFieldNotTouched = (accountData, values) => {
-    return Object.values(
-      simplifyValues(
-        accountData.initialValues,
-        accountData.fields
-      )
-    ).toString() ===
-      Object.values(
-        simplifyValues(values, accountData.fields)
-      ).toString()
+    if (formikRef.current) {
+      return Object.values(
+        simplifyValues(
+          accountData.initialValues,
+          accountData.fields
+        )
+      ).toString() ===
+        Object.values(
+          simplifyValues(formikRef.current.values, accountData.fields)
+        ).toString()
+    }
+  }
+
+  const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
+    if (values && values.hasOwnProperty(formFieldNames.marketSegment)) {
+      const getNewAddedMarketSegment = marketSegmentSource.find(
+        (d) => d?.optionValue === newMarketSegmentId
+      );
+      if (getNewAddedMarketSegment) {
+        values[formFieldNames.marketSegment] = getNewAddedMarketSegment.optionValue;
+      }
+      return values;
+    }
+    return values;
+  };
+
+  const initializeSubMarketSegmentDropdown = (values, subMarketSegmentSource) => {
+    if (values && values.hasOwnProperty(formFieldNames.subMarketSegment)) {
+      const getNewAddedSubMarketSegment = subMarketSegmentSource.find(
+        (d) => d?.optionValue === newSubMarketSegmentId
+      );
+      if (getNewAddedSubMarketSegment) {
+        values[formFieldNames.subMarketSegment] = getNewAddedSubMarketSegment.optionValue;
+      }
+      return values;
+    }
+    return values;
+  };
+
+
+
+  const marketSegmentChange = (marketSegmentId: string) => {
+    setSubMarketSegmentDataSource(marketSegmentId ? mainMarketSegmentDataSource.filter(d => d.parentMarketSegment === marketSegmentId) : []);
   }
 
   return (
@@ -211,7 +327,7 @@ export default function ManageAccount(props) {
       <Dialog
         fullWidth
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={(e, reason) => {
@@ -222,6 +338,11 @@ export default function ManageAccount(props) {
         open={open}
       >
         <CustomDialogHeader
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
           onClose={() => {
             if (isFieldNotTouched(accountData, formValues)) {
               onClose({})
@@ -229,13 +350,9 @@ export default function ManageAccount(props) {
               setShowConfirmDialog(true)
             }
           }}
-          title={
-            isNew
-              ? "Add Account"
-              : `Editing ${accountData.initialValues.accountName
-                ? accountData.initialValues.accountName
-                : ""
-              }`
+          title={isClone ? `Clone - ${accountNameForClone}` :
+            isNew ? accountResource === "customerAccount" ? `Add ${routes?.customerAccount?.title}` : `Add ${routes?.supplierAccount?.title}`
+              : `Editing ${accountData.initialValues.accountName ? accountData.initialValues.accountName : ""}`
           }
         />
         {accountData.fields.length > 0 ? (
@@ -244,7 +361,11 @@ export default function ManageAccount(props) {
               initialValues={accountData.initialValues}
               validationSchema={yupSchema(accountData.fields)}
               validateOnMount
-
+              innerRef={(ref) => {
+                if (ref) {
+                  formikRef.current = ref
+                }
+              }}
               onSubmit={onSubmit}
             >
               {({
@@ -257,11 +378,15 @@ export default function ManageAccount(props) {
                 <>
                   <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
-                      <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                      {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
+
                       {formsData &&
                         formsData.filter((item) => item.name !== additionalFieldName).map((form, i) => (
                           <div key={i}>
-                            <h2 className="form-label-style">{form.name}</h2>
+                            <div className={"detail-box-content"}>
+                              <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                              <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                            </div>
                             <Box marginY={2}>
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field, index2) => (
@@ -277,11 +402,10 @@ export default function ManageAccount(props) {
                                         name={field.fieldName}
                                         type={field.type}
                                         options={
-                                          // fromProject ? owners : ownerDataSource
                                           ownerDataSource
                                         }
                                         onChange={(e, val) => {
-                                          handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : "");
+                                          // handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : "");
                                           setFieldValue(
                                             field.fieldName,
                                             val && val.optionValue
@@ -311,11 +435,11 @@ export default function ManageAccount(props) {
                                                   )
                                                   : collaboratorDataSource;
 
-                                              handleValuesChange("collaborator", newCollaboratorDataSource.find(
-                                                (d) =>
-                                                  d?.optionValue ===
-                                                  user?.user?._id
-                                              ).optionValue)
+                                              // handleValuesChange("collaborator", newCollaboratorDataSource.find(
+                                              //   (d) =>
+                                              //     d?.optionValue ===
+                                              //     user?.user?._id
+                                              // ).optionValue)
 
                                               setFieldValue("collaborator", [
                                                 ...values["collaborator"],
@@ -335,7 +459,6 @@ export default function ManageAccount(props) {
                                         size="small"
                                         disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
                                         onOpen={() =>
-                                          // !fromProject &&
                                           onOwnerDropdownOpen(
                                             values.collaborator, values.entity ? values.entity : []
                                           )
@@ -364,7 +487,7 @@ export default function ManageAccount(props) {
                                           collaboratorDataSource
                                         }
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange(field.fieldName, value);
+                                          // handleValuesChange(field.fieldName, value);
                                           setFieldValue(field.fieldName, value)
                                         }}
                                         required={field.required}
@@ -373,7 +496,6 @@ export default function ManageAccount(props) {
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onOpen={() =>
-                                          // !fromProject &&
                                           onCollaboratorOwnerMultiselectOpen(
                                             values.owner, values.entity ? values.entity : []
                                           )
@@ -383,7 +505,7 @@ export default function ManageAccount(props) {
                                       <FormTypes
                                         isNew={isNew}
                                         {...field}
-                                        disabled={!isNew && field.disableOnEdit}
+                                        disabled={!isNew && (field.disableOnEdit || values["owner"] !== user.user._id)}
                                         multiple
                                         values={values}
                                         errors={errors}
@@ -398,19 +520,18 @@ export default function ManageAccount(props) {
                                         size="small"
                                         onChange={(e, value) => {
 
-                                          handleValuesChange(field.fieldName, value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [])
+                                          // handleValuesChange(field.fieldName, value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [])
                                           setFieldValue(
                                             field.fieldName,
                                             value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
                                           );
-                                          handleValuesChange("owner", "")
-                                          handleValuesChange("collaborator", [])
+                                          // handleValuesChange("owner", "")
+                                          // handleValuesChange("collaborator", [])
                                           setFieldValue("owner", "");
                                           setFieldValue("collaborator", []);
                                         }}
                                       />
-                                    ) : field.fieldName ===
-                                      "isShippingAddressSameAsBillingAddress" ? (
+                                    ) : field.fieldName.includes("isShippingAddressSameAsBillingAddress") ? (
                                       <FormTypes
                                         isNew={isNew}
                                         {...field}
@@ -422,7 +543,7 @@ export default function ManageAccount(props) {
                                         name={field.fieldName}
                                         type={field.type}
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange(name, value)
+                                          // handleValuesChange(name, value)
                                           setFieldValue(name, value)
                                         }}
                                         required={field.required}
@@ -431,16 +552,24 @@ export default function ManageAccount(props) {
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onChange={(e) => {
-                                          handleValuesChange(field.fieldName, e.target.checked)
+                                          // handleValuesChange(field.fieldName, e.target.checked)
                                           setFieldValue(
                                             field.fieldName,
                                             e.target.checked
                                           );
+                                          if (isShippingSameAsBilling === false) {
+                                            setIsShippingSameAsBilling(true)
+                                          } else {
+                                            setIsShippingSameAsBilling(false)
+                                            setFieldValue("shippingAddress", []);
+                                          }
+
+
                                           if (
                                             e.target.checked &&
                                             values.billingAddress
                                           ) {
-                                            handleValuesChange("shippingAddress", values.billingAddress)
+                                            // handleValuesChange("shippingAddress", values.billingAddress)
                                             setFieldValue(
                                               "shippingAddress",
                                               values.billingAddress
@@ -448,135 +577,452 @@ export default function ManageAccount(props) {
                                           }
                                         }}
                                       />
-                                    ) : field.fieldName === "billingAddress" ? (
-                                      <FormTypes
-                                        isNew={isNew}
-                                        {...field}
-                                        disabled={!isNew && field.disableOnEdit}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange(field.fieldName, value)
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onChange={(event, newValue) => {
-                                          handleValuesChange(field.fieldName, newValue?.description ?? "")
-                                          setFieldValue(
-                                            field.fieldName,
-                                            newValue?.description ?? ""
-                                          );
-                                          if (
-                                            values.isShippingAddressSameAsBillingAddress ===
-                                            true
-                                          ) {
-                                            handleValuesChange("shippingAddress", newValue?.description ?? "")
-                                            setFieldValue(
-                                              "shippingAddress",
-                                              newValue?.description ?? ""
-                                            );
-                                          }
-                                        }}
-                                      />
-                                    ) : field.fieldName ===
-                                      "shippingAddress" ? (
-                                      <FormTypes
-                                        isNew={isNew}
-                                        {...field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange(name, value);
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        disabled={
-                                          values.isShippingAddressSameAsBillingAddress ===
-                                          true || (!isNew && field.disableOnEdit)
-                                        }
-                                        onChange={(event, newValue) => {
-                                          handleValuesChange(field.fieldName, newValue?.description ?? "");
-                                          setFieldValue(
-                                            field.fieldName,
-                                            newValue?.description ?? ""
-                                          );
-                                        }}
-                                      />
-                                    ) : field.fieldName === "parentAccount" ? (
-                                      <FormTypes
-                                        isNew={isNew}
-                                        {...field}
-                                        disabled={!isNew && field.disableOnEdit}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={parentAccountDataSource}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange(name, value);
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    ) : (
-                                      <FormTypes
-                                        isNew={isNew}
-                                        {...field}
-                                        // {...rest}
-                                        disabled={!isNew && field.disableOnEdit}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange(name, value);
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ["imageUpload", "fileUpload"].some(
-                                            (s) => s === field.type
-                                          )
-                                            ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(
-                                                completePercentage
-                                              );
+                                    ) : field.fieldName === "billingAddress" ?
+                                      <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                        <Grid container spacing={1}>
+                                          <Grid
+                                            item
+                                            xs={
+                                              permissions[accountResource]?.isCreate ? 10
+                                                : 11
                                             }
-                                            : null
-                                        }
-                                      />
-                                    )}
+                                            sm={
+                                              permissions[accountResource]?.isCreate ? 10
+                                                : 11
+                                            }
+                                            md={
+                                              permissions[accountResource]?.isCreate ? 10
+                                                : 11
+                                            }
+                                          >
+                                            <FormTypes
+                                              isNew={isNew}
+                                              {...field}
+                                              disabled={!isNew && field.disableOnEdit}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={addressDataSource}
+                                              setFieldValue={(name, value) => {
+                                                setFieldValue(field.fieldName, value)
+                                                handleValuesChange({ [name]: value })
+                                                if (
+                                                  values.isShippingAddressSameAsBillingAddress ===
+                                                  true
+                                                ) {
+                                                  setFieldValue(
+                                                    "shippingAddress",
+                                                    value ?? ""
+                                                  );
+                                                }
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                            // onChange={(event, newValue) => {
+                                            //   // handleValuesChange(field.fieldName, newValue?.description ?? "")
+                                            //   setFieldValue(
+                                            //     field.fieldName,
+                                            //     newValue?.description ?? ""
+                                            //   );
+                                            //   if (
+                                            //     values.isShippingAddressSameAsBillingAddress ===
+                                            //     true
+                                            //   ) {
+                                            //     // handleValuesChange("shippingAddress", newValue?.description ?? "")
+                                            //     setFieldValue(
+                                            //       "shippingAddress",
+                                            //       newValue?.description ?? ""
+                                            //     );
+                                            //   }
+                                            // }}
+                                            />
+                                          </Grid>
+                                          {(
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip
+                                                title="Add Address"
+                                                className="mt-1"
+                                              >
+                                                <IconButton
+                                                  onClick={() => {
+                                                    setShowAddAddresstDialog(true);
+                                                    setAddressType({ account: accountResource, address: "billingAddress" })
+                                                  }}
+                                                  disabled={field.disableOnEdit}
+                                                  size="small"
+                                                >
+                                                  <AddIcon color={field.disableOnEdit ? "disabled" : "primary"} />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Grid>
+                                          )
+                                          }
+                                          {field?.tooltipMessage ? (
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip
+                                                title={
+                                                  field?.tooltipMessage ?? ""
+                                                }
+                                              >
+                                                <InfoIcon color="disabled" />
+                                              </Tooltip>
+                                            </Grid>
+                                          ) : null}
+                                        </Grid>
+                                      </Grid>
+                                      : field.fieldName === "shippingAddress" ?
+                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                          <Grid container spacing={1}>
+                                            <Grid
+                                              item
+                                              xs={
+                                                permissions[accountResource]?.isCreate ? 10
+                                                  : 11
+                                              }
+                                              sm={
+                                                permissions[accountResource]?.isCreate ? 10
+                                                  : 11
+                                              }
+                                              md={
+                                                permissions[accountResource]?.isCreate ? 10
+                                                  : 11
+                                              }
+                                            >
+                                              <FormTypes
+                                                isNew={isNew}
+                                                {...field}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={addressDataSource}
+                                                setFieldValue={(name, value) => {
+                                                  handleValuesChange({ [name]: value })
+                                                  setFieldValue(field.fieldName, value)
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                disabled={
+                                                  values.isShippingAddressSameAsBillingAddress ===
+                                                  true || (!isNew && field.disableOnEdit)
+                                                }
+                                              />
+                                            </Grid>
+                                            {(
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip
+                                                  title="Add Address"
+                                                  className="mt-1"
+                                                >
+                                                  <IconButton
+                                                    onClick={() => {
+                                                      setShowAddAddresstDialog(true);
+                                                      setAddressType({ account: accountResource, address: "shippingAddress" })
+
+                                                    }}
+                                                    disabled={field.disableOnEdit}
+                                                    size="small"
+                                                  >
+                                                    <AddIcon color={field.disableOnEdit ? "disabled" : "primary"} />
+                                                  </IconButton>
+                                                </Tooltip>
+                                              </Grid>
+                                            )
+                                            }
+                                            {field?.tooltipMessage ? (
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip
+                                                  title={
+                                                    field?.tooltipMessage ?? ""
+                                                  }
+                                                >
+                                                  <InfoIcon color="disabled" />
+                                                </Tooltip>
+                                              </Grid>
+                                            ) : null}
+                                          </Grid>
+                                        </Grid>
+                                        : field.fieldName === "parentAccount" ?
+                                          <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                            <Grid container spacing={1}>
+                                              <Grid
+                                                item
+                                                xs={permissions[accountResource]?.isCreate ? 10 : 11}
+                                                sm={permissions[accountResource]?.isCreate ? 10 : 11}
+                                                md={permissions[accountResource]?.isCreate ? 10 : 11}
+                                              >
+                                                <FormTypes
+                                                  isNew={isNew}
+                                                  {...field}
+                                                  disabled={!isNew && field.disableOnEdit}
+                                                  values={values}
+                                                  errors={errors}
+                                                  touched={touched}
+                                                  label={field.fieldLabel}
+                                                  name={field.fieldName}
+                                                  type={field.type}
+                                                  options={parentAccountDataSource}
+                                                  setFieldValue={(name, value) => {
+                                                    // handleValuesChange(name, value);
+                                                    setFieldValue(name, value)
+
+                                                  }}
+                                                  required={field.required}
+                                                  fullWidth
+                                                  isTooltip={field?.isTooltip || false}
+                                                  tooltipMessage={field?.tooltipMessage}
+                                                  size="small"
+                                                />
+                                              </Grid>
+                                              {
+                                                permissions[accountResource]?.isCreate && (
+                                                  <Grid item xs={1} sm={1} md={1}>
+                                                    <Tooltip
+                                                      title="Add Parent Account"
+                                                      className="mt-1"
+                                                    >
+                                                      <IconButton
+                                                        onClick={() => {
+                                                          setIsAccDialogVisible(true)
+                                                        }}
+                                                        disabled={!isNew && field.disableOnEdit}
+                                                        size="small"
+                                                      >
+                                                        <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
+                                                      </IconButton>
+                                                    </Tooltip>
+                                                  </Grid>
+                                                )
+                                              }
+                                              {field?.tooltipMessage ? (
+                                                <Grid item xs={1} sm={1} md={1}>
+                                                  <Tooltip
+                                                    title={
+                                                      field?.tooltipMessage ?? ""
+                                                    }
+                                                  >
+                                                    <InfoIcon color="disabled" />
+                                                  </Tooltip>
+                                                </Grid>
+                                              ) : null}
+                                            </Grid>
+                                          </Grid> :
+                                          field.fieldName === formFieldNames.marketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                            <Grid container spacing={1}>
+                                              <Grid
+                                                item
+                                                xs={
+                                                  permissions.marketSegment?.isCreate ? 10
+                                                    : 11
+                                                }
+                                                sm={
+                                                  permissions.marketSegment?.isCreate ? 10
+                                                    : 11
+                                                }
+                                                md={
+                                                  permissions.marketSegment?.isCreate ? 10
+                                                    : 11
+                                                }
+                                              >
+                                                <FormTypes
+                                                  {...field}
+                                                  isNew={isNew}
+                                                  disabled={!isNew && field.disableOnEdit}
+                                                  fieldData={field}
+                                                  errors={errors}
+                                                  touched={touched}
+                                                  label={field.fieldLabel}
+                                                  name={field.fieldName}
+                                                  type={field.type}
+                                                  setFieldValue={(name, value) => {
+                                                    // handleValuesChange({ [name]: value })
+                                                    setFieldValue(name, value)
+                                                  }}
+                                                  required={field.required}
+                                                  fullWidth
+                                                  isTooltip={field.isTooltip}
+                                                  tooltipMessage={field.tooltipMessage}
+                                                  onChange={(e, val) => {
+                                                    setNewMarketSegmentId(null);
+                                                    setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                    setNewSubMarketSegmentId(null);
+                                                    setFieldValue(formFieldNames.subMarketSegment, "")
+                                                    marketSegmentChange(val && val.optionValue ? val.optionValue : "");
+                                                  }}
+                                                  size="small"
+                                                  values={
+                                                    newMarketSegmentId
+                                                      ? initializeMarketSegmentDropdown(
+                                                        values,
+                                                        marketSegmentDataSource
+                                                      )
+                                                      : values
+                                                  }
+                                                  options={marketSegmentDataSource}
+                                                  doNotShowInfoTooltip={true}
+                                                />
+                                              </Grid>
+                                              {
+                                                permissions.marketSegment?.isCreate && (
+                                                  <Grid item xs={1} sm={1} md={1}>
+                                                    <Tooltip
+                                                      title="Add Market Segment"
+                                                      className="mt-1"
+                                                    >
+                                                      <IconButton
+                                                        onClick={() => { setShowAddMarketSegmentDialog(true); }}
+                                                        disabled={!isNew && field.disableOnEdit}
+                                                        size="small"
+                                                      >
+                                                        <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
+                                                      </IconButton>
+                                                    </Tooltip>
+                                                  </Grid>
+                                                )
+                                              }
+                                              {field?.tooltipMessage ? (
+                                                <Grid item xs={1} sm={1} md={1}>
+                                                  <Tooltip
+                                                    title={
+                                                      field?.tooltipMessage ?? ""
+                                                    }
+                                                  >
+                                                    <InfoIcon color="disabled" />
+                                                  </Tooltip>
+                                                </Grid>
+                                              ) : null}
+                                            </Grid>
+                                          </Grid>
+                                            : field.fieldName === formFieldNames.subMarketSegment ? <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                              <Grid container spacing={1}>
+                                                <Grid
+                                                  item
+                                                  xs={
+                                                    permissions.marketSegment?.isCreate ? 10
+                                                      : 11
+                                                  }
+                                                  sm={
+                                                    permissions.marketSegment?.isCreate ? 10
+                                                      : 11
+                                                  }
+                                                  md={
+                                                    permissions.marketSegment?.isCreate ? 10
+                                                      : 11
+                                                  }
+                                                >
+                                                  <FormTypes
+                                                    {...field}
+                                                    isNew={isNew}
+                                                    disabled={!isNew && field.disableOnEdit}
+                                                    fieldData={field}
+                                                    errors={errors}
+                                                    touched={touched}
+                                                    label={field.fieldLabel}
+                                                    name={field.fieldName}
+                                                    type={field.type}
+                                                    setFieldValue={(name, value) => {
+                                                      // handleValuesChange({ [name]: value })
+                                                      setFieldValue(name, value)
+                                                    }}
+                                                    required={field.required}
+                                                    fullWidth
+                                                    isTooltip={field.isTooltip}
+                                                    tooltipMessage={field.tooltipMessage}
+                                                    onChange={(e, val) => {
+                                                      setNewSubMarketSegmentId(null);
+                                                      setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                    }}
+                                                    size="small"
+                                                    values={
+                                                      newSubMarketSegmentId
+                                                        ? initializeSubMarketSegmentDropdown(
+                                                          values,
+                                                          subMarketSegmentDataSource
+                                                        )
+                                                        : values
+                                                    }
+                                                    options={subMarketSegmentDataSource}
+                                                    doNotShowInfoTooltip={true}
+                                                  />
+                                                </Grid>
+                                                {
+                                                  permissions.marketSegment?.isCreate && (
+                                                    <Grid item xs={1} sm={1} md={1}>
+                                                      <Tooltip
+                                                        title="Add Sub Market Segment"
+                                                        className="mt-1"
+                                                      >
+                                                        <IconButton
+                                                          onClick={() => {
+                                                            setShowAddMarketSegmentDialog(true);
+                                                          }}
+                                                          disabled={!isNew && field.disableOnEdit}
+                                                          size="small"
+                                                        >
+                                                          <AddIcon color={!isNew && field.disableOnEdit ? "disabled" : "primary"} />
+                                                        </IconButton>
+                                                      </Tooltip>
+                                                    </Grid>
+                                                  )
+                                                }
+                                                {field?.tooltipMessage ? (
+                                                  <Grid item xs={1} sm={1} md={1}>
+                                                    <Tooltip
+                                                      title={
+                                                        field?.tooltipMessage ?? ""
+                                                      }
+                                                    >
+                                                      <InfoIcon color="disabled" />
+                                                    </Tooltip>
+                                                  </Grid>
+                                                ) : null}
+                                              </Grid>
+                                            </Grid> : (
+                                              <FormTypes
+                                                isNew={isNew}
+                                                {...field}
+                                                // {...rest}
+                                                disabled={!isNew && field.disableOnEdit}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={field.option}
+                                                setFieldValue={(name, value) => {
+                                                  // handleValuesChange(name, value);
+                                                  setFieldValue(name, value)
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                imageOrFileUploadCompletePercentage={
+                                                  ["imageUpload", "fileUpload"].some(
+                                                    (s) => s === field.type
+                                                  )
+                                                    ? (completePercentage) => {
+                                                      setUploadingImageOrFileProgress(
+                                                        completePercentage
+                                                      );
+                                                    }
+                                                    : null
+                                                }
+                                              />
+                                            )}
                                   </Grid>
                                 ))}
                               </Grid>
@@ -584,6 +1030,72 @@ export default function ManageAccount(props) {
                           </div>
                         ))}
                     </Form>
+                    {
+                      showAddAddresstDialog && <ManageAddressDialog
+                        onClose={() => {
+                          setShowAddAddresstDialog(false);
+                        }}
+                        onSuccess={(obj) => {
+                          if (obj) {
+                            setShowAddAddresstDialog(false);
+                            if (obj?.isAlreadyExist === true) {
+                              let tempAddress = addressDataSource.find(d => d?.optionLabel === obj?.fullAddress)
+                              setFieldValue(addressType.address, [...values[`${addressType.address}`], tempAddress?.optionValue]);
+                              if (isShippingSameAsBilling === true) {
+                                if (addressType.address === "billingAddress") {
+                                  setFieldValue("shippingAddress", [...values[`${addressType.address}`], tempAddress?.optionValue]);
+                                } else {
+                                  setFieldValue("billingAddress", [...values[`${addressType.address}`], tempAddress?.optionValue]);
+                                }
+                              }
+                            }
+                            else {
+                              setAddressDataSource((prevState) => [...prevState,
+                              {
+                                default: false,
+                                optionLabel: obj?.fullAddress,
+                                optionValue: obj._id,
+                                order: addressDataSource.length + 1,
+                              }]);
+                              setFieldValue(addressType.address, [...values[`${addressType.address}`], obj._id]);
+                              if (isShippingSameAsBilling === true) {
+                                if (addressType.address === "billingAddress") {
+                                  setFieldValue("shippingAddress", [...values[`${addressType.address}`], obj._id]);
+                                } else {
+                                  setFieldValue("billingAddress", [...values[`${addressType.address}`], obj._id]);
+                                }
+
+                              }
+                            }
+                          }
+                        }
+                        }
+                      />
+                    }
+                    {isAccDialogVisible ? (
+                      <ManageAccountDialog
+                        open={isAccDialogVisible}
+                        onClose={() => {
+                          setIsAccDialogVisible(false)
+                        }}
+                        id={null}
+                        isRedirectToDetailPage={false}
+                        isGetAccountData={true}
+                        onGetAddedAccount={({ data }) => {
+                          if (data?._id) {
+                            setFieldValue("parentAccount", data?._id)
+                            setParentAccountDataSource([...parentAccountDataSource, {
+                              optionLabel: data?.accountName,
+                              optionValue: data?._id
+                            }])
+                          }
+                        }}
+                        accountResource={accountResource}
+                        accountApi={accountApi}
+                        isClone={false}
+                        accountNameForClone={''}
+                      />
+                    ) : null}
                   </CustomDialogContent>
                   <CustomDialogFooter>
                     <Button
@@ -604,8 +1116,8 @@ export default function ManageAccount(props) {
                       loading={loading}
                       disabled={
                         loading ||
-                        uploadingImageOrFileProgress > 0 ||
-                        isFieldNotTouched(accountData, values)
+                        uploadingImageOrFileProgress > 0
+                        // isFieldNotTouched(accountData, values)
                         // || Object.keys(errors).length > 0 ? true : false
                       }
                       onClick={(e) => {
@@ -622,6 +1134,7 @@ export default function ManageAccount(props) {
                     showConfirmDialog ?
                       <ConfirmCancelDialog
                         open={showConfirmDialog}
+                        close={() => setShowConfirmDialog(false)}
                         onSave={() => {
                           setShowConfirmDialog(false)
                           // e.preventDefault();
@@ -656,6 +1169,99 @@ export default function ManageAccount(props) {
           </CustomDialogContent>
         )}
       </Dialog>
+
+      {
+        showAddMarketSegmentDialog && <ManageMarketSegmentDialog
+          marketSegmentId={null}
+          onClose={() => {
+            setShowAddMarketSegmentDialog(false);
+          }}
+          onSuccess={(data) => {
+            if (data?._id) {
+              setMainMarketSegmentDataSource((prevState) => {
+                return [
+                  ...prevState,
+                  {
+                    optionValue: data._id,
+                    optionLabel: data.name,
+                    order: mainMarketSegmentDataSource.length,
+                    default: false,
+                    parentMarketSegment: data.parentMarketSegment
+                  }
+                ];
+              });
+
+              //  If no parent selected, consider that as parent and add it in Market Segment
+              if (data.parentMarketSegment === "") {
+                setMarketSegmentDataSource((prevState) => {
+                  return [
+                    ...prevState,
+                    {
+                      optionValue: data._id,
+                      optionLabel: data.name,
+                      order: marketSegmentDataSource.length,
+                      default: false,
+                      parentMarketSegment: data.parentMarketSegment
+                    }
+                  ];
+                });
+                setSubMarketSegmentDataSource([]);
+                setNewMarketSegmentId(data._id);
+                setNewSubMarketSegmentId(null);
+              } else {
+                //  If parent selected, consider that as a child
+                if (marketSegmentDataSource.some(d => d?.optionValue === data.parentMarketSegment)) {
+                  setSubMarketSegmentDataSource([
+                    ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
+                    {
+                      optionValue: data._id,
+                      optionLabel: data.name,
+                      order: subMarketSegmentDataSource.length,
+                      default: false,
+                      parentMarketSegment: data.parentMarketSegment
+                    }]
+                  );
+                } else {
+
+                  let initializeMarketSegmentDataSource = [];
+                  mainMarketSegmentDataSource.forEach(option => {
+                    if (option.parentMarketSegment === "" || mainMarketSegmentDataSource.some(s => s.parentMarketSegment === option.optionValue)) {
+                      initializeMarketSegmentDataSource.push(option);
+                    }
+                  })
+
+                  if (!initializeMarketSegmentDataSource.some(s => s.optionValue === data.parentMarketSegment)) {
+                    const getMarketSegment = mainMarketSegmentDataSource.find(d => d?.optionValue === data.parentMarketSegment);
+
+                    initializeMarketSegmentDataSource.push({
+                      optionValue: getMarketSegment.optionValue,
+                      optionLabel: getMarketSegment.optionLabel,
+                      order: initializeMarketSegmentDataSource.length,
+                      default: false,
+                      parentMarketSegment: getMarketSegment.parentMarketSegment
+                    })
+                  }
+                  setMarketSegmentDataSource(initializeMarketSegmentDataSource);
+
+                  setSubMarketSegmentDataSource([
+                    ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
+                    {
+                      optionValue: data._id,
+                      optionLabel: data.name,
+                      order: subMarketSegmentDataSource.length,
+                      default: false,
+                      parentMarketSegment: data.parentMarketSegment
+                    }]
+                  );
+                }
+                setNewMarketSegmentId(data.parentMarketSegment);
+                setNewSubMarketSegmentId(data._id);
+              }
+            }
+            setShowAddMarketSegmentDialog(false);
+          }}
+        />
+      }
     </>
   );
 }

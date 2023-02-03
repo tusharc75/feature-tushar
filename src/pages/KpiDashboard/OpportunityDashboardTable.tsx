@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Box, Paper, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, MenuItem, Menu, Button } from '@material-ui/core';
-import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
+import { Box, Paper, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, MenuItem, Menu, Button, FormControl, InputLabel, Popover, Select, TextField, TableContainer, Table, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
+import { ToggleButtonGroup, ToggleButton, Autocomplete } from '@material-ui/lab';
 import { ImportExport } from '@material-ui/icons';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -9,16 +9,38 @@ import { utils, write } from 'xlsx';
 
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
+import { FilterList } from '@material-ui/icons';
+import Countries from "../../constants/Country.json"
+import Currencies from '../../constants/currency_with_country.json';
+import { startCase } from 'lodash';
 
-const OpportunityTable = ({ filterCurrency, currency, salesFilter, getExchangeRates, moment }) => {
-  const [toggleButtonValue, setToggleButtonValue] = useState('totalSell');
+const OpportunityTable = ({ filterCurrency, salesFilter, currency, salesReps, customerAccounts, marketSegments, selectedEntity, getExchangeRates, moment }) => {
   const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [anchorElTable, setAnchorElTable] = useState(null);
+  const [filterAnchor, setFilterAnchor] = useState(null);
+  const [openFilter, setOpenFilter] = useState(false);
+  const [subMarketSegments, setSubMarketSegments] = useState([]);
+
+  const [filter, setFilter] = useState({
+    marketSegment: {},
+    salesRep: {},
+    customerAccount: {},
+    subMarketSegment: {},
+    productCategory: {},
+    countrySellTo: {},
+    countryBillTo: {}
+  });
 
   const fetchTopProducts = useCallback(() => {
     let params = {
-      entity: salesFilter.entity ? salesFilter.entity['id'] : '',
+      entity: selectedEntity ? selectedEntity : '',
+      salesRep: filter.salesRep ? filter.salesRep['id'] : '',
+      marketSegment: filter.marketSegment ? filter.marketSegment['id'] : '',
+      subMarketSegment: filter.subMarketSegment ? filter.subMarketSegment['id'] : '',
+      customerAccount: filter.customerAccount ? filter.customerAccount['id'] : '',
+      countrySellTo: filter.countrySellTo ? filter.countrySellTo["optionValue"] : '',
+      countryBillTo: filter.countryBillTo ? filter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -41,7 +63,7 @@ const OpportunityTable = ({ filterCurrency, currency, salesFilter, getExchangeRa
       .get(`dashboard/products${url}`)
       .then(async ({ data: { data } }) => {
         data = data
-          .map((d) => ({ ...d, productCategory: d.hasOwnProperty('productCategory') ? d.productCategory : 'Unknown' }))
+          .map((d) => ({ ...d, productCategory: d.hasOwnProperty('productCategory') ? d.productCategory : 'Deleted Category' }))
           .sort((a, b) => b.totalSell - a.totalSell);
 
         let topProductsData = [];
@@ -49,7 +71,7 @@ const OpportunityTable = ({ filterCurrency, currency, salesFilter, getExchangeRa
         for (const d of data) {
           let totalSell = 0;
           let totalCost = 0;
-          if (d.totalSell && d.totalCost && filterCurrency !== currency) {
+          if (d.totalSell && d.totalCost && filterCurrency && filterCurrency !== currency) {
             const sellRateData = await getExchangeRates(moment().format('YYYY-MM-DD'), d.totalSell);
             const costRateData = await getExchangeRates(moment().format('YYYY-MM-DD'), d.totalCost);
             totalSell = sellRateData.rates[filterCurrency];
@@ -61,13 +83,18 @@ const OpportunityTable = ({ filterCurrency, currency, salesFilter, getExchangeRa
           topProductsData.push({ ...d, totalSell, totalCost });
         }
 
-        setTopProducts(topProductsData);
+        setTopProducts(topProductsData.map(d => {
+          return {
+            productCategory: d.productCategory,
+            totalAmount: d.totalSell ?? 0
+          }
+        }));
         setLoading(false);
       })
       .catch((err) => {
         setLoading(false);
       });
-  }, [salesFilter.entity, salesFilter.between, filterCurrency]);
+  }, [selectedEntity, filter, filterCurrency]);
 
   useEffect(() => {
     fetchTopProducts();
@@ -162,10 +189,136 @@ const OpportunityTable = ({ filterCurrency, currency, salesFilter, getExchangeRa
     setAnchorElTable(null);
   };
 
+  const handleClickFilter = (event) => {
+    setFilterAnchor(event.currentTarget);
+    setOpenFilter((prev) => !prev);
+  };
+
+
   return (
     <div>
       <Paper>
+        <Popover
+          open={openFilter}
+          anchorEl={filterAnchor}
+          onClose={handleClickFilter}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center'
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center'
+          }}
+        >
+          <Box p={2}>
+            <Box width="250px">
+              <Autocomplete
+                size="small"
+                fullWidth
+                options={salesReps}
+                autoHighlight
+                value={filter.salesRep}
+                getOptionLabel={(option: any) => option.name || ''}
+                getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+                onChange={(_, val) => {
+                  setFilter({ ...filter, salesRep: val });
+                }}
+                renderInput={(params) => <TextField {...params} label="Sales Rep" variant="outlined" />}
+              />
+              <Box mt={1} />
+              <Autocomplete
+                size="small"
+                fullWidth
+                options={customerAccounts}
+                autoHighlight
+                value={filter.customerAccount}
+                getOptionLabel={(option: any) => option.name || ''}
+                getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+                onChange={(_, val) => {
+                  let data = { ...filter, customerAccount: val }
+                  if (val?.countryBillTo) {
+                    let foundCountry = Countries.find(o => o.optionValue === val?.countryBillTo)
+                    if (foundCountry) {
+                      data.countryBillTo = foundCountry
+                    }
+                  }
+                  if (val?.countrySellTo) {
+                    let foundCountry = Countries.find(o => o.optionValue === val?.countrySellTo)
+                    if (foundCountry) {
+                      data.countrySellTo = foundCountry
+                    }
+                  }
+                  setFilter({ ...data });
+                }}
+                renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
+              />
+              <Box mt={1} />
+              <Autocomplete
+                size="small"
+                fullWidth
+                options={marketSegments.filter(d => !d.parentSegment)}
+                autoHighlight
+                value={filter.marketSegment}
+                getOptionLabel={(option: any) => option.name || ''}
+                getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+                onChange={(_, val) => {
+                  setFilter({ ...filter, marketSegment: val });
+                  if (val) {
+                    setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
+                  } else {
+                    setSubMarketSegments([]);
+                  }
+                }}
+                renderInput={(params) => <TextField {...params} label="Market Segment" variant="outlined" />}
+              />
+              <Box mt={1} />
+              <Autocomplete
+                size="small"
+                fullWidth
+                options={subMarketSegments}
+                autoHighlight
+                value={filter.subMarketSegment}
+                getOptionLabel={(option: any) => option.name || ''}
+                getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+                onChange={(_, val) => setFilter({ ...filter, subMarketSegment: val })}
+                renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
+              />
+              <Box mt={1} />
+              <Autocomplete
+                size="small"
+                fullWidth
+                options={Countries}
+                autoHighlight
+                value={filter.countrySellTo}
+                getOptionLabel={(option: any) => option.optionLabel || ''}
+                getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
+                onChange={(_, val) => setFilter({ ...filter, countrySellTo: val })}
+                renderInput={(params) => <TextField {...params} label="Country Sell To" variant="outlined" />}
+              />
+              <Box mt={1} />
+
+              <Autocomplete
+                size="small"
+                fullWidth
+                options={Countries}
+                autoHighlight
+                value={filter?.countryBillTo}
+                getOptionLabel={(option: any) => option.optionLabel || ''}
+                getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
+                onChange={(_, val) => setFilter({ ...filter, countryBillTo: val })}
+                renderInput={(params) => <TextField {...params} label="Country Bill To" variant="outlined" />}
+              />
+            </Box>
+          </Box>
+        </Popover>
         <Box p={2}>
+          <Button
+            onClick={handleClickFilter}
+            color="primary"
+            endIcon={<FilterList />}>
+            Filters
+          </Button>
           <Button onClick={handleClickTable} startIcon={<ImportExport />}>
             Export to
           </Button>
@@ -179,36 +332,40 @@ const OpportunityTable = ({ filterCurrency, currency, salesFilter, getExchangeRa
           <Typography variant="h6" color="textSecondary">
             Top Selling Product Category
           </Typography>
-
           <Box mt={1} />
-          <ToggleButtonGroup value={toggleButtonValue} exclusive onChange={(e, val) => setToggleButtonValue(val)} size="small">
-            <ToggleButton value="totalSell">Total Sell</ToggleButton>
-            <ToggleButton value="totalCost">Total Cost</ToggleButton>
-          </ToggleButtonGroup>
         </Box>
-
-        <List style={{ overflow: 'auto', maxHeight: 450 }}>
-          {topProducts.length && !loading ? (
-            topProducts.map((product, i) => (
-              <ListItem divider key={i}>
-                <ListItemText primary={product.productCategory} />
-                <ListItemSecondaryAction>
-                  <Typography>
-                    {product[toggleButtonValue]
-                      ? formatAmountWithCurrency(filterCurrency || currency, product[toggleButtonValue].toFixed(2)).fullFormatAmount
-                      : 0}
-                  </Typography>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))
-          ) : (
-            <ListItem>
-              <ListItemText primary={loading ? 'Loading Data...' : 'No Data'} />
-            </ListItem>
+        {topProducts.length && !loading ? (
+          <TableContainer style={{ height: '400px' }}>
+            <Table stickyHeader aria-label="caption table">
+              <TableHead>
+                <TableRow>
+                  {Object.keys(topProducts[0]).map((label, i) => (
+                    <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                      {startCase(label)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {topProducts.map((data, index) => (
+                  <TableRow key={index}>
+                    {Object.keys(data).map((label, i) => (
+                      <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                        {(i < 1 || data[label] === 0) ? data[label] : formatAmountWithCurrency(filterCurrency || currency, data[label]).fullFormatAmount}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>)
+          : (
+            <Typography variant="h6" color="textSecondary">
+              {loading ? 'Loading Data...' : 'No Data'}
+            </Typography>
           )}
-        </List>
       </Paper>
-    </div>
+    </div >
   );
 };
 

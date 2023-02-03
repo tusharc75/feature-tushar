@@ -29,6 +29,7 @@ const CreateNewDialog = (props) => {
     const [loading, setLoading] = useState(false);
     const [initialData] = useState({ name: "" });
     const history = useHistory();
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     const handleSubmit = (values) => {
         axiosInstance().post(`/productbuilder`, values).then(({ data: { data } }) => {
@@ -43,7 +44,7 @@ const CreateNewDialog = (props) => {
 
     return (<Dialog
         maxWidth="sm"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
@@ -62,10 +63,16 @@ const CreateNewDialog = (props) => {
                 submitForm,
             }) => (
                 <Fragment>
-                    <CustomDialogHeader title={"Create New"} onClose={handleClose}></CustomDialogHeader>
+                    <CustomDialogHeader title={"Create New"} onClose={handleClose}
+                        isMinimized={!fullScreen}
+                        onMinimizeMaximize={() => {
+                            setFullScreen(prevState => !prevState)
+                        }}
+                        showManimizeMaximize={true}
+                    ></CustomDialogHeader>
                     <CustomDialogContent>
                         <Form autoComplete="off" autoCorrect="off" noValidate >
-                            <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                            {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                             <Box p={1}>
                                 <TextField
                                     variant="outlined"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import {
     Dialog,
     Stepper,
@@ -16,7 +16,7 @@ import { useData } from '../../StateProvider/Provider';
 import { userType } from '../../constants/helpers';
 import AssignRolesDialog from '../../components/AssignRolesDialog/AssignRolesDialog';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
-import DoaDialog from '../DoaSetup/ManageDoa/ManageDoaDialog';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -33,25 +33,46 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-const stepsLabel = ["Set Approval Process", "Assign DOA", "Assign Regional Roles", "Assign Company Wide Role"]
 
-const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, userPermissions = null, fetchUsers, userList, selectedRecords }) => {
+const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, userPermissions = null, fetchUsers, userList, selectedRecords, isRoleSetUpPermission, isApprovalProcess, roleAccessIds, entityAccessIds }) => {
     const { state: { user, permissions }, } = useData();
     const [activeStep, setActiveStep] = useState(0)
+    const [stepsLabel, setStepsLabel] = useState([]);
     const classes = useStyles();
+    const toastConfig = useContext(CustomToastContext);
 
-    
+    useEffect(() => {
+        if (isApprovalProcess) {
+            setStepsLabel((prevStep) => [...prevStep, 'Set Approval Process'])
+        }
+        if (isRoleSetUpPermission) {
+            setStepsLabel((prevStep) => [...prevStep, 'Assign Role'])
+        }
+    }, [])
 
-    const getStepContent = (step: Number) => {
-        switch (step) {
-            case 0:
+
+
+    const getStepContent = (step: any) => {
+        let currentLabel = stepsLabel[step]
+        switch (currentLabel) {
+            case 'Set Approval Process':
                 return (
                     <ApprovalProcessDialog
                         openApprovalProcessDialog={open}
-                        hasPermissionToUpdateApprovalProcess={permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin}
-                        onSuccess={() =>{
-                                setActiveStep((prevStep) => prevStep + 1)                           
+                        hasPermissionToUpdateApprovalProcess={permissions?.user?.isUpdate && user?.user?.userType === userType.brandAdmin}
+                        onSuccess={() => {
+                            if (isRoleSetUpPermission) {
+                                setActiveStep((prevStep) => prevStep + 1)
+                            } else {
+                                toastConfig.setToastConfig({
+                                    open: true,
+                                    type: 'success',
+                                    message: "The user configuration is completed"
+                                })
+                                close()
+                                fetchUsers()
                             }
+                        }
                         }
                         handleCloseDialog={close}
                         userIds={userIds}
@@ -59,24 +80,7 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                     />
                 )
 
-            case 1:
-                return (
-                    <DoaDialog
-                        userList={userList.filter(user => !selectedRecords.some(item => item?._id === user?.id))}
-                        doa={[]}
-                        doaCurrency={null}
-                        userSelected={userIds}
-                        open={open}
-                        from={"UserListPage"}
-                        onSuccess={() => {
-                            setActiveStep((prevStep) => prevStep + 1)
-                        }}
-                        onClose={close}
-                        isRenderedFromUserSetUp={true}
-                    />
-                    
-                )
-            case 2:
+            case 'Assign Role':
                 return (
                     <AssignEntityDialog
                         entitiesDialogOpen={open}
@@ -86,27 +90,35 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                         assignedEntity={[]}
                         regionalRole={false}
                         onSuccess={() => {
-                            setActiveStep((prevStep) => prevStep + 1)
-                            
-                        }}
-                        isRenderedFromUserSetUp={true}
-                    />
-                )
-            case 3:
-                return (
-                    <AssignRolesDialog
-                        rolesDialogOpen={open}
-                        handleCloseDialog={close}
-                        userIds={userIds}
-                        assignedRoles={null}
-                        onSuccess={() => {
+                            toastConfig.setToastConfig({
+                                open: true,
+                                type: 'success',
+                                message: "The user configuration is completed"
+                            })
                             close()
                             fetchUsers()
 
                         }}
                         isRenderedFromUserSetUp={true}
+                        roleAccessIds={roleAccessIds}
+                        entityAccessIds={entityAccessIds}
                     />
                 )
+            // case 2:
+            //     return (
+            //         <AssignRolesDialog
+            //             rolesDialogOpen={open}
+            //             handleCloseDialog={close}
+            //             userIds={userIds}
+            //             assignedRoles={null}
+            //             onSuccess={() => {
+            //                 close()
+            //                 fetchUsers()
+
+            //             }}
+            //             isRenderedFromUserSetUp={true}
+            //         />
+            //     )
             default:
                 return "Unknown step";
         }

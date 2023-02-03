@@ -16,7 +16,7 @@ import emailStyles from "../../../pages/Activity/Email/email.module.scss"
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { IconButton, Paper } from "@material-ui/core";
+import { CircularProgress, IconButton, Paper } from "@material-ui/core";
 import { csvIcon, docIcon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index"
 import DeleteIcon from "@material-ui/icons/Delete";
 import GetAppIcon from '@material-ui/icons/GetApp';
@@ -25,6 +25,7 @@ import ImagePreview from "../Email/ImagePreview";
 import { displayDate } from "../../../constants/helpers"
 import TinyMce from "../../../components/TinyMCE"
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+import CommonSkeleton from "../../Helpers/CommonSkeleton";
 
 const NoteSchema = object().shape({
     name: string()
@@ -58,13 +59,14 @@ const fileIcons = [
     }
 ]
 
-export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }) => {
+export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, isMinimized, onMinimizeMaximize, showManimizeMaximize }) => {
 
     const [initialValues, setInitialValues] = useState(null);
     const [fileImageAttachments, setFileImageAttachments] = useState([])
     const [imageAttachments, setImageAttachments] = useState([])
     const [otherAttachments, setOtherAttachments] = useState([])
-    const [, setUploading] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [imageSource, setImageSource] = useState(null);
     const [open, setOpen] = useState(false)
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
@@ -81,6 +83,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
     }
     const fetchNoteDetail = async () => {
         if (noteId) {
+            setLoading(true)
             await GetNoteDetail(noteId)
                 .then(({ data }) => {
                     if (data.fileUrl && data.fileUrl.length) {
@@ -98,8 +101,10 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                     }
                     setInitialValues(data)
                     setFormValues(data)
+                    setLoading(false)
                 })
                 .catch(() => {
+                    setLoading(false)
                 });
         }
         else {
@@ -115,21 +120,26 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
         values.description = description;
         values.fileUrl = (otherAttachments.length || fileImageAttachments.length) ?
             [...imageAttachments, ...otherAttachments, ...fileImageAttachments] : [...imageAttachments]
+        setUploading(true)
         if (noteId) {
             UpdateNote(noteId, values)
                 .then(() => {
+                    setUploading(false)
                     setInitialValues(null)
                     handleClose()
                 })
                 .catch(() => {
+                    setUploading(false)
                 });
         }
         else {
             CreateNewNote(values)
                 .then(() => {
+                    setUploading(false)
                     handleClose()
                 })
                 .catch(() => {
+                    setUploading(false)
                 });
         }
     };
@@ -255,125 +265,131 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
     )
 
 
-    return (initialValues && <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
-        {({ submitForm, touched, errors, setFieldValue, values, setFieldTouched, setFieldError }) => (
-            <>
-                <CustomDialogHeader
-                    onClose={() => {
-                        if (isFieldNotTouched(initialValues, formValues)) handleClose()
-                        else setShowConfirmDialog(true)
-                    }}
-                    title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
-                <CustomDialogContent>
-                    <Form autoComplete="off" autoCorrect="off" noValidate >
-                        <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
-                        <MuiPickersUtilsProvider utils={MomentUtils}>
-                            <Box padding={1}>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12}>
-                                        <TextField
-                                            variant="outlined"
-                                            type="text"
-                                            label="Note Title"
-                                            required={true}
-                                            name="name"
-                                            fullWidth
-                                            margin="dense"
-                                            value={values["name"]}
-                                            error={touched["name"] && Boolean(errors["name"])}
-                                            helperText={touched["name"] && errors["name"]}
-                                            onChange={(e) => {
-                                                setFieldValue("name", e.target.value.trimStart())
-                                                handleValuesChange({ name: e.target.value.trimStart() })
-                                            }}
-                                        />
-                                        {renderFileThumbnails}
-                                        <ImageAttachments
-                                            imageAttachments={fileImageAttachments}
-                                            onImageClick={(attachment) => {
-                                                setImageSource(attachment)
-                                                setOpen(true)
-                                            }}
-                                            onDelete={handleDeleteFileImageAttachment}
-                                            emailId={noteId}
-                                            isRenderedFrom={true}
-                                        />
-                                        <ImageAttachments
-                                            imageAttachments={imageAttachments}
-                                            onImageClick={(attachment) => {
-                                                setImageSource(attachment)
-                                                setOpen(true)
-                                            }}
-                                            onDelete={handleDeleteImageAttachment}
-                                            emailId={noteId}
-                                            isRenderedFrom={true}
-                                        />
-                                        <Box >
-                                            <TinyMce
-                                                onChange={(value) => {
-                                                    setFieldValue("description", value)
-                                                    handleValuesChange({ description: value })
-                                                }}
-                                                initialValue={initialValues?.description}
-                                                imageOrFileUploadCompletePercentage={(
-                                                    completePercentage
-                                                ) => {
-                                                    setUploadingImageOrFileProgress(
-                                                        completePercentage
-                                                    );
-                                                }}
-                                                // doNotShowUploadFile={true : false}
-                                                onUploadFile={onUploadFile}
-                                                onUploadImage={handleUploadImage}
-                                                usePublicUrlforFileUpload={true}
-                                            />
-                                        </Box>
-
-                                        {noteId && <Fragment>
-
-                                            {
-                                                initialValues.relatedTo && initialValues.relatedTo.length ?
-                                                    <Box mt={2}>
-                                                        <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                                                    </Box> : null
-                                            }
-                                            {initialValues.createdBy && initialValues.createdBy.date && <Box mt={1} color="text.secondary">
-                                                <Typography variant="body2">Created {displayDate(initialValues.createdBy.date)}</Typography>
-                                            </Box>}
-                                            {initialValues.updatedBy && initialValues.updatedBy.date && <Box mt={1} color="text.secondary">
-                                                <Typography variant="body2">Updated {displayDate(initialValues.updatedBy.date)}</Typography>
-                                            </Box>}
-                                        </Fragment>}
-                                    </Grid>
-                                </Grid>
-                            </Box>
-                        </MuiPickersUtilsProvider>
-                    </Form>
-                </CustomDialogContent>
-                <CustomDialogFooter>
-                    <Button size="small" type="button" color="primary"
-                        onClick={() => {
-                            if (isFieldNotTouched(initialValues, values)) handleClose()
+    return (!initialValues ? <>
+        <CustomDialogHeader
+            title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
+        <CustomDialogContent>
+            <CommonSkeleton lenArray={[...Array(4).keys()]} />
+        </CustomDialogContent>
+        <CustomDialogFooter>
+            <Button variant="outlined" color='primary' size="small" disabled>
+                Cancel
+            </Button>
+            <Button variant="contained" color='primary' size="small" disabled>
+                Save
+            </Button>
+        </CustomDialogFooter>
+    </>
+        : <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
+            {({ submitForm, touched, errors, setFieldValue, values, setFieldTouched, setFieldError }) => (
+                <>
+                    <CustomDialogHeader
+                        onClose={() => {
+                            if (isFieldNotTouched(initialValues, formValues)) handleClose()
                             else setShowConfirmDialog(true)
-                        }}>Cancel</Button>
-                    <Button size="small" type="button" color="primary" variant="contained"
-                        onClick={() => {
-
-                            if (Object.keys(errors).length) {
-                                Object.keys(errors).map(k => {
-                                    setFieldTouched(k, true)
-                                })
-                            }
-                            else submitForm()
                         }}
-                        disabled={uploadingImageOrFileProgress > 0}>Save</Button>
-                </CustomDialogFooter>
-                {
-                    showConfirmDialog ?
-                        <ConfirmCancelDialog
-                            open={showConfirmDialog}
-                            onSave={() => {
-                                setShowConfirmDialog(false)
+                        title={`${noteId ? "Edit" : "New"} Note`}
+                        isMinimized={isMinimized}
+                        onMinimizeMaximize={onMinimizeMaximize}
+                        showManimizeMaximize={showManimizeMaximize}
+                    ></CustomDialogHeader>
+                    <CustomDialogContent>
+                        <Form autoComplete="off" autoCorrect="off" noValidate >
+                            {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
+                            <MuiPickersUtilsProvider utils={MomentUtils}>
+                                <Box padding={1}>
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                variant="outlined"
+                                                type="text"
+                                                label="Note Title"
+                                                required={true}
+                                                name="name"
+                                                fullWidth
+                                                margin="dense"
+                                                value={values["name"]}
+                                                error={touched["name"] && Boolean(errors["name"])}
+                                                helperText={touched["name"] && errors["name"]}
+                                                onChange={(e) => {
+                                                    setFieldValue("name", e.target.value.trimStart())
+                                                    handleValuesChange({ name: e.target.value.trimStart() })
+                                                }}
+                                            />
+                                            {renderFileThumbnails}
+                                            <ImageAttachments
+                                                imageAttachments={fileImageAttachments}
+                                                onImageClick={(attachment) => {
+                                                    setImageSource(attachment)
+                                                    setOpen(true)
+                                                }}
+                                                onDelete={handleDeleteFileImageAttachment}
+                                                emailId={noteId}
+                                                isRenderedFrom={true}
+                                            />
+                                            <ImageAttachments
+                                                imageAttachments={imageAttachments}
+                                                onImageClick={(attachment) => {
+                                                    setImageSource(attachment)
+                                                    setOpen(true)
+                                                }}
+                                                onDelete={handleDeleteImageAttachment}
+                                                emailId={noteId}
+                                                isRenderedFrom={true}
+                                            />
+                                            <Box >
+                                                <TinyMce
+                                                    onChange={(value) => {
+                                                        setFieldValue("description", value)
+                                                        handleValuesChange({ description: value })
+                                                    }}
+                                                    initialValue={initialValues?.description}
+                                                    imageOrFileUploadCompletePercentage={(
+                                                        completePercentage
+                                                    ) => {
+                                                        setUploadingImageOrFileProgress(
+                                                            completePercentage
+                                                        );
+                                                    }}
+                                                    // doNotShowUploadFile={true : false}
+                                                    onUploadFile={onUploadFile}
+                                                    onUploadImage={handleUploadImage}
+                                                    usePublicUrlforFileUpload={true}
+                                                />
+                                            </Box>
+
+                                            {noteId && <Fragment>
+
+                                                {
+                                                    initialValues.relatedTo && initialValues.relatedTo.length ?
+                                                        <Box mt={2}>
+                                                            <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                                                        </Box> : null
+                                                }
+                                                {initialValues.createdBy && initialValues.createdBy.date && <Box mt={1} color="text.secondary">
+                                                    <Typography variant="body2">Created {displayDate(initialValues.createdBy.date)}</Typography>
+                                                </Box>}
+                                                {initialValues.updatedBy && initialValues.updatedBy.date && <Box mt={1} color="text.secondary">
+                                                    <Typography variant="body2">Updated {displayDate(initialValues.updatedBy.date)}</Typography>
+                                                </Box>}
+                                            </Fragment>}
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+                            </MuiPickersUtilsProvider>
+                        </Form>
+                    </CustomDialogContent>
+                    <CustomDialogFooter>
+                        <Button size="small" variant='outlined' type="button" color="primary"
+                            disabled={uploading}
+                            onClick={() => {
+                                if (isFieldNotTouched(initialValues, values)) handleClose()
+                                else setShowConfirmDialog(true)
+                            }}>Cancel</Button>
+                        <Button size="small" type="button" color="primary" variant="contained"
+                            endIcon={uploading && <CircularProgress size={20} />}
+                            onClick={() => {
+
                                 if (Object.keys(errors).length) {
                                     Object.keys(errors).map(k => {
                                         setFieldTouched(k, true)
@@ -381,32 +397,46 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                 }
                                 else submitForm()
                             }}
-                            onClose={() => {
-                                setShowConfirmDialog(false)
-                                handleClose()
-                            }}
-                        /> : null
-                }
-                {
-                    open ?
-                        <ImagePreview
-                            open={open}
-                            aria-labelledby="customized-dialog-title"
-                            // heading="image preview"
-                            heading={imageSource ? imageSource.substring(imageSource.lastIndexOf("/") + 1,) : "image preview"}
-                            close={() => {
-                                setImageSource(null)
-                                setOpen(false)
-                            }}
-                            image={imageSource}
-                        /> : null
-                }
-            </>
+                            disabled={uploadingImageOrFileProgress > 0 || uploading}>Save</Button>
+                    </CustomDialogFooter>
+                    {
+                        showConfirmDialog ?
+                            <ConfirmCancelDialog
+                                close={() => setShowConfirmDialog(false)}
+                                open={showConfirmDialog}
+                                onSave={() => {
+                                    setShowConfirmDialog(false)
+                                    if (Object.keys(errors).length) {
+                                        Object.keys(errors).map(k => {
+                                            setFieldTouched(k, true)
+                                        })
+                                    }
+                                    else submitForm()
+                                }}
+                                onClose={() => {
+                                    setShowConfirmDialog(false)
+                                    handleClose()
+                                }}
+                            /> : null
+                    }
+                    {
+                        open ?
+                            <ImagePreview
+                                open={open}
+                                aria-labelledby="customized-dialog-title"
+                                // heading="image preview"
+                                heading={imageSource ? imageSource.substring(imageSource.lastIndexOf("/") + 1,) : "image preview"}
+                                close={() => {
+                                    setImageSource(null)
+                                    setOpen(false)
+                                }}
+                                image={imageSource}
+                            /> : null
+                    }
+                </>
 
-        )}
-    </Formik>
-
-
+            )}
+        </Formik>
     );
 
 }

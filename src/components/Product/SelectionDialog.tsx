@@ -29,7 +29,7 @@ const SelectionDialog = (props) => {
     const toastConfig = useContext(CustomToastContext)
     const { handleClose, api, refrenceId, isUpload, uploadData } = props;
     const [loading, setLoading] = useState(false);
-    const [initialData, setInitialData] = useState({});
+    const [initialData, setInitialData] = useState({ productCategory: "", productTemplate: "", priceTemplate: "" });
     const [productCategory, setProductCategory] = useState([]);
     const [productTemplate, setProductTemplate] = useState([]);
     const [priceTemplate, setPriceTemplate] = useState([]);
@@ -41,7 +41,7 @@ const SelectionDialog = (props) => {
     const ref = useRef(null);
 
     useEffect(() => {
-        axiosInstance().get(`/product-category`).then(({ data }) => {
+        axiosInstance().get(`/product-category?sortBy=name&orderBy=asc`).then(({ data }) => {
             data.data = data.data?.map((u) => ({
                 optionValue: u._id,
                 optionLabel: u.name,
@@ -92,12 +92,15 @@ const SelectionDialog = (props) => {
                     }
                 });
             } else {
-                axiosInstance().get(newFunction()).then(({ data: { data } }) => {
+                axiosInstance().get('/product-template/template/standard').then(({ data: { data } }) => {
                     setProductTemplate(data.data)
                     if (data.data.length) {
                         setInitialData({ ...ref.current.values, productTemplate: data.data[0].optionValue })
                         handleChangeProductTemplate(data.data[0].optionValue);
                     }
+                }).catch((error) => {
+                    setProductTemplate([])
+                    setPriceTemplate([])
                 });
             }
         }
@@ -359,7 +362,5 @@ const SelectionDialog = (props) => {
 }
 
 export default SelectionDialog;
-function newFunction(): string {
-    return `/product-template/template/standard`;
-}
+
 

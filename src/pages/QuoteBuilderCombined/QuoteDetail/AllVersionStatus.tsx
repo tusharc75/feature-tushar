@@ -1,4 +1,4 @@
-import { IconButton, Tooltip } from '@material-ui/core';
+import { Dialog, IconButton, Tooltip } from '@material-ui/core';
 import { useContext, useReducer, useState } from 'react'
 import axiosInstance from '../../../axios/axiosInstance';
 import { formatAmountWithCurrency, gridLoadingTimeout } from '../../../constants/helpers';
@@ -8,13 +8,45 @@ import { useEffect } from 'react';
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import CustomRenderCell from '../../../components/Helpers/CustomRenderCell';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { isMobile, isTablet } from 'react-device-detect';
 
-export default function AllVersionStatus({ quoteId, quoteData, quotePermissions, fetchQuoteData, handleChangeVersionFromAllVersion, handleCloneQuoteWithVersionFromAllVersion }) {
+const DOASteps = [
+    {
+        key: "New",
+        label: "Product Builder",
+    },
+    {
+        key: "Price Builder",
+        label: "Price Builder",
+    },
+    {
+        key: "Quote Builder",
+        label: "Quote Builder",
+    },
+    {
+        key: "DOA Process",
+        label: "DOA Process",
+    },
+    {
+        key: "Send To Customer",
+        label: "Send To Customer",
+    },
+    {
+        key: "End",
+        label: "End",
+    },
+];
+
+export default function AllVersionStatus({ open, onClose, quoteId, quoteData, quotePermissions, fetchQuoteData, handleChangeVersionFromAllVersion, handleCloneQuoteWithVersionFromAllVersion }) {
 
     const toastConfig = useContext(CustomToastContext);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     const [columns,] = useState([
         { field: "versionNumber", headerName: "Version #", show: true, width: 140, disabled: true, cellRenderer: "nameRenderer" },
@@ -24,16 +56,15 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
         { field: "totalcost", headerName: "Total Cost", show: true, cellRenderer: "commonRenderer" },
         { field: "totalSalesPrice", headerName: "Total Sales Price", show: true, cellRenderer: "commonRenderer" },
     ]);
-    const NameRenderer = params => <Link
-        title={params.value}
-        className="text-truncate link"
-        onClick={() => {
-            fetchQuoteData(params.data.versionNumber);
-            handleChangeVersionFromAllVersion(params.data.versionNumber);
-        }}
-    >
-        {params.value}
-    </Link>;
+    const NameRenderer = params =>
+        <span className="link"
+            onClick={() => {
+                fetchQuoteData(params.data.versionNumber);
+                handleChangeVersionFromAllVersion(params.data.versionNumber);
+            }}>
+            <CustomRenderCell value={params?.value} />
+        </span>
+        ;
 
     const ActionsRenderer = params => <>
 
@@ -92,6 +123,7 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
                             quoteData?.currency,
                             d.productData.totalSalesPrice
                         ).fullFormatAmount,
+                        processStatus: DOASteps.find(obj => obj.key === d.processStatus)?.label
                     };
                 });
 
@@ -108,22 +140,42 @@ export default function AllVersionStatus({ quoteId, quoteData, quotePermissions,
     };
 
     return (
-        <div style={{ maxHeight: 500, width: "100%" }} className="mt-2">
-            <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameworkComponents}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                allowSelection={false}
-                loading={loading}
-                refreshGrid={getVersionStatus}
+        <Dialog
+            maxWidth="md"
+            aria-labelledby="customized-dialog-title"
+            open={open}
+            onClose={onClose}
+            fullWidth
+            fullScreen={fullScreen || (isMobile || isTablet)}
+        >
+            <CustomDialogHeader
+                title={`All Version Status`}
+                onClose={onClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                    setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
             />
-        </div>
+            <CustomDialogContent>
+                <CustomAgGrid
+                    columns={columns}
+                    dataRows={dataRows}
+                    frameworkComponents={frameworkComponents}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    actionWidth={150}
+                    isClientSideGrid={true}
+                    allowSelection={false}
+                    loading={loading}
+                    refreshGrid={getVersionStatus}
+                />
+            </CustomDialogContent>
+        </Dialog>
+
     )
 }

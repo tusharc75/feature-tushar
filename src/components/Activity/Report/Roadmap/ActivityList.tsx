@@ -22,9 +22,9 @@ const useStyles = makeStyles((theme) => ({
       color: "var(--tree-view-color)",
     },
     "&:focus > $content $label, &:hover > $content $label, &$selected > $content $label":
-      {
-        backgroundColor: "transparent",
-      },
+    {
+      backgroundColor: "transparent",
+    },
   },
   label: {
     paddingLeft: 0,
@@ -52,6 +52,7 @@ export default function ActivityList(props) {
   } = useData();
   const [isCreate, setCreate] = useState(false);
   const [activityData, setActivityData] = useState(null);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const closeDialog = () => {
     setCreate(false);
@@ -130,11 +131,16 @@ export default function ActivityList(props) {
       {isCreate && (
         <Dialog
           open={true}
-          fullScreen={isMobile || isTablet}
+          fullScreen={fullScreen || (isMobile || isTablet)}
           TransitionComponent={CustomDialogTransition}
           fullWidth
           maxWidth="md"
-          onClose={closeDialog}
+          onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+              closeDialog()
+              setFullScreen(false);
+            }
+          }}
         >
           {type === "task" && (
             <CreateTask
@@ -145,7 +151,13 @@ export default function ActivityList(props) {
               handleClose={() => {
                 fetchRoadmap();
                 closeDialog();
+                setFullScreen(false)
               }}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+              }}
+              showManimizeMaximize={true}
             />
           )}
           {type === "case" && (
@@ -157,7 +169,13 @@ export default function ActivityList(props) {
               handleClose={() => {
                 fetchRoadmap();
                 closeDialog();
+                setFullScreen(false)
               }}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+              }}
+              showManimizeMaximize={true}
             />
           )}
         </Dialog>

@@ -22,7 +22,7 @@ const CarouselDialog = ({ images, index, close }) => {
  
     return (
         <Dialog maxWidth="md" fullWidth open={true} onClose={close}>
-        <CustomDialogHeader title="Image Carousel" onClose={close}/>
+        <CustomDialogHeader title="Image Carousel" onClose={close} showRequiredLabel={false}/>
           <CustomDialogContent>
           <Carousel
             strictIndexing

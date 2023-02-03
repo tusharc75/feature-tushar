@@ -12,12 +12,12 @@ import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, marketSegment, setFieldsInAscendingOrder } from "../../constants/helpers";
-import InputField from "../../components/Helpers/InputField";
 import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import {FaDiceOne} from "react-icons/fa";
 
 const ManageMarketSegmentDialog = (props) => {
 
@@ -27,7 +27,7 @@ const ManageMarketSegmentDialog = (props) => {
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [formsData, setFormsData] = useState([]);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
         if (initialData.fields.length > 0) {
@@ -93,7 +93,7 @@ const ManageMarketSegmentDialog = (props) => {
 
     return (<Dialog
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
@@ -126,17 +126,24 @@ const ManageMarketSegmentDialog = (props) => {
                                 }, values)) onClose()
                                 else setShowConfirmDialog(true)
                             }}
-
+                            isMinimized={!fullScreen}
+                            onMinimizeMaximize={() => {
+                                setFullScreen(prevState => !prevState)
+                            }}
+                            showManimizeMaximize={true}
                         ></CustomDialogHeader>
                         <CustomDialogContent>
 
                             <Form noValidate>
-                                <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                                {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                                 {formsData &&
                                     formsData.map((form, index1) => {
                                         return form.name ? (
                                             <div key={index1}>
-                                                <h2 className="form-label-style">{form.name}</h2>
+                                                <div className={"detail-box-content"}>
+                                                    <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                                    <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                                                </div>
                                                 <Box marginY={2}>
                                                     <Grid spacing={3} container>
                                                         {form.sectionFields.map((field, index2) => (
@@ -212,6 +219,7 @@ const ManageMarketSegmentDialog = (props) => {
                         {
                             showConfirmDialog ?
                                 <ConfirmCancelDialog
+                                    close={() => setShowConfirmDialog(false)}
                                     open={showConfirmDialog}
                                     onSave={() => {
                                         setShowConfirmDialog(false)

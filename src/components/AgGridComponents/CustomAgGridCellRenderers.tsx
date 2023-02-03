@@ -3,8 +3,9 @@ import moment from "moment";
 import { AiOutlineLoading } from "react-icons/ai";
 import CustomRenderCell from "../Helpers/CustomRenderCell";
 import NoDataCell from "../Helpers/NoDataCell";
-import { dateFormat } from "../../constants/helpers"
+import { dateFormat, dateTimeFormat } from "../../constants/helpers"
 import Avatar from "@material-ui/core/Avatar"
+import Tooltip from "@material-ui/core/Tooltip"
 import { Link } from 'react-router-dom'
 
 export const CommonRenderer = params => <CustomRenderCell value={params.value} />;
@@ -12,12 +13,12 @@ export const CommonRenderer = params => <CustomRenderCell value={params.value} /
 export const CommonRendererWithCopy = params => <CustomRenderCell value={params.value} isCopyToClipboard={true} />;
 
 export const CreatedByRenderer = params => params.value ? (
-    <h5 className="createBy" title={`${params.value} • ${moment(
-        params.data.createdByDate.slice(0, 10)
+    <h5 className="createBy" title={`${params?.value} • ${moment(
+        params?.data?.createdByDate?.slice(0, 10)
     ).format(dateFormat)}`}>
         {params.value}
         <span className="createdAtTime badge-date">
-            {moment(params.data.createdByDate.slice(0, 10)).format(dateFormat)}
+            {moment(params?.data?.createdByDate?.slice(0, 10))?.format(dateFormat)}
         </span>
     </h5>
 ) : (
@@ -28,44 +29,66 @@ export const DateRenderer = params => params.value ? (
     <h5 className="createBy" title={`${moment(
         params.value.slice(0, 10)
     ).format(dateFormat)}`}>
-        {moment(params.value.slice(0, 10)).format(dateFormat)}
+        {moment(params?.value?.slice(0, 10))?.format(dateFormat)}
     </h5>
 ) : (
     <NoDataCell />
 );
+
+export const DateTimeRenderer = params => params.value ? (
+    <h5 className="createBy" title={`${moment(params.value)?.format(dateTimeFormat)}`}>
+        {moment(params.value)?.format(dateTimeFormat)}
+    </h5>
+) : (
+    <NoDataCell />
+);
+
 export const CheckboxRenderer = params => (
-    <span>
-        {Boolean(params?.value) ? "Yes" : "No"}
-    </span>
+    params?.node?.rowPinned ? <NoDataCell /> :
+        <span>
+            {Boolean(params?.value) ? "Yes" : "No"}
+        </span>
 )
 
 export const UpdatedByRenderer = params => params.value ? (
     <h5 className="updateBy" title={`${params.value} • ${moment(
-        params.data.updatedByDate.slice(0, 10)
+        params?.data?.updatedByDate?.slice(0, 10)
     ).format(dateFormat)}`}>
         {params.value}
         <span className="updatedAtTime badge-date">
-            {moment(params.data.updatedByDate.slice(0, 10)).format(dateFormat)}
+            {moment(params?.data?.updatedByDate?.slice(0, 10))?.format(dateFormat)}
         </span>
     </h5>
 ) : (
     <NoDataCell />
 )
 
-export const LinkRenderer = params => params.value ? (
-    <>
-        <Link className="link" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
-            `${params?.pathName}/${params?.data[params?.property]}`} title={params?.value}>{params?.value}</Link>
+export const NumberRenderer = params => params.value ? params.value : 0;
 
-        {
-            params["more"] && params.data[params["more"]]?.length > 0 && (
+
+const getTitle = data => {
+    if (data.length) {
+        let restParams = data.map(o => o?.optionLabel ? o?.optionLabel : typeof o !== "object" ? o : "").join(", ")
+        return restParams
+    }
+    return ""
+}
+
+export const LinkRenderer = params => params.value ? <>
+    <Link className="link text-truncate" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
+        `${params?.pathName}/${params?.data[params?.property]}`} title={params?.value}>{params?.value}</Link>
+    {
+        params["more"] && params.data[params["more"]]?.length > 0 && (
+            <Tooltip title={getTitle(params.data[params["more"]])} >
                 <span className="createdAtTime badge-date">{`+${params.data[params["more"]].length} more..`}</span>
-            )
-        }
-    </>
-) : (
-    <NoDataCell />
+            </Tooltip>
+
+        )
+    }
+</> : (
+    params.property === "entityId" ? "Global" : <NoDataCell />
 )
+
 
 export const NameRenderer = params => params.value ? (
     <Link className="link"
@@ -75,7 +98,8 @@ export const NameRenderer = params => params.value ? (
 )
 
 export const ImageRenderer = params => (
-    <Avatar className="grid-avatar" src={params?.value} />
+    params?.node?.rowPinned ? <NoDataCell /> :
+        <Avatar className="grid-avatar" src={params?.value} />
 )
 
 export const CustomLoadingOverlay = (params) => <div

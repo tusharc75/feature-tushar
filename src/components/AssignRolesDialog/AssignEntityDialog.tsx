@@ -26,6 +26,7 @@ import StepLabel from "@material-ui/core/StepLabel";
 import StepContent from "@material-ui/core/StepContent";
 import { roleTypes } from "../../constants/helpers";
 import SearchBox from "../Helpers/SearchBox";
+import { useData } from "../../StateProvider/Provider";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -49,7 +50,11 @@ const AssignEntityDialog = ({
   type,
   assignedEntity,
   regionalRole,
-  isRenderedFromUserSetUp = false
+  isRenderedFromUserSetUp = false,
+  isRenderedFromContact = false,
+  entityAccessIds = [],
+  roleAccessIds = [],
+  contactResource = '',
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState([]);
@@ -62,7 +67,7 @@ const AssignEntityDialog = ({
   const [isAssigning, setAssigning] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [, setCheckAll] = useState(false);
-  const steps = [`Select ${type}`, 'Select Regional Wide Functional Role']
+  const steps = [`Select ${type}`, 'Select Role']
   const [search, setSearch] = useState("");
   const classes = useStyles();
 
@@ -77,23 +82,24 @@ const AssignEntityDialog = ({
 
   useEffect(() => {
     setLoadingData(true);
-    axiosInstance()
-      .get(`/${type}`)
-      .then(({ data: { data } }) => {
-        if (type == "user") {
+    if (type == "user") {
+      axiosInstance()
+        .get(`/${type}`)
+        .then(({ data: { data } }) => {
           setData(data.filter(user => !assignedEntity.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
           setDataConst(data.filter(user => !assignedEntity.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
-        }
-        else {
-          setData(data.filter(user => !assignedEntity.some(item => item?.entity._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
-          setDataConst(data.filter(user => !assignedEntity.some(item => item?.entity._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
-        }
-        setLoadingData(false);
-      })
-      .catch((error) => {
-        setLoadingData(false);
-        toastConfig.setToastConfig(error);
-      });
+          setLoadingData(false);
+        })
+        .catch((error) => {
+          setLoadingData(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+    else {
+      setLoadingData(false);
+      setData(JSON.parse(localStorage.getItem("mappedEntities")).map(obj => ({ ...obj, entityName: obj.optionLabel, _id: obj.optionValue, isChecked: false, show: true })));
+      setDataConst(JSON.parse(localStorage.getItem("mappedEntities")).map(obj => ({ ...obj, entityName: obj.optionLabel, _id: obj.optionValue, isChecked: false, show: true })));
+    }
 
     axiosInstance()
       .get(`/role?type=${roleTypes.find((d) => d.key === "Regional")?.value}`)
@@ -104,8 +110,8 @@ const AssignEntityDialog = ({
           setRoleConst(data.filter(role => !assignedEntity.find(element => element.entity._id === selectedData[0]).role.some(item => item?._id === role?._id)).map(obj => ({ ...obj, isChecked: false })))
         }
         else {
-          setRole(data.map(obj => ({ ...obj, isChecked: false })))
-          setRoleConst(data.map(obj => ({ ...obj, isChecked: false })))
+          setRole(data.filter((item) => roleAccessIds && roleAccessIds.length > 0 ? roleAccessIds.includes(item._id) : true).map(obj => ({ ...obj, isChecked: false })))
+          setRoleConst(data.filter((item) => roleAccessIds && roleAccessIds.length > 0 ? roleAccessIds.includes(item._id) : true).map(obj => ({ ...obj, isChecked: false })))
         }
         setLoadingData(false);
       })
@@ -116,12 +122,34 @@ const AssignEntityDialog = ({
     // eslint-disable-next-line
   }, []);
 
+  const handleAccessPortal = () => {
+    let payLoad = {
+      [contactResource] : ids,
+      entities: selectedData,
+      roles: selectedRole
+    }
+    axiosInstance()
+      .put('/user/create-user-from-contact', payLoad)
+      .then(({data}) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        })
+        onSuccess()
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        handleCloseDialog();
+      })
+  }
+
 
   const handleAssignEntity = async () => {
     if (selectedData.length) {
       setAssigning(true);
       let dataObj: any;
-      
+
       if (type === "entity") {
         dataObj = {
           users: ids,
@@ -274,7 +302,7 @@ const AssignEntityDialog = ({
     //   aria-labelledby="assign-roles-dialog"
     // >
     <>
-      {!isRenderedFromUserSetUp && <CustomDialogHeader title={regionalRole ? `Assign  Region wide functional role` : `Assign  ${startCase(type)}`} />}
+      {!isRenderedFromUserSetUp && <CustomDialogHeader title={regionalRole ? `Assign role` : type === "entity" ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`} />}
       <CustomDialogContent>
         {!regionalRole ? (loadingData ? (
           <Loader text={`Loading ${startCase(type)}`} />
@@ -395,7 +423,7 @@ const AssignEntityDialog = ({
         }
         <Button
           disabled={!selectedData?.length || !selectedRole?.length}
-          onClick={handleAssignEntity}
+          onClick={isRenderedFromContact ? handleAccessPortal : handleAssignEntity}
           color="primary"
           size="small"
           variant="contained"

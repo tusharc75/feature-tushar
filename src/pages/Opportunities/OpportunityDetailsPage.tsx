@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext } from 'react';
-import { Box, Button, Grid, Paper } from '@material-ui/core';
+import React, { useState, useEffect, useContext } from 'react';
+import { Box, Button, Grid, Paper, useMediaQuery } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useHistory, useParams } from 'react-router-dom';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -14,6 +14,7 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageOpportunityDialog from './ManageOpportunityDialog/ManageOpportunityDialog';
 import { cloneDeep } from 'lodash';
+import CustomMobileStepperOpportunities from '../../components/CustomMobileStepperOpportunities';
 import {
   customerAccount,
   supplierAccount,
@@ -23,7 +24,7 @@ import {
   customerContact,
   getObjKeysWithValues,
   processFieldName,
-  formatAmountWithCurrency, 
+  formatAmountWithCurrency,
   defaultActivityShow
 } from '../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -38,6 +39,11 @@ import ProcessFlow from '../../components/ProcessFlow';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { SVG } from '../../assets';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import queryString from 'query-string';
+import { MdDelete, MdEdit } from 'react-icons/md';
+import { BiEdit } from 'react-icons/bi';
+import contactClass from '../Contact/contact.module.scss';
+import accountClass from '../Account/account.module.scss';
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -46,6 +52,7 @@ function OpportunityDetailsPage() {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(true);
   const [opportunityData, setOpportunityData] = useState(null);
@@ -66,7 +73,9 @@ function OpportunityDetailsPage() {
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
-  const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' })
+  const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' });
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit } = parsed;
 
   const [messageDialog, setMessageDialog] = useState({
     open: false,
@@ -86,10 +95,9 @@ function OpportunityDetailsPage() {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [, setShowAtLast] = useState(false);
   const [, setAdditionalFieldName] = useState('');
-
   const handleActivityHideShow = () => {
-    setActivityShow(!showActivity)
-  }
+    setActivityShow(!showActivity);
+  };
 
   const handleOpenUpdateDialog = () => {
     if (activeStep === steps.length - 1) {
@@ -125,19 +133,25 @@ function OpportunityDetailsPage() {
   }, [id]);
 
   useEffect(() => {
+    if (isSmallScreen) {
+      setActivityShow(true);
+    }
+  }, [isSmallScreen]);
+
+  useEffect(() => {
     if (
       opportunityData?.staticData?.customerContact &&
-      opportunityData.staticData?.customerContact.length &&
+      opportunityData?.staticData?.customerContact.length &&
       customerContacts &&
-      customerContacts.length === 0
+      customerContacts?.length === 0
     )
       fetchCustomerContactData(false);
 
     if (
       opportunityData?.staticData?.supplierContact &&
-      opportunityData.staticData?.supplierContact.length &&
+      opportunityData?.staticData?.supplierContact?.length &&
       supplierContacts &&
-      supplierContacts.length === 0
+      supplierContacts?.length === 0
     )
       fetchSupplierContactData(false);
   }, [opportunityData]);
@@ -150,9 +164,10 @@ function OpportunityDetailsPage() {
         .then(({ data: { data } }) => {
           let modifiedData = {};
           Object.assign(modifiedData, data);
-          modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).shortFormatAmount;
+          modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).fullFormatAmount;
           setCopyOfOpportunityData(modifiedData);
-
+          const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+          setAllowedToEdit(isAllowedToEdit);
           handleMainPoints(data);
           setHeadingLbl(data.opportunityName);
 
@@ -196,7 +211,12 @@ function OpportunityDetailsPage() {
             tempExpanded.customerContacts = false;
           }
           setExpanded(tempExpanded);
-
+          if (isAllowedToEdit && openEdit === 'true') {
+            setOpenUpdateDialog(true);
+            const params = new URLSearchParams();
+            params.delete('openEdit');
+            history.push({ search: params.toString() });
+          }
           getOpportunityFields(data);
           setCustomizedRoutes([routes.opportunity, { title: `${data.opportunityName}` }]);
         })
@@ -219,7 +239,7 @@ function OpportunityDetailsPage() {
 
         if (data[sidebarResource.lead] && data[sidebarResource.lead][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]) {
           let tempName = data[sidebarResource.lead][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')][0];
-          setParentLead({ leadName: `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`, leadId: tempName._id })
+          setParentLead({ leadName: `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`, leadId: tempName._id });
         }
 
         setQuotes(
@@ -237,8 +257,8 @@ function OpportunityDetailsPage() {
   const fetchSupplierContactData = (showDialog, useAccountList = false, accountList = []) => {
     let ids = [];
 
-    if (opportunityData.supplierAccountName.length > 0 || useAccountList) {
-      ids = useAccountList ? accountList.map((d) => d?.optionValue) : opportunityData.supplierAccountName.map((d) => d?.optionValue);
+    if (opportunityData.supplierAccount?.length > 0 || useAccountList) {
+      ids = useAccountList ? accountList?.map((d) => d?.optionValue) : opportunityData?.supplierAccount.map((d) => d?.optionValue);
 
       const filterById = JSON.stringify([{ field: 'accountName', term: ids.length > 1 ? { $in: ids } : ids[0] }]);
       setLoadingSupplierAccounts(true);
@@ -294,7 +314,7 @@ function OpportunityDetailsPage() {
     const filterById = JSON.stringify([
       {
         field: 'accountName',
-        term: opportunityData?.customerAccountName?.optionValue
+        term: opportunityData?.customerAccount?.optionValue
       }
     ]);
 
@@ -315,7 +335,7 @@ function OpportunityDetailsPage() {
     let mainPoint = {};
     mainPoint['Account Name'] = data?.accountName?.optionLabel || '';
     mainPoint['Close Date'] = yyyyMMDD(data.closeDate);
-    mainPoint['Estimated Amount'] = data?.estimatedAmount ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount).shortFormatAmount : '';
+    mainPoint['Estimated Amount'] = data?.estimatedAmount ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount).fullFormatAmount : '';
     mainPoint['Opportunity Owner'] = data?.owner?.optionLabel || '';
     setMainPoints(mainPoint);
   };
@@ -324,12 +344,12 @@ function OpportunityDetailsPage() {
       axiosInstance()
         .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
-          const filteredFields = data.filter((currentField) => currentField.fieldData?.fieldName !== 'supplierAccountName');
+          const filteredFields = data.filter((currentField) => currentField.fieldData?.fieldName !== 'supplierAccount');
 
           const processSteps = data.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
 
           if (data && data.length) {
-            let fieldData = data.find((currentField) => currentField?.fieldData?.fieldName === 'supplierAccountName')?.fieldData;
+            let fieldData = data.find((currentField) => currentField?.fieldData?.fieldName === 'supplierAccount')?.fieldData;
             if (fieldData?.option && fieldData.option.length) {
               setSupplierAccountOptions(
                 fieldData.option.map((option) => ({
@@ -423,7 +443,7 @@ function OpportunityDetailsPage() {
 
   const goBackToListing = () => {
     history.push({
-      pathname: routes.opportunity.path
+      pathname: routes?.opportunity?.path
     });
   };
 
@@ -434,7 +454,6 @@ function OpportunityDetailsPage() {
 
     let values = {
       ...getObjKeysWithValues(opportunityData, newFields),
-      supplierAccountName: supplierAccounts,
       _id: opportunityData._id
     };
 
@@ -495,7 +514,7 @@ function OpportunityDetailsPage() {
       ...data
     };
 
-    const updatedOpportunityFields = [...opportunityFieldData, ...sectionFields.map((item) => item.fieldData)]
+    const updatedOpportunityFields = [...opportunityFieldData, ...sectionFields.map((item) => item.fieldData)];
     const updatedData = {
       ...getObjKeysWithValues(updatedOpportunityData, updatedOpportunityFields),
       [processFieldName]: steps[tempActiveStep].text,
@@ -542,8 +561,8 @@ function OpportunityDetailsPage() {
   };
 
   let selectedSupplierAccounts = [];
-  if (opportunityData?.supplierAccountName && opportunityData.supplierAccountName.length) {
-    selectedSupplierAccounts = opportunityData.supplierAccountName.map((s) => s.optionValue);
+  if (opportunityData?.supplierAccount && opportunityData.supplierAccount.length) {
+    selectedSupplierAccounts = opportunityData.supplierAccount.map((s) => s.optionValue);
   }
 
   return (
@@ -551,9 +570,9 @@ function OpportunityDetailsPage() {
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={customizedRoutes} />
       </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
         <div>
-          <Paper>
+          <Paper style={isMobile ? { width: '98%' } : {}}>
             {!opportunityData ? (
               <div>
                 <Skeleton variant="text" width="150px" height="40px" />
@@ -571,19 +590,29 @@ function OpportunityDetailsPage() {
                 showHeading={true}
               >
                 {allowedToEdit ? (
-                  <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                    Edit
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    color="primary"
+                    size="small"
+                    onClick={handleOpenUpdateDialog}
+                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                  >
+                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 ) : null}
                 {opportunityPermissions.isDelete &&
-                  opportunityData?.owner.optionValue &&
-                  user?.user?._id &&
-                  opportunityData.owner.optionValue === user.user._id ? (
-                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                opportunityData?.owner.optionValue &&
+                user?.user?._id &&
+                opportunityData.owner.optionValue === user.user._id ? (
+                  <DeleteButton
+                    text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
+                    onClick={() => setShowConfirmBox(true)}
+                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                  />
                 ) : null}
               </DetailsPageHeader>
             )}
-
             <ProcessFlow
               disableBackNext={allowedToEdit ? false : true}
               steps={steps}
@@ -609,8 +638,8 @@ function OpportunityDetailsPage() {
               <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
             )}
 
-            <div className="p-3">
-              {opportunityData && (
+            <div className="p-3 modified_style_of_accordion">
+              {opportunityData && permissions?.supplierContact?.isRead && (
                 <OpportunityContacts
                   contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
                   title="Supplier Contacts"
@@ -626,11 +655,11 @@ function OpportunityDetailsPage() {
                     });
                   }}
                   recordsPerLine={recordsPerLine}
-                  accounts={cloneDeep(opportunityData?.supplierAccountName)}
+                  accounts={cloneDeep(opportunityData?.supplierAccount)}
                   isAllowedToUpdate={allowedToEdit}
                 />
               )}
-              {opportunityData && (
+              {opportunityData && permissions?.customerContact?.isRead && (
                 <OpportunityContacts
                   contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
                   title="Customer Contacts"
@@ -647,11 +676,11 @@ function OpportunityDetailsPage() {
                   }}
                   recordsPerLine={recordsPerLine}
                   saveContactToOpportunity={handleAssignContacts}
-                  accountId={opportunityData?.customerAccountName?.optionValue}
+                  accountId={opportunityData?.customerAccount?.optionValue}
                   isAllowedToUpdate={allowedToEdit}
                 />
               )}
-              {permissions?.projectStrategy?.isRead && (
+              {permissions?.projectSales?.isRead && (
                 <ProjectInAccordion
                   recordsPerLine={3}
                   projectSales={projectSales}
@@ -660,6 +689,9 @@ function OpportunityDetailsPage() {
                   permissions={permissions}
                   isAddProjectSale={true}
                   isAllowedToEdit={allowedToEdit}
+                  accountId={opportunityData?._id}
+                  accountName={opportunityData?.opportunityName}
+                  resource={sidebarResource.opportunity}
                 />
               )}
               {permissions?.quoteBuilder?.isRead && (
@@ -669,7 +701,7 @@ function OpportunityDetailsPage() {
                   fetchData={fetchRelatedData}
                   quoteBuilderPermission={permissions.quoteBuilder}
                   opportunityId={id}
-                  accountId={opportunityData?.customerAccountName?.optionValue}
+                  accountId={opportunityData?.customerAccount?.optionValue}
                   opportunityName={opportunityData?.opportunityName}
                   marketSegmentId={opportunityData?.marketSegment?.optionValue}
                   subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
@@ -682,8 +714,8 @@ function OpportunityDetailsPage() {
             </div>
           </Paper>
         </div>
-        <div className="position-relative">
-          {showActivity ?
+        <div className={isMobile ? 'position-relative mb-5' : 'position-relative'}>
+          {/* {showActivity ?
             <Paper>
               {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                 <IoIosArrowDropright className="icon" />
@@ -717,7 +749,42 @@ function OpportunityDetailsPage() {
             :
             !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
               <IoIosArrowDropleft className="icon" />
-            </span>}
+            </span>} */}
+
+          <Paper>
+            {!isSmallScreen && (
+              <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+              </span>
+            )}
+            <div style={{ display: showActivity ? 'block' : 'none' }}>
+              {!opportunityData ? (
+                <Box>
+                  <Skeleton variant="text" width="100px" height="25px" />
+                  <Box marginY={1} />
+                  {[0, 1, 2, 3, 4].map((i, index) => (
+                    <Skeleton key={index} width="100%" height="50px" />
+                  ))}
+                </Box>
+              ) : (
+                <div>
+                  <Activity
+                    resourceId={opportunityData?._id}
+                    resource={opportunityResource}
+                    relatedTo={[
+                      {
+                        type: opportunityResource,
+                        referenceId: opportunityData?._id,
+                        access: true
+                      }
+                    ]}
+                    handleActivityRefresh={() => {}}
+                    emails={contactsEmailsData}
+                  />
+                </div>
+              )}
+            </div>
+          </Paper>
         </div>
       </div>
 
@@ -744,7 +811,7 @@ function OpportunityDetailsPage() {
           dataToUpdate={opportunityData}
           resource={null}
           isRedirectTodetailPage={false}
-        // opportunityApi={opportunityApi}
+          // opportunityApi={opportunityApi}
         />
       )}
 

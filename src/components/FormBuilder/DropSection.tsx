@@ -26,7 +26,7 @@ const dropstyle = {
 
 export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionHoverIndex, sectionHoverIndex, section,
     setSection, sectionId, id, index, moveSection, data, addDeleteField, extraFields,
-    onAddRemoveField = null
+    onAddRemoveField = null, isCalculativeField
 }) => {
 
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -46,8 +46,8 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
                     option = [{ optionLabel: "Option 1", optionValue: "Option 1" }]
                 }
                 let insert_object: any = {
-                    _id: (parseInt((Math.random() * 100000).toString())), fieldLabel: FieldList[type.toUpperCase()].label + " " + (count + 1), type: type, option: option,
-                    required: false, isTooltip: false, tooltipMessage: "", editAble: true, order: 0
+                    _id: (parseInt((Math.random() * 100000).toString())), fieldLabel: FieldList[type?.toUpperCase()]?.label + " " + (count + 1), type: type, option: option,
+                    required: false, isTooltip: false, tooltipMessage: "", editAble: true, deletAble: true, order: 0
                 }
                 if (type === FieldList.FORMULA.type) {
                     insert_object.formula = "return "
@@ -92,10 +92,10 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
                 delete fieldData._id
                 delete fieldData.fieldName
                 if (index !== null) {
-                    row.field.splice(index, 0, { _id: (parseInt((Math.random() * 100000).toString())), ...fieldData, editAble: true, order: 0 });
+                    row.field.splice(index, 0, { _id: (parseInt((Math.random() * 100000).toString())), ...fieldData, editAble: true, deletAble: true, order: 0 });
                 }
                 else {
-                    row.field.push({ _id: (parseInt((Math.random() * 100000).toString())), ...fieldData, editAble: true, order: 0 })
+                    row.field.push({ _id: (parseInt((Math.random() * 100000).toString())), ...fieldData, editAble: true, deletAble: true, order: 0 })
                 }
             }
         })
@@ -266,7 +266,6 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
                                 id="standard-basic"
                                 variant="outlined"
                                 margin="dense"
-                                disabled={module === "pdf-template"}
                                 value={data.sectionName}
                                 onChange={(event) => onChangeSectionName(data.sectionId, event.target.value)}
                             />
@@ -302,6 +301,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
                                     module={module}
                                     extraFields={extraFields}
                                     onAddRemoveField={onAddRemoveField}
+                                    isCalculativeField={isCalculativeField}
                                 />
                             )) : <Box m={5} width="100%">
                                 <Typography variant="body2" align="center">Drag and drop your fields here</Typography>

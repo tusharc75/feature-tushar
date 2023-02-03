@@ -4,7 +4,7 @@ import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import { Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select } from '@material-ui/core';
-import { ControlPoint } from '@material-ui/icons';
+import { ControlPoint, Delete } from '@material-ui/icons';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import UserRoles from './UserRoles';
 import axiosInstance from '../../axios/axiosInstance';
@@ -13,7 +13,7 @@ import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityD
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import {useData} from '../../StateProvider/Provider'
+import { useData } from '../../StateProvider/Provider'
 import RoleEngine from '../../components/Shared/RoleEngine';
 
 export default function AssignedEntities({
@@ -21,9 +21,11 @@ export default function AssignedEntities({
   permissions,
   userId,
   onSuccess,
-  loggedInUser
+  loggedInUser,
+  entityAccessIds = [],
+  roleAccessIds = [],
 }) {
-  const {state: {selectedEntity, user: {user}}} = useData()
+  const { state: { selectedEntity, user: { user } } } = useData()
   const [currentEntity, setCurrentEntity] = useState(entities[0]);
   const [unionRoleData, setUnionRoleData] = useState(null);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
@@ -141,13 +143,15 @@ export default function AssignedEntities({
             onSuccess={() => {
               onSuccess();
             }}
+            entityAccessIds={entityAccessIds}
+            roleAccessIds={roleAccessIds}
           />
         </Dialog>
       )}
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to un-assign  ${currentEntity.entity.entityName} ?`}
+          message={`Are you sure you want to un-assign  ${currentEntity?.entity?.entityName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -196,13 +200,27 @@ export default function AssignedEntities({
                 aria-label="icon tabs example"
               >
                 {entities.map((c, i) => (
-                  <Tab
-                    key={i}
-                    tabIndex={i}
-                    label={c?.entity?.entityName}
-                    aria-controls={`a11y-tabpanel-${i}`}
-                    id={`a11y-tab-${i}`}
-                  />
+                  currentTabIndex === i ?
+                    <>
+                      <Tab
+                        key={i}
+                        tabIndex={i}
+                        label={c?.entity?.entityName}
+                        aria-controls={`a11y-tabpanel-${i}`}
+                        id={`a11y-tab-${i}`}
+                      />
+                      {permissions?.user?.isDelete && !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
+                        <IconButton aria-label="delete" onClick={() => handleDeleteEntity()}>
+                          <Delete color="error" />
+                        </IconButton>) : null}
+                    </>
+                    : <Tab
+                      key={i}
+                      tabIndex={i}
+                      label={c?.entity?.entityName}
+                      aria-controls={`a11y-tabpanel-${i}`}
+                      id={`a11y-tab-${i}`}
+                    />
                 ))}
               </Tabs>
           }
@@ -214,23 +232,18 @@ export default function AssignedEntities({
                       <Grid container>
                         <Grid item xs={4}>
                           <Typography variant="subtitle2">
-                            Assigned Region Wide Functional Roles ({currentEntity?.role?.length || "0"})
+                            Assigned Roles ({currentEntity?.role?.length || "0"})
                           </Typography>
                         </Grid>
                         <Grid item xs={8} justify="flex-start">
-                          {permissions.user.isDelete && !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
-                            <DeleteButton
-                              text="Un-assign Entity"
-                              onClick={() => handleDeleteEntity()}
-                            />
-                          ) : null}
+
                         </Grid>
                       </Grid>
 
                     </Box>
                   </Grid>
                   <Grid item xs={2} container justify="flex-end">
-                    {permissions.user.isUpdate && (
+                    {permissions?.user?.isUpdate && (
                       <IconButton
                         color="primary"
                         size="small"

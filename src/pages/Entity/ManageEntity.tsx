@@ -8,6 +8,9 @@ import {
   useMediaQuery,
   Box,
 } from "@material-ui/core";
+import { IconButton, Tooltip } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/AddCircle';
+import InfoIcon from '@material-ui/icons/Info';
 import { Skeleton } from "@material-ui/lab";
 import { Formik, Form } from "formik";
 import axiosInstance from "../../axios/axiosInstance";
@@ -19,31 +22,40 @@ import { useHistory } from "react-router-dom";
 import { getObjKeys, yupSchema, isFieldNotTouched, setFieldsInAscendingOrder, getObjKeysWithValues } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import FormTypes from "../../components/Helpers/FormTypes";
-
+import { useData } from '../../StateProvider/Provider';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from "react-icons/fa";
+import ManageAddressDialog from "../../components/Address/ManageAddressDialog"
 interface InitialData {
   fields: any[];
   values: object;
 }
 
-const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = false, entityId = null }) => {
+const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = false,
+  entityId = null, fetchEntities = null }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState<InitialData>({
     fields: [],
     values: values,
   });
-
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [cloneHeading, setCloneHeading] = useState('');
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
   const [parentEntityDataSource, setParentEntityDataSource] = useState([]);
-
+  const [addressOptions, setAddressOptions] = useState([]);
+  const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false })
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [formValues, setFormValues] = useState({})
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user, permissions }
+  }: any = useData();
+
 
   useEffect(() => {
     getInitialData();
@@ -77,11 +89,11 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
 
         const fieldsData = isNew ? data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
           : data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
         let tempData = getObjKeys("", fieldsData)
         if (isClone) {
           const { data: { data } } = await axiosInstance().get(`/entity/${entityId}`);
           const { entityName, ...rest } = data
+          setCloneHeading(entityName);
           tempData = getObjKeysWithValues({ ...rest }, fieldsData)
         }
 
@@ -106,7 +118,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
         .then(({ data }) => {
           const newId = data.data._id;
           setSubmitting(false);
-          fetchData();
+          fetchData(true);
           toastConfig.setToastConfig({
             type: "success",
             open: true,
@@ -158,16 +170,22 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
       }}
       maxWidth="md"
       fullWidth
-      fullScreen={isMobile}
+      fullScreen={fullScreen || (isMobile || isTablet)}
     >
-      <CustomDialogHeader title={isClone ? "Clone" : isNew ? "Create New Entities" : "Update Entity"}
+      <CustomDialogHeader title={isClone ? `Clone - ${cloneHeading}` : isNew ? "Create New Entities" : "Update Entity"}
         onClose={() => {
           if (isFieldNotTouched({
             ...initialData,
             initialValues: initialData.values,
           }, formValues)) close()
           else setShowConfirmDialog(true)
-        }} />
+        }}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={true}
+      />
 
       {loading || !initialData.fields.length ? (
         <>
@@ -200,12 +218,15 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
             <>
               <CustomDialogContent>
                 <Form noValidate>
-                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                  {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                   {
                     formsData &&
                     formsData.map((form, i) => (
                       <div key={i}>
-                        <h2 className="form-label-style">{form.name}</h2>
+                        <div className={"detail-box-content"}>
+                          <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                          <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                        </div>
                         <Box marginY={2}>
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field, index2) => (
@@ -215,6 +236,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                                     <FormTypes
                                       isNew={isNew}
                                       {...field}
+                                      fieldData={field}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -235,6 +257,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                                   ) : (
                                     <FormTypes
                                       isNew={isNew}
+                                      fieldData={field}
                                       {...field}
                                       values={values}
                                       errors={errors}
@@ -273,6 +296,27 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                     ))
                   }
                 </Form>
+                {addressOpen?.open && (
+                  <ManageAddressDialog
+                    onClose={() => setAddressOpen({ open: false, isClone: false })}
+                    onSuccess={(data) => {
+
+                      setAddressOpen({ open: false, isClone: false })
+                      setFieldValue("address", data.fullAddress)
+                      setAddressOptions((prevState) => {
+                        return [
+                          ...prevState,
+                          {
+                            optionValue: data?.brand,
+                            optionLabel: data?.fullAddress,
+                            order: addressOptions.length,
+                            default: false
+                          }
+                        ]
+                      })
+                    }}
+                  />
+                )}
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button
@@ -296,10 +340,8 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                   color="primary"
                   size="small"
                   onClick={submitForm}
-                  disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0 || isFieldNotTouched({
-                    ...initialData,
-                    initialValues: initialData.values
-                  }, values)}
+                  disabled={isSubmitting || loading ||
+                    uploadingImageOrFileProgress > 0}
                 >
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>
@@ -307,6 +349,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
               {
                 showConfirmDialog ?
                   <ConfirmCancelDialog
+                    close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false)

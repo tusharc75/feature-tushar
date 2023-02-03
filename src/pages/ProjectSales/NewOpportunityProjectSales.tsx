@@ -75,7 +75,8 @@ export default function NewOpportunityProjectSales({
   ] = useState([]);
   const [ownerDataSource, setOwnerDataSource] = useState([]);
   const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
-
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  
   useEffect(() => {
     const processSteps = opportunityData.fields.find(
       (d) => d.type.toLowerCase() === "process"
@@ -137,14 +138,14 @@ export default function NewOpportunityProjectSales({
 
           if (
             accountId &&
-            ["customerAccountName", "supplierAccountName"].some(
+            ["customerAccount", "supplierAccount"].some(
               (d) => d === _f.fieldData.fieldName
             )
           ) {
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
           }
 
-          if (!(_f.fieldData.fieldName === "supplierAccountName")) {
+          if (!(_f.fieldData.fieldName === "supplierAccount")) {
             newFields.push(_f.fieldData);
           }
         });
@@ -200,7 +201,7 @@ export default function NewOpportunityProjectSales({
   };
 
   const handleCreateOpportunity = (values) => {
-    if (accountId) values["supplierAccountName"] = [accountId];
+    if (accountId) values["supplierAccount"] = [accountId];
     setLoading(true);
     axiosInstance()
       .post(`${opportunityApi}?entity=${selectedEntity}`, values)
@@ -245,14 +246,20 @@ export default function NewOpportunityProjectSales({
       <Dialog
         maxWidth="md"
         fullWidth
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={onClose}
         open={open}
         disableBackdropClick={true}
       >
-        <CustomDialogHeader title="Create Opportunity" onClose={onClose} />
+        <CustomDialogHeader title="Create Opportunity" onClose={onClose}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
+        />
 
         {opportunityData.fields.length === 0 && (
           <CustomDialogContent>
@@ -639,7 +646,7 @@ export default function NewOpportunityProjectSales({
                                               // {...rest}
                                               disabled={
                                                 field.fieldName ===
-                                                "customerAccountName"
+                                                "customerAccount"
                                               }
                                               values={values}
                                               errors={errors}

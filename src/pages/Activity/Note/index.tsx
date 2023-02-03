@@ -12,10 +12,10 @@ import CustomContainer from '../../../components/CustomContainer';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { GoNote } from 'react-icons/go';
 import { ExpandMore } from '@material-ui/icons';
-import { Button, Dialog, Menu, MenuItem } from '@material-ui/core';
+import { Button, Chip, Dialog, Link, Menu, MenuItem, TextField } from '@material-ui/core';
 import { AddOutlined } from '@material-ui/icons';
 import { CreateNote } from '../../../components/Activity/Note/CreateNote';
-import { CustomDialogTransition, gridLoadingTimeout } from '../../../constants/helpers';
+import { CustomDialogTransition, getApi, getData, gridLoadingTimeout } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import styles from '../../Leads/Header.module.scss';
@@ -25,6 +25,10 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
+import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
+import { MdAdd } from 'react-icons/all';
+import { Autocomplete } from '@material-ui/lab';
+import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 
 const Note = () => {
   const {
@@ -37,27 +41,39 @@ const Note = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isNew, setIsNew] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [filter, setFilter] = useState([]);
+  const [filter, setFilter] = useState(null);
   const [okButtonLoading, setOkButtonLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState({ id: null, name: null });
   const [, setShowDeleteWarningConfirmBox] = useState(false);
   const [noteData, setNoteData] = useState(null);
   const [noteId, setNoteId] = useState(undefined);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
-
-  // const [showGridFilters, setShowGridFilters] = useState(true)
+  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords, appendRows } = state;
+  const localStorageSelectedRecords = 'notesPage';
+  const [resource, setResource] = useState(null);
+  const [resourceData, setResourceData] = useState(null);
+  const [loadingResources, setLoadingResources] = useState(false);
+  const [selectedResourceData, setSelectedResourceData] = useState(null);
   const columnState = JSON.parse(localStorage.getItem('notesPage'));
 
+  const [resourceOptions, setResourceOptions] = useState([]);
+
+  useEffect(() => {
+    setResourceOptions(get_activity_resource(permissions));
+  }, []);
+
   const columns = [
-    { field: 'name', headerName: 'Title', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+    { field: 'name', headerName: 'Title', show: true, disabled: true, primaryField: true, cellRenderer: 'nameRenderer' },
+    { field: 'relatedTo', headerName: 'Related To', show: true, disabled: true, primaryField: true, cellRenderer: 'referenceRenderer' },
     { field: 'createdByDate', headerName: 'Created At', filter: false, sortable: false, show: true, cellRenderer: 'createdAtDateRenderer' },
     { field: 'updatedByDate', headerName: 'Updated At', filter: false, sortable: false, show: true, cellRenderer: 'updatedAtDateRenderer' }
   ];
+
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
@@ -78,11 +94,37 @@ const Note = () => {
         .catch((err) => {
           toastConfig.setToastConfig(err);
         });
+    } else {
+      setFilter([]);
     }
   }, [referenceId]);
 
   useEffect(() => {
-    fetchNotes();
+    if (resource && resource?.optionValue) {
+      setLoadingResources(true);
+      axiosInstance()
+        .get(`${getApi(resource?.optionValue)}?limit=100`)
+        .then(({ data: { data } }) => {
+          if (data.length) {
+            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
+            setResourceData(mappedData || []);
+          }
+          setLoadingResources(false);
+        })
+        .catch((error) => {
+          setLoadingResources(false);
+        });
+      return () => {
+        setSelectedResourceData(null);
+        setResourceData(null);
+      };
+    }
+  }, [resource]);
+
+  useEffect(() => {
+    if (filter) {
+      fetchNotes();
+    }
   }, [filter]);
 
   const openActions = (event) => {
@@ -105,14 +147,35 @@ const Note = () => {
   };
 
   const NameRenderer = (params) => (
-    <span className={permissions?.note?.isUpdate ? "link cursor-pointer" : ""}
+    <span
+      className={permissions?.note?.isUpdate ? 'link cursor-pointer' : ''}
       onClick={() => {
         if (permissions?.note?.isUpdate) {
-          handleActivityOpen(params.data)
+          handleActivityOpen(params.data);
         }
-      }}>
+      }}
+    >
       {params.value}
     </span>
+  );
+
+  const ReferenceRenderer = (params) => (
+    <>
+      {params.value && params.value?.length > 0 ? (
+        params.value.map((d) => {
+          return (
+            <>
+              <Link className="link text-truncate" onClick={() => history.push(`${routes[d?.type].path}/detail/${d?.referenceId}`)}>
+                {d.name}
+              </Link>
+              <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
+            </>
+          );
+        })
+      ) : (
+        <NoDataCell />
+      )}
+    </>
   );
 
   const CreatedAtDateRenderer = (params) => <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(params.value)}</span>;
@@ -133,25 +196,21 @@ const Note = () => {
   );
   const frameworkComponents = {
     nameRenderer: NameRenderer,
+    referenceRenderer: ReferenceRenderer,
     createdAtDateRenderer: CreatedAtDateRenderer,
     updatedAtDateRenderer: UpdatedAtDateRenderer,
     actionsRenderer: ActionsRenderer
   };
 
   const fetchNotes = async () => {
-    // setLoading(true)
-
     dispatch({ type: 'loading', loading: true });
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     await GetNotes(JSON.stringify(filter))
       .then(({ data }) => {
         let rows = data.map((u) => {
-          const { createdBy, updatedBy, relatedTo, ...restProperties } = u;
-
+          const { createdBy, updatedBy, ...restProperties } = u;
           let res = {
             ...restProperties,
             id: u._id,
@@ -159,10 +218,40 @@ const Note = () => {
             createdBy: u.createdBy?.user,
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
+            updatedByDate: u.updatedBy?.date,
+            isChecked: false
           };
           return res;
         });
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: data.count,
+            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: data.count,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
+          });
+        }
+        if (gridApi) {
+          try {
+            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
+              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
+              : [];
+            if (oldSelectedRecords.length > 0) {
+              gridApi.forEachNode(function (node) {
+                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
+              });
+            }
+          } catch (ex) {
+            console.error('Error in getting selected records from local storage');
+          }
+        }
 
         dispatch({ type: 'initialize', data: rows, count: data.length });
         setTimeout(() => {
@@ -178,7 +267,6 @@ const Note = () => {
   const handleDeleteNote = async () => {
     if (deleteRecord.id || selectedRecords.length > 0) {
       setOkButtonLoading(true);
-
       axiosInstance()
         .put(`/note/deletemany`, { ids: deleteRecord.id ? [deleteRecord.id] : selectedRecords.map((d) => d._id) })
         .then(({ data }) => {
@@ -207,10 +295,6 @@ const Note = () => {
   };
 
   const handleActivityOpen = (data) => {
-    // history.push({
-    //     pathname: '/activity/note',
-    //     search: '?activityType=note&activityId=' + id
-    // })
     setShowCreateDialog(true);
     setNoteData(data);
   };
@@ -237,86 +321,185 @@ const Note = () => {
           <CustomBreadCrumbs routes={[{ title: routes.activityNote.title }]} />
         </Grid>
       </Grid>
-
       <CustomContainer>
-        <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={6} className="d-flex align-items-center gap-1">
-              <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title} ({dataRows.length})</span>
-            </Grid>
-            <Grid item xs={6} className={styles.filter_side}>
-              <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
-                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  className={styles.add_submit_btn}
-                  onClick={() => {
-                    setIsNew(true);
-                    setShowCreateDialog(true);
+        {filter && (
+          <div className="header-panel">
+            <Grid container className={styles.filter_side_container}>
+              <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
+                <GoNote className="headerLogo" />
+                <span className="listingHeader">{routes.activityNote.title}</span>
+                <Autocomplete
+                  options={resourceOptions}
+                  getOptionLabel={(option) => option.optionLabel}
+                  style={{ width: isMobile && !isTablet ? '60%' : '250px' }}
+                  value={resource}
+                  onChange={(event, newValue) => {
+                    setResource(newValue);
+                    if (newValue) {
+                      setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
+                    } else {
+                      setFilter([]);
+                    }
                   }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-                {/* </Box> */}
-                <Button
-                  className={styles.action_submit_btn}
-                  variant="outlined"
-                  color="default"
                   size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length > 0 ? false : true}
-                >
-                  Actions <ExpandMore />
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      showConfirmBox(selectedRecords);
-                      closeActions();
+                  renderInput={(params) =>
+                    isMobile && !isTablet ? (
+                      <TextField {...params} label="Select Resource" size="small" variant="outlined" className={isMobile ? 'serchBox' : ''} />
+                    ) : (
+                      <TextField {...params} label="Select Resource" variant="outlined" />
+                    )
+                  }
+                />
+                {resource && resourceData && (
+                  <Autocomplete
+                    disabled={loadingResources}
+                    options={resourceData}
+                    getOptionLabel={(option: any) => option.name}
+                    getOptionSelected={(option: any, value: any) => option.name === value.name}
+                    style={{ width: isMobile && !isTablet ? '60%' : '250px' }}
+                    value={selectedResourceData}
+                    onChange={(event, newValue) => {
+                      setSelectedResourceData(newValue);
+                      if (newValue?.id) {
+                        setFilter((prevState) => [...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]);
+                      } else {
+                        setFilter([]);
+                      }
                     }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-              </Box>
+                    size="small"
+                    renderInput={(params) =>
+                      isMobile && !isTablet ? (
+                        <TextField
+                          {...params}
+                          label={`${resource.optionLabel}`}
+                          size="small"
+                          variant="outlined"
+                          className={isMobile ? 'serchBox' : ''}
+                        />
+                      ) : (
+                        <TextField {...params} label={`${resource.optionLabel}`} variant="outlined" />
+                      )
+                    }
+                  />
+                )}
+              </Grid>
+              <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
+                <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
+                  <Grid style={{ width: isMobile && !isTablet ? '75%' : '100%', display: 'flex' }}>
+                    <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
+                  </Grid>
+                  <Grid style={{ display: 'flex', gap: '5px' }}>
+                    {
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setIsNew(true);
+                          setShowCreateDialog(true);
+                        }}
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                      >
+                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                      </Button>
+                    }
+                    <div className="d-flex gap-2">
+                      {/* </Box> */}
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                        disabled={selectedRecords.length > 0 ? false : true}
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      >
+                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        <MenuItem
+                          onClick={() => {
+                            showConfirmBox(selectedRecords);
+                            closeActions();
+                          }}
+                          disabled={!permissions.note.isDelete}
+                        >
+                          Delete
+                        </MenuItem>
+                      </Menu>
+                    </div>
+                  </Grid>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </div>
-
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={true}
-          allowSelection={true}
-          actionWidth={100}
-          isClientSideGrid={true}
-          loading={loading}
-          renderedFrom="notesPage"
-          refreshGrid={fetchNotes}
-        />
-
+          </div>
+        )}
+        {isMobile && !isTablet ? (
+          <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={permissions.note}
+            primaryField={columns?.find((d) => d.primaryField)}
+            onClick={(data) => {
+              if (permissions?.note?.isUpdate) {
+                handleActivityOpen(data);
+              }
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={(data) => {}}
+            extraParamsToCheckDelete={true}
+            onDelete={(data) => {
+              showConfirmBox(selectedRecords);
+              closeActions();
+            }}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            chips={[
+              {
+                label: 'Status: ',
+                field: 'status'
+              }
+            ]}
+            onCreate={false}
+            showClone={false}
+            onClone={() => {}}
+            renderedFrom={'notesPage'}
+          />
+        ) : (
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={true}
+            allowSelection={true}
+            actionWidth={100}
+            isClientSideGrid={true}
+            loading={loading}
+            renderedFrom="notesPage"
+            refreshGrid={fetchNotes}
+          />
+        )}
         {noteId !== undefined && <ActivityModelHandler activityType="note" activityId={noteId} onClose={() => setNoteId(undefined)} />}
       </CustomContainer>
       {isConfirmDialogVisible ? (
@@ -334,20 +517,41 @@ const Note = () => {
       {showCreateDialog && (
         <Dialog
           open={showCreateDialog}
-          fullScreen={isMobile || isTablet}
+          fullScreen={fullScreen || isMobile || isTablet}
           TransitionComponent={CustomDialogTransition}
           aria-labelledby="customized-dialog-title"
           maxWidth={'md'}
-          onClose={handleDialogClose}
+          onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+              handleDialogClose();
+              setFullScreen(false);
+            }
+          }}
           fullWidth
         >
           <CreateNote
             noteId={isNew ? null : noteData?.id}
-            relatedTo={[{ type: 'my', name: user?.user?._id }]}
-            handleClose={handleClose}
-            handleDialogClose={handleDialogClose}
-
-          // noteData={noteData}
+            relatedTo={[
+              {
+                type: resource && selectedResourceData ? resource.optionValue : 'user',
+                referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
+                access: true
+              }
+            ]}
+            handleClose={() => {
+              handleClose();
+              setFullScreen(false);
+            }}
+            handleDialogClose={() => {
+              handleDialogClose();
+              setFullScreen(false);
+            }}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            showManimizeMaximize={true}
+            // noteData={noteData}
           />
         </Dialog>
       )}

@@ -17,11 +17,20 @@ import { FaEye } from 'react-icons/fa';
 import {
   SET_USER,
   USER_LOADING,
-  SET_SELECTED_ENTITY,
+  SET_SELECTED_ENTITY
 } from "../../StateProvider/actionTypes";
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 import AssignedUsers from "./AssignedUsers";
 import ManageEntity from "./ManageEntity";
+import NewStepper from "../../components/Helpers/NewStepper";
+import { isObjectEmpty } from "../../constants/helpers";
+import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
+import DeleteButton from "../../components/Helpers/DeleteButton";
+import ResourceTransferDialog from "../../components/ResourceTransferDialog"
+import { isMobile, isTablet } from "react-device-detect";
+import accountClass from "../Account/account.module.scss";
+import { BiEdit } from "react-icons/bi";
+import { MdDelete } from "react-icons/md";
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -29,7 +38,7 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions },
+    state: { user, permissions },
     dispatch,
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
@@ -49,14 +58,24 @@ const EntityDetailsPage = () => {
   ]);
   const showRecordsBeforeViewAll = 2;
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
+  const [doa, setDoa] = useState<any[]>([]);
+  const [doaCurrency, setDoaCurrency] = useState("");
+  const [doaType, setDoaType] = useState(null);
+  const [doaApproveType, setDoaApproveType] = useState(null);
+  const [doaMinLimit, setDoaMinLimit] = useState(null);
+  const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
 
+  const [doaDialogOpen, setDoaDialogOpen] = useState(false);
+  const [userList, setUserList] = useState<any[]>([]);
+  const [showDeleteEntityDialog, setShowDeleteEntityDialog] = useState(false)
   useEffect(() => {
     if (id) {
       getEntityFields();
       fetchEntityData();
       fetchEntityUser();
+      fetchDoa();
+      fetchLoggedInUserRole();
     }
-    // eslint-disable-next-line
   }, [id]);
 
   const fetchEntityData = async () => {
@@ -67,9 +86,9 @@ const EntityDetailsPage = () => {
       } = await axiosInstance().get(`/entity/${id}`);
 
       handleMainPoints(data);
-      setHeadingLbl(data.entityName);
+      setHeadingLbl(data?.entityName);
       setEntityData(data);
-      setCustomizedRoutes([routes.entity, { title: data.entityName }]);
+      setCustomizedRoutes([routes.entity, { title: data?.entityName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -82,6 +101,7 @@ const EntityDetailsPage = () => {
       .get(`/user?filterById=[{"field": "entities.entity", "term": "${id}"}]`)
       .then(({ data: { data } }) => {
         setUsers(data);
+        getRows(data)
         setUsersLoading(false);
       })
       .catch((err) => {
@@ -92,7 +112,7 @@ const EntityDetailsPage = () => {
 
   const handleMainPoints = (data) => {
     let tempMp = {
-      name: `${data.entityName}`,
+      name: `${data?.entityName}`,
       taxJurisdiction: data.taxJurisdiction || "",
     };
     setMainPoints(tempMp);
@@ -223,6 +243,69 @@ const EntityDetailsPage = () => {
 
   const fieldsToShowInDetailPage = entityFields.filter((field) => field.isRead);
 
+  const fetchLoggedInUserRole = async () => {
+    let roleIds = [];
+    await axiosInstance().get(`/user/${user.user?._id}`).then(({ data: { data } }) => {
+      data.entities.map((item) => {
+        item.role.forEach((role) => {
+          if (roleIds.includes(role?._id)) {
+
+          } else {
+            roleIds.push(role?._id)
+          }
+        })
+
+      })
+      setRoleAccessOfLoggedInUser(roleIds)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  }
+
+  const fetchDoa = async () => {
+    axiosInstance()
+      .get(`/doa/${id}`)
+      .then(({ data: { data } }) => {
+        let doaData = [];
+
+        // data.doa.forEach((item) => {
+        //   //  When the user set in doa was deleted, we are getting {} in array like this [{}]
+        //   //  So added this check
+        //   if (!isObjectEmpty(item)) {
+        //     doaData.push({
+        //       id: item.user?._id,
+        //       name: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
+        //       firstName: item.user?.firstName,
+        //       lastName: item.user?.lastName,
+        //       amount: item.amount,
+        //     });
+        //   }
+        // });
+
+        setDoa(data?.doa);
+        setDoaCurrency(data?.doaCurrency)
+        setDoaType(data?.doaType)
+        setDoaMinLimit(data?.doaMinLimit)
+        setDoaApproveType(data?.doaApproveType ? data?.doaApproveType : "User")
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setLoading(false);
+        setDoa([]);
+      });
+  };
+
+  const getRows = (data: []) => {
+    const rows = data.length
+      ? data.map((user: any) => ({
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+      }))
+      : [];
+
+    setUserList(rows);
+  };
+
   return (
     <>
       {showAssignUserDialog && (
@@ -244,6 +327,7 @@ const EntityDetailsPage = () => {
               fetchEntityUser();
               userDialogClose();
             }}
+            roleAccessIds={roleAccessOfLoggedInUser}
           />
         </Dialog>
       )}
@@ -292,34 +376,27 @@ const EntityDetailsPage = () => {
                 >
                   {permissions?.entity?.isUpdate && (
                     <Button
-                      variant="contained"
+                      variant={isMobile && !isTablet ? "text" : "contained"}
                       color="primary"
                       size="small"
                       onClick={handleOpenUpdateDialog}
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                      style={isMobile && !isTablet ? { color: "#43aeaa" } : {}}
                     >
-                      Edit
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
                     </Button>
                   )}
-                  {/* <Box component="span" marginX={1} />
+                  {/* <Box component="span" marginX={1} /> */}
                   {permissions?.entity?.isDelete && (
-                    <span
-                      title={
-                        selectedEntity === id
-                          ? "Primarily selected entity can't be deleted"
-                          : "Permanently delete this entity"
-                      }
-                    >
-                      <DeleteButton
-                        disabled={selectedEntity === id}
-                        text="Delete"
-                        onClick={() => setShowConfirmBox(true)}
-                      />
-                    </span>
-                  )} */}
+                    <DeleteButton
+                      disabled={entityData?.createdBy?.user?._id !== user?.user?._id}
+                      text={isMobile && !isTablet ? <MdDelete size={20} /> : "Delete"}
+                      onClick={() => setShowDeleteEntityDialog(true)}
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                    />
+                  )}
                 </DetailsPageHeader>
               )}
-
-
               <Box>
                 {loading || !entityFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
@@ -342,84 +419,145 @@ const EntityDetailsPage = () => {
                   </>
                 )}
               </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                  <Box
-                    width="100%"
-                    padding={1}
-                    bgcolor="grey.200"
-                    display="flex"
-                    justifyContent="space-between"
-                  >
-                    <Typography variant="subtitle2">
-                      Assigned Users ({users.length || 0})
-                    </Typography>
-                    {permissions.entity.isUpdate && (
-                      <IconButton
-                        title="Assign users"
-                        color="primary"
-                        size="small"
-                        onClick={userDialogOpen}
-                      >
-                        <ControlPoint />
-                      </IconButton>
-                    )}
-                  </Box>
-                  <Box padding={1}>
-                    {usersLoading ? (
-                      <Box display="flex">
-                        {[1, 2].map((i) => (
-                          <BoxWithBorder
-                            key={i}
-                            style={{
-                              padding: "8px",
-                              margin: "8px",
-                              width: "100%",
-                            }}
-                          >
-                            <Box padding={1}>
-                              <Skeleton
-                                variant="text"
-                                width="100px"
-                                height="20px"
-                              />
-                              <Box marginTop={1} />
-                              <Skeleton variant="text" width="100%" height="15px" />
+              {
+                <>
+                  <Box>
+                    <Box
+                      width="100%"
+                      padding={1}
+                      bgcolor="grey.200"
+                      display="flex"
+                      justifyContent="space-between"
+                    >
+                      <Grid container>
+                        <Grid item xs={8}>
+                          <Box display="flex">
+                            <Box padding="5px">
+                              <Typography variant="subtitle2">
+                                {"DOA Details "}
+                              </Typography>
                             </Box>
-                          </BoxWithBorder>
-                        ))}
-                      </Box>
-                    ) : users.length ? (
-                      <>
-                        <AssignedUsers
-                          permissions={permissions}
-                          user={users.slice(0, showUsers)}
-                          unassignEntity={handleUnassignUser}
-                          type="entity"
-                        />
-
-                        <Box marginY={1} />
-                        {
-                          users.length > showRecordsBeforeViewAll &&
-                          <Box className="btn-view gap-1" p={1} display="flex" justifyContent="center" alignItems="center"
-                            onClick={() => history.push(`/user`, {
-                              id: entityData._id,
-                              name: entityData.entityName,
-                              type: "entity",
-                              text: "Entity"
-                            })}>
-                            <FaEye /> View All &#8599;
                           </Box>
-                        }
-                      </>
-                    ) : (
-                      <Box textAlign="center" padding={2}>
-                        <Typography>No Users </Typography>
-                      </Box>
-                    )}
+                        </Grid>
+                        <Grid item container xs={4} justify="flex-end">
+                          {permissions.entity?.isUpdate && user?.user?.permissions?.doaSetup && (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              onClick={() => setDoaDialogOpen(true)}
+                            >
+                              {doa.length > 0 ? "Edit DOA" : "Add DOA"}
+                            </Button>
+                          )}
+                        </Grid>
+                      </Grid>
+                    </Box>
                   </Box>
-                </Grid>
-              </Grid>
+                  <Grid container style={{ padding: "8px" }} spacing={1}>
+                    <Grid item xs={12} sm={12}>
+                      <BoxWithBorder
+                        style={{
+                          padding: "0px",
+                        }}
+                      >
+                        {doa.length > 0 ? (
+                          <NewStepper
+                            heading={" "}
+                            steps={doa}
+                            doaCurrency={doaCurrency}
+                            doaApproveType={doaApproveType}
+                          />
+                        ) : (
+                          <Box textAlign="center" marginTop={2}>
+                            <Typography variant="body2">
+                              Entity doesn't have any DOA
+                            </Typography>
+                          </Box>
+                        )}
+                      </BoxWithBorder>
+                    </Grid>
+                  </Grid>
+                </>
+              }
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+            <Paper style={{ overflow: 'hidden' }}>
+              <Box
+                width="100%"
+                padding={1}
+                bgcolor="grey.200"
+                display="flex"
+                justifyContent="space-between"
+              >
+                <Typography variant="subtitle2">
+                  Assigned Users ({users.length || 0})
+                </Typography>
+                {permissions.entity.isUpdate && (
+                  <IconButton
+                    title="Assign users"
+                    color="primary"
+                    size="small"
+                    onClick={userDialogOpen}
+                  >
+                    <ControlPoint />
+                  </IconButton>
+                )}
+              </Box>
+              <Box padding={1}>
+                {usersLoading ? (
+                  <Box display="flex">
+                    {[1, 2].map((i) => (
+                      <BoxWithBorder
+                        key={i}
+                        style={{
+                          padding: "8px",
+                          margin: "8px",
+                          width: "100%",
+                        }}
+                      >
+                        <Box padding={1}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="20px"
+                          />
+                          <Box marginTop={1} />
+                          <Skeleton variant="text" width="100%" height="15px" />
+                        </Box>
+                      </BoxWithBorder>
+                    ))}
+                  </Box>
+                ) : users.length ? (
+                  <>
+                    <AssignedUsers
+                      permissions={permissions}
+                      user={users.slice(0, showUsers)}
+                      unassignEntity={handleUnassignUser}
+                      type="entity"
+                    />
+
+                    <Box marginY={1} />
+                    {
+                      users.length > showRecordsBeforeViewAll &&
+                      <Box className="btn-view gap-1" p={1} display="flex" justifyContent="center" alignItems="center"
+                        onClick={() => history.push(`/user`, {
+                          id: entityData._id,
+                          name: entityData?.entityName,
+                          type: "entity",
+                          text: "Entity"
+                        })}>
+                        <FaEye /> View All &#8599;
+                      </Box>
+                    }
+                  </>
+                ) : (
+                  <Box textAlign="center" padding={2}>
+                    <Typography>No Users </Typography>
+                  </Box>
+                )}
+              </Box>
             </Paper>
           </Grid>
         </Grid>
@@ -443,6 +581,40 @@ const EntityDetailsPage = () => {
           }
         />
       ) : null}
+      {
+        showDeleteEntityDialog ?
+          <ResourceTransferDialog
+            open={true}
+            resource="Entity"
+            fromResource={{ ...entityData, name: entityData?.entityName }}
+            allResourceData={JSON.parse(localStorage.getItem("mappedEntities")).map(o => ({ ...o, name: o?.entityName }))}
+            onClose={() => setShowDeleteEntityDialog(false)}
+            handleDelete={handleDeleteEntity}
+          />
+          : null
+      }
+      {doaDialogOpen && (
+
+          <DoaDialog
+            userList={userList}
+            doa={doa}
+            doaCurrency={doaCurrency}
+            selectedEntity={[id]}
+            open={doaDialogOpen}
+            onSuccess={() => {
+              setDoaDialogOpen(false);
+              fetchDoa();
+            }}
+            onClose={() => {
+              setDoaDialogOpen(false);
+            }}
+            doaType={doaType}
+            doaMinLimit={doaMinLimit}
+            doaApproveType={doaApproveType}
+          />
+
+
+      )}
     </>
   );
 };

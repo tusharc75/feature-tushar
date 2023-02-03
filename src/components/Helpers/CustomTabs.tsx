@@ -1,48 +1,46 @@
-import { withStyles, Theme, createStyles } from "@material-ui/core/styles";
-import { Typography, Tabs, Tab } from "@material-ui/core";
-import { DeveloperBoard, Map } from "@material-ui/icons";
+import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
+import { Typography, Tabs, Tab } from '@material-ui/core';
+import { DeveloperBoard, Map } from '@material-ui/icons';
 
 const AntTabs = withStyles((theme) => ({
   root: {
-    minHeight: "38px",
+    minHeight: '38px'
     // borderBottom: "1px solid #e8e8e8",
   },
   indicator: {
     backgroundColor: theme.palette.primary.main, //  dargBg
-    display: "none",
+    display: 'none'
   },
+  "&.Component-root.Component-selected" :{
+      color:"red !important"
+  }
 }))(Tabs);
 
 const AntTab = withStyles((theme: Theme) =>
   createStyles({
     root: {
-      textTransform: "none",
+      textTransform: 'none',
       minWidth: 72,
-      fontWeight: theme.typography.fontWeightRegular,
+      fontWeight: 600,
       marginRight: theme.spacing(4),
 
-      "&:hover": {
+      '&:hover': {
+        color: "var(--secondary)", //  dargBg
+        opacity: 1
+      },
+      '&$selected': {
         color: theme.palette.primary.main, //  dargBg
-        opacity: 1,
+        fontWeight: theme.typography.fontWeightMedium
       },
-      "&$selected": {
-        color: theme.palette.primary.main, //  dargBg
-        fontWeight: theme.typography.fontWeightMedium,
-      },
-      "&:focus": {
-        color: theme.palette.primary.main, //  darkBg
-      },
+      '&:focus': {
+        color: theme.palette.primary.main //  darkBg
+      }
     },
-    selected: {},
+    selected: {
+      color:"#43AEAA !important"
+    }
   })
-)((props: StyledTabProps) => (
-  <Tab
-    className="AntTab"
-    icon={props.label === "Board" ? <DeveloperBoard /> : <Map />}
-    disableRipple
-    {...props}
-  />
-));
+)((props: StyledTabProps) => <Tab className="AntTab" icon={props.label === 'Board' ? <DeveloperBoard /> : <Map />} disableRipple {...props} />);
 
 interface StyledTabProps {
   label: string;
@@ -54,11 +52,7 @@ const CustomTabs = ({ value, setValue, tabs }) => {
   };
   return (
     <div>
-      <AntTabs
-        value={value}
-        onChange={handleTabChange}
-        aria-label="ant example"
-      >
+      <AntTabs value={value} onChange={handleTabChange} aria-label="ant example">
         {tabs.map((tab, i) => (
           <AntTab key={i} label={tab} />
         ))}

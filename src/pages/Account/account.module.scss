@@ -4,6 +4,7 @@
   justify-content: space-between;
   width: 40%;
 }
+
 .detail_page_container {
   width: 100%;
   max-height: 400px;
@@ -58,16 +59,29 @@
 
 .account_header {
   display: flex;
-  justify-content: flex-end;
+  // justify-content: flex-end;
   gap: 0.25rem;
   -webkit-gap: 0.25rem;
 }
-@supports (not (gap:0.25rem)) and (not (-webkit-gap: 0.25rem)){
-  .account_header > *:not(:nth-child(1)) {
-      margin-left: 0.25rem !important;
-  }
+
+.mobile_filter_side_header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
+@supports (not (gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
+  .account_header > *:not(:nth-child(1)) {
+    margin-left: 0.25rem !important;
+  }
+}
+.mobile_button_layout {
+  padding: 5px !important;
+}
+.mobile_button_layout_secondary {
+  padding: 5px !important;
+  border-color: var(--warning-light) !important;
+}
 .custom_height {
   height: calc(100vh - 230px);
 }
@@ -161,17 +175,43 @@
   display: flex;
   gap: 0.25rem;
 }
-@media only screen and (max-width: 1024px) {
-  .account_header {
-    margin-top: 15px;
+@media only screen and (max-width: 1299px) {
+  .set_width_table {
+    width: 93vw;
   }
 }
+@media only screen and (max-width: 1024px) {
+  // .account_header {
+  //   //margin-top: 15px;
+  // }
+}
+@media only screen and (max-width: 960px) {
+  .mobile_filter_side_header {
+    width: 100%;
+  }
+  .search_box_input {
+    flex: none !important;
+    width: 300px !important;
+  }
+  .set_width_table {
+    width: 97vw;
+  }
+}
+
+@media only screen and (max-width: 830px) {
+}
+
 @media only screen and (max-width: 768px) {
   .account_header {
-    display: block;
+    display: flex !important;
     grid-gap: 8px;
-    flex-direction: column;
     margin-top: 0;
+  }
+  .search_box_input {
+    width: 100% !important;
+  }
+  .set_width_table {
+    width: 95vw;
   }
 
   .account_header_add_btn_action_btn_group {
@@ -190,21 +230,16 @@
     width: 100% !important;
     /* display:inline; */
   }
-  .account_header_dropdown
-    .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
+  .account_header_dropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
     width: 100% !important;
   }
-  .account_header_dropdown
-    .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
+  .account_header_dropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
     width: 100% !important;
   }
-  .account_header_dropdown
-    .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl
-    .MuiInput-formControl {
+  .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl .MuiInput-formControl {
     width: 100% !important;
   }
-  .account_header_dropdown
-    .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl.MuiInput-formControl {
+  .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl.MuiInput-formControl {
     width: 100% !important;
   }
   .account_header_inner_container
@@ -235,6 +270,7 @@
 .account_grid {
   height: calc(100vh - 200px);
 }
+
 @media only screen and (max-width: 714px) {
   .account_header_inner_container
     .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between
@@ -250,8 +286,7 @@
   .account_header.account_header-mobile .MuiFormControl-root.MuiTextField-root {
     width: 100% !important;
   }
-  .account_header_dropdown
-    .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
+  .account_header_dropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
     width: 100% !important;
   }
   .account_header_account_tab,
@@ -262,14 +297,12 @@
   .account_header_inner_container div.account_header {
     width: 100%;
   }
-  .account_header_dropdown
-    .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl
-    .MuiInput-formControl {
+  .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl .MuiInput-formControl {
     width: 100% !important;
   }
 
   .account_header.account_header-mobile {
-    margin-top: 1rem;
+    //margin-top: 1rem;
   }
 }
 @media only screen and (max-width: 425px) {
@@ -292,6 +325,18 @@
 @media only screen and (max-width: 599px) {
   .account_activities_div {
     width: 100%;
+  }
+  .account_header {
+    display: block;
+    grid-gap: 8px;
+    margin-top: 0;
+  }
+  .account_header-mobile {
+    flex: 1;
+    justify-content: space-between !important;
+  }
+  .set_width_table {
+    width: 100vw;
   }
 }
 

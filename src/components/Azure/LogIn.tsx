@@ -9,14 +9,15 @@ import {
   UnauthenticatedTemplate,
 } from "@azure/msal-react";
 import { SiMicrosoftoffice } from "react-icons/si";
+import axios from "axios";
 
 const LogIn = () => {
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
-  const azureLogin = async() => {
-    try{
-      await instance.loginPopup()
-    }catch(e){}
+  const azureLogin = async () => {
+    try {
+      await instance.loginPopup();
+    } catch (e) { }
   }
   return (
     <>
@@ -26,8 +27,8 @@ const LogIn = () => {
           fullWidth
           startIcon={<SiMicrosoftoffice />}
           variant="outlined"
-          color="primary"
-          onClick={() =>instance.logout()}
+          className="logo-bg-color"
+          onClick={() => instance.logout()}
         >
           Log Out
         </Button>
@@ -36,8 +37,8 @@ const LogIn = () => {
         <Button
           startIcon={<SiMicrosoftoffice />}
           fullWidth
+          className="logo-bg-color"
           variant="contained"
-          color="secondary"
           onClick={azureLogin}
         >
           Office 365 Login

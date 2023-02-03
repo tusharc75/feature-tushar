@@ -22,20 +22,43 @@ const useStyles = makeStyles((theme) => ({
         marginBottom: theme.spacing(1),
     },
     inActive: {
+        borderRadius: "12px 40px 40px 50px !important",
         background: "#ebebeb",
+        borderLeft: "6px solid var(--grey) !important",
     },
     currentStep: {
         background: "#ffffff",
+        borderRadius: "12px 40px 40px 50px !important",
+        border: "1px solid #d6d5d5 !important",
+        borderLeft: "6px solid #378280 !important",
+        color: "#378280 !important",
     },
     active: {
-        background: "#53ac65",
+        background: "#c8e9ce",
+        borderRadius: "12px 40px 40px 50px !important",
+        color: "var(--secondary) !important",
+        borderLeft: "6px solid var(--secondary) !important",
+        padding: "10px 8px !important",
+        ["@media (max-width: 560px)"]: {
+            padding: "5px 8px !important"
+        },
+
     },
     pbStepper: {
         overflow: "none",
         [theme.breakpoints.down("xs")]: {
             overflow: "auto"
         },
+
     },
+    icon:{
+        fontSize: "18px !important"
+    },
+    text:{
+
+    }
+
+
 }));
 
 export default function CustomSteps({ steps, active }) {
@@ -59,6 +82,7 @@ export default function CustomSteps({ steps, active }) {
                         stepProps.completed = false;
                     }
                     return (
+                        
                         <Step
                             key={index} {...stepProps}
                             style={isMobile ? { width: "50%" } : { width: `${100 / steps.length}%` }}
@@ -66,8 +90,11 @@ export default function CustomSteps({ steps, active }) {
                         //className={`${active > index ? classes.completed : (index === active ? classes.current : "")} ${classes[setBackGroundColor[step.text]] ?? ''}`}
                         >
                             <StepLabel
+                                className="step-label-layout"
                                 {...labelProps}
-                                icon={active >= index ? <FaCheckCircle /> : (index === active ? index + 1 : index + 1)}>
+                                icon={active >= index ? <FaCheckCircle  size={18}/> : (index === active ? index + 1 : index + 1)}
+                                >
+
                                 {step.text}</StepLabel>
                         </Step>
                     );
