@@ -249,7 +249,7 @@ const Activity = (props) => {
                               </IconButton>
                             </Tooltip>
                           )}
-                          <IconButton size="small" onClick={(event) => handleCreateActivity(event, data)}>
+                          <IconButton size="small" onClick={(event) => handleCreateActivity(event, 'AttachmentFile')}>
                             {' '}
                             <AddOutlinedIcon />
                           </IconButton>
@@ -386,7 +386,7 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           ) : null}
-          {type === 'Attachment' ? (
+          {type === 'AttachmentFile' ? (
             <ManageAttachment
               attachmentId={null}
               handleClose={() => {
