@@ -103,9 +103,9 @@ const SerializedAssetDetailsPage = () => {
     <>
       {params.value ? (
         params.data.type === 'Loading Ticket' ||
-          params.data.type === 'Receiving Ticket' ||
-          params.data.type === 'Return Ticket' ||
-          params.data.type === 'Delivery Ticket' ? (
+        params.data.type === 'Receiving Ticket' ||
+        params.data.type === 'Return Ticket' ||
+        params.data.type === 'Delivery Ticket' ? (
           <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link>
@@ -331,7 +331,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { ids: [id] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -476,7 +476,7 @@ const SerializedAssetDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         <Grid container spacing={1}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Paper>
+            <div>
               {productInventoryData && <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true}></DetailsPageHeader>}
               <Box display={isMobile ? 'none' : ''}>
                 {loadingProductInventory || !productInventoryFields.length ? (
@@ -498,39 +498,40 @@ const SerializedAssetDetailsPage = () => {
               </Box>
               <Grid container spacing={2} style={isMobile ? { display: 'none' } : { display: '' }}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
-                  <div className="detail-box">
-                    <div className="detail-box-content">
-                      <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                      <h3 className="form-label-style" title="Asset History">
-                        Asset History
-                      </h3>
-                    </div>
+                  <div className="form-v1 mt-4">
+                    <div className="single-form-v1">
+                      <div className="form-head-v1">
+                        <h3 className="form-label-style-v1" title="Asset History">
+                          Asset History
+                        </h3>
+                      </div>
 
-                    <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
-                      {columns ? (
-                        <CustomAgGrid
-                          columns={columns}
-                          dataRows={dataRows}
-                          frameworkComponents={frameworkComponents}
-                          setGridApi={setGridApi}
-                          dispatch={dispatch}
-                          rowCount={rowCount}
-                          limit={limit}
-                          pageSizes={pageSizes}
-                          page={page}
-                          allowAction={false}
-                          allowSelection={false}
-                          isClientSideGrid={true}
-                          loading={loading}
-                          renderedFrom="rentalManagementDetailsPageInventory"
-                          refreshGrid={fetchProductInventoryHistory}
-                        />
-                      ) : (
-                        <Box p={2} height={500} bgcolor="white">
-                          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                        </Box>
-                      )}
-                    </Grid>
+                      <Grid item xs={12} sm={12} md={12} lg={12} className=" formdata-v1">
+                        {columns ? (
+                          <CustomAgGrid
+                            columns={columns}
+                            dataRows={dataRows}
+                            frameworkComponents={frameworkComponents}
+                            setGridApi={setGridApi}
+                            dispatch={dispatch}
+                            rowCount={rowCount}
+                            limit={limit}
+                            pageSizes={pageSizes}
+                            page={page}
+                            allowAction={false}
+                            allowSelection={false}
+                            isClientSideGrid={true}
+                            loading={loading}
+                            renderedFrom="rentalManagementDetailsPageInventory"
+                            refreshGrid={fetchProductInventoryHistory}
+                          />
+                        ) : (
+                          <Box p={2} height={500} bgcolor="white">
+                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                          </Box>
+                        )}
+                      </Grid>
+                    </div>
                   </div>
                 </Grid>
               </Grid>
@@ -628,7 +629,7 @@ const SerializedAssetDetailsPage = () => {
                   </Grid>
                 </Grid>
               </TabPanel>
-            </Paper>
+            </div>
           </Grid>
         </Grid>
       </Box>

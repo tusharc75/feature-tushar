@@ -24,6 +24,8 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useData } from '../../../StateProvider/Provider';
 import { Skeleton } from '@material-ui/lab';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import PreviewIcon from '@material-ui/icons/Visibility';
+import _ from 'lodash';
 
 const AttachmentSchema = object().shape({
   name: string().required('please add attachment name'),
@@ -249,6 +251,50 @@ export default function ManageAttachment({
     }
   };
 
+  const viewPdf = (event, file) => {
+    if (event) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'info',
+        message: `File is Loading, Please wait...`
+      });
+    }
+    setDownloadProgress(0);
+    setIsDownloading(true);
+    axiosInstance()
+      .get(`user/download?fileName=${file}`, {
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          setDownloadProgress(percentCompleted);
+
+          if (percentCompleted === 100) {
+            toastConfig.setToastConfig({
+              message: 'File Downloaded Successfully',
+              open: true,
+              type: 'success'
+            });
+            setTimeout(() => {
+              setDownloadProgress(0);
+              setIsDownloading(false);
+            }, 2000);
+          }
+        }
+      })
+      .then(({ data }) => {
+        const file = new Blob([data], { type: 'application/pdf' });
+        const fileURL = URL.createObjectURL(file);
+        const pdfWindow = window.open();
+        pdfWindow.location.href = fileURL;
+        // toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+        setIsDownloading(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsDownloading(false);
+      });
+  };
+
   const downloadFile = (event, file) => {
     if (event) {
       toastConfig.setToastConfig({
@@ -336,28 +382,44 @@ export default function ManageAttachment({
                       <div style={{ display: 'flex', justifyContent: 'space-between', width: '50%', float: 'right', bottom: '0' }}>
                         {attachmentId ? (
                           <>
-                            <IconButton onClick={(event) => downloadFile(event, attachment)} style={{ paddingBottom: '1px' }}>
-                              {
-                                // <a href={`${attachment}`}
-                                //     download={true}>
-                                //     <GetAppIcon />
-                                // </a>
-                                <GetAppIcon />
-                              }
-                            </IconButton>
-                            {canEdit && permissions.attachment.isDelete ? (
-                              <IconButton>
+                            <Tooltip title="Download">
+                              <IconButton onClick={(event) => downloadFile(event, attachment)} style={{ paddingBottom: '1px' }}>
                                 {
-                                  <DeleteIcon
-                                    color="error"
-                                    onClick={() => {
-                                      setShowConfirmationDialog(true);
-                                      // handleDeleteAttachment(attachment)
-                                      setAttachemnetToDelete(attachment);
-                                    }}
-                                  />
+                                  // <a href={`${attachment}`}
+                                  //     download={true}>
+                                  //     <GetAppIcon />
+                                  // </a>
+                                  <GetAppIcon />
                                 }
                               </IconButton>
+                            </Tooltip>
+                            {_.endsWith(attachment?.url, '.pdf') && (
+                              <Tooltip title="Preview">
+                                <IconButton>
+                                  <PreviewIcon
+                                    color="primary"
+                                    onClick={(e) => {
+                                      viewPdf(e, attachment.url);
+                                    }}
+                                  />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            {canEdit && permissions.attachment.isDelete ? (
+                              <Tooltip title="Delete">
+                                <IconButton>
+                                  {
+                                    <DeleteIcon
+                                      color="error"
+                                      onClick={() => {
+                                        setShowConfirmationDialog(true);
+                                        // handleDeleteAttachment(attachment)
+                                        setAttachemnetToDelete(attachment);
+                                      }}
+                                    />
+                                  }
+                                </IconButton>
+                              </Tooltip>
                             ) : (
                               <Tooltip
                                 className="cursor-stop"

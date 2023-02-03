@@ -2606,6 +2606,11 @@ svg.MuiSvgIcon-root {
     --header-mb: 35px;
     --container-padding: 26px;
   }
+  .MuiButton-outlinedPrimary {
+    color: #3e3e3e !important;
+    border: 1px solid #e2e2e2 !important;
+    font-weight: 400 !important;
+  }
 
   margin-bottom: 20px;
 
@@ -2871,7 +2876,7 @@ svg.MuiSvgIcon-root {
 }
 
 body {
-  --button-v1-padding: 4px 16px !important;
+  --button-v1-padding: 7px 16px !important;
 
   .btn-secondary-v1 {
     background: #eeeeee !important;
@@ -2895,11 +2900,23 @@ body {
     box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
     border-radius: 3px !important;
     padding: var(--button-v1-padding);
+    & > span {
+      line-height: 16px;
+      padding: 0;
+      svg {
+        height: 16px;
+      }
+    }
+    font-weight: 500;
     &:disabled {
       opacity: 0.5;
     }
     &:hover {
       background-color: rgba(0, 0, 0, 0.04) !important;
+    }
+    &.light {
+      color: #737373;
+      font-weight: 400;
     }
   }
   .btn-primary-v1 {
@@ -2914,6 +2931,10 @@ body {
     box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
     border-radius: 3px !important;
     padding: var(--button-v1-padding);
+    & > span {
+      line-height: 16px;
+      padding: 0;
+    }
     &:disabled {
       opacity: 0.3;
       border-color: gray !important;
@@ -3065,9 +3086,7 @@ body {
     }
   }
   .chip-container {
-    margin-top: 10px;
-    margin-bottom: 15px;
-    min-height: 27px;
+    padding-bottom: 15px;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -3099,7 +3118,7 @@ body {
   }
   .arrange-view-v1 {
     z-index: 2;
-    width: 38px;
+    width: 46px;
     height: 40px;
     position: absolute;
     background: white;
@@ -3111,12 +3130,12 @@ body {
   }
   .arrange-view-v2 {
     z-index: 2;
-    width: 38px;
+    width: 46px;
     height: 40px;
     position: absolute;
     background: white;
     right: 1px;
-    top: 86px;
+    top: 1px;
     padding: 11px;
     border-left: 1px solid #e5e5e5;
   }
@@ -3128,6 +3147,7 @@ body {
       position: absolute;
       right: 123px;
       bottom: -51px;
+      z-index: 5;
     }
   }
 }

@@ -8,7 +8,7 @@ import AssignUserDialog from './AssignUserDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import moment from 'moment';
-
+import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
 
 const Approver = ({ irtTicketData }) => {
   const [approver, setAapprover] = useState(null);
@@ -32,7 +32,7 @@ const Approver = ({ irtTicketData }) => {
     axiosInstance()
       .put(`${routes?.irtTicket?.path}/approver/remove/${irtTicketData?._id}`, { ids: [id] })
       .then(({ data: { data } }) => {
-        fetchData()
+        fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -42,7 +42,7 @@ const Approver = ({ irtTicketData }) => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   return (
     <Box>
@@ -74,45 +74,52 @@ const Approver = ({ irtTicketData }) => {
                     style={{
                       borderWidth: '1px',
                       borderStyle: 'solid',
-                      backgroundColor: 'white',
+                      backgroundColor:
+                        item.status === IRT_APPROVER_STATUS.send
+                          ? '#E2F8FF'
+                          : item.status === IRT_APPROVER_STATUS.approved
+                          ? '#EDFFE1'
+                          : item.status === IRT_APPROVER_STATUS.declined
+                          ? '#FFEAEA'
+                          : 'white',
                       borderColor: selected?._id === item?._id ? '#329592' : 'rgb(224, 224, 224)',
                       cursor: 'pointer',
                       transition: '.3s'
                     }}
                     p={2}
                     onClick={() => {
-                      setSelected(item)
+                      setSelected(item);
                     }}
                   >
-                    <Box display="flex">
-                      <Box>
+                    <Grid container alignItems={'center'} spacing={1}>
+                      <Grid item>
                         <PersonIcon />
-                      </Box>
-                      <Box ml={2}>
+                      </Grid>
+                      <Grid item>
                         <Typography>{item?.user?.optionLabel}</Typography>
-                      </Box>
-                      <Box ml={2}>
+                      </Grid>
+                      <Grid item>
                         <Chip color="primary" label={item?.type} />
-                      </Box>
-                      <Box ml={2} flexGrow={1}>
+                      </Grid>
+                      <Grid item>
                         <Chip color="primary" label={item?.status} />
-                      </Box>
-                      <Box ml={2} >
-                        {item?.status === "Send" &&
+                      </Grid>
+                      <Grid item>
+                        {item?.status === 'Send' && (
                           <Tooltip title="Delete">
                             <IconButton
                               aria-label="Delete"
                               size="small"
                               onClick={() => {
-                                handleDelete(item?._id)
+                                handleDelete(item?._id);
                               }}
                             >
                               <DeleteIcon fontSize="small" color="error" />
                             </IconButton>
                           </Tooltip>
-                        }
-                      </Box>
-                    </Box>
+                        )}
+                      </Grid>
+                    </Grid>
                   </Box>
                 </Grid>
               ))
@@ -124,25 +131,41 @@ const Approver = ({ irtTicketData }) => {
           </Grid>
         </Grid>
         <Grid item xs={12} sm={7} md={8} lg={9}>
-          {selected &&
+          {selected && (
             <Box
               p={2}
               style={{
                 borderWidth: '1px',
                 borderStyle: 'solid',
                 borderColor: 'rgb(224, 224, 224)',
-              }}>
+                marginTop: '47px'
+              }}
+            >
               {selected?.logs?.map((item, index) => (
                 <Box key={index}>
-                  <Typography variant="body1">{item?.detail}</Typography>
-                  <Typography variant="body2">{moment(item?.date).format('MMM DD YYYY hh:mm A')}</Typography>
-                  {item?.reason && <Typography variant="body2">{item?.reason}</Typography>}
-                  <br />
-                  <hr />
-                  <br />
+                  {index !== 0 && (
+                    <>
+                      <br />
+                      <div style={{ height: '1px', width: '100%', background: 'rgb(224, 224, 224)' }} />
+                      <br />
+                    </>
+                  )}
+
+                  <Typography variant="body1" style={{ fontWeight: '600' }}>
+                    {item?.detail}
+                  </Typography>
+                  <Typography variant="body2" style={{ fontSize: '12px', marginBottom: '6px', color: 'gray' }}>
+                    {moment(item?.date).format('MMM DD YYYY hh:mm A')}
+                  </Typography>
+                  {item?.reason && (
+                    <Typography variant="body2" style={{ color: '#3e3e3e' }}>
+                      {item?.reason}
+                    </Typography>
+                  )}
                 </Box>
               ))}
-            </Box>}
+            </Box>
+          )}
         </Grid>
       </Grid>
       {openDialog && <AssignUserDialog handleClose={() => setOpenDialog(false)} onSuccess={() => fetchData()} id={irtTicketData?._id} />}

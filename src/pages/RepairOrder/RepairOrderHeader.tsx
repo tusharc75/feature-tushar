@@ -82,7 +82,9 @@ function RepairOrderHeader(props) {
   );
 
   return (
-    <Grid className={`${styles.filter_side_container} table-header-container-v1`} container>
+    <Grid className={`${styles.filter_side_container} `} container>
+      {' '}
+      {/*table-header-container-v1 */}
       <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet">
         {/* <Grid>
           {icon} <span className="listingHeader">{heading}</span>
@@ -161,7 +163,9 @@ function RepairOrderHeader(props) {
         )}
         {children}
       </Grid>
-      <Grid item xs={12} sm={12} md={6} className={`${styles.filter_side} header-inner-right-v1`}>
+      <Grid item xs={12} sm={12} md={6} className={`${styles.filter_side} `}>
+        {' '}
+        {/*  header-inner-right-v1 */}
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
           <Grid style={{ display: 'flex', flex: 1 }}>
             <SearchBox

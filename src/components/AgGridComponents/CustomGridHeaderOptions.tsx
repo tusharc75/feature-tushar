@@ -10,23 +10,18 @@ import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import ArrangeViewDialog from './ArrangeViewDialog';
 import ReportArrangeView from './ReportArrangeView';
 import { BiFilterAlt } from 'react-icons/bi';
-import { BsArrowLeftRight } from 'react-icons/bs';
+// import { BsArrowLeftRight } from 'react-icons/bs';
+import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 
 let timeout;
 export default function CustomGridHeaderOptions({
-  columns,
-  setColumns,
-  columnApi,
   refreshGrid = null,
   renderedFrom = null,
-  isClientSideGrid = false,
   dispatch: gridDispatch = null,
   showOnlyShowFilteredRecordSwitch = false,
-  saveColumnOptions = false,
   selectedRecords = [],
-  selectedReportView = null,
-  setSelectedReportView = null,
-  reportSave = false,
+  showFilters = false,
+
   handleFilterOpen = () => {}
 }) {
   const [disableSelectionSwitch, setDisableSelectionSwitch] = useState(true);
@@ -104,9 +99,9 @@ export default function CustomGridHeaderOptions({
 
   return (
     <>
-      <Box className="ag-grid-listing-grid-header-options d-flex gap-2 justify-content-space-between" style={{ marginBottom: 0, flexWrap: 'wrap' }}>
+      <Box className="ag-grid-listing-grid-header-options d-flex gap-2 justify-content-space-between" style={{ flexWrap: 'wrap' }}>
         <div className="d-flex gap-2">
-          <Tooltip title="Arrange View" placement="top">
+          {/* <Tooltip title="Arrange View" placement="top">
             <IconButton
               aria-describedby="columnSelection"
               size="small"
@@ -117,9 +112,9 @@ export default function CustomGridHeaderOptions({
                 setOpenColumnSelectionAnchorEl(event.currentTarget);
               }}
             >
-              <BsArrowLeftRight />
+              <SwapHorizIcon style={{ color: '#1d1d1d' }} />
             </IconButton>
-          </Tooltip>
+          </Tooltip> */}
 
           {/* <Popover
             id="columnSelection"
@@ -242,9 +237,11 @@ export default function CustomGridHeaderOptions({
         </div>
 
         <div style={{ marginLeft: 'auto' }}>
-          <Button startIcon={<BiFilterAlt />} size={'small'} className="btn-outline-v1 " onClick={handleFilterOpen}>
-            Filter
-          </Button>
+          {showFilters && (
+            <Button startIcon={<BiFilterAlt />} size={'small'} className="btn-outline-v1 light " onClick={handleFilterOpen}>
+              Filter
+            </Button>
+          )}
 
           {refreshGrid && (
             <>
@@ -282,7 +279,7 @@ export default function CustomGridHeaderOptions({
         </Button> */}
       </Box>
 
-      {openColumnSelection && (
+      {/* {openColumnSelection && (
         <>
           {renderedFrom?.includes('report') && reportSave ? (
             <ReportArrangeView
@@ -310,7 +307,7 @@ export default function CustomGridHeaderOptions({
             />
           )}
         </>
-      )}
+      )} */}
     </>
   );
 }

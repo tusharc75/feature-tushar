@@ -21,6 +21,10 @@ import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { MdDelete } from 'react-icons/md';
 import { Tooltip } from '@material-ui/core';
+import { TreeItem, TreeView } from '@material-ui/lab';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState({ open: false, type: 'file', parentFolder: null, purpose: 'add' });
@@ -52,12 +56,313 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
         }) => {
           setLoading(false);
           onSetCount('Attachment', count);
-          setAttachments(data);
+          const rows = data
+            ?.filter((item) => item.parentFolder === null)
+            .map((_attachment, idx) => {
+              if (_attachment?.attachmentType === 'folder') {
+                const childTree = nestedSubTrees(data, _attachment._id);
+                return (
+                  <TreeItem
+                    nodeId={_attachment._id}
+                    label={
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '0 10px'
+                        }}
+                      >
+                        <div
+                          style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', cursor: 'pointer' }}
+                          onClick={() => {
+                            setAttachmentId(_attachment._id);
+                            setOpen({
+                              open: true,
+                              type: _attachment.attachmentType === 'folder' ? 'folder' : 'file',
+                              parentFolder: null,
+                              purpose: 'edit'
+                            });
+                          }}
+                        >
+                          <FolderOpenIcon fontSize="small" color="secondary" />
+                          <Typography style={{ fontWeight: 'bold' }}>
+                            {` ${_attachment?.name} ${childTree?.length ? `(${childTree?.length})` : ''}`}
+                          </Typography>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+                          <Tooltip title={'Add Folder'}>
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setOpen({ open: true, type: 'folder', parentFolder: _attachment._id, purpose: 'add' });
+                              }}
+                            >
+                              <CreateNewFolderIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title={'Add File'}>
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setOpen({ open: true, type: 'file', parentFolder: _attachment._id, purpose: 'add' });
+                              }}
+                            >
+                              <AddOutlinedIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title={'Delete Folder'}>
+                            <IconButton size="small" onClick={() => handleFolderDelete(_attachment._id)}>
+                              <MdDelete color="error" />
+                            </IconButton>
+                          </Tooltip>
+                        </div>
+                      </div>
+                    }
+                  >
+                    {childTree}
+                  </TreeItem>
+                );
+              }
+              return (
+                <TreeItem
+                  nodeId="2"
+                  label={
+                    <Box key={_attachment._id} className="activity">
+                      <Box>
+                        <Grid container>
+                          <Grid item xs={9} className="d-flex align-items-center gap-1">
+                            <Typography
+                              variant="subtitle2"
+                              className="cursor-pointer"
+                              onClick={() => {
+                                setAttachmentId(_attachment._id);
+                                setOpen({
+                                  open: true,
+                                  type: _attachment.attachmentType === 'folder' ? 'folder' : 'file',
+                                  parentFolder: null,
+                                  purpose: 'edit'
+                                });
+                              }}
+                            >
+                              {_attachment?.name ?? ''}
+                            </Typography>
+                          </Grid>
+                          {permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
+                            <Grid item xs={3} container justify="flex-end">
+                              {_attachment.attachmentType !== 'folder' ? (
+                                <IconButton
+                                  size="small"
+                                  color="primary"
+                                  aria-label="delete"
+                                  onClick={(event) => handleOpenMenu(event, _attachment._id, _attachment)}
+                                >
+                                  <MoreHorizIcon />
+                                </IconButton>
+                              ) : (
+                                <>
+                                  <Tooltip title={'Add Folder'}>
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => {
+                                        setOpen({ open: true, type: 'folder', parentFolder: _attachment._id, purpose: 'add' });
+                                      }}
+                                    >
+                                      <CreateNewFolderIcon />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title={'Add File'}>
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => {
+                                        setOpen({ open: true, type: 'file', parentFolder: _attachment._id, purpose: 'add' });
+                                      }}
+                                    >
+                                      <AddOutlinedIcon />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title={'Delete Folder'}>
+                                    <IconButton size="small" onClick={() => handleFolderDelete(_attachment._id)}>
+                                      <MdDelete color="error" />
+                                    </IconButton>
+                                  </Tooltip>
+                                </>
+                              )}
+                            </Grid>
+                          ) : null}
+                        </Grid>
+                      </Box>
+                      <Box pt={1}>
+                        <Grid container>
+                          <Grid item xs={12}>
+                            <ListRelatedTo relatedTo={_attachment.relatedTo} originRelatedTo={relatedTo} />
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    </Box>
+                  }
+                />
+              );
+            });
+          setAttachments(rows);
         }
       )
       .catch((error) => {
         setLoading(false);
         toastConfig.setToastConfig(error);
+      });
+  };
+
+  const nestedSubTrees = (data, parentId) => {
+    return data
+      ?.filter((item) => `${item.parentFolder}` === `${parentId}`)
+      ?.map((_attachment, idx) => {
+        if (_attachment?.attachmentType === 'folder') {
+          const childTree = nestedSubTrees(data, _attachment._id);
+          return (
+            <TreeItem
+              nodeId={_attachment._id}
+              label={
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0 10px'
+                  }}
+                >
+                  <div
+                    style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', cursor: 'pointer' }}
+                    onClick={() => {
+                      setAttachmentId(_attachment._id);
+                      setOpen({
+                        open: true,
+                        type: _attachment.attachmentType === 'folder' ? 'folder' : 'file',
+                        parentFolder: null,
+                        purpose: 'edit'
+                      });
+                    }}
+                  >
+                    <FolderOpenIcon fontSize="small" color="secondary" />
+                    <Typography style={{ fontWeight: 'bold' }}>
+                      {` ${_attachment?.name} ${childTree?.length ? `(${childTree?.length})` : ''}`}
+                    </Typography>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <Tooltip title={'Add Folder'}>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setOpen({ open: true, type: 'folder', parentFolder: _attachment._id, purpose: 'add' });
+                        }}
+                      >
+                        <CreateNewFolderIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={'Add File'}>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setOpen({ open: true, type: 'file', parentFolder: _attachment._id, purpose: 'add' });
+                        }}
+                      >
+                        <AddOutlinedIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={'Delete Folder'}>
+                      <IconButton size="small" onClick={() => handleFolderDelete(_attachment._id)}>
+                        <MdDelete color="error" />
+                      </IconButton>
+                    </Tooltip>
+                  </div>
+                </div>
+              }
+            >
+              {childTree}
+            </TreeItem>
+          );
+        }
+        return (
+          <TreeItem
+            nodeId="2"
+            label={
+              <Box key={_attachment._id} className="activity">
+                <Box>
+                  <Grid container>
+                    <Grid item xs={9} className="d-flex align-items-center gap-1">
+                      <Typography
+                        variant="subtitle2"
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setAttachmentId(_attachment._id);
+                          setOpen({
+                            open: true,
+                            type: _attachment.attachmentType === 'folder' ? 'folder' : 'file',
+                            parentFolder: null,
+                            purpose: 'edit'
+                          });
+                        }}
+                      >
+                        {_attachment?.name ?? ''}
+                      </Typography>
+                    </Grid>
+                    {permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
+                      <Grid item xs={3} container justify="flex-end">
+                        {_attachment.attachmentType !== 'folder' ? (
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            aria-label="delete"
+                            onClick={(event) => handleOpenMenu(event, _attachment._id, _attachment)}
+                          >
+                            <MoreHorizIcon />
+                          </IconButton>
+                        ) : (
+                          <>
+                            <Tooltip title={'Add Folder'}>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  setOpen({ open: true, type: 'folder', parentFolder: _attachment._id, purpose: 'add' });
+                                }}
+                              >
+                                <CreateNewFolderIcon />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title={'Add File'}>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  setOpen({ open: true, type: 'file', parentFolder: _attachment._id, purpose: 'add' });
+                                }}
+                              >
+                                <AddOutlinedIcon />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title={'Delete Folder'}>
+                              <IconButton size="small" onClick={() => handleFolderDelete(_attachment._id)}>
+                                <MdDelete color="error" />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        )}
+                      </Grid>
+                    ) : null}
+                  </Grid>
+                </Box>
+                <Box pt={1}>
+                  <Grid container>
+                    <Grid item xs={12}>
+                      <ListRelatedTo relatedTo={_attachment.relatedTo} originRelatedTo={relatedTo} />
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Box>
+            }
+          />
+        );
       });
   };
 
@@ -181,80 +486,9 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           <>
             {attachments.length ? (
               <Fragment>
-                {attachments.slice(0, 5).map((_attachment, index) => (
-                  <Box key={_attachment._id} className="activity">
-                    <Box>
-                      <Grid container>
-                        <Grid item xs={9} className="d-flex align-items-center gap-1">
-                          <Typography
-                            variant="subtitle2"
-                            className="cursor-pointer"
-                            onClick={() => {
-                              setAttachmentId(_attachment._id);
-                              setOpen({
-                                open: true,
-                                type: _attachment.attachmentType === 'folder' ? 'folder' : 'file',
-                                parentFolder: null,
-                                purpose: 'edit'
-                              });
-                            }}
-                          >
-                            {_attachment?.name ?? ''}
-                          </Typography>
-                        </Grid>
-                        {permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
-                          <Grid item xs={3} container justify="flex-end">
-                            {_attachment.attachmentType !== 'folder' ? (
-                              <IconButton
-                                size="small"
-                                color="primary"
-                                aria-label="delete"
-                                onClick={(event) => handleOpenMenu(event, _attachment._id, _attachment)}
-                              >
-                                <MoreHorizIcon />
-                              </IconButton>
-                            ) : (
-                              <>
-                                <Tooltip title={'Add Folder'}>
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => {
-                                      setOpen({ open: true, type: 'folder', parentFolder: _attachment._id, purpose: 'add' });
-                                    }}
-                                  >
-                                    <CreateNewFolderIcon />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title={'Add File'}>
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => {
-                                      setOpen({ open: true, type: 'file', parentFolder: _attachment._id, purpose: 'add' });
-                                    }}
-                                  >
-                                    <AddOutlinedIcon />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title={'Delete Folder'}>
-                                  <IconButton size="small" onClick={() => handleFolderDelete(_attachment._id)}>
-                                    <MdDelete color="error" />
-                                  </IconButton>
-                                </Tooltip>
-                              </>
-                            )}
-                          </Grid>
-                        ) : null}
-                      </Grid>
-                    </Box>
-                    <Box pt={1}>
-                      <Grid container>
-                        <Grid item xs={12}>
-                          <ListRelatedTo relatedTo={_attachment.relatedTo} originRelatedTo={relatedTo} />
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  </Box>
-                ))}
+                <TreeView defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
+                  {attachments}
+                </TreeView>
                 <ViewAll type="attachment" relatedTo={relatedTo} />
               </Fragment>
             ) : (

@@ -15,6 +15,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageIrtTicket from './ManageIrtTicket';
 import { sidebarResource } from 'src/constants/helpers';
 import Approver from './Approver';
+import IrtTicketView from './View';
 
 const IrtTicketDetail = () => {
   const { id } = useParams();
@@ -159,6 +160,17 @@ const IrtTicketDetail = () => {
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
           />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                Views
+              </div>
+            }
+            value={2}
+            aria-controls="a11y-tabpanel-1"
+            id="a11y-tab-1"
+          />
         </Tabs>
         {tabValue === 0 && (
           <Box>
@@ -174,6 +186,11 @@ const IrtTicketDetail = () => {
         {tabValue === 1 && (
           <Approver
             irtTicketData={irtTicketData} />
+        )}
+        {tabValue === 2 && (
+          <IrtTicketView
+            id={id}
+          />
         )}
       </Box>
       {showConfirmBox && (
