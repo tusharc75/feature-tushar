@@ -244,6 +244,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                         value={values['qty']}
                         error={touched['qty'] && Boolean(errors['qty'])}
                         helperText={touched['qty'] && errors['qty']}
+                        onKeyDown={(e)=>['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                         onChange={(e) => {
                           setFieldValue('qty', e.target.value);
                         }}
@@ -263,6 +264,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                         value={values['price']}
                         error={touched['price'] && Boolean(errors['price'])}
                         helperText={touched['price'] && errors['price']}
+                        onKeyDown={(e)=>['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                         onChange={(e) => {
                           setFieldValue('price', e.target.value);
                         }}

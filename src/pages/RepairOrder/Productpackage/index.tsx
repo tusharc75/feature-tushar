@@ -445,7 +445,7 @@ const Productpackage = ({
                 {permissions?.serializedAsset?.isRead && allowedToEdit && (
                   <>
                     <Button
-                      className="btn-outline-v1"
+                      className="btn-outline-v1 light"
                       size="small"
                       variant={isMobile && !isTablet ? 'outlined' : 'contained'}
                       style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
@@ -457,7 +457,7 @@ const Productpackage = ({
                     </Button>
                     <Box ml={1} />
                     <Button
-                      className="btn-outline-v1"
+                      className="btn-outline-v1 light"
                       size="small"
                       variant={isMobile && !isTablet ? 'outlined' : 'contained'}
                       style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
