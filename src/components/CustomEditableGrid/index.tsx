@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
+import { Box, Button, Dialog, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -8,6 +8,7 @@ import { arrayToDropwdownOption, CustomDialogTransition, getObjKeysWithValues, g
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomButton from '../Helpers/CustomButton';
 import FormTypes from './FormTypes';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 const cellWidth = 250;
 
@@ -106,15 +107,17 @@ const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => 
                                                         </TableCell>
                                                     ))}
                                                 <TableCell>
-                                                    <Button
-                                                        variant={"contained"}
-                                                        color="primary"
-                                                        size="small"
-                                                        onClick={() => {
-                                                        }}
-                                                    >
-                                                        Delete
-                                                    </Button>
+                                                    <Tooltip title="Delete">
+                                                        <IconButton
+                                                            size="small"
+                                                            aria-label="Delete"
+                                                            onClick={() => {
+                                                            }}
+                                                        >
+                                                            <DeleteIcon color="error" />
+                                                        </IconButton>
+                                                    </Tooltip>
+
                                                 </TableCell>
                                             </TableRow>
                                         ))}
