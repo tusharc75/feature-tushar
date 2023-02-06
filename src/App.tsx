@@ -183,6 +183,8 @@ import BudgetDetail from './pages/Budget/BudgetDetail';
 import MarketSegmentDetail from './pages/MarketSegment/MarketSegmentDetail';
 import IrtTicket from './pages/IrtTicket';
 import IrtTicketDetail from './pages/IrtTicket/IrtTicketDetail';
+import PurchaseRequisition from './components/PurchaseRequisition';
+import PurchaseRequisitionDetail from './components/PurchaseRequisition/PurchaseRequisitionDetail';
 
 var notificationInterval: any = null;
 
@@ -920,6 +922,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.irtTicketDetail.path}/:id`}>
               <IrtTicketDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.purchaseRequisition.path}`}>
+              <PurchaseRequisition />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.purchaseRequisitionDetail.path}/:id`}>
+              <PurchaseRequisitionDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
