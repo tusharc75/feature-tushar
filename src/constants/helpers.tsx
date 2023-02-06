@@ -217,7 +217,9 @@ export const sidebarResource = {
   employeeMaster: 'Employee Master',
   competencyMaster: 'Competency Master',
   technicianScheduler: 'Technician Scheduler',
-  irtTicket: 'IRT Ticket'
+  irtTicket: 'IRT Ticket',
+  purchaseRequisition: 'Purchase Requisition'
+
 };
 
 export const primaryFields = {
@@ -317,7 +319,8 @@ export const RESOURCE_LABEL = {
   employeeMaster: 'Employee Master',
   competencyMaster: 'Competency Master',
   technicianScheduler: 'Technician Scheduler',
-  irtTicket: 'IRT Ticket'
+  irtTicket: 'IRT Ticket',
+  purchaseRequisition: 'Purchase Requisition'
 };
 
 export const CHILD_RESOURCE = {
@@ -325,6 +328,7 @@ export const CHILD_RESOURCE = {
   rentalManagementCost: 'Rental Management Cost',
   purchaseOrderProduct: 'Purchase Order Product',
   purchaseOrderCost: 'Purchase Order Cost',
+  purchaseOrderService: 'Purchase Order Service',
   bulkAssetCreationProduct: 'Bulk Asset Creation Product',
   repairJobAsset: 'Repair Job Asset',
   invoiceProduct: 'Invoice Product',
