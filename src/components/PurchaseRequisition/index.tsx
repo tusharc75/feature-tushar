@@ -458,7 +458,7 @@ const PurchaseRequisition = () => {
               allowAction={true}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={setPurchaseRequisitionId}
+              refreshGrid={fetchPurchaseRequisitionData}
               showOnlyShowFilteredRecordSwitch={true}
             />
           )
