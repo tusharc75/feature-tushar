@@ -23,7 +23,6 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleAddService, handleUpd
 
   useEffect(() => {
     fetchFields(purchaseOrderData?.currency);
-    console.log('serviceData', serviceData)
   }, []);
 
   const fetchFields = async (currency) => {
