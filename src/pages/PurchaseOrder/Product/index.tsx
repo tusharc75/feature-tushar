@@ -512,14 +512,14 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               >
                 {isMobile && !isTablet ? 'Existing' : `Add Existing Product`}
               </MenuItem>
-              <MenuItem
+              {/* <MenuItem
                 onClick={() => {
                   closeAddActions();
                   setShowServiceDialog(true);
                 }}
               >
                 {isMobile && !isTablet ? 'Existing' : `Add Existing Services`}
-              </MenuItem>
+              </MenuItem> */}
               {/* <MenuItem
                 onClick={() => {
                   closeAddActions();
