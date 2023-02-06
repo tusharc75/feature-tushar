@@ -794,6 +794,20 @@ const routes = {
         : RESOURCE_LABEL.irtTicket,
     path: '/irt-ticket/detail'
   },
+  purchaseRequisition: {
+    title:
+      storedRoutes && storedRoutes.purchaseRequisition && storedRoutes.purchaseRequisition.title
+        ? storedRoutes.purchaseRequisition?.title
+        : RESOURCE_LABEL.purchaseRequisition,
+    path: '/purchase-requisition'
+  },
+  purchaseRequisitionDetail: {
+    title:
+      storedRoutes && storedRoutes.purchaseRequisition && storedRoutes.purchaseRequisition.title
+        ? storedRoutes.purchaseRequisition?.title
+        : RESOURCE_LABEL.purchaseRequisition,
+    path: '/purchase-requisition/detail'
+  },
 };
 
 export default routes;
