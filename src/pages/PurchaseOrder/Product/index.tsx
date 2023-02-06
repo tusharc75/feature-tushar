@@ -262,15 +262,19 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     const serviceResponse: any = await axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`);
 
     const data = [
-      ...(productResponce?.data?.data?.map((e: any) => {
+      ...(productResponce?.data?.data?.length && productResponce?.data?.data?.map((e: any) => {
         return { ...e, type: 'Product' };
       }) || []),
-      ...(costResponce?.data?.data?.map((e: any) => {
-        return { ...e, type: 'Cost' };
-      }) || []),
-      ...(serviceResponse?.data?.data.map((e: any) => {
-        return { ...e, type: 'Service' };
-      }) || [])
+      ...((costResponce?.data?.data?.length &&
+        costResponce?.data?.data?.map((e: any) => {
+          return { ...e, type: 'Cost' };
+        })) ||
+        []),
+      ...((serviceResponse?.data?.data?.length &&
+        serviceResponse?.data?.data?.map((e: any) => {
+          return { ...e, type: 'Service' };
+        })) ||
+        [])
     ];
 
     setMaterial(JSON.parse(JSON.stringify(data)));
