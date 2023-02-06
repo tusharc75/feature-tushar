@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import {
-  Box,
-  Button,
-  IconButton,
-  MenuItem,
-  Menu
-} from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem, Menu } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -26,23 +20,20 @@ import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helpe
 import SendEmail from './../SendEmail';
 import InventoryStatesDialog from './InventoryStatesDialog';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import CostDialog from './CostDialog';
+import ServiceDialog from './ServiceDialog';
 import AddIcon from '@material-ui/icons/Add';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 
-const Product = ({
-  purchaseOrderData,
-  setNextStep,
-  renderedFrom,
-  allowedToEdit: hasPermission,
-  checkReceivedProduct
-}) => {
-
+const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const allowedToEdit = hasPermission && permissions?.purchaseOrder.isUpdate;
 
@@ -52,12 +43,16 @@ const Product = ({
 
   const [showProductDialog, setShowProductDialog] = useState(false);
   const [showInventoryStatesDialog, setShowInventoryStatesDialog] = useState({ open: false, product: null, qty: 0 });
+  const [showServiceDialog, setShowServiceDialog] = useState(false);
 
   const [showCostDialog, setShowCostDialog] = useState(false);
+  const [showUpdateServiceDialog, setShowUpdateServiceDialog] = useState(false);
   const [selectedCostData, setSelectedCostData] = useState(null);
+  const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [showCostDeleteConfirmBox, setShowCostDeleteConfirmBox] = useState(false);
+  const [showServiceDeleteConfirmBox, setShowServiceDeleteConfirmBox] = useState(false);
   const [deletePurchaseOrderCost, setDeletePurchaseOrderCost] = useState([]);
-
+  const [deletePurchaseOrderService, setDeletePurchaseOrderService] = useState([]);
 
   const [selectedProductData, setSelectedProductData] = useState(null);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
@@ -111,8 +106,18 @@ const Product = ({
               ) : (
                 <p
                   onClick={() => {
-                    row.original.type === 'Product' ? setShowProductDialog(true) : setShowCostDialog(true);
-                    row.original.type === 'Product' ? setSelectedProductData(row.original) : setSelectedCostData(row.original);
+                    if (row.original.type === 'Product') {
+                      setShowProductDialog(true);
+                      setSelectedProductData(row.original);
+                    }
+                    if (row.original.type === 'Cost') {
+                      setShowCostDialog(true);
+                      setSelectedCostData(row.original);
+                    }
+                    if (row.original.type === 'Service') {
+                      setShowUpdateServiceDialog(true);
+                      setSelectedServiceData(row.original);
+                    }
                   }}
                   className="link text-truncate"
                   title={row.original.detail}
@@ -224,12 +229,20 @@ const Product = ({
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
                 onDelete={() => {
-                  { row.original.type === 'Product' ? setShowDeleteConfirmBox(true) : setShowCostDeleteConfirmBox(true) };
-                  {
-                    row.original.type === 'Product'
-                      ? setDeletePurchaseOrderProduct([row.original?._id])
-                      : setDeletePurchaseOrderCost([row.original?._id])
-                  };
+                  if (row.original.type === 'Product') {
+                    setShowDeleteConfirmBox(true);
+                    setDeletePurchaseOrderProduct([row.original?._id]);
+                  }
+
+                  if (row.original.type === 'Cost') {
+                    setShowCostDeleteConfirmBox(true);
+                    setDeletePurchaseOrderCost([row.original?._id]);
+                  }
+
+                  if (row.original.type === 'Service') {
+                    setShowServiceDeleteConfirmBox(true);
+                    setDeletePurchaseOrderService([row.original?._id]);
+                  }
                 }}
                 entity="rentalManagement"
               />
@@ -242,17 +255,29 @@ const Product = ({
   };
 
   const fetchData = async () => {
-
     setNextStep(false);
 
     const productResponce: any = await axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`);
     const costResponce: any = await axiosInstance().get(`${purchaseOrder.api}/cost/${purchaseOrderData._id}`);
+    const serviceResponse: any = await axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`);
 
-    const data = [...productResponce?.data?.data?.map((e: any) => { return { ...e, type: "Product" } }) || [],
-    ...costResponce?.data?.data?.map((e: any) => { return { ...e, type: "Cost" } }) || []]
+    const data = [
+      ...(productResponce?.data?.data?.length && productResponce?.data?.data?.map((e: any) => {
+        return { ...e, type: 'Product' };
+      }) || []),
+      ...((costResponce?.data?.data?.length &&
+        costResponce?.data?.data?.map((e: any) => {
+          return { ...e, type: 'Cost' };
+        })) ||
+        []),
+      ...((serviceResponse?.data?.data?.length &&
+        serviceResponse?.data?.data?.map((e: any) => {
+          return { ...e, type: 'Service' };
+        })) ||
+        [])
+    ];
 
     setMaterial(JSON.parse(JSON.stringify(data)));
-
     let rows = data?.map((item, index) => {
       let finalObject = prepareDataForGrid(item);
       finalObject['isChecked'] = selectedProducts.some((s) => s._id === item._id);
@@ -260,7 +285,10 @@ const Product = ({
       let res: any = {
         ...finalObject
       };
-      res.productName = item.type === "Product" ? item.productDetail?.productName : item?.description;
+      res.productName =
+        (item.type === 'Product' && item.productDetail?.productName) ||
+        (item.type === 'Cost' && item?.description) ||
+        (item.type === 'Service' && item?.service?.serviceName);
       res.productNumber = item.productDetail?.productNumber;
       res.productDescription = item.productDetail?.productDescription || item.productDetail?.productDesc;
       res.serializedProduct = item.productDetail?.serializedProduct;
@@ -268,10 +296,10 @@ const Product = ({
       res.productCategory = item.productDetail?.productCategory?.optionLabel;
       res.productDetail = item.productDetail;
       res.parentId = null;
+      res.qty = (item.type === 'Product' && item?.qty) || (item.type === 'Cost' && item?.qty) || (item.type === 'Service' && item?.qty);
       if (item?.qty === 0) {
         res.isValid = false;
-      }
-      else if (isRateRequired) {
+      } else if (isRateRequired) {
         if (item['finalPrice_' + purchaseOrderData?.currency?.toLowerCase()]) {
           res.isValid = true;
         } else {
@@ -401,6 +429,43 @@ const Product = ({
       });
   };
 
+  const handleAddService = (rows) => {
+    axiosInstance()
+      .post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/add`, { services: rows })
+      .then(() => {
+        fetchData();
+        setShowServiceDialog(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleUpdateService = (rows) => {
+    axiosInstance()
+      .put(`${purchaseOrder.api}/service/${purchaseOrderData._id}/update`, { services: rows })
+      .then(() => {
+        fetchData();
+        setShowUpdateServiceDialog(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleDeleteService = () => {
+    axiosInstance()
+      .post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/delete`, { ids: deletePurchaseOrderService })
+      .then(() => {
+        fetchData();
+        setShowServiceDeleteConfirmBox(false);
+        setDeletePurchaseOrderService([]);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = material.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
@@ -413,13 +478,7 @@ const Product = ({
       {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" m={1}>
           <Box display="flex" alignItems="center">
-            <Button
-              variant={'outlined'}
-              color="primary"
-              size="small"
-              startIcon={<AddIcon />}
-              onClick={openAddActions}
-              aria-controls="add-menu">
+            <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
               {'Add'}
               <ExpandMore fontSize="small" />
             </Button>
@@ -452,6 +511,14 @@ const Product = ({
                 }}
               >
                 {isMobile && !isTablet ? 'Existing' : `Add Existing Product`}
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setShowServiceDialog(true);
+                }}
+              >
+                {isMobile && !isTablet ? 'Existing' : `Add Existing Services`}
               </MenuItem>
               {/* <MenuItem
                 onClick={() => {
@@ -595,6 +662,31 @@ const Product = ({
           costData={selectedCostData}
         />
       )}
+      {showUpdateServiceDialog && (
+        <ServiceDialog
+          onClose={() => {
+            setShowUpdateServiceDialog(false);
+            setSelectedServiceData(null);
+          }}
+          handleAddService={handleAddService}
+          handleUpdateService={handleUpdateService}
+          purchaseOrderData={purchaseOrderData}
+          serviceData={selectedServiceData}
+        />
+      )}
+      {showServiceDialog && (
+        <AssignServiceDialog
+          reference={'purchaseOrder'}
+          referenceId={purchaseOrderData?._id}
+          onSuccess={(services) => {
+            handleAddService(services);
+          }}
+          handleClose={() => {
+            setShowServiceDialog(false);
+          }}
+          ids={rowsData.filter((d) => d.type === 'service').map((d) => d?.materialId)}
+        />
+      )}
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
@@ -609,6 +701,14 @@ const Product = ({
           message={`Are you sure you want to delete  ? `}
           onClose={() => setShowCostDeleteConfirmBox(false)}
           onOk={handleDeleteCost}
+        />
+      )}
+      {showServiceDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to delete  ? `}
+          onClose={() => setShowServiceDeleteConfirmBox(false)}
+          onOk={handleDeleteService}
         />
       )}
       {showInventoryStatesDialog.open && (
