@@ -9,6 +9,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomButton from '../Helpers/CustomButton';
 import FormTypes from './FormTypes';
 import DeleteIcon from '@material-ui/icons/Delete';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
 const cellWidth = 250;
 
@@ -19,17 +20,21 @@ const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => 
     const [columns, setColummns] = useState([]);
 
     useEffect(() => {
+        generateRows()
+        generateColumnField()
+    }, []);
+
+    const generateRows = () => {
         const tempRows = data.map(d => {
             let tempFieldData = getObjKeysWithValues(d, fields)
             return { ...d, ...tempFieldData }
         })
         setRows(tempRows)
-        generateColumnField()
-    }, [fields]);
+    };
 
     const generateColumnField = () => {
         let column = [];
-        let _fields = fields;
+        let _fields = JSON.parse(JSON.stringify(fields));
         _fields.forEach((ele) => {
             if (ele.type === 'currencyAmount') {
                 ele.fieldLabel = ele.fieldLabel + ' ' + currency
@@ -43,10 +48,15 @@ const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => 
         setColummns(column)
     };
 
+
+
     const updateData = (row, inputField, value) => {
         setRows((prevState) => {
             let tempIndex = prevState.findIndex((obj => obj._id === row._id));
-            prevState[tempIndex][inputField] = value
+            // prevState[tempIndex][inputField] = value
+            const values = { [inputField]: value }
+            const calValues = autoCalculateSpecificFields(values, { ...values, ...prevState[tempIndex] }, fields)
+            prevState[tempIndex] = { ...prevState[tempIndex], ...calValues }
             return [...prevState]
         });
 

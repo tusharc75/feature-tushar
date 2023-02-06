@@ -42,7 +42,7 @@ const FormTypes = (props) => {
             required={fieldData?.required}
             name={fieldData?.fieldName}
             value={values[fieldData?.fieldName]}
-
+            margin="dense"
             onChange={(e) => onChange(fieldData?.fieldName, e.target.value.trimStart())}
         />
     ) : fieldData?.type === 'multiLine' ? (
@@ -55,6 +55,7 @@ const FormTypes = (props) => {
             required={fieldData?.required}
             rows={3}
             value={values[fieldData?.fieldName]}
+            margin="dense"
             onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
         />
     ) : fieldData?.type === 'percent' ? (
@@ -70,6 +71,7 @@ const FormTypes = (props) => {
                 inputProps: { min: 0 },
                 readOnly: fieldData && fieldData?.isUneditable ? true : false
             }}
+            margin="dense"
             onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
         />
     ) : fieldData?.type === "currencyAmount" ? (
@@ -83,6 +85,7 @@ const FormTypes = (props) => {
             InputProps={{
                 startAdornment: getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative,
             }}
+            margin="dense"
             onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
         />
     ) : fieldData?.type === 'dropDown' ? (
@@ -96,7 +99,7 @@ const FormTypes = (props) => {
             getOptionLabel={(option: any) => option.optionLabel || ''}
             getOptionSelected={(option: any, val) => (option ? option.optionValue == val.optionValue : false)}
             onChange={(e, val) => onChange(fieldData?.fieldName, val.optionValue)}
-            renderInput={(params) => <TextField {...params} label={fieldData?.label} variant="outlined" />}
+            renderInput={(params) => <TextField {...params} margin="dense" label={fieldData?.label} variant="outlined" />}
         />
     ) : fieldData?.type === 'decimal' ? (
         <TextField
@@ -106,6 +109,7 @@ const FormTypes = (props) => {
             required={fieldData?.required}
             name={fieldData?.fieldName}
             value={values[fieldData?.fieldName]}
+            margin="dense"
             onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
             InputProps={{
                 inputProps: { min: 0 },
@@ -123,6 +127,7 @@ const FormTypes = (props) => {
                     color="secondary"
                 />
             }
+
             label={fieldData?.label}
         />
     ) : fieldData?.type === 'date' ? (
@@ -142,6 +147,7 @@ const FormTypes = (props) => {
                 InputLabelProps={{
                     shrink: true
                 }}
+                margin="dense"
             />
         </MuiPickersUtilsProvider>
     ) : fieldData?.type === 'dateTime' ? (
@@ -162,6 +168,7 @@ const FormTypes = (props) => {
                 InputLabelProps={{
                     shrink: true
                 }}
+                margin="dense"
             />
         </MuiPickersUtilsProvider>
     ) : null;
