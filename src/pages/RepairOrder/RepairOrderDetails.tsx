@@ -221,10 +221,10 @@ const RepairOrderDetails = () => {
       });
   };
 
-  const createNewVersionQuote = () => {
+  const createNewVersionQuote = (updateProcessStatus = false) => {
     setQuoteClonning(true);
     axiosInstance()
-      .post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`, { updateProcessStatus: false })
+      .post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`, { updateProcessStatus })
       .then(() => {
         setShowQuotationConfirmBox(false);
         fetchQuotationData();
@@ -471,6 +471,7 @@ const RepairOrderDetails = () => {
                   allowedToDelete={allowedToDelete}
                   isPostWorkService={Boolean(currentStep === 3)}
                   setCurrentStep={setCurrentStep}
+                  createNewVersionQuote={createNewVersionQuote}
                 />
               )}
             {repairOrderProcessSteps[currentStep] === 'Quotation' && repairOrderData && (

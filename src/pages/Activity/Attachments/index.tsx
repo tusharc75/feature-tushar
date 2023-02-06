@@ -412,9 +412,6 @@ export default function Attachment() {
               isChecked: false
             };
           });
-          // console.log(parentRows);
-          // setRowsData(parentRows);
-          console.log('parentRows', parentRows);
           dispatch({ type: 'initialize', data: parentRows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
