@@ -121,7 +121,7 @@ const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequ
         ) : (
           coloum.push({
             accessor: 'action',
-            Header: '',
+            Header: 'Action',
             minWidth: 100,
             width: 100,
             sticky: 'right',
