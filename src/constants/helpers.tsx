@@ -325,6 +325,7 @@ export const CHILD_RESOURCE = {
   rentalManagementCost: 'Rental Management Cost',
   purchaseOrderProduct: 'Purchase Order Product',
   purchaseOrderCost: 'Purchase Order Cost',
+  purchaseOrderService: 'Purchase Order Service',
   bulkAssetCreationProduct: 'Bulk Asset Creation Product',
   repairJobAsset: 'Repair Job Asset',
   invoiceProduct: 'Invoice Product',
