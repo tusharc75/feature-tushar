@@ -949,10 +949,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           handleClose={() => setServiceDialog({ open: false, uniqueId: null, preWork: null })}
           ids={[]}
           onSuccess={(data) => {
-            handleAddService(
-              data?.map((e) => e.service),
-              serviceDialog.uniqueId
-            );
+            handleAddService(data?.map((e) => e._id), serviceDialog.uniqueId);
             setServiceDialog({ open: false, uniqueId: null, preWork: null });
           }}
           extraStaticFilter={serviceDialog.preWork === null ? [] : [{ field: 'preWork', term: serviceDialog.preWork }]}

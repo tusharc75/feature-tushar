@@ -17,6 +17,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import PurchaseRequisitionDetailDialog from './PurchaseRequisitionDetailDialog';
 import AddIcon from '@material-ui/icons/Add';
+import { sidebarResource } from 'src/constants/helpers';
 
 
 const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitionData, stepFullScreen }) => {
@@ -24,7 +25,7 @@ const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequ
     state: { user, permissions }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
-  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: ''});
+  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '' });
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [columns, setColumns] = useState(null);
@@ -46,16 +47,16 @@ const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequ
   const fetchFields = async () => {
     try {
       let fields = await axiosInstance().get('/field?resource=Purchase Requisition Detail');
-      let data = fields?.data?.data.map((i:any)=>{
+      let data = fields?.data?.data.map((i: any) => {
         return i?.fieldData
-      }) 
+      })
       setAllFields(data);
       const newColumns = genrateCustomTableColumns(data, '', '');
       let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';
       }
-      newColumns.forEach((element)=>{
+      newColumns.forEach((element) => {
         if (element.accessor === 'qtyDisplay') {
           element['Footer'] = (info) => {
             const qtyTotal = info.rows
@@ -63,7 +64,8 @@ const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequ
               .reduce((sum, row) => row.values[element.accessor] + sum, 0);
             return <>{qtyTotal}</>;
           };
-      }})
+        }
+      })
       let coloum: any = [
         {
           accessor: 'srno',
@@ -234,7 +236,6 @@ const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequ
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       material.push(element);
     });
-
     axiosInstance()
       .post(`${routes?.purchaseRequisition?.path}/productservice/${purchaseRequisitionData._id}`, { material })
       .then(() => {
@@ -273,39 +274,39 @@ const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequ
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center">
-        <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
+          <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
+            {'Add'}
+            <ExpandMore fontSize="small" />
+          </Button>
+          <Menu
+            anchorEl={addAnchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="add-menu"
+            open={Boolean(addAnchorEl)}
+            onClose={closeAddActions}
+          >
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'product' });
               }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
             >
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'product' });
-                }}
-              >
-                Add Products
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'service' });
-                }}
-              >
-                Add Services
-              </MenuItem>
-            </Menu>
+              Add Products
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'service' });
+              }}
+            >
+              Add Services
+            </MenuItem>
+          </Menu>
         </Box>
         <Box display="flex">
           <Button
@@ -403,7 +404,7 @@ const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequ
           serialized={null}
           productsDialogOpen={addExistingProductDialog.open}
           productId={null}
-          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: ''})}
+          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '' })}
           assignedProducts={rowsData?.map((e) => e?.materialId)}
           renderedFrom={renderedFrom}
           onSuccess={(d) => {
@@ -413,7 +414,7 @@ const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequ
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
         <AssignServiceDialog
-          reference="service"
+          reference={"purchaseRequisition"}
           referenceId={purchaseRequisitionData?._id}
           handleClose={() => setAddExistingProductDialog({ open: false, type: '' })}
           ids={rowsData?.map((e) => e?.materialId)}
