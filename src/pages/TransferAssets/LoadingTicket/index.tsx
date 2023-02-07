@@ -201,7 +201,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         </Link>
         {(params?.data?.isReplaced) &&
           <Box ml={1}>
-            <HtmlTooltip title={`Replaced Asset with ${params?.data?.replaceAsset} Reason-${params?.data?.replaceReason}`}>
+            <HtmlTooltip title={`Replaced Asset ${params?.data?.replaceAsset} Reason-${params?.data?.replaceReason}`}>
               <InfoIcon fontSize="small" color={"primary"} />
             </HtmlTooltip>
           </Box>
