@@ -333,30 +333,16 @@ const TransferAssetDetailPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <>
-              {!transferAssetData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    <Box marginX={1} />
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  </Box>
-                </div>
-              ) : (
-                permissions?.transferAsset?.isUpdate && !isTransferEnded && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    onClick={handleOpenUpdateDialog}
-                    className={'btn-outline-v1'}
-                  >
-                    {isMobile ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )
-              )}
-
-              <ActivityButton referenceId={transferAssetData?._id} resource={ACTIVITY_RESOURCE.transferAsset} />
-            </>
+            {permissions?.transferAsset?.isUpdate && !isTransferEnded && (
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                onClick={handleOpenUpdateDialog}
+                className={'btn-outline-v1'}
+              >
+                {isMobile ? <BiEdit size={20} /> : 'Edit'}
+              </Button>
+            )}
+            <ActivityButton referenceId={transferAssetData?._id} resource={ACTIVITY_RESOURCE.transferAsset} />
           </Box>
         </Box>
       </Box>
