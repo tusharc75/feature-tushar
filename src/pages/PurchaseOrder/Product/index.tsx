@@ -8,7 +8,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { purchaseOrder } from 'src/constants/helpers';
 import AddExistingProductInventory from '../../Sublease/Productpackage/AddExistingProductInventory';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
-import CreateProduct from 'src/components/Product/CreateProduct';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -39,7 +38,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
 
   const [addProductDialog, setAddProductDialog] = useState(false);
   const [isAddingProducts, setAddingProducts] = useState(false);
-  const [isAddNewProduct, setIsAddNewProduct] = useState(false);
 
   const [showProductDialog, setShowProductDialog] = useState(false);
   const [showInventoryStatesDialog, setShowInventoryStatesDialog] = useState({ open: false, product: null, qty: 0 });
@@ -86,10 +84,19 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     productFields?.forEach((e) => {
       if (e?.fieldData?.fieldName === 'productName') {
         columns.push({
+          accessor: 'index',
+          Header: 'Index',
+          width: 50,
+          primaryField: true,
+          Cell: ({ row }) => {
+            return row.original['index'] ? <p className="text-truncate">{row.original.index}</p> : <NoDataCell />;
+          }
+        });
+        columns.push({
           accessor: 'type',
           Header: 'Type',
           width: 100,
-          sticky: isMobile ? 'none' : 'left',
+          primaryField: true,
           Cell: ({ row }) => {
             return row.original['type'] ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
           }
@@ -99,6 +106,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           Header: e?.fieldData?.fieldLabel,
           minWidth: 200,
           width: 200,
+          primaryField: true,
           Cell: ({ row }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {!allowedToEdit ? (
@@ -110,13 +118,13 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                       setShowProductDialog(true);
                       setSelectedProductData(row.original);
                     }
-                    if (row.original.type === 'Cost') {
-                      setShowCostDialog(true);
-                      setSelectedCostData(row.original);
-                    }
                     if (row.original.type === 'Service') {
                       setShowUpdateServiceDialog(true);
                       setSelectedServiceData(row.original);
+                    }
+                    if (row.original.type === 'Expanse') {
+                      setShowCostDialog(true);
+                      setSelectedCostData(row.original);
                     }
                   }}
                   className="link text-truncate"
@@ -143,7 +151,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           }
         });
       }
-
       if (e?.fieldData?.fieldName === 'productNumber') {
         columns.push({
           accessor: 'productNumber',
@@ -233,15 +240,13 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                     setShowDeleteConfirmBox(true);
                     setDeletePurchaseOrderProduct([row.original?._id]);
                   }
-
-                  if (row.original.type === 'Cost') {
-                    setShowCostDeleteConfirmBox(true);
-                    setDeletePurchaseOrderCost([row.original?._id]);
-                  }
-
                   if (row.original.type === 'Service') {
                     setShowServiceDeleteConfirmBox(true);
                     setDeletePurchaseOrderService([row.original?._id]);
+                  }
+                  if (row.original.type === 'Expanse') {
+                    setShowCostDeleteConfirmBox(true);
+                    setDeletePurchaseOrderCost([row.original?._id]);
                   }
                 }}
                 entity="rentalManagement"
@@ -258,21 +263,21 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     setNextStep(false);
 
     const productResponce: any = await axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`);
-    const costResponce: any = await axiosInstance().get(`${purchaseOrder.api}/cost/${purchaseOrderData._id}`);
     const serviceResponse: any = await axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`);
+    const costResponce: any = await axiosInstance().get(`${purchaseOrder.api}/cost/${purchaseOrderData._id}`);
 
     const data = [
       ...(productResponce?.data?.data?.length && productResponce?.data?.data?.map((e: any) => {
         return { ...e, type: 'Product' };
       }) || []),
-      ...((costResponce?.data?.data?.length &&
-        costResponce?.data?.data?.map((e: any) => {
-          return { ...e, type: 'Cost' };
-        })) ||
-        []),
       ...((serviceResponse?.data?.data?.length &&
         serviceResponse?.data?.data?.map((e: any) => {
           return { ...e, type: 'Service' };
+        })) ||
+        []),
+      ...((costResponce?.data?.data?.length &&
+        costResponce?.data?.data?.map((e: any) => {
+          return { ...e, type: 'Expanse' };
         })) ||
         [])
     ];
@@ -285,9 +290,10 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       let res: any = {
         ...finalObject
       };
+      res.index = index + 1;
       res.productName =
         (item.type === 'Product' && item.productDetail?.productName) ||
-        (item.type === 'Cost' && item?.description) ||
+        (item.type === 'Expanse' && item?.description) ||
         (item.type === 'Service' && item?.serviceDetail?.serviceName);
       res.productNumber = item.productDetail?.productNumber;
       res.productDescription = item.productDetail?.productDescription || item.productDetail?.productDesc;
@@ -296,7 +302,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       res.productCategory = item.productDetail?.productCategory?.optionLabel;
       res.productDetail = item.productDetail;
       res.parentId = null;
-      res.qty = (item.type === 'Product' && item?.qty) || (item.type === 'Cost' && item?.qty) || (item.type === 'Service' && item?.qty);
+      res.qty = item?.qty;
       if (item?.qty === 0) {
         res.isValid = false;
       } else if (isRateRequired) {
@@ -494,41 +500,31 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               open={Boolean(addAnchorEl)}
               onClose={closeAddActions}
             >
-              {permissions?.product?.isCreate ? (
-                <MenuItem
-                  onClick={() => {
-                    closeAddActions();
-                    setIsAddNewProduct(true);
-                  }}
-                >
-                  {isMobile && !isTablet ? 'Add' : `Add New Product`}
-                </MenuItem>
-              ) : null}
               <MenuItem
                 onClick={() => {
                   closeAddActions();
                   setAddProductDialog(true);
                 }}
               >
-                {isMobile && !isTablet ? 'Existing' : `Add Existing Product`}
+                Add Products
               </MenuItem>
-              {/* <MenuItem
+              <MenuItem
                 onClick={() => {
                   closeAddActions();
                   setShowServiceDialog(true);
                 }}
               >
-                {isMobile && !isTablet ? 'Existing' : `Add Existing Services`}
-              </MenuItem> */}
-              {/* <MenuItem
+                Add Services
+              </MenuItem>
+              <MenuItem
                 onClick={() => {
                   closeAddActions();
                   setShowCostDialog(true);
                   setSelectedCostData(null);
                 }}
               >
-                Add Cost
-              </MenuItem> */}
+                Add Expanse
+              </MenuItem>
             </Menu>
           </Box>
           <div className="d-flex gap-2">
@@ -618,22 +614,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           renderedFrom={renderedFrom}
           //ignoreIds={dataRows?.map((e) => e?.productId)}
           ignoreIds={[]}
-        />
-      )}
-      {isAddNewProduct && (
-        <CreateProduct
-          isClone={false}
-          productId={null}
-          handleClose={() => setIsAddNewProduct(false)}
-          isAddInBuilder={true}
-          addProductInBuilder={(rows: any) => {
-            rows?.forEach((element) => {
-              element.unitMain = element?.unit;
-            });
-            handleAddProduct(rows);
-          }}
-          openFrom="builder"
-          fromQuote={true}
         />
       )}
       {showProductDialog && (
