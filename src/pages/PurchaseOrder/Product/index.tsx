@@ -288,7 +288,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       res.productName =
         (item.type === 'Product' && item.productDetail?.productName) ||
         (item.type === 'Cost' && item?.description) ||
-        (item.type === 'Service' && item?.service?.serviceName);
+        (item.type === 'Service' && item?.serviceDetail?.serviceName);
       res.productNumber = item.productDetail?.productNumber;
       res.productDescription = item.productDetail?.productDescription || item.productDetail?.productDesc;
       res.serializedProduct = item.productDetail?.serializedProduct;
