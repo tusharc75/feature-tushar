@@ -24,7 +24,6 @@ import { GrDrag } from 'react-icons/gr';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const Steps = ({ serviceId }) => {
-
   const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_steps`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -42,7 +41,7 @@ const Steps = ({ serviceId }) => {
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
-  
+
   const [columns, setColumns] = useState([
     { field: 'stepName', headerName: 'Step Name', show: true, disabled: true, cellRenderer: 'stepNameRenderer' },
     { field: 'order', headerName: 'Order', show: true, disabled: true, cellRenderer: 'commonRenderer' },
@@ -118,7 +117,7 @@ const Steps = ({ serviceId }) => {
       });
   };
 
-  const ActionsRenderer = (params) => (
+  const ActionsRenderer = (params) =>
     permissions?.serviceMaster?.isUpdate && (
       <>
         <HtmlTooltip title="Edit">
@@ -155,8 +154,7 @@ const Steps = ({ serviceId }) => {
           </IconButton>
         </HtmlTooltip>
       </>
-    )
-  );
+    );
 
   const StepNameRenderer = (params) =>
     params?.value ? (
@@ -246,13 +244,7 @@ const Steps = ({ serviceId }) => {
                 </Menu>
                 <Box ml={1} />
                 {dataRows?.length ? (
-                  <Button
-                    variant="outlined"
-                    className="btn-outline-v1"
-                    size="small"
-                    onClick={() => setArrangeView(true)}
-                    style={{ padding: '4.5px 16px' }}
-                  >
+                  <Button variant="outlined" className="btn-outline-v1" size="small" onClick={() => setArrangeView(true)}>
                     <GrDrag fontSize="small" color="primary" className="mr-1" />
                     Arrange
                   </Button>
