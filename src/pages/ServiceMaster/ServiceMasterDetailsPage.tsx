@@ -110,25 +110,31 @@ const ServiceMasterDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              height: 0
+            }
+          }}
+        >
+          <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+          <Tab label={<div className="tab-font">Steps</div>} value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className={'tabLayout'} />
+          <Tab
+            label={<div className="tab-font">Consumables</div>}
+            value={2}
+            aria-controls="a11y-tabpanel-2"
+            id="a11y-tab-2"
+            className={'tabLayout'}
+          />
+        </Tabs>
         <Grid container spacing={2}>
           <Grid item xs={permissions?.leadTimeMaster?.isRead ? 8 : 12}>
-            <Tabs
-              className="new-tab-container-v1"
-              value={tabValue}
-              onChange={handleMainTabChange}
-              textColor="primary"
-              TabIndicatorProps={{
-                style: {
-                  height: 0
-                }
-              }}
-            >
-              <Tab label={<div className='tab-font'>Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-              <Tab label={<div className='tab-font'>Steps</div>} value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className={'tabLayout'} />
-              <Tab label={<div className='tab-font'>Consumables</div>} value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className={'tabLayout'} />
-            </Tabs>
             {tabValue === 0 && (
-              <Box>
+              <Box className="form-v1">
                 {loading || (!fields.length && serviceMasterDetailData != null) ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -140,7 +146,6 @@ const ServiceMasterDetailsPage = () => {
             )}
             {tabValue === 1 && <Steps serviceId={id} />}
             {tabValue === 2 && <Product id={id} />}
-
           </Grid>
           {permissions?.leadTimeMaster?.isRead && (
             <Grid item xs={4}>
