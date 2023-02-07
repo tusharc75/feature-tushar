@@ -9,13 +9,12 @@ import { purchaseOrder } from 'src/constants/helpers';
 import AddExistingProductInventory from '../../Sublease/Productpackage/AddExistingProductInventory';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
-import { isMobile, isTablet } from 'react-device-detect';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { genrateCustomTableColumns } from 'src/constants/columns';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
+import { fetch_po_cost_fields, fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
 import SendEmail from './../SendEmail';
 import InventoryStatesDialog from './InventoryStatesDialog';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -45,12 +44,9 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
 
   const [showCostDialog, setShowCostDialog] = useState(false);
   const [showUpdateServiceDialog, setShowUpdateServiceDialog] = useState(false);
+
   const [selectedCostData, setSelectedCostData] = useState(null);
   const [selectedServiceData, setSelectedServiceData] = useState(null);
-  const [showCostDeleteConfirmBox, setShowCostDeleteConfirmBox] = useState(false);
-  const [showServiceDeleteConfirmBox, setShowServiceDeleteConfirmBox] = useState(false);
-  const [deletePurchaseOrderCost, setDeletePurchaseOrderCost] = useState([]);
-  const [deletePurchaseOrderService, setDeletePurchaseOrderService] = useState([]);
 
   const [selectedProductData, setSelectedProductData] = useState(null);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
@@ -58,13 +54,20 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [deletePurchaseOrderProduct, setDeletePurchaseOrderProduct] = useState([]);
 
   const [isRateRequired, setIsRateRequired] = useState(false);
+
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [allFields, setAllFields] = useState([]);
+
+  const [productFields, setProductFields] = useState([]);
+  const [serviceFields, setServiceFields] = useState([]);
+  const [costFields, setCostFields] = useState([]);
+
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deletePurchaseOrderItem, setDeletePurchaseOrderItem] = useState([]);
+
+
   const [material, setMaterial] = useState([]);
 
   useEffect(() => {
@@ -81,28 +84,28 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     const productFields = productResult?.data?.data?.filter((e) =>
       ['productName', 'productCategory', 'productNumber', 'productDescription', 'serializedProduct'].includes(e?.fieldData?.fieldName)
     );
+    columns.push({
+      accessor: 'index',
+      Header: 'Index',
+      width: 50,
+      primaryField: true,
+      Cell: ({ row }) => {
+        return row.original['index'] ? <p className="text-truncate">{row.original.index}</p> : <NoDataCell />;
+      }
+    });
+    columns.push({
+      accessor: 'type',
+      Header: 'Type',
+      width: 100,
+      primaryField: true,
+      Cell: ({ row }) => {
+        return row.original['type'] ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
+      }
+    });
     productFields?.forEach((e) => {
       if (e?.fieldData?.fieldName === 'productName') {
         columns.push({
-          accessor: 'index',
-          Header: 'Index',
-          width: 50,
-          primaryField: true,
-          Cell: ({ row }) => {
-            return row.original['index'] ? <p className="text-truncate">{row.original.index}</p> : <NoDataCell />;
-          }
-        });
-        columns.push({
-          accessor: 'type',
-          Header: 'Type',
-          width: 100,
-          primaryField: true,
-          Cell: ({ row }) => {
-            return row.original['type'] ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
-          }
-        });
-        columns.push({
-          accessor: 'productName',
+          accessor: 'detail',
           Header: e?.fieldData?.fieldLabel,
           minWidth: 200,
           width: 200,
@@ -110,7 +113,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           Cell: ({ row }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {!allowedToEdit ? (
-                <p> {row.original.productName}</p>
+                <p className='text-truncate'> {row.original.detail}</p>
               ) : (
                 <p
                   onClick={() => {
@@ -122,7 +125,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                       setShowUpdateServiceDialog(true);
                       setSelectedServiceData(row.original);
                     }
-                    if (row.original.type === 'Expanse') {
+                    if (row.original.type === 'Expense') {
                       setShowCostDialog(true);
                       setSelectedCostData(row.original);
                     }
@@ -130,7 +133,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   className="link text-truncate"
                   title={row.original.detail}
                 >
-                  {row.original.productName}
+                  {row.original.detail}
                 </p>
               )}
               <Box ml={1} />
@@ -192,14 +195,20 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         });
       }
     });
-    const fields = await fetch_po_product_fields(purchaseOrderData?.currency);
-    fields.forEach((element) => {
+    const p_fields = await fetch_po_product_fields(purchaseOrderData?.currency);
+    const s_fields = await fetch_po_service_fields(purchaseOrderData?.currency);
+    setServiceFields(s_fields)
+    const c_fields = await fetch_po_cost_fields(purchaseOrderData?.currency);
+    setCostFields(c_fields)
+
+    p_fields.forEach((element) => {
       if (element.fieldName === 'price' && element.required) {
         setIsRateRequired(true);
       }
     });
-    setAllFields(JSON.parse(JSON.stringify(fields)));
-    const newColumns = genrateCustomTableColumns(fields, purchaseOrderData?.currency, renderedFrom);
+
+    setProductFields(JSON.parse(JSON.stringify(p_fields)));
+    const newColumns = genrateCustomTableColumns(p_fields, purchaseOrderData?.currency, renderedFrom);
     columns = [...columns, ...newColumns];
     columns.push({
       accessor: 'action',
@@ -212,7 +221,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       Cell: ({ row }) => {
         return allowedToEdit ? (
           <>
-            {permissions?.irtTicket?.isCreate && (
+            {permissions?.irtTicket?.isCreate && row.original?.type === 'Product' && (
               <HtmlTooltip title="Explore Inventory">
                 <IconButton
                   color="primary"
@@ -221,7 +230,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   onClick={() => {
                     setShowInventoryStatesDialog({
                       open: true,
-                      product: row.original?.type === 'Product' ? row.original?.productDetail?._id : row.original?._id,
+                      product: row.original?.productDetail?._id,
                       qty: row.original?.qty
                     });
                   }}
@@ -236,26 +245,22 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
                 onDelete={() => {
-                  if (row.original.type === 'Product') {
-                    setShowDeleteConfirmBox(true);
-                    setDeletePurchaseOrderProduct([row.original?._id]);
-                  }
-                  if (row.original.type === 'Service') {
-                    setShowServiceDeleteConfirmBox(true);
-                    setDeletePurchaseOrderService([row.original?._id]);
-                  }
-                  if (row.original.type === 'Expanse') {
-                    setShowCostDeleteConfirmBox(true);
-                    setDeletePurchaseOrderCost([row.original?._id]);
-                  }
+                  setShowDeleteConfirmBox(true);
+                  setDeletePurchaseOrderItem([row.original])
                 }}
-                entity="rentalManagement"
+                entity=""
               />
             )}
           </>
         ) : null;
       }
     });
+
+    if (!allowedToEdit) {
+      columns?.forEach((e: any) => {
+        e.editable = false;
+      })
+    }
     setColumns([...columns]);
   };
 
@@ -277,7 +282,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         []),
       ...((costResponce?.data?.data?.length &&
         costResponce?.data?.data?.map((e: any) => {
-          return { ...e, type: 'Expanse' };
+          return { ...e, type: 'Expense' };
         })) ||
         [])
     ];
@@ -291,10 +296,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         ...finalObject
       };
       res.index = index + 1;
-      res.productName =
-        (item.type === 'Product' && item.productDetail?.productName) ||
-        (item.type === 'Expanse' && item?.description) ||
-        (item.type === 'Service' && item?.serviceDetail?.serviceName);
+      res.detail = item.type === 'Product' ? item?.productDetail?.productName : item.type === 'Service' ? item?.serviceDetail?.serviceName : item?.description
       res.productNumber = item.productDetail?.productNumber;
       res.productDescription = item.productDetail?.productDescription || item.productDetail?.productDesc;
       res.serializedProduct = item.productDetail?.serializedProduct;
@@ -385,17 +387,23 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       });
   };
 
-  const handleDelete = () => {
-    axiosInstance()
-      .post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/delete`, { ids: deletePurchaseOrderProduct })
-      .then(() => {
-        fetchData();
-        setShowDeleteConfirmBox(false);
-        setDeletePurchaseOrderProduct([]);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  const handleDelete = async () => {
+    const product = deletePurchaseOrderItem?.filter((e) => e.type === "Product");
+    const service = deletePurchaseOrderItem?.filter((e) => e.type === "Service");
+    const cost = deletePurchaseOrderItem?.filter((e) => e.type === "Expense");
+
+    if (product?.length) {
+      await axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/delete`, { ids: product?.map((e) => e._id) })
+    }
+    if (service?.length) {
+      await axiosInstance().post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/delete`, { ids: service?.map((e) => e._id) })
+    }
+    if (cost?.length) {
+      await axiosInstance().post(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/delete`, { ids: cost?.map((e) => e._id) })
+    }
+    fetchData();
+    setShowDeleteConfirmBox(false);
+    setDeletePurchaseOrderItem([]);
   };
 
   const handleAddCost = (rows) => {
@@ -416,19 +424,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       .then(() => {
         fetchData();
         setShowCostDialog(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleDeleteCost = () => {
-    axiosInstance()
-      .post(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/delete`, { ids: deletePurchaseOrderCost })
-      .then(() => {
-        fetchData();
-        setShowCostDeleteConfirmBox(false);
-        setDeletePurchaseOrderCost([]);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -459,24 +454,23 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       });
   };
 
-  const handleDeleteService = () => {
-    axiosInstance()
-      .post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/delete`, { ids: deletePurchaseOrderService })
-      .then(() => {
-        fetchData();
-        setShowServiceDeleteConfirmBox(false);
-        setDeletePurchaseOrderService([]);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = material.find((d) => d._id === updatedData._id);
-    let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(material, inputField, allFields, updatedData);
-    handleUpdateQty(rows);
+    if (rowData?.type === "Product") {
+      let rows: any = [{ ...rowData, ...updatedData }];
+      rows = await calculateRowsField(material, inputField, productFields, updatedData);
+      handleUpdateQty(rows);
+    }
+    else if (rowData?.type === "Service") {
+      let rows: any = [{ ...rowData, ...updatedData }];
+      rows = await calculateRowsField(material, inputField, serviceFields, updatedData);
+      handleUpdateService(rows);
+    }
+    else if (rowData?.type === "Expense") {
+      let rows: any = [{ ...rowData, ...updatedData }];
+      rows = await calculateRowsField(material, inputField, costFields, updatedData);
+      handleUpdateCost(rows);
+    }
   };
 
   return (
@@ -523,7 +517,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   setSelectedCostData(null);
                 }}
               >
-                Add Expanse
+                Add Expense
               </MenuItem>
             </Menu>
           </Box>
@@ -569,7 +563,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   onClick={() => {
                     closeActions();
                     setShowDeleteConfirmBox(true);
-                    setDeletePurchaseOrderProduct(selectedProducts.map((d) => d._id));
+                    setDeletePurchaseOrderItem(selectedProducts)
                   }}
                 >
                   Delete
@@ -673,22 +667,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           message={`Are you sure you want to delete  ? `}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
-        />
-      )}
-      {showCostDeleteConfirmBox && (
-        <ConfirmationDialog
-          open={true}
-          message={`Are you sure you want to delete  ? `}
-          onClose={() => setShowCostDeleteConfirmBox(false)}
-          onOk={handleDeleteCost}
-        />
-      )}
-      {showServiceDeleteConfirmBox && (
-        <ConfirmationDialog
-          open={true}
-          message={`Are you sure you want to delete  ? `}
-          onClose={() => setShowServiceDeleteConfirmBox(false)}
-          onOk={handleDeleteService}
         />
       )}
       {showInventoryStatesDialog.open && (
