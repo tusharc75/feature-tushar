@@ -20,7 +20,7 @@ export const ViewAll = ({ type, relatedTo }) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          padding: '14px 6px',
+          padding: '12px 6px',
           marginBottom: 6
         }}
       >

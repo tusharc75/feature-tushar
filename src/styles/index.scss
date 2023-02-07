@@ -1043,6 +1043,13 @@ body::-webkit-scrollbar-thumb {
   line-height: 16px;
   color: #298b88;
   cursor: pointer;
+  transition: all 0.3s;
+  &:hover {
+    background-color: #d8e7df;
+  }
+  &:disabled {
+    opacity: 0.5;
+  }
 }
 
 .detailListing {
