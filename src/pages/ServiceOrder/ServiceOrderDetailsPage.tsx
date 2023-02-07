@@ -171,7 +171,6 @@ const ServiceOrderDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {serviceOrderData ? (
               <Fragment>
                 {permissions?.serviceOrder?.isUpdate && allowedToEdit && (
                   <Fragment>
@@ -181,9 +180,6 @@ const ServiceOrderDetailsPage = () => {
                   </Fragment>
                 )}
               </Fragment>
-            ) : (
-              <Skeleton variant="text" width="150px" height="32px" />
-            )}
             <ActivityButton referenceId={serviceOrderData?._id} resource={ACTIVITY_RESOURCE.serviceOrder} />
           </Box>
         </Box>

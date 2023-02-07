@@ -115,8 +115,6 @@ const WarehouseDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {warehouseData ? (
-              <>
                 {permissions?.warehouse?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -132,10 +130,6 @@ const WarehouseDetailsPage = () => {
                     <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                   </span>
                 )}
-              </>
-            ) : (
-              <Skeleton variant="text" width="150px" height="32px" />
-            )}
           </Box>
         </Box>
       </Box>

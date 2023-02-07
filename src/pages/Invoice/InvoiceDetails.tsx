@@ -192,7 +192,6 @@ const InvoiceDetails = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {invoiceData ? (
               <>
                 {permissions?.invoice?.isUpdate && allowedToEdit && (
                   <Button
@@ -251,9 +250,6 @@ const InvoiceDetails = () => {
                   </>
                 )}
               </>
-            ) : (
-              <Skeleton variant="text" width="150px" height="32px" />
-            )}
             <ActivityButton referenceId={invoiceData?._id} resource={ACTIVITY_RESOURCE.invoice} />
           </Box>
         </Box>

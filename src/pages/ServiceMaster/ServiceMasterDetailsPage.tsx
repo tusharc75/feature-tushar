@@ -87,9 +87,6 @@ const ServiceMasterDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {!serviceMasterDetailData ? (
-              <Skeleton variant="text" width="150px" height="32px" />
-            ) : (
               <>
                 {permissions?.product?.isUpdate && (
                   <Button
@@ -105,7 +102,6 @@ const ServiceMasterDetailsPage = () => {
                 )}
                 {permissions?.serviceMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
-            )}
           </Box>
         </Box>
       </Box>

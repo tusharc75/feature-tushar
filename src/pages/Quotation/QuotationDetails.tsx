@@ -298,7 +298,6 @@ const QuotationDetails = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {quotationData ? (
               <>
                 <Tooltip title="Quote Summary">
                   <Button
@@ -416,9 +415,6 @@ const QuotationDetails = () => {
                   )}
                 </Menu>
               </>
-            ) : (
-              <Skeleton variant="text" width="150px" height="32px" />
-            )}
             <ActivityButton referenceId={quotationData?._id} resource={ACTIVITY_RESOURCE.quotation} />
           </Box>
         </Box>

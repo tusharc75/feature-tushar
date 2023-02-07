@@ -187,16 +187,6 @@ const BulkAssetCreationDetailsPage = () => {
                 </Box>
                 <Box className="controls-v1">
                     <Box className="control-buttons-v1">
-                        {!bulkAssetCreationData ? (
-                            <div>
-                                <Skeleton variant="text" width="150px" height="40px" />
-                                <Box display="flex">
-                                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                                    <Box marginX={1} />
-                                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                                </Box>
-                            </div>
-                        ) : <>
                             {permissions?.bulkAssetCreation?.isUpdate && allowedToEdit && !["Completed"]?.includes(bulkAssetCreationData?.status) &&
                                 <Button
                                     variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -207,8 +197,6 @@ const BulkAssetCreationDetailsPage = () => {
                                 </Button>
                             }
                             <ActivityButton referenceId={bulkAssetCreationData?._id} resource={ACTIVITY_RESOURCE.bulkAssetCreation} />
-                        </>
-                        }
                     </Box>
                 </Box>
             </Box>

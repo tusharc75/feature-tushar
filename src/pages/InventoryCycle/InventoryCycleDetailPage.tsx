@@ -99,8 +99,6 @@ const InventoryCycleDetailPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {inventoryCycleData ? (
-              <>
                 {permissions?.inventoryCycle?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -112,10 +110,6 @@ const InventoryCycleDetailPage = () => {
                   </Button>
                 )}
                 {permissions?.inventoryCycle?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </>
-            ) : (
-              <Skeleton variant="text" width="150px" height="32px" />
-            )}
           </Box>
         </Box>
       </Box>

@@ -306,7 +306,6 @@ const EntityDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {entityData ? (
               <>
                 {permissions?.entity?.isUpdate && (
                   <Button
@@ -322,9 +321,6 @@ const EntityDetailsPage = () => {
                   <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowDeleteEntityDialog(true)} />
                 )}
               </>
-            ) : (
-              <Skeleton variant="text" width="150px" height="32px" />
-            )}
           </Box>
         </Box>
       </Box>
