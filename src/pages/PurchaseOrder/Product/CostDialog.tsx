@@ -18,13 +18,15 @@ import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { fetch_po_cost_fields } from '../../../components/PurchaseOrder/helper';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
-const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCost, costData }) => {
+const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCost, costData, bulkEdit }) => {
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
+  const [allFields, setAllFields] = useState([]);
 
   useEffect(() => {
     fetchFields()
@@ -32,17 +34,32 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
 
   const fetchFields = async () => {
     let poFields = await fetch_po_cost_fields(purchaseOrderData?.currency);
-    if (costData) {
+    setAllFields(JSON.parse(JSON.stringify(poFields)))
+    if (bulkEdit) {
+      poFields.forEach((element) => {
+        element.required = false;
+        element.isFormula = false;
+        element.isMulitFormula = false;
+      })
+      poFields = poFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
       setInitialData({
         fields: poFields,
-        values: getObjKeysWithValues(costData, poFields),
+        values: { ...getObjKeys("", poFields) },
       });
     }
     else {
-      setInitialData({
-        fields: poFields,
-        values: getObjKeys("", poFields),
-      });
+      if (costData) {
+        setInitialData({
+          fields: poFields,
+          values: getObjKeysWithValues(costData, poFields),
+        });
+      }
+      else {
+        setInitialData({
+          fields: poFields,
+          values: getObjKeys("", poFields),
+        });
+      }
     }
     EvaluteproductFields(poFields);
   }
@@ -58,16 +75,30 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
   }
 
   const handleSubmit = (values) => {
-    if (!costData) {
-      let returnData = []
-      returnData = [{ ...values }]
-      handleAddCost(returnData)
+    let returnData = []
+    if (bulkEdit) {
+      for (const x in values) {
+        if (values[x] === "" || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
+          delete values[x]
+        }
+      }
+      costData.forEach(element => {
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
+        returnData.push({ _id: element._id, ...element, ...calValues })
+      })
+      handleUpdateCost(returnData);
     }
     else {
-      let returnData = []
-      returnData = [{ ...values, _id: costData._id }]
-      handleUpdateCost(returnData)
+      if (!costData) {
+        returnData = [{ ...values }]
+        handleAddCost(returnData)
+      }
+      else {
+        returnData = [{ ...values, _id: costData._id }]
+        handleUpdateCost(returnData)
+      }
     }
+
   };
 
   return (
@@ -94,7 +125,7 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
           }) => (
             <Fragment>
               <CustomDialogHeader
-                title={costData ? `Edit - ${costData?.index} (${costData?.description || "Expanse"})` : `Add Expanse`}
+                title={bulkEdit ? "Bulk Edit" : costData ? `Edit - ${costData?.index} (${costData?.description || "Expanse"})` : `Add Expanse`}
                 onClose={() => {
                   onClose()
                 }}

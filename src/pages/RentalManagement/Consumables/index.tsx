@@ -22,7 +22,6 @@ import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
 import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
 import { calculatePrice, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import AddExistingProductInventory from '../Productpackage/AddExistingProductInventory';
 

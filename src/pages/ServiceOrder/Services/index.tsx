@@ -488,9 +488,9 @@ const Services = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'service'}
+          reference={'serviceOrder'}
           onSuccess={(services) => {
-            handleAdd(services.map((d) => ({ ...d, detail: d.serviceName })));
+            handleAdd(services);
           }}
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });

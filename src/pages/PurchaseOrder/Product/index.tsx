@@ -26,6 +26,7 @@ import CostDialog from './CostDialog';
 import ServiceDialog from './ServiceDialog';
 import AddIcon from '@material-ui/icons/Add';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import { map, uniq } from 'lodash';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -316,7 +317,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       res.parentId = null;
       res.qty = item?.qty;
       res.productDetail = item?.productDetail;
-      
+      if (item?.productDetail) {
+        res.productDetail = item?.productDetail;
+      }
+      if (item?.serviceDetail) {
+        res.serviceDetail = item?.serviceDetail;
+      }
       if (item?.qty === 0) {
         res.isValid = false;
       } else if (isRateRequired) {
@@ -443,8 +449,13 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   };
 
   const handleAddService = (rows) => {
+    let tempServiceArray = rows?.map((d) => ({
+      serviceId: d._id,
+      qty: d.qty ? parseInt(d.qty) : 1,
+      unit: d?.unitMain?.length ? d?.unitMain[0] : '',
+    }));
     axiosInstance()
-      .post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/add`, { services: rows })
+      .post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/add`, { services: tempServiceArray })
       .then(() => {
         fetchData();
         setShowServiceDialog(false);
@@ -563,11 +574,20 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               onClose={closeActions}
             >
               <MenuItem
-                disabled={selectedProducts.length === 0}
+                disabled={selectedProducts.length > 0 && uniq(map(selectedProducts, 'type'))?.length === 1 ? false : true}
                 onClick={() => {
                   closeActions();
                   setIsBulkEdit(true);
-                  setShowProductDialog(true);
+                  const typeUniq: any = uniq(map(selectedProducts, 'type'));
+                  if (typeUniq[0] === "Product") {
+                    setShowProductDialog(true);
+                  }
+                  else if (typeUniq[0] === "Service") {
+                    setShowUpdateServiceDialog(true);
+                  }
+                  else {
+                    setShowCostDialog(true);
+                  }
                 }}
               >
                 Bulk Edit
@@ -637,28 +657,17 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           nextRowData={null}
         />
       )}
-      {showCostDialog && (
-        <CostDialog
-          onClose={() => {
-            setShowCostDialog(false);
-            setSelectedCostData(null);
-          }}
-          handleAddCost={handleAddCost}
-          handleUpdateCost={handleUpdateCost}
-          purchaseOrderData={purchaseOrderData}
-          costData={selectedCostData}
-        />
-      )}
       {showUpdateServiceDialog && (
         <ServiceDialog
           onClose={() => {
             setShowUpdateServiceDialog(false);
+            setIsBulkEdit(false);
             setSelectedServiceData(null);
           }}
-          handleAddService={handleAddService}
           handleUpdateService={handleUpdateService}
           purchaseOrderData={purchaseOrderData}
-          serviceData={selectedServiceData}
+          serviceData={!isBulkEdit ? selectedServiceData : selectedProducts}
+          bulkEdit={isBulkEdit}
         />
       )}
       {showServiceDialog && (
@@ -671,7 +680,21 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           handleClose={() => {
             setShowServiceDialog(false);
           }}
-          ids={rowsData.filter((d) => d.type === 'service').map((d) => d?.materialId)}
+          ids={[]}
+        />
+      )}
+      {showCostDialog && (
+        <CostDialog
+          onClose={() => {
+            setShowCostDialog(false);
+            setIsBulkEdit(false);
+            setSelectedCostData(null);
+          }}
+          handleAddCost={handleAddCost}
+          handleUpdateCost={handleUpdateCost}
+          purchaseOrderData={purchaseOrderData}
+          costData={!isBulkEdit ? selectedCostData : selectedProducts}
+          bulkEdit={isBulkEdit}
         />
       )}
       {showDeleteConfirmBox && (
