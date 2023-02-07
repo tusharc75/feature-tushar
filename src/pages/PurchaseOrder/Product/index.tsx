@@ -106,7 +106,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       if (e?.fieldData?.fieldName === 'productName') {
         columns.push({
           accessor: 'detail',
-          Header: e?.fieldData?.fieldLabel,
+          Header: "Detail",
           minWidth: 200,
           width: 200,
           primaryField: true,
@@ -141,7 +141,17 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 <IconButton
                   size="small"
                   onClick={() => {
-                    window.open(`${routes.productDetail.path}/${row.original?.productId}`);
+                    window.open(`${routes.productDetail.path}/${row.original?.materialId}`);
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              )}
+              {row.original.type === 'Service' && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original?.materialId}`);
                   }}
                 >
                   <OpenInNewIcon fontSize="small" color="primary" />
@@ -230,7 +240,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   onClick={() => {
                     setShowInventoryStatesDialog({
                       open: true,
-                      product: row.original?.productDetail?._id,
+                      product: row?.original?.materialId,
                       qty: row.original?.qty
                     });
                   }}
@@ -297,14 +307,16 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       };
       res.index = index + 1;
       res.detail = item.type === 'Product' ? item?.productDetail?.productName : item.type === 'Service' ? item?.serviceDetail?.serviceName : item?.description
+      res.materialId = item.type === 'Product' ? item?.productDetail?._id : item.type === 'Service' ? item?.serviceDetail?._id : item?._id
       res.productNumber = item.productDetail?.productNumber;
       res.productDescription = item.productDetail?.productDescription || item.productDetail?.productDesc;
       res.serializedProduct = item.productDetail?.serializedProduct;
       res.serializedProductView = item.productDetail?.serializedProduct ? 'Yes' : 'No';
       res.productCategory = item.productDetail?.productCategory?.optionLabel;
-      res.productDetail = item.productDetail;
       res.parentId = null;
       res.qty = item?.qty;
+      res.productDetail = item?.productDetail;
+      
       if (item?.qty === 0) {
         res.isValid = false;
       } else if (isRateRequired) {
@@ -608,7 +620,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           type={'product'}
           refrenceType="purchaseOrder"
           renderedFrom={renderedFrom}
-          //ignoreIds={dataRows?.map((e) => e?.productId)}
           ignoreIds={[]}
         />
       )}
