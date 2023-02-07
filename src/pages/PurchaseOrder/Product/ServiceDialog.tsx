@@ -78,7 +78,7 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleAddService, handleUpd
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={serviceData && `Edit ${serviceData?.productName || 'Service'}`}
+                title={serviceData && `Edit - ${serviceData?.index} (${serviceData?.productName || 'Service'})`}
                 onClose={() => {
                   onClose();
                 }}

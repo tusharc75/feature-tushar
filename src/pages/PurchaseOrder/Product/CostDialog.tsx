@@ -94,7 +94,7 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
           }) => (
             <Fragment>
               <CustomDialogHeader
-                title={costData ? `Edit ${costData?.description || "Cost"}` : `Add Cost`}
+                title={costData ? `Edit - ${costData?.index} (${costData?.description || "Expanse"})` : `Add Expanse`}
                 onClose={() => {
                   onClose()
                 }}
