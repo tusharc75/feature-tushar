@@ -4,12 +4,13 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { arrayToDropwdownOption, CustomDialogTransition, getObjKeysWithValues, getUniqueCurrencies } from 'src/constants/helpers';
+import { arrayToDropwdownOption, CustomDialogTransition, getObjKeysWithValues, getUniqueCurrencies, yupSchema } from 'src/constants/helpers';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomButton from '../Helpers/CustomButton';
 import FormTypes from './FormTypes';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { FieldArray, Form, Formik } from 'formik';
 
 const cellWidth = 250;
 
@@ -62,6 +63,10 @@ const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => 
 
     }
 
+    function validate(values) {
+        const errors = {};
+        return errors;
+    }
 
     return (
         <Dialog
@@ -86,54 +91,83 @@ const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => 
                 <div className="p-3">
                     {data && data.length ?
                         <TableContainer component={Paper}>
-                            <Table aria-label="customized table">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell width={cellWidth}>Details</TableCell>
-                                        {columns &&
-                                            columns?.map((field: any, index: any) => (
-                                                <TableCell width={cellWidth} >{field?.fieldLabel}</TableCell>
-                                            ))}
-                                        <TableCell>Action</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {rows &&
-                                        rows?.map((row: any, index: any) => (
-                                            <TableRow key={index}>
-                                                <TableCell width={cellWidth}>{row?.detail}</TableCell>
-                                                {columns &&
-                                                    columns?.map((field: any, index: any) => (
-                                                        <TableCell width={cellWidth}>
-                                                            <FormTypes
-                                                                fieldData={field}
-                                                                values={row}
-                                                                currency={currency}
-                                                                onChange={(inputField, val) => {
-                                                                    updateData(row, inputField, val)
-                                                                }}
-                                                                size="small"
-                                                            />
-                                                        </TableCell>
-                                                    ))}
-                                                <TableCell>
-                                                    <Tooltip title="Delete">
-                                                        <IconButton
-                                                            size="small"
-                                                            aria-label="Delete"
-                                                            onClick={() => {
-                                                            }}
-                                                        >
-                                                            <DeleteIcon color="error" />
-                                                        </IconButton>
-                                                    </Tooltip>
 
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                </TableBody>
-                            </Table>
+                            {rows &&
+                                <Formik
+                                    initialValues={{ rows: rows }}
+                                    enableReinitialize
+                                    onSubmit={() => { }}>
+                                    {({ values,
+                                        errors,
+                                        touched,
+                                        setFieldValue,
+                                        submitForm,
+                                    }) => (
+                                        <>
+                                            <Table aria-label="customized table">
+                                                <FieldArray
+                                                    name="bulk_edit_element"
+                                                    render={(arrayHelpers) => (
+                                                        <div>
+                                                            <TableHead>
+                                                                <TableRow>
+                                                                    <TableCell width={cellWidth}>Details</TableCell>
+                                                                    {columns &&
+                                                                        columns?.map((field: any, index: any) => (
+                                                                            <TableCell width={cellWidth} >{field?.fieldLabel}</TableCell>
+                                                                        ))}
+                                                                    <TableCell>Action</TableCell>
+                                                                </TableRow>
+                                                            </TableHead>
+                                                            <TableBody>
+                                                                {values.rows?.map((row: any, rowIndex: any) => (
+                                                                    <TableRow key={rowIndex}>
+                                                                        <TableCell width={cellWidth}>{row?.detail}</TableCell>
+                                                                        {columns &&
+                                                                            columns?.map((field: any, colIndex: any) => (
+                                                                                <TableCell width={cellWidth}>
+                                                                                    <FormTypes
+                                                                                        fieldData={field}
+                                                                                        values={row}
+                                                                                        currency={currency}
+                                                                                        onChange={(inputField, val) => {
+                                                                                            let tempValue = {
+                                                                                                ...values.rows[rowIndex],
+                                                                                                [inputField]: val
+                                                                                            }
+                                                                                            arrayHelpers.replace(rowIndex, tempValue);
+                                                                                            // updateData(row, inputField, val)
+                                                                                        }}
+                                                                                        size="small"
+                                                                                    />
+                                                                                </TableCell>
+                                                                            ))}
+                                                                        <TableCell>
+                                                                            <Tooltip title="Delete">
+                                                                                <IconButton
+                                                                                    size="small"
+                                                                                    aria-label="Delete"
+                                                                                    onClick={() => {
+                                                                                    }}
+                                                                                >
+                                                                                    <DeleteIcon color="error" />
+                                                                                </IconButton>
+                                                                            </Tooltip>
+
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                ))}
+                                                            </TableBody>
+                                                        </div>
+                                                    )}
+                                                />
+                                            </Table>
+                                        </>
+                                    )}
+                                </Formik>}
+
                         </TableContainer>
+
                         : <Box
                             p={2}
                             height={500}
