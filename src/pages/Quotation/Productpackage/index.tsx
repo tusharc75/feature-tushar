@@ -515,7 +515,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
   const calculatePrice = (arr: any[]) => {
     if (quotationData) {
       const data: any = {};
-      data.conditionType = ['Rent'];
+      data.conditionType = ['Price'];
       data.material = arr.map((ele) => ({
         materialId: ele?.materialId,
         materialType: ele?.type,

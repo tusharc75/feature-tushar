@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
         right: theme.spacing(1),
         top: theme.spacing(1),
         color: theme.palette.grey[500],
-      },
+    },
 }));
 
 export default function ConfirmationCancelDialog(props) {
@@ -50,10 +50,10 @@ export default function ConfirmationCancelDialog(props) {
             <DialogTitle id="confirmation-dialog-title" className="text-white">
                 Confirm
                 {onClose ? (
-        <IconButton title="Close Confirm Dialog" aria-label="close" className={classes.closeButton} onClick={close}>
-          <CloseIcon />
-        </IconButton>
-      ) : null}
+                    <IconButton title="Close Confirm Dialog" aria-label="close" className={classes.closeButton} onClick={onClose}>
+                        <CloseIcon />
+                    </IconButton>
+                ) : null}
             </DialogTitle>
             <DialogContent dividers>
                 <Typography>Do you want to save changes or leave?</Typography>
