@@ -4,7 +4,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import LeadTimeAddDialog from './CustomLeadTimeDialog';
 
-const LeadTimeMaster = ({ Id, type }) => {
+const LeadTimeMaster = ({ Id, type, className = '' }) => {
   const [loadingPLT, setLoadingPLT] = useState(false);
   const [leadTimeData, setLeadTimeData] = useState(null);
   const [leadTimeDialogOpen, setLeadTimeDialogOpen] = useState(false);
@@ -60,8 +60,8 @@ const LeadTimeMaster = ({ Id, type }) => {
 
   return (
     <>
-      <Paper style={{ overflow: 'hidden' }}>
-        <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
+      <Box className={`${className} single-form-v1`} style={{ overflow: 'hidden' }}>
+        <Box className={'form-head-v1'} justifyContent="space-between" alignItems="center">
           <Typography variant="subtitle2">Lead Time</Typography>
           <IconButton
             size="small"
@@ -72,72 +72,88 @@ const LeadTimeMaster = ({ Id, type }) => {
             <AddCircleOutlineIcon fontSize="small" />
           </IconButton>
         </Box>
-        {leadTimeData?.steps?.length ? (
-          <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-            <Grid container>
-              <Grid item xs={2}>
-                <Typography variant="body1">Index</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body1">Status</Typography>
-              </Grid>
-              <Grid item xs={4}>
-                <Typography variant="body1">Days</Typography>
-              </Grid>
-            </Grid>
-          </Box>
-        ) : null}
-        {leadTimeData?.steps?.length ? (
-          leadTimeData?.steps?.map((steps, index) => (
-            <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+        <Box className="formdata-v1">
+          {leadTimeData?.steps?.length ? (
+            <Box width={'100%'}>
               <Grid container>
                 <Grid item xs={2}>
-                  <Typography variant="body2">{index + 1}</Typography>
+                  <Typography className="table-head-v1 br-0" style={{ width: '100%' }} variant="body1">
+                    Index
+                  </Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography variant="body2">{steps?.leadTimeStatus || ''}</Typography>
+                  <Typography className="table-head-v1  br-0" style={{ width: '100%' }} variant="body1">
+                    Status
+                  </Typography>
                 </Grid>
                 <Grid item xs={4}>
-                  <Typography variant="body2">{steps?.days || 0}</Typography>
+                  <Typography className="table-head-v1" style={{ width: '100%' }} variant="body1">
+                    Days
+                  </Typography>
                 </Grid>
               </Grid>
             </Box>
-          ))
-        ) : loadingPLT ? (
-          <Box bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-            <Grid container>
-              <Grid item xs={6} justifyContent={'center'}>
-                <Typography variant="body2">Loading ...</Typography>
+          ) : null}
+          {leadTimeData?.steps?.length ? (
+            leadTimeData?.steps?.map((steps, index) => (
+              <Box key={index} bgcolor="white" width={'100%'}>
+                <Grid container>
+                  <Grid item xs={2}>
+                    <Typography className="table-body-v1 bt-0 br-0" style={{ width: '100%' }} variant="body2">
+                      {index + 1}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography className="table-body-v1  bt-0 br-0" style={{ width: '100%' }}>
+                      {steps?.leadTimeStatus || ''}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography className="table-body-v1  bt-0" style={{ width: '100%' }}>
+                      {steps?.days || 0}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+            ))
+          ) : loadingPLT ? (
+            <Box bgcolor="white" width={'100%'}>
+              <Grid container>
+                <Grid item xs={6} justifyContent={'center'}>
+                  <Typography variant="body2">Loading ...</Typography>
+                </Grid>
               </Grid>
-            </Grid>
-          </Box>
-        ) : (
-          <Box bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-            <Grid container>
-              <Grid item xs={6} justifyContent={'center'}>
-                <Typography variant="body2">No Data Found</Typography>
+            </Box>
+          ) : (
+            <Box bgcolor="white" width={'100%'}>
+              <Grid container>
+                <Grid item xs={6} justifyContent={'center'}>
+                  <Typography variant="body2">No Data Found</Typography>
+                </Grid>
               </Grid>
-            </Grid>
-          </Box>
-        )}
-        {leadTimeData?.steps?.length ? (
-          <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-            <Grid container>
-              <Grid item xs={2}>
-                <Typography variant="body2"></Typography>
+            </Box>
+          )}
+          {leadTimeData?.steps?.length ? (
+            <Box width={'100%'}>
+              <Grid container>
+                <Grid item xs={2}>
+                  <Typography variant="body2"></Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography className="table-head-v1  bt-0 br-0" style={{ width: '100%' }}>
+                    Total
+                  </Typography>
+                </Grid>
+                <Grid item xs={4}>
+                  <Typography className="table-body-v1  bt-0" style={{ width: '100%' }}>
+                    {leadTimeData?.leadTimeDays || 0}
+                  </Typography>
+                </Grid>
               </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body2" style={{ fontWeight: 'bold' }}>
-                  Total
-                </Typography>
-              </Grid>
-              <Grid item xs={4}>
-                <Typography variant="body2">{leadTimeData?.leadTimeDays || 0}</Typography>
-              </Grid>
-            </Grid>
-          </Box>
-        ) : null}
-      </Paper>
+            </Box>
+          ) : null}
+        </Box>
+      </Box>
       {leadTimeDialogOpen && (
         <LeadTimeAddDialog
           title={'Assign Lead Time'}
