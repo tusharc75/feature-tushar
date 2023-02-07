@@ -1,5 +1,5 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import {  useContext, useEffect, useState } from 'react';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -14,8 +14,17 @@ import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
+import Steps from 'src/pages/RentalManagement/Steps';
+import { purchaseRequisitionSteps } from 'src/constants/helpers';
+import ContentFullScreen from '../../components/ContentFullScreen';
+import TabPanel from '../../components/TabPanel';
+import ProductService from './ProductService';
+import { camelCase } from 'lodash';
+
+
 
 const PurchaseRequisitionDetail = () => {
+    const renderedFrom = camelCase(routes?.purchaseRequisition.title);
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -27,6 +36,11 @@ const PurchaseRequisitionDetail = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
+  const [nextStep, setNextStep] = useState(true);
+  const [currentStep, setCurrentStep] = useState(null);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
+
   const {
     state: { permissions, user }
   }: any = useData();
@@ -37,6 +51,22 @@ const PurchaseRequisitionDetail = () => {
       fetchData();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
+      updateProcessStatus(purchaseRequisitionSteps[currentStep]);
+    }
+  }, [currentStep]);
+
+  const updateProcessStatus = (processStatus) => {
+    axiosInstance()
+      .put(`${routes?.purchaseRequisition?.path}/${id}/process-status`, { processStatus: processStatus })
+      .then(({ data }) => {})
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
 
   const fetchFields = async () => {
     axiosInstance()
@@ -56,6 +86,7 @@ const PurchaseRequisitionDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.purchaseRequisition.path}/${id}`);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      setCurrentStep(purchaseRequisitionSteps.indexOf(data?.processStatus) !== -1 ? purchaseRequisitionSteps.indexOf(data?.processStatus) : 0);
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setPurchaseRequisitionData(data);
@@ -96,6 +127,10 @@ const PurchaseRequisitionDetail = () => {
     setOpenUpdateDialog(false);
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -115,7 +150,7 @@ const PurchaseRequisitionDetail = () => {
               </div>
             ) : (
               <>
-                {permissions?.purchaseRequisition?.isUpdate && allowedToEdit &&  (
+                {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     className="btn-outline-v1"
@@ -125,22 +160,73 @@ const PurchaseRequisitionDetail = () => {
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 )}
-                {permissions?.purchaseRequisition?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {permissions?.purchaseRequisition?.isDelete && allowedToDelete && (
+                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                )}
               </>
             )}
           </Box>
         </Box>
       </Box>
       <Box className="detail-container-v1">
-            <Box>
-              {loading || !fields?.length ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              ) : (
-                <DetailsPage data={purchaseRequisitionData} fields={fields} />
-              )}
-            </Box>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              height: 0
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={<div className="d-flex align-items-center tab-font">Header</div>}
+            value={0}
+            aria-controls="a11y-tabpanel-0"
+            id="a11y-tab-0"
+          />
+          <Tab
+            className={'tabLayout'}
+            label={<div className="d-flex align-items-center tab-font">Details</div>}
+            value={1}
+            aria-controls="a11y-tabpanel-1"
+            id="a11y-tab-1"
+          />
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          <Box>
+            {loading || !fields?.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={purchaseRequisitionData} fields={fields} />
+            )}
+          </Box>
+          </TabPanel>
+          <TabPanel value={tabValue} index={1}>
+          <Steps
+          isNextStep={false}
+          nextStep={nextStep}
+          steps={purchaseRequisitionSteps}
+          currentStep={currentStep}
+          setCurrentStep={setCurrentStep}
+          isStepEnded={['Closed'].includes(purchaseRequisitionData?.status)}
+        />
+        <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            {currentStep === 0 && purchaseRequisitionData && (
+                <ProductService 
+                renderedFrom={`${renderedFrom}_grid-1`}
+                allowedToEdit={allowedToEdit}
+                setNextStep={setNextStep}
+                purchaseRequisitionData={purchaseRequisitionData}
+                stepFullScreen={stepFullScreen}
+                />
+            )}
+        </ContentFullScreen>
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
