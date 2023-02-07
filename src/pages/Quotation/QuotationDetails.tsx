@@ -508,8 +508,8 @@ const QuotationDetails = () => {
               handleNext={
                 currentStep > 2
                   ? () => {
-                      setCustomerAcceptable(true);
-                    }
+                    setCustomerAcceptable(true);
+                  }
                   : null
               }
             />
@@ -614,7 +614,10 @@ const QuotationDetails = () => {
         />
       )}
       {quotationData && showAllVersionStatus && (
-        <Versions onClose={() => setShowAllVersionStatus(false)} quotationId={id} handleChangeVersion={handleChangeVersion} />
+        <Versions
+          onClose={() => setShowAllVersionStatus(false)}
+          quotationId={id}
+          handleChangeVersion={handleChangeVersion} />
       )}
       {customerAcceptable && (
         <ManualReponseDialog
