@@ -1,7 +1,9 @@
 .MuiToolbar-root {
   min-height: 64px !important;
+  min-width: 84px !important;
   @media all and (max-width: 768px) {
     min-height: 0px !important;
+    min-width: px !important;
   }
 }
 @media all and (max-width: 768px) {
