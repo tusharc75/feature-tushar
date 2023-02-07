@@ -15,6 +15,8 @@ const FormTypes = (props) => {
         onChange,
         fieldData,
         currency,
+        touched,
+        errors
     } = props;
 
     const [options, setOptions] = useState([]);
@@ -42,6 +44,8 @@ const FormTypes = (props) => {
             required={fieldData?.required}
             name={fieldData?.fieldName}
             value={values[fieldData?.fieldName]}
+            error={touched[fieldData?.fieldName] && Boolean(errors[fieldData?.fieldName])}
+            helperText={touched[fieldData?.fieldName] && errors[fieldData?.fieldName]}
             margin="dense"
             onChange={(e) => onChange(fieldData?.fieldName, e.target.value.trimStart())}
         />
@@ -56,6 +60,8 @@ const FormTypes = (props) => {
             rows={3}
             value={values[fieldData?.fieldName]}
             margin="dense"
+            error={touched[fieldData?.fieldName] && Boolean(errors[fieldData?.fieldName])}
+            helperText={touched[fieldData?.fieldName] && errors[fieldData?.fieldName]}
             onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
         />
     ) : fieldData?.type === 'percent' ? (
@@ -67,11 +73,13 @@ const FormTypes = (props) => {
             name={fieldData?.fieldName}
             value={values[fieldData?.fieldName]}
             InputProps={{
-                endAdornment: '%',
+                endAdornment: '% ',
                 inputProps: { min: 0 },
                 readOnly: fieldData && fieldData?.isUneditable ? true : false
             }}
             margin="dense"
+            error={touched[fieldData?.fieldName] && Boolean(errors[fieldData?.fieldName])}
+            helperText={touched[fieldData?.fieldName] && errors[fieldData?.fieldName]}
             onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
         />
     ) : fieldData?.type === "currencyAmount" ? (
@@ -86,6 +94,8 @@ const FormTypes = (props) => {
                 startAdornment: getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative,
             }}
             margin="dense"
+            error={touched[fieldData?.fieldName] && Boolean(errors[fieldData?.fieldName])}
+            helperText={touched[fieldData?.fieldName] && errors[fieldData?.fieldName]}
             onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
         />
     ) : fieldData?.type === 'dropDown' ? (
@@ -99,7 +109,13 @@ const FormTypes = (props) => {
             getOptionLabel={(option: any) => option.optionLabel || ''}
             getOptionSelected={(option: any, val) => (option ? option.optionValue == val.optionValue : false)}
             onChange={(e, val) => onChange(fieldData?.fieldName, val.optionValue)}
-            renderInput={(params) => <TextField {...params} margin="dense" label={fieldData?.label} variant="outlined" />}
+            renderInput={(params) => <TextField
+                {...params}
+                error={touched[fieldData?.fieldName] && Boolean(errors[fieldData?.fieldName])}
+                helperText={touched[fieldData?.fieldName] && errors[fieldData?.fieldName]}
+                margin="dense"
+                label={fieldData?.label}
+                variant="outlined" />}
         />
     ) : fieldData?.type === 'decimal' ? (
         <TextField
@@ -110,6 +126,8 @@ const FormTypes = (props) => {
             name={fieldData?.fieldName}
             value={values[fieldData?.fieldName]}
             margin="dense"
+            error={touched[fieldData?.fieldName] && Boolean(errors[fieldData?.fieldName])}
+            helperText={touched[fieldData?.fieldName] && errors[fieldData?.fieldName]}
             onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
             InputProps={{
                 inputProps: { min: 0 },
@@ -148,6 +166,8 @@ const FormTypes = (props) => {
                     shrink: true
                 }}
                 margin="dense"
+                error={touched[fieldData?.fieldName] && Boolean(errors[fieldData?.fieldName])}
+                helperText={touched[fieldData?.fieldName] && errors[fieldData?.fieldName]}
             />
         </MuiPickersUtilsProvider>
     ) : fieldData?.type === 'dateTime' ? (
@@ -169,6 +189,8 @@ const FormTypes = (props) => {
                     shrink: true
                 }}
                 margin="dense"
+                error={touched[fieldData?.fieldName] && Boolean(errors[fieldData?.fieldName])}
+                helperText={touched[fieldData?.fieldName] && errors[fieldData?.fieldName]}
             />
         </MuiPickersUtilsProvider>
     ) : null;
