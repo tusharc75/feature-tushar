@@ -494,22 +494,24 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               open={Boolean(addAnchorEl)}
               onClose={closeAddActions}
             >
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddProductDialog(true);
-                }}
-              >
-                Add Products
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setShowServiceDialog(true);
-                }}
-              >
-                Add Services
-              </MenuItem>
+              {permissions?.product?.isRead &&
+                <MenuItem
+                  onClick={() => {
+                    closeAddActions();
+                    setAddProductDialog(true);
+                  }}
+                >
+                  Add Products
+                </MenuItem>}
+              {permissions?.serviceMaster?.isRead &&
+                <MenuItem
+                  onClick={() => {
+                    closeAddActions();
+                    setShowServiceDialog(true);
+                  }}
+                >
+                  Add Services
+                </MenuItem>}
               <MenuItem
                 onClick={() => {
                   closeAddActions();
