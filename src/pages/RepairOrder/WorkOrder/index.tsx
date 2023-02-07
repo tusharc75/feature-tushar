@@ -10,6 +10,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import {
   repairOrder,
+  REPAIR_ORDER_TYPE,
   workOrder,
   WORKORDER_SERVICE_STATUS,
   WORK_ORDER_STATUS
@@ -33,7 +34,8 @@ const WorkOrder = ({
   allowedToEdit,
   allowedToDelete,
   isPostWorkService,
-  setCurrentStep
+  setCurrentStep,
+  createNewVersionQuote
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -292,7 +294,6 @@ const WorkOrder = ({
       .catch((err) => {
         setShowConfirmBox(false);
         setDeleting(false);
-
         toastConfig.setToastConfig(err);
       });
   };
@@ -313,6 +314,9 @@ const WorkOrder = ({
           uniqueIds: ids
         })
         .then(({ data }) => {
+          if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
+            createNewVersionQuote(true)
+          }
           setDeleting(false);
           setShowConfirmBox(false);
           fetchData();
@@ -325,7 +329,6 @@ const WorkOrder = ({
         .catch((err) => {
           setShowConfirmBox(false);
           setDeleting(false);
-
           toastConfig.setToastConfig(err);
         });
     } else {
@@ -464,6 +467,9 @@ const WorkOrder = ({
     axiosInstance()
       .post(`${workOrder.api}/service`, data)
       .then(() => {
+        if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
+          createNewVersionQuote(true)
+        }
         fetchData();
       })
       .catch((err) => {

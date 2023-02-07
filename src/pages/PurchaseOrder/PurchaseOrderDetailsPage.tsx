@@ -445,6 +445,7 @@ const PurchaseOrderDetailsPage = () => {
           fetchPurchaseOrderData();
         }}
         currencyDisable={purchaseOrderData?.canDelete ? false : true}
+        currency={user.user?.brandCurrency || null}
       />)}
   </Box >
   );

@@ -1,20 +1,16 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import { Formik, Form } from 'formik';
 import {
   convertMsToTime,
-  dateTimeFormat,
   getObjKeys,
   getObjKeysWithValues,
-  serviceMaster,
   setFieldsInAscendingOrder,
   workOrder,
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS,
-  yupSchema
 } from 'src/constants/helpers';
-import { Box, IconButton, Divider, Grid, Badge, Accordion, AccordionDetails, AccordionSummary, Typography, Chip, Checkbox } from '@material-ui/core';
+import { Box, IconButton, Grid, Typography, Chip } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -161,7 +157,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   const toastConfig = useContext(CustomToastContext);
 
   const [serviceDetails, setServiceDetails] = useState(null);
-  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, values: null, type: '' });
+  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, type: '' });
   const [selectedStep, setSelectedStep] = useState(null);
   const [stepState, setStepState] = useState(null);
   const [serviceData, setServiceData] = useState([]);
@@ -188,7 +184,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
     const serviceDetailResponse = await axiosInstance().get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`);
     var serviceDetail = serviceDetailResponse?.data?.data;
     serviceDetail.steps = serviceDetail?.steps?.sort((a, b) => a?.order - b?.order);
-    
+
     serviceDetail.steps?.forEach((ele, index) => {
       ele.isAllowToPerform = false;
       if (index === 0) {
@@ -273,7 +269,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
       });
   };
 
-  const handleAddService = (ids, forMinMax = false, step = null, values = null) => {
+  const handleAddService = (ids, step) => {
     const data: any = {};
     data.serviceIds = ids;
     if (selectedService?.uniqueId) {
@@ -283,11 +279,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
     axiosInstance()
       .post(`${workOrder.api}/service/${workOrderId}`, data)
       .then(() => {
-        if (forMinMax) {
-          const type = automatePassFail(values, step);
-          handlePassFail(type, step);
-        }
-        setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });
+        setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
         fetchService();
       })
       .catch((err) => {
@@ -358,20 +350,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
         setSelectedStep(null);
         fetchServiceData();
         fetchService();
-        const serviceIds = determinServiceDialog(values, step);
-        if (serviceIds.length > 0) {
-          const services = serviceIds.filter((s) => {
-            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
-          });
-          if (services.length > 0) {
-            if (referencType === "workOrderTechnician") {
-              handleAddService(services?.map((e) => e._id), false, step);
-            }
-            else {
-              setAddServiceConfirmation({ open: true, status: '', services, step, values, type: '' });
-            }
-          }
-        } else if (step?.isPassFail) {
+        if (step?.isPassFail) {
           const type = automatePassFail(values, step);
           handlePassFail(type, step);
         }
@@ -379,27 +358,6 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  };
-
-  const determinServiceDialog = (values: any, step: any) => {
-    const { fieldData } = getFields(step);
-    const minMaxFields = fieldData.fields.filter((f) => {
-      const keys = Object.keys(f);
-      if (keys.includes('minValueServiceAdd') || keys.includes('maxValueServiceAdd')) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-    const serviceIds = [];
-    minMaxFields.forEach((f) => {
-      if (values[f?.fieldName] && values[f?.fieldName] < f?.minValue && f?.minValueServiceAdd) {
-        serviceIds.push({ _id: f?.minValueServiceAdd });
-      } else if (values[f?.fieldName] && values[f?.fieldName] > f?.maxValue && f?.maxValueServiceAdd) {
-        serviceIds.push({ _id: f?.maxValueServiceAdd });
-      }
-    });
-    return serviceIds;
   };
 
   const automatePassFail = (values: any, step: any): string => {
@@ -452,18 +410,18 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
         const result = data?.data;
         if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isPassAddon && result?.passAddon?.length) {
           if (referencType === "workOrderTechnician") {
-            handleAddService(result?.passAddon?.map((e) => e._id), false, step);
+            handleAddService(result?.passAddon?.map((e) => e._id), step);
           }
           else {
-            setAddServiceConfirmation({ open: true, status: WORKORDER_SERVICE_STEP_STATUS.passed, services: result?.passAddon, step: step, values: null, type: '' });
+            setAddServiceConfirmation({ open: true, status: WORKORDER_SERVICE_STEP_STATUS.passed, services: result?.passAddon, step: step, type: '' });
           }
         }
         else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isFailAddon && result?.failAddon?.length) {
           if (referencType === "workOrderTechnician") {
-            handleAddService(result?.failAddon?.map((e) => e._id), false, step);
+            handleAddService(result?.failAddon?.map((e) => e._id), step);
           }
           else {
-            setAddServiceConfirmation({ open: true, status: WORKORDER_SERVICE_STEP_STATUS.failed, services: result?.failAddon, step: step, values: null, type: '' });
+            setAddServiceConfirmation({ open: true, status: WORKORDER_SERVICE_STEP_STATUS.failed, services: result?.failAddon, step: step, type: '' });
           }
         }
         else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isJumpStepPass && result?.jumpStepsPass?.length) {
@@ -800,18 +758,13 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                     : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
-              setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });
+              setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
             }}
             onOk={() => {
               if (addServiceConfirmation.type === '') {
-                handleAddService(
-                  addServiceConfirmation.services?.map((e) => e._id),
-                  addServiceConfirmation.status === '' ? true : false,
-                  addServiceConfirmation.step,
-                  addServiceConfirmation.values
-                );
+                handleAddService(addServiceConfirmation.services?.map((e) => e._id), addServiceConfirmation.step);
               }
-              setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });
+              setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
             }}
           />
         )}

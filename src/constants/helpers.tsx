@@ -65,6 +65,7 @@ export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
 export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Loading Ticket', 'Invoice'];
 export const demandOrderSteps = ['Add Products'];
+export const purchaseRequisitionSteps = ['Add Products'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -217,7 +218,9 @@ export const sidebarResource = {
   employeeMaster: 'Employee Master',
   competencyMaster: 'Competency Master',
   technicianScheduler: 'Technician Scheduler',
-  irtTicket: 'IRT Ticket'
+  irtTicket: 'IRT Ticket',
+  purchaseRequisition: 'Purchase Requisition'
+
 };
 
 export const primaryFields = {
@@ -317,7 +320,8 @@ export const RESOURCE_LABEL = {
   employeeMaster: 'Employee Master',
   competencyMaster: 'Competency Master',
   technicianScheduler: 'Technician Scheduler',
-  irtTicket: 'IRT Ticket'
+  irtTicket: 'IRT Ticket',
+  purchaseRequisition: 'Purchase Requisition'
 };
 
 export const CHILD_RESOURCE = {
@@ -325,6 +329,7 @@ export const CHILD_RESOURCE = {
   rentalManagementCost: 'Rental Management Cost',
   purchaseOrderProduct: 'Purchase Order Product',
   purchaseOrderCost: 'Purchase Order Cost',
+  purchaseOrderService: 'Purchase Order Service',
   bulkAssetCreationProduct: 'Bulk Asset Creation Product',
   repairJobAsset: 'Repair Job Asset',
   invoiceProduct: 'Invoice Product',

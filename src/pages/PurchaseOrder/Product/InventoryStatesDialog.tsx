@@ -30,7 +30,7 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
             filterById.push({ field: "purchaseOrder", term: purchaseOrderData?._id });
             filterById.push({ field: "product", term: product });
             axiosInstance()
-                .get(`/irt-ticket?filterById=${encodeURI(JSON.stringify(filterById))}`)
+                .get(`/irt-ticket?filterById=${encodeURI(JSON.stringify(filterById))}&filterType=and`)
                 .then(({ data: { data } }) => {
                     setIrtTicketData(data?.data)
                 });

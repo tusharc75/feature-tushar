@@ -559,11 +559,8 @@ export default function CustomReactTable({
                             value={cellValue}
                             onChange={(e) => {
                               let value: any = e.target.value;
-
-                              value = parseInt(value);
-
+                              value = parseFloat(value);
                               if (value < 0) return;
-
                               setCellValue(value);
                             }}
                           />

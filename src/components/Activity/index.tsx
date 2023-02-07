@@ -396,7 +396,7 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           ) : null}
-          {type === 'Attachment' ? (
+          {type === 'AttachmentFile' ? (
             <ManageAttachment
               attachmentId={null}
               handleClose={() => {

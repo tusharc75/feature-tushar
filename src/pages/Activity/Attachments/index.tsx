@@ -33,8 +33,9 @@ import { camelCase } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 import Add from '@material-ui/icons/Add';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable from 'src/components/CustomReactTableNew/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import moment from 'moment';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -153,15 +154,17 @@ export default function Attachment() {
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
-  const [rowsData, setRowsData] = useState(null);
+  // const [rowsData, setRowsData] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
+  // const [rowCount, setRowCount] = useState(second);
+
   const column: any = [
     {
-      accessor: 'srNo',
-      Header: 'Sr No',
-      width: 30,
+      accessor: 'attachmentType',
+      Header: 'Type',
+      width: 70,
       sticky: isMobile ? 'none' : 'left',
-      Cell: ({ row }) => <>{row.original?.srNo || ''}</>
+      Cell: ({ row }) => <>{row.original?.attachmentType === 'folder' ? 'Folder' : 'Attachment'}</>
     },
     {
       accessor: 'name',
@@ -187,16 +190,9 @@ export default function Attachment() {
       )
     },
     {
-      accessor: 'attachmentType',
-      Header: 'Type',
-      width: 70,
-      sticky: isMobile ? 'none' : 'left',
-      Cell: ({ row }) => <>{row.original?.attachmentType === 'folder' ? 'Folder' : 'Attachment'}</>
-    },
-    {
       accessor: 'relatedTo',
       Header: 'Related To',
-      width: 70,
+      width: 230,
       sticky: isMobile ? 'none' : 'left',
       Cell: ({ row }) => (
         <>
@@ -222,14 +218,14 @@ export default function Attachment() {
       Header: 'Created At',
       width: 70,
       sticky: isMobile ? 'none' : 'left',
-      Cell: ({ row }) => <>{row.original?.createdByDate}</>
+      Cell: ({ row }) => <>{row.original?.createdBy}</>
     },
     {
       accessor: 'updatedAt',
       Header: 'Updated At',
       width: 70,
       sticky: isMobile ? 'none' : 'left',
-      Cell: ({ row }) => <>{row.original?.updatedAtDate}</>
+      Cell: ({ row }) => <>{row.original?.updatedAt}</>
     },
     {
       accessor: 'action',
@@ -406,19 +402,17 @@ export default function Attachment() {
           const parentRows = rows.map((parent, idx) => {
             parent.srNo = idx + 1;
             parent.subRows = generateNestedData(data, parent);
-            const { createdBy, updatedBy, ...rest } = parent;
             return {
-              ...rest,
+              ...parent,
+              id: parent._id,
               fileUrl: parent.fileUrl,
               canEdit: parent.attachmentType === 'folder' ? true : parent?.canEdit,
-              createdByDate: createdBy?.date ?? '',
-              updatedByDate: updatedBy?.date ?? '',
+              createdBy: moment(parent.createdBy?.date).format('MMM Do, YYYY'),
+              updatedBy: moment(parent.updatedBy?.date).format('MMM Do, YYYY'),
               isChecked: false
             };
           });
-          console.log(parentRows);
-          setRowsData(parentRows);
-          // dispatch({ type: 'initialize', data: rows, count: count });
+          dispatch({ type: 'initialize', data: parentRows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
           }, gridLoadingTimeout);
@@ -436,13 +430,13 @@ export default function Attachment() {
       ?.map((u, idx) => {
         u.srNo = parent.srNo + '.' + (idx + 1);
         u.subRows = generateNestedData(data, u);
-        const { createdBy, updatedBy, ...rest } = u;
         return {
-          ...rest,
+          ...u,
+          id: u._id,
           fileUrl: u.fileUrl,
           canEdit: u.attachmentType === 'folder' ? true : u?.canEdit,
-          createdByDate: u.createdBy.date ?? '',
-          updatedByDate: u?.updatedBy?.date ?? '',
+          createdBy: moment(u.createdBy?.date).format('MMM Do, YYYY'),
+          updatedBy: moment(u.updatedBy?.date).format('MMM Do, YYYY'),
           isChecked: false
         };
       });
@@ -614,17 +608,27 @@ export default function Attachment() {
           </div>
         )}
         <Box zIndex={5} width={'100%'}>
-          {rowsData?.length ? (
+          {dataRows?.length ? (
             <CustomReactTable
+              height={'calc(100vh - 300px)'}
               columns={column}
-              data={rowsData}
-              onSelect={setSelectedRecords}
+              data={dataRows}
+              currentPage={page}
+              onSelect={(newSelectedRecords) => {
+                // dispatch({ type: "selection", selectedRecords: newSelectedRecords })
+              }}
+              dispatch={dispatch}
               childrenProperty="subRows"
               uniqueKey="_id"
-              hideSelection={false}
-              renderedFrom="attachment_page"
-              isClientSideGrid={true}
-              material={rowsData}
+              expander={true}
+              setWholeRowsCellColor={() => {}}
+              renderedFrom={'attachment_render_form'}
+              isClientSideGrid={false}
+              rowCount={rowCount}
+              limit={limit}
+              customFilters={filters}
+              sorting={sorting}
+              loading={loading}
             />
           ) : (
             <Box p={2} height={500} bgcolor="white">
