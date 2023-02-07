@@ -206,19 +206,28 @@ export default function ImportExportLinks({
               }}
               htmlFor="importFromExcel"
               className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}
+              className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}
             >
               {/* {ImportInput} */}
               Import from Excel
             </label>
             {/* <Divider orientation="vertical" flexItem className={classes.linkDivider} /> */}
+            {/* <Divider orientation="vertical" flexItem className={classes.linkDivider} /> */}
           </>
         )}
-        <label onClick={exportToExcel} className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}>
+
+        <label
+          onClick={exportToExcel}
+          className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}
+        >
           Export to Excel
           {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? ' (All)' : ` (${recordsToExport})`) : null}
         </label>
         {/* <Divider orientation="vertical" flexItem className={classes.linkDivider} /> */}
-        <label onClick={() => setIsSelection(true)} className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}>
+        <label
+          onClick={() => setIsSelection(true)}
+          className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}
+        >
           Download Template
         </label>
         {/* <Divider
