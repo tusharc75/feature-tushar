@@ -101,16 +101,6 @@ const CompetencyMasterDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {!competencyMasterData ? (
-              <div>
-                <Skeleton variant="text" width="150px" height="40px" />
-                <Box display="flex">
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  <Box marginX={1} />
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                </Box>
-              </div>
-            ) : (
               <>
                 {permissions?.competencyMaster?.isUpdate && (
                   <Button
@@ -124,7 +114,6 @@ const CompetencyMasterDetail = () => {
                 )}
                 {permissions?.competencyMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
-            )}
           </Box>
         </Box>
       </Box>
