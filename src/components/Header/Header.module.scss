@@ -164,6 +164,7 @@
     display: flex;
     padding-block: 10px;
     padding-inline: 3% !important;
+
     @media all and (max-width: 900px) {
       padding-inline: 24px;
     }
@@ -184,7 +185,7 @@
   .drawerClosed {
     margin-left: -7px;
     @media all and (min-width: 959.95px) {
-      margin-left: 61px;
+      padding-left: 84px;
     }
   }
   .drawerOpen {
