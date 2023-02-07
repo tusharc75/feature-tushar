@@ -218,6 +218,8 @@ const WorkOrderDetails = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {workOrderData ? (
+              <>
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
                   workOrderData?.canComplete &&
@@ -282,6 +284,10 @@ const WorkOrderDetails = () => {
                 {permissions?.workOrder?.isDelete && allowedToEdit && workOrderData?.canDelete && !workOrderData?.deleted && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="40px" />
+            )}
             <ActivityButton referenceId={workOrderData?._id} resource={ACTIVITY_RESOURCE.workOrder} />
           </Box>
         </Box>

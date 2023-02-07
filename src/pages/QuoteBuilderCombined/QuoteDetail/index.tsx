@@ -691,6 +691,8 @@ export default function QuoteDetail() {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {quoteData ? (
+              <>
                 {processStatus !== 'New' && (
                   <Tooltip title="Quote Summary">
                     <Button
@@ -874,6 +876,10 @@ export default function QuoteDetail() {
                     </Menu>
                   </>
                 )}
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
             <ActivityButton referenceId={quoteData?._id} resource={ACTIVITY_RESOURCE.quote} />
           </Box>
         </Box>

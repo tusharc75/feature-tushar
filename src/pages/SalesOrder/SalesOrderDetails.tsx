@@ -198,6 +198,7 @@ const SalesOrderDetails = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {salesOrderData ? (
               <>
                 {permissions?.salesOrder?.isUpdate && allowedToEdit && (
                   <Button
@@ -256,6 +257,9 @@ const SalesOrderDetails = () => {
                   </>
                 )}
               </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
             <ActivityButton referenceId={salesOrderData?._id} resource={ACTIVITY_RESOURCE.salesOrder} />
           </Box>
         </Box>

@@ -389,7 +389,7 @@ const SerializedAssetDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {productInventoryData && (
+            {productInventoryData ? (
               <>
                 {permissions?.serializedAsset?.isUpdate && productInventoryData.active && (
                   <>
@@ -466,6 +466,8 @@ const SerializedAssetDetailsPage = () => {
                   </>
                 )}
               </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
             )}
             <ActivityButton referenceId={productInventoryData?._id} resource={ACTIVITY_RESOURCE.serializedAsset} />
           </Box>

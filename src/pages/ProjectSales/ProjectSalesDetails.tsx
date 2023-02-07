@@ -323,6 +323,17 @@ const ProjectSalesDetails = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {!projectSalesData ? (
+              <Box padding={1}>
+                <Skeleton variant="text" width="150px" height="30px" />
+                <Box display="flex">
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                  <Box marginX={1} />
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                </Box>
+              </Box>
+            ) : (
+              <>
                 {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -342,6 +353,8 @@ const ProjectSalesDetails = () => {
                   />
                 ) : null}
                 <ActivityButton referenceId={projectSalesData?._id} resource={projectSales?.projectSalesResource} />
+              </>
+            )}
           </Box>
         </Box>
       </Box>

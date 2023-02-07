@@ -472,6 +472,8 @@ const RoleDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {roleData ? (
+              <>
                 {permissions.role.isUpdate && (
                   <Button
                     disabled={isUpdating || checkError()}
@@ -491,6 +493,10 @@ const RoleDetailsPage = () => {
                     }}
                   />
                 )}
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
           </Box>
         </Box>
       </Box>

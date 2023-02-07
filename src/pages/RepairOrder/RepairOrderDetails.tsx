@@ -276,6 +276,8 @@ const RepairOrderDetails = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {repairOrderData ? (
+              <>
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
                   [REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced].includes(repairOrderData?.status) && (
@@ -337,6 +339,7 @@ const RepairOrderDetails = () => {
                       Create New Version
                     </Button>
                   )}
+
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
                   !(
@@ -355,6 +358,10 @@ const RepairOrderDetails = () => {
                 {permissions?.repairOrder?.isDelete && allowedToDelete && repairOrderData?.canDelete && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
             <ActivityButton referenceId={repairOrderData?._id} resource={ACTIVITY_RESOURCE.repairOrder} />
           </Box>
         </Box>

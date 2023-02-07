@@ -208,6 +208,8 @@ const ProductionOrderDetails = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {productionOrderData ? (
+              <>
                 {permissions?.productionOrder?.isUpdate && allowedToEdit && (
                   <Fragment>
                     <Button
@@ -262,6 +264,10 @@ const ProductionOrderDetails = () => {
                 {permissions?.productionOrder?.isDelete && allowedToDelete && productionOrderData?.canDelete && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
             <ActivityButton referenceId={productionOrderData?._id} resource={ACTIVITY_RESOURCE.productionOrder} />
           </Box>
         </Box>

@@ -93,6 +93,16 @@ const WellMasterDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {!wellMasterData ? (
+              <div>
+                <Skeleton variant="text" width="150px" height="40px" />
+                <Box display="flex">
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                  <Box marginX={1} />
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                </Box>
+              </div>
+            ) : (
               <>
                 {permissions?.address?.isUpdate && (
                   <Button
@@ -110,6 +120,7 @@ const WellMasterDetailsPage = () => {
                 )}
                 {permissions?.address?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
+            )}
           </Box>
         </Box>
       </Box>
