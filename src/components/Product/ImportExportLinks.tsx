@@ -206,7 +206,6 @@ export default function ImportExportLinks({
               }}
               htmlFor="importFromExcel"
               className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}
-              className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}
             >
               {/* {ImportInput} */}
               Import from Excel
