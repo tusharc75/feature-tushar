@@ -16,11 +16,10 @@ import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
-import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
+import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
 import moment from "moment";
-import { calculatePrice, calculateRowsField, fetch_rental_product_fields, resetValueZero } from '../../../components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField, fetch_rental_product_fields, resetValueZero, sumOnParent } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
-import { object, number } from 'yup';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -34,56 +33,6 @@ interface EditDialogProps {
   from?: any
   isQtyOnly?: Boolean
   isInlineEdit?: Boolean
-}
-
-export const sumOnParent = (packages, product, allFields, currency) => {
-  const resetFields = []
-  allFields.forEach((element) => {
-    if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
-      if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-        element.displayUnits.forEach((_unit) => {
-          resetFields.push({ fieldName: element.fieldName + "_" + _unit.toLowerCase(), type: "amount" })
-        })
-      }
-      else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-        element.displayUnits.forEach((_unit) => {
-          element.displayCurrency.forEach((_currency) => {
-            resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(), type: "amount" })
-          })
-        })
-      }
-      else if (element.type === "currencyAmount") {
-        element.displayCurrency.forEach((_currency) => {
-          resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase(), type: "amount" })
-        })
-      }
-    }
-    else if (element.type === "percent") {
-      resetFields.push({ fieldName: element.fieldName, type: "percent" })
-    }
-  })
-  const sumValues: any = {}
-  resetFields.forEach((_field: any) => {
-    sumValues[_field.fieldName] = 0;
-    product.forEach(element => {
-      sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
-    });
-  });
-  packages.forEach((row) => {
-    resetFields.forEach((ele) => {
-      if (ele.type === "amount") {
-        row[ele.fieldName] = sumValues[ele.fieldName];
-      }
-      else {
-        if (ele.fieldName === "discountPercentage") {
-          row[ele.fieldName] = parseFloat(((sumValues[`discount_${currency}`] / sumValues[`totalPrice_${currency}`]) * 100)?.toFixed(2));
-        }
-        if (ele.fieldName === "taxPercentage") {
-          row[ele.fieldName] = parseFloat(((sumValues[`tax_${currency}`] / (sumValues[`totalPrice_${currency}`] - sumValues[`discount_${currency}`])) * 100)?.toFixed(2));
-        }
-      }
-    })
-  })
 }
 
 const rateChangeFields = ["unit", "pricingMethod", "pricingCondition"]
@@ -267,6 +216,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   const handleSubmit = async (values) => {
     const currency = rentalManagementData?.currency?.toLowerCase();
     if (isBulkedit) {
+
       for (const x in values) {
         if (values[x] === "" || (Array.isArray(values[x]) && values[x].length === 0) || values[x] === 0) {
           delete values[x]
@@ -307,9 +257,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         const child: any = resetValueZero(material, allFields, element._id)
         rows = [...rows, ...child]
         if (element.parentId) {
-          const parent: any = unionBy(rows, material, '_id').filter((e) => e._id === element.parentId)
+          var parent: any = unionBy(rows, material, '_id').filter((e) => e._id === element.parentId)
           const sameParent: any = unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId && e._id !== element._id)
-          sumOnParent(parent, [...sameParent, { ...element, ...calValues }], allFields, currency)
+          parent = sumOnParent(parent, [...sameParent, { ...element, ...calValues }], allFields, currency)
           rows = [...rows, ...parent]
         }
 
@@ -320,7 +270,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       if (packageProducts.length) {
         const packageIds = uniq(map(packageProducts, 'parentId'))
         packageIds.forEach((_packageId) => {
-          const packages: any = material.filter((e) => e._id === _packageId)
+          var packages: any = material.filter((e) => e._id === _packageId)
           const product: any = material.filter((e) => e.parentId === _packageId)
           product.forEach((element) => {
             if (packageProducts.filter((e) => element._id === e._id).length) {
@@ -331,7 +281,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
               }
             }
           })
-          sumOnParent(packages, product, allFields, currency)
+          packages = sumOnParent(packages, product, allFields, currency)
           rows = [...rows, ...packages]
         })
       }
@@ -393,7 +343,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       }
     }
   };
-
 
   function validate(values) {
     const errors = {};
@@ -540,7 +489,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                         }
                                         else {
                                           getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
-                                            // if (price) {
                                             let priceFieldName = "price_" + rentalManagementData?.currency?.toLowerCase()
                                             const result = autoCalculateSpecificFields({ [priceFieldName]: price, [field.fieldName]: value }, values, initialData.fields)
                                             if (Object.keys(result).length >= 1) {
@@ -548,15 +496,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                                 setFieldValue(x, result[x]);
                                               }
                                             }
-                                            // }
-                                            // else {
-                                            //   const result = handleAutoCalculation(field, initialData.fields, values, field.fieldName, '', '', value);
-                                            //   if (Object.keys(result).length >= 1) {
-                                            //     for (var x in result) {
-                                            //       setFieldValue(x, result[x]);
-                                            //     }
-                                            //   }
-                                            // }
                                           });
                                         }
                                       }}
