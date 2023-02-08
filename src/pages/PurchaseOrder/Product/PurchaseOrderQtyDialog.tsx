@@ -23,19 +23,20 @@ import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 
-const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purchaseOrderData, nextRowData }) => {
+const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purchaseOrderData, showSaveAndNext, loadingEdit }) => {
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [loading, setLoading] = useState(false);
   const [allFields, setAllFields] = useState([]);
+  const [saveAndNext, setSaveAndNext] = useState(false);
 
   useEffect(() => {
     fetchField()
-  }, []);
+  }, [productData]);
 
   const fetchField = async () => {
+    setInitialData({ fields: [], values: {} })
     var poFields = await fetch_po_product_fields(purchaseOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(poFields)))
     if (bulkEdit) {
@@ -118,7 +119,7 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
     else {
       returnData = [{ ...values, _id: productData._id, productId: productData.productId }]
     }
-    onSubmit(returnData)
+    onSubmit(returnData, saveAndNext)
   };
 
   function validate(values) {
@@ -257,21 +258,29 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
                   onClose()
                 }}
               >{"Close"}</Button>
-              {nextRowData &&
+              {bulkEdit === false && showSaveAndNext &&
                 <CustomButton
-                  loading={loading}
+                  loading={loadingEdit}
+                  disabled={loadingEdit}
                   variant="contained"
                   color="primary"
                   type="submit"
-                  onClick={submitForm}
+                  onClick={() => {
+                    setSaveAndNext(true);
+                    submitForm()
+                  }}
                 > Save & Next
                 </CustomButton>}
               <CustomButton
-                loading={loading}
+                loading={loadingEdit}
+                disabled={loadingEdit}
                 variant="contained"
                 color="primary"
                 type="submit"
-                onClick={submitForm}
+                onClick={() => {
+                  setSaveAndNext(false);
+                  submitForm()
+                }}
               > Save
               </CustomButton>
             </CustomDialogFooter>
