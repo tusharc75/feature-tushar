@@ -18,7 +18,7 @@ import Steps from 'src/pages/RentalManagement/Steps';
 import { purchaseRequisitionSteps } from 'src/constants/helpers';
 import ContentFullScreen from '../../components/ContentFullScreen';
 import TabPanel from '../../components/TabPanel';
-import ProductService from './ProductService';
+import Material from './Material';
 import { camelCase } from 'lodash';
 
 
@@ -206,7 +206,7 @@ const PurchaseRequisitionDetail = () => {
         />
         <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && purchaseRequisitionData && (
-                <ProductService 
+                <Material 
                 renderedFrom={`${renderedFrom}_grid-1`}
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}

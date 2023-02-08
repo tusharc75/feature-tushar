@@ -11,16 +11,14 @@ import { genrateCustomTableColumns } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable from '../../CustomReactTable/CustomReactTable';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import PurchaseRequisitionDetailDialog from './PurchaseRequisitionDetailDialog';
 import AddIcon from '@material-ui/icons/Add';
-import { sidebarResource } from 'src/constants/helpers';
 
-
-const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitionData, stepFullScreen }) => {
+const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitionData, stepFullScreen }) => {
   const {
     state: { user, permissions }
   }: any = useData();
@@ -151,7 +149,7 @@ const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequ
   const fetchData = async () => {
     setNextStep(false);
     var data: any = [];
-    const response = await axiosInstance().get(`${routes.purchaseRequisition.path}/productservice/${purchaseRequisitionData._id}`);
+    const response = await axiosInstance().get(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     const rows = data.material
@@ -187,7 +185,7 @@ const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequ
   const handleSaveData = async (rows: any) => {
     setUpdating(true);
     axiosInstance()
-      .put(`${routes.purchaseRequisition.path}/productservice/${purchaseRequisitionData._id}`, { material: rows })
+      .put(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`, { material: rows })
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
@@ -207,7 +205,7 @@ const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequ
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${routes.purchaseRequisition.path}/productservice/${purchaseRequisitionData?._id}/delete`, { ids: rows })
+      .put(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
         toastConfig.setToastConfig({
@@ -237,7 +235,7 @@ const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequ
       material.push(element);
     });
     axiosInstance()
-      .post(`${routes?.purchaseRequisition?.path}/productservice/${purchaseRequisitionData._id}`, { material })
+      .post(`${routes?.purchaseRequisition?.path}/material/${purchaseRequisitionData._id}`, { material })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '' });
         toastConfig.setToastConfig({
@@ -427,4 +425,4 @@ const ProductService = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequ
   );
 };
 
-export default ProductService;
+export default Material;
