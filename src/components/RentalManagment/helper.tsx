@@ -1,12 +1,9 @@
 
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Link } from 'react-router-dom'
 import { CHILD_RESOURCE, pricingCondition } from '../../constants/helpers';
-import routes from './../../components/Helpers/Routes';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from '../../constants/formulaUtility';
+import { unionBy, uniq, map } from 'lodash';
 
 export const fetch_rental_product_fields = async (currency, isOffline) => {
     var data;
@@ -81,9 +78,8 @@ export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => 
     }
 };
 
-export const sumOnParent = (parent, child, fields) => {
+export const sumOnParent = (parent, child, fields, currency) => {
     const resetFields = []
-    var currency = "USD";
     fields.forEach((element) => {
         if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
             if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
@@ -121,10 +117,12 @@ export const sumOnParent = (parent, child, fields) => {
                 row[ele.fieldName] = sumValues[ele.fieldName];
             }
             else {
-                //row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / (sumCount[ele.fieldName] || 1)).toFixed(2));
-                var percentValue: any = sumValues[`${ele.fieldName?.replace("Percentage", "")}_${currency.toLowerCase()}`]
-                var totalPriceValue: any = sumValues[`totalPrice_${currency.toLowerCase()}`]
-                row[ele.fieldName] = parseFloat(((percentValue * 100) / totalPriceValue).toFixed(2))
+                if (ele.fieldName === "discountPercentage") {
+                    row[ele.fieldName] = parseFloat(((sumValues[`discount_${currency?.toLowerCase()}`] / sumValues[`totalPrice_${currency?.toLowerCase()}`]) * 100)?.toFixed(2));
+                }
+                if (ele.fieldName === "taxPercentage") {
+                    row[ele.fieldName] = parseFloat(((sumValues[`tax_${currency?.toLowerCase()}`] / (sumValues[`totalPrice_${currency?.toLowerCase()}`] - sumValues[`discount_${currency?.toLowerCase()}`])) * 100)?.toFixed(2));
+                }
             }
         })
     })
@@ -176,7 +174,7 @@ export const resetValueZero = (material, fields, _id) => {
 const calculateParentRows = (material: any[], rows: any, fields: any[], rowData: any, parent) => {
     let tempParent: any = material.filter((e) => e._id === rowData.parentId)
     const sameParent: any = material.filter((e) => e.parentId === rowData.parentId && e._id !== rowData._id)
-    tempParent = sumOnParent(tempParent, [...sameParent, ...rows], fields)
+    tempParent = sumOnParent(tempParent, [...sameParent, ...rows], fields, "USD")
     parent.push(tempParent[0])
     if (tempParent[0].parentId) {
         calculateParentRows(material, tempParent, fields, tempParent[0], parent)
@@ -203,4 +201,52 @@ export const getNestedSubRows = (obj, original) => {
             getNestedSubRows(obj, element);
         });
     }
+};
+
+export const bulkUpdate = (values, selectedProducts, material, allFields, currency) => {
+
+    var rows: any = []
+
+    for (const x in values) {
+        if (values[x] === "" || (Array.isArray(values[x]) && values[x].length === 0)) {
+            delete values[x]
+        }
+    }
+
+    selectedProducts.filter(d => !selectedProducts.some(obj => obj._id === d.parentId)).forEach(element => {
+
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
+        rows.push({ ...element, ...calValues })
+
+        const child: any = resetValueZero(material, allFields, element._id)
+        rows = [...rows, ...child]
+        if (element.parentId) {
+            var parent: any = unionBy(rows, material, '_id').filter((e: any) => e._id === element.parentId)
+            const sameParent: any = unionBy(rows, material, '_id').filter((e: any) => e.parentId === element.parentId && e._id !== element._id)
+            parent = sumOnParent(parent, [...sameParent, { ...element, ...calValues }], allFields, currency)
+            rows = [...rows, ...parent]
+        }
+    });
+
+    let packageProducts = selectedProducts.filter((ele) => ele.parentId !== null && !selectedProducts.some(f => f._id === ele.parentId));
+    if (packageProducts.length) {
+        const packageIds = uniq(map(packageProducts, 'parentId'))
+        packageIds.forEach((_packageId) => {
+            var packages: any = material.filter((e) => e._id === _packageId)
+            const product: any = material.filter((e) => e.parentId === _packageId)
+            product.forEach((element) => {
+                if (packageProducts.filter((e) => element._id === e._id).length) {
+                    const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
+                    rows.push({ ...element, ...calValues })
+                    for (var key in calValues) {
+                        element[key] = calValues[key];
+                    }
+                }
+            })
+            packages = sumOnParent(packages, product, allFields, currency)
+            rows = [...rows, ...packages]
+        })
+    }
+
+    return rows;
 };

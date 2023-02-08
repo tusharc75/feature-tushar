@@ -15,8 +15,10 @@ const FormTypes = (props) => {
         onChange,
         fieldData,
         currency,
+        touched,
+        errors
     } = props;
-
+    
     const [options, setOptions] = useState([]);
 
     useEffect(() => {
@@ -40,8 +42,10 @@ const FormTypes = (props) => {
             type="text"
             label={fieldData?.fieldLabel}
             required={fieldData?.required}
-            name={fieldData?.fieldName}
+            name={`${values._id}_${fieldData?.fieldName}`}
             value={values[fieldData?.fieldName]}
+            error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
+            helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
             margin="dense"
             onChange={(e) => onChange(fieldData?.fieldName, e.target.value.trimStart())}
         />
@@ -51,11 +55,13 @@ const FormTypes = (props) => {
             type="text"
             multiline
             label={fieldData?.label}
-            name={fieldData?.fieldName}
+            name={`${values._id}_${fieldData?.fieldName}`}
             required={fieldData?.required}
             rows={3}
             value={values[fieldData?.fieldName]}
             margin="dense"
+            error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
+            helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
             onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
         />
     ) : fieldData?.type === 'percent' ? (
@@ -64,14 +70,16 @@ const FormTypes = (props) => {
             variant="outlined"
             label={fieldData?.label}
             required={fieldData?.required}
-            name={fieldData?.fieldName}
+            name={`${values._id}_${fieldData?.fieldName}`}
             value={values[fieldData?.fieldName]}
             InputProps={{
-                endAdornment: '%',
+                endAdornment: '% ',
                 inputProps: { min: 0 },
                 readOnly: fieldData && fieldData?.isUneditable ? true : false
             }}
             margin="dense"
+            error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
+            helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
             onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
         />
     ) : fieldData?.type === "currencyAmount" ? (
@@ -80,12 +88,14 @@ const FormTypes = (props) => {
             variant="outlined"
             label={fieldData?.label}
             required={fieldData?.required}
-            name={fieldData?.fieldName}
+            name={`${values._id}_${fieldData?.fieldName}`}
             value={values[fieldData?.fieldName]}
             InputProps={{
                 startAdornment: getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative,
             }}
             margin="dense"
+            error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
+            helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
             onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
         />
     ) : fieldData?.type === 'dropDown' ? (
@@ -96,10 +106,16 @@ const FormTypes = (props) => {
             value={
                 options.find((data) => data.optionValue === values[fieldData?.fieldName]) ? options.find((data) => data.optionValue === values[fieldData?.fieldName]) : ''
             }
-            getOptionLabel={(option: any) => option.optionLabel || ''}
-            getOptionSelected={(option: any, val) => (option ? option.optionValue == val.optionValue : false)}
-            onChange={(e, val) => onChange(fieldData?.fieldName, val.optionValue)}
-            renderInput={(params) => <TextField {...params} margin="dense" label={fieldData?.label} variant="outlined" />}
+            getOptionLabel={(option: any) => option?.optionLabel || ''}
+            getOptionSelected={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
+            onChange={(e, val) => onChange(fieldData?.fieldName, val?.optionValue)}
+            renderInput={(params) => <TextField
+                {...params}
+                error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
+                helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
+                margin="dense"
+                label={fieldData?.label}
+                variant="outlined" />}
         />
     ) : fieldData?.type === 'decimal' ? (
         <TextField
@@ -107,9 +123,11 @@ const FormTypes = (props) => {
             type="number"
             label={fieldData?.label}
             required={fieldData?.required}
-            name={fieldData?.fieldName}
+            name={`${values._id}_${fieldData?.fieldName}`}
             value={values[fieldData?.fieldName]}
             margin="dense"
+            error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
+            helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
             onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
             InputProps={{
                 inputProps: { min: 0 },
@@ -121,7 +139,7 @@ const FormTypes = (props) => {
             control={
                 <Checkbox
                     required={fieldData?.required}
-                    name={fieldData?.fieldName}
+                    name={`${values._id}_${fieldData?.fieldName}`}
                     checked={values[fieldData?.fieldName]}
                     onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
                     color="secondary"
@@ -140,7 +158,7 @@ const FormTypes = (props) => {
                 variant="inline"
                 inputVariant="outlined"
                 value={values[fieldData?.fieldName]}
-                name={fieldData?.fieldName}
+                name={`${values._id}_${fieldData?.fieldName}`}
                 label={fieldData?.label}
                 onChange={(date) => onChange(fieldData?.fieldName, date)}
                 format={dateFormatForInputControl}
@@ -148,6 +166,8 @@ const FormTypes = (props) => {
                     shrink: true
                 }}
                 margin="dense"
+                error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
+                helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
             />
         </MuiPickersUtilsProvider>
     ) : fieldData?.type === 'dateTime' ? (
@@ -160,7 +180,7 @@ const FormTypes = (props) => {
                 inputVariant="outlined"
                 ampm={false}
                 value={values[fieldData?.fieldName]}
-                name={fieldData?.fieldName}
+                name={`${values._id}_${fieldData?.fieldName}`}
                 label={fieldData?.label}
                 onChange={(date) => onChange(fieldData?.fieldName, date)}
                 onError={console.error}
@@ -169,6 +189,8 @@ const FormTypes = (props) => {
                     shrink: true
                 }}
                 margin="dense"
+                error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
+                helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
             />
         </MuiPickersUtilsProvider>
     ) : null;
