@@ -642,11 +642,11 @@ const WorkOrder = ({
           )}
           {addServicesDialog.open && (
             <AssignServiceDialog
-              reference="workorder"
+              reference="repairOrder"
               handleClose={() => setAddServicesDialog({ open: false })}
               ids={[]}
               onSuccess={(data) => {
-                handleAddService(data?.map((e) => e.service));
+                handleAddService(data?.map((e) => e._id));
                 setAddServicesDialog({ open: false });
               }}
               extraStaticFilter={!isPostWorkService ? [] : [{ field: 'preWork', term: false }]}

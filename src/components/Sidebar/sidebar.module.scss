@@ -9,10 +9,10 @@
   }
   //   list Items
   .listItem {
-    padding-left: 21px;
-    padding-block: 15px;
+    padding-left: 31px;
+    padding-block: 12px;
     svg {
-      color: #dbdbdb;
+      color: #ffffff;
     }
   }
   .listIcon {
@@ -36,12 +36,12 @@
       &::before {
         content: '';
         position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        background-color: #2da9a4;
+        top: -6px;
+        bottom: -6px;
+        left: -6px;
+        background-color: #298b88;
         z-index: -1;
-        width: 30px;
+        width: 33px;
         border-radius: 7px;
       }
     }
@@ -57,7 +57,7 @@
       bottom: 0;
     }
     i {
-      --height: 18px;
+      --height: 16px;
       position: absolute;
       width: 100%;
       background-color: #f8fffe;

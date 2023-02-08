@@ -11,15 +11,11 @@ import { prepareDataForGrid, packages } from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Loader from 'src/components/Loader';
 import { camelCase } from 'lodash';
-import { GrDrag } from 'react-icons/gr';
-import ArrangeView from 'src/components/Helpers/ArrangeView';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
 const PackagesTable = ({ packageId, packageData }) => {

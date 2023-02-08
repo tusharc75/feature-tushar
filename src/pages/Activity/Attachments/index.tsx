@@ -398,7 +398,8 @@ export default function Attachment() {
             data: { data, count }
           }
         }) => {
-          let rows = data?.filter((e) => e.parentFolder === null);
+          console.log('data', data, count);
+          let rows = data?.filter((e) => e?.parentFolder === null || e?.parentFolder === undefined);
           const parentRows = rows.map((parent, idx) => {
             parent.srNo = idx + 1;
             parent.subRows = generateNestedData(data, parent);

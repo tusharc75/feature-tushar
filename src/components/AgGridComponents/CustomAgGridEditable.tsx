@@ -582,8 +582,8 @@ export default function CustomAgGridEditable({
                     width={actionWidth}
                     field={actionLabel ? actionLabel.toLowerCase() : 'actions'}
                     headerName={actionLabel || 'Actions'}
-                    pinned={isMobile || isTablet ? false : 'right'}
-                    lockPinned={isMobile || isTablet ? false : true}
+                    pinned={'right'}
+                    lockPinned={true}
                     resizable={false}
                     sortable={false}
                     filter={false}
