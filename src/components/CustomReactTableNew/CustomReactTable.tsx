@@ -279,7 +279,7 @@ function CustomReactTable({
       defaultColumn,
       filterTypes,
       initialState: {
-        columnOrder: newColumns.map((col) => col.id || col.accessor),
+        columnOrder: newColumns.map((col) => col?.id || col?.accessor),
         filters: Object.keys(customFilters).map((key, i) => {
           return { id: key, value: customFilters[key].filter };
         }),
