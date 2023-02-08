@@ -24,16 +24,7 @@ import { calculatePrice, calculateRowsField, fetch_rental_product_fields, getNes
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { startCase } from 'lodash';
-import LayersIcon from '@material-ui/icons/Layers';
-import CategoryIcon from '@material-ui/icons/Category';
-import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
-import StorageIcon from '@material-ui/icons/Storage';
-import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
-import StorefrontIcon from '@material-ui/icons/Storefront';
-import AllOutIcon from '@material-ui/icons/AllOut';
-import InfoIcon from '@material-ui/icons/InfoOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const Services = ({
