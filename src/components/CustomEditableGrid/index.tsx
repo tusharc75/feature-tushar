@@ -120,7 +120,7 @@ const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => 
                                                                         <TableCell width={cellWidth}>Details</TableCell>
                                                                         {columns &&
                                                                             columns?.map((field: any, index: any) => (
-                                                                                <TableCell width={cellWidth} >{field?.fieldLabel}</TableCell>
+                                                                                <TableCell width={cellWidth} >{`${field?.fieldLabel} ${field?.required ? '*' : ''}`}</TableCell>
                                                                             ))}
                                                                         <TableCell>Action</TableCell>
                                                                     </TableRow>

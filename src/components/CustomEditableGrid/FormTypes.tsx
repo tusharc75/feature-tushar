@@ -106,9 +106,9 @@ const FormTypes = (props) => {
             value={
                 options.find((data) => data.optionValue === values[fieldData?.fieldName]) ? options.find((data) => data.optionValue === values[fieldData?.fieldName]) : ''
             }
-            getOptionLabel={(option: any) => option.optionLabel || ''}
-            getOptionSelected={(option: any, val) => (option ? option.optionValue == val.optionValue : false)}
-            onChange={(e, val) => onChange(fieldData?.fieldName, val.optionValue)}
+            getOptionLabel={(option: any) => option?.optionLabel || ''}
+            getOptionSelected={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
+            onChange={(e, val) => onChange(fieldData?.fieldName, val?.optionValue)}
             renderInput={(params) => <TextField
                 {...params}
                 error={touched[fieldData?.fieldName] && Boolean(errors[fieldData?.fieldName])}
