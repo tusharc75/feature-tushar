@@ -476,7 +476,6 @@ export default function ManageAttachment({
             ></CustomDialogHeader>
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
-                {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                 <Box padding={1}>
                   <Grid container spacing={3}>
                     <Grid item xs={12}>
@@ -523,75 +522,6 @@ export default function ManageAttachment({
                           />
                         </Grid>
                         {renderFileThumbnails}
-
-                        {/* {attachments.length > 0 && 
-                                    <Grid item xs={10} sm={11} md={11}>
-                                        <ul>
-                                        {attachments.map((attachment, index)=>(
-                                            
-                                                <li>{attachment}
-                                                {attachment && <span>
-                                                    <IconButton onClick={() => delete attachments[index] }>
-                                                        {
-                                                            <DeleteIcon color='error' />
-
-                                                        }
-                                                    </IconButton>
-                                                </span>}
-                                                </li>
-                                        ))}
-                                        </ul>
-                                    </Grid>
-                                    }
-                                     */}
-                        {/* <Grid item xs={2} sm={1} md={1}>
-                                        {
-                                            attachmentId && values?.fileUrl ?
-                                                (isDownloading ? (
-                                                    <Box display="flex" alignItems="center">
-                                                        {downloadProgress === 100
-                                                            ? "Downloaded"
-                                                            : "Downloading"}
-
-                                                        <Box
-                                                            marginLeft={1}
-                                                            position="relative"
-                                                            display="inline-flex"
-                                                        >
-                                                            <CircularProgress
-                                                                size={37}
-                                                                variant="determinate"
-                                                                value={downloadProgress}
-                                                            />
-                                                            <Box
-                                                                top={0}
-                                                                left={0}
-                                                                bottom={0}
-                                                                right={0}
-                                                                position="absolute"
-                                                                display="flex"
-                                                                alignItems="center"
-                                                                justifyContent="center"
-                                                            >
-                                                                <Typography
-                                                                    variant="caption"
-                                                                    component="div"
-                                                                    color="textSecondary"
-                                                                >{`${downloadProgress}%`}</Typography>
-                                                            </Box>
-                                                        </Box>
-                                                    </Box>
-                                                ) : <IconButton
-                                                    title="Download"
-                                                    size="small"
-                                                    color="primary" 
-                                                    aria-label="download picture"
-                                                    component="span"
-                                                    onClick={() => downloadFile(initialValues.fileUrl)}>
-                                                    <GoArrowDown size={26}/>
-                                                </IconButton>) : null
-                                        }
-                                    </Grid> */}
                       </Grid>
                     )}
                   </Grid>
@@ -640,7 +570,6 @@ export default function ManageAttachment({
               <ImagePreview
                 open={open}
                 aria-labelledby="customized-dialog-title"
-                // heading="image preview"
                 heading={imageSource ? imageSource.substring(imageSource.lastIndexOf('/') + 1) : 'image preview'}
                 close={() => {
                   setImageSource(null);

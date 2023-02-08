@@ -20,19 +20,20 @@ import { uniq, map, orderBy, isEqual } from 'lodash';
 import { fetch_po_cost_fields } from '../../../components/PurchaseOrder/helper';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
-const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCost, costData, bulkEdit }) => {
+const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCost, costData, bulkEdit, showSaveAndNext, loadingEdit }) => {
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [loading, setLoading] = useState(false);
   const [allFields, setAllFields] = useState([]);
+  const [saveAndNext, setSaveAndNext] = useState(false);
 
   useEffect(() => {
     fetchFields()
-  }, []);
+  }, [costData]);
 
   const fetchFields = async () => {
+    setInitialData({ fields: [], values: {} })
     let poFields = await fetch_po_cost_fields(purchaseOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(poFields)))
     if (bulkEdit) {
@@ -95,10 +96,9 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
       }
       else {
         returnData = [{ ...values, _id: costData._id }]
-        handleUpdateCost(returnData)
+        handleUpdateCost(returnData, saveAndNext)
       }
     }
-
   };
 
   return (
@@ -125,7 +125,7 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
           }) => (
             <Fragment>
               <CustomDialogHeader
-                title={bulkEdit ? "Bulk Edit" : costData ? `Edit - ${costData?.index} (${costData?.description || "Expanse"})` : `Add Expanse`}
+                title={bulkEdit ? "Bulk Edit" : costData ? `Edit - ${costData?.index} (${costData?.description || "Expense"})` : `Add Expense`}
                 onClose={() => {
                   onClose()
                 }}
@@ -209,12 +209,29 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
                     onClose()
                   }}
                 >{"Close"}</Button>
+                {bulkEdit === false && showSaveAndNext &&
+                  <CustomButton
+                    loading={loadingEdit}
+                    disabled={loadingEdit}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={() => {
+                      setSaveAndNext(true);
+                      submitForm()
+                    }}
+                  > Save & Next
+                  </CustomButton>}
                 <CustomButton
-                  loading={loading}
+                  loading={loadingEdit}
+                  disabled={loadingEdit}
                   variant="contained"
                   color="primary"
                   type="submit"
-                  onClick={submitForm}
+                  onClick={() => {
+                    setSaveAndNext(false);
+                    submitForm()
+                  }}
                 > Save
                 </CustomButton>
               </CustomDialogFooter>
