@@ -74,7 +74,7 @@ const useStyles = makeStyles(() => ({
 
 const Activity = (props) => {
   const classes = useStyles();
-  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => {} } = props;
+  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => { } } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [type, setType] = useState(null);
@@ -396,7 +396,7 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           ) : null}
-          {type === 'AttachmentFile' ? (
+          {type === 'Attachment' ? (
             <ManageAttachment
               attachmentId={null}
               handleClose={() => {
