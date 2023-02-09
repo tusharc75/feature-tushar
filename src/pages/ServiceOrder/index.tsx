@@ -12,7 +12,8 @@ import {
   serviceOrder,
   prepareDataForGrid,
   getLocalStorageArrayData,
-  removeLocalStorage
+  removeLocalStorage,
+  RESOURCE_LABEL
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -505,6 +506,8 @@ const ServiceOrder = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchServiceOrders}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={RESOURCE_LABEL.serviceOrder}
             />
           )
         ) : null}

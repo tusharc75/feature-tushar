@@ -354,7 +354,7 @@ const ProductDetailsPage = () => {
                   </Grid>
                 ) : (
                   <div className="pb-3">
-                    <DetailsPage data={productData} fields={productFields} />
+                    <DetailsPage data={productData} fields={productFields} fullHeight={true} />
                   </div>
                 )}
               </Box>

@@ -31,6 +31,7 @@ import { get_activity_resource } from '../../../components/Activity/Helpers/util
 import CustomReactTable from 'src/components/CustomReactTableNew/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import moment from 'moment';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -161,7 +162,7 @@ export default function Attachment() {
       Cell: ({ row }) => <>{row.original?.type === 'folder' ? 'Folder' : 'File'}</>
     },
     {
-      id: "name",
+      id: 'name',
       accessor: 'name',
       Header: 'Name',
       width: 300,
@@ -174,7 +175,7 @@ export default function Attachment() {
           </a>
           {row.original?.type === 'folder' && (
             <Box pl={1}>
-              <HtmlTooltip title={"Add Folder/File"}>
+              <HtmlTooltip title={'Add Folder/File'}>
                 <IconButton
                   size="small"
                   onClick={(e) => {
@@ -190,7 +191,7 @@ export default function Attachment() {
       )
     },
     {
-      id: "relatedTo",
+      id: 'relatedTo',
       accessor: 'relatedTo',
       Header: 'Related To',
       width: 300,
@@ -216,7 +217,7 @@ export default function Attachment() {
       )
     },
     {
-      id: "createdAt",
+      id: 'createdAt',
       accessor: 'createdAt',
       Header: 'Created At',
       width: 100,
@@ -225,7 +226,7 @@ export default function Attachment() {
       Cell: ({ row }) => <>{row.original?.createdBy}</>
     },
     {
-      id: "updatedAt",
+      id: 'updatedAt',
       accessor: 'updatedAt',
       Header: 'Updated At',
       width: 100,
@@ -234,7 +235,7 @@ export default function Attachment() {
       Cell: ({ row }) => <>{row.original?.updatedAt}</>
     },
     {
-      id: "action",
+      id: 'action',
       accessor: 'action',
       Header: '',
       minWidth: 50,
@@ -250,7 +251,8 @@ export default function Attachment() {
                 <IconButton size="small" aria-label="Delete" onClick={() => downloadFile(row.original)}>
                   <GetAppIcon fontSize="small" color="primary" />
                 </IconButton>
-              </Tooltip>)}
+              </Tooltip>
+            )}
             {row.original.canEdit ? (
               <Tooltip title="Delete">
                 <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
@@ -620,7 +622,7 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => { }}
+              setWholeRowsCellColor={() => {}}
               renderedFrom={'attachment_render_form'}
               isClientSideGrid={false}
               rowCount={rowCount}
