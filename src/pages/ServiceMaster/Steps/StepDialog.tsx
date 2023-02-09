@@ -91,20 +91,20 @@ export default function StepDialog({
         costPrice: stepData?.costPrice || 0,
         listPrice: stepData?.listPrice || 0,
         currency: stepData?.currency || user?.brandCurrency || '',
-        isPassFail: stepData?.isPassFail,
-        isFailAddon: stepData?.isFailAddon,
-        failAddon: stepData?.failAddon,
-        isPassAddon: stepData?.isPassAddon,
-        passAddon: stepData?.passAddon,
-        isJumpStepPass: stepData?.isJumpStepPass,
-        jumpStepsPass: stepData?.jumpStepsPass,
-        isJumpStepFail: stepData?.isJumpStepFail,
-        jumpStepsFail: stepData?.jumpStepsFail,
-        isQuoteRevisionOnFail: stepData?.isQuoteRevisionOnFail,
-        isReturnToStepOnFail: stepData?.isReturnToStepOnFail,
-        returnToStepOnFail: stepData?.returnToStepOnFail,
-        isReturnToServiceOnFail: stepData?.isReturnToServiceOnFail,
-        returnToServiceOnFail: stepData?.returnToServiceOnFail
+        isPassFail: stepData?.isPassFail === null ? false : stepData?.isPassFail,
+        isFailAddon: stepData?.isFailAddon === null ? false : stepData?.isFailAddon,
+        failAddon: stepData?.failAddon && Array.isArray(stepData?.failAddon) ? stepData?.failAddon : [],
+        isPassAddon: stepData?.isPassAddon === null ? false : stepData?.isPassAddon,
+        passAddon: stepData?.passAddon && Array.isArray(stepData?.passAddon) ? stepData?.passAddon : [],
+        isJumpStepPass: stepData?.isJumpStepPass === null ? false : stepData?.isJumpStepPass,
+        jumpStepsPass: stepData?.jumpStepsPass && Array.isArray(stepData?.jumpStepsPass) ? stepData?.jumpStepsPass : [],
+        isJumpStepFail: stepData?.isJumpStepFail === null ? false : stepData?.isJumpStepFail,
+        jumpStepsFail: stepData?.jumpStepsFail && Array.isArray(stepData?.jumpStepsFail) ? stepData?.jumpStepsFail : [],
+        isQuoteRevisionOnFail: stepData?.isQuoteRevisionOnFail === null ? false : stepData?.isQuoteRevisionOnFail,
+        isReturnToStepOnFail: stepData?.isReturnToStepOnFail === null ? false : stepData?.isReturnToStepOnFail,
+        returnToStepOnFail: stepData?.returnToStepOnFail || '',
+        isReturnToServiceOnFail: stepData?.isReturnToServiceOnFail === null ? false : stepData?.isReturnToServiceOnFail,
+        returnToServiceOnFail: stepData?.returnToServiceOnFail || '',
       });
     } else if (stepId != '') {
       axiosInstance()
@@ -116,23 +116,25 @@ export default function StepDialog({
             costPrice: data?.costPrice || 0,
             listPrice: data?.listPrice || 0,
             currency: data?.currency || user?.brandCurrency || '',
-            isPassFail: data?.isPassFail,
-            isFailAddon: data?.isFailAddon,
-            failAddon: data?.failAddon,
-            isPassAddon: data?.isPassAddon,
-            passAddon: data?.passAddon,
-            isJumpStepPass: data?.isJumpStepPass,
-            jumpStepsPass: data?.jumpStepsPass,
-            isJumpStepFail: data?.isJumpStepFail,
-            jumpStepsFail: data?.jumpStepsFail,
-            isQuoteRevisionOnFail: data?.isQuoteRevisionOnFail,
-            isReturnToStepOnFail: data?.isReturnToStepOnFail,
-            returnToStepOnFail: data?.returnToStepOnFail,
-            isReturnToServiceOnFail: data?.isReturnToServiceOnFail,
-            returnToServiceOnFail: data?.returnToServiceOnFail
+            isPassFail: data?.isPassFail === null ? false : data?.isPassFail,
+            isFailAddon: data?.isFailAddon === null ? false : data?.isFailAddon,
+            failAddon: data?.failAddon && Array.isArray(data?.failAddon) ? data?.failAddon : [],
+            isPassAddon: data?.isPassAddon === null ? false : data?.isPassAddon,
+            passAddon: data?.passAddon && Array.isArray(data?.passAddon) ? data?.passAddon : [],
+            isJumpStepPass: data?.isJumpStepPass === null ? false : data?.isJumpStepPass,
+            jumpStepsPass: data?.jumpStepsPass && Array.isArray(data?.jumpStepsPass) ? data?.jumpStepsPass : [],
+            isJumpStepFail: data?.isJumpStepFail === null ? false : data?.isJumpStepFail,
+            jumpStepsFail: data?.jumpStepsFail && Array.isArray(data?.jumpStepsFail) ? data?.jumpStepsFail : [],
+            isQuoteRevisionOnFail: data?.isQuoteRevisionOnFail === null ? false : data?.isQuoteRevisionOnFail,
+            isReturnToStepOnFail: data?.isReturnToStepOnFail === null ? false : data?.isReturnToStepOnFail,
+            returnToStepOnFail: data?.returnToStepOnFail || '',
+            isReturnToServiceOnFail: data?.isReturnToServiceOnFail === null ? false : data?.isReturnToServiceOnFail,
+            returnToServiceOnFail: data?.returnToServiceOnFail || '',
           });
         })
-        .catch((err) => {});
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
     } else {
       setStepDetails({
         stepName: '',
@@ -335,9 +337,8 @@ export default function StepDialog({
                       <TextField
                         InputProps={{
                           startAdornment: (
-                            <InputAdornment position="start">{`${
-                              values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                            }`}</InputAdornment>
+                            <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                              }`}</InputAdornment>
                           )
                         }}
                         margin="dense"
@@ -359,9 +360,8 @@ export default function StepDialog({
                       <TextField
                         InputProps={{
                           startAdornment: (
-                            <InputAdornment position="start">{`${
-                              values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                            }`}</InputAdornment>
+                            <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                              }`}</InputAdornment>
                           )
                         }}
                         margin="dense"

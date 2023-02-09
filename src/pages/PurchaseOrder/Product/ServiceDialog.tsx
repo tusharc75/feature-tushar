@@ -1,9 +1,9 @@
-import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, arrayToDropwdownOption } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -12,29 +12,72 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
+import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
+import { fetch_po_service_fields } from 'src/components/PurchaseOrder/helper';
 
-const ServiceDialog = ({ onClose, purchaseOrderData, handleAddService, handleUpdateService, serviceData }) => {
+const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, serviceData, bulkEdit, showSaveAndNext, loadingEdit }) => {
+
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [loading, setLoading] = useState(false);
+  const [allFields, setAllFields] = useState([]);
+  const [saveAndNext, setSaveAndNext] = useState(false);
 
   useEffect(() => {
-    fetchFields(purchaseOrderData?.currency);
-  }, []);
+    fetchField();
+  }, [serviceData]);
 
-  const fetchFields = async (currency) => {
-    axiosInstance()
-      .get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderService}`)
-      .then((response) => {
-        let data = response?.data?.data;
-        data = CURReplaceByCurrencySingle(data, currency ? currency : 'USD');
-        setInitialData({ fields: data, values:getObjKeysWithValues(serviceData, data) });
-        EvaluteproductFields(data);
+  const fetchField = async () => {
+    setInitialData({ fields: [], values: {} })
+    var poFields = await fetch_po_service_fields(purchaseOrderData?.currency);
+    setAllFields(JSON.parse(JSON.stringify(poFields)))
+    if (bulkEdit) {
+      let unitArray: any = []
+      serviceData?.forEach(element => {
+        if (element?.serviceDetail?.unit) {
+          unitArray.push([...element?.serviceDetail?.unit])
+        }
       });
-  };
+      let unit: any = unitArray?.shift()?.filter(function (v) {
+        return unitArray.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      const unitOptions: any = arrayToDropwdownOption(unit)
+      poFields.forEach((element) => {
+        if (element.fieldName === "unit") {
+          element.option = unitOptions;
+          if (unitOptions?.length) {
+            element.isDefaultValue = true;
+            element.defaultValue = unitOptions[0]?.optionValue;
+          }
+        }
+        element.required = false;
+        element.isFormula = false;
+        element.isMulitFormula = false;
+      })
+      poFields = poFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
+      setInitialData({
+        fields: poFields,
+        values: { ...getObjKeys("", poFields), expectedDelivery: "" },
+      });
+    }
+    else {
+      poFields.filter((_f) => {
+        if (["unit"].includes(_f.fieldName.toLowerCase())) {
+          if (serviceData?.serviceDetail?.unit) {
+            _f.option = arrayToDropwdownOption(serviceData?.serviceDetail?.unit)
+          }
+        }
+      })
+      let tempObjKeysWithValues = getObjKeysWithValues(serviceData, poFields)
+      setInitialData({
+        fields: poFields,
+        values: tempObjKeysWithValues,
+      });
+    }
+    EvaluteproductFields(poFields);
+  }
 
   const EvaluteproductFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
@@ -47,14 +90,22 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleAddService, handleUpd
   };
 
   const handleSubmit = (values) => {
-    if (!serviceData) {
-      let returnData = [];
-      returnData = [{ ...values }];
-      handleAddService(returnData);
-    } else {
-      let returnData = [];
-      returnData = [{ ...values, _id: serviceData._id }];
+    let returnData = []
+    if (bulkEdit) {
+      for (const x in values) {
+        if (values[x] === "" || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
+          delete values[x]
+        }
+      }
+      serviceData.forEach(element => {
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
+        returnData.push({ _id: element._id, ...calValues })
+      })
       handleUpdateService(returnData);
+    }
+    else {
+      returnData = [{ ...values, _id: serviceData._id }];
+      handleUpdateService(returnData, saveAndNext);
     }
   };
 
@@ -78,7 +129,7 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleAddService, handleUpd
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={serviceData && `Edit - ${serviceData?.index} (${serviceData?.productName || 'Service'})`}
+                title={bulkEdit ? "Bulk Edit" : `Edit - ${serviceData?.index} (${serviceData?.detail || ""})`}
                 onClose={() => {
                   onClose();
                 }}
@@ -168,8 +219,30 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleAddService, handleUpd
                 >
                   {'Close'}
                 </Button>
-                <CustomButton loading={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
-                  {' '}
+                {bulkEdit === false && showSaveAndNext &&
+                  <CustomButton
+                    loading={loadingEdit}
+                    disabled={loadingEdit}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={() => {
+                      setSaveAndNext(true);
+                      submitForm()
+                    }}
+                  > Save & Next
+                  </CustomButton>}
+                <CustomButton
+                  loading={loadingEdit}
+                  disabled={loadingEdit}
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  onClick={() => {
+                    setSaveAndNext(false);
+                    submitForm()
+                  }}
+                >
                   Save
                 </CustomButton>
               </CustomDialogFooter>

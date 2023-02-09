@@ -20,22 +20,17 @@ import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, getApi, getData, gridLoadingTimeout } from '../../../constants/helpers';
 import { Delete as DeleteIcon } from '@material-ui/icons';
-import CustomAgGrid from '../../../components/AgGridComponents/CustomAgGrid';
 import { gridPageSizes, isObjectEmpty, displayDate } from '../../../constants/helpers';
-import { CommonRenderer, CommonRendererWithCopy } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
-import { GoArrowDown } from 'react-icons/go';
 import { ExpandMore } from '@material-ui/icons';
 import routes from '../../../components/Helpers/Routes';
-import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import { MdAdd } from 'react-icons/all';
+import GetAppIcon from '@material-ui/icons/GetApp';
 import { Autocomplete } from '@material-ui/lab';
-import { camelCase } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
-import Add from '@material-ui/icons/Add';
 import CustomReactTable from 'src/components/CustomReactTableNew/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import moment from 'moment';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -126,6 +121,7 @@ const intialState = {
   sorting: [],
   selectedRecords: []
 };
+
 export default function Attachment() {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -147,52 +143,59 @@ export default function Attachment() {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting } = state;
-  // const columnState = JSON.parse(localStorage.getItem('attachmentPage'));
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
-  // const [rowsData, setRowsData] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
-  // const [rowCount, setRowCount] = useState(second);
 
   const column: any = [
     {
       accessor: 'type',
+      id: "attachmentType",
       Header: 'Type',
       width: 70,
+      canDrag: false,
       sticky: isMobile ? 'none' : 'left',
       Cell: ({ row }) => <>{row.original?.type === 'folder' ? 'Folder' : 'Attachment'}</>
     },
     {
+      id: "name",
       accessor: 'name',
       Header: 'Name',
-      width: 100,
+      width: 300,
+      canDrag: false,
       sticky: isMobile ? 'none' : 'left',
       Cell: ({ row }) => (
-        <>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           <a className={permissions?.attachment?.isUpdate ? 'link cursor-pointer' : ''} onClick={() => handleActivityOpen(row.original)}>
             {row.original.name || ''}
-          </a>{' '}
+          </a>
           {row.original?.attachmentType === 'folder' && (
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                setAddchildDialog({ open: true, parentId: row.original._id, top: e.clientY, bottom: e.clientX });
-              }}
-            >
-              <AddOutlined fontSize="small" />
-            </IconButton>
+            <Box pl={1}>
+              <HtmlTooltip title={"Add Folder/File"}>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    setAddchildDialog({ open: true, parentId: row.original._id, top: e.clientY, bottom: e.clientX });
+                  }}
+                >
+                  <AddOutlined fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            </Box>
           )}
-        </>
+        </div>
       )
     },
     {
+      id: "relatedTo",
       accessor: 'relatedTo',
       Header: 'Related To',
-      width: 230,
+      width: 300,
+      canDrag: false,
       sticky: isMobile ? 'none' : 'left',
       Cell: ({ row }) => (
         <>
@@ -214,20 +217,25 @@ export default function Attachment() {
       )
     },
     {
+      id: "createdAt",
       accessor: 'createdAt',
       Header: 'Created At',
-      width: 70,
+      width: 100,
+      canDrag: false,
       sticky: isMobile ? 'none' : 'left',
       Cell: ({ row }) => <>{row.original?.createdBy}</>
     },
     {
+      id: "updatedAt",
       accessor: 'updatedAt',
       Header: 'Updated At',
-      width: 70,
+      width: 100,
+      canDrag: false,
       sticky: isMobile ? 'none' : 'left',
       Cell: ({ row }) => <>{row.original?.updatedAt}</>
     },
     {
+      id: "action",
       accessor: 'action',
       Header: '',
       minWidth: 50,
@@ -238,6 +246,12 @@ export default function Attachment() {
       Cell: ({ row }) => {
         return (
           <>
+            {row.original.attachmentType !== "folder" && (
+              <Tooltip title="Download">
+                <IconButton size="small" aria-label="Delete" onClick={() => downloadFile(row.original)}>
+                  <GetAppIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Tooltip>)}
             {row.original.canEdit ? (
               <Tooltip title="Delete">
                 <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
@@ -419,6 +433,7 @@ export default function Attachment() {
           }, gridLoadingTimeout);
         }
       )
+
       .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
@@ -426,18 +441,16 @@ export default function Attachment() {
   };
 
   const generateNestedData = (data, parent) => {
-    const childRow = data
-      ?.filter((e) => `${e?.parentFolder}` === `${parent._id}`)
-      ?.map((u, idx) => {
-        u.srNo = parent.srNo + '.' + (idx + 1);
+    const childRow = data?.filter((e) => e?.parentFolder === parent?._id)
+      ?.map((u) => {
         u.subRows = generateNestedData(data, u);
         return {
           ...u,
           id: u._id,
           fileUrl: u.fileUrl,
           canEdit: u.attachmentType === 'folder' ? true : u?.canEdit,
-          createdBy: moment(u.createdBy?.date).format('MMM Do, YYYY'),
-          updatedBy: moment(u.updatedBy?.date).format('MMM Do, YYYY'),
+          createdBy: displayDate(u.createdBy?.date),
+          updatedBy: displayDate(u.updatedBy?.date),
           isChecked: false
         };
       });
@@ -465,7 +478,7 @@ export default function Attachment() {
     setIsConfirmDialogVisible(true);
   };
 
-  const handleDeleteEmails = async () => {
+  const handleDelete = async () => {
     setDeleteLoading(true);
     if (deleteRecord?._id || selectedRecords.length > 0)
       axiosInstance()
@@ -609,7 +622,7 @@ export default function Attachment() {
           </div>
         )}
         <Box zIndex={5} width={'100%'}>
-          {dataRows?.length ? (
+          {dataRows ? (
             <CustomReactTable
               height={'calc(100vh - 300px)'}
               columns={column}
@@ -622,7 +635,7 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => {}}
+              setWholeRowsCellColor={() => { }}
               renderedFrom={'attachment_render_form'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -671,15 +684,6 @@ export default function Attachment() {
               >
                 Add File
               </MenuItem>
-              {/* <MenuItem
-              onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'service', parentId: addchildDialog.parentId })
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
-              }
-              }
-            >
-              Services
-            </MenuItem> */}
             </MenuList>
           </Popover>
         )}
@@ -732,7 +736,7 @@ export default function Attachment() {
               setIsConfirmDialogVisible(false);
             }}
             okBtnLoading={deleteLoading}
-            onOk={handleDeleteEmails}
+            onOk={handleDelete}
           />
         ) : null}
       </CustomContainer>

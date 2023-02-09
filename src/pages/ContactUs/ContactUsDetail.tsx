@@ -101,16 +101,6 @@ const BlogDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="controls-buttons-v1">
-            {!contactUsData ? (
-              <div>
-                <Skeleton variant="text" width="150px" height="40px" />
-                <Box display="flex">
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  <Box marginX={1} />
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                </Box>
-              </div>
-            ) : (
                 <>
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -127,7 +117,6 @@ const BlogDetail = () => {
                     <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                   </span>
                 </>
-            )}
           </Box>
         </Box>
       </Box>

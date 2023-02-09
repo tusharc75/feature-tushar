@@ -221,11 +221,13 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         }}
       >
         <Toolbar />
-        <div id="sidebarOrDrawer">
+        <div id="sidebarOrDrawer" style={{ borderTop: '1px solid #485B64' }}>
           {toggleDrawer ? (
-            user?.brandLogo ?
-              <img src={user.brandLogo} alt="brand" className={styles.logo} /> :
+            user?.brandLogo ? (
+              <img src={user.brandLogo} alt="brand" className={styles.logo} />
+            ) : (
               <img className={styles.logo} src={SVG('LogoNew')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
+            )
           ) : (
             <img className={styles.logo} src={SVG('LogoNewShort')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
           )}
@@ -260,9 +262,9 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 )}
               </ListItemIcon>
               <ListItemText
-                onClick={() => { }}
+                onClick={() => {}}
                 primary={[user?.user?.firstName, user?.user?.lastName].filter((f) => f).join(' ')}
-              // className={`wordWrap`}
+                // className={`wordWrap`}
               />
             </ListItem>
             {permissions?.dashboard?.isRead && !isOffline && (
@@ -355,8 +357,9 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                       <List component="div" disablePadding className={`${styles.subList} `}>
                         {listItem.items.map((item, j) => (
                           <Link
-                            className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''
-                              }`}
+                            className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${
+                              itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''
+                            }`}
                             key={j}
                             onClick={() => {
                               setItemToAddActiveClass(i);
@@ -378,7 +381,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         </div>
         {!isOffline && (
           <List style={{ bottom: '0px', marginTop: 'auto' }}>
-            <ListItem style={{ paddingLeft: '21px', paddingBlock: '15px' }} button onClick={() => setChatOpen((prevState) => !prevState)}>
+            <ListItem style={{ paddingLeft: '31px', paddingBlock: '12px' }} button onClick={() => setChatOpen((prevState) => !prevState)}>
               <ListItemIcon className={styles.listIcon}>
                 <BsChatLeftTextFill size={20} className={styles.sidebarIcon} />
               </ListItemIcon>

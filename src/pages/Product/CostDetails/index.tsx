@@ -1,27 +1,41 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Box, Paper, Typography } from '@material-ui/core';
+import { Box, IconButton, Paper, Typography } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import BoxWithBorder from '../../../components/BoxWithBorder';
 import { Skeleton } from '@material-ui/lab';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const CostDetails = ({ product, productData, className = '' }) => {
   const [averageCost, setAverageCost] = useState(null);
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    fetchCostDetails()
+  }, [product, productData]);
+
+  const fetchCostDetails = () => {
+    setLoading(true)
     axiosInstance()
       .get(`product/${product}/cost`)
       .then(async ({ data: { data } }) => {
         setAverageCost(data?.averagePrice || 0);
+        setLoading(false)
       })
-      .catch((err) => {});
-  }, [product, productData]);
+      .catch((err) => { });
+  }
 
   return (
     <Box className={`single-form-v1 ${className}`}>
-      <Box className={'form-head-v1'} display="flex" justifyContent="space-between" alignItems="center">
+      <Box className={'form-head-v1'} justifyContent="space-between" alignItems="center">
         <Typography variant="subtitle2">Cost Details</Typography>
+        <HtmlTooltip title="Refresh Cost Details">
+          <IconButton size="small" onClick={fetchCostDetails}>
+            <RefreshIcon fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
       </Box>
-      {averageCost !== null ? (
+      {averageCost !== null && !loading ? (
         <Box className="formdata-v1">
           <Box display="flex" justifyContent="space-between">
             <Typography className="table-head-v1">List Price</Typography>
