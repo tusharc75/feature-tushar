@@ -1,5 +1,5 @@
 import { Box, Button, IconButton, makeStyles, Grid, Menu, MenuItem } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Add, ExpandMore } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -18,13 +18,16 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
 import ScheduleDetailDialog from './scheduleDetailDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
-const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, stepFullScreen }) => {
+
+const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
   const {
     state: { user, permissions }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
-  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '' });
+  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [columns, setColumns] = useState(null);
@@ -55,16 +58,6 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';
       }
-      newColumns.forEach((element) => {
-        if (element.accessor === 'qtyDisplay') {
-          element['Footer'] = (info) => {
-            const qtyTotal = info.rows
-              .filter((f) => f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-              .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-            return <>{qtyTotal}</>;
-          };
-        }
-      })
       let coloum: any = [
         {
           accessor: 'srno',
@@ -105,6 +98,38 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
                   {row.original?.detail}
                 </p>
               }
+              { row?.original?.type !== 'service' &&
+              <Box ml={1} className="d-flex align-items-center">
+                <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
+                <HtmlTooltip title="Add ">
+                  <IconButton
+                    onClick={(event) => {
+                      const type = row.original.type;
+                      setAddExistingProductDialog({ open: true, type: type, parentId: row.original?._id  });
+                    }}
+                    size="small"
+                  >
+                    <Add color="disabled" fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              </Box>
+            }
+            {
+               <IconButton
+               size="small"
+               onClick={() => {
+                 if (row.original.type === 'service') {
+                   window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                 } else if (row.original.type === 'product') {
+                   window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else {
+                   window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                 }
+               }}
+             >
+               <OpenInNewIcon fontSize="small" color="primary" />
+             </IconButton>
+            }
             </div>
           )
         }
@@ -148,24 +173,42 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
   };
 
   const fetchData = async () => {
-    setNextStep(false);
     var data: any = [];
     const response = await axiosInstance().get(`${routes.schedule.path}/material/${scheduleData._id}`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
-    const rows = data.material
+    let rows = data.material.filter((e) => e.parentId === null)
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'package' ? parent.packageDetail.packageName : parent.serviceDetail?.serviceName}`;
+      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'package' ? parent.packageDetail?.packageName : parent.serviceDetail?.serviceName}`;
       parent.qtyDisplay = parent.qty;
+      parent.subRows = generateNestedData(data.material, parent);
     });
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(true);
-    } else {
-      setNextStep(true);
-    }
     setRowsData(rows);
     setSelectedProducts([]);
+  };
+
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    let productIndex = 0;
+    subRows.forEach((_subRow, j) => {
+      _subRow.srno = parent.srno + '.' + `${productIndex + 1}`;
+      _subRow.detail = `${ _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
+      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+    if (subRows.length === 0 && parent.type === 'package') {
+      parent.isValid = false;
+    }
+    if (parent.type === 'package') {
+      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
+    }
+    return subRows;
   };
 
   const handleOpen = (rowData) => {
@@ -233,12 +276,13 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
       element.type = addExistingProductDialog.type;
       element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
+      element.parentId = addExistingProductDialog.parentId;
       material.push(element);
     });
     axiosInstance()
       .post(`${routes?.schedule?.path}/material/${scheduleData._id}`, { material })
       .then(() => {
-        setAddExistingProductDialog({ open: false, type: '' });
+        setAddExistingProductDialog({ open: false, type: '', parentId:null });
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -247,7 +291,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
         fetchData();
       })
       .catch((error) => {
-        setAddExistingProductDialog({ open: false, type: '' });
+        setAddExistingProductDialog({ open: false, type: '', parentId:null });
         toastConfig.setToastConfig(error);
       });
   };
@@ -292,7 +336,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
             <MenuItem
               onClick={() => {
                 closeAddActions();
-                setAddExistingProductDialog({ open: true, type: 'product' });
+                setAddExistingProductDialog({ open: true, type: 'product', parentId:null });
               }}
             >
               Add Products
@@ -300,7 +344,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
             <MenuItem
               onClick={() => {
                 closeAddActions();
-                setAddExistingProductDialog({ open: true, type: 'service' });
+                setAddExistingProductDialog({ open: true, type: 'service', parentId:null });
               }}
             >
               Add Services
@@ -308,7 +352,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
             <MenuItem
               onClick={() => {
                 closeAddActions();
-                setAddExistingProductDialog({ open: true, type: 'package' });
+                setAddExistingProductDialog({ open: true, type: 'package', parentId:null });
               }}
             >
               Add Packages
@@ -365,7 +409,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
         <>
           <Box p="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={'calc(100vh - 345px)'}
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
@@ -377,7 +421,6 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
               onSaveEdit={onSaveInlineEdit}
               material={material}
               hideSelection={!allowedToEdit}
-              hideExpander={true}
             />
           </Box>
         </>
@@ -411,7 +454,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
           serialized={null}
           productsDialogOpen={addExistingProductDialog.open}
           productId={null}
-          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '' })}
+          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId:null })}
           assignedProducts={rowsData?.map((e) => e?.materialId)}
           renderedFrom={renderedFrom}
           onSuccess={(d) => {
@@ -423,7 +466,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
         <AssignServiceDialog
           reference={"schedule"}
           referenceId={scheduleData?._id}
-          handleClose={() => setAddExistingProductDialog({ open: false, type: '' })}
+          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId:null })}
           ids={rowsData?.map((e) => e?.materialId)}
           onSuccess={(rows) => {
             handleAdd(rows);
@@ -433,7 +476,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
        {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
           referenceType="demandOrder"
-          handleClose={() => setAddExistingProductDialog({ open: false, type: ''})}
+          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId:null})}
           ids={rowsData?.map((e) => e?.materialId)}
           onSuccess={(rows) => {
             handleAdd(rows)
