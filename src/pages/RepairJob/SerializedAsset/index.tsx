@@ -496,7 +496,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             />}
         {repairAssetDialog.open && <ConfirmationDialog
             open={true}
-            message={`Are you sure you want to complete repair of ${repairAssetDialog.assetId ? repairAssetDialog.assetName : "selected asset(s)"} ? `}
+            message={`Are you sure you want to mark repair complete for ${repairAssetDialog.assetId ? repairAssetDialog.assetName : "selected asset(s)"} ? `}
             onClose={() => {
                 setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] })
             }}

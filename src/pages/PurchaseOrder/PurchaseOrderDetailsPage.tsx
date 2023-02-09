@@ -186,7 +186,8 @@ const PurchaseOrderDetailsPage = () => {
       });
   };
 
-  const checkReceivedProduct = (products) => {
+  const checkReceivedProduct = (data) => {
+    const products = data?.filter((e) => e.type === "Product");
     if (products?.length && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.closed) {
       var isCompleteReceived = false;
       var isPartialReceived = products?.some((e) => e?.actualReceived);

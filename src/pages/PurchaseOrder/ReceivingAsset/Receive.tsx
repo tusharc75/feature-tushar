@@ -421,9 +421,12 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                     </Box>}
                             </CustomDialogContent>
                             <CustomDialogFooter>
-                                <Button variant="outlined"
+                                <Button
+                                    variant="outlined"
                                     disabled={isSubmitting}
-                                    color="primary" onClick={onClose}>
+                                    size="small"
+                                    color="primary"
+                                    onClick={onClose}>
                                     Cancel
                                 </Button>
                                 <Button
@@ -434,6 +437,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                             && !validate(values.seriaizedAsset).serialNumber)
                                             handleCreateSerializedAsset(values)
                                     }}
+                                    size="small"
                                     variant="contained"
                                     disabled={isSubmitting}
                                     color="primary"

@@ -44,7 +44,7 @@ const AskSupplierPriceDialog = (props) => {
     const [contactId, setContactId] = useState([]);
     const [fields, setFields] = useState([]);
     const [selectedFields, setSelectedFields] = useState([]);
-    const [displayColumns, setDisplayColumns] = useState(["qty", "productName", "productDesc", "unit", "productCategory"]);
+    const [displayColumns, setDisplayColumns] = useState(["qty", "productName", "productDescription", "unit", "productCategory"]);
 
 
     useEffect(() => {

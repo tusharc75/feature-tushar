@@ -56,57 +56,71 @@ const ReceivingAsset = ({
   const fetchColumns = async () => {
     const column = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
-    const productFields = productResult?.data?.data?.filter((e) =>
-      ['productName', 'productCategory', 'productNumber', 'productDescription', 'serializedProduct'].includes(e?.fieldData?.fieldName)
-    );
-    productFields?.forEach((e) => {
-      if (e?.fieldData?.fieldName === 'productName') {
-        column.push({
-          accessor: 'productName',
-          Header: 'Detail',
-          width: 300,
-          disabled: true,
-          Cell: ({ row }) => (
-            <p className="text-truncate">
-              {row.original.type === 'Product' ? (
-                <Link className="link" title={row.original.productId} to={`${routes.productDetail.path}/${row.original.productId}`}>
-                  {row.original.productName}
-                </Link>
-              ) : row.original.type === 'Asset' ? (
-                <Link className="link" title={row.original.productId} to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}>
-                  {row.original.productName}
-                </Link>
-              ) : (
-                row.original.productName
-              )}
-            </p>
-          ),
-          Footer: () => {
-            return <>Total</>;
-          }
-        });
+    const productFields = productResult?.data?.data?.filter((e) => ['productCategory', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName));
+    column.push({
+      accessor: 'index',
+      Header: 'Index',
+      width: 50,
+      primaryField: true,
+      Cell: ({ row }) => {
+        return row.original['index'] ? <p className="text-truncate">{row.original.index}</p> : <NoDataCell />;
+      },
+      Footer: () => {
+        return <>Total</>;
       }
+    });
+    column.push({
+      accessor: 'type',
+      Header: 'Type',
+      width: 100,
+      primaryField: true,
+      Cell: ({ row }) => {
+        return row.original['type'] ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
+      }
+    });
+    column.push({
+      accessor: 'detail',
+      Header: 'Detail',
+      width: 300,
+      disabled: true,
+      Cell: ({ row }) => (
+        <p className="text-truncate">
+          {row.original.type === 'Product' ? (
+            <Link className="link" title={row.original.productId} to={`${routes.productDetail.path}/${row.original.productId}`}>
+              {row.original.detail}
+            </Link>
+          ) : row.original.type === 'Asset' ? (
+            <Link className="link" title={row.original.productId} to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}>
+              {row.original.detail}
+            </Link>
+          ) : (
+            <p className="text-truncate">{row.original.detail}</p>
+          )}
+        </p>
+      )
+    });
+    column.push({
+      accessor: 'description',
+      Header: "Description",
+      width: 200,
+      Cell: ({ row }) => {
+        return row.original['description'] ? <p className="text-truncate">{row?.original?.description}</p> : <NoDataCell />;
+      }
+    });
+    productFields?.forEach((e) => {
       if (e?.fieldData?.fieldName === 'productNumber') {
         column.push({
           accessor: 'productNumber',
           Header: e?.fieldData?.fieldLabel,
-          width: 300,
+          width: 200,
           Cell: ({ row }) => (row.original.productNumber ? <p className="text-truncate">{row.original.productNumber}</p> : <NoDataCell />)
-        });
-      }
-      if (e?.fieldData?.fieldName === 'productDescription') {
-        column.push({
-          accessor: 'productDescription',
-          Header: e?.fieldData?.fieldLabel,
-          width: 300,
-          Cell: ({ row }) => (row.original.productDescription ? <p className="text-truncate">{row.original.productDescription}</p> : <NoDataCell />)
         });
       }
       if (e?.fieldData?.fieldName === 'serializedProduct') {
         column.push({
           accessor: 'serializedProductView',
           Header: e?.fieldData?.fieldLabel,
-          width: 150,
+          width: 200,
           Cell: ({ row }) =>
             row.original.type === 'Product' ? <p className="text-truncate">{row.original.serializedProductView}</p> : <NoDataCell />
         });
@@ -115,11 +129,12 @@ const ReceivingAsset = ({
         column.push({
           accessor: 'productCategory',
           Header: e?.fieldData?.fieldLabel,
-          width: 150,
+          width: 200,
           Cell: ({ row }) => (row.original.type === 'Product' ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />)
         });
       }
     });
+
     let fields = await fetch_po_product_fields(purchaseOrderData?.currency);
     fields.forEach((element) => {
       if (element.type === 'date') {
@@ -245,8 +260,8 @@ const ReceivingAsset = ({
             row?.original?.type === 'Product' ? (
               <>
                 {permissions?.purchaseOrder?.isUpdate &&
-                allowedToEdit &&
-                row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) ? (
+                  allowedToEdit &&
+                  row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) ? (
                   <HtmlTooltip title="Reject">
                     <span>
                       <IconButton
@@ -267,7 +282,7 @@ const ReceivingAsset = ({
                       size="small"
                       aria-label="History"
                       onClick={() => {
-                        setHistoryDialog({ open: true, product: row?.original?.productId, productName: row?.original?.productName });
+                        setHistoryDialog({ open: true, product: row?.original?.productId, productName: row?.original?.detail });
                       }}
                     >
                       <HistoryIcon fontSize="small" color={'primary'} />
@@ -292,16 +307,18 @@ const ReceivingAsset = ({
 
       setInventoryHistory(assets?.data?.data?.inventoryHistory);
 
-      let rows = result?.data?.data?.map((item) => {
+      let rows = result?.data?.data?.map((item, index) => {
         let finalObject = prepareDataForGrid(item);
         finalObject['isChecked'] = selectedRecords.some((s) => s._id === item._id);
         finalObject['allowedToEdit'] = allowedToEdit;
         let res: any = {
           ...finalObject,
+          index: index + 1,
           type: 'Product',
+          detail: item?.productDetail?.productName,
+          description: item?.productDetail?.productDescription,
           productName: item?.productDetail?.productName,
           productNumber: item?.productDetail?.productNumber,
-          productDescription: item?.productDetail?.productDescription,
           serializedProduct: item?.productDetail?.serializedProduct,
           serializedProductView: item.productDetail?.serializedProduct ? 'Yes' : 'No',
           productCategory: item.productDetail?.productCategory?.optionLabel,
@@ -312,9 +329,9 @@ const ReceivingAsset = ({
         const subRows = serializedAsset?.filter((e) => e?.product?.optionValue === res?.productId);
         if (subRows?.length) {
           let actualReceived = item.actualReceived;
-          subRows?.forEach((e: any) => {
+          subRows?.forEach((e: any, index) => {
             if (actualReceived && !e.isUsed) {
-              res.subRows.push({ productName: e.assetNumber, type: 'Asset', assetId: e?._id, hideSelection: true });
+              res.subRows.push({ index: `${res.index}.${index + 1}`, detail: e.assetNumber, type: 'Asset', assetId: e?._id, hideSelection: true });
               actualReceived = actualReceived - 1;
               e.isUsed = true;
             }
@@ -323,9 +340,9 @@ const ReceivingAsset = ({
         const subRowsproductSerialNumber = productSerialNumber?.filter((e) => e?.product === res?.productId);
         if (subRowsproductSerialNumber?.length) {
           let actualReceived = item.actualReceived;
-          subRowsproductSerialNumber?.forEach((e: any) => {
+          subRowsproductSerialNumber?.forEach((e: any, index: any) => {
             if (actualReceived && !e.isUsed) {
-              res.subRows.push({ productName: e.serialNumber, type: 'Serial Number', assetId: e?._id, hideSelection: true });
+              res.subRows.push({ index: `${res.index}.${index + 1}`, detail: e.serialNumber, type: 'Serial Number', assetId: e?._id, hideSelection: true });
               actualReceived = actualReceived - 1;
               e.isUsed = true;
             }
@@ -345,7 +362,7 @@ const ReceivingAsset = ({
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between" m={1}>
+      <Box display="flex" justifyContent="space-between" m={1} pb={2}>
         <Box display="flex">
           {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
             <Button
