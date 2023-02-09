@@ -4,7 +4,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { arrayToDropwdownOption, CustomDialogTransition, getObjKeysWithValues } from 'src/constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues } from 'src/constants/helpers';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomButton from '../Helpers/CustomButton';
 import FormTypes from './FormTypes';
@@ -41,7 +41,7 @@ const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => 
         _fields.forEach((ele) => {
             if (ele.type === 'currencyAmount') {
                 ele.fieldLabel = ele.fieldLabel + ' ' + currency
-                ele.fieldName = ele.fieldName + '_' + currency.toLowerCase()
+                ele.fieldName = ele.fieldName + '_' + currency?.toLowerCase()
                 column.push(ele)
             }
             else {

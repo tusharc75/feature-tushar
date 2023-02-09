@@ -11,14 +11,14 @@ import { genrateCustomTableColumns } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CustomReactTable from '../../CustomReactTable/CustomReactTable';
+import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
-import PurchaseRequisitionDetailDialog from './PurchaseRequisitionDetailDialog';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
+import ScheduleDetailDialog from './scheduleDetailDialog';
 
-const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitionData, stepFullScreen }) => {
+const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, stepFullScreen }) => {
   const {
     state: { user, permissions }
   }: any = useData();
@@ -44,7 +44,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitio
 
   const fetchFields = async () => {
     try {
-      let fields = await axiosInstance().get('/field?resource=Purchase Requisition Detail');
+      let fields = await axiosInstance().get('/field?resource=Schedule Material');
       let data = fields?.data?.data.map((i: any) => {
         return i?.fieldData
       })
@@ -149,7 +149,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitio
   const fetchData = async () => {
     setNextStep(false);
     var data: any = [];
-    const response = await axiosInstance().get(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`);
+    const response = await axiosInstance().get(`${routes.schedule.path}/material/${scheduleData._id}`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     const rows = data.material
@@ -185,7 +185,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitio
   const handleSaveData = async (rows: any) => {
     setUpdating(true);
     axiosInstance()
-      .put(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`, { material: rows })
+      .put(`${routes.schedule.path}/material/${scheduleData._id}`, { material: rows })
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
@@ -205,7 +205,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitio
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData?._id}/delete`, { ids: rows })
+      .put(`${routes.schedule.path}/material/${scheduleData?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
         toastConfig.setToastConfig({
@@ -235,7 +235,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitio
       material.push(element);
     });
     axiosInstance()
-      .post(`${routes?.purchaseRequisition?.path}/material/${purchaseRequisitionData._id}`, { material })
+      .post(`${routes?.schedule?.path}/material/${scheduleData._id}`, { material })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '' });
         toastConfig.setToastConfig({
@@ -387,7 +387,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitio
         />
       )}
       {isProductEdit.open && (
-        <PurchaseRequisitionDetailDialog
+        <ScheduleDetailDialog
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false });
           }}
@@ -398,7 +398,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitio
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
         <AssignProductDialog
-          reference="purchaseRequisition"
+          reference="schedule"
           serialized={null}
           productsDialogOpen={addExistingProductDialog.open}
           productId={null}
@@ -412,8 +412,8 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitio
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={"purchaseRequisition"}
-          referenceId={purchaseRequisitionData?._id}
+          reference={"schedule"}
+          referenceId={scheduleData?._id}
           handleClose={() => setAddExistingProductDialog({ open: false, type: '' })}
           ids={rowsData?.map((e) => e?.materialId)}
           onSuccess={(rows) => {

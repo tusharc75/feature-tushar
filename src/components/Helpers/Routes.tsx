@@ -808,6 +808,20 @@ const routes = {
         : RESOURCE_LABEL.purchaseRequisition,
     path: '/purchase-requisition/detail'
   },
+  schedule: {
+    title:
+      storedRoutes && storedRoutes.schedule && storedRoutes.schedule.title
+        ? storedRoutes.schedule?.title
+        : RESOURCE_LABEL.schedule,
+    path: '/schedule'
+  },
+  scheduleDetail: {
+    title:
+      storedRoutes && storedRoutes.schedule && storedRoutes.schedule.title
+        ? storedRoutes.schedule?.title
+        : RESOURCE_LABEL.schedule,
+    path: '/schedule/detail'
+  },
 };
 
 export default routes;

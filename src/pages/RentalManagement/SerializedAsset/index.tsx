@@ -84,6 +84,9 @@ const SerializedAsset = ({
   const fetchFields = async () => {
     setNextStep(false);
     var { fields: data } = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    data?.forEach((e) => {
+      e.isColumnEditable = false;
+    });
     const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, "");
     let coloum: any = [
       {
@@ -335,7 +338,7 @@ const SerializedAsset = ({
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-              ? parent?.productDetail?.productDesc || ''
+              ? parent?.productDetail?.productDescription || ''
               : parent.type === 'package'
                 ? parent?.packageDetail?.packageDescription || ''
                 : '';
@@ -473,7 +476,7 @@ const SerializedAsset = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
+            ? _subRow?.productDetail?.productDescription || ''
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';

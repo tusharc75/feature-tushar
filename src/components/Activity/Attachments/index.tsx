@@ -59,7 +59,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           const rows = data
             ?.filter((item) => item.parentFolder === null)
             .map((_attachment, idx) => {
-              if (_attachment?.attachmentType === 'folder') {
+              if (_attachment?.type === 'folder') {
                 const childTree = nestedSubTrees(data, _attachment._id);
                 return (
                   <>
@@ -237,7 +237,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     return data
       ?.filter((item) => `${item.parentFolder}` === `${parentId}`)
       ?.map((_attachment, idx) => {
-        if (_attachment?.attachmentType === 'folder') {
+        if (_attachment?.type === 'folder') {
           const childTree = nestedSubTrees(data, _attachment._id);
           return (
             <TreeItem

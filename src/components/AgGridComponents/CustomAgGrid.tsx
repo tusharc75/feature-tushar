@@ -171,7 +171,8 @@ export default function CustomAgGrid({
   setSelectedReportView = null,
   isMultipleSelection = true,
   reportSave = false,
-  showFilters = false
+  showFilters = false,
+  resource = null
 }) {
   const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
@@ -465,6 +466,7 @@ export default function CustomAgGrid({
               columnApi={columnApi}
               columns={columns}
               tableSource={renderedFrom}
+              resource={resource}
             />
           )}
           <div className="table-container-v1" style={{ position: 'relative' }}>
