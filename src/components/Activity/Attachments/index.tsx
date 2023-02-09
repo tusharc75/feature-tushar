@@ -27,6 +27,7 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
+  
   const [open, setOpen] = useState({ open: false, type: 'file', parentFolder: null, purpose: 'add' });
   const [loading, setLoading] = useState(false);
   const [attachments, setAttachments] = useState(null);
@@ -88,7 +89,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                               setAttachmentId(_attachment._id);
                               setOpen({
                                 open: true,
-                                type: _attachment.attachmentType === 'folder' ? 'folder' : 'file',
+                                type: _attachment.type === 'folder' ? 'folder' : 'file',
                                 parentFolder: null,
                                 purpose: 'edit'
                               });
@@ -155,7 +156,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                                 setAttachmentId(_attachment._id);
                                 setOpen({
                                   open: true,
-                                  type: _attachment.attachmentType === 'folder' ? 'folder' : 'file',
+                                  type: _attachment.type === 'folder' ? 'folder' : 'file',
                                   parentFolder: null,
                                   purpose: 'edit'
                                 });
@@ -166,7 +167,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                           </Grid>
                           {permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
                             <Grid item xs={3} container justify="flex-end" alignItems="center">
-                              {_attachment.attachmentType !== 'folder' ? (
+                              {_attachment.type !== 'folder' ? (
                                 <IconButton
                                   size="small"
                                   color="primary"
@@ -259,7 +260,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                       setAttachmentId(_attachment._id);
                       setOpen({
                         open: true,
-                        type: _attachment.attachmentType === 'folder' ? 'folder' : 'file',
+                        type: _attachment.type === 'folder' ? 'folder' : 'file',
                         parentFolder: null,
                         purpose: 'edit'
                       });
@@ -324,7 +325,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                           setAttachmentId(_attachment._id);
                           setOpen({
                             open: true,
-                            type: _attachment.attachmentType === 'folder' ? 'folder' : 'file',
+                            type: _attachment.type === 'folder' ? 'folder' : 'file',
                             parentFolder: null,
                             purpose: 'edit'
                           });
@@ -335,7 +336,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                     </Grid>
                     {permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
                       <Grid item xs={3} container justify="flex-end" alignItems="center">
-                        {_attachment.attachmentType !== 'folder' ? (
+                        {_attachment.type !== 'folder' ? (
                           <Box mr={1}>
                             <IconButton
                               size="small"
@@ -561,24 +562,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                 parentFolder={open.parentFolder}
                 type={open.type}
               />
-
-              {/* open.type === 'folder' ? (
-              <ManageAttachmentFolder
-                folderId={open.purpose === 'add' ? null : attachmentId}
-                folderData={open.purpose === 'add' ? null : attachmentData}
-                handleClose={() => {
-                  handleClose();
-                  setFullScreen(false);
-                }}
-                relatedTo={relatedTo}
-                isMinimized={!fullScreen}
-                onMinimizeMaximize={() => {
-                  setFullScreen((prevState) => !prevState);
-                }}
-                showManimizeMaximize={true}
-                parentFolder={open.parentFolder}
-              />
-              ) : */}
             </Dialog>
           </>
         )

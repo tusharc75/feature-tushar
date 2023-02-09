@@ -103,7 +103,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                     }}
                     enableReinitialize={true}
                     onSubmit={() => { }}>
-                    {({ values, setFieldValue }) => (
+                    {({ values, setFieldValue, errors }) => (
                         <>
                             <CustomDialogContent>
                                 {(values.products && values.products.length) ?
@@ -260,8 +260,9 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                 </Button>
                                 <Button
                                     onClick={() => {
-                                        if (!validate(values.products).rejectQuantity)
+                                        if (!validate(values.products).rejectQuantity && !errors["rejectDate"]) {
                                             handleReject(values.products, values.rejectDate)
+                                        }
                                     }}
                                     size="small"
                                     variant="contained"

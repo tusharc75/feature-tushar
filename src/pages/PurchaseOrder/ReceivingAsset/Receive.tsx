@@ -169,7 +169,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                     }}
                     enableReinitialize={true}
                     onSubmit={() => { }}>
-                    {({ values, setFieldValue }) => (
+                    {({ values, setFieldValue, errors }) => (
                         <>
                             <CustomDialogContent>
                                 {(values.seriaizedAsset && values.seriaizedAsset.length && wareHouseList) ?
@@ -436,8 +436,11 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                         if (!validate(values.seriaizedAsset).inventoryQuantity
                                             && !validate(values.seriaizedAsset).warehouse
                                             && !validate(values.seriaizedAsset).assetQuantity
-                                            && !validate(values.seriaizedAsset).serialNumber)
+                                            && !validate(values.seriaizedAsset).serialNumber
+                                            && !errors["receiveDate"]) {
                                             handleCreateSerializedAsset(values)
+
+                                        }
                                     }}
                                     size="small"
                                     variant="contained"

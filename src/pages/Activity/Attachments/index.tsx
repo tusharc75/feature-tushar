@@ -143,24 +143,23 @@ export default function Attachment() {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting } = state;
+  const { dataRows, rowCount, selectedRecords, loading, page, limit, pageSizes, search, filters, sorting } = state;
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
-  const [selectedRecords, setSelectedRecords] = useState([]);
 
   const column: any = [
     {
       accessor: 'type',
-      id: 'attachmentType',
+      id: "type",
       Header: 'Type',
       width: 70,
       canDrag: false,
       sticky: isMobile ? 'none' : 'left',
-      Cell: ({ row }) => <>{row.original?.type === 'folder' ? 'Folder' : 'Attachment'}</>
+      Cell: ({ row }) => <>{row.original?.type === 'folder' ? 'Folder' : 'File'}</>
     },
     {
       id: 'name',
@@ -174,7 +173,7 @@ export default function Attachment() {
           <a className={permissions?.attachment?.isUpdate ? 'link cursor-pointer' : ''} onClick={() => handleActivityOpen(row.original)}>
             {row.original.name || ''}
           </a>
-          {row.original?.attachmentType === 'folder' && (
+          {row.original?.type === 'folder' && (
             <Box pl={1}>
               <HtmlTooltip title={'Add Folder/File'}>
                 <IconButton
@@ -246,8 +245,8 @@ export default function Attachment() {
       canDrag: false,
       Cell: ({ row }) => {
         return (
-          <>
-            {row.original.attachmentType !== 'folder' && (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {row.original.type !== "folder" && (
               <Tooltip title="Download">
                 <IconButton size="small" aria-label="Delete" onClick={() => downloadFile(row.original)}>
                   <GetAppIcon fontSize="small" color="primary" />
@@ -267,7 +266,7 @@ export default function Attachment() {
                 </IconButton>
               </Tooltip>
             )}
-          </>
+          </div>
         );
       }
     }
@@ -406,57 +405,42 @@ export default function Attachment() {
       gridApi.setRowData([]);
     }
     let api = `/attachment?relatedTo=${JSON.stringify(filter)}${queryString}`;
-    axiosInstance()
-      .get(api)
-      .then(
-        ({
-          data: {
-            data: { data, count }
-          }
-        }) => {
-          console.log('data', data, count);
-          let rows = data?.filter((e) => e?.parentFolder === null || e?.parentFolder === undefined);
-          const parentRows = rows.map((parent, idx) => {
-            parent.srNo = idx + 1;
-            parent.subRows = generateNestedData(data, parent);
-            return {
-              ...parent,
-              id: parent._id,
-              fileUrl: parent.fileUrl,
-              canEdit: parent.type === 'folder' ? true : parent?.canEdit,
-              createdBy: displayDate(parent.createdBy?.date),
-              updatedBy: displayDate(parent.updatedBy?.date),
-              isChecked: false
-            };
-          });
-          dispatch({ type: 'initialize', data: parentRows, count: count });
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
-        }
-      )
-
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
-      });
-  };
-
-  const generateNestedData = (data, parent) => {
-    const childRow = data
-      ?.filter((e) => e?.parentFolder === parent?._id)
-      ?.map((u) => {
-        u.subRows = generateNestedData(data, u);
+    axiosInstance().get(api).then(({ data: { data: { data, count } } }) => {
+      let rows = data?.filter((e) => !e?.parentFolder);
+      const parentRows = rows.map((parent, idx) => {
+        parent.subRows = generateNestedData(data, parent);
         return {
-          ...u,
-          id: u._id,
-          fileUrl: u.fileUrl,
-          canEdit: u.attachmentType === 'folder' ? true : u?.canEdit,
-          createdBy: displayDate(u.createdBy?.date),
-          updatedBy: displayDate(u.updatedBy?.date),
+          ...parent,
+          id: parent._id,
+          fileUrl: parent.fileUrl,
+          canEdit: parent.type === 'folder' ? true : parent?.canEdit,
+          createdBy: displayDate(parent.createdBy?.date),
+          updatedBy: displayDate(parent.updatedBy?.date),
           isChecked: false
         };
       });
+      dispatch({ type: 'initialize', data: parentRows, count: count });
+      setTimeout(() => { dispatch({ type: 'loading', loading: false }) }, gridLoadingTimeout);
+    }
+    ).catch((error) => {
+      toastConfig.setToastConfig(error);
+      dispatch({ type: 'loading', loading: false });
+    });
+  };
+
+  const generateNestedData = (data, parent) => {
+    const childRow = data?.filter((e) => e?.parentFolder === parent?._id)?.map((u) => {
+      u.subRows = generateNestedData(data, u);
+      return {
+        ...u,
+        id: u._id,
+        fileUrl: u.fileUrl,
+        canEdit: u.type === 'folder' ? true : u?.canEdit,
+        createdBy: displayDate(u.createdBy?.date),
+        updatedBy: displayDate(u.updatedBy?.date),
+        isChecked: false
+      };
+    });
     return childRow;
   };
 
@@ -465,7 +449,7 @@ export default function Attachment() {
   };
 
   const handleActivityOpen = (data) => {
-    setOpen({ open: true, type: data?.attachmentType ? data.attachmentType : 'file', parentFolder: data?._id });
+    setOpen({ open: true, type: data?.type ? data.type : 'file', parentFolder: data?._id });
     setAttachmentData(data);
   };
   const handleClose = () => {
@@ -632,7 +616,7 @@ export default function Attachment() {
               data={dataRows}
               currentPage={page}
               onSelect={(newSelectedRecords) => {
-                // dispatch({ type: "selection", selectedRecords: newSelectedRecords })
+                dispatch({ type: "selection", selectedRecords: newSelectedRecords })
               }}
               dispatch={dispatch}
               childrenProperty="subRows"
