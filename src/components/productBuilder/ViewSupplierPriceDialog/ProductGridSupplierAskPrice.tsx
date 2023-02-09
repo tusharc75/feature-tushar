@@ -25,7 +25,7 @@ import moment from "moment";
 
 
 
-const displayColumns = ["qty", "productName", "productDesc", "unit", "responseDate", "status"]
+const displayColumns = ["qty", "productName", "productDescription", "unit", "responseDate", "status"]
 let levalOrderBy = [
     "product",
     "product-custom",

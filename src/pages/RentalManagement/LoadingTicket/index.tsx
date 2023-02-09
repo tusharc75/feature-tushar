@@ -207,7 +207,7 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDesc || ''
+                ? element?.productDetail?.productDescription || ''
                 : element.type === 'package'
                   ? element?.packageDetail?.packageDescription || ''
                   : '';
@@ -236,7 +236,7 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDesc || ''
+                ? element?.productDetail?.productDescription || ''
                 : element.type === 'package'
                   ? element?.packageDetail?.packageDescription || ''
                   : '';

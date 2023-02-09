@@ -248,9 +248,13 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                     </Box>}
                             </CustomDialogContent>
                             <CustomDialogFooter>
-                                <Button variant="outlined"
+                                <Button
+                                    variant="outlined"
                                     disabled={isSubmitting}
-                                    color="primary" onClick={onClose}>
+                                    color="primary"
+                                    size="small"
+                                    onClick={onClose}
+                                >
                                     Cancel
                                 </Button>
                                 <Button
@@ -258,6 +262,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                         if (!validate(values.products).rejectQuantity)
                                             handleReject(values.products, values.rejectDate)
                                     }}
+                                    size="small"
                                     variant="contained"
                                     disabled={isSubmitting}
                                     color="primary"

@@ -171,12 +171,7 @@ const Productpackage = ({
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
       parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
-      parent.description =
-        parent.type === 'product'
-          ? parent?.productDetail?.productDesc || ''
-          : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription || ''
-            : '';
+      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription || '' : parent.type === 'package' ? parent?.packageDetail?.packageDescription || '' : '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.allowedToDelete = parent.workOrder ? true : false;
@@ -204,7 +199,7 @@ const Productpackage = ({
       _subRow.detail = `${_subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName}`;
       _subRow.description =
         _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDesc || ''
+          ? _subRow?.productDetail?.productDescription || ''
           : _subRow.type === 'package'
             ? _subRow?.packageDetail?.packageDescription || ''
             : '';

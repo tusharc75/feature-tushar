@@ -79,9 +79,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   const fetchFields = async () => {
     let columns: any = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
-    const productFields = productResult?.data?.data?.filter((e) =>
-      ['productName', 'productCategory', 'productNumber', 'productDescription', 'serializedProduct'].includes(e?.fieldData?.fieldName)
-    );
+    const productFields = productResult?.data?.data?.filter((e) => ['productCategory', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName));
     columns.push({
       accessor: 'index',
       Header: 'Index',
@@ -89,6 +87,9 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       primaryField: true,
       Cell: ({ row }) => {
         return row.original['index'] ? <p className="text-truncate">{row.original.index}</p> : <NoDataCell />;
+      },
+      Footer: () => {
+        return <>Total</>;
       }
     });
     columns.push({
@@ -100,65 +101,68 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         return row.original['type'] ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
       }
     });
-    productFields?.forEach((e) => {
-      if (e?.fieldData?.fieldName === 'productName') {
-        columns.push({
-          accessor: 'detail',
-          Header: "Detail",
-          minWidth: 200,
-          width: 200,
-          primaryField: true,
-          Cell: ({ row, rows }) => (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              {!allowedToEdit ? (
-                <p className='text-truncate'> {row.original.detail}</p>
-              ) : (
-                <p
-                  onClick={() => {
-                    if (row.original.type === 'Product') {
-                      setShowProductDialog({ open: true, data: row.original, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
-                    }
-                    if (row.original.type === 'Service') {
-                      setShowServiceDialog({ open: true, data: row.original, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
-                    }
-                    if (row.original.type === 'Expense') {
-                      setShowCostDialog({ open: true, data: row.original, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
-                    }
-                  }}
-                  className="link text-truncate"
-                  title={row.original.detail}
-                >
-                  {row.original.detail}
-                </p>
-              )}
-              <Box ml={1} />
-              {row.original.type === 'Product' && (
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.productDetail.path}/${row.original?.materialId}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              )}
-              {row.original.type === 'Service' && (
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original?.materialId}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              )}
-            </div>
-          ),
-          Footer: () => {
-            return <>Total</>;
-          }
-        });
+    columns.push({
+      accessor: 'detail',
+      Header: "Detail",
+      minWidth: 200,
+      width: 200,
+      primaryField: true,
+      Cell: ({ row, rows }) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {!allowedToEdit ? (
+            <p className='text-truncate'> {row.original.detail}</p>
+          ) : (
+            <p
+              onClick={() => {
+                if (row.original.type === 'Product') {
+                  setShowProductDialog({ open: true, data: row.original, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
+                }
+                if (row.original.type === 'Service') {
+                  setShowServiceDialog({ open: true, data: row.original, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
+                }
+                if (row.original.type === 'Expense') {
+                  setShowCostDialog({ open: true, data: row.original, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
+                }
+              }}
+              className="link text-truncate"
+              title={row.original.detail}
+            >
+              {row.original.detail}
+            </p>
+          )}
+          <Box ml={1} />
+          {row.original.type === 'Product' && (
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.productDetail.path}/${row.original?.materialId}`);
+              }}
+            >
+              <OpenInNewIcon fontSize="small" color="primary" />
+            </IconButton>
+          )}
+          {row.original.type === 'Service' && (
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.serviceMasterDetail.path}/${row.original?.materialId}`);
+              }}
+            >
+              <OpenInNewIcon fontSize="small" color="primary" />
+            </IconButton>
+          )}
+        </div>
+      ),
+    });
+    columns.push({
+      accessor: 'description',
+      Header: "Description",
+      width: 200,
+      Cell: ({ row }) => {
+        return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
       }
+    });
+    productFields?.forEach((e) => {
       if (e?.fieldData?.fieldName === 'productNumber') {
         columns.push({
           accessor: 'productNumber',
@@ -166,26 +170,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           width: 200,
           Cell: ({ row }) => {
             return row.original['productNumber'] ? <p className="text-truncate">{row.original.productNumber}</p> : <NoDataCell />;
-          }
-        });
-      }
-      if (e?.fieldData?.fieldName === 'serializedProduct') {
-        columns.push({
-          accessor: 'serializedProductView',
-          Header: e?.fieldData?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) => {
-            return row.original['serializedProductView'] ? <p className="text-truncate">{row.original.serializedProductView}</p> : <NoDataCell />;
-          }
-        });
-      }
-      if (e?.fieldData?.fieldName === 'productDescription') {
-        columns.push({
-          accessor: 'productDescription',
-          Header: e?.fieldData?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) => {
-            return row.original['productDescription'] ? <p className="text-truncate">{row.original.productDescription}</p> : <NoDataCell />;
           }
         });
       }
@@ -199,7 +183,18 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           }
         });
       }
+      if (e?.fieldData?.fieldName === 'serializedProduct') {
+        columns.push({
+          accessor: 'serializedProductView',
+          Header: e?.fieldData?.fieldLabel,
+          width: 200,
+          Cell: ({ row }) => {
+            return row.original['serializedProductView'] ? <p className="text-truncate">{row.original.serializedProductView}</p> : <NoDataCell />;
+          }
+        });
+      }
     });
+
     const p_fields = await fetch_po_product_fields(purchaseOrderData?.currency);
     const s_fields = await fetch_po_service_fields(purchaseOrderData?.currency);
     setServiceFields(s_fields)
@@ -302,9 +297,9 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       };
       res.index = index + 1;
       res.detail = item.type === 'Product' ? item?.productDetail?.productName : item.type === 'Service' ? item?.serviceDetail?.serviceName : item?.description
+      res.description = item.type === 'Product' ? item?.productDetail?.productDescription : item.type === 'Service' ? item?.serviceDetail?.serviceDescription : item?.description
       res.materialId = item.type === 'Product' ? item?.productDetail?._id : item.type === 'Service' ? item?.serviceDetail?._id : item?._id
       res.productNumber = item.productDetail?.productNumber;
-      res.productDescription = item.productDetail?.productDescription || item.productDetail?.productDesc;
       res.serializedProduct = item.productDetail?.serializedProduct;
       res.serializedProductView = item.productDetail?.serializedProduct ? 'Yes' : 'No';
       res.productCategory = item.productDetail?.productCategory?.optionLabel;
