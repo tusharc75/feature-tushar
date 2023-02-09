@@ -1,7 +1,9 @@
 .MuiToolbar-root {
   min-height: 64px !important;
+  min-width: 84px !important;
   @media all and (max-width: 768px) {
     min-height: 0px !important;
+    min-width: px !important;
   }
 }
 @media all and (max-width: 768px) {
@@ -458,6 +460,9 @@ Button.MuiButtonBase-root:not(.MuiFab-root) {
 .MuiButton-containedPrimary {
   background-color: #298b88 !important;
   color: white !important;
+  &:hover {
+    background-color: rgb(15, 35, 44) !important;
+  }
 }
 .MuiOutlinedInput-adornedStart {
   padding-left: 11px !important;

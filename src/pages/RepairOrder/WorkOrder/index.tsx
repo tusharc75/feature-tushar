@@ -10,6 +10,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import {
   repairOrder,
+  REPAIR_ORDER_TYPE,
   workOrder,
   WORKORDER_SERVICE_STATUS,
   WORK_ORDER_STATUS
@@ -33,7 +34,8 @@ const WorkOrder = ({
   allowedToEdit,
   allowedToDelete,
   isPostWorkService,
-  setCurrentStep
+  setCurrentStep,
+  createNewVersionQuote
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -292,7 +294,6 @@ const WorkOrder = ({
       .catch((err) => {
         setShowConfirmBox(false);
         setDeleting(false);
-
         toastConfig.setToastConfig(err);
       });
   };
@@ -313,6 +314,9 @@ const WorkOrder = ({
           uniqueIds: ids
         })
         .then(({ data }) => {
+          if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
+            createNewVersionQuote(true)
+          }
           setDeleting(false);
           setShowConfirmBox(false);
           fetchData();
@@ -325,7 +329,6 @@ const WorkOrder = ({
         .catch((err) => {
           setShowConfirmBox(false);
           setDeleting(false);
-
           toastConfig.setToastConfig(err);
         });
     } else {
@@ -358,11 +361,11 @@ const WorkOrder = ({
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
+            ? parent?.productDetail?.productDescription || ''
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : parent.type === 'serializedAsset'
-                ? parent?.serializedAssetDetail?.product?.productDesc || ''
+                ? parent?.serializedAssetDetail?.product?.productDescription || ''
                 : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
@@ -426,7 +429,7 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
+            ? _subRow?.productDetail?.productDescription || ''
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
@@ -464,6 +467,9 @@ const WorkOrder = ({
     axiosInstance()
       .post(`${workOrder.api}/service`, data)
       .then(() => {
+        if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
+          createNewVersionQuote(true)
+        }
         fetchData();
       })
       .catch((err) => {
@@ -636,11 +642,11 @@ const WorkOrder = ({
           )}
           {addServicesDialog.open && (
             <AssignServiceDialog
-              reference="workorder"
+              reference="repairOrder"
               handleClose={() => setAddServicesDialog({ open: false })}
               ids={[]}
               onSuccess={(data) => {
-                handleAddService(data?.map((e) => e.service));
+                handleAddService(data?.map((e) => e._id));
                 setAddServicesDialog({ open: false });
               }}
               extraStaticFilter={!isPostWorkService ? [] : [{ field: 'preWork', term: false }]}

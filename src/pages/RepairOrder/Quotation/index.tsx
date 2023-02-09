@@ -109,11 +109,12 @@ const Quotation = ({
     var data = await fetch_quotation_product_fields(quotationInfo?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
 
-    if (allowedToEdit === false && invoiceStep === false && ![QUOTATION_STATUS.buildingQuote].includes(quotationInfo?.versions[tempCurrentVersion]?.status)) {
+    if (allowedToEdit === false || invoiceStep === true || ![QUOTATION_STATUS.buildingQuote].includes(quotationInfo?.versions[tempCurrentVersion]?.status)) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
     }
+
     let column: any = [
       {
         accessor: 'srno',
@@ -257,7 +258,7 @@ const Quotation = ({
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
+            ? parent?.productDetail?.productDescription || ''
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : '';
@@ -295,7 +296,7 @@ const Quotation = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
+            ? _subRow?.productDetail?.productDescription || ''
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';

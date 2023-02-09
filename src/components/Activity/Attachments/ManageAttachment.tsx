@@ -24,6 +24,8 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useData } from '../../../StateProvider/Provider';
 import { Skeleton } from '@material-ui/lab';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import PreviewIcon from '@material-ui/icons/Visibility';
+import _ from 'lodash';
 
 const AttachmentSchema = object().shape({
   name: string().required('please add attachment name'),
@@ -249,6 +251,50 @@ export default function ManageAttachment({
     }
   };
 
+  const viewPdf = (event, file) => {
+    if (event) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'info',
+        message: `File is Loading, Please wait...`
+      });
+    }
+    setDownloadProgress(0);
+    setIsDownloading(true);
+    axiosInstance()
+      .get(`user/download?fileName=${file}`, {
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          setDownloadProgress(percentCompleted);
+
+          if (percentCompleted === 100) {
+            toastConfig.setToastConfig({
+              message: 'File Downloaded Successfully',
+              open: true,
+              type: 'success'
+            });
+            setTimeout(() => {
+              setDownloadProgress(0);
+              setIsDownloading(false);
+            }, 2000);
+          }
+        }
+      })
+      .then(({ data }) => {
+        const file = new Blob([data], { type: 'application/pdf' });
+        const fileURL = URL.createObjectURL(file);
+        const pdfWindow = window.open();
+        pdfWindow.location.href = fileURL;
+        // toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+        setIsDownloading(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsDownloading(false);
+      });
+  };
+
   const downloadFile = (event, file) => {
     if (event) {
       toastConfig.setToastConfig({
@@ -336,28 +382,44 @@ export default function ManageAttachment({
                       <div style={{ display: 'flex', justifyContent: 'space-between', width: '50%', float: 'right', bottom: '0' }}>
                         {attachmentId ? (
                           <>
-                            <IconButton onClick={(event) => downloadFile(event, attachment)} style={{ paddingBottom: '1px' }}>
-                              {
-                                // <a href={`${attachment}`}
-                                //     download={true}>
-                                //     <GetAppIcon />
-                                // </a>
-                                <GetAppIcon />
-                              }
-                            </IconButton>
-                            {canEdit && permissions.attachment.isDelete ? (
-                              <IconButton>
+                            <Tooltip title="Download">
+                              <IconButton onClick={(event) => downloadFile(event, attachment)} style={{ paddingBottom: '1px' }}>
                                 {
-                                  <DeleteIcon
-                                    color="error"
-                                    onClick={() => {
-                                      setShowConfirmationDialog(true);
-                                      // handleDeleteAttachment(attachment)
-                                      setAttachemnetToDelete(attachment);
-                                    }}
-                                  />
+                                  // <a href={`${attachment}`}
+                                  //     download={true}>
+                                  //     <GetAppIcon />
+                                  // </a>
+                                  <GetAppIcon />
                                 }
                               </IconButton>
+                            </Tooltip>
+                            {_.endsWith(attachment?.url, '.pdf') && (
+                              <Tooltip title="Preview">
+                                <IconButton>
+                                  <PreviewIcon
+                                    color="primary"
+                                    onClick={(e) => {
+                                      viewPdf(e, attachment.url);
+                                    }}
+                                  />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            {canEdit && permissions.attachment.isDelete ? (
+                              <Tooltip title="Delete">
+                                <IconButton>
+                                  {
+                                    <DeleteIcon
+                                      color="error"
+                                      onClick={() => {
+                                        setShowConfirmationDialog(true);
+                                        // handleDeleteAttachment(attachment)
+                                        setAttachemnetToDelete(attachment);
+                                      }}
+                                    />
+                                  }
+                                </IconButton>
+                              </Tooltip>
                             ) : (
                               <Tooltip
                                 className="cursor-stop"
@@ -414,7 +476,6 @@ export default function ManageAttachment({
             ></CustomDialogHeader>
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
-                {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                 <Box padding={1}>
                   <Grid container spacing={3}>
                     <Grid item xs={12}>
@@ -461,75 +522,6 @@ export default function ManageAttachment({
                           />
                         </Grid>
                         {renderFileThumbnails}
-
-                        {/* {attachments.length > 0 && 
-                                    <Grid item xs={10} sm={11} md={11}>
-                                        <ul>
-                                        {attachments.map((attachment, index)=>(
-                                            
-                                                <li>{attachment}
-                                                {attachment && <span>
-                                                    <IconButton onClick={() => delete attachments[index] }>
-                                                        {
-                                                            <DeleteIcon color='error' />
-
-                                                        }
-                                                    </IconButton>
-                                                </span>}
-                                                </li>
-                                        ))}
-                                        </ul>
-                                    </Grid>
-                                    }
-                                     */}
-                        {/* <Grid item xs={2} sm={1} md={1}>
-                                        {
-                                            attachmentId && values?.fileUrl ?
-                                                (isDownloading ? (
-                                                    <Box display="flex" alignItems="center">
-                                                        {downloadProgress === 100
-                                                            ? "Downloaded"
-                                                            : "Downloading"}
-
-                                                        <Box
-                                                            marginLeft={1}
-                                                            position="relative"
-                                                            display="inline-flex"
-                                                        >
-                                                            <CircularProgress
-                                                                size={37}
-                                                                variant="determinate"
-                                                                value={downloadProgress}
-                                                            />
-                                                            <Box
-                                                                top={0}
-                                                                left={0}
-                                                                bottom={0}
-                                                                right={0}
-                                                                position="absolute"
-                                                                display="flex"
-                                                                alignItems="center"
-                                                                justifyContent="center"
-                                                            >
-                                                                <Typography
-                                                                    variant="caption"
-                                                                    component="div"
-                                                                    color="textSecondary"
-                                                                >{`${downloadProgress}%`}</Typography>
-                                                            </Box>
-                                                        </Box>
-                                                    </Box>
-                                                ) : <IconButton
-                                                    title="Download"
-                                                    size="small"
-                                                    color="primary" 
-                                                    aria-label="download picture"
-                                                    component="span"
-                                                    onClick={() => downloadFile(initialValues.fileUrl)}>
-                                                    <GoArrowDown size={26}/>
-                                                </IconButton>) : null
-                                        }
-                                    </Grid> */}
                       </Grid>
                     )}
                   </Grid>
@@ -578,7 +570,6 @@ export default function ManageAttachment({
               <ImagePreview
                 open={open}
                 aria-labelledby="customized-dialog-title"
-                // heading="image preview"
                 heading={imageSource ? imageSource.substring(imageSource.lastIndexOf('/') + 1) : 'image preview'}
                 close={() => {
                   setImageSource(null);

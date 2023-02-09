@@ -229,11 +229,11 @@ const Productpackage = ({
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDesc || ''
+          ? parent?.productDetail?.productDescription || ''
           : parent.type === 'package'
           ? parent?.packageDetail?.packageDescription || ''
           : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.product?.productDesc || ''
+          ? parent?.serializedAssetDetail?.product?.productDescription || ''
           : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
@@ -286,7 +286,7 @@ const Productpackage = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDesc || ''
+          ? _subRow?.productDetail?.productDescription || ''
           : _subRow.type === 'package'
           ? _subRow?.packageDetail?.packageDescription || ''
           : '';
@@ -445,7 +445,7 @@ const Productpackage = ({
                 {permissions?.serializedAsset?.isRead && allowedToEdit && (
                   <>
                     <Button
-                      className="btn-outline-v1"
+                      className="btn-outline-v1 light"
                       size="small"
                       variant={isMobile && !isTablet ? 'outlined' : 'contained'}
                       style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
@@ -457,7 +457,7 @@ const Productpackage = ({
                     </Button>
                     <Box ml={1} />
                     <Button
-                      className="btn-outline-v1"
+                      className="btn-outline-v1 light"
                       size="small"
                       variant={isMobile && !isTablet ? 'outlined' : 'contained'}
                       style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}

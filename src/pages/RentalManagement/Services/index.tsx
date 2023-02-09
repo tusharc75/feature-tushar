@@ -24,16 +24,7 @@ import { calculatePrice, calculateRowsField, fetch_rental_product_fields, getNes
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { startCase } from 'lodash';
-import LayersIcon from '@material-ui/icons/Layers';
-import CategoryIcon from '@material-ui/icons/Category';
-import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
-import StorageIcon from '@material-ui/icons/Storage';
-import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
-import StorefrontIcon from '@material-ui/icons/Storefront';
-import AllOutIcon from '@material-ui/icons/AllOut';
-import InfoIcon from '@material-ui/icons/InfoOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const Services = ({
@@ -274,7 +265,7 @@ const Services = ({
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
+            ? parent?.productDetail?.productDescription || ''
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : '';
@@ -316,7 +307,7 @@ const Services = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
+            ? _subRow?.productDetail?.productDescription || ''
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
@@ -633,9 +624,9 @@ const Services = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'service'}
+          reference={'rentalManagement'}
           onSuccess={(services) => {
-            handleAdd(services.map((d) => ({ ...d, detail: d.serviceName })));
+            handleAdd(services);
           }}
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });

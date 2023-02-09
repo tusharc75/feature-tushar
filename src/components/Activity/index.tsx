@@ -74,7 +74,7 @@ const useStyles = makeStyles(() => ({
 
 const Activity = (props) => {
   const classes = useStyles();
-  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => {} } = props;
+  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => { } } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [type, setType] = useState(null);
@@ -142,22 +142,22 @@ const Activity = (props) => {
   const getIcon = (tab: string) => {
     switch (tab) {
       case 'Task':
-        return <BiTask className="mr-1" size={20} />;
+        return <BiTask className="mr-2" size={16} />;
 
       case 'Event':
-        return <VscCalendar className="mr-1" size={20} />;
+        return <VscCalendar className="mr-2" size={16} />;
 
       case 'Case':
-        return <BsBriefcase className="mr-1" size={20} />;
+        return <BsBriefcase className="mr-2" size={16} />;
 
       case 'Note':
-        return <GoNote className="mr-1" size={20} />;
+        return <GoNote className="mr-2" size={16} />;
 
       case 'Email':
-        return <HiOutlineMail className="mr-1" size={20} />;
+        return <HiOutlineMail className="mr-2" size={16} />;
 
       case 'Attachment':
-        return <AiOutlinePaperClip className="mr-1" size={20} />;
+        return <AiOutlinePaperClip className="mr-2" size={16} />;
     }
   };
 
@@ -222,12 +222,16 @@ const Activity = (props) => {
                 <Box className={classes.activitySubBox} onClick={(event) => handleChangeType(event, data)}>
                   <Grid container>
                     <Grid item xs={8}>
-                      <Box display="flex">
+                      <Box display="flex" alignItems={'center'}>
                         <Box>
                           <IconButton size="small">{type === data ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
                         </Box>
-                        <Box ml={1} mt={0.5}>
-                          <Typography variant="subtitle2" className={`d-flex align-items-center `}>
+                        <Box ml={1}>
+                          <Typography
+                            variant="subtitle2"
+                            className={`d-flex align-items-center `}
+                            style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: '#5B5B5B' }}
+                          >
                             {getIcon(data)} {data} ({totalCount[data]})
                           </Typography>
                         </Box>
@@ -235,23 +239,29 @@ const Activity = (props) => {
                     </Grid>
                     {data === 'Event' || permissions[data?.toLowerCase()]?.isCreate ? (
                       restrictedAddActivities.indexOf(data) >= 0 ? null : (
-                        <Grid item xs={4} container justify="flex-end">
-                          <Box mr={1} mt={0.5}>
+                        <Grid item xs={4} container justify="flex-end" alignItems="center">
+                          {data === 'Attachment' && (
+                            <Box mr={1}>
+                              <Tooltip title={'Add Folder'}>
+                                <IconButton
+                                  size="small"
+                                  onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}
+                                  style={{ marginRight: '3px' }}
+                                >
+                                  {' '}
+                                  <CreateNewFolderIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                          )}
+                          <Box mr={1}>
                             <Tooltip title={infoTitle[data]}>
-                              <InfoOutlinedIcon />
+                              <InfoOutlinedIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
                             </Tooltip>
                           </Box>
-                          {data === 'Attachment' && (
-                            <Tooltip title={'Add Folder'}>
-                              <IconButton size="small" onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}>
-                                {' '}
-                                <CreateNewFolderIcon />
-                              </IconButton>
-                            </Tooltip>
-                          )}
                           <IconButton size="small" onClick={(event) => handleCreateActivity(event, data)}>
                             {' '}
-                            <AddOutlinedIcon />
+                            <AddOutlinedIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
                           </IconButton>
                         </Grid>
                       )

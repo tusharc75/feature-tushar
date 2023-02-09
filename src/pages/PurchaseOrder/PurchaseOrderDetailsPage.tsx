@@ -21,7 +21,6 @@ import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
 import Product from './Product';
 import HideWhenOffline from '../../components/HideWhenOffline';
-import Service from './Service';
 import IssuePo from './IssuePo';
 import ReceivingAsset from './ReceivingAsset';
 import { GrStatusGood, GrStatusInfo, RiFlowChart } from 'react-icons/all';
@@ -50,7 +49,6 @@ const PurchaseOrderDetailsPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [purchaseOrderFields, setPurchaseOrderFields] = useState([]);
   const [statusOptions, setStatusOptions] = useState([]);
-  const [purchaseOrderProduct, setPurchaseOrderProduct] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [currentStep, setCurrentStep] = useState(null);
 
@@ -188,7 +186,8 @@ const PurchaseOrderDetailsPage = () => {
       });
   };
 
-  const checkReceivedProduct = (products) => {
+  const checkReceivedProduct = (data) => {
+    const products = data?.filter((e) => e.type === "Product");
     if (products?.length && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.closed) {
       var isCompleteReceived = false;
       var isPartialReceived = products?.some((e) => e?.actualReceived);
@@ -387,19 +386,11 @@ const PurchaseOrderDetailsPage = () => {
                   <Product
                     purchaseOrderData={purchaseOrderData}
                     setNextStep={setNextStep}
-                    setPurchaseOrderProduct={setPurchaseOrderProduct}
                     renderedFrom={`${renderedFrom}_grid-1`}
                     allowedToEdit={allowedToEdit}
-                    updateStatus={updateStatus}
                     checkReceivedProduct={checkReceivedProduct}
                   />
                 )}
-                {/* {currentStep === 1 &&
-                              <Service
-                                purchaseOrderData={purchaseOrderData}
-                                renderedFrom={`${renderedFrom}_grid-2`}
-                                setNextStep={setNextStep}
-                              />} */}
                 {/* {currentStep === 2 && (
                             <IssuePo
                               purchaseOrderData={purchaseOrderData}
@@ -454,7 +445,8 @@ const PurchaseOrderDetailsPage = () => {
           setOpenUpdateDialog(false);
           fetchPurchaseOrderData();
         }}
-        currencyDisable={Boolean(purchaseOrderProduct.length > 0) || Boolean(currentStep > 0)}
+        currencyDisable={purchaseOrderData?.canDelete ? false : true}
+        currency={user.user?.brandCurrency || null}
       />)}
   </Box >
   );

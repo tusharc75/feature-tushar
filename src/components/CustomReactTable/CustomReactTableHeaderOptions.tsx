@@ -116,21 +116,8 @@ export default function CustomReactTableHeaderOptions({
         <IconButton
           aria-describedby="columnSelection"
           size="small"
-          className="px-2"
+          className="px-2  arrange-view-v1"
           color="primary"
-          style={{
-            zIndex: '2',
-            width: '38px',
-            height: '42px',
-            position: 'absolute',
-            background: 'white',
-            right: '1px',
-            top: showOnlyShowFilteredRecordSwitch ? '35px' : '1px',
-            padding: '11px',
-            boxShadow: '0px 3.92655px 39.2655px rgb(0 0 0, 0.8)',
-            borderLeft: '1px solid #E5E5E5',
-            borderRadius: '0'
-          }}
           onClick={(event) => {
             setOpenColumnSelection(true);
             setOpenColumnSelectionAnchorEl(event.currentTarget);

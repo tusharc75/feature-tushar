@@ -15,6 +15,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageIrtTicket from './ManageIrtTicket';
 import { sidebarResource } from 'src/constants/helpers';
 import Approver from './Approver';
+import IrtTicketView from './View';
 
 const IrtTicketDetail = () => {
   const { id } = useParams();
@@ -126,7 +127,7 @@ const IrtTicketDetail = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-      <Tabs
+        <Tabs
           className="new-tab-container-v1"
           value={tabValue}
           onChange={handleMainTabChange}
@@ -141,7 +142,7 @@ const IrtTicketDetail = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-               Header
+                Header
               </div>
             }
             value={0}
@@ -152,28 +153,45 @@ const IrtTicketDetail = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-              Details
+                Details
               </div>
             }
             value={1}
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
           />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                Views
+              </div>
+            }
+            value={2}
+            aria-controls="a11y-tabpanel-1"
+            id="a11y-tab-1"
+          />
         </Tabs>
         {tabValue === 0 && (
           <Box>
-        {loading || !fields?.length ? (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
-          </Grid>
-        ) : (
-          <DetailsPage data={irtTicketData} fields={fields} />
+            {loading || !fields?.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={irtTicketData} fields={fields} />
+            )}
+          </Box>
         )}
-        </Box>
-          )}
-          {tabValue === 1 && (
-              <Approver  approver={irtTicketData?.approver}/>
-          )}
+        {tabValue === 1 && (
+          <Approver
+            irtTicketData={irtTicketData} />
+        )}
+        {tabValue === 2 && (
+          <IrtTicketView
+            id={id}
+          />
+        )}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

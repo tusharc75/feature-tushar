@@ -41,6 +41,9 @@ import { HTML5Backend, getEmptyImage } from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 import { XYCoord } from 'dnd-core';
 import HtmlTooltip from '../CustomTooltipTitle';
+import ArrangeViewButton from './ArrangeViewButton';
+import { GrFormClose } from 'react-icons/gr';
+import { CgSearch } from 'react-icons/cg';
 
 const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, ...rest }: any, ref) => {
   const defaultRef = React.useRef();
@@ -61,6 +64,33 @@ const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, ...rest }
   );
 });
 
+// function DefaultColumnFilter({
+//   column: {
+//     filterValue,
+//     // preFilteredRows,
+//     setFilter
+//   }
+// }) {
+//   // const count = preFilteredRows.length
+//   return (
+//     <TextField
+//       autoComplete="off"
+//       type="search"
+//       id="search"
+//       style={{ padding: 0 }}
+//       fullWidth
+//       value={filterValue || ''}
+//       size="small"
+//       InputProps={{
+//         startAdornment: <FilterListIcon fontSize="small" className="mr-2" />
+//       }}
+//       onChange={(e) => {
+//         setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
+//       }}
+//     />
+//   );
+// }
+
 function DefaultColumnFilter({
   column: {
     filterValue,
@@ -68,23 +98,59 @@ function DefaultColumnFilter({
     setFilter
   }
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = React.useRef(null);
+  const inputRef = React.useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ref]);
+
+  useEffect(() => {
+    if (isOpen) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
+
   // const count = preFilteredRows.length
   return (
-    <TextField
-      autoComplete="off"
-      type="search"
-      id="search"
-      style={{ padding: 0 }}
-      fullWidth
-      value={filterValue || ''}
-      size="small"
-      InputProps={{
-        startAdornment: <FilterListIcon fontSize="small" className="mr-2" />
-      }}
-      onChange={(e) => {
-        setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
-      }}
-    />
+    <div>
+      <IconButton onClick={() => setIsOpen(true)} size="small" className={`${filterValue ? 'activeFilter' : ''}`}>
+        <CgSearch />
+      </IconButton>
+      {/* {isOpen && ( */}
+      <div className={`tableFilterSearch ${isOpen ? 'open' : ''}`} ref={ref}>
+        <input
+          value={filterValue || ''}
+          onChange={(e) => {
+            setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
+          }}
+          autoComplete="off"
+          placeholder="Search..."
+          type="text"
+          id="search"
+          aria-hidden={!isOpen}
+          ref={inputRef}
+        />
+        {/* {filterValue !== '' && ( */}
+        <GrFormClose
+          onClick={() => {
+            setFilter('');
+            setIsOpen(false);
+          }}
+        />
+        {/* )} */}
+      </div>
+      {/* )} */}
+    </div>
   );
 }
 
@@ -224,6 +290,7 @@ function CustomReactTable({
           ],
     [baseColumns]
   );
+  console.log(baseColumns);
 
   const filterTypes = React.useMemo(
     () => ({
@@ -279,7 +346,7 @@ function CustomReactTable({
       defaultColumn,
       filterTypes,
       initialState: {
-        columnOrder: newColumns.map((col) => col.id || col.accessor),
+        columnOrder: newColumns.map((col) => col?.id || col?.accessor),
         filters: Object.keys(customFilters).map((key, i) => {
           return { id: key, value: customFilters[key].filter };
         }),
@@ -492,7 +559,7 @@ function CustomReactTable({
 
   // Render the UI for your table
   return (
-    <>
+    <div className="custom-react-table custom-react-table-v1">
       <CustomReactTableHeaderOptions
         columns={baseColumns}
         // setSelectedReportView={setSelectedReportView}
@@ -511,147 +578,159 @@ function CustomReactTable({
         setColumnOrder={setColumnOrder}
       />
 
-      <div
-        style={{
-          display: 'block',
-          overflow: 'auto',
-          height: height ?? '100%'
-          // maxWidth: "100%",
-          // overflowX: "scroll",
-          // overflowY: "hidden",
-          // borderBottom: "1px solid black"
-        }}
-        className="border custom-react-table"
-      >
-        {loading && (
-          <Box
-            bgcolor={'rgba(255,255,255,0.2)'}
-            width="100%"
-            height="100%"
-            zIndex={100}
-            position="absolute"
-            top={0}
-            left={0}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <Box textAlign="center">
-              <CircularProgress color="inherit" />
-              <p>Loading...</p>
-            </Box>
-          </Box>
-        )}
-        <DndProvider backend={HTML5Backend}>
-          <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
-            <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
-              {headerGroups.map((headerGroup, index) => (
-                <React.Fragment key={index}>
-                  <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
-                    {headerGroup.headers.map((column, index) => (
-                      <DraggableHeader key={column.id} column={column} reorder={reorder} index={index} />
-                    ))}
-                  </TableRow>
-                  <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
-                    {headerGroup.headers.map((column) => (
-                      <TableCell key={column.Header} {...column.getHeaderProps()} className="th text-truncate bg-white">
-                        <div>{column.canFilter ? column.render('Filter') : null}</div>
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </React.Fragment>
-              ))}
-            </TableHead>
-
-            <TableBody
-              style={{
-                overflowY: 'scroll',
-                overflowX: 'hidden'
-                // height: "250px"
-              }}
-              className="body"
+      <div className="table-container-v1" style={{ position: 'relative' }}>
+        <ArrangeViewButton
+          columns={baseColumns}
+          renderedFrom={renderedFrom}
+          isClientSideGrid={isClientSideGrid}
+          setHiddenColumns={setHiddenColumns}
+          getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
+          setColumnOrder={setColumnOrder}
+        />
+        <div
+          style={{
+            display: 'block',
+            overflow: 'auto',
+            height: height ?? '100%'
+            // maxWidth: "100%",
+            // overflowX: "scroll",
+            // overflowY: "hidden",
+            // borderBottom: "1px solid black"
+          }}
+          className="border "
+        >
+          {loading && (
+            <Box
+              bgcolor={'rgba(255,255,255,0.2)'}
+              width="100%"
+              height="100%"
+              zIndex={100}
+              position="absolute"
+              top={0}
+              left={0}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
             >
-              {rows.map((row, index1) => {
-                prepareRow(row);
-                return (
-                  <TableRow key={index1} {...row.getRowProps()} className="tr">
-                    {row.cells.map((cell, index2) => {
-                      return (
-                        <TableCell
-                          onDoubleClick={() => {
-                            // setRowState(row.id, { ...row, original: { ...row.original, isEditing: true } });
-                            // Object.keys(rowState).forEach((k) => {
-                            //   if (row.id !== k) {
-                            //     setRowState(k, { ...rowState[k], original: { ...rowState[k].original, isEditing: false } });
-                            //   }
-                            // });
-                            setCellValue(cell?.value || '');
-                            setIsCellEditing(true);
-                            setCurrentRowEditing(row);
-                            setCellState(row.id, cell.column.id, { isEditing: true });
-                            Object.keys(rowState).forEach((rowId) => {
-                              Object.keys(rowState[rowId].cellState).forEach((colId) => {
-                                if (rowState[rowId]?.cellState[colId] !== cell.column?.id && rowState[rowId]?.cellState[colId]?.isEditing) {
-                                  setCellState(rowId, colId, { isEditing: false });
-                                }
+              <Box textAlign="center">
+                <CircularProgress color="inherit" />
+                <p>Loading...</p>
+              </Box>
+            </Box>
+          )}
+          <DndProvider backend={HTML5Backend}>
+            <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
+              <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
+                {headerGroups.map((headerGroup, index) => (
+                  <React.Fragment key={index}>
+                    <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
+                      {headerGroup.headers.map((column, index) => (
+                        <>
+                          <DraggableHeader key={column.id} column={column} reorder={reorder} index={index} />
+                        </>
+                      ))}
+                    </TableRow>
+                    {/* <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
+                      {headerGroup.headers.map((column) => (
+                        <TableCell key={column.Header} {...column.getHeaderProps()} className="th text-truncate bg-white">
+                          <div>{column.canFilter ? column.render('Filter') : null}</div>
+                        </TableCell>
+                      ))}
+                    </TableRow> */}
+                  </React.Fragment>
+                ))}
+              </TableHead>
+
+              <TableBody
+                style={{
+                  overflowY: 'scroll',
+                  overflowX: 'hidden'
+                  // height: "250px"
+                }}
+                className="body"
+              >
+                {rows.map((row, index1) => {
+                  prepareRow(row);
+                  return (
+                    <TableRow key={index1} {...row.getRowProps()} className="tr">
+                      {row.cells.map((cell, index2) => {
+                        return (
+                          <TableCell
+                            onDoubleClick={() => {
+                              // setRowState(row.id, { ...row, original: { ...row.original, isEditing: true } });
+                              // Object.keys(rowState).forEach((k) => {
+                              //   if (row.id !== k) {
+                              //     setRowState(k, { ...rowState[k], original: { ...rowState[k].original, isEditing: false } });
+                              //   }
+                              // });
+                              setCellValue(cell?.value || '');
+                              setIsCellEditing(true);
+                              setCurrentRowEditing(row);
+                              setCellState(row.id, cell.column.id, { isEditing: true });
+                              Object.keys(rowState).forEach((rowId) => {
+                                Object.keys(rowState[rowId].cellState).forEach((colId) => {
+                                  if (rowState[rowId]?.cellState[colId] !== cell.column?.id && rowState[rowId]?.cellState[colId]?.isEditing) {
+                                    setCellState(rowId, colId, { isEditing: false });
+                                  }
+                                });
                               });
-                            });
-                          }}
-                          key={index2}
-                          {...cell.getCellProps()}
-                          className={`td 
+                            }}
+                            key={index2}
+                            {...cell.getCellProps()}
+                            className={`td 
                           ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} 
                           ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
-                        >
-                          {!['selection'].includes(cell?.column.id) &&
-                          rowState &&
-                          rowState.hasOwnProperty(row.id) &&
-                          rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
-                            <input
-                              autoFocus
-                              onBlur={submitInput}
-                              style={{
-                                borderLeft: '0',
-                                borderTop: '0',
-                                padding: '2px 4px',
-                                width: cell?.column.width - 20,
-                                background: 'transparent',
-                                outline: 'none'
-                              }}
-                              value={cellValue}
-                              onChange={(e) => setCellValue(e.target.value)}
-                            />
-                          ) : isCellEditing && currentRowEditing && currentRowEditing.id === row.id && cell?.column.id === 'action' ? (
-                            <HtmlTooltip title="Save">
-                              <IconButton size="small" aria-label="Save" onClick={submitInput}>
-                                <Check color="primary" />
-                              </IconButton>
-                            </HtmlTooltip>
-                          ) : (
-                            cell.render('Cell')
-                          )}
+                          >
+                            {!['selection'].includes(cell?.column.id) &&
+                            rowState &&
+                            rowState.hasOwnProperty(row.id) &&
+                            rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
+                              <input
+                                autoFocus
+                                onBlur={submitInput}
+                                style={{
+                                  borderLeft: '0',
+                                  borderTop: '0',
+                                  padding: '2px 4px',
+                                  width: cell?.column.width - 20,
+                                  background: 'transparent',
+                                  outline: 'none'
+                                }}
+                                value={cellValue}
+                                onChange={(e) => setCellValue(e.target.value)}
+                              />
+                            ) : isCellEditing && currentRowEditing && currentRowEditing.id === row.id && cell?.column.id === 'action' ? (
+                              <HtmlTooltip title="Save">
+                                <IconButton size="small" aria-label="Save" onClick={submitInput}>
+                                  <Check color="primary" />
+                                </IconButton>
+                              </HtmlTooltip>
+                            ) : (
+                              cell.render('Cell')
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+              {rows?.length > 0 && (
+                <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer">
+                  {footerGroups.map((group, index) => (
+                    <TableRow key={index} {...group.getFooterGroupProps()} className="tr">
+                      {group.headers.map((column, index1) => (
+                        <TableCell key={index1} {...column.getHeaderProps()} className="th text-truncate font-weight-bold text-black">
+                          {column.render('Footer')}
                         </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-            {rows?.length > 0 && (
-              <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer">
-                {footerGroups.map((group, index) => (
-                  <TableRow key={index} {...group.getFooterGroupProps()} className="tr">
-                    {group.headers.map((column, index1) => (
-                      <TableCell key={index1} {...column.getHeaderProps()} className="th text-truncate font-weight-bold text-black">
-                        {column.render('Footer')}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableFooter>
-            )}
-          </MaUTable>
-        </DndProvider>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableFooter>
+              )}
+            </MaUTable>
+          </DndProvider>
+        </div>
       </div>
       {allowPagination && !loading && (
         <TablePagination
@@ -669,7 +748,7 @@ function CustomReactTable({
           rowsPerPageOptions={gridPageSizes}
         />
       )}
-    </>
+    </div>
   );
 }
 
@@ -710,9 +789,12 @@ const DraggableHeader = ({ column, index, reorder }: { column: any; index: numbe
 
   return (
     <TableCell ref={ref} {...column.getHeaderProps()} className="th text-truncate table-header">
-      <div style={{ opacity: isDragging ? 0.2 : 1 }} className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
-        <span>{column.render('Header')}</span>
-        {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
+      <div className="d-flex align-items-center justify-content-space-between pos-rel" style={{ width: '100%' }}>
+        <div style={{ opacity: isDragging ? 0.2 : 1 }} className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
+          <span>{column.render('Header')}</span>
+          {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
+        </div>
+        <div>{column.canFilter ? column.render('Filter') : null}</div>
       </div>
       <div {...column.getResizerProps()} className="resizer" />
     </TableCell>

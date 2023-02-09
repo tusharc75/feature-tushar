@@ -16,21 +16,26 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
     const history = useHistory();
     const [fullScreen, setFullScreen] = useState(true);
     const [irtTicketDialog, setIrtTicketDialog] = useState({ open: false, data: null });
-    const [inventoryData, setInventoryData] = useState([]);
-    const [irtTicketData, setIrtTicketData] = useState([]);
+    const [inventoryData, setInventoryData] = useState(null);
+    const [irtTicketData, setIrtTicketData] = useState(null);
 
     useEffect(() => {
+        fetchData()
+    }, []);
+
+    const fetchData = () => {
         axiosInstance().get(`${purchaseOrder.api}/product-stat?product=${product}&warehouse=${warehouse}`).then(({ data: { data } }) => {
             setInventoryData(data)
+            let filterById = []
+            filterById.push({ field: "purchaseOrder", term: purchaseOrderData?._id });
+            filterById.push({ field: "product", term: product });
+            axiosInstance()
+                .get(`/irt-ticket?filterById=${encodeURI(JSON.stringify(filterById))}&filterType=and`)
+                .then(({ data: { data } }) => {
+                    setIrtTicketData(data?.data)
+                });
         })
-        let updatedFilters = []
-        updatedFilters.push({ "field": "purchaseOrder", "term": `${purchaseOrderData?.purchaseOrderNumber}` });
-        axiosInstance()
-            .get(`/irt-ticket?deepFilter=${encodeURI(JSON.stringify(updatedFilters))}`)
-            .then(({ data: { data } }) => {
-                setIrtTicketData(data?.data)
-            });
-    }, []);
+    }
 
     return (
         <Dialog
@@ -48,12 +53,12 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
                 }}
                 showManimizeMaximize={true}
                 showRequiredLabel={false}
-                title={"Inventory States"}
+                title={"Explore Inventory"}
                 onClose={onClose}
             />
             <CustomDialogContent>
                 <div className="p-3">
-                    {inventoryData ?
+                    {inventoryData && irtTicketData ?
                         <TableContainer component={Paper}>
                             <Table aria-label="customized table">
                                 <TableHead>
@@ -121,7 +126,7 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
                     onClose={() => setIrtTicketDialog({ open: false, data: null })}
                     referenceData={{
                         purchaseOrder: purchaseOrderData?._id,
-                        product: purchaseOrderData?._id,
+                        product: product,
                         warehouse: irtTicketDialog.data?.warehouse?.optionValue,
                         qty: data?.qty > irtTicketDialog.data?.qty ? irtTicketDialog.data?.qty : data?.qty,
                         amount: data?.qty > irtTicketDialog.data?.qty ? irtTicketDialog.data?.qty * irtTicketDialog.data?.price : data?.qty * irtTicketDialog.data?.price,
@@ -130,6 +135,7 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
                     }}
                     onSuccess={() => {
                         setIrtTicketDialog({ open: false, data: null })
+                        fetchData()
                     }}
                 />
             )}

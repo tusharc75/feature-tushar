@@ -13,13 +13,11 @@ import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
-import { uniq, map, orderBy, isEqual } from 'lodash';
+import { uniq, map, orderBy, isEqual, unionBy } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import { isNull } from 'util';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
-
+import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -68,7 +66,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
       let errors: any = {}
       let touched: any = {}
       initialData.fields.forEach(({ fieldName, required, fieldLabel }) => {
-
         if (required && !initialData.values[fieldName]) {
           errors[fieldName] = fieldLabel + " is a required field"
           touched[fieldName] = true
@@ -76,11 +73,9 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
       })
       setErrors(errors)
       setTouched(touched)
-
     }
-
   }, [initialData, ref.current, isInlineEdit])
-  
+
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency)
     setAllFields(JSON.parse(JSON.stringify(data)))
@@ -170,111 +165,9 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
     }
   }
 
-  const resetValueZero = (rows) => {
-    const resetFields = []
-    initialData.fields.forEach((element) => {
-      if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
-        if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            resetFields.push(element.fieldName + "_" + _unit.toLowerCase())
-          })
-        }
-        else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              resetFields.push(element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase())
-            })
-          })
-        }
-        else if (element.type === "currencyAmount") {
-          element.displayCurrency.forEach((_currency) => {
-            resetFields.push(element.fieldName + "_" + _currency.toLowerCase())
-          })
-        }
-      }
-      else if (element.type === "percent") {
-        resetFields.push(element.fieldName)
-      }
-    })
-    rows.forEach((row) => {
-      resetFields.forEach((fieldName) => {
-        row[fieldName] = 0;
-      })
-    })
-  }
-
-  const sumOnParent = (parent, child) => {
-    const resetFields = []
-    initialData.fields.forEach((element) => {
-      if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
-        if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            resetFields.push({ fieldName: element.fieldName + "_" + _unit.toLowerCase(), type: "amount" })
-          })
-        }
-        else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(), type: "amount" })
-            })
-          })
-        }
-        else if (element.type === "currencyAmount") {
-          element.displayCurrency.forEach((_currency) => {
-            resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase(), type: "amount" })
-          })
-        }
-      }
-      else if (element.type === "percent") {
-        resetFields.push({ fieldName: element.fieldName, type: "percent" })
-      }
-    })
-    const sumValues: any = {}
-    resetFields.forEach((_field: any) => {
-      sumValues[_field.fieldName] = 0;
-      child.forEach(element => {
-        sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
-      });
-    });
-    parent.forEach((row) => {
-      resetFields.forEach((ele) => {
-        if (ele.type === "amount") {
-          row[ele.fieldName] = sumValues[ele.fieldName];
-        }
-        else {
-          row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / parent.length).toFixed(2));
-        }
-      })
-    })
-  }
-
   const handleSubmit = async (values) => {
     if (isBulkedit) {
-      for (const x in values) {
-        if (values[x] === "" || (Array.isArray(values[x]) && values[x].length === 0)) {
-          delete values[x]
-        }
-      }
-      let rows: any = []
-      selectedProducts.forEach(element => {
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
-        rows.push({ ...element, ...calValues })
-      });
-
-      const parentIds = uniq(map(selectedProducts, "parentId"));
-      parentIds?.forEach((parentId) => {
-        const parent: any = material.filter((e) => e._id === parentId)
-        const sameParent: any = material.filter((e) => e.parentId === parentId)
-        sameParent.forEach((ele) => {
-          rows.forEach((element) => {
-            if (ele._id === element._id) {
-              Object.assign(ele, element);
-            }
-          })
-        })
-        sumOnParent(parent, sameParent)
-        rows = [...rows, ...parent]
-      })
+      const rows = bulkUpdate(values, selectedProducts, material, allFields, quotationData?.currency)
       handleSaveData(rows)
     }
     else {
@@ -282,24 +175,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
         setShowConfirmationDialog(true);
       }
       else {
-        // let rows: any = [{ ...rowData, ...values }]
-        // if (rowData.parentId) {
-        //   const parent: any = material.filter((e) => e._id === rowData.parentId)
-        //   const sameParent: any = material.filter((e) => e.parentId === rowData.parentId)
-        //   sameParent.forEach((element) => {
-        //     if (element.materialId === rowData.materialId) {
-        //       for (var key in values) {
-        //         element[key] = values[key];
-        //       }
-        //     }
-        //   })
-        //   sumOnParent(parent, sameParent)
-        //   rows = [...rows, ...parent]
-        // }
-        // const child = material.filter((e) => e.parentId === rowData._id)
-        // resetValueZero(child)
         const rows = await calculateRowsField(material, values, allFields, rowData)
-
         handleSaveData(rows)
         setShowConfirmationDialog(false);
       }
@@ -327,7 +203,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
       }
     }
   };
-
 
   function validate(values) {
     const errors = {};

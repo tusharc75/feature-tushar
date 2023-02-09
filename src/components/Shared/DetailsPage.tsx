@@ -240,10 +240,11 @@ const Details = (props: DetailProps) => {
   const renderData = (val: any, fieldData: any) => {
     const value = normalizeValues(val, fieldData);
     if (
-      fieldData.hasOwnProperty('lookup') &&
-      fieldData.lookup &&
-      permissions[camelCase(fieldData.lookupResource)]?.isRead &&
-      !unlinkFields.includes(fieldData.lookupResource)
+      fieldData?.hasOwnProperty('lookup') &&
+      fieldData?.lookup &&
+      permissions &&
+      permissions[camelCase(fieldData?.lookupResource)]?.isRead &&
+      !unlinkFields.includes(fieldData?.lookupResource)
     ) {
       if (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') {
         return (
@@ -270,7 +271,9 @@ const Details = (props: DetailProps) => {
                   </React.Fragment>
                 ))
               ) : (
-                '-'
+                <Typography component={'span'} style={{ padding: '7px 10px' }}>
+                  -
+                </Typography>
               )
             ) : data[fieldData.fieldName] ? (
               <Link
@@ -291,7 +294,9 @@ const Details = (props: DetailProps) => {
                 </span>
               </Link>
             ) : (
-              '-'
+              <Typography component={'span'} style={{ padding: '7px 10px' }}>
+                -
+              </Typography>
             )}
           </Typography>
         );

@@ -14,7 +14,7 @@ import styles from './Form.module.scss';
 import { CHILD_RESOURCE } from "../../constants/helpers";
 
 const subForms = [CHILD_RESOURCE.rentalManagementProduct, CHILD_RESOURCE.rentalManagementCost,
-CHILD_RESOURCE.salesOrderProduct, CHILD_RESOURCE.salesOrderCost, CHILD_RESOURCE.purchaseOrderProduct, CHILD_RESOURCE.purchaseOrderService,
+CHILD_RESOURCE.salesOrderProduct, CHILD_RESOURCE.salesOrderCost, CHILD_RESOURCE.purchaseOrderProduct, CHILD_RESOURCE.purchaseOrderCost,
 CHILD_RESOURCE.repairJobAsset, CHILD_RESOURCE.subleaseProduct]
 
 const useStyles = makeStyles(() => ({
