@@ -24,6 +24,8 @@ import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import FormTypes from '../Helpers/FormTypes';
+import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -44,6 +46,7 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
   const [isFieldsDisabled, setIsFieldsDisabled] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isConfrimDialogOpen, setIsConfrimDialogOpen] = useState(false);
+  const [filterValue, setFilterValue] = useState({});
   const [confrimDialogParam, setConfrimDialogParam] = useState({
     head: '',
     body: '',
@@ -78,12 +81,27 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
     return data;
   };
   useEffect(() => {
+    fetchGridColumns();
     fetchGridFilters();
   }, []);
 
+  const fetchGridColumns = () => {
+    // const {
+    //   data: { data }
+    // }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}`);
+    axiosInstance()
+      .get(`/field?resource=${resource}`)
+      .then((columns) => {
+        setColsWithFilterValue(columns?.data?.data || []);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
   useEffect(() => {
-    const allCol = createEmptyColWithFilterValue();
-    setColsWithFilterValue(allCol);
+    // const allCol = createEmptyColWithFilterValue();
+    // setColsWithFilterValue(allCol);
     // setSavedFilters(() => getFiltersFromLocalStorage());
     // fetchGridFilters();
   }, [columns]);
@@ -105,7 +123,7 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
       return;
     }
     if (!isEditing && !selectedFilter) {
-      setColsWithFilterValue(() => createEmptyColWithFilterValue());
+      // setColsWithFilterValue(() => createEmptyColWithFilterValue());
       setIsFieldsDisabled(false);
       return;
     }
@@ -117,32 +135,37 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
   useEffect(() => {
     disableButtonandFields();
   }, [selectedFilter, isEditing]);
-  const updateColumnValue = (index, value) => {
-    setColsWithFilterValue((prev) => {
-      const newList = [...prev];
-      newList[index].value = value;
-      return newList;
-    });
-  };
+  // const updateColumnValue = (name, value) => {
+  //   console.log(name, value);
+  //   setFilterValue({
+  //     ...filterValue,
+  //     name: value
+  //   });
+  //   // console.log(filterValue);
+  //   // setColsWithFilterValue((prev) => {
+  //   //   const newList = [...prev];
+  //   //   newList[index].value = value;
+  //   //   return newList;
+  //   // });
+  // };
 
   // <<<<<<<<<<<<<<<<<<<<<<<<< FILTER FUNCTIONS >>>>>>>>>>>>>>>>>>>>>>>>>
-  const createFilterModel = () => {
-    const filterModel = {};
-    colsWithFilterValue?.forEach((col) => {
-      if (col.value !== '') {
-        const key = col.name;
-        filterModel[key] = {
-          filterType: 'text',
-          type: 'contains',
-          filter: col.value
-        };
-      }
-    });
-    return filterModel;
-  };
+  // const createFilterModel = () => {
+  //   const filterModel = {};
+  //   colsWithFilterValue?.forEach((col) => {
+  //     if (col.value !== '') {
+  //       const key = col.name;
+  //       filterModel[key] = {
+  //         filterType: 'text',
+  //         type: 'contains',
+  //         filter: col.value
+  //       };
+  //     }
+  //   });
+  //   return {};
+  // };
   const applyFilter = () => {
-    const filterModel = createFilterModel();
-    currentGridApi.setFilterModel(filterModel);
+    currentGridApi.setFilterModel(filterValue);
     setIsEditing(false);
     setOpen(false);
     handleClose();
@@ -152,7 +175,7 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
     const newFilter = {
       title: filterName,
       resource: resource,
-      filterValue: createFilterModel()
+      filterValue: filterValue
     };
     await axiosInstance()
       .post(`/user-resource-filter/`, newFilter)
@@ -183,15 +206,15 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
     // fetchGridFilters();
     // const oldSavedFilters = savedFilters ? savedFilters : [];
     // const newFilterValue = createFilterModel();
-    const updatedFilterValue = {
-      ...selectedFilter,
-      filterValue: createFilterModel()
-    };
+    // const updatedFilterValue = {
+    //   ...selectedFilter,
+    //   filterValue: createFilterModel()
+    // };
     axiosInstance()
-      .put(`/user-resource-filter`, updatedFilterValue)
+      .put(`/user-resource-filter`, selectedFilter)
       .then((res) => {
         fetchGridFilters();
-        setSelectedFilter(updatedFilterValue);
+        setSelectedFilter(selectedFilter);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -215,28 +238,28 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
     // setIsEditing(false);
     // setOpen(false);
   };
-  const onFliterSelect = (newValue) => {
-    if (!newValue) return;
+  // const onFliterSelect = (newValue) => {
+  //   if (!newValue) return;
 
-    let filterCols = [];
-    for (const key in newValue?.filterValue) {
-      let obj = {
-        name: key,
-        value: newValue?.filterValue[key].filter
-      };
-      filterCols.push(obj);
-    }
-    const emptyCols = createEmptyColWithFilterValue();
-    const key = 'name';
-    let updatedColumns = emptyCols.map((el) => {
-      const found = filterCols.find((s) => s[key] === el[key]);
-      if (found) {
-        el = Object.assign(el, found);
-      }
-      return el;
-    });
-    setColsWithFilterValue(updatedColumns);
-  };
+  //   let filterCols = [];
+  //   for (const key in newValue?.filterValue) {
+  //     let obj = {
+  //       name: key,
+  //       value: newValue?.filterValue[key].filter
+  //     };
+  //     filterCols.push(obj);
+  //   }
+  //   const emptyCols = createEmptyColWithFilterValue();
+  //   const key = 'name';
+  //   let updatedColumns = emptyCols.map((el) => {
+  //     const found = filterCols.find((s) => s[key] === el[key]);
+  //     if (found) {
+  //       el = Object.assign(el, found);
+  //     }
+  //     return el;
+  //   });
+  //   // setColsWithFilterValue(updatedColumns);
+  // };
 
   // <<<<<<<<<<<<<<<<<<<<<<<<< FUNCTIONS FOR DELETE FILTER >>>>>>>>>>>>>>>>>>>>>>>>>
   const deleteFilter = (id) => {
@@ -296,7 +319,7 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
       {/* <<<<<<<<<<<<<<<<<<<<<<<<< FILTER DIALOG >>>>>>>>>>>>>>>>>>>>>>>>> */}
       <Dialog maxWidth={'md'} open={open} TransitionComponent={Transition} onClose={handleClose} aria-describedby="Filter Dialog">
         {/* <DialogTitle className="white-bg">Filters</DialogTitle> */}
-        <CustomDialogHeader title="Filters" onClose={handleClose} />
+        <CustomDialogHeader title="Filters" onClose={handleClose} showRequiredLabel={false} />
         <CustomDialogContent>
           <Grid container spacing={2}>
             <Grid item xs={12}>
@@ -306,7 +329,7 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
                 value={selectedFilter}
                 onChange={(event: any, newValue: any) => {
                   setSelectedFilter(newValue);
-                  onFliterSelect(newValue);
+                  setFilterValue(newValue);
                 }}
                 getOptionLabel={(option) => option.title}
                 renderOption={(option) => (
@@ -336,19 +359,47 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
                 renderInput={(params) => <TextField fullWidth {...params} label="Select a Filter Set" variant="outlined" />}
               />
             </Grid>
-            {colsWithFilterValue?.map((cols, index) => (
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  disabled={isFieldsDisabled}
-                  fullWidth
-                  label={cols.title}
-                  size="small"
-                  value={cols.value}
-                  onChange={(e) => updateColumnValue(index, e.target.value)}
-                  variant="outlined"
-                />
-              </Grid>
-            ))}
+            {colsWithFilterValue ? (
+              colsWithFilterValue?.map((field, index) => (
+                <Grid item xs={12} sm={6} md={4}>
+                  {/* {console.log(field)} */}
+                  <FormTypes
+                    key={index}
+                    disabled={isFieldsDisabled}
+                    values={filterValue[field.fieldData?.fieldName] ?? ''}
+                    errors={{}}
+                    touched={{}}
+                    label={field.fieldData?.fieldLabel || ''}
+                    name={field.fieldData?.fieldName || ''}
+                    type={field.fieldData?.type}
+                    options={field.fieldData?.option}
+                    setFieldValue={(name, value) => {
+                      setFilterValue({
+                        ...filterValue,
+                        [field.fieldData?.fieldName]: value
+                      });
+                      console.log(filterValue);
+                    }}
+                    required={false}
+                    fullWidth
+                    size="small"
+                  />
+                  {/* <TextField
+                    disabled={isFieldsDisabled}
+                    fullWidth
+                    label={field.title}
+                    size="small"
+                    value={field.value}
+                    onChange={(e) => updateColumnValue(index, e.target.value)}
+                    variant="outlined"
+                  /> */}
+                </Grid>
+              ))
+            ) : (
+              <Box p={2} height={500} bgcolor="white">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>
+            )}
           </Grid>
         </CustomDialogContent>
         <CustomDialogFooter>

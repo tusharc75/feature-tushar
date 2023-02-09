@@ -12,6 +12,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
+  
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
@@ -24,7 +25,6 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
 
   let columns = [
     {
-      //   disabled: true,
       field: 'invoiceNumber',
       headerName: 'Invoice Number',
       show: true,
@@ -32,34 +32,24 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
       primaryField: true
     },
     {
-      //   disabled: true,
       field: 'invoiceDate',
       headerName: 'Invoice Date',
-      disableFilters: true,
+      filter: false,
       show: true,
       cellRenderer: 'dateRenderer',
-      primaryField: true
-    },
-    {
-      //   disabled: true,
-      field: 'action',
-      headerName: 'Action',
-      disableFilters: true,
-      show: true,
-      cellRenderer: 'actionsRenderer',
       primaryField: true
     }
   ];
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-
     let res = await axiosInstance().get(`${purchaseOrder.api}/invoice/${purchaseOrderData?._id}`);
     dispatch({ type: 'initialize', data: res?.data?.data, count: res?.data?.data?.length });
     setTimeout(() => {
       dispatch({ type: 'loading', loading: false });
     }, gridLoadingTimeout);
   };
+
   const ActionsRenderer = (params) => (
     <>
       <HtmlTooltip title="Edit">
@@ -84,16 +74,6 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
           <DeleteIcon color="error" />
         </IconButton>
       </HtmlTooltip>
-
-      {/* <GridDeleteIcon
-        ownerId={user?.user?._id}
-        userId={user?.user?._id}
-        onDelete={() => {
-          setShowDeleteConfirmBox(true);
-          setDeletePurchaseOrderProduct([params.data._id]);
-        }}
-        entity="rentalManagement"
-      /> */}
     </>
   );
 
@@ -148,7 +128,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
         pageSizes={pageSizes}
         page={page}
         actionWidth={150}
-        allowAction={false}
+        allowAction={true}
         isClientSideGrid={true}
         loading={loading}
         renderedFrom={'po_invoice'}

@@ -13,14 +13,14 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 31px;
   }
-  @media all and (min-width: 1700px) {
-    grid-template-columns: repeat(5, 1fr);
-    gap: 31px;
-  }
-  @media all and (min-width: 2200px) {
-    grid-template-columns: repeat(6, 1fr);
-    gap: 31px;
-  }
+  // @media all and (min-width: 1700px) {
+  //   grid-template-columns: repeat(5, 1fr);
+  //   gap: 31px;
+  // }
+  // @media all and (min-width: 2200px) {
+  //   grid-template-columns: repeat(6, 1fr);
+  //   gap: 31px;
+  // }
 
   .singleCard {
     padding-top: 21px;
@@ -53,7 +53,7 @@
       color: rgba(0, 0, 0, 0.5);
       min-height: 48px;
       &.withoutDetails {
-        min-height: 15px;
+        min-height: 48px;
       }
     }
     a {
