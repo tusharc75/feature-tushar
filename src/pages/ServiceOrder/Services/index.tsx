@@ -55,7 +55,7 @@ const Services = ({
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [openBulkEdit, setOpenBulkEdit] = useState(false);
+  const [openBulkEdit, setOpenBulkEdit] = useState({ open: false, data: null });
 
   useEffect(() => {
     fetchFields();
@@ -267,9 +267,21 @@ const Services = ({
     });
     axiosInstance()
       .post(`${serviceOrder.api}/${serviceOrderData._id}/material`, { material: material })
-      .then(() => {
+      .then(({ data }) => {
         setUpdating(false);
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
+        setOpenBulkEdit({
+          open: true, data: data.data.material.map(d => {
+            return {
+              ...d, detail:
+                d.type === 'product'
+                  ? d?.productDetail?.productName
+                  : d.type === 'service'
+                    ? d?.serviceDetail?.serviceName
+                    : d?.packageDetail?.packageName
+            }
+          })
+        })
         fetchProductInventory();
       })
       .catch((error) => {
@@ -418,7 +430,7 @@ const Services = ({
                   <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
                     <MenuItem
                       onClick={() => {
-                        setOpenBulkEdit(true);
+                        setOpenBulkEdit({ open: true, data: selectedProducts });
                         handleClose();
                       }}
                     >
@@ -498,15 +510,15 @@ const Services = ({
           ids={[]}
         />
       )}
-      {openBulkEdit &&
+      {openBulkEdit.open &&
         <CustomEditableGrid
-          onClose={() => setOpenBulkEdit(false)}
-          data={selectedProducts}
+          onClose={() => setOpenBulkEdit({ open: false, data: null })}
+          data={openBulkEdit.data}
           fields={allFields}
           currency={serviceOrderData?.currency}
           handleSave={(rows) => {
             handleSaveData(rows)
-            setOpenBulkEdit(false)
+            setOpenBulkEdit({ open: false, data: null })
           }} />
       }
     </Fragment>

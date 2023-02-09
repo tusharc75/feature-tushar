@@ -1,6 +1,7 @@
 import {
     Checkbox,
     FormControlLabel,
+    InputAdornment,
     TextField,
 } from '@material-ui/core';
 import DateUtils from '@date-io/date-fns';
@@ -18,7 +19,7 @@ const FormTypes = (props) => {
         touched,
         errors
     } = props;
-    
+
     const [options, setOptions] = useState([]);
 
     useEffect(() => {
@@ -91,7 +92,9 @@ const FormTypes = (props) => {
             name={`${values._id}_${fieldData?.fieldName}`}
             value={values[fieldData?.fieldName]}
             InputProps={{
-                startAdornment: getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative,
+                startAdornment: <InputAdornment position="start">
+                    {getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative}
+                </InputAdornment>,
             }}
             margin="dense"
             error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
