@@ -2781,13 +2781,14 @@ svg.MuiSvgIcon-root {
       border: 0 !important;
 
       background: #efefef;
-
+      border-right: 1px solid #d7d7d7 !important;
       &:first-of-type {
         border-radius: 6px 0 0 6px !important;
       }
 
       &:last-of-type {
         border-radius: 0 6px 6px 0 !important;
+        border-right: 0 !important;
       }
 
       &.Mui-selected {
@@ -2994,7 +2995,7 @@ body {
 
 .formdata-v1 {
   padding: 18px 28px 30px;
-  border: 1px solid #f7f7f7;
+  border: 1px solid #ececec;
   box-shadow: 0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03);
   border-radius: 0px 0px 4.04585px 4.04585px;
 }
@@ -3111,7 +3112,16 @@ body {
     gap: 10px;
   }
 }
+
 .custom-react-table-v1 {
+  .table.sticky .header,
+  .table.sticky .footer {
+    position: sticky;
+    z-index: 1;
+    width: -moz-fit-content;
+    width: fit-content;
+  }
+
   th,
   .ag-header-cell-label,
   .th {
@@ -3218,5 +3228,36 @@ body {
   .MuiTreeItem-root.Mui-selected:focus > .MuiTreeItem-content .MuiTreeItem-label,
   .MuiTreeItem-root.Mui-selected > .MuiTreeItem-content .MuiTreeItem-label {
     background-color: white;
+  }
+}
+
+.custom-react-table-v1.custom-react-table {
+  th,
+  .th {
+    height: 40px;
+    & > * {
+      height: 100%;
+    }
+  }
+  tr {
+    border-bottom: 1px solid rgba(224, 224, 224, 1);
+    th,
+    td {
+      border-bottom: 0 !important;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+  }
+  .table .td:last-of-type,
+  .table .th:last-of-type {
+    // min-width: var(--last-child-width, var(--last-child-fallback-width)) !important;
+    min-width: unset !important;
+    margin-right: 45px !important;
+  }
+  .table tfoot .tr {
+    background-color: white;
+    border-bottom: 0;
   }
 }
