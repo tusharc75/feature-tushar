@@ -160,11 +160,11 @@ export default function Attachment() {
 
   const column: any = [
     {
-      accessor: 'attachmentType',
+      accessor: 'type',
       Header: 'Type',
       width: 70,
       sticky: isMobile ? 'none' : 'left',
-      Cell: ({ row }) => <>{row.original?.attachmentType === 'folder' ? 'Folder' : 'Attachment'}</>
+      Cell: ({ row }) => <>{row.original?.type === 'folder' ? 'Folder' : 'Attachment'}</>
     },
     {
       accessor: 'name',
@@ -407,7 +407,7 @@ export default function Attachment() {
               ...parent,
               id: parent._id,
               fileUrl: parent.fileUrl,
-              canEdit: parent.attachmentType === 'folder' ? true : parent?.canEdit,
+              canEdit: parent.type === 'folder' ? true : parent?.canEdit,
               createdBy: moment(parent.createdBy?.date).format('MMM Do, YYYY'),
               updatedBy: moment(parent.updatedBy?.date).format('MMM Do, YYYY'),
               isChecked: false
