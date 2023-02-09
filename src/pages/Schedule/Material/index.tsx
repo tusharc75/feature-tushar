@@ -17,6 +17,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
 import ScheduleDetailDialog from './scheduleDetailDialog';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
 const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, stepFullScreen }) => {
   const {
@@ -155,7 +156,7 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
     const rows = data.material
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.serviceDetail?.serviceName}`;
+      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'package' ? parent.packageDetail.packageName : parent.serviceDetail?.serviceName}`;
       parent.qtyDisplay = parent.qty;
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
@@ -304,6 +305,14 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
             >
               Add Services
             </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'package' });
+              }}
+            >
+              Add Packages
+            </MenuItem>
           </Menu>
         </Box>
         <Box display="flex">
@@ -419,6 +428,17 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, scheduleData, step
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
+        />
+      )}
+       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
+        <AssignPackageDialog
+          referenceType="demandOrder"
+          handleClose={() => setAddExistingProductDialog({ open: false, type: ''})}
+          ids={rowsData?.map((e) => e?.materialId)}
+          onSuccess={(rows) => {
+            handleAdd(rows)
+          }}
+          packageType={null}
         />
       )}
     </Fragment>
