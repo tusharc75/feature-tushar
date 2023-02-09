@@ -352,7 +352,8 @@ const ReceivingAsset = ({
         res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - subRows?.length : 0;
         return res;
       });
-      checkReceivedProduct(result?.data?.data);
+
+      checkReceivedProduct(result?.data?.data?.map((e) => { return { ...e, type: "Product" } }));
       setRowsData(rows);
       setSelectedRecords([]);
     } catch (error) {
