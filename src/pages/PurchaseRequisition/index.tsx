@@ -5,7 +5,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
-import styles from './Header.module.scss';
+import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { camelCase } from 'lodash';
 import { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';

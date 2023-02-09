@@ -116,6 +116,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                       component={TextFieldFormik}
                       margin="dense"
                       type="number"
+                      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                       label="Qty"
                       name="qty"
                       variant="outlined"

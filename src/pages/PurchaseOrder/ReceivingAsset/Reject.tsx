@@ -180,6 +180,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                                                                                             ["rejectQuantity"]: value,
                                                                                                         })
                                                                                                     }}
+                                                                                                    onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                                                                     error={validate([data])?.rejectQuantity}
                                                                                                     helperText={validate([data]).rejectQuantity ? "Reject quantity is more than quantity" : ""}
                                                                                                 />
