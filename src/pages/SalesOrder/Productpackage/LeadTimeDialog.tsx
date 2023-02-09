@@ -156,6 +156,7 @@ function LeadTimeDialog({ salesOrderId, data, onClose, handleSucess }) {
                           name="Days"
                           label="Days"
                           type="number"
+                          onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                           fullWidth
                           style={{ margin: 0 }}
                           value={steps?.days || ''}

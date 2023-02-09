@@ -155,6 +155,7 @@ function LeadTimeDialog({ quotationId, data, versionId, onClose, handleSucess })
                           margin="dense"
                           name="Days"
                           label="Days"
+                          onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                           type="number"
                           fullWidth
                           style={{ margin: 0 }}

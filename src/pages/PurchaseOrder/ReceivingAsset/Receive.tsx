@@ -259,6 +259,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                                     type="number"
                                                                                                     size="small"
                                                                                                     component={TextField}
+                                                                                                    onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                                                                     name="inventoryQuantity"
                                                                                                     placeholder="Inventory Quantity"
                                                                                                     value={data.inventoryQuantity}
@@ -280,6 +281,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                                         label='Asset Creation Quantity'
                                                                                                         variant="outlined"
                                                                                                         type="number"
+                                                                                                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                                                                         size="small"
                                                                                                         component={TextField}
                                                                                                         name="assetQuantity"
