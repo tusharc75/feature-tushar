@@ -259,6 +259,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                                     type="number"
                                                                                                     size="small"
                                                                                                     component={TextField}
+                                                                                                    onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                                                                     name="inventoryQuantity"
                                                                                                     placeholder="Inventory Quantity"
                                                                                                     value={data.inventoryQuantity}
@@ -280,6 +281,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                                         label='Asset Creation Quantity'
                                                                                                         variant="outlined"
                                                                                                         type="number"
+                                                                                                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                                                                         size="small"
                                                                                                         component={TextField}
                                                                                                         name="assetQuantity"
@@ -421,9 +423,12 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                     </Box>}
                             </CustomDialogContent>
                             <CustomDialogFooter>
-                                <Button variant="outlined"
+                                <Button
+                                    variant="outlined"
                                     disabled={isSubmitting}
-                                    color="primary" onClick={onClose}>
+                                    size="small"
+                                    color="primary"
+                                    onClick={onClose}>
                                     Cancel
                                 </Button>
                                 <Button
@@ -434,6 +439,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                             && !validate(values.seriaizedAsset).serialNumber)
                                             handleCreateSerializedAsset(values)
                                     }}
+                                    size="small"
                                     variant="contained"
                                     disabled={isSubmitting}
                                     color="primary"

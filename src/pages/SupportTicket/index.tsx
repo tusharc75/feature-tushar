@@ -5,8 +5,6 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
-import styles from './Header.module.scss';
-import { ImTicket } from 'react-icons/im';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { camelCase } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
@@ -24,6 +22,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ManageSupportTicket from './ManageSupportTicket';
+import styles from '../Leads/Header.module.scss';
 
 const SupportTicket = () => {
   const renderedFrom = camelCase(routes?.supportTicket.title);

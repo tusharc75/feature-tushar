@@ -373,6 +373,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                       fullWidth
                                       label={'Rate ' + _unit + ' ' + _currency}
                                       type="number"
+                                      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                       value={values['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())]}
                                       onChange={(e) => {
                                         setFieldValue(
@@ -481,6 +482,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                                 margin="dense"
                                                 fullWidth
                                                 type="number"
+                                                onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                 style={{ margin: 0 }}
                                                 value={
                                                   values[
@@ -630,6 +632,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                       fullWidth
                                       label={'Discount ' + (val.type === 'Flat' ? ' Amount' : ' Percentage')}
                                       type="number"
+                                      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                       value={val.amount}
                                       onChange={(e) => handleChangeValue(index, 'amount', parseFloat(e.target.value))}
                                     />
@@ -643,6 +646,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                       fullWidth
                                       label="Minimum Trans. Amount"
                                       type="number"
+                                      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                       value={val.minTransAmount}
                                       onChange={(e) => handleChangeValue(index, 'minTransAmount', parseFloat(e.target.value))}
                                     />
@@ -656,6 +660,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                       fullWidth
                                       label="Maximum Discount"
                                       type="number"
+                                      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                       value={val.maxDiscount}
                                       onChange={(e) => handleChangeValue(index, 'maxDiscount', parseFloat(e.target.value))}
                                     />
@@ -773,6 +778,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   fullWidth
                                   label={'Charge ' + (val.type === 'Flat' ? ' Amount' : ' Percentage')}
                                   type="number"
+                                  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                   value={val.amount}
                                   onChange={(e) => handleChangeChargeValue(index, 'amount', parseFloat(e.target.value))}
                                 />
@@ -867,6 +873,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   fullWidth
                                   label={'Tax ' + (val.type === 'Flat' ? ' Amount' : ' Percentage')}
                                   type="number"
+                                  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                   value={val.amount}
                                   onChange={(e) => handleChangeTaxValue(index, 'amount', parseFloat(e.target.value))}
                                 />

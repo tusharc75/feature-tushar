@@ -153,13 +153,13 @@ export default function Attachment() {
 
   const column: any = [
     {
+      accessor: 'type',
       id: "attachmentType",
-      accessor: 'attachmentType',
       Header: 'Type',
       width: 70,
       canDrag: false,
       sticky: isMobile ? 'none' : 'left',
-      Cell: ({ row }) => <>{row.original?.attachmentType === 'folder' ? 'Folder' : 'Attachment'}</>
+      Cell: ({ row }) => <>{row.original?.type === 'folder' ? 'Folder' : 'Attachment'}</>
     },
     {
       id: "name",
@@ -404,27 +404,36 @@ export default function Attachment() {
       gridApi.setRowData([]);
     }
     let api = `/attachment?relatedTo=${JSON.stringify(filter)}${queryString}`;
-    axiosInstance().get(api).then(({ data: { data: { data, count } } }) => {
-      let rows = data?.filter((e) => e?.parentFolder === null || e?.parentFolder === undefined);
-      const parentRows = rows.map((parent) => {
-        parent.subRows = generateNestedData(data, parent);
-        return {
-          ...parent,
-          id: parent._id,
-          fileUrl: parent.fileUrl,
-          canEdit: parent.attachmentType === 'folder' ? true : parent?.canEdit,
-          createdBy: displayDate(parent.createdBy?.date),
-          updatedBy: displayDate(parent.updatedBy?.date),
-          isChecked: false
-        };
-      });
-      console.log(parentRows)
-      dispatch({ type: 'initialize', data: parentRows, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    }
-    )
+    axiosInstance()
+      .get(api)
+      .then(
+        ({
+          data: {
+            data: { data, count }
+          }
+        }) => {
+          console.log('data', data, count);
+          let rows = data?.filter((e) => e?.parentFolder === null || e?.parentFolder === undefined);
+          const parentRows = rows.map((parent, idx) => {
+            parent.srNo = idx + 1;
+            parent.subRows = generateNestedData(data, parent);
+            return {
+              ...parent,
+              id: parent._id,
+              fileUrl: parent.fileUrl,
+              canEdit: parent.type === 'folder' ? true : parent?.canEdit,
+              createdBy: displayDate(parent.createdBy?.date),
+              updatedBy: displayDate(parent.updatedBy?.date),
+              isChecked: false
+            };
+          });
+          dispatch({ type: 'initialize', data: parentRows, count: count });
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
+        }
+      )
+
       .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });

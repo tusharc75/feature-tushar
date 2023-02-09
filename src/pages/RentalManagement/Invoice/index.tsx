@@ -82,6 +82,9 @@ const Invoice = ({
   const fetchFields = async () => {
     try {
       let { fields } = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+      fields?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
       const resultCost = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
       fields = [...fields, ...resultCost];
       fields = [...new Map(fields.map((item) => [item['fieldName'], item])).values()];
@@ -317,7 +320,7 @@ const Invoice = ({
           parent?.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent?.type === 'product'
-              ? parent?.productDetail?.productDesc || ''
+              ? parent?.productDetail?.productDescription || ''
               : parent?.type === 'package'
                 ? parent?.packageDetail?.packageDescription || ''
                 : '';
@@ -360,7 +363,7 @@ const Invoice = ({
         _subRow?.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow?.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
+            ? _subRow?.productDetail?.productDescription || ''
             : _subRow?.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';

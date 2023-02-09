@@ -1,22 +1,19 @@
-import { Box, Grid, Button, Menu, MenuItem, Tooltip, IconButton } from '@material-ui/core';
-import { useState, useEffect, Fragment, useContext, useReducer } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { Link } from 'react-router-dom';
-import CustomContainer from 'src/components/CustomContainer';
-import styles from '../Leads/Header.module.scss';
-import routes from 'src/components/Helpers/Routes';
+import { Box, Button, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { IoIosPeople } from 'react-icons/io';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { camelCase } from 'lodash';
+import { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { useData } from 'src/StateProvider/Provider';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { MdAdd } from 'react-icons/md';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
-import { camelCase } from 'lodash';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import {
   getLocalStorageArrayData,
   gridLoadingTimeout,
@@ -25,41 +22,38 @@ import {
   removeLocalStorage,
   sidebarResource
 } from 'src/constants/helpers';
-import ManageEmployeeMaster from './ManageEmployeeMaster';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import { getColumnData } from 'src/constants/columns';
+import { Link } from 'react-router-dom';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import ManageSchedule from './ManageSchedule';
+import styles from '../Leads/Header.module.scss';
 
-const EmployeeMaster = () => {
-  const renderedFrom = camelCase(routes?.employeeMaster.title);
-  const {
-    state: { permissions, selectedEntity }
-  }: any = useData();
+
+const Schedule = () => {
+  const renderedFrom = camelCase(routes?.schedule.title);
   const toastConfig = useContext(CustomToastContext);
-
-  //  Grid Variables - Start
-
-  const [gridApi, setGridApi] = useState(null);
+  const {
+    state: { permissions, selectedEntity, user }
+  }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const { getColumnData } = useColumns();
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+  const [scheduleId, setScheduleId] = useState(null);
+  const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
-  const [open, setOpen] = useState({ open: false, isClone: false });
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
-  const [employeeMasterId, setEmployeeMasterId] = useState(null);
+  const [gridApi, setGridApi] = useState(null);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.employeeMaster}`)
+      .get(`/field?resource=${sidebarResource?.schedule}`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
@@ -77,7 +71,7 @@ const EmployeeMaster = () => {
               }
             ];
           } else {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.employeeMaster.path);
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.schedule.path);
 
             if (currentColumn !== null) {
               columns = [...columns, currentColumn?.columnData];
@@ -99,7 +93,7 @@ const EmployeeMaster = () => {
       });
   };
 
-  const fetchEmployeeMasterData = () => {
+  const fetchScheduleData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
@@ -107,22 +101,19 @@ const EmployeeMaster = () => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes?.employeeMaster?.path}${queryString}`)
+      .get(`${routes?.schedule.path}${queryString}`)
       .then(({ data: { data } }) => {
         let count = data?.count;
-        let rows = data?.data.map((u: any) => {
+        let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-
-          finalObject['canDelete'] = permissions?.employeeMaster?.isDelete;
-          finalObject['isChecked'] = selectedRecords.some((s) => s?._id === u?._id);
-          finalObject['allowedToEdit'] = permissions?.employeeMaster?.isUpdate;
+          finalObject['canDelete'] = permissions?.schedule?.isDelete && finalObject?.ownerId === user?.user?._id;
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['allowedToEdit'] = permissions?.schedule?.isUpdate;
 
           return {
             ...finalObject
           };
         });
-        setIsAllChecked(false);
-        setClonedData(data);
         if (appendRows) {
           dispatch({
             type: 'initialize',
@@ -219,7 +210,7 @@ const EmployeeMaster = () => {
   const NameRenderer = (params) => {
     return (
       <span className=" d-flex gap-2 align-items-center">
-        <Link className="link" to={`${routes.employeeMasterDetail.path}/${params.data._id}`}>
+        <Link className="link" to={`${routes.schedule.path}/detail/${params.data._id}`}>
           {params.value}
         </Link>
       </span>
@@ -228,13 +219,13 @@ const EmployeeMaster = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      {permissions?.employeeMaster?.isCreate ? (
+      {permissions?.schedule?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
             aria-label="Clone"
             onClick={() => {
-              setEmployeeMasterId(params.data.id);
+             setScheduleId(params.data.id);
               setOpen({ open: true, isClone: true });
             }}
           >
@@ -279,10 +270,10 @@ const EmployeeMaster = () => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`/employee-master/remove`, { ids: ids })
+      .put(`${routes?.schedule?.path}/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
-        fetchEmployeeMasterData();
+        fetchScheduleData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
@@ -301,22 +292,22 @@ const EmployeeMaster = () => {
   }, []);
 
   useEffect(() => {
-    fetchEmployeeMasterData();
+    fetchScheduleData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   return (
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.employeeMaster.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.schedule.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.employeeMaster}
-            module="employeeMaster"
-            api={'employee-master'}
+            permissions={permissions.schedule}
+            module="schedule"
+            api={'schedule'}
             afterImportCompleted={() => {
-              fetchEmployeeMasterData();
+              fetchScheduleData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
@@ -328,7 +319,7 @@ const EmployeeMaster = () => {
             }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
-              else fetchEmployeeMasterData();
+              else fetchScheduleData();
             }}
             additionalParams={getQueryString(true)}
           />
@@ -337,8 +328,7 @@ const EmployeeMaster = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-            </Grid>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>
@@ -352,11 +342,11 @@ const EmployeeMaster = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.employeeMaster.isCreate && (
+                  {permissions.schedule.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
-                        setEmployeeMasterId(null);
+                        setScheduleId(null);
                         setOpen({ open: true, isClone: false });
                       }}
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -367,7 +357,7 @@ const EmployeeMaster = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions?.employeeMaster?.isDelete && (
+                  {permissions?.schedule?.isDelete && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -393,6 +383,12 @@ const EmployeeMaster = () => {
                         onClose={closeActions}
                       >
                         <MenuItem
+                          disabled={
+                            !(
+                              (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) ===
+                              selectedRecords?.length
+                            )
+                          }
                           onClick={() => {
                             closeActions();
                             // eslint-disable-next-line no-lone-blocks
@@ -417,17 +413,17 @@ const EmployeeMaster = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.employeeMaster}
+              permissions={permissions.schedule}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
-                setEmployeeMasterId(data.id);
+                setScheduleId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                setEmployeeMasterId(data.id);
+                setScheduleId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               extraParamsToCheckDelete={true}
@@ -443,7 +439,7 @@ const EmployeeMaster = () => {
               onCreate={false}
               showClone={true}
               onClone={(data) => {
-                setEmployeeMasterId(data.id);
+                setScheduleId(data.id);
                 setOpen({ open: true, isClone: true });
               }}
               chips={[]}
@@ -463,7 +459,7 @@ const EmployeeMaster = () => {
               allowAction={true}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={fetchEmployeeMasterData}
+              refreshGrid={fetchScheduleData}
               showOnlyShowFilteredRecordSwitch={true}
             />
           )
@@ -471,7 +467,7 @@ const EmployeeMaster = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete Employe Master  ${deleteRecord?.employeeNumber || ''} ?`}
+            message={`Are you sure you want to delete Schedule  ${deleteRecord?.scheduleNumber || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -479,15 +475,14 @@ const EmployeeMaster = () => {
             onOk={handleDelete}
           />
         )}
-
         {open?.open && (
-          <ManageEmployeeMaster
-            id={employeeMasterId}
+          <ManageSchedule
+            id={scheduleId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
-              fetchEmployeeMasterData();
+              fetchScheduleData();
             }}
           />
         )}
@@ -496,4 +491,4 @@ const EmployeeMaster = () => {
   );
 };
 
-export default EmployeeMaster;
+export default Schedule;

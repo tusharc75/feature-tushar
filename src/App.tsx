@@ -168,8 +168,8 @@ import ProductionOrder from './pages/ProductionOrder';
 import ProductionOrderDetails from './pages/ProductionOrder/ProductionOrderDetails';
 import ContactUs from './pages/ContactUs';
 import ContactUsDetail from './pages/ContactUs/ContactUsDetail';
-import SupportTicket from './components/SupportTicket';
-import SupportTicketDetail from './components/SupportTicket/SupportTicketDetail';
+import SupportTicket from './pages/SupportTicket';
+import SupportTicketDetail from './pages/SupportTicket/SupportTicketDetail';
 import DemandOrder from './pages/DemandOrder';
 import DemandOrderDetails from './pages/DemandOrder/DemandOrderDetails';
 import ServiceOrder from './pages/ServiceOrder';
@@ -183,8 +183,10 @@ import BudgetDetail from './pages/Budget/BudgetDetail';
 import MarketSegmentDetail from './pages/MarketSegment/MarketSegmentDetail';
 import IrtTicket from './pages/IrtTicket';
 import IrtTicketDetail from './pages/IrtTicket/IrtTicketDetail';
-import PurchaseRequisition from './components/PurchaseRequisition';
-import PurchaseRequisitionDetail from './components/PurchaseRequisition/PurchaseRequisitionDetail';
+import PurchaseRequisition from './pages/PurchaseRequisition';
+import PurchaseRequisitionDetail from './pages/PurchaseRequisition/PurchaseRequisitionDetail';
+import ScheduleDetail from './pages/Schedule/ScheduleDetail';
+import Schedule from './pages/Schedule';
 
 var notificationInterval: any = null;
 
@@ -928,6 +930,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.purchaseRequisitionDetail.path}/:id`}>
               <PurchaseRequisitionDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.schedule.path}`}>
+              <Schedule />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.scheduleDetail.path}/:id`}>
+              <ScheduleDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
