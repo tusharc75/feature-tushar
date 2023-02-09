@@ -87,9 +87,7 @@ export default function ManageAttachment({
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [imageSource, setImageSource] = useState(null);
   const [open, setOpen] = useState(false);
-  const [imageAttachments] = useState([]);
   const [otherAttachments, setOtherAttachments] = useState([]);
-  const [fileImageAttachments] = useState([]);
   const [canEdit, setCanEdit] = useState(true);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [attachmentToDelete, setAttachemnetToDelete] = useState('');
@@ -97,12 +95,12 @@ export default function ManageAttachment({
   const [formValues, setFormValues] = useState({});
   const [isFetching, setIsFetching] = useState(false);
 
-  const {
-    state: { permissions }
-  }: any = useData();
+  const { state: { permissions } }: any = useData();
+
   useEffect(() => {
     fetchAttachmentDetail();
   }, []);
+
   const checkImageUrl = (url) => {
     let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
     let imageExtensions = ['.tif', 'tiff', '.bmp', '.jpg', 'jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
@@ -117,24 +115,21 @@ export default function ManageAttachment({
         .then(({ data: { data } }) => {
           setCanEdit(data?.canEdit);
           if (data.file && data.file.length) {
-            let otherAttachments = [];
-            let filteredAttachments = [];
+            let imageAttachments = [];
+            let nonImageAttachments = [];
             data.file.map((file) => {
               let isImageUrl = checkImageUrl(file.url);
               if (!isImageUrl) {
-                // data.fileUrl = url
-                otherAttachments.push({ name: file.name, url: file.url });
+                nonImageAttachments.push({ name: file.name, url: file.url });
               } else {
-                filteredAttachments.push({ name: file.name, url: file.url });
+                imageAttachments.push({ name: file.name, url: file.url });
               }
             });
-            // setImageAttachments(filteredAttachments)
-            setOtherAttachments([...otherAttachments, ...filteredAttachments]);
+            setOtherAttachments([...nonImageAttachments, ...imageAttachments]);
           }
-          setInitialValues(data);
           setFormValues(data);
           setIsFetching(false);
-          // setInitialValues({ name: data?.name ?? '', fileUrl: data?.fileUrl ?? '' })
+          setInitialValues({ ...data, fileUrl: data.file && data.file.length && data.file ? data.file[0]?.url : "" })
         })
         .catch((error) => {
           setIsFetching(false);
@@ -179,7 +174,7 @@ export default function ManageAttachment({
     if (type === 'file') {
       request = {
         name: values.name,
-        file: values['fileUrl'] ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments] : [...imageAttachments],
+        file: otherAttachments,
         relatedTo: relatedTo
       };
     } else {
@@ -188,7 +183,9 @@ export default function ManageAttachment({
         relatedTo: relatedTo
       };
     }
-    if (parentFolder) request.parentFolder = parentFolder;
+    if (parentFolder) {
+      request.parentFolder = parentFolder
+    };
     setLoading(true);
     if (type === 'file') {
       if (attachmentId) {
@@ -339,14 +336,17 @@ export default function ManageAttachment({
         setIsDownloading(false);
       });
   };
+
   const onUploadFile = (file) => {
     setOtherAttachments((prevState) => [...prevState, { name: file.split('_')[3] || file, url: file }]);
   };
+
   const handleDeleteAttachment = (file) => {
     setOtherAttachments(otherAttachments.filter((current) => current?.url !== file.url));
     setAttachemnetToDelete('');
     setShowConfirmationDialog(false);
   };
+
   const getFileIconSrc = (file) => {
     if (file) {
       let extension = file.substring(file.lastIndexOf('.')).toLowerCase();
@@ -354,6 +354,7 @@ export default function ManageAttachment({
       if (data && data?.source) return data.source;
     }
   };
+
   const renderFileThumbnails = (
     <Grid container spacing={1} className={emailStyles.createEmailContainer}>
       {otherAttachments && otherAttachments.length > 0 ? (
@@ -449,9 +450,11 @@ export default function ManageAttachment({
       ) : null}
     </Grid>
   );
+
   const isFieldNotTouched = (initialValues, values) => {
     return Object.values(initialValues).toString() === Object.values(values).toString();
   };
+
   const handleValuesChange = (data) => {
     setFormValues((prevState) => ({
       ...prevState,

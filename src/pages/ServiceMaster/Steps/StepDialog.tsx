@@ -287,6 +287,7 @@ export default function StepDialog({
                         component={TextFieldFormik}
                         margin="dense"
                         type="number"
+                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                         label="Lead Day"
                         name="leadDay"
                         variant="outlined"
@@ -343,6 +344,7 @@ export default function StepDialog({
                         }}
                         margin="dense"
                         type="number"
+                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                         label="Cost Price"
                         name="costPrice"
                         variant="outlined"
@@ -366,6 +368,7 @@ export default function StepDialog({
                         }}
                         margin="dense"
                         type="number"
+                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                         label="List Price"
                         name="listPrice"
                         variant="outlined"

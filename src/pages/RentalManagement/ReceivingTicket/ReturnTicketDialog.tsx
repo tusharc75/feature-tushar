@@ -135,6 +135,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                   label="Return Quantity"
                                                   variant="outlined"
                                                   type="number"
+                                                  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                   size="small"
                                                   component={TextField}
                                                   name="returnQuantity"
@@ -157,6 +158,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                   label="Product is Consumed"
                                                   variant="outlined"
                                                   type="number"
+                                                  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                   size="small"
                                                   component={TextField}
                                                   disabled
@@ -180,6 +182,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                   label="Invoiced Quantity"
                                                   variant="outlined"
                                                   type="number"
+                                                  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                   size="small"
                                                   component={TextField}
                                                   disabled

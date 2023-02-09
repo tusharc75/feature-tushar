@@ -103,7 +103,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                     }}
                     enableReinitialize={true}
                     onSubmit={() => { }}>
-                    {({ values, setFieldValue }) => (
+                    {({ values, setFieldValue, errors }) => (
                         <>
                             <CustomDialogContent>
                                 {(values.products && values.products.length) ?
@@ -180,6 +180,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                                                                                             ["rejectQuantity"]: value,
                                                                                                         })
                                                                                                     }}
+                                                                                                    onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                                                                     error={validate([data])?.rejectQuantity}
                                                                                                     helperText={validate([data]).rejectQuantity ? "Reject quantity is more than quantity" : ""}
                                                                                                 />
@@ -259,8 +260,9 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                 </Button>
                                 <Button
                                     onClick={() => {
-                                        if (!validate(values.products).rejectQuantity)
+                                        if (!validate(values.products).rejectQuantity && !errors["rejectDate"]) {
                                             handleReject(values.products, values.rejectDate)
+                                        }
                                     }}
                                     size="small"
                                     variant="contained"

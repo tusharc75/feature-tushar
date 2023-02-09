@@ -3,7 +3,7 @@ import { useState, useEffect, Fragment, useContext, useReducer } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { Link } from 'react-router-dom';
 import CustomContainer from 'src/components/CustomContainer';
-import styles from './Header.module.scss';
+import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { IoIosPeople } from 'react-icons/io';

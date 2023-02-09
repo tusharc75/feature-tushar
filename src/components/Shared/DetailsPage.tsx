@@ -82,6 +82,7 @@ interface DetailProps {
   fields: any[];
   gridSize?: GridSize;
   containerPadding?: string | number;
+  fullHeight?: boolean;
 }
 
 const unlinkFields = [
@@ -97,7 +98,7 @@ const Details = (props: DetailProps) => {
   const {
     state: { permissions }
   }: any = useData();
-  const { data, fields, gridSize, containerPadding } = props;
+  const { data, fields, gridSize, containerPadding, fullHeight = false } = props;
   const [isDownloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [initialVals, setValues] = useState(null);
@@ -352,7 +353,10 @@ const Details = (props: DetailProps) => {
         return (
           form.name && (
             <React.Fragment key={form.name}>
-              <div className="single-form-v1" style={containerPadding ? { padding: containerPadding } : {}}>
+              <div
+                className={`single-form-v1 ${fullHeight && 'full-height-details-from'}`}
+                style={containerPadding ? { padding: containerPadding } : {}}
+              >
                 <div className={'form-head-v1'}>
                   {/* <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} /> */}
                   <h3 className="form-label-style-v1" title={form.name}>
@@ -368,10 +372,17 @@ const Details = (props: DetailProps) => {
                       sm={gridSize ?? dynamicSize(6, field.fieldData.type)}
                       md={gridSize ?? dynamicSize(4, field.fieldData.type)}
                     >
-                      <Grid container alignItems="center" style={{ border: '1px solid #EDEDED' }}>
+                      <Grid container alignItems="center" style={{ border: field.fieldData.type === 'imageUpload' ? 0 : '1px solid #EDEDED' }}>
                         <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(5, field.fieldData.type)}>
-                          <div className="d-flex align-items-center formdata-title-v1">
-                            <h4 title={field.fieldData.fieldLabel} className={`text-truncate `}>
+                          <div
+                            className="d-flex align-items-center formdata-title-v1"
+                            style={{ borderRight: field.fieldData.type === 'imageUpload' && 0 }}
+                          >
+                            <h4
+                              title={field.fieldData.fieldLabel}
+                              style={{ paddingLeft: field.fieldData.type === 'imageUpload' && 0 }}
+                              className={`text-truncate `}
+                            >
                               {field.fieldData.fieldLabel}
                             </h4>
                             {field.fieldData.isTooltip && (
@@ -384,8 +395,8 @@ const Details = (props: DetailProps) => {
 
                         <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(7, field.fieldData.type)}>
                           {field.fieldData.type === 'imageUpload' ? (
-                            <Box paddingLeft={2} marginTop={1} marginBottom={4}>
-                              <Avatar src={initialVals[field.fieldData.fieldName]} />
+                            <Box marginTop={1} marginBottom={4}>
+                              <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }} />
                             </Box>
                           ) : (
                             <Box display="flex" alignItems="center" className="formdata-text-v1">

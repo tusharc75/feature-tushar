@@ -290,7 +290,6 @@ function CustomReactTable({
           ],
     [baseColumns]
   );
-  console.log(baseColumns);
 
   const filterTypes = React.useMemo(
     () => ({
