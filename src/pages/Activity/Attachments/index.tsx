@@ -422,8 +422,8 @@ export default function Attachment() {
               id: parent._id,
               fileUrl: parent.fileUrl,
               canEdit: parent.type === 'folder' ? true : parent?.canEdit,
-              createdBy: moment(parent.createdBy?.date).format('MMM Do, YYYY'),
-              updatedBy: moment(parent.updatedBy?.date).format('MMM Do, YYYY'),
+              createdBy: displayDate(parent.createdBy?.date),
+              updatedBy: displayDate(parent.updatedBy?.date),
               isChecked: false
             };
           });
