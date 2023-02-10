@@ -132,6 +132,8 @@ const AssignProductDialog = ({
           finalObject['isChecked'] = false;
           finalObject['id'] = u._id;
           finalObject['qty'] = 1;
+          finalObject['unitMain'] = u?.unit;
+          finalObject['pricingMethodMain'] = u?.pricingMethod;
           const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id);
           if (qtyAdded.length) {
             finalObject['qty'] = qtyAdded[0].qty;
