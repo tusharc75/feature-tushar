@@ -625,12 +625,28 @@ const routes = {
     path: '/repair-order/detail'
   },
   productionOrder: {
-    title: storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title ? storedRoutes.productionOrder?.title : RESOURCE_LABEL.productionOrder,
+    title:
+      storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title
+        ? storedRoutes.productionOrder?.title
+        : RESOURCE_LABEL.productionOrder,
     path: '/production-order'
   },
   productionOrderDetail: {
-    title: storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title ? storedRoutes.productionOrder?.title : RESOURCE_LABEL.productionOrder,
+    title:
+      storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title
+        ? storedRoutes.productionOrder?.title
+        : RESOURCE_LABEL.productionOrder,
     path: '/production-order/detail'
+  },
+  serviceOrder: {
+    title:
+      storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
+    path: '/service-order'
+  },
+  serviceOrderDetail: {
+    title:
+      storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
+    path: '/service-order/detail'
   },
   workOrder: {
     title: storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title ? storedRoutes.workOrder?.title : RESOURCE_LABEL.workOrder,
@@ -728,7 +744,84 @@ const routes = {
   demandOrderDetail: {
     title: storedRoutes && storedRoutes.demandOrder && storedRoutes.demandOrder.title ? storedRoutes.demandOrder?.title : RESOURCE_LABEL.demandOrder,
     path: '/demand-order/detail'
-  }
+  },
+  employeeMaster: {
+    title:
+      storedRoutes && storedRoutes.employeeMaster && storedRoutes.employeeMaster.title
+        ? storedRoutes.employeeMaster?.title
+        : RESOURCE_LABEL?.employeeMaster,
+    path: '/employee-master'
+  },
+  employeeMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.employeeMaster && storedRoutes.employeeMaster.title
+        ? storedRoutes.employeeMaster?.title
+        : RESOURCE_LABEL?.employeeMaster,
+    path: '/employee-master/detail'
+  },
+  competencyMaster: {
+    title:
+      storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title
+        ? storedRoutes.competencyMaster?.title
+        : RESOURCE_LABEL.competencyMaster,
+    path: '/competency-master'
+  },
+  competencyMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title
+        ? storedRoutes.competencyMaster?.title
+        : RESOURCE_LABEL.competencyMaster,
+    path: '/competency-master/detail'
+  },
+  technicianScheduler: {
+    title:
+      storedRoutes && storedRoutes.technicianScheduler && storedRoutes.technicianScheduler.title
+        ? storedRoutes.technicianScheduler?.title
+        : RESOURCE_LABEL.technicianScheduler,
+    path: '/technician-scheduler'
+  },
+  irtTicket: {
+    title:
+      storedRoutes && storedRoutes.irtTicket && storedRoutes.irtTicket.title
+        ? storedRoutes.irtTicket?.title
+        : RESOURCE_LABEL.irtTicket,
+    path: '/irt-ticket'
+  },
+  irtTicketDetail: {
+    title:
+      storedRoutes && storedRoutes.irtTicket && storedRoutes.irtTicket.title
+        ? storedRoutes.irtTicket?.title
+        : RESOURCE_LABEL.irtTicket,
+    path: '/irt-ticket/detail'
+  },
+  purchaseRequisition: {
+    title:
+      storedRoutes && storedRoutes.purchaseRequisition && storedRoutes.purchaseRequisition.title
+        ? storedRoutes.purchaseRequisition?.title
+        : RESOURCE_LABEL.purchaseRequisition,
+    path: '/purchase-requisition'
+  },
+  purchaseRequisitionDetail: {
+    title:
+      storedRoutes && storedRoutes.purchaseRequisition && storedRoutes.purchaseRequisition.title
+        ? storedRoutes.purchaseRequisition?.title
+        : RESOURCE_LABEL.purchaseRequisition,
+    path: '/purchase-requisition/detail'
+  },
+  schedule: {
+    title:
+      storedRoutes && storedRoutes.schedule && storedRoutes.schedule.title
+        ? storedRoutes.schedule?.title
+        : RESOURCE_LABEL.schedule,
+    path: '/schedule'
+  },
+  scheduleDetail: {
+    title:
+      storedRoutes && storedRoutes.schedule && storedRoutes.schedule.title
+        ? storedRoutes.schedule?.title
+        : RESOURCE_LABEL.schedule,
+    path: '/schedule/detail'
+  },
 };
 
 export default routes;

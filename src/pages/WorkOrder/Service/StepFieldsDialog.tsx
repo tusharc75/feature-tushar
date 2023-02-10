@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Dialog, Box, Grid, Button, Typography, IconButton } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { FaDiceOne } from 'react-icons/fa';
@@ -13,11 +13,13 @@ import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import SettingsIcon from '@material-ui/icons/Settings';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, workOrderId, stepData, isStepValid, referencType, allowedToEdit, selectedService = null }) => {
+const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrderId, stepData, isStepValid, referencType, allowedToEdit, selectedService = null }) => {
 
   const [isEditing, setEditing] = React.useState(false);
   const [viewStep, setViewStep] = React.useState(false);
+  const toastConfig = useContext(CustomToastContext);
 
   const steps = selectedService?.steps || [];
 
@@ -77,18 +79,25 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
   };
 
   const handleUpdateStep = (values: any) => {
+    values.order = step?.order
     axiosInstance().put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/update-step`, values)
       .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         setViewStep(false);
         handleClose()
       })
-      .catch((err) => {
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   };
 
   return (
     <>
-      <div className={`${styles.sidebarContainer} ${isOpen && styles.active}`}>
+      <div className={`${styles.sidebarContainer} ${styles.active}`}>
         <div className={styles.headersection}>
           <Typography variant="h6" color="inherit" style={{ fontSize: '1rem' }}>
             {step?.stepName}
@@ -99,17 +108,17 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
             </IconButton>
           </div>
         </div>
-        {fieldData?.fields.length ? (
-          <Formik
-            initialValues={fieldData?.values}
-            validationSchema={yupSchema(fieldData?.fields)}
-            onSubmit={(values) => handleSubmit(values, step)}
-            enableReinitialize
-          >
-            {({ values, errors, setFieldValue, touched, submitForm }) => (
-              <>
-                <div className={styles.content}>
-                  {isStepValid && !isEditing ? (
+        <Formik
+          initialValues={fieldData?.values}
+          validationSchema={yupSchema(fieldData?.fields)}
+          onSubmit={(values) => handleSubmit(values, step)}
+          enableReinitialize
+        >
+          {({ values, errors, setFieldValue, touched, submitForm }) => (
+            <>
+              <div className={styles.content}>
+                {fieldData?.fields?.length ?
+                  isStepValid && !isEditing ? (
                     <Details
                       containerPadding={'0px'}
                       gridSize={12}
@@ -184,127 +193,74 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                           );
                         })}
                     </Form>
-                  )}
-                  <Box mt={2} className={styles.dates}>
-                    <RenderStepData />
-                  </Box>
-                </div>
-                <div
-                  className={styles.footerSection}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between'
-                  }}
-                >
-                  {referencType !== "workOrderTechnician" && allowedToEdit ?
-                    <IconButton
-                      aria-label="close"
-                      onClick={() => {
-                        setViewStep(true);
-                      }}
-                      size="small"
-                      color="inherit"
-                    >
-                      <SettingsIcon color="inherit" />
-                    </IconButton> : <div />}
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'right'
-                    }}
-                  >
-                    {isStepValid && !isEditing ? (
-                      <>
-                        <Button variant="outlined" size="small" onClick={handleClose} color="primary">
-                          Close
-                        </Button>
-                        <Box ml={1} />
-                        <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
-                          Edit
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button variant="outlined" size="small" onClick={handleClose} color="primary">
-                          Cancel
-                        </Button>
-                        <Box ml={1} />
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => {
-                            submitForm();
-                            setEditing(false);
-                          }}
-                          color="primary"
-                        >
-                          Save
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-          </Formik>
-        ) : (
-          <>
-            <div className={styles.content}>
-              <div className={styles.centerText}>
-                <Typography variant={'body1'} style={{ color: 'var(--new_theme_color)' }}>
-                  No Fields...
-                </Typography>
+                  ) :
+                  <div className={styles.centerText}>
+                    <Typography variant={'body1'} style={{ color: 'var(--new_theme_color)' }}>
+                      No Fields...
+                    </Typography>
+                  </div>}
+                <Box mt={2} className={styles.dates}>
+                  <RenderStepData />
+                </Box>
               </div>
-              <Box mt={2} className={`${styles.dates} ${styles.fixedBottom}`}>
-                <RenderStepData />
-              </Box>
-            </div>
-            <div
-              className={styles.footerSection}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between'
-              }}
-            >
-              {referencType !== "workOrderTechnician" && allowedToEdit ?
-                <IconButton
-                  aria-label="close"
-                  onClick={() => {
-                    setViewStep(true);
-                  }}
-                  size="small"
-                  color="inherit"
-                >
-                  <SettingsIcon color="inherit" />
-                </IconButton>
-                : <div />}
               <div
+                className={styles.footerSection}
                 style={{
                   display: 'flex',
-                  justifyContent: 'right'
+                  justifyContent: 'space-between'
                 }}
               >
-                {isStepValid && !isEditing ? (
-                  <>
-                    <Button variant="outlined" size="small" onClick={handleClose} color="primary">
-                      Close
-                    </Button>
-                    <Box ml={1} />
-                    <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
-                      Edit
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button variant="outlined" size="small" onClick={handleClose} color="primary">
-                      Cancel
-                    </Button>
-                  </>
-                )}
+                {allowedToEdit ?
+                  <IconButton
+                    aria-label="close"
+                    onClick={() => {
+                      setViewStep(true);
+                    }}
+                    size="small"
+                    color="inherit"
+                  >
+                    <SettingsIcon color="inherit" />
+                  </IconButton> : <div />}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'right'
+                  }}
+                >
+                  {isStepValid && !isEditing ? (
+                    <>
+                      <Button variant="outlined" size="small" onClick={handleClose} color="primary">
+                        Close
+                      </Button>
+                      <Box ml={1} />
+                      <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
+                        Edit
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="outlined" size="small" onClick={handleClose} color="primary">
+                        Cancel
+                      </Button>
+                      <Box ml={1} />
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => {
+                          submitForm();
+                          setEditing(false);
+                        }}
+                        color="primary"
+                      >
+                        Save
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </Formik>
       </div>
       {viewStep && (
         <StepDialog
@@ -316,7 +272,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
           }}
           stepId={''}
           stepData={step}
-          notEditable={step?.customStep === true ? false : true}
+          notEditable={referencType === "workOrderTechnician" ? true : step?.customStep === true ? false : true}
           steps={steps}
           reference={'workOrder'}
           workOrderId={workOrderId}

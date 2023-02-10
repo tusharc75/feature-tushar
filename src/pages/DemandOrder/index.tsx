@@ -2,15 +2,10 @@ import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { Chip, Grid, IconButton, Tooltip, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { FaRegistered, FaSuitcase } from 'react-icons/fa';
-import { MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, FaWarehouse, SiStatuspage, BsListCheck } from 'react-icons/all';
+import { BsListCheck } from 'react-icons/all';
 import {
   isObjectEmpty,
-  customerAccount,
-  supplierAccount,
   gridLoadingTimeout,
-  salesOrder,
-  sidebarResource,
   prepareDataForGrid,
   getLocalStorageArrayData,
   removeLocalStorage,
@@ -35,10 +30,22 @@ import ManageSalesOrderDialog from './ManageDemandOrderDialog';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
 
-let salesOrderTimeout;
+let searchTimeout;
+
+const DemandOrderType = [
+    {
+        key: 'All Demand Order',
+        value: 1
+    },
+    {
+        key: 'My Demand Order',
+        value: 2
+    }
+];
 
 const DemandOrder = () => {
   const renderedFrom = camelCase(routes?.demandOrder.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -57,11 +64,6 @@ const DemandOrder = () => {
     show: false,
     demandOrderNumber: ''
   });
-  const [accountDetails, setAccountDetails] = useState({
-    accountId: history.location?.state?.accountId,
-    accountName: history.location?.state?.accountName,
-    resource: history.location?.state?.resource
-  });
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -69,7 +71,6 @@ const DemandOrder = () => {
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState({});
   const [columns, setColumns] = useState(null);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   useEffect(() => {
     fetchGridColumns();
@@ -84,27 +85,11 @@ const DemandOrder = () => {
     data.forEach((o) => {
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.demandOrderDetail.path);
       if (currentColumn !== null) {
-        if (currentColumn.columnData.field === 'demandOrderNumber') {
-          currentColumn.columnData.cellRenderer = 'demandOrderRenderer';
-        }
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
           rendererNames.push(currentColumn?.rendererName);
         }
       }
-      // if (o?.fieldData?.fieldName === 'productName') {
-      //   columns = [
-      //     ...columns,
-      //     {
-      //       pivotIndex: 0,
-      //       field: o?.fieldData?.fieldName,
-      //       headerName: o?.fieldData?.fieldLabel,
-      //       show: true,
-      //       disabled: true,
-      //       cellRenderer: 'productNameRenderer'
-      //     }
-      //   ];
-      // }
       return o?.fieldData;
     });
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
@@ -119,8 +104,6 @@ const DemandOrder = () => {
       columns.push(checkStaticField(routes.projectSales.title, field));
     });
     setColumns([...columns]);
-    console.log(columns);
-
     if (JSON.parse(sessionStorage.getItem('filters')) !== null) {
       let savedFilter = JSON.parse(sessionStorage.getItem('filters'));
       dispatch({ type: 'filter', filters: savedFilter });
@@ -129,25 +112,23 @@ const DemandOrder = () => {
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (salesOrderTimeout) {
-      clearTimeout(salesOrderTimeout);
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
-
-    salesOrderTimeout = setTimeout(() => {
-      fetchSalesOrder();
+    searchTimeout = setTimeout(() => {
+      fetchData();
     }, millisec);
     // eslint-disable-next-line
   }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchSalesOrder();
+      fetchData();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const handleSingleDeleteSalesOrder = async () => {
     dispatch({ type: 'loading', loading: true });
-
     axiosInstance()
       .put(`${demandOrder.api}/remove`, {
         ids: [singleSalesOrderDelete.id]
@@ -158,7 +139,7 @@ const DemandOrder = () => {
           type: 'success',
           message: data.message
         });
-        fetchSalesOrder();
+        fetchData();
         dispatch({ type: 'loading', loading: false });
         setSingleSalesOrderDelete({ id: null, show: false, demandOrderNumber: '' });
       })
@@ -176,7 +157,7 @@ const DemandOrder = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions?.salesOrder?.isCreate ? (
+      {permissions?.demandOrder?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
@@ -195,7 +176,6 @@ const DemandOrder = () => {
           </IconButton>
         </Tooltip>
       )}
-
       <GridDeleteIcon
         hasDeletePermission={permissions?.demandOrder?.isDelete}
         ownerId={user?.user?._id}
@@ -254,27 +234,8 @@ const DemandOrder = () => {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
-    if (accountDetails.accountId) {
-      if (accountDetails.resource === customerAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('customerAccount'),
-            term: accountDetails.accountId
-          }
-        ])}`;
-      } else if (accountDetails.resource === supplierAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('supplierAccountName'),
-            term: { $in: [accountDetails.accountId] }
-          }
-        ])}`;
-      }
-    }
-
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
-
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
@@ -283,19 +244,16 @@ const DemandOrder = () => {
       });
       deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
     }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
-
     return deepFilter;
   };
 
-  const fetchSalesOrder = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
@@ -303,21 +261,19 @@ const DemandOrder = () => {
       gridApi.setRowData([]);
     }
 
-    axiosInstance()
-      .get(`${demandOrder.api}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
-          finalObject['isChecked'] = false;
-          finalObject['allowedToEdit'] = permissions?.demandOrder?.isUpdate;
-          finalObject['canDelete'] = permissions?.demandOrder?.isDelete;
-          return finalObject;
-        });
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
+    axiosInstance().get(`${demandOrder.api}${queryString}`).then(({ data: { data, count } }) => {
+      let rows = data.map((u) => {
+        let finalObject = prepareDataForGrid(u, user);
+        finalObject['isChecked'] = false;
+        finalObject['allowedToEdit'] = permissions?.demandOrder?.isUpdate;
+        finalObject['canDelete'] = permissions?.demandOrder?.isDelete;
+        return finalObject;
+      });
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    })
       .catch((error) => {
         dispatch({ type: 'loading', loading: false });
         toastConfig.setToastConfig(error);
@@ -330,6 +286,7 @@ const DemandOrder = () => {
 
   const handleSalesOrderTypeSel = (filterValues) => {
     setSelectedType(filterValues);
+    history.push(`?type=${filterValues}`)
   };
 
   const handleTransferEntityDialog = () => {
@@ -378,7 +335,7 @@ const DemandOrder = () => {
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
-          fetchSalesOrder();
+          fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -402,7 +359,7 @@ const DemandOrder = () => {
                   permissions={permissions?.demandOrder}
                   module="demandOrder"
                   api={demandOrder.api}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
                   recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -413,7 +370,7 @@ const DemandOrder = () => {
                   }
                   onExportToExcelSuccess={() => {
                     if (gridApi) gridApi.deselectAll();
-                    else fetchSalesOrder();
+                    else fetchData();
                   }}
                   additionalParams={getQueryString(true)}
                 />
@@ -426,8 +383,10 @@ const DemandOrder = () => {
         <div className="header-panel">
           {columns && (
             <SalesOrderHeader
+              selectedType={selectedType}
               selectedRecords={selectedRecords}
               onTypeChange={handleSalesOrderTypeSel}
+              options={DemandOrderType}
               onSearch={handleSearch}
               searchVal={search}
               SalesOrderPermissions={permissions?.demandOrder}
@@ -470,39 +429,7 @@ const DemandOrder = () => {
               rowCount={rowCount}
               page={page}
               loading={loading}
-              additionalDetails={[
-                {
-                  icon: <FaSuitcase size={18} />,
-                  field: 'customerAccount'
-                }
-              ]}
-              chips={[
-                {
-                  icon: <MdContactPhone />,
-                  label: 'Customer Contact: ',
-                  field: 'customerContact'
-                },
-                {
-                  icon: <RiContactsBookUploadFill />,
-                  label: 'Billing Address: ',
-                  field: 'billingAddress'
-                },
-                {
-                  icon: <RiShip2Fill />,
-                  label: 'Shipping Address: ',
-                  field: 'shippingAddress'
-                },
-                {
-                  icon: <FaWarehouse />,
-                  label: 'Plants: ',
-                  field: 'plants'
-                },
-                {
-                  icon: <SiStatuspage />,
-                  label: 'Status: ',
-                  field: 'status:'
-                }
-              ]}
+              chips={[]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
@@ -525,7 +452,7 @@ const DemandOrder = () => {
               actionWidth={100}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={fetchSalesOrder}
+              refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
             />
           )
@@ -562,11 +489,7 @@ const DemandOrder = () => {
             }
             onOk={handleSingleDeleteSalesOrder}
           />
-        ) : (
-          <Box p={2} height={500} bgcolor="white">
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
+        ) : null}
       </CustomContainer>
       {showManageSalesOrderDialog.open && (
         <ManageSalesOrderDialog
@@ -575,7 +498,7 @@ const DemandOrder = () => {
           salesOrderId={showManageSalesOrderDialog.idToClone}
           onClose={() => setShowManageSalesOrderDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
-            fetchSalesOrder();
+            fetchData();
             setShowManageSalesOrderDialog({ open: false, isClone: false, idToClone: null });
           }}
         />

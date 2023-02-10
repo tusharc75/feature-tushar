@@ -17,10 +17,10 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
-import { BiFoodMenu } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import Steps from '../RentalManagement/Steps';
 import Productpackage from './Productpackage';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { GrStatusInfo } from 'react-icons/all';
 import { camelCase } from 'lodash';
@@ -38,8 +38,6 @@ const DemandOrderDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
 
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,7 +50,6 @@ const DemandOrderDetails = () => {
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -69,14 +66,6 @@ const DemandOrderDetails = () => {
       'aria-controls': `main-tabpanel-${index}`
     };
   }
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
 
   const handleStatusChange = (o) => {
     if (o.optionValue && salesOrderData?.status !== o.optionValue) {
@@ -198,165 +187,103 @@ const DemandOrderDetails = () => {
   };
 
   return (
-    <>
-      <Fragment>
-        <Grid container className="headerbox">
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
           <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-
-        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-          <div>
-            <div>
-              <Paper>
-                {!salesOrderData ? (
-                  <div>
-                    <Skeleton variant="text" width="150px" height="40px" />
-                    <Box display="flex">
-                      <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                      <Box marginX={1} />
-                      <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    </Box>
-                  </div>
-                ) : (
-                  <DetailsPageHeader heading={headingLabel} mainPoints={[]} showHeading={true}>
-                    {permissions?.demandOrder?.isUpdate && allowedToEdit && (
-                      <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                        Edit
-                      </Button>
-                    )}
-
-                    {permissions?.demandOrder?.isDelete && ['Invoiced', 'Closed'].indexOf(salesOrderData?.status) === -1 && (
-                      <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                    )}
-
-                    {permissions?.demandOrder?.isUpdate && ['Ready to Invoice', 'Invoiced'].includes(salesOrderData?.status) && (
-                      <>
-                        <Button
-                          variant="outlined"
-                          color="default"
-                          size="small"
-                          onClick={openActions}
-                          aria-controls="action-menu"
-                          endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                        >
-                          {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
-                        </Button>
-                        <Menu
-                          anchorEl={anchorEl}
-                          keepMounted
-                          getContentAnchorEl={null}
-                          anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left'
-                          }}
-                          id="action-menu"
-                          open={Boolean(anchorEl)}
-                          onClose={closeActions}
-                        >
-                          {statusOptions?.map((o, index) => {
-                            return (
-                              <MenuItem
-                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === salesOrderData?.status)}
-                                onClick={() => {
-                                  closeActions();
-                                  handleStatusChange(o);
-                                }}
-                                value={o}
-                              >
-                                {o?.optionLabel}
-                              </MenuItem>
-                            );
-                          })}
-                        </Menu>
-                      </>
-                    )}
-                  </DetailsPageHeader>
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {salesOrderData ? (
+              <>
+                {permissions?.demandOrder?.isUpdate && allowedToEdit && (
+                  <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                    Edit
+                  </Button>
                 )}
 
-                <Tabs
-                  className="quote-tab"
-                  value={tabValue}
-                  onChange={handleMainTabChange}
-                  textColor="primary"
-                  TabIndicatorProps={{
-                    style: {
-                      display: 'none'
-                    }
-                  }}
-                >
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 1 ? 'white' : '',
-                      color: tabValue === 1 ? '#163340' : '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                      </div>
-                    }
-                    {...a11yProps(0)}
-                  />
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 2 ? 'white' : '',
-                      color: tabValue === 2 ? 'blue' : '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                      </div>
-                    }
-                    {...a11yProps(1)}
-                  />
-                  <div className={'uio'}> </div>
-                </Tabs>
-
-                <TabPanel value={tabValue} index={0}>
-                  <Box>
-                    {loading || !salesOrderFields.length ? (
-                      <Grid container spacing={2} style={{ padding: '8px' }}>
-                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                      </Grid>
-                    ) : (
-                      <>
-                        <DetailsPage data={salesOrderData} fields={salesOrderFields} />
-                      </>
-                    )}
-                  </Box>
-                </TabPanel>
-
-                <TabPanel value={tabValue} index={1}>
-                  <Paper>
-                    <Steps
-                      isNextStep={false}
-                      nextStep={nextStep}
-                      steps={demandOrderSteps}
-                      currentStep={currentStep}
-                      setCurrentStep={setCurrentStep}
-                      isStepEnded={['Closed'].includes(salesOrderData?.status)}
-                    />
-                    <ContentFullScreen title={demandOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                      {currentStep === 0 && salesOrderData && (
-                        <Productpackage
-                          salesOrderData={salesOrderData}
-                          setNextStep={setNextStep}
-                          currencySymbol={currencySymbol}
-                          renderedFrom={`${renderedFrom}_grid-1`}
-                          showActivity={showActivity}
-                          stepFullScreen={stepFullScreen}
-                        />
-                      )}
-                    </ContentFullScreen>
-                  </Paper>
-                </TabPanel>
-              </Paper>
-            </div>
-            <Box my={1} />
-          </div>
-        </div>
-      </Fragment>
+                {permissions?.demandOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            style={{
+              background: tabValue === 1 ? 'white' : '',
+              color: tabValue === 1 ? '#163340' : '#163340'
+            }}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            {...a11yProps(0)}
+          />
+          <Tab
+            className={'tabLayout'}
+            style={{
+              background: tabValue === 2 ? 'white' : '',
+              color: tabValue === 2 ? 'blue' : '#163340'
+            }}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
+            }
+            {...a11yProps(1)}
+          />
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          <Box>
+            {loading || !salesOrderFields.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <>
+                <DetailsPage data={salesOrderData} fields={salesOrderFields} />
+              </>
+            )}
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Steps
+            isNextStep={false}
+            nextStep={nextStep}
+            steps={demandOrderSteps}
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
+            isStepEnded={['Closed'].includes(salesOrderData?.status)}
+          />
+          <ContentFullScreen title={demandOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            {currentStep === 0 && salesOrderData && (
+              <Productpackage
+                salesOrderData={salesOrderData}
+                setNextStep={setNextStep}
+                currencySymbol={currencySymbol}
+                renderedFrom={`${renderedFrom}_grid-1`}
+                stepFullScreen={stepFullScreen}
+              />
+            )}
+          </ContentFullScreen>
+        </TabPanel>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -364,7 +291,9 @@ const DemandOrderDetails = () => {
           onClose={() => {
             setShowConfirmBox(false);
           }}
-          onOk={handleDelete}
+          onOk={() => {
+            handleDelete();
+          }}
         />
       )}
       {openUpdateDialog && (
@@ -382,7 +311,7 @@ const DemandOrderDetails = () => {
           }}
         />
       )}
-    </>
+    </Box>
   );
 };
 

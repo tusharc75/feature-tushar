@@ -7,14 +7,12 @@ import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import styles from '../Leads/Header.module.scss';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import AddIcon from '@material-ui/icons/Add';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomContainer from '../../components/CustomContainer';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -54,9 +52,11 @@ const QuotePdfTemplate: FC = () => {
 
   const columns = [
     { field: 'name', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
     { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }
   ];
+
   if (columnState) {
     columns.forEach((item) => {
       columnState.forEach((d) => {
@@ -66,7 +66,6 @@ const QuotePdfTemplate: FC = () => {
       });
     });
   }
-
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -284,7 +283,8 @@ const QuotePdfTemplate: FC = () => {
       .get(`${quotePdfTemplateApi}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u);
+          let finalObject: any = prepareDataForGrid(u);
+          finalObject.type = routes[camelCase(u?.type)] ? routes[camelCase(u?.type)]?.title : u?.type
           finalObject['canDelete'] = permissions.quotePdfTemplate.isDelete && user?.user?._id === finalObject['owner'];
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions.quotePdfTemplate.isUpdate;
@@ -319,9 +319,6 @@ const QuotePdfTemplate: FC = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <GiAbstract055 /> <span className="listingHeader">{routes.quotePdfTemplate.title}</span>
-              </div>
               {isMobile && (
                 <>
                   <Grid style={{ display: 'inline-flex' }}>

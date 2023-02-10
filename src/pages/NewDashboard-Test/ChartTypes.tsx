@@ -179,8 +179,15 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
           )}
         </Grid>
       ) : (
-        <Box component={Paper} p={'8px'} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
-          <Box>
+        <Box
+          m={'8px'}
+          height={'100%'}
+          display="flex"
+          flexDirection="column"
+          justifyContent="space-between"
+          sx={{ border: '1px solid #EFFBF9', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
+        >
+          <Box style={{ padding: '15px 10px' }}>
             <Box display="flex" justifyContent="space-between" alignItems="center">
               <Box display="flex">
                 {chart.hasFilters && (
@@ -287,9 +294,8 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   type={chart.chartType?.toLowerCase()}
                   chartData={chartData?.tableData}
                   isScreenSmall={isScreenSmall}
-                  isCurrency={chart.currency || false}
+                  isCurrency={chart?.currency || false}
                   currency={globalFilters.currency || currency}
-                  selectedDashboard={globalFilters?.dashboardType}
                 />
               ) : chart.graphType === 'Map' ? (
                 <MapView height={isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} />
@@ -310,8 +316,8 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                 type={chart.chartType}
                 chartData={chartData?.tableData}
                 isScreenSmall={isScreenSmall}
+                isCurrency={chart?.currency || false}
                 currency={globalFilters.currency || currency}
-                selectedDashboard={globalFilters?.dashboardType}
               />
             )}
           </Box>

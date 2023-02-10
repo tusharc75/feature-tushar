@@ -172,7 +172,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const handleToggleAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newColumns = [...sortedColumns];
     newColumns?.forEach((e: any) => {
-      if (!e.disabled) {
+      if (!e.disabled && !e.primaryField) {
         e.isVisible = event.target.checked;
       }
     });
@@ -452,29 +452,20 @@ const RenderListItem = (props: ItemProps) => {
   const opacity = isDragging ? 0 : 1;
   drag(drop(ref));
 
-  return column.sticky ? <div className="d-none">
-    {/* <ListItem divider disableGutters className="not-allowed bg-grey">
-      <ListItemIcon className="pl-2">
-        <DragHandle />
-      </ListItemIcon>
-      <ListItemText id={column.id} primary={column.id === "expander" ? "> (Expander)" : (column.id === "selection" ? <Checkbox className="pl-0" size="small" disabled={true} indeterminate={true} /> : (column.id === "action" ? "Actions" : column.Header))} />
-      <ListItemSecondaryAction className="not-allowed">
-
-      </ListItemSecondaryAction>
-    </ListItem> */}
-  </div> : <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
-    <ListItem divider disableGutters disabled={column.disabled}>
-      <ListItemIcon className={`${classes.cursor} pl-2`}>
-        <DragHandle />
-      </ListItemIcon>
-      <ListItemText id={column.id} primary={column.Header} />
-      <ListItemSecondaryAction>
-        <Switch size="small" disabled={column.disabled} checked={column.isVisible} onChange={(e) => {
-          handleToggle(column, e)
-        }} />
-      </ListItemSecondaryAction>
-    </ListItem>
-  </div>
+  return column.sticky ? <div className="d-none" /> :
+    <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
+      <ListItem divider disableGutters disabled={column.disabled || column?.primaryField}>
+        <ListItemIcon className={`${classes.cursor} pl-2`}>
+          <DragHandle />
+        </ListItemIcon>
+        <ListItemText id={column.id} primary={column.Header} />
+        <ListItemSecondaryAction>
+          <Switch size="small" disabled={column.disabled || column?.primaryField} checked={column.isVisible} onChange={(e) => {
+            handleToggle(column, e)
+          }} />
+        </ListItemSecondaryAction>
+      </ListItem>
+    </div>
 };
 
 export default ArrangeViewDialog;

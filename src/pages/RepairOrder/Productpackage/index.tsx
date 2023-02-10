@@ -21,6 +21,7 @@ import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAss
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { ExpandMore } from '@material-ui/icons';
 import { sortBy } from 'lodash';
+import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -28,9 +29,6 @@ const Productpackage = ({
   fetchRepairOrderData,
   repairOrderData,
   setNextStep,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity,
   renderedFrom,
   stepFullScreen,
   allowedToEdit,
@@ -101,25 +99,27 @@ const Productpackage = ({
             }
             <Chip
               className="ml-1"
-              label={`${row.original.type === 'service'
+              label={`${
+                row.original.type === 'service'
                   ? 'Service'
                   : row.original.type === 'product'
-                    ? 'Product'
-                    : row.original.type === 'serializedAsset'
-                      ? 'Asset'
-                      : 'Package'
-                }`}
+                  ? 'Product'
+                  : row.original.type === 'serializedAsset'
+                  ? 'Asset'
+                  : 'Package'
+              }`}
               size="small"
               color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'service'
-                    ? routes.serviceMasterDetail.path
-                    : row.original.type === 'product'
+                  `${
+                    row.original.type === 'service'
+                      ? routes.serviceMasterDetail.path
+                      : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : routes.packagesDetail.path
+                      ? routes.serializedAssetDetail.path
+                      : routes.packagesDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -216,38 +216,40 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service'
+      parent.detail = `${
+        parent.type === 'service'
           ? parent.serviceDetail?.serviceName
           : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'serializedAsset'
-              ? parent.serializedAssetDetail.assetNumber
-              : parent.packageDetail?.packageName
-        }`;
+          ? parent.productDetail?.productName
+          : parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail.assetNumber
+          : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'serializedAsset'
-                ? parent?.serializedAssetDetail?.product?.productDesc || ''
-                : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.status = `${parent.type === 'service'
+      parent.status = `${
+        parent.type === 'service'
           ? parent.serviceDetail?.status
           : parent.type === 'product'
-            ? parent?.productDetail?.status
-            : parent.type === 'serializedAsset'
-              ? parent?.serializedAssetDetail?.status
-              : parent.packageDetail?.status
-        }`;
+          ? parent?.productDetail?.status
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAssetDetail?.status
+          : parent.packageDetail?.status
+      }`;
     });
 
     if (rows.length !== 0) {
@@ -271,22 +273,23 @@ const Productpackage = ({
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = `${_subRow.type === 'service'
+      _subRow.detail = `${
+        _subRow.type === 'service'
           ? _subRow.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow.serializedAssetDetail.assetNumber
-              : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail.assetNumber
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -294,14 +297,15 @@ const Productpackage = ({
       _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
-      parent.status = `${parent.type === 'service'
+      parent.status = `${
+        parent.type === 'service'
           ? parent.serviceDetail?.status
           : parent.type === 'product'
-            ? parent.productDetail?.status
-            : parent.type === 'serializedAsset'
-              ? parent.serializedAssetDetail.status
-              : parent.packageDetail?.status
-        }`;
+          ? parent.productDetail?.status
+          : parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -310,15 +314,6 @@ const Productpackage = ({
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return sortBy(subRows, ['type']);
-  };
-
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
   };
 
   const handleAdd = async (rows) => {
@@ -450,7 +445,7 @@ const Productpackage = ({
                 {permissions?.serializedAsset?.isRead && allowedToEdit && (
                   <>
                     <Button
-                      color="primary"
+                      className="btn-outline-v1 light"
                       size="small"
                       variant={isMobile && !isTablet ? 'outlined' : 'contained'}
                       style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
@@ -462,7 +457,7 @@ const Productpackage = ({
                     </Button>
                     <Box ml={1} />
                     <Button
-                      color="primary"
+                      className="btn-outline-v1 light"
                       size="small"
                       variant={isMobile && !isTablet ? 'outlined' : 'contained'}
                       style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
@@ -516,13 +511,9 @@ const Productpackage = ({
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={stepFullScreen ? '100%' : isTabletScreen ? '100%' : isSmallScreen ? '100%' : showActivity ? '100%' : 'calc(100vw - 103px)'}
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-            >
+            <Box zIndex={5} width={'100%'}>
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
@@ -530,6 +521,7 @@ const Productpackage = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={!allowedToEdit}
+                hideAction={!allowedToEdit}
                 renderedFrom="repair_order_product_package"
                 isClientSideGrid={true}
               />

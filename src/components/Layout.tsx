@@ -15,20 +15,22 @@ const useStyles = makeStyles(() => ({
     flexGrow: 1,
     width: '100%',
     overflow: 'hidden',
-    minHeight: 'calc(100vh - 55px)',
+    minHeight: 'calc(100vh - 64px)',
     ['@media (max-width:768px)']: {
       minHeight: 'calc(100vh - 108px)'
-    },
-    backgroundColor: 'white'
+    }
   },
   layout: {
     flexGrow: 1,
-    width: '100%',
-    overflowX: 'hidden',
-    overflowY: 'auto',
-    height: '100%',
+    width: 'calc(100% - 6%)',
+    marginInline: 'auto',
 
-    zIndex: 1
+    height: '100%',
+    zIndex: 1,
+    ['@media (max-width:900px)']: {
+      paddingInline: '13px',
+      width: '100%'
+    }
   }
 }));
 
@@ -214,13 +216,14 @@ const Layout = ({ children, width }) => {
       <Sidebar toggleDrawer={toggleDrawer} setToggleDrawer={setToggleDrawer} />
       <Toolbar />
       <Box display="flex">
-        {!mobileWidths.includes(width) && <Toolbar style={{ width: '48px' }} />}
+        {!mobileWidths.includes(width) && <Toolbar style={{ width: '66px' }} />}
         <motion.div
           animate={{ opacity: 1 }}
           initial={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
           exit={{ opacity: 0 }}
           className={classes.content}
+          style={{ backgroundColor: pathname === '/' ? '#ffffff' : '#f8fffe' }}
           onClick={handleToggleState}
         >
           <div className={classes.layout} ref={bodyRef} onScroll={onScroll}>

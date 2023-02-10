@@ -51,9 +51,6 @@ const Quotation = ({
   rentalManagementData,
   setNextStep,
   currencySymbol,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity,
   stepFullScreen,
   allowedToEdit,
   allowedToDelete,
@@ -305,7 +302,7 @@ const Quotation = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDesc || ''
+          ? _subRow?.productDetail?.productDescription || ''
           : _subRow.type === 'package'
           ? _subRow?.packageDetail?.packageDescription || ''
           : '';
@@ -365,7 +362,7 @@ const Quotation = ({
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDesc || ''
+          ? parent?.productDetail?.productDescription || ''
           : parent.type === 'package'
           ? parent?.packageDetail?.packageDescription || ''
           : parent?.description;
@@ -801,17 +798,7 @@ const Quotation = ({
           <Box
             p="6px"
             zIndex={5}
-            width={
-              stepFullScreen
-                ? '100%'
-                : isTabletScreen
-                ? 'calc(100vw -30px)'
-                : isSmallScreen
-                ? 'calc(100vw -30px)'
-                : showActivity
-                ? '100%'
-                : 'calc(100vw - 100px)'
-            }
+            width={'100%'}
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
           >
             <CustomReactTable
@@ -823,6 +810,7 @@ const Quotation = ({
               childrenProperty="subRows"
               uniqueKey="_id"
               hideSelection={true}
+              hideAction={true}
               renderedFrom="quotation_product_package_quotation"
               isClientSideGrid={true}
             />

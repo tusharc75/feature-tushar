@@ -60,15 +60,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, updateJobStatus }) => {
+const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol, renderedFrom, stepFullScreen, updateJobStatus }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
     state: { user, permissions }
   }: any = useData();
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [isUpdating, setUpdating] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -681,16 +679,9 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
       </Box>
       {columns && rowsData ? (
         <>
-          <Box
-            p="6px"
-            zIndex={5}
-            width={
-              stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 100px)'
-            }
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-          >
+          <Box p="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}

@@ -228,7 +228,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDesc || ''
+          ? parent?.productDetail?.productDescription || ''
           : parent.type === 'package'
           ? parent?.packageDetail?.packageDescription || ''
           : '';
@@ -266,7 +266,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDesc || ''
+          ? _subRow?.productDetail?.productDescription || ''
           : _subRow.type === 'package'
           ? _subRow?.packageDetail?.packageDescription || ''
           : '';
@@ -404,6 +404,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                     setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
                     onSelect={() => {}}
                     hideSelection={true}
+                    hideAction={true}
                     childrenProperty="subRows"
                     uniqueKey="_id"
                     renderedFrom="quotation_product_package"

@@ -5,14 +5,9 @@ import {
   Box,
   Button,
   IconButton,
-  CircularProgress,
   Menu,
   MenuItem,
-  Chip,
   MenuList,
-  ListItemIcon,
-  ListItemText,
-  Tooltip,
   Popover
 } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -26,31 +21,23 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import moment from 'moment';
-import { rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency } from '../../../constants/helpers';
+import { rentalManagement } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import RentalJobQtyDialog from './RentalJobQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
-import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
-import { calculatePrice, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import { startCase } from 'lodash';
-import InfoIcon from '@material-ui/icons/InfoOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { genrateCustomTableColumns, flattenArray } from 'src/constants/columns';
 
 const Productpackage = ({
   rentalManagementData,
   setNextStep,
-  currencySymbol,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity,
   renderedFrom,
   stepFullScreen,
   allowedToEdit
@@ -102,7 +89,11 @@ const Productpackage = ({
       });
     }
     setAllFields(JSON.parse(JSON.stringify(allFields)));
-    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, currencySymbol, renderedFrom);
+    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
+    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay'
+    }
     let column: any = [
       {
         accessor: 'srno',
@@ -129,12 +120,12 @@ const Productpackage = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -210,93 +201,6 @@ const Productpackage = ({
     ];
     const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
-    // data.forEach((element) => {
-    //   if (element.fieldName === 'price' && element.required) {
-    //     setIsRateRequired(true);
-    //   }
-    //   if (element.type === 'date') {
-    //     column.push({
-    //       accessor: element.fieldName,
-    //       Header: element.fieldLabel,
-    //       disableFilters: true,
-    //       Cell: ({ row }) => {
-    //         return row.original[element.fieldName] && isNaN(row.original[element.fieldName]) ? (
-    //           <p>{moment(row.original[element.fieldName]?.slice(0, 10)).format(dateFormat)}</p>
-    //         ) : (
-    //           <NoDataCell />
-    //         );
-    //       }
-    //     });
-    //   } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-    //     if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-    //       element.displayUnits.forEach((_unit) => {
-    //         let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-    //         let fieldLabel = element.fieldLabel + ' ' + _unit;
-    //         column.push({
-    //           accessor: fieldName,
-    //           Header: fieldLabel,
-    //           Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-    //         });
-    //       });
-    //     } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-    //       element.displayUnits.forEach((_unit) => {
-    //         element.displayCurrency.forEach((_currency) => {
-    //           let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-    //           let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-    //           column.push({
-    //             accessor: fieldName,
-    //             Header: fieldLabel,
-    //             Cell: ({ row }) =>
-    //               row.original[fieldName] ? (
-    //                 <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-    //               ) : (
-    //                 <NoDataCell />
-    //               )
-    //           });
-    //         });
-    //       });
-    //     } else if (element.type === 'currencyAmount') {
-    //       element.displayCurrency.forEach((_currency) => {
-    //         let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-    //         let fieldLabel = element.fieldLabel + ' ' + _currency;
-    //         column.push({
-    //           accessor: fieldName,
-    //           Header: fieldLabel,
-    //           Cell: ({ row }) =>
-    //             row.original[fieldName] ? (
-    //               <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-    //             ) : (
-    //               <NoDataCell />
-    //             ),
-    //           Footer: (info) => {
-    //             const total = info?.rows
-    //               ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-    //               .reduce((sum, row) => row.values[fieldName] + sum, 0);
-    //             return (
-    //               <>
-    //                 {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
-    //               </>
-    //             );
-    //           }
-    //         });
-    //       });
-    //     }
-    //   } else {
-    //     if (element.fieldName === 'qty') {
-    //       element.fieldName = 'qtyDisplay';
-    //     }
-    //     if (element.fieldName === 'pricingCondition') {
-    //       element.fieldName = 'pricingConditionDisplay';
-    //     }
-    //     column.push({
-    //       accessor: element.fieldName,
-    //       Header: element.fieldLabel,
-    //       Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-    //     });
-    //   }
-    // });
-    // eslint-disable-next-line no-lone-blocks
-
     column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
@@ -338,20 +242,6 @@ const Productpackage = ({
         );
       }
     });
-    // column.forEach((element) => {
-    //   const priceField = allFields.find((f) => f.fieldName === 'price')
-    //   if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
-    //     element.editable = allowedToEdit && priceField?.isColumnEditable ;
-    //   }
-    //   if (element.accessor === 'qtyDisplay') {
-    //     element['Footer'] = (info) => {
-    //       const qtyTotal = info.rows
-    //         .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-    //         .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-    //       return <>{qtyTotal}</>;
-    //     };
-    //   }
-    // });
     setColumns(column);
   };
 
@@ -379,27 +269,24 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'service'
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.packageDetail?.packageName
-      }`;
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDesc || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
-      parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
-      parent.pricingCondition = parent.pricingCondition?.optionValue;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length
@@ -413,7 +300,6 @@ const Productpackage = ({
     } else {
       setNextStep(true);
     }
-
     setRowsData(rows);
     setSelectedProducts([]);
   };
@@ -422,27 +308,24 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'package'
+      _subRow.detail = `${_subRow.type === 'service'
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'package'
           ? _subRow.packageDetail?.packageName
           : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : ''
-      } `;
+            ? _subRow.productDetail?.productName
+            : ''
+        } `;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDesc || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
-      _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
-      _subRow.pricingCondition = _subRow.pricingCondition?.optionValue;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
@@ -457,15 +340,6 @@ const Productpackage = ({
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
-  };
-
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
   };
 
   const handleAdd = async (rows) => {
@@ -498,43 +372,6 @@ const Productpackage = ({
     } else {
       setPriceDataDialog({ open: true, material: material });
     }
-    // const priceData: any = await calculatePrice(
-    //   rentalManagementData,
-    //   material.filter((d) => d.listPrice === null)
-    // );
-    // material.forEach((element) => {
-    //   const rateResult = priceData?.filter(
-    //     (e) =>
-    //       e.materialId === element.materialId &&
-    //       e.materialType === element.type &&
-    //       e.unit === element.unit &&
-    //       e.pricingMethod === element.pricingMethod
-    //   );
-    //   if (element.listPrice) {
-    //     const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-    //     element[priceFieldName] = element.listPrice;
-    //     const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
-    //     Object.assign(element, calValues);
-    //   } else if (rateResult.length && rateResult[0].mrp) {
-    //     const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-    //     element[priceFieldName] = rateResult[0].mrp;
-    //     const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-    //     Object.assign(element, calValues);
-    //   }
-    // });
-
-    // axiosInstance()
-    //   .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material })
-    //   .then(() => {
-    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
-    //     fetchProductInventory();
-    //     setAddingProducts(false);
-    //   })
-    //   .catch((error) => {
-    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
-    //     toastConfig.setToastConfig(error);
-    //     setAddingProducts(false);
-    //   });
   };
 
   const AddMaterial = async (material, priceData) => {
@@ -676,7 +513,7 @@ const Productpackage = ({
   };
 
   const onConfirmSave = async (inputField, updatedData) => {
-    const rowData = material.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
     if (rowData.parentId && !showConfirmationDialog.open) {
       setShowConfirmationDialog({
         open: true,
@@ -688,6 +525,13 @@ const Productpackage = ({
     } else {
       if (inputField.hasOwnProperty('qtyDisplay')) {
         inputField['qty'] = inputField['qtyDisplay'];
+        if (rowData.hideSelection && inputField['qty'] < rowData?.assetQty) {
+          toastConfig.setToastConfig({
+            open: true, type: "error", message: "The quantity is less than what was assigned."
+          });
+          setShowConfirmationDialog({ open: false, data: {} });
+          return;
+        }
       }
       let rows: any = [{ ...rowData, ...updatedData }];
       rows = await calculateRowsField(material, inputField, allFields, updatedData);
@@ -705,11 +549,10 @@ const Productpackage = ({
               <Box display="flex">
                 {permissions?.product?.isRead && (
                   <Button
-                    color="primary"
+                    className="btn-outline-v1"
                     size="small"
                     disabled={isOffline}
-                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                    style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                    variant={'contained'}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
                     }}
@@ -720,10 +563,9 @@ const Productpackage = ({
                 <Box mx={isMobile ? 0.5 : 1} />
                 {permissions?.packages?.isRead && (
                   <Button
-                    color="primary"
+                    className="btn-outline-v1"
                     size="small"
-                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                    style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                    variant='contained'
                     disabled={isOffline}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
@@ -800,21 +642,7 @@ const Productpackage = ({
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
-                  ? 'calc(100vw -30px)'
-                  : isSmallScreen
-                  ? 'calc(100vw -30px)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 103px)'
-              }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-            >
+            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}  >
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
@@ -824,10 +652,10 @@ const Productpackage = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={isOffline || !allowedToEdit}
+                hideAction={isOffline || !allowedToEdit}
                 renderedFrom="rental_management_product_package"
                 isClientSideGrid={true}
                 onSaveEdit={onSaveInlineEdit}
-                material={material}
               />
             </Box>
           ) : (

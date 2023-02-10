@@ -11,7 +11,6 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import InputField from 'src/components/Helpers/InputField';
 import { CustomDialogTransition, isFieldNotTouched, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -142,7 +141,6 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
         if (reason !== 'backdropClick') {
           setShowConfirmDialog(true);
         }
-        onClose();
       }}
     >
       {initialData.fields.length ? (

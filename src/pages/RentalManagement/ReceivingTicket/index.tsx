@@ -94,6 +94,8 @@ const ReceivingTicket = ({
   const [showConformationConsume, setShowConformationConsume] = useState({ open: false, type: 'add' });
   const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
   const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
+  const [showConformationCancleTicket, setShowConformationCancleTicket] = useState(false);
+
 
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
@@ -296,7 +298,7 @@ const ReceivingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDesc || ''
+                ? element?.productDetail?.productDescription || ''
                 : element.type === 'package'
                   ? element?.packageDetail?.packageDescription || ''
                   : '';
@@ -343,7 +345,7 @@ const ReceivingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDesc || ''
+                ? element?.productDetail?.productDescription || ''
                 : element.type === 'package'
                   ? element?.packageDetail?.packageDescription || ''
                   : '';
@@ -959,6 +961,23 @@ const ReceivingTicket = ({
     }
   }
 
+  const handelCancleTickets = () => {
+    const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
+    if (receivingTicketIds.length) {
+      axiosInstance().put(`${deliveryTicket.api}/revert`, { ids: receivingTicketIds }).then(({ data: { data } }) => {
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Cancelled Successfully`
+        });
+      })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
   useEffect(() => {
     const product = selectedRecords?.filter((e) => e.type === 'Product');
     if (product.length) {
@@ -1336,14 +1355,24 @@ const ReceivingTicket = ({
             {selectedRecords.length &&
               selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length ===
               selectedRecords?.length ? (
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setShowConformationRevertTicket(true)
-                }}
-              >
-                Revert Receiving Ticket
-              </MenuItem>
+              <Fragment>
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    setShowConformationRevertTicket(true)
+                  }}
+                >
+                  Revert Line Items
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    setShowConformationCancleTicket(true)
+                  }}
+                >
+                  Cancel Receiving Ticket
+                </MenuItem>
+              </Fragment>
             ) : null}
 
             {selectedRecords?.filter(
@@ -1760,6 +1789,20 @@ const ReceivingTicket = ({
           onOk={() => {
             handelRevertTickets();
             setShowConformationRevertTicket(false);
+          }}
+          okBtnLoading={okBtnLoading}
+        />
+      )}
+      {showConformationCancleTicket && (
+        <ConfirmationDialog
+          open={showConformationCancleTicket}
+          message={`Are you sure you want to cancel receiving ticket?`}
+          onClose={() => {
+            setShowConformationCancleTicket(false);
+          }}
+          onOk={() => {
+            handelCancleTickets();
+            setShowConformationCancleTicket(false);
           }}
           okBtnLoading={okBtnLoading}
         />

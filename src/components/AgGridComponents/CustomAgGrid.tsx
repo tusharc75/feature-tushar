@@ -12,6 +12,8 @@ import { checkStaticField, staticColumns } from '../../constants/columns';
 import { GridApi } from 'ag-grid-community';
 import { uniqBy } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
+import GridFilters from './GridFilters';
+import ArrangeView from './ArrangeView';
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -168,10 +170,17 @@ export default function CustomAgGrid({
   selectedReportView = null,
   setSelectedReportView = null,
   isMultipleSelection = true,
-  reportSave = false
+  reportSave = false,
+  showFilters = false,
+  resource = null
 }) {
   const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const handleFilterOpen = () => {
+    setIsFilterOpen(true);
+  };
 
   const {
     state: { searchQuery }
@@ -186,7 +195,7 @@ export default function CustomAgGrid({
           dispatch({ type: 'search', search: query });
         }
       }, 300);
-    } 
+    }
     // else {
     //   timer = setTimeout(() => {
     //     dispatch({ type: 'search', search: '' });
@@ -337,11 +346,11 @@ export default function CustomAgGrid({
       return (
         <AgGridColumn
           key={generateUniqueId()}
-          width={actionWidth}
+          width={130}
           field="actions"
           headerName={actionLabel ? actionLabel : 'Actions'}
-          pinned={isMobile || isTablet ? false : 'right'}
-          lockPinned={isMobile || isTablet ? false : true}
+          pinned={'right'}
+          lockPinned={true}
           resizable={true}
           sortable={false}
           editable={actionEditable}
@@ -430,7 +439,7 @@ export default function CustomAgGrid({
 
   return (
     <>
-      <div className="ag-grid-main">
+      <div className="ag-grid-main custom-react-table-v1">
         {loading ? (
           <div className="loader">
             <span>Loading</span>
@@ -441,186 +450,203 @@ export default function CustomAgGrid({
 
         <div style={{ opacity: loading ? 0.5 : 1 }}>
           <CustomGridHeaderOptions
-            setSelectedReportView={setSelectedReportView}
-            selectedReportView={selectedReportView}
-            reportSave={reportSave}
-            columns={columns}
-            setColumns={setColumns}
-            columnApi={columnApi}
             refreshGrid={refreshGrid}
             renderedFrom={renderedFrom}
-            isClientSideGrid={isClientSideGrid}
             dispatch={dispatch}
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
             selectedRecords={selectedRecords}
+            handleFilterOpen={handleFilterOpen}
+            showFilters={showFilters}
           />
+          {showFilters && (
+            <GridFilters
+              open={isFilterOpen}
+              setOpen={setIsFilterOpen}
+              currentGridApi={currentGridApi}
+              columnApi={columnApi}
+              columns={columns}
+              tableSource={renderedFrom}
+              resource={resource}
+            />
+          )}
+          <div className="table-container-v1" style={{ position: 'relative' }}>
+            <ArrangeView
+              setSelectedReportView={setSelectedReportView}
+              selectedReportView={selectedReportView}
+              reportSave={reportSave}
+              columns={columns}
+              setColumns={setColumns}
+              columnApi={columnApi}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={isClientSideGrid}
+              dispatch={dispatch}
+            />
+            <div id="grid-listing" className="ag-theme-material ag-grid-listing-grid">
+              <AgGridReact
+                onFirstDataRendered={onFirstDataRendered}
+                gridOptions={customGridOptions}
+                rowData={dataRows}
+                onColumnMoved={onColumnMoved}
+                rowClassRules={rowClassRules}
+                onGridReady={onGridReady}
+                suppressDragLeaveHidesColumns={true}
+                accentedSort={true}
+                suppressCellSelection={true}
+                headerHeight={AgGridHeaderHeight}
+                floatingFiltersHeight={AgGridFloatingFiltersHeight}
+                rowHeight={AgGridRowHeight}
+                onColumnResized={onColumnResized}
+                frameworkComponents={{
+                  ...frameworkComponents,
+                  commonRenderer: frameworkComponents['commonRenderer'] ?? CommonRenderer,
+                  customLoadingOverlay: CustomLoadingOverlay,
+                  customFloatingFilter: CustomFloatingFilter
+                  // customLoadingCellRenderer: CustomLoadingCellRenderer,
+                  // customNoRowsOverlay: CustomNoRowsOverlay
+                }}
+                isRowSelectable={(rowNode) => {
+                  if (allowSelection) {
+                    return rowNode.data && rowNode.data.hideSelection === true ? false : true;
+                  }
+                  return false;
+                }}
+                enableCellChangeFlash={false}
+                defaultColDef={{
+                  resizable: true,
+                  floatingFilter: true,
+                  sortable: true,
+                  suppressMenu: true,
+                  // suppressSizeToFit: true,
+                  // suppressAutoSize: true,
+                  // headerCheckboxSelection: true,
+                  // checkboxSelection: true,
+                  floatingFilterComponentParams: { suppressFilterButton: true }
+                }}
+                onSortChanged={() => {
+                  if (!isClientSideGrid) {
+                    dispatch({
+                      type: 'sort',
+                      sorting: columnApi.getColumnState().filter((d) => ['asc', 'desc'].some((s) => s === d.sort))
+                    });
+                  }
+                }}
+                onFilterChanged={(e) => {
+                  if (isClientSideGrid) {
+                    currentGridApi.paginationGoToPage(0);
+                    dispatch({
+                      type: 'count',
+                      count: currentGridApi.getModel().rootNode.allChildrenCount
+                    });
+                    dispatch({ type: 'pageChange', page: 0 });
+                  } else {
+                    dispatch({ type: 'filter', filters: e.api.getFilterModel() });
+                  }
+                }}
+                enableCellTextSelection={true}
+                ensureDomOrder={false}
+                suppressLoadingOverlay={true}
+                // loadingOverlayComponent={'customLoadingOverlay'}
+                // loadingOverlayComponentParams={{
+                //     loadingMessage: 'Loading...',
+                // }}
+                animateRows={enableRowDrag ?? false}
+                suppressAnimationFrame={!enableRowDrag}
+                suppressMaintainUnsortedOrder={true}
+                rowBuffer={limit}
+                // suppressMaxRenderedRowRestriction={true}
 
-          <div id="grid-listing" className="ag-theme-material ag-grid-listing-grid" style={{ zIndex: -500, position: 'inherit' }}>
-            <AgGridReact
-              onFirstDataRendered={onFirstDataRendered}
-              gridOptions={customGridOptions}
-              rowData={dataRows}
-              onColumnMoved={onColumnMoved}
-              rowClassRules={rowClassRules}
-              onGridReady={onGridReady}
-              suppressDragLeaveHidesColumns={true}
-              accentedSort={true}
-              suppressCellSelection={true}
-              headerHeight={AgGridHeaderHeight}
-              floatingFiltersHeight={AgGridFloatingFiltersHeight}
-              rowHeight={AgGridRowHeight}
-              onColumnResized={onColumnResized}
-              frameworkComponents={{
-                ...frameworkComponents,
-                commonRenderer: frameworkComponents['commonRenderer'] ?? CommonRenderer,
-                customLoadingOverlay: CustomLoadingOverlay,
-                customFloatingFilter: CustomFloatingFilter
-                // customLoadingCellRenderer: CustomLoadingCellRenderer,
-                // customNoRowsOverlay: CustomNoRowsOverlay
-              }}
-              isRowSelectable={(rowNode) => {
-                if (allowSelection) {
-                  return rowNode.data && rowNode.data.hideSelection === true ? false : true;
-                }
-                return false;
-              }}
-              enableCellChangeFlash={false}
-              defaultColDef={{
-                resizable: true,
-                floatingFilter: true,
-                sortable: true,
-                suppressMenu: true,
-                // suppressSizeToFit: true,
-                // suppressAutoSize: true,
-                // headerCheckboxSelection: true,
-                // checkboxSelection: true,
-                floatingFilterComponentParams: { suppressFilterButton: true }
-              }}
-              onSortChanged={() => {
-                if (!isClientSideGrid) {
-                  dispatch({
-                    type: 'sort',
-                    sorting: columnApi.getColumnState().filter((d) => ['asc', 'desc'].some((s) => s === d.sort))
-                  });
-                }
-              }}
-              onFilterChanged={(e) => {
-                if (isClientSideGrid) {
-                  currentGridApi.paginationGoToPage(0);
-                  dispatch({
-                    type: 'count',
-                    count: currentGridApi.getModel().rootNode.allChildrenCount
-                  });
-                  dispatch({ type: 'pageChange', page: 0 });
-                } else {
-                  dispatch({ type: 'filter', filters: e.api.getFilterModel() });
-                }
-              }}
-              enableCellTextSelection={true}
-              ensureDomOrder={false}
-              suppressLoadingOverlay={true}
-              // loadingOverlayComponent={'customLoadingOverlay'}
-              // loadingOverlayComponentParams={{
-              //     loadingMessage: 'Loading...',
-              // }}
-              animateRows={enableRowDrag ?? false}
-              suppressAnimationFrame={!enableRowDrag}
-              suppressMaintainUnsortedOrder={true}
-              rowBuffer={limit}
-              // suppressMaxRenderedRowRestriction={true}
+                // loadingCellRenderer={'customLoadingCellRenderer'}
+                // loadingCellRendererParams={{
+                //   loadingMessage: 'One moment please...',
+                // }}
+                pinnedBottomRowData={pinnedBottomRowData ?? null}
+                suppressRowClickSelection={true}
+                rowSelection={!isMultipleSelection ? 'single' : 'multiple'}
+                onRowSelected={(event) => {
+                  if (event.rowIndex !== null && !isClientSideGrid) {
+                    try {
+                      let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`)
+                        ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`))
+                        : [];
 
-              // loadingCellRenderer={'customLoadingCellRenderer'}
-              // loadingCellRendererParams={{
-              //   loadingMessage: 'One moment please...',
-              // }}
-              pinnedBottomRowData={pinnedBottomRowData ?? null}
-              suppressRowClickSelection={true}
-              rowSelection={!isMultipleSelection ? 'single' : 'multiple'}
-              onRowSelected={(event) => {
-                if (event.rowIndex !== null && !isClientSideGrid) {
-                  try {
-                    let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`)
-                      ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`))
-                      : [];
-
-                    if (event.node.isSelected() === true && !oldSelectedRecords.some((s) => s[idProperty] === event.node.data[idProperty])) {
-                      oldSelectedRecords = [...oldSelectedRecords, event.node.data];
-                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
-                    } else if (event.node.isSelected() === false) {
-                      if (oldSelectedRecords.length > 0) {
-                        localStorage.setItem(
-                          `${renderedFrom}_selected`,
-                          JSON.stringify(oldSelectedRecords.filter((f) => f[idProperty] !== event.data[idProperty]))
-                        );
+                      if (event.node.isSelected() === true && !oldSelectedRecords.some((s) => s[idProperty] === event.node.data[idProperty])) {
+                        oldSelectedRecords = [...oldSelectedRecords, event.node.data];
+                        localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
+                      } else if (event.node.isSelected() === false) {
+                        if (oldSelectedRecords.length > 0) {
+                          localStorage.setItem(
+                            `${renderedFrom}_selected`,
+                            JSON.stringify(oldSelectedRecords.filter((f) => f[idProperty] !== event.data[idProperty]))
+                          );
+                        }
                       }
+                    } catch (ex) {
+                      console.error('Error in getting / storing selected records');
                     }
-                  } catch (ex) {
-                    console.error('Error in getting / storing selected records');
                   }
-                }
-              }}
-              onSelectionChanged={(event: any) => {
-                if (onSelection) onSelection(event.api.getSelectedRows());
-                dispatch({
-                  type: 'selection',
-                  selectedRecords: event.api.getSelectedRows()
-                });
+                }}
+                onSelectionChanged={(event: any) => {
+                  if (onSelection) onSelection(event.api.getSelectedRows());
+                  dispatch({
+                    type: 'selection',
+                    selectedRecords: event.api.getSelectedRows()
+                  });
 
-                if (renderedFrom) {
-                  try {
-                    let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`)
-                      ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`))
-                      : [];
-                    if (oldSelectedRecords.length > 0) {
-                      const uniqueRecords = uniqBy([...oldSelectedRecords, ...event.api.getSelectedRows()], idProperty);
-                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(uniqueRecords));
-                    } else {
-                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(event.api.getSelectedRows()));
+                  if (renderedFrom) {
+                    try {
+                      let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`)
+                        ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`))
+                        : [];
+                      if (oldSelectedRecords.length > 0) {
+                        const uniqueRecords = uniqBy([...oldSelectedRecords, ...event.api.getSelectedRows()], idProperty);
+                        localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(uniqueRecords));
+                      } else {
+                        localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(event.api.getSelectedRows()));
+                      }
+                    } catch (ex) {
+                      console.error('Error in getting / storing selected records');
                     }
-                  } catch (ex) {
-                    console.error('Error in getting / storing selected records');
                   }
-                }
-              }}
-              onRowDragEnd={(event: any) => {
-                if (onRowDragEnd) {
-                  onRowDragEnd(orderBy(event.api.getSelectedNodes(), 'rowIndex', ['asc']).map((d) => d.data));
-                }
-              }}
-              immutableData={true}
-              getRowNodeId={(data) => {
-                return data[idProperty];
-              }}
-              pagination={allowPagination}
-              suppressPaginationPanel={true}
-              paginationPageSize={limit}
-              rowDragManaged={enableRowDrag}
-            >
-              {allowSelection && (
-                <AgGridColumn
-                  width={70}
-                  filter={false}
-                  pinned="left"
-                  lockPinned={true}
-                  headerCheckboxSelection={allowHeaderSelection}
-                  headerCheckboxSelectionFilteredOnly={true}
-                  checkboxSelection={true}
-                  resizable={false}
-                  sortable={false}
-                  pinnedRowCellRendererFramework={pinnedBottomRowData ? () => <></> : null}
-                ></AgGridColumn>
-              )}
+                }}
+                onRowDragEnd={(event: any) => {
+                  if (onRowDragEnd) {
+                    onRowDragEnd(orderBy(event.api.getSelectedNodes(), 'rowIndex', ['asc']).map((d) => d.data));
+                  }
+                }}
+                immutableData={true}
+                getRowNodeId={(data) => {
+                  return data[idProperty];
+                }}
+                pagination={allowPagination}
+                suppressPaginationPanel={true}
+                paginationPageSize={limit}
+                rowDragManaged={enableRowDrag}
+              >
+                {allowSelection && (
+                  <AgGridColumn
+                    width={70}
+                    filter={false}
+                    pinned="left"
+                    lockPinned={true}
+                    headerCheckboxSelection={allowHeaderSelection}
+                    headerCheckboxSelectionFilteredOnly={true}
+                    checkboxSelection={true}
+                    resizable={false}
+                    sortable={false}
+                    pinnedRowCellRendererFramework={pinnedBottomRowData ? () => <></> : null}
+                  ></AgGridColumn>
+                )}
 
-              {columns.length > 0 ? generateColumns : null}
-            </AgGridReact>
+                {columns.length > 0 ? generateColumns : null}
+              </AgGridReact>
+            </div>
           </div>
-
           {allowPagination && (
             <TablePagination
               component="div"
               count={rowCount}
               page={page}
-              className="agPagination"
+              className="agPagination pagination-v1"
               onPageChange={(event, newPage) => {
                 dispatch({ type: 'pageChange', page: newPage });
 

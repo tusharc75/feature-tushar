@@ -15,13 +15,12 @@ import { fetch_invoice_product_fields } from '../../../components/Invoice/helper
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import InvoiceFacility from './InvoiceFacility';
 
-const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, statusOptions, stepFullScreen, showActivity, renderedFrom }) => {
+const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, statusOptions, stepFullScreen, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
+  
   const [sendEmail, setSendEmail] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
@@ -245,28 +244,14 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns && rowsData ? (
           <>
-            <Box
-              p="6px"
-              zIndex={5}
-              width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
-                  ? 'calc(100vw)'
-                  : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 100px)'
-              }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-            >
+            <Box p="6px" zIndex={5}>
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
                 hideSelection={true}
+                hideAction={true}
                 onSelect={() => {}}
                 childrenProperty="subRows"
                 uniqueKey="_id"

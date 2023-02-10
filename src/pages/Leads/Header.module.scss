@@ -4,109 +4,101 @@
 .filter_side_header {
   display: flex;
   justify-content: flex-end;
-  gap: 0.50rem;
-  -webkit-gap: 0.50rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  -webkit-gap: 0.5rem;
   align-items: center;
 }
-.sort_title{
+.sort_title {
   background-color: white !important;
   padding: 8px 24px !important;
   font-weight: 700;
   color: #757575;
 }
-.inner_content_sort{
+.inner_content_sort {
   padding: 0px !important;
-  
 }
-.mobile_filter_content{
+.mobile_filter_content {
   height: 400px;
 }
-.mobile_panel{
+.mobile_panel {
   display: flex;
   align-items: center;
 }
 
-
-
-.mobile_filter_side_header{
+.mobile_filter_side_header {
   display: flex;
   justify-content: space-between;
-  gap: 0.50rem;
+  gap: 0.5rem;
 }
-.Related_Account{
-  display:flex;
+.Related_Account {
+  display: flex;
 }
-.search_box_layout{
+.search_box_layout {
   margin-left: 5px;
   justify-content: flex-end;
   max-width: 400px;
 }
-.account_header_search_bar{
+.account_header_search_bar {
   margin-left: 5px;
   justify-content: flex-end;
-
 }
-.rental_header_layout{
+.rental_header_layout {
   row-gap: 5px;
 }
 
-.font_size_header_mobile{
+.font_size_header_mobile {
   padding-top: 2px;
   font-size: 12px;
 }
-.filter_side_delivery_ticket{
+.filter_side_delivery_ticket {
   display: flex;
   justify-content: flex-end;
 }
-.filter_side_deck{
+.filter_side_deck {
   display: flex;
   justify-content: flex-end;
 }
 
-
-@supports (not (gap:0.25rem)) and (not (-webkit-gap: 0.25rem)){
+@supports (not (gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
   .filter_side_header > *:not(:nth-child(1)) {
-      margin-left: 0.50rem !important;
+    margin-left: 0.5rem !important;
   }
 }
 .filter_side {
   display: flex;
   justify-content: flex-end;
-  
 }
 @media only screen and (max-width: 960px) {
-  .mobile_filter_side_header{
-      width: 100%
+  .mobile_filter_side_header {
+    width: 100%;
   }
-  .search_box_input{
-     flex:none !important;
-     width:300px !important;
+  .search_box_input {
+    flex: none !important;
+    width: 300px !important;
   }
-  .content_box{
+  .content_box {
     justify-content: space-between;
-    gap:5px
+    gap: 5px;
   }
- 
+
   .filter_side_container {
-     gap:5px
+    gap: 5px;
   }
-  .filter_side_container_delivery_ticket{
+  .filter_side_container_delivery_ticket {
     flex-wrap: nowrap;
   }
-  
-
 }
-@media only screen and (max-width: 830px){
-  .action_new_submit_btn{
+@media only screen and (max-width: 830px) {
+  .action_new_submit_btn {
     width: 100% !important;
   }
-  .add_submit_btn{
-     box-shadow: none !important;
+  .add_submit_btn {
+    box-shadow: none !important;
   }
   .filter_side {
     justify-content: space-between;
   }
- 
 }
 
 @media only screen and (max-width: 768px) {
@@ -114,7 +106,6 @@
     width: 100% !important;
   }
   .filter_side_container {
-    display: block !important;
     max-width: 100% !important;
   }
   .filter_side {
@@ -122,30 +113,27 @@
     max-width: 100% !important;
   }
   .filter_side_header {
-    display: block;
-    //margin-top: 0.8rem;
-    flex-direction: column;
     gap: 0.75rem;
     -webkit-gap: 0.75rem;
     align-items: center;
   }
-  .search_box_layout{
+  .search_box_layout {
     margin-left: 0px;
   }
-  .search_box_input{
+  .search_box_input {
     flex: 1 !important;
- }
+  }
 
-  @supports (not (gap:0.75rem)) and (not (-webkit-gap: 0.75rem)){
+  @supports (not (gap: 0.75rem)) and (not (-webkit-gap: 0.75rem)) {
     .filter_side_header > *:not(:nth-child(1)) {
-        margin-left: 0.75rem !important;
+      margin-left: 0.75rem !important;
     }
-}
+  }
 
   // .add_submit_btn,
   // .action_submit_btn {
   //   width: 49%;
-    
+
   // }
   .add_submit_btn {
     margin-right: 1% !important;
@@ -159,7 +147,7 @@
     justify-content: flex-start;
     max-width: 600px !important;
   }
-  .search_box_input{
+  .search_box_input {
     max-width: 600px !important;
   }
   .filter_side_container {
@@ -167,13 +155,12 @@
     max-width: 100% !important;
     row-gap: 5px;
   }
-  .filter_side_container_delivery_ticket{
+  .filter_side_container_delivery_ticket {
     flex-wrap: wrap;
   }
-  .mobile_filter_side_container_delivery_ticket{
-
-  }
-  .mobile_panel{
+  // .mobile_filter_side_container_delivery_ticket {
+  // }
+  .mobile_panel {
     display: flex;
     justify-content: space-between;
     align-items: center;

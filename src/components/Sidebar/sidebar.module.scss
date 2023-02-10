@@ -1,0 +1,96 @@
+.drawer {
+  background-color: #163340 !important;
+  color: #dbdbdb !important;
+  border-right: 0 !important;
+
+  // List container
+  .listContainer {
+    margin-top: 10px;
+  }
+  //   list Items
+  .listItem {
+    padding-left: 31px;
+    padding-block: 12px;
+    svg {
+      color: #ffffff;
+    }
+  }
+  .listIcon {
+    color: #dbdbdb;
+  }
+  .logo {
+    max-height: 33px;
+    margin-inline: auto;
+    position: absolute;
+    top: 15px;
+    left: 0;
+    right: 0;
+    cursor: pointer;
+  }
+  .activeList {
+    position: relative;
+    isolation: isolate;
+    color: #2da9a4;
+    .listIcon {
+      position: relative;
+      &::before {
+        content: '';
+        position: absolute;
+        top: -6px;
+        bottom: -6px;
+        left: -6px;
+        background-color: #298b88;
+        z-index: -1;
+        width: 33px;
+        border-radius: 7px;
+      }
+    }
+    &::before {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      left: 8px;
+      right: 0;
+      border-radius: 100vh 0 0 100vh;
+      background-color: #f8fffe;
+      top: 0;
+      bottom: 0;
+    }
+    i {
+      --height: 16px;
+      position: absolute;
+      width: 100%;
+      background-color: #f8fffe;
+      height: var(--height, 10px);
+      left: 0;
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #163340;
+      }
+      &:first-of-type {
+        top: calc(var(--height, 10px) * -1);
+        &::before {
+          border-radius: 0 0 var(--height, 10px) 0;
+        }
+      }
+      &:last-of-type {
+        bottom: calc(var(--height, 10px) * -1);
+        &::before {
+          border-radius: 0 var(--height, 10px) 0 0;
+        }
+      }
+    }
+  }
+  .subList {
+    background-color: hsl(199, 49%, 22%);
+  }
+  .active_sub {
+    background-color: hsl(200deg, 49%, 29%);
+    display: block;
+  }
+}

@@ -43,39 +43,28 @@ const EcommercePolicy = () => {
             });
     };
 
-    return (<div>
-        <Grid container className="headerbox">
-            <Grid item md={4} sm={11} xs={10}>
+    return (<Box className="main-container-v1">
+        <Box className="headerbox-v1">
+            <Box className="nav-v1">
                 <CustomBreadCrumbs routes={[{ title: routes.eCommercePolicy.title, path: '' }]} />
-            </Grid>
-        </Grid>
-        <div className="main-container">
-            <div className="header-panel">
-                <Grid container className={styles.rental_header_layout} spacing={1}>
-                    <Grid item xs={6} md={6}>
-                        <Grid style={{ display: "flex", justifyContent: "left" }}>
-                            <MdDescription size={22} className="headerLogo" />
-                            <span className="listingHeader">{routes.eCommercePolicy.title}</span>
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={6} md={6}>
-                        <Box display="flex" justifyContent="flex-end" alignItems="center">
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                size="small"
-                                onClick={() => { setOpen(true) }}>
-                                Edit
-                            </Button>
-                        </Box>
-                    </Grid>
-                </Grid>
-            </div>
-            <Divider />
+            </Box>
+            <Box className="controls-v1">
+                <Box className="control-buttons-v1">
+                    <Button
+                        variant="contained"
+                        size="small"
+                        className={'btn-outline-v1'}
+                        onClick={() => { setOpen(true) }}>
+                        Edit
+                    </Button>
+                </Box>
+            </Box>
+        </Box>
+        <Box className={`detail-container-v1`}>
             {fields ?
                 <DetailsPage data={details} fields={fields} /> :
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />}
-        </div>
+        </Box>
         {open && <DetailsDialog
             onClose={() => setOpen(false)}
             onSuccess={() => {
@@ -83,7 +72,7 @@ const EcommercePolicy = () => {
                 fetchDetails();
             }}
         />}
-    </div>
+    </Box>
     );
 };
 

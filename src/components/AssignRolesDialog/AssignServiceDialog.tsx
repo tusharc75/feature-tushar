@@ -24,6 +24,7 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 let searchTimeout;
 
 const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, extraStaticFilter = [], serviceType = '' }) => {
+
   const renderedFrom = `${routes.serviceMaster.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -113,6 +114,8 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
           finalObject['isChecked'] = false;
           finalObject['id'] = u._id;
           finalObject['qty'] = 1;
+          finalObject['unitMain'] = u?.unit;
+          finalObject['pricingMethodMain'] = u?.pricingMethod;
           const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id);
           if (qtyAdded.length) {
             finalObject['qty'] = qtyAdded[0].qty;
@@ -189,10 +192,8 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
           setAssigning(false);
           toastConfig.setToastConfig(err);
         });
-    } else if (reference === 'service') {
-      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
     } else {
-      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) })));
+      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
     }
   };
 

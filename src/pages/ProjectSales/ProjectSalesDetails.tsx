@@ -27,18 +27,16 @@ import {
   formatAmountWithCurrency,
   opportunity,
   projectSales,
-  quote,
-  defaultActivityShow
+  quote
 } from '../../constants/helpers';
-import Activity from '../../components/Activity';
 import CreateProjectSales from './CreateProjectSales';
 import { isMobile, isTablet } from 'react-device-detect';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import accountClass from '../Account/account.module.scss';
 import { FaWpforms } from 'react-icons/fa';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -71,7 +69,6 @@ const ProjectSalesDetails = () => {
   const {
     state: { user, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [loading, setLoading] = useState(false);
   const [copyOfProjectSalesData, setCopyOfProjectSalesData] = useState(null);
   const [projectSalesData, setProjectSalesData] = useState(null);
@@ -91,7 +88,6 @@ const ProjectSalesDetails = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState('');
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes?.projectSales]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [loadingGraphData, setLoadingGraphData] = useState(false);
@@ -108,9 +104,7 @@ const ProjectSalesDetails = () => {
     setTabValue(newValue);
   };
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
+
   useEffect(() => {
     //  When it is nodal structure tab
     initializeGraphData();
@@ -189,12 +183,6 @@ const ProjectSalesDetails = () => {
   };
 
   useEffect(() => {
-    if (isSmallScreen) {
-      setActivityShow(true);
-    }
-  }, [isSmallScreen]);
-
-  useEffect(() => {
     getSalesData();
     getProjectFields();
   }, [id]);
@@ -212,11 +200,11 @@ const ProjectSalesDetails = () => {
 
   const handleMainPoints = (data) => {
     let tempMp = {
-      ['Project Name']: data.projectName || '',
-      ['Amount']: formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount || '',
-      ['End Date']: data.endDate ? displayCardDate(data.endDate) : '',
-      ['Project Probability']: data?.projectProbability ? `${data.projectProbability}%` : '',
-      ['Opportunity Owner']: data.opportunityOwner?.optionLabel || ''
+      'Project Name': data.projectName || '',
+      Amount: formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount || '',
+      'End Date': data.endDate ? displayCardDate(data.endDate) : '',
+      'Project Probability': data?.projectProbability ? `${data.projectProbability}%` : '',
+      'Opportunity Owner': data.opportunityOwner?.optionLabel || ''
     };
     setMainPoints(tempMp);
   };
@@ -328,216 +316,97 @@ const ProjectSalesDetails = () => {
   const fiteredFieldToShow = projectSalesFields.filter((obj) => obj.isRead);
 
   return (
-    <>
-      {openUpdateDialog && (
-        <CreateProjectSales
-          open={openUpdateDialog}
-          close={closeUpdateDIalog}
-          fetchData={() => {
-            getSalesData();
-            getProjectFields();
-          }}
-          projectSalesId={projectSalesData._id}
-        />
-
-        // <UpdateDetailsDialog
-        //   title={`Update ${projectSalesData?.projectName}`}
-        //   openDialog={openUpdateDialog}
-        //   onClose={closeUpdateDIalog}
-        //   data={projectSalesData}
-        //   fields={fiteredFieldForUpdate}
-        //   isUpdating={isUpdating}
-        //   handleUpdate={handleUpdateProject}
-        //   isProjectSales={true}
-        // />
-      )}
-      {openDialog && (
-        <AssignDataDialog
-          dialogOpen={openDialog}
-          onSuccess={() => {
-            handleCloseDialog();
-            getSalesData();
-          }}
-          handleCloseDialog={handleCloseDialog}
-          projectID={id}
-          type={dialogType}
-          existingData={getExisitingData}
-          accountId={currentAccountId}
-          entityIds={projectSalesData?.entity?.map((m) => m.optionValue) || []}
-        />
-      )}
-      <Fragment>
-        <Grid container className="headerbox">
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
           <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-          <div>
-            <Paper>
-              {!projectSalesData ? (
-                <Box padding={1}>
-                  <Skeleton variant="text" width="150px" height="30px" />
-                  <Box display="flex">
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    <Box marginX={1} />
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  </Box>
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {!projectSalesData ? (
+              <Box padding={1}>
+                <Skeleton variant="text" width="150px" height="30px" />
+                <Box display="flex">
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                  <Box marginX={1} />
+                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
                 </Box>
-              ) : (
-                <DetailsPageHeader heading={headingLbl} logo={undefined} mainPoints={mainPoints} showHeading={true}>
-                  {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                      onClick={handleOpenUpdateDialog}
-                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
-                  ) : null}
-                  {permissions?.projectSales?.isDelete && isManager ? (
-                    <DeleteButton
-                      text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
-                      onClick={() => {
-                        handleDeleteProject(id);
-                      }}
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                    />
-                  ) : null}
-                </DetailsPageHeader>
-              )}
-              <Box>
-                {loading || !projectSalesFields.length || !projectSalesData ? (
-                  <Grid container spacing={2} style={{ padding: '16px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <>
-                    <Tabs
-                      className="oms-tab"
-                      value={currentTabIndex}
-                      onChange={(index, newValue) => {
-                        setCurrentTabIndex(newValue);
-                      }}
-                      indicatorColor="primary"
-                      textColor="primary"
-                      aria-label="icon tabs example"
-                      TabIndicatorProps={{
-                        style: {
-                          display: 'none'
-                        }
-                      }}
-                    >
-                      <Tab className="tabLayout" label="Header" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-                      <Tab className="tabLayout" label="OM-Neurons" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
-                      <Tab
-                        className={'tabLayout'}
-                        label={<div className="d-flex align-items-center tab-font">Project Team</div>}
-                        aria-controls="a11y-tabpanel-2"
-                        id="a11y-tab-2"
-                      />
-                      <Tab
-                        className={'tabLayout'}
-                        label="Customer Account"
-                        aria-controls="a11y-tabpanel-2"
-                        id="a11y-tab-2"
-                      />
-                      <div className={'uio'}> </div>
-                    </Tabs>
-                    {currentTabIndex === 0 && (
-                      <Box>
-                        <DetailsPage data={copyOfProjectSalesData} fields={fiteredFieldToShow} />
-                      </Box>
-                    )}
-                    {currentTabIndex === 1 && (
-                      <Box>
-                        <CustomNodalStructure
-                          id={id}
-                          graphData={graphData}
-                          loadingGraphData={loadingGraphData}
-                          onClick={(node) => {
-                            if (node && routes[node.route]) {
-                              history.push({
-                                pathname: `${routes[node.route].path}/${node.redirectId}`
-                              });
-                            }
-                          }}
-                        />
-                      </Box>
-                    )}
-                    {currentTabIndex === 2 && (
-                      <Paper>
-                        <Box style={{ padding: '0px' }}>
-                          <Box width="100%" padding={1} bgcolor="grey.200" display="flex" alignItems="center" justifyContent="space-between">
-                            <Typography variant="subtitle2">Project Team</Typography>
-                            {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
-                              <IconButton color="primary" size="small" onClick={() => handleOpenDialog('user')}>
-                                <ControlPoint />
-                              </IconButton>
-                            ) : null}
-                          </Box>
-                          <Box padding={1}>
-                            {loading ? (
-                              [1, 2].map((i) => (
-                                <BoxWithBorder key={i} style={{ marginBottom: '8px' }}>
-                                  <Box padding={1}>
-                                    <Skeleton variant="text" width="100px" height="20px" />
-                                    <Box marginTop={1} />
-                                    <Skeleton variant="text" width="100%" height="15px" />
-                                  </Box>
-                                </BoxWithBorder>
-                              ))
-                            ) : teamUsers.length ? (
-                              <Box>
-                                <TeamUsers
-                                  managerId={projectSalesData.projectManager?.optionValue}
-                                  permissions={permissions}
-                                  data={teamUsers}
-                                  removeUser={handleRemoveUser}
-                                />
-                                <Box marginY={1} />
-                              </Box>
-                            ) : (
-                              <Box textAlign="center" padding={2}>
-                                No Users
-                              </Box>
-                            )}
-                          </Box>
-                        </Box>
-                      </Paper>
-                    )}
-                    {currentTabIndex === 3 && (
-                      <Box>
-                        <CustomerAccounts
-                          isTeamMember={isTeamMember}
-                          isManager={isManager}
-                          ownerId={projectSalesData?.projectManager?.optionValue}
-                          loading={loading}
-                          handleOpenDialog={handleOpenDialog}
-                          customerAccounts={customerAccounts}
-                          customerContacts={customerContacts}
-                          opportunities={opportunities}
-                          quotes={quotes}
-                          currency={projectSalesData?.currency}
-                          estimatedAmount={projectSalesData?.amount}
-                          marketSegmentId={projectSalesData?.marketSegment?.optionValue}
-                          subMarketSegmentId={projectSalesData?.subMarketSegment?.optionValue}
-                          permissions={permissions?.projectSales}
-                          fetchProjectData={getSalesData}
-                          projectId={id}
-                          users={teamUsers}
-                        />
-                      </Box>
-                    )}
-                  </>
-                )}
               </Box>
-            </Paper>
-            <Box my={1} />
-            <TabPanel value={tabValue} index={1}>
+            ) : (
+              <>
+                {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={handleOpenUpdateDialog}
+                  >
+                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  </Button>
+                ) : null}
+                {permissions?.projectSales?.isDelete && isManager ? (
+                  <DeleteButton
+                    text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
+                    onClick={() => {
+                      handleDeleteProject(id);
+                    }}
+                  />
+                ) : null}
+                <ActivityButton referenceId={projectSalesData?._id} resource={projectSales?.projectSalesResource} />
+              </>
+            )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        {loading || !projectSalesFields.length || !projectSalesData ? (
+          <Grid container spacing={2} style={{ padding: '16px' }}>
+            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+          </Grid>
+        ) : (
+          <>
+            <Tabs
+              className="new-tab-container-v1"
+              value={currentTabIndex}
+              onChange={(index, newValue) => {
+                setCurrentTabIndex(newValue);
+              }}
+              textColor="primary"
+              TabIndicatorProps={{
+                style: {
+                  display: 'none'
+                }
+              }}
+            >
+              <Tab label={<div className="tab-font">Header</div>} className="tabLayout" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+              <Tab label={<div className="tab-font">OM-Neurons</div>} className="tabLayout" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
+              <Tab className={'tabLayout'} label={<div className="tab-font">Project Team</div>} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
+              <Tab className={'tabLayout'} label="Customer Account" aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
+            </Tabs>
+            {currentTabIndex === 0 && (
+              <Box>
+                <DetailsPage data={copyOfProjectSalesData} fields={fiteredFieldToShow} />
+              </Box>
+            )}
+            {currentTabIndex === 1 && (
+              <Box>
+                <CustomNodalStructure
+                  id={id}
+                  graphData={graphData}
+                  loadingGraphData={loadingGraphData}
+                  onClick={(node) => {
+                    if (node && routes[node.route]) {
+                      history.push({
+                        pathname: `${routes[node.route].path}/${node.redirectId}`
+                      });
+                    }
+                  }}
+                />
+              </Box>
+            )}
+            {currentTabIndex === 2 && (
               <Paper>
-                <Box style={{ padding: '0px', maxHeight: '450px' }}>
+                <Box style={{ padding: '0px' }}>
                   <Box width="100%" padding={1} bgcolor="grey.200" display="flex" alignItems="center" justifyContent="space-between">
                     <Typography variant="subtitle2">Project Team</Typography>
                     {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
@@ -575,35 +444,74 @@ const ProjectSalesDetails = () => {
                   </Box>
                 </Box>
               </Paper>
-            </TabPanel>
-          </div>
-          <div className="position-relative">
-            <Paper>
-              {!isSmallScreen && (
-                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                </span>
-              )}
-              <div style={{ display: showActivity ? 'block' : 'none' }}>
-                <Activity
-                  resourceId={id}
-                  resource={projectSales.projectSalesRoute}
-                  relatedTo={[
-                    {
-                      type: projectSales.projectSalesResource,
-                      referenceId: id,
-                      access: true
-                    }
-                  ]}
-                  handleActivityRefresh={() => { }}
-                  emails={[]}
+            )}
+            {currentTabIndex === 3 && (
+              <Box>
+                <CustomerAccounts
+                  isTeamMember={isTeamMember}
+                  isManager={isManager}
+                  ownerId={projectSalesData?.projectManager?.optionValue}
+                  loading={loading}
+                  handleOpenDialog={handleOpenDialog}
+                  customerAccounts={customerAccounts}
+                  customerContacts={customerContacts}
+                  opportunities={opportunities}
+                  quotes={quotes}
+                  currency={projectSalesData?.currency}
+                  estimatedAmount={projectSalesData?.amount}
+                  marketSegmentId={projectSalesData?.marketSegment?.optionValue}
+                  subMarketSegmentId={projectSalesData?.subMarketSegment?.optionValue}
+                  permissions={permissions?.projectSales}
+                  fetchProjectData={getSalesData}
+                  projectId={id}
+                  users={teamUsers}
                 />
-              </div>
-            </Paper>
-          </div>
-        </div>
-      </Fragment>
-
+              </Box>
+            )}
+          </>
+        )}
+        <TabPanel value={tabValue} index={1}>
+          <Paper>
+            <Box style={{ padding: '0px', maxHeight: '450px' }}>
+              <Box width="100%" padding={1} bgcolor="grey.200" display="flex" alignItems="center" justifyContent="space-between">
+                <Typography variant="subtitle2">Project Team</Typography>
+                {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
+                  <IconButton color="primary" size="small" onClick={() => handleOpenDialog('user')}>
+                    <ControlPoint />
+                  </IconButton>
+                ) : null}
+              </Box>
+              <Box padding={1}>
+                {loading ? (
+                  [1, 2].map((i) => (
+                    <BoxWithBorder key={i} style={{ marginBottom: '8px' }}>
+                      <Box padding={1}>
+                        <Skeleton variant="text" width="100px" height="20px" />
+                        <Box marginTop={1} />
+                        <Skeleton variant="text" width="100%" height="15px" />
+                      </Box>
+                    </BoxWithBorder>
+                  ))
+                ) : teamUsers.length ? (
+                  <Box>
+                    <TeamUsers
+                      managerId={projectSalesData.projectManager?.optionValue}
+                      permissions={permissions}
+                      data={teamUsers}
+                      removeUser={handleRemoveUser}
+                    />
+                    <Box marginY={1} />
+                  </Box>
+                ) : (
+                  <Box textAlign="center" padding={2}>
+                    No Users
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          </Paper>
+        </TabPanel>
+      </Box>
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -611,8 +519,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName} ?`
               : removeUserRec
-                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName} ?`
-                : ''
+              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName} ?`
+              : ''
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -623,7 +531,44 @@ const ProjectSalesDetails = () => {
           okBtnLoading={isDeleting}
         />
       ) : null}
-    </>
+      {openUpdateDialog && (
+        <CreateProjectSales
+          open={openUpdateDialog}
+          close={closeUpdateDIalog}
+          fetchData={() => {
+            getSalesData();
+            getProjectFields();
+          }}
+          projectSalesId={projectSalesData._id}
+        />
+
+        // <UpdateDetailsDialog
+        //   title={`Update ${projectSalesData?.projectName}`}
+        //   openDialog={openUpdateDialog}
+        //   onClose={closeUpdateDIalog}
+        //   data={projectSalesData}
+        //   fields={fiteredFieldForUpdate}
+        //   isUpdating={isUpdating}
+        //   handleUpdate={handleUpdateProject}
+        //   isProjectSales={true}
+        // />
+      )}
+      {openDialog && (
+        <AssignDataDialog
+          dialogOpen={openDialog}
+          onSuccess={() => {
+            handleCloseDialog();
+            getSalesData();
+          }}
+          handleCloseDialog={handleCloseDialog}
+          projectID={id}
+          type={dialogType}
+          existingData={getExisitingData}
+          accountId={currentAccountId}
+          entityIds={projectSalesData?.entity?.map((m) => m.optionValue) || []}
+        />
+      )}
+    </Box>
   );
 };
 

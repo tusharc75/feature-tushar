@@ -35,14 +35,11 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const Invoice = ({
   rentalManagementData,
-  isTabletScreen,
-  isSmallScreen,
   setNextStep,
   fetchRentalData,
   updateJobStatus,
   statusOptions,
   renderedFrom,
-  showActivity,
   stepFullScreen,
   currencySymbol,
   allowedToEdit
@@ -85,6 +82,9 @@ const Invoice = ({
   const fetchFields = async () => {
     try {
       let { fields } = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+      fields?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
       const resultCost = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
       fields = [...fields, ...resultCost];
       fields = [...new Map(fields.map((item) => [item['fieldName'], item])).values()];
@@ -320,7 +320,7 @@ const Invoice = ({
           parent?.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent?.type === 'product'
-              ? parent?.productDetail?.productDesc || ''
+              ? parent?.productDetail?.productDescription || ''
               : parent?.type === 'package'
                 ? parent?.packageDetail?.packageDescription || ''
                 : '';
@@ -363,7 +363,7 @@ const Invoice = ({
         _subRow?.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow?.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
+            ? _subRow?.productDetail?.productDescription || ''
             : _subRow?.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
@@ -490,7 +490,7 @@ const Invoice = ({
             <Fragment>
               <Button
                 variant="outlined"
-                color="primary"
+                className="btn-outline-v1"
                 size="small"
                 disabled={isOffline}
                 onClick={() => {
@@ -505,7 +505,7 @@ const Invoice = ({
           {permissions?.rentalManagement?.isRead && !isMobile && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
+              className="btn-outline-v1"
               type="button"
               size="small"
               style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
@@ -523,7 +523,7 @@ const Invoice = ({
           {permissions?.rentalManagement?.isRead && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
+              className="btn-outline-v1"
               type="button"
               size="small"
               style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
@@ -574,7 +574,7 @@ const Invoice = ({
           {permissions?.rentalManagement?.isRead && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
+              className="btn-outline-v1"
               size="small"
               style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
               disabled={downlodingFile === 'Email' && isLoading ? true : false || isOffline}
@@ -595,17 +595,7 @@ const Invoice = ({
           {columns && rowsData ? (
             <Box
               zIndex={5}
-              width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
-              }
+              width={'100%'}
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 350px)'}
             >
               <CustomReactTable
@@ -617,6 +607,7 @@ const Invoice = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}
+                hideAction={true}
                 renderedFrom="rental_management_serialized_asset"
                 isClientSideGrid={true}
               />

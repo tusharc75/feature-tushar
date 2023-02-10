@@ -26,7 +26,7 @@ import DeleteButton from "../Helpers/DeleteButton";
 
 const renderedFrom = "quoteSupplierPrice";
 const localStorageSelectedRecords = `${renderedFrom}_selected`;
-const displayColumns = ["qty", "productName", "productDesc", "unit", "supplierAccount", "responseDate", "supplierContact", "status"]
+const displayColumns = ["qty", "productName", "productDescription", "unit", "supplierAccount", "responseDate", "supplierContact", "status"]
 let levalOrderBy = [
     "product",
     "product-custom",

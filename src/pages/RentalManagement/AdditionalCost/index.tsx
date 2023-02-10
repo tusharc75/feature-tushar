@@ -198,8 +198,8 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
         <Box display="flex" justifyContent="space-between" m={1}>
           <Box display="flex">
             <Button
+              className="btn-outline-v1"
               variant="contained"
-              color="primary"
               size="small"
               disabled={isOffline}
               onClick={() => {
@@ -213,7 +213,6 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
           <Box display="flex-end">
             <Button
               variant="contained"
-              color="primary"
               size="small"
               disabled={isOffline || selectedRecords.length === 0}
               onClick={() => {
@@ -262,7 +261,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
             showClone={false}
             fullHeight={true}
             renderedFrom={renderedFrom}
-            onClone={() => {}}
+            onClone={() => { }}
           />
         ) : (
           <CustomAgGridEditable
@@ -285,7 +284,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
               const currency = rentalManagementData?.currency?.toLowerCase();
               newData[`price_${currency}`] = parseFloat(newData[`price_${currency}`]);
               newData[`finalPrice_${currency}`] = parseFloat(newData[`price_${currency}`]);
-              
+
               delete newData.allowedToEdit;
               delete newData.canDelete;
               delete newData.id;

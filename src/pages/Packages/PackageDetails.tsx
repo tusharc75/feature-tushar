@@ -4,7 +4,7 @@ import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
-import { BiFoodMenu, BiPackage } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu, BiPackage } from 'react-icons/bi';
 
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -24,6 +24,7 @@ import Packages from './Packages';
 import LeadTimeMaster from '../../components/LeadTime';
 import { RiShoppingBag3Fill } from 'react-icons/ri';
 import { MdMiscellaneousServices } from 'react-icons/md';
+import { isMobile, isTablet } from 'react-device-detect';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -129,133 +130,108 @@ const PackageDetails = () => {
   };
 
   return (
-    <>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={customizedRoutes} />
-      </Grid>
-      <Grid container spacing={1} className="detail-container">
-        <Grid item xs={12} sm={12} md={permissions?.leadTimeMaster?.isRead ? 8 : 12} lg={permissions?.leadTimeMaster?.isRead ? 8 : 12}>
-          <Paper>
-            {!packageData ? (
-              <div>
-                <Skeleton variant="text" width="150px" height="40px" />
-                <Box display="flex">
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  <Box marginX={1} />
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                </Box>
-              </div>
-            ) : (
-              <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {packageData ? (
+              <>
                 {permissions?.packages?.isUpdate && (
-                  <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                    Edit
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    className={'btn-outline-v1'}
+                    size="small"
+                    onClick={handleOpenUpdateDialog}
+                  >
+                    {isMobile ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 )}
                 {permissions?.packages?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </DetailsPageHeader>
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
             )}
-
-            <Box>
-              {packagesLoading || !packageFields.length ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              ) : (
-                <>
-                  <Tabs
-                    className="quote-tab"
-                    value={tabValue}
-                    onChange={handleMainTabChange}
-                    textColor="primary"
-                    TabIndicatorProps={{
-                      style: {
-                        display: 'none'
-                      }
-                    }}
-                  >
-                    <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 1 ? 'white' : '',
-                        color: tabValue === 1 ? '#163340' : '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                        </div>
-                      }
-                      {...a11yProps(0)}
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 2 ? 'white' : '',
-                        color: '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <MdMiscellaneousServices className="mr-1" fontSize="inherit" />
-                          individual Services
-                        </div>
-                      }
-                      {...a11yProps(1)}
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 2 ? 'white' : '',
-                        color: '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <RiShoppingBag3Fill className="mr-1" fontSize="inherit" />
-                          individual Products
-                        </div>
-                      }
-                      {...a11yProps(2)}
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 2 ? 'white' : '',
-                        color: '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <BiPackage className="mr-1" fontSize="inherit" /> Sub Packages
-                        </div>
-                      }
-                      {...a11yProps(3)}
-                    />
-                    <div className={'uio'}> </div>
-                  </Tabs>
-
-                  <TabPanel value={tabValue} index={0}>
-                    <DetailsPage data={packageData} fields={packageFields} />
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={1}>
-                    {tabValue === 1 && <Services packageData={packageData} packageId={id} />}
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={2}>
-                    {tabValue === 2 && <Products packageData={packageData} packageId={id} />}
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={3}>
-                    {tabValue === 3 && <Packages packageData={packageData} packageId={id} />}
-                  </TabPanel>
-                </>
-              )}
-            </Box>
-          </Paper>
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            {...a11yProps(0)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <MdMiscellaneousServices className="mr-1" fontSize="inherit" />
+                individual Services
+              </div>
+            }
+            {...a11yProps(1)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <RiShoppingBag3Fill className="mr-1" fontSize="inherit" />
+                individual Products
+              </div>
+            }
+            {...a11yProps(2)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiPackage className="mr-1" fontSize="inherit" /> Sub Packages
+              </div>
+            }
+            {...a11yProps(3)}
+          />
+        </Tabs>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={12} md={permissions?.leadTimeMaster?.isRead ? 8 : 12} lg={permissions?.leadTimeMaster?.isRead ? 8 : 12}>
+            <TabPanel value={tabValue} index={0}>
+              <DetailsPage data={packageData} fields={packageFields} fullHeight={true} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              {tabValue === 1 && <Services packageData={packageData} packageId={id} />}
+            </TabPanel>
+            <TabPanel value={tabValue} index={2}>
+              {tabValue === 2 && <Products packageData={packageData} packageId={id} />}
+            </TabPanel>
+            <TabPanel value={tabValue} index={3}>
+              {tabValue === 3 && <Packages packageData={packageData} packageId={id} />}
+            </TabPanel>
+          </Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4}>
+            {permissions?.leadTimeMaster?.isRead && (
+              <Box mb={2}>
+                <LeadTimeMaster Id={id} type={'package'} />
+              </Box>
+            )}
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={12} md={4} lg={4}>
-          {permissions?.leadTimeMaster?.isRead && (
-            <Box mb={2}>
-              <LeadTimeMaster Id={id} type={'package'} />
-            </Box>
-          )}
-        </Grid>
-      </Grid>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -280,7 +256,7 @@ const PackageDetails = () => {
           }}
         />
       )}
-    </>
+    </Box>
   );
 };
 

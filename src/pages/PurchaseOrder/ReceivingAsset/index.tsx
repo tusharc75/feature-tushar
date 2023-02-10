@@ -26,9 +26,6 @@ const ReceivingAsset = ({
   purchaseOrderData,
   updateStatus,
   stepFullScreen,
-  isSmallScreen,
-  isTabletScreen,
-  showActivity,
   renderedFrom,
   checkReceivedProduct,
   allowedToEdit
@@ -38,81 +35,90 @@ const ReceivingAsset = ({
     state: { user, permissions }
   }: any = useData();
   const theme = useTheme();
-  const isMobileScreen = useMediaQuery(theme.breakpoints.down('xs'));
-
   const [receiveDialog, setReceiveDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectProductDialog, setRejectProductDialog] = useState(null);
-  const [historyDialog, setHistoryDialog] = useState({ open: false, product: "", productName: "" });
+  const [historyDialog, setHistoryDialog] = useState({ open: false, product: '', productName: '' });
   const [inventoryHistory, setInventoryHistory] = useState([]);
-
 
   const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
 
   useEffect(() => {
-    if (purchaseOrderData?.status === PURCHASE_ORDER_STATUS.closed) {
-      setColumns(null)
-    }
     fetchColumns();
     fetchProduct();
   }, [purchaseOrderData]);
 
   const fetchColumns = async () => {
+    setColumns(null);
     const column = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
-    const productFields = productResult?.data?.data?.filter((e) =>
-      ['productName', 'productCategory', 'productNumber', 'productDescription', 'serializedProduct'].includes(e?.fieldData?.fieldName)
-    );
-    productFields?.forEach((e) => {
-      if (e?.fieldData?.fieldName === 'productName') {
-        column.push({
-          accessor: 'productName',
-          Header: 'Detail',
-          width: 300,
-          disabled: true,
-          Cell: ({ row }) => (
-            <p className="text-truncate">
-              {row.original.type === 'Product' ? (
-                <Link className="link" title={row.original.productId} to={`${routes.productDetail.path}/${row.original.productId}`}>
-                  {row.original.productName}
-                </Link>
-              ) : row.original.type === 'Asset' ? (
-                <Link className="link" title={row.original.productId} to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}>
-                  {row.original.productName}
-                </Link>
-              ) : (
-                row.original.productName
-              )}
-            </p>
-          ),
-          Footer: () => {
-            return <>Total</>;
-          }
-        });
+    const productFields = productResult?.data?.data?.filter((e) => ['productCategory', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName));
+    column.push({
+      accessor: 'index',
+      Header: 'Index',
+      width: 50,
+      primaryField: true,
+      Cell: ({ row }) => {
+        return row.original['index'] ? <p className="text-truncate">{row.original.index}</p> : <NoDataCell />;
+      },
+      Footer: () => {
+        return <>Total</>;
       }
+    });
+    column.push({
+      accessor: 'type',
+      Header: 'Type',
+      width: 100,
+      primaryField: true,
+      Cell: ({ row }) => {
+        return row.original['type'] ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
+      }
+    });
+    column.push({
+      accessor: 'detail',
+      Header: 'Detail',
+      width: 300,
+      disabled: true,
+      Cell: ({ row }) => (
+        <p className="text-truncate">
+          {row.original.type === 'Product' ? (
+            <Link className="link" title={row.original.productId} to={`${routes.productDetail.path}/${row.original.productId}`}>
+              {row.original.detail}
+            </Link>
+          ) : row.original.type === 'Asset' ? (
+            <Link className="link" title={row.original.productId} to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}>
+              {row.original.detail}
+            </Link>
+          ) : (
+            <p className="text-truncate">{row.original.detail}</p>
+          )}
+        </p>
+      )
+    });
+    column.push({
+      accessor: 'description',
+      Header: "Description",
+      width: 200,
+      Cell: ({ row }) => {
+        return row.original['description'] ? <p className="text-truncate">{row?.original?.description}</p> : <NoDataCell />;
+      }
+    });
+    productFields?.forEach((e) => {
       if (e?.fieldData?.fieldName === 'productNumber') {
         column.push({
           accessor: 'productNumber',
           Header: e?.fieldData?.fieldLabel,
-          width: 300,
+          width: 200,
           Cell: ({ row }) => (row.original.productNumber ? <p className="text-truncate">{row.original.productNumber}</p> : <NoDataCell />)
-        });
-      }
-      if (e?.fieldData?.fieldName === 'productDescription') {
-        column.push({
-          accessor: 'productDescription',
-          Header: e?.fieldData?.fieldLabel,
-          width: 300,
-          Cell: ({ row }) => (row.original.productDescription ? <p className="text-truncate">{row.original.productDescription}</p> : <NoDataCell />)
         });
       }
       if (e?.fieldData?.fieldName === 'serializedProduct') {
         column.push({
           accessor: 'serializedProductView',
           Header: e?.fieldData?.fieldLabel,
-          width: 150,
+          width: 200,
           Cell: ({ row }) =>
             row.original.type === 'Product' ? <p className="text-truncate">{row.original.serializedProductView}</p> : <NoDataCell />
         });
@@ -121,12 +127,12 @@ const ReceivingAsset = ({
         column.push({
           accessor: 'productCategory',
           Header: e?.fieldData?.fieldLabel,
-          width: 150,
-          Cell: ({ row }) =>
-            row.original.type === 'Product' ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />
+          width: 200,
+          Cell: ({ row }) => (row.original.type === 'Product' ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />)
         });
       }
     });
+
     let fields = await fetch_po_product_fields(purchaseOrderData?.currency);
     fields.forEach((element) => {
       if (element.type === 'date') {
@@ -248,39 +254,45 @@ const ReceivingAsset = ({
           sticky: 'right',
           disableFilters: true,
           canDrag: false,
-          Cell: ({ row }) => (
-            row?.original?.type === "Product" ?
+          Cell: ({ row }) =>
+            row?.original?.type === 'Product' ? (
               <>
-                {(permissions?.purchaseOrder?.isUpdate && allowedToEdit && row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0)) ? (
-                  <HtmlTooltip title="Reject">
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="reject"
-                        onClick={() => {
-                          setRejectProductDialog(row.original);
-                        }}
-                      >
-                        <TransformIcon fontSize="small" color={'primary'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                ) : null}
+                {permissions?.purchaseOrder?.isUpdate
+                  && allowedToEdit
+                  && row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0)
+                  && ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status)
+                  ? (
+                    <HtmlTooltip title="Reject">
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="reject"
+                          onClick={() => {
+                            setRejectProductDialog(row.original);
+                          }}
+                        >
+                          <TransformIcon fontSize="small" color={'primary'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                  ) : null}
                 <HtmlTooltip title="History">
                   <span>
                     <IconButton
                       size="small"
                       aria-label="History"
                       onClick={() => {
-                        setHistoryDialog({ open: true, product: row?.original?.productId, productName: row?.original?.productName });
+                        setHistoryDialog({ open: true, product: row?.original?.productId, productName: row?.original?.detail });
                       }}
                     >
                       <HistoryIcon fontSize="small" color={'primary'} />
                     </IconButton>
                   </span>
                 </HtmlTooltip>
-              </> : <></>
-          )
+              </>
+            ) : (
+              <></>
+            )
         }
       ]
     ]);
@@ -293,18 +305,20 @@ const ReceivingAsset = ({
       const serializedAsset = assets?.data?.data?.serializedAsset;
       const productSerialNumber = assets?.data?.data?.productSerialNumber;
 
-      setInventoryHistory(assets?.data?.data?.inventoryHistory)
+      setInventoryHistory(assets?.data?.data?.inventoryHistory);
 
-      let rows = result?.data?.data?.map((item) => {
+      let rows = result?.data?.data?.map((item, index) => {
         let finalObject = prepareDataForGrid(item);
         finalObject['isChecked'] = selectedRecords.some((s) => s._id === item._id);
         finalObject['allowedToEdit'] = allowedToEdit;
         let res: any = {
           ...finalObject,
+          index: index + 1,
           type: 'Product',
+          detail: item?.productDetail?.productName,
+          description: item?.productDetail?.productDescription,
           productName: item?.productDetail?.productName,
           productNumber: item?.productDetail?.productNumber,
-          productDescription: item?.productDetail?.productDescription,
           serializedProduct: item?.productDetail?.serializedProduct,
           serializedProductView: item.productDetail?.serializedProduct ? 'Yes' : 'No',
           productCategory: item.productDetail?.productCategory?.optionLabel,
@@ -315,9 +329,9 @@ const ReceivingAsset = ({
         const subRows = serializedAsset?.filter((e) => e?.product?.optionValue === res?.productId);
         if (subRows?.length) {
           let actualReceived = item.actualReceived;
-          subRows?.forEach((e: any) => {
+          subRows?.forEach((e: any, index) => {
             if (actualReceived && !e.isUsed) {
-              res.subRows.push({ productName: e.assetNumber, type: 'Asset', assetId: e?._id, hideSelection: true });
+              res.subRows.push({ index: `${res.index}.${index + 1}`, detail: e.assetNumber, type: 'Asset', assetId: e?._id, hideSelection: true });
               actualReceived = actualReceived - 1;
               e.isUsed = true;
             }
@@ -326,9 +340,9 @@ const ReceivingAsset = ({
         const subRowsproductSerialNumber = productSerialNumber?.filter((e) => e?.product === res?.productId);
         if (subRowsproductSerialNumber?.length) {
           let actualReceived = item.actualReceived;
-          subRowsproductSerialNumber?.forEach((e: any) => {
+          subRowsproductSerialNumber?.forEach((e: any, index: any) => {
             if (actualReceived && !e.isUsed) {
-              res.subRows.push({ productName: e.serialNumber, type: 'Serial Number', assetId: e?._id, hideSelection: true });
+              res.subRows.push({ index: `${res.index}.${index + 1}`, detail: e.serialNumber, type: 'Serial Number', assetId: e?._id, hideSelection: true });
               actualReceived = actualReceived - 1;
               e.isUsed = true;
             }
@@ -338,7 +352,8 @@ const ReceivingAsset = ({
         res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - subRows?.length : 0;
         return res;
       });
-      checkReceivedProduct(result?.data?.data);
+
+      checkReceivedProduct(result?.data?.data?.map((e) => { return { ...e, type: "Product" } }));
       setRowsData(rows);
       setSelectedRecords([]);
     } catch (error) {
@@ -348,35 +363,45 @@ const ReceivingAsset = ({
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between" m={1}>
+      <Box display="flex" justifyContent="space-between" m={1} pb={2}>
         <Box display="flex">
-          {permissions?.purchaseOrder?.isUpdate && allowedToEdit && <Button
-            variant={'contained'}
-            color="primary"
-            size="small"
-            style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-            disabled={selectedRecords.length === 0 ||
-              (selectedRecords?.filter((e: any) => e.type === "Product" && e.qty - (e?.actualReceived || 0) > 0).length > 0 ? false : true)}
-            onClick={() => {
-              setReceiveDialog(true);
-            }}
-          >
-            Receive
-          </Button>}
-          {permissions?.purchaseOrder?.isUpdate && allowedToEdit && <Button
-            variant={'contained'}
-            color="primary"
-            size="small"
-            className='ml-2'
-            style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-            disabled={selectedRecords.length === 0 ||
-              (selectedRecords?.filter((e: any) => e.type === "Product" && e.qty !== (e?.rejectQuantity || 0 + e?.assetQty || 0)).length > 0 ? false : true)}
-            onClick={() => {
-              setRejectDialog(true);
-            }}
-          >
-            Reject
-          </Button>}
+          {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
+            <Button
+              variant={'contained'}
+              color="primary"
+              size="small"
+              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
+              disabled={
+                selectedRecords.length === 0 ||
+                (selectedRecords?.filter((e: any) => e.type === 'Product' && e.qty - (e?.actualReceived || 0) > 0).length > 0 ? false : true)
+              }
+              onClick={() => {
+                setReceiveDialog(true);
+              }}
+            >
+              Receive
+            </Button>
+          )}
+          {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
+            <Button
+              variant={'contained'}
+              color="primary"
+              size="small"
+              className="ml-2"
+              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
+              disabled={
+                selectedRecords.length === 0 ||
+                (selectedRecords?.filter((e: any) => e.type === 'Product' && e.qty !== (e?.rejectQuantity || 0 + e?.assetQty || 0)).length > 0
+                  ? false
+                  : true)
+              }
+              onClick={() => {
+                setRejectDialog(true);
+              }}
+            >
+              Reject
+            </Button>
+          )}
         </Box>
         <div className="d-flex gap-2">
           <SendEmail purchaseOrderData={purchaseOrderData} />
@@ -384,9 +409,9 @@ const ReceivingAsset = ({
       </Box>
       <Grid item xs={12} md={12} sm={12}>
         {columns && rowsData ? (
-          <Box zIndex={5} width={isMobileScreen ? '100vw' : stepFullScreen || showActivity || isTabletScreen ? '100%' : 'calc(100vw - 103px)'}>
+          <Box zIndex={5} width={'100%'}>
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
               onSelect={setSelectedRecords}
@@ -411,7 +436,7 @@ const ReceivingAsset = ({
             setReceiveDialog(false);
             fetchProduct();
           }}
-          productList={selectedRecords.filter((d) => d.type === "Product" && d.qty !== d.actualReceived)}
+          productList={selectedRecords.filter((d) => d.type === 'Product' && d.qty !== d.actualReceived)}
           purchaseOrderData={purchaseOrderData}
         />
       )}
@@ -423,7 +448,7 @@ const ReceivingAsset = ({
             setRejectDialog(false);
             fetchProduct();
           }}
-          productList={selectedRecords.filter((d) => d.type === "Product" && d.qty !== (d?.rejectQuantity || 0 + d?.assetQty || 0))}
+          productList={selectedRecords.filter((d) => d.type === 'Product' && d.qty !== (d?.rejectQuantity || 0 + d?.assetQty || 0))}
           purchaseOrderData={purchaseOrderData}
         />
       )}
@@ -442,7 +467,7 @@ const ReceivingAsset = ({
       )}
       {historyDialog.open && (
         <History
-          handleClose={() => setHistoryDialog({ open: false, product: "", productName: "" })}
+          handleClose={() => setHistoryDialog({ open: false, product: '', productName: '' })}
           productName={historyDialog.productName}
           inventoryHistory={inventoryHistory?.filter((e) => e.product === historyDialog.product)}
         />

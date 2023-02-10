@@ -46,6 +46,7 @@ import DateRangeIcon from '@material-ui/icons/DateRange';
 import SalesOrderQtyDialog from './SalesOrderQtyDialog';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
 import LeadTimeDialog from './LeadTimeDialog';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -60,15 +61,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen }) => {
+const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedFrom, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
     state: { user, permissions }
   }: any = useData();
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
+
   const [isUpdating, setUpdating] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -101,7 +101,12 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const coloum: any = [
+    const newColumns = genrateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay'
+    }
+    let coloum: any = [
       {
         accessor: 'detail',
         Header: 'Detail',
@@ -142,20 +147,22 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
               color="primary"
               onClick={() => {
                 window.open(
-                  `${
-                    row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === 'product'
+                  `${row.original.type === 'serializedAsset'
+                    ? routes.serializedAssetDetail.path
+                    : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'package'
-                      ? routes.packagesDetail.path
-                      : routes.serviceMasterDetail.path
+                        ? routes.packagesDetail.path
+                        : routes.serviceMasterDetail.path
                   }/${row.original.materialId}`
                 );
               }}
             />
           </div>
-        )
+        ),
+        Footer: () => {
+          return <>Total</>;
+        }
       },
       {
         accessor: 'leadTime',
@@ -169,84 +176,9 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
         }
       }
     ];
-    data.forEach((element) => {
-      if (element.fieldName === 'price' && element.required) {
-        setIsRateRequired(true);
-      }
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-        });
-      } else if (element.fieldName === 'supplierAccount') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? (
-              <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
-            ) : (
-              <NoDataCell />
-            )
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                )
-            });
-          });
-        }
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
-      }
-    });
+    const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    setIsRateRequired(isPriceRequired);
+    coloum = [...coloum, ...newColumns];
     {
       isMobile ? (
         <Box display={'none'} />
@@ -287,31 +219,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
         })
       );
     }
-    coloum.forEach((element) => {
-      if (element.accessor.includes('detail')) {
-        element['Footer'] = () => {
-          return <>Total</>;
-        };
-      } else if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      } else if (element.accessor.includes('finalPrice')) {
-        element['Footer'] = (info) => {
-          const total = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return (
-            <>
-              {currencySymbol} {formatAmountWithCurrency(salesOrderData?.currency, total)?.amountWithouCurrencyCode ?? total}
-            </>
-          );
-        };
-      }
-    });
     setColumns(coloum);
     fetchProductInventory();
   };
@@ -319,29 +226,24 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
   const fetchProductInventory = async () => {
     setNextStep(false);
     var data: any = [];
-    var inventory: any = [];
     const response = await axiosInstance().get(`${salesOrder.api}/productpackage/${salesOrderData._id}`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
-    inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
-      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
-      parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
-      parent.subRows = generateNestedData(data.material, inventory, parent);
+      parent.subRows = generateNestedData(data.material, parent);
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(true);
@@ -352,25 +254,22 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
     setSelectedProducts([]);
   };
 
-  const generateNestedData = (material, inventory, parent) => {
+  const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      _subRow.qtyDisplay = _subRow.qty;
+      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
-      _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
-      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
-      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+      _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -667,16 +566,9 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
       </Box>
       {columns && rowsData ? (
         <>
-          <Box
-            p="6px"
-            zIndex={5}
-            width={
-              stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 100px)'
-            }
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-          >
+          <Box p="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
@@ -723,8 +615,8 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
             addExistingProductDialog.type === 'product'
               ? `${renderedFrom}-product`
               : addExistingProductDialog.type === 'service'
-              ? `${renderedFrom}-service`
-              : `${renderedFrom}-package`
+                ? `${renderedFrom}-service`
+                : `${renderedFrom}-package`
           }
           isAddingProducts={isAddingProducts}
           addProductInventory={handleAdd}
@@ -799,3 +691,4 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
 };
 
 export default Productpackage;
+

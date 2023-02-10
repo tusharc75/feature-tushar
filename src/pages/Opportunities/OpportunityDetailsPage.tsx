@@ -9,7 +9,6 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import axiosInstance from './../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
-import Activity from '../../components/Activity';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageOpportunityDialog from './ManageOpportunityDialog/ManageOpportunityDialog';
@@ -24,8 +23,7 @@ import {
   customerContact,
   getObjKeysWithValues,
   processFieldName,
-  formatAmountWithCurrency,
-  defaultActivityShow
+  formatAmountWithCurrency
 } from '../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { opportunity, sidebarResource } from '../../constants/helpers';
@@ -38,12 +36,11 @@ import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccord
 import ProcessFlow from '../../components/ProcessFlow';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { SVG } from '../../assets';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { BiEdit } from 'react-icons/bi';
-import contactClass from '../Contact/contact.module.scss';
-import accountClass from '../Account/account.module.scss';
+
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -52,7 +49,6 @@ function OpportunityDetailsPage() {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(true);
   const [opportunityData, setOpportunityData] = useState(null);
@@ -70,7 +66,6 @@ function OpportunityDetailsPage() {
   const [supplierContacts, setSupplierContacts] = useState([]);
   const [customerContacts, setCustomerContacts] = useState([]);
   const [quotes, setQuotes] = useState([]);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
   const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' });
@@ -95,9 +90,6 @@ function OpportunityDetailsPage() {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [, setShowAtLast] = useState(false);
   const [, setAdditionalFieldName] = useState('');
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
 
   const handleOpenUpdateDialog = () => {
     if (activeStep === steps.length - 1) {
@@ -131,12 +123,6 @@ function OpportunityDetailsPage() {
       fetchRelatedData();
     }
   }, [id]);
-
-  useEffect(() => {
-    if (isSmallScreen) {
-      setActivityShow(true);
-    }
-  }, [isSmallScreen]);
 
   useEffect(() => {
     if (
@@ -567,327 +553,239 @@ function OpportunityDetailsPage() {
 
   return (
     <>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={customizedRoutes} />
-      </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-        <div>
-          <Paper style={isMobile ? { width: '98%' } : {}}>
-            {!opportunityData ? (
-              <div>
-                <Skeleton variant="text" width="150px" height="40px" />
-                <Box display="flex">
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  <Box marginX={1} />
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                </Box>
-              </div>
-            ) : (
-              <DetailsPageHeader
-                heading={headingLbl}
-                logo={opportunityData?.leadLogo ? opportunityData.leadLogo : undefined}
-                mainPoints={parentLead.leadId ? Object.assign(mainPoints, { 'Parent Lead': parentLead }) : mainPoints}
-                showHeading={true}
-              >
-                {allowedToEdit ? (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                ) : null}
-                {opportunityPermissions.isDelete &&
-                opportunityData?.owner.optionValue &&
-                user?.user?._id &&
-                opportunityData.owner.optionValue === user.user._id ? (
-                  <DeleteButton
-                    text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
-                    onClick={() => setShowConfirmBox(true)}
-                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                  />
-                ) : null}
-              </DetailsPageHeader>
-            )}
-            <ProcessFlow
-              disableBackNext={allowedToEdit ? false : true}
-              steps={steps}
-              activeStep={activeStep}
-              handleMarkAsCompleted={handleMarkAsCompleted}
-            />
-
-            {loading ? (
-              <Grid container spacing={2}>
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
-                  <Grid key={index} item sm={6} md={6}>
-                    <Skeleton variant="text" width="100px" height="16px" />
-                    <Box marginY={1} />
-                    <Skeleton width="100%" height="50px" />
-                  </Grid>
-                ))}
-              </Grid>
-            ) : !opportunityFields.length ? (
-              <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-                <img src={SVG('Opportunity Placeholder')} alt="No Data" />
-              </Box>
-            ) : (
-              <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
-            )}
-
-            <div className="p-3 modified_style_of_accordion">
-              {opportunityData && permissions?.supplierContact?.isRead && (
-                <OpportunityContacts
-                  contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
-                  title="Supplier Contacts"
-                  contactApi={supplierContact.contactApi}
-                  isExpanded={expanded.supplierContacts}
-                  onAddContact={() => {
-                    fetchSupplierContactData(true);
-                  }}
-                  onSetExpanded={() => {
-                    setExpanded({
-                      ...expanded,
-                      supplierContacts: !expanded.supplierContacts
-                    });
-                  }}
-                  recordsPerLine={recordsPerLine}
-                  accounts={cloneDeep(opportunityData?.supplierAccount)}
-                  isAllowedToUpdate={allowedToEdit}
-                />
-              )}
-              {opportunityData && permissions?.customerContact?.isRead && (
-                <OpportunityContacts
-                  contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
-                  title="Customer Contacts"
-                  isExpanded={expanded['customerContacts']}
-                  contactApi={customerContact.contactApi}
-                  onAddContact={() => {
-                    fetchCustomerContactData(true);
-                  }}
-                  onSetExpanded={() => {
-                    setExpanded({
-                      ...expanded,
-                      customerContacts: !expanded.customerContacts
-                    });
-                  }}
-                  recordsPerLine={recordsPerLine}
-                  saveContactToOpportunity={handleAssignContacts}
-                  accountId={opportunityData?.customerAccount?.optionValue}
-                  isAllowedToUpdate={allowedToEdit}
-                />
-              )}
-              {permissions?.projectSales?.isRead && (
-                <ProjectInAccordion
-                  recordsPerLine={3}
-                  projectSales={projectSales}
-                  type={typeCreateProjectSalesDialog}
-                  fetchData={fetchRelatedData}
-                  permissions={permissions}
-                  isAddProjectSale={true}
-                  isAllowedToEdit={allowedToEdit}
-                  accountId={opportunityData?._id}
-                  accountName={opportunityData?.opportunityName}
-                  resource={sidebarResource.opportunity}
-                />
-              )}
-              {permissions?.quoteBuilder?.isRead && (
-                <QuotesInAccordion
-                  recordsPerLine={3}
-                  quotes={quotes}
-                  fetchData={fetchRelatedData}
-                  quoteBuilderPermission={permissions.quoteBuilder}
-                  opportunityId={id}
-                  accountId={opportunityData?.customerAccount?.optionValue}
-                  opportunityName={opportunityData?.opportunityName}
-                  marketSegmentId={opportunityData?.marketSegment?.optionValue}
-                  subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
-                  currency={opportunityData?.currency}
-                  estimatedAmount={opportunityData?.estimatedAmount}
-                  isRenderedFromOpportunity={true}
-                  isAllowedToUpdate={allowedToEdit}
-                />
-              )}
-            </div>
-          </Paper>
-        </div>
-        <div className={isMobile ? 'position-relative mb-5' : 'position-relative'}>
-          {/* {showActivity ?
-            <Paper>
-              {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                <IoIosArrowDropright className="icon" />
-              </span>}
-              {!opportunityData ? (
-                <Box>
-                  <Skeleton variant="text" width="100px" height="25px" />
-                  <Box marginY={1} />
-                  {[0, 1, 2, 3, 4].map((i, index) => (
-                    <Skeleton key={index} width="100%" height="50px" />
-                  ))}
-                </Box>
+      <Box className="main-container-v1">
+        <Box className="headerbox-v1">
+          <Box className="nav-v1">
+            <CustomBreadCrumbs routes={customizedRoutes} />
+          </Box>
+          <Box className="controls-v1">
+            <Box className="control-buttons-v1">
+              {opportunityData ? (
+                <>
+                  {allowedToEdit ? (
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      size="small"
+                      onClick={handleOpenUpdateDialog}
+                      className={'btn-outline-v1'}
+                    >
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    </Button>
+                  ) : null}
+                  {opportunityPermissions.isDelete &&
+                  opportunityData?.owner.optionValue &&
+                  user?.user?._id &&
+                  opportunityData.owner.optionValue === user.user._id ? (
+                    <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
+                  ) : null}
+                  <ActivityButton referenceId={opportunityData?._id} resource={opportunityResource} />
+                </>
               ) : (
-                <div>
-                  <Activity
-                    resourceId={opportunityData?._id}
-                    resource={opportunityResource}
-                    relatedTo={[
-                      {
-                        type: opportunityResource,
-                        referenceId: opportunityData?._id,
-                        access: true
-                      }
-                    ]}
-                    handleActivityRefresh={() => { }}
-                    emails={contactsEmailsData}
-                  />
-                </div>
+                <Skeleton variant="text" width="150px" height="32px" />
               )}
-            </Paper>
-            :
-            !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-              <IoIosArrowDropleft className="icon" />
-            </span>} */}
-
-          <Paper>
-            {!isSmallScreen && (
-              <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-              </span>
-            )}
-            <div style={{ display: showActivity ? 'block' : 'none' }}>
-              {!opportunityData ? (
-                <Box>
-                  <Skeleton variant="text" width="100px" height="25px" />
-                  <Box marginY={1} />
-                  {[0, 1, 2, 3, 4].map((i, index) => (
-                    <Skeleton key={index} width="100%" height="50px" />
-                  ))}
-                </Box>
-              ) : (
-                <div>
-                  <Activity
-                    resourceId={opportunityData?._id}
-                    resource={opportunityResource}
-                    relatedTo={[
-                      {
-                        type: opportunityResource,
-                        referenceId: opportunityData?._id,
-                        access: true
-                      }
-                    ]}
-                    handleActivityRefresh={() => {}}
-                    emails={contactsEmailsData}
-                  />
-                </div>
-              )}
-            </div>
-          </Paper>
-        </div>
-      </div>
-
-      {showConfirmBox ? (
-        <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete this opportunity`}
-          onClose={() => setShowConfirmBox(false)}
-          onOk={handleDeleteOpportunity}
-        />
-      ) : null}
-
-      {openUpdateDialog && (
-        <ManageOpportunityDialog
-          open={openUpdateDialog}
-          onSuccess={() => {
-            setOpenUpdateDialog(false);
-            fetchOpportunityData();
-          }}
-          onClose={() => {
-            setOpenUpdateDialog(false);
-          }}
-          isNew={false}
-          dataToUpdate={opportunityData}
-          resource={null}
-          isRedirectTodetailPage={false}
-          // opportunityApi={opportunityApi}
-        />
-      )}
-
-      {showAddSupplierContactsDialog && (
-        <AssignSupplierContactsDialog
-          opportunityId={opportunityData._id}
-          open={showAddSupplierContactsDialog}
-          title="Assign Supplier Contacts"
-          onSuccess={() => {
-            fetchOpportunityData();
-            setShowAddSupplierContactsDialog(false);
-          }}
-          handleCloseDialog={() => {
-            if (selectedSupplierAccounts.length == 0) setSupplierContacts([]);
-            setShowAddSupplierContactsDialog(false);
-          }}
-          contacts={{
-            supplierContacts: supplierContacts,
-            customerContacts: customerContacts,
-            notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
-          }}
-          contactType="supplier"
-          supplierAccountOptions={supplierAccountOptions}
-          onGetSupplierAccountsContacts={fetchSupplierContactData}
-          onUpdateOpportunity={handleUpdateOpportunity}
-          currentContacts={supplierContacts}
-          selectedSupplierAccountsList={selectedSupplierAccounts}
-          handleContactSelection={handleContactSelection}
-          loadingSupplierAccounts={loadingSupplierAccounts}
-          notToBeRemovedContacts={notToBeRemovedContacts}
-        />
-      )}
-
-      {showAddCustomerContactsDialog && (
-        <AssignContactsDialog
-          opportunityId={opportunityData._id}
-          open={showAddCustomerContactsDialog}
-          title="Assign Customer Contacts"
-          onSuccess={() => {
-            fetchOpportunityData();
-            setShowAddCustomerContactsDialog(false);
-          }}
-          handleCloseDialog={() => {
-            setShowAddCustomerContactsDialog(false);
-          }}
-          contacts={{
-            supplierContacts: supplierContacts,
-            customerContacts: customerContacts,
-            notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
-          }}
-          assignedContacts={opportunityData.staticData?.customerContact ?? []}
-          contactType="customer"
-          notToBeRemovedContacts={notToBeRemovedContacts}
-        />
-      )}
-
-      {messageDialog.open && (
-        <MessageDialog
-          open={messageDialog.open}
-          onClose={() => {
-            setMessageDialog({ open: false, message: null });
-          }}
-          message={messageDialog.message}
-        />
-      )}
-      {openAdditionalDialog && (
-        <>
-          <AdditionalDialogPopUp
-            open={openAdditionalDialog}
-            close={() => setOpenAdditionalDialog(false)}
-            title="Additional Information"
-            fieldData={sectionFields}
-            handleSave={handleSave}
+            </Box>
+          </Box>
+        </Box>
+        <Box className={`detail-container-v1`}>
+          <ProcessFlow
+            disableBackNext={allowedToEdit ? false : true}
+            steps={steps}
+            activeStep={activeStep}
+            handleMarkAsCompleted={handleMarkAsCompleted}
           />
-        </>
-      )}
+          {loading ? (
+            <Grid container spacing={2}>
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
+                <Grid key={index} item sm={6} md={6}>
+                  <Skeleton variant="text" width="100px" height="16px" />
+                  <Box marginY={1} />
+                  <Skeleton width="100%" height="50px" />
+                </Grid>
+              ))}
+            </Grid>
+          ) : !opportunityFields.length ? (
+            <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
+              <img src={SVG('Opportunity Placeholder')} alt="No Data" />
+            </Box>
+          ) : (
+            <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
+          )}
+          <div className="pt-3 modified_style_of_accordion">
+            {opportunityData && permissions?.supplierContact?.isRead && (
+              <OpportunityContacts
+                contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
+                title="Supplier Contacts"
+                contactApi={supplierContact.contactApi}
+                isExpanded={expanded.supplierContacts}
+                onAddContact={() => {
+                  fetchSupplierContactData(true);
+                }}
+                onSetExpanded={() => {
+                  setExpanded({
+                    ...expanded,
+                    supplierContacts: !expanded.supplierContacts
+                  });
+                }}
+                recordsPerLine={recordsPerLine}
+                accounts={cloneDeep(opportunityData?.supplierAccount)}
+                isAllowedToUpdate={allowedToEdit}
+              />
+            )}
+            {opportunityData && permissions?.customerContact?.isRead && (
+              <OpportunityContacts
+                contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
+                title="Customer Contacts"
+                isExpanded={expanded['customerContacts']}
+                contactApi={customerContact.contactApi}
+                onAddContact={() => {
+                  fetchCustomerContactData(true);
+                }}
+                onSetExpanded={() => {
+                  setExpanded({
+                    ...expanded,
+                    customerContacts: !expanded.customerContacts
+                  });
+                }}
+                recordsPerLine={recordsPerLine}
+                saveContactToOpportunity={handleAssignContacts}
+                accountId={opportunityData?.customerAccount?.optionValue}
+                isAllowedToUpdate={allowedToEdit}
+              />
+            )}
+            {permissions?.projectSales?.isRead && (
+              <ProjectInAccordion
+                recordsPerLine={3}
+                projectSales={projectSales}
+                type={typeCreateProjectSalesDialog}
+                fetchData={fetchRelatedData}
+                permissions={permissions}
+                isAddProjectSale={true}
+                isAllowedToEdit={allowedToEdit}
+                accountId={opportunityData?._id}
+                accountName={opportunityData?.opportunityName}
+                resource={sidebarResource.opportunity}
+              />
+            )}
+            {permissions?.quoteBuilder?.isRead && (
+              <QuotesInAccordion
+                recordsPerLine={3}
+                quotes={quotes}
+                fetchData={fetchRelatedData}
+                quoteBuilderPermission={permissions.quoteBuilder}
+                opportunityId={id}
+                accountId={opportunityData?.customerAccount?.optionValue}
+                opportunityName={opportunityData?.opportunityName}
+                marketSegmentId={opportunityData?.marketSegment?.optionValue}
+                subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
+                currency={opportunityData?.currency}
+                estimatedAmount={opportunityData?.estimatedAmount}
+                isRenderedFromOpportunity={true}
+                isAllowedToUpdate={allowedToEdit}
+              />
+            )}
+          </div>
+        </Box>
+        {showConfirmBox ? (
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={`Are you sure you want to delete this opportunity`}
+            onClose={() => setShowConfirmBox(false)}
+            onOk={handleDeleteOpportunity}
+          />
+        ) : null}
+
+        {openUpdateDialog && (
+          <ManageOpportunityDialog
+            open={openUpdateDialog}
+            onSuccess={() => {
+              setOpenUpdateDialog(false);
+              fetchOpportunityData();
+            }}
+            onClose={() => {
+              setOpenUpdateDialog(false);
+            }}
+            isNew={false}
+            dataToUpdate={opportunityData}
+            resource={null}
+            isRedirectTodetailPage={false}
+            // opportunityApi={opportunityApi}
+          />
+        )}
+
+        {showAddSupplierContactsDialog && (
+          <AssignSupplierContactsDialog
+            opportunityId={opportunityData._id}
+            open={showAddSupplierContactsDialog}
+            title="Assign Supplier Contacts"
+            onSuccess={() => {
+              fetchOpportunityData();
+              setShowAddSupplierContactsDialog(false);
+            }}
+            handleCloseDialog={() => {
+              if (selectedSupplierAccounts.length == 0) setSupplierContacts([]);
+              setShowAddSupplierContactsDialog(false);
+            }}
+            contacts={{
+              supplierContacts: supplierContacts,
+              customerContacts: customerContacts,
+              notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
+            }}
+            contactType="supplier"
+            supplierAccountOptions={supplierAccountOptions}
+            onGetSupplierAccountsContacts={fetchSupplierContactData}
+            onUpdateOpportunity={handleUpdateOpportunity}
+            currentContacts={supplierContacts}
+            selectedSupplierAccountsList={selectedSupplierAccounts}
+            handleContactSelection={handleContactSelection}
+            loadingSupplierAccounts={loadingSupplierAccounts}
+            notToBeRemovedContacts={notToBeRemovedContacts}
+          />
+        )}
+
+        {showAddCustomerContactsDialog && (
+          <AssignContactsDialog
+            opportunityId={opportunityData._id}
+            open={showAddCustomerContactsDialog}
+            title="Assign Customer Contacts"
+            onSuccess={() => {
+              fetchOpportunityData();
+              setShowAddCustomerContactsDialog(false);
+            }}
+            handleCloseDialog={() => {
+              setShowAddCustomerContactsDialog(false);
+            }}
+            contacts={{
+              supplierContacts: supplierContacts,
+              customerContacts: customerContacts,
+              notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
+            }}
+            assignedContacts={opportunityData.staticData?.customerContact ?? []}
+            contactType="customer"
+            notToBeRemovedContacts={notToBeRemovedContacts}
+          />
+        )}
+
+        {messageDialog.open && (
+          <MessageDialog
+            open={messageDialog.open}
+            onClose={() => {
+              setMessageDialog({ open: false, message: null });
+            }}
+            message={messageDialog.message}
+          />
+        )}
+        {openAdditionalDialog && (
+          <>
+            <AdditionalDialogPopUp
+              open={openAdditionalDialog}
+              close={() => setOpenAdditionalDialog(false)}
+              title="Additional Information"
+              fieldData={sectionFields}
+              handleSave={handleSave}
+            />
+          </>
+        )}
+      </Box>
     </>
   );
 }

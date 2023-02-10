@@ -10,10 +10,8 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import {
   repairOrder,
+  REPAIR_ORDER_TYPE,
   workOrder,
-  sidebarResource,
-  getObjKeys,
-  generateUniqueIdOnly,
   WORKORDER_SERVICE_STATUS,
   WORK_ORDER_STATUS
 } from '../../../constants/helpers';
@@ -32,14 +30,12 @@ const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm
 const WorkOrder = ({
   repairOrderData,
   setNextStep,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity,
   stepFullScreen,
   allowedToEdit,
   allowedToDelete,
   isPostWorkService,
-  setCurrentStep
+  setCurrentStep,
+  createNewVersionQuote
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -240,11 +236,11 @@ const WorkOrder = ({
         disableFilters: true,
         canDrag: false,
         Cell: ({ row }) => {
-          return row?.original?.type === 'service' ||
-            (row?.original?.type === 'package' && row?.original?.packageDetail?.packageType === 'Service') ? (
+          return row?.original?.type === 'service' || row?.original?.type === 'package' ? (
             <>
               <IconButton
-                disabled={row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete ? false : true}
+                disabled={row?.original?.type === 'package' && row?.original?.subRows?.length === 0 ? false :
+                  row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete ? false : true}
                 size="small"
                 aria-label="Details"
                 onClick={() => {
@@ -254,7 +250,8 @@ const WorkOrder = ({
               >
                 <Delete
                   fontSize="small"
-                  color={row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete ? 'error' : 'disabled'}
+                  color={row?.original?.type === 'package' && row?.original?.subRows?.length === 0 ? 'error' :
+                    row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete ? 'error' : 'disabled'}
                 />
               </IconButton>
             </>
@@ -297,13 +294,12 @@ const WorkOrder = ({
       .catch((err) => {
         setShowConfirmBox(false);
         setDeleting(false);
-
         toastConfig.setToastConfig(err);
       });
   };
 
   const handleDelete = () => {
-    if (deleteData?.some((e) => e.type === 'service')) {
+    if (deleteData?.some((e) => e.type === 'service' || e.type === 'package')) {
       let ids = [];
       let workOrderId = '';
       if (deleteData.length > 0) {
@@ -318,6 +314,9 @@ const WorkOrder = ({
           uniqueIds: ids
         })
         .then(({ data }) => {
+          if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
+            createNewVersionQuote(true)
+          }
           setDeleting(false);
           setShowConfirmBox(false);
           fetchData();
@@ -330,7 +329,6 @@ const WorkOrder = ({
         .catch((err) => {
           setShowConfirmBox(false);
           setDeleting(false);
-
           toastConfig.setToastConfig(err);
         });
     } else {
@@ -363,11 +361,11 @@ const WorkOrder = ({
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
+            ? parent?.productDetail?.productDescription || ''
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : parent.type === 'serializedAsset'
-                ? parent?.serializedAssetDetail?.product?.productDesc || ''
+                ? parent?.serializedAssetDetail?.product?.productDescription || ''
                 : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
@@ -431,7 +429,7 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
+            ? _subRow?.productDetail?.productDescription || ''
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
@@ -469,6 +467,9 @@ const WorkOrder = ({
     axiosInstance()
       .post(`${workOrder.api}/service`, data)
       .then(() => {
+        if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
+          createNewVersionQuote(true)
+        }
         fetchData();
       })
       .catch((err) => {
@@ -617,13 +618,9 @@ const WorkOrder = ({
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={stepFullScreen ? '100%' : isTabletScreen ? '100%' : isSmallScreen ? '100%' : showActivity ? '100%' : 'calc(100vw - 103px)'}
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-            >
+            <Box zIndex={5} width={'100%'}>
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                 columns={columns}
                 data={rowsData}
                 onSelect={(data) => {
@@ -634,6 +631,7 @@ const WorkOrder = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={allowedToEdit ? false : isPostWorkService ? false : true}
+                hideAction={allowedToEdit ? false : isPostWorkService ? false : true}
                 renderedFrom="repair_order_workorder"
                 isClientSideGrid={true}
               />
@@ -645,11 +643,11 @@ const WorkOrder = ({
           )}
           {addServicesDialog.open && (
             <AssignServiceDialog
-              reference="workorder"
+              reference="repairOrder"
               handleClose={() => setAddServicesDialog({ open: false })}
               ids={[]}
               onSuccess={(data) => {
-                handleAddService(data?.map((e) => e.service));
+                handleAddService(data?.map((e) => e._id));
                 setAddServicesDialog({ open: false });
               }}
               extraStaticFilter={!isPostWorkService ? [] : [{ field: 'preWork', term: false }]}

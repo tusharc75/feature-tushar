@@ -45,6 +45,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
             inventoryQuantity: parseInt(u?.inventoryQuantity),
             assetQuantity: parseInt(u?.assetQuantity),
             serialNumber: u?.serialNumber,
+            comment: u?.comment,
         }))
         axiosInstance().post(`${purchaseOrder.api}/receive-inventory/${purchaseOrderID}`,
             { products: products, receiveDate: values?.receiveDate }).then(({ data }) => {
@@ -162,12 +163,13 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                             "assetQuantity": 0,
                             "serializedProduct": d.serializedProduct || false,
                             "serialNumber": [],
+                            "comment": "",
                             "row": d
                         }))
                     }}
                     enableReinitialize={true}
                     onSubmit={() => { }}>
-                    {({ values, setFieldValue }) => (
+                    {({ values, setFieldValue, errors }) => (
                         <>
                             <CustomDialogContent>
                                 {(values.seriaizedAsset && values.seriaizedAsset.length && wareHouseList) ?
@@ -257,6 +259,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                                     type="number"
                                                                                                     size="small"
                                                                                                     component={TextField}
+                                                                                                    onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                                                                     name="inventoryQuantity"
                                                                                                     placeholder="Inventory Quantity"
                                                                                                     value={data.inventoryQuantity}
@@ -278,6 +281,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                                         label='Asset Creation Quantity'
                                                                                                         variant="outlined"
                                                                                                         type="number"
+                                                                                                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                                                                         size="small"
                                                                                                         component={TextField}
                                                                                                         name="assetQuantity"
@@ -355,6 +359,27 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                             </Grid>
                                                                                         </Box>
                                                                                     }
+                                                                                    <Box mt={2}>
+                                                                                        <Grid item xs={12} md={8}>
+                                                                                            <Field
+                                                                                                fullWidth
+                                                                                                label="Comment"
+                                                                                                variant="outlined"
+                                                                                                type="text"
+                                                                                                size="small"
+                                                                                                component={TextField}
+                                                                                                name="comment"
+                                                                                                placeholder="Comment"
+                                                                                                value={data.comment}
+                                                                                                onChange={(e) => {
+                                                                                                    arrayHelpers.replace(index, {
+                                                                                                        ...values.seriaizedAsset[index],
+                                                                                                        ["comment"]: e.target.value,
+                                                                                                    })
+                                                                                                }}
+                                                                                            />
+                                                                                        </Grid>
+                                                                                    </Box>
                                                                                 </Grid>
                                                                             </Grid>
                                                                         </Box>
@@ -398,9 +423,12 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                     </Box>}
                             </CustomDialogContent>
                             <CustomDialogFooter>
-                                <Button variant="outlined"
+                                <Button
+                                    variant="outlined"
                                     disabled={isSubmitting}
-                                    color="primary" onClick={onClose}>
+                                    size="small"
+                                    color="primary"
+                                    onClick={onClose}>
                                     Cancel
                                 </Button>
                                 <Button
@@ -408,9 +436,13 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                         if (!validate(values.seriaizedAsset).inventoryQuantity
                                             && !validate(values.seriaizedAsset).warehouse
                                             && !validate(values.seriaizedAsset).assetQuantity
-                                            && !validate(values.seriaizedAsset).serialNumber)
+                                            && !validate(values.seriaizedAsset).serialNumber
+                                            && !errors["receiveDate"]) {
                                             handleCreateSerializedAsset(values)
+
+                                        }
                                     }}
+                                    size="small"
                                     variant="contained"
                                     disabled={isSubmitting}
                                     color="primary"
@@ -422,10 +454,6 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                     )}
                 </Formik>
             </MuiPickersUtilsProvider>
-
-
-
-
         </Dialog>
     );
 };

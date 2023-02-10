@@ -11,15 +11,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import {
-  productionOrder,
-  sidebarResource,
-  ACTIVITY_RESOURCE,
-  PRODUCTION_ORDER_STATUS,
-  PRODUCTION_ORDER_TYPE,
-  QUOTATION_STATUS,
-  WORKORDER_SERVICE_STATUS
-} from 'src/constants/helpers';
+import { productionOrder, sidebarResource, ACTIVITY_RESOURCE, PRODUCTION_ORDER_STATUS } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
@@ -27,16 +19,16 @@ import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import TabPanel from 'src/components/TabPanel';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import { defaultActivityShow } from 'src/constants/helpers';
 import Steps from '../RentalManagement/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
 import ManageProductionOrder from './ManageProductionOrder';
+import Productpackage from './Productpackage';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 function a11yProps(index: any) {
   return {
@@ -46,10 +38,10 @@ function a11yProps(index: any) {
 }
 
 const ProductionOrderDetails = () => {
+  
   const renderedFrom = camelCase(routes?.productionOrder.title);
   const toastConfig = useContext(CustomToastContext);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
+
   const { id } = useParams();
   const history = useHistory();
 
@@ -59,7 +51,6 @@ const ProductionOrderDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const [hasAssetsAdded, setHasAssetsAdded] = useState(false);
   const [productionOrderData, setProductionOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -68,19 +59,12 @@ const ProductionOrderDetails = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
-  const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [productionOrderProcessSteps, setProductionOrderProcessSteps] = useState([]);
-  const [quotationVersionData, setQuotationVersionData] = useState(null);
-  const [showQuotationConfirmBox, setShowQuotationConfirmBox] = useState(false);
-  const [quoteClonning, setQuoteClonning] = useState(false);
-  const [isAnyMaterial, setisAnyMaterial] = useState(false);
+  const [productionOrderProcessSteps, setProductionOrderProcessSteps] = useState(['Add']);
   const [anchorEl, setAnchorEl] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
-  const [enableStatusChange, setEnableStatusChange] = useState(false);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -114,10 +98,8 @@ const ProductionOrderDetails = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= productionOrderProcessSteps.length) {
-      fetchQuotationData();
       updateProcessStatus(productionOrderProcessSteps[currentStep]);
     }
-    if (['Add Assets', 'Work Order'].includes(productionOrderProcessSteps[currentStep])) fetchQuotationData();
   }, [currentStep]);
 
   const getResourceFields = () => {
@@ -127,7 +109,7 @@ const ProductionOrderDetails = () => {
         setProductionOrderFields(data);
         data.some((o) => {
           if (o?.fieldData?.fieldName === 'status') {
-            setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue !== "Deleted")]);
+            setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue !== 'Deleted')]);
             return true;
           }
         });
@@ -138,17 +120,14 @@ const ProductionOrderDetails = () => {
   };
 
   const fetchProductionOrderData = () => {
-    setProductionOrderData(null)
     axiosInstance()
       .get(`${routes.productionOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        setisAnyMaterial(data?.canDelete ? false : true);
-        setCurrentStep(productionOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? productionOrderProcessSteps.indexOf(data?.processStatus) : 0);
+        setCurrentStep(
+          productionOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? productionOrderProcessSteps.indexOf(data?.processStatus) : 0
+        );
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
-        // if (data?.type === PRODUCTION_ORDER_TYPE.internal) {
-        //   setProductionOrderProcessSteps(productionOrderSteps.filter((d) => !['Quotation', `Post Work Service`, 'Loading Ticket', `Invoice`]?.includes(d)));
-        // }
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setProductionOrderData({ ...data });
         if (permissions?.productionOrder?.isUpdate && openEdit === 'true') {
@@ -157,31 +136,11 @@ const ProductionOrderDetails = () => {
           params.delete('openEdit');
           history.push({ search: params.toString() });
         }
-        if (data?.type === PRODUCTION_ORDER_TYPE.internal && data?.status !== PRODUCTION_ORDER_STATUS.completed) {
-          checkStatusChange()
-        }
-        else {
-          setEnableStatusChange(false)
-        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
-
-  const checkStatusChange = () => {
-    axiosInstance().get(`${productionOrder.api}/${id}/work-order/service`).then(({ data: { data } }) => {
-      if (data?.material?.length) {
-        const material = data?.material?.filter((e) => !e.parentId);
-        if (material?.filter((e) => e?.workOrder?.status === WORKORDER_SERVICE_STATUS.completed)?.length === material?.length) {
-          setEnableStatusChange(true)
-        }
-      }
-    })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  }
 
   const handleDelete = () => {
     axiosInstance()
@@ -207,37 +166,8 @@ const ProductionOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${productionOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
-  };
-
-  const fetchQuotationData = (versionNumber = null) => {
-    axiosInstance()
-      .get(`${productionOrder.api}/${id}/check/quotation`)
-      .then(({ data: { data } }) => {
-        if (data) {
-          let keys = Object.keys(data?.versions);
-          let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1]);
-          setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] });
-        }
-      });
-  };
-
-  const createNewVersionQuote = () => {
-    setQuoteClonning(true);
-    axiosInstance()
-      .post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`, { updateProcessStatus: false })
-      .then(() => {
-        setShowQuotationConfirmBox(false);
-        fetchQuotationData();
-        fetchProductionOrderData();
-        setQuoteClonning(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setShowQuotationConfirmBox(false);
-        setQuoteClonning(false);
-      });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const handleStatusChange = (o) => {
@@ -270,303 +200,145 @@ const ProductionOrderDetails = () => {
     setAnchorEl(null);
   };
 
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
-
   return (
-    <>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.productionOrder, { title: productionOrderData?.productionOrderNumber }]} />
-      </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-        <div>
-          <div>
-            <Paper>
-              {productionOrderData ? (
-                <DetailsPageHeader heading={productionOrderData?.productionOrderNumber} mainPoints={null} showHeading={true}>
-                  {permissions?.productionOrder?.isUpdate && allowedToEdit &&
-                    ([PRODUCTION_ORDER_STATUS.readyToInvoice, PRODUCTION_ORDER_STATUS.invoiced].includes(productionOrderData?.status) || enableStatusChange) && (
-                      <Fragment>
-                        <Button
-                          variant="outlined"
-                          color="default"
-                          size="small"
-                          onClick={openActions}
-                          aria-controls="action-menu"
-                          endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                        >
-                          {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
-                        </Button>
-                        <Menu
-                          anchorEl={anchorEl}
-                          keepMounted
-                          getContentAnchorEl={null}
-                          anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left'
-                          }}
-                          id="action-menu"
-                          open={Boolean(anchorEl)}
-                          onClose={closeActions}
-                        >
-                          {statusOptions?.map((o, index) => {
-                            return (
-                              <MenuItem
-                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === productionOrderData?.status)
-                                  || ![PRODUCTION_ORDER_STATUS.readyToInvoice, PRODUCTION_ORDER_STATUS.invoiced, PRODUCTION_ORDER_STATUS.completed]?.includes(o?.optionLabel)
-                                }
-                                onClick={() => {
-                                  closeActions();
-                                  handleStatusChange(o);
-                                }}
-                                value={o}
-                              >
-                                {o?.optionLabel}
-                              </MenuItem>
-                            );
-                          })}
-                        </Menu>
-                      </Fragment>)}
-                  {permissions?.productionOrder?.isUpdate && allowedToEdit && ['Add Assets', 'Work Order'].includes(productionOrderProcessSteps[currentStep]) &&
-                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationVersionData?.status) && (
-                      <Button
-                        className="buttonStyleBigScreen"
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          createNewVersionQuote();
-                        }}
-                      >
-                        Create New Version
-                      </Button>
-                    )}
-                  {permissions?.productionOrder?.isUpdate &&
-                    allowedToEdit &&
-                    !(
-                      [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                        quotationVersionData?.status
-                      ) && ['Add Assets', 'Work Order'].includes(productionOrderProcessSteps[currentStep])
-                    ) && (
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        onClick={() => setOpenUpdateDialog(true)}
-                        className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                        style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                      >
-                        {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                      </Button>
-                    )}
-                  {permissions?.productionOrder?.isDelete && allowedToDelete && productionOrderData?.canDelete
-                    && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                </DetailsPageHeader>
-              ) : (
-                <Skeleton variant="text" width="150px" height="40px" />
-              )}
-              <Tabs
-                className="quote-tab"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    display: 'none'
-                  }
-                }}
-              >
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 1 ? 'white' : '',
-                    color: tabValue === 1 ? '#163340' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                    </div>
-                  }
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 2 ? 'white' : '',
-                    color: '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                    </div>
-                  }
-                  {...a11yProps(1)}
-                />
-              </Tabs>
-              <TabPanel value={tabValue} index={0}>
-                <Box>
-                  {productionOrderData && productionOrderFields.length ? (
-                    <DetailsPage data={productionOrderData} fields={productionOrderFields} />
-                  ) : (
-                    <Grid container spacing={2} style={{ padding: '8px' }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  )}
-                </Box>
-              </TabPanel>
-              <TabPanel value={tabValue} index={1}>
-                {/* <Paper>
-                  <Steps
-                    isNextStep={false}
-                    nextStep={nextStep}
-                    steps={productionOrderProcessSteps}
-                    currentStep={currentStep}
-                    setCurrentStep={setCurrentStep}
-                    isStepEnded={[PRODUCTION_ORDER_STATUS.completed].includes(productionOrderData?.status)}
-                    setStepFullScreen={() => setStepFullScreen(true)}
-                    handlePrev={() => {
-                      if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationVersionData?.status) &&
-                        productionOrderProcessSteps[currentStep] === 'Quotation' && allowedToEdit
-                      ) {
-                        setShowQuotationConfirmBox(true);
-                      } else {
-                        setCurrentStep((prevStep) => {
-                          const newStep = prevStep - 1;
-                          return newStep;
-                        });
-                      }
-                    }}
-                  />
-                  <ContentFullScreen title={productionOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                    {productionOrderProcessSteps[currentStep] === 'Add Assets' && productionOrderData && (
-                      <Productpackage
-                        fetchProductionOrderData={fetchProductionOrderData}
-                        productionOrderData={productionOrderData}
-                        setNextStep={setNextStep}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
-                        renderedFrom={`${renderedFrom}_grid-1`}
-                        stepFullScreen={stepFullScreen}
-                        setHasAssetsAdded={setHasAssetsAdded}
-                        allowedToEdit={
-                          [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                            quotationVersionData?.status
-                          )
-                            ? false
-                            : allowedToEdit
-                        }
-                        allowedToDelete={allowedToDelete}
-                      />
-                    )}
-                    {(productionOrderProcessSteps[currentStep] === 'Work Order' || productionOrderProcessSteps[currentStep] === 'Post Work Service') &&
-                      productionOrderData && (
-                        <WorkOrder
-                          productionOrderData={productionOrderData}
-                          setNextStep={setNextStep}
-                          isSmallScreen={isSmallScreen}
-                          isTabletScreen={isTabletScreen}
-                          showActivity={showActivity}
-                          stepFullScreen={stepFullScreen}
-                          allowedToEdit={currentStep === 3 ? allowedToEdit :
-                            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationVersionData?.status) ? false
-                              : allowedToEdit
-                          }
-                          allowedToDelete={allowedToDelete}
-                          isPostWorkService={Boolean(currentStep === 3)}
-                          setCurrentStep={setCurrentStep}
-                        />
-                      )}
-                    {productionOrderProcessSteps[currentStep] === 'Quotation' && productionOrderData && (
-                      <Quotation
-                        productionOrderData={productionOrderData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        showActivity={showActivity}
-                        renderedFrom={`${renderedFrom}_grid-4`}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={allowedToEdit}
-                        allowedToDelete={allowedToDelete}
-                        setQuotationVersionData={setQuotationVersionData}
-                        invoiceStep={false}
-                        updateOrderStatus={updateOrderStatus}
-                      />
-                    )}
-                    {productionOrderProcessSteps[currentStep] === 'Loading Ticket' && productionOrderData && (
-                      <LoadingTicket
-                        productionOrderData={productionOrderData}
-                        setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-5`}
-                        allowedToEdit={allowedToEdit}
-                      />
-                    )}
-                    {productionOrderProcessSteps[currentStep] === 'Invoice' && productionOrderData && (
-                      <Quotation
-                        productionOrderData={productionOrderData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        showActivity={showActivity}
-                        renderedFrom={`${renderedFrom}_grid-4`}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={false}
-                        allowedToDelete={false}
-                        invoiceStep={true}
-                        setQuotationVersionData={setQuotationVersionData}
-                        updateOrderStatus={updateOrderStatus}
-                      />
-                    )}
-                  </ContentFullScreen>
-                </Paper> */}
-              </TabPanel>
-            </Paper>
-          </div>
-          <Box my={1} />
-        </div>
-        <div className="position-relative">
-          <HideWhenOffline>
-            <Paper>
-              {!isSmallScreen && (
-                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={() => setActivityShow(!showActivity)}>
-                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                </span>
-              )}
-              <div style={{ display: showActivity ? 'block' : 'none' }}>
-                <Grid container>
-                  <Grid item xs={12}>
-                    {productionOrderData && (
-                      <div>
-                        <Activity
-                          resourceId={productionOrderData._id}
-                          resource={ACTIVITY_RESOURCE.productionOrder}
-                          restrictedAddActivities={
-                            permissions && permissions[`${ACTIVITY_RESOURCE.productionOrder}`] && permissions[`${ACTIVITY_RESOURCE.productionOrder}`].isUpdate
-                              ? []
-                              : ['Attachment', 'Case']
-                          }
-                          relatedTo={[
-                            {
-                              type: ACTIVITY_RESOURCE.productionOrder,
-                              referenceId: productionOrderData._id,
-                              access: true
-                            }
-                          ]}
-                          handleActivityRefresh={() => { }}
-                          emails={[]}
-                        />
-                      </div>
-                    )}
-                  </Grid>
-                </Grid>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={[routes.productionOrder, { title: productionOrderData?.productionOrderNumber }]} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {productionOrderData ? (
+              <>
+                {permissions?.productionOrder?.isUpdate && allowedToEdit && (
+                  <Fragment>
+                    <Button
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                      endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                    >
+                      {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      {statusOptions?.map((o, index) => {
+                        return (
+                          <MenuItem
+                            disabled={index <= statusOptions.findIndex((d) => d.optionLabel === productionOrderData?.status)}
+                            onClick={() => {
+                              closeActions();
+                              handleStatusChange(o);
+                            }}
+                            value={o}
+                          >
+                            {o?.optionLabel}
+                          </MenuItem>
+                        );
+                      })}
+                    </Menu>
+                  </Fragment>
+                )}
+                {permissions?.productionOrder?.isUpdate && allowedToEdit && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    className={'btn-outline-v1'}
+                    size="small"
+                    onClick={() => setOpenUpdateDialog(true)}
+                  >
+                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  </Button>
+                )}
+                {permissions?.productionOrder?.isDelete && allowedToDelete && productionOrderData?.canDelete && (
+                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                )}
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
+            <ActivityButton referenceId={productionOrderData?._id} resource={ACTIVITY_RESOURCE.productionOrder} />
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
               </div>
-            </Paper>
-          </HideWhenOffline>
-        </div>
-      </div>
+            }
+            {...a11yProps(0)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
+            }
+            {...a11yProps(1)}
+          />
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          <Box>
+            {productionOrderData && productionOrderFields.length ? (
+              <DetailsPage data={productionOrderData} fields={productionOrderFields} />
+            ) : (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            )}
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Steps
+            isNextStep={false}
+            nextStep={nextStep}
+            steps={productionOrderProcessSteps}
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
+            isStepEnded={[PRODUCTION_ORDER_STATUS.completed].includes(productionOrderData?.status)}
+            setStepFullScreen={() => setStepFullScreen(true)}
+          />
+          <ContentFullScreen title={productionOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            {productionOrderProcessSteps[currentStep] === 'Add' && productionOrderData && (
+              <Productpackage
+                fetchProductionOrderData={fetchProductionOrderData}
+                productionOrderData={productionOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-1`}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={true}
+                allowedToDelete={allowedToDelete}
+              />
+            )}
+          </ContentFullScreen>
+        </TabPanel>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -577,32 +349,8 @@ const ProductionOrderDetails = () => {
           onOk={handleDelete}
         />
       )}
-      {showQuotationConfirmBox && (
-        <ConfirmationDialog
-          open={showQuotationConfirmBox}
-          message={`Are you sure you want to create new version of this quote ?`}
-          onClose={() => {
-            setShowQuotationConfirmBox(false);
-            setCurrentStep((prevStep) => {
-              const newStep = prevStep - 1;
-              return newStep;
-            });
-          }}
-          onOk={() => {
-            createNewVersionQuote();
-            setCurrentStep((prevStep) => {
-              const newStep = prevStep - 1;
-              return newStep;
-            });
-          }}
-          forwardText={'Yes'}
-          cancelText={'No'}
-        />
-      )}
       {openUpdateDialog && (
         <ManageProductionOrder
-          isAnyMaterial={isAnyMaterial}
-          isEditable={!hasAssetsAdded}
           isClone={false}
           productionOrderId={id}
           onClose={() => {
@@ -614,7 +362,7 @@ const ProductionOrderDetails = () => {
           }}
         />
       )}
-    </>
+    </Box>
   );
 };
 

@@ -10,13 +10,8 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import moment from 'moment';
 import {
   quotation,
-  dateFormat,
   pricingCondition,
-  formatAmountWithCurrency,
-  supplierContact,
   repairOrder,
-  CustomDialogTransition,
-  currencyCodeToSymbol,
   QUOTATION_STATUS,
   REPAIR_ORDER_STATUS
 } from '../../../constants/helpers';
@@ -33,12 +28,11 @@ import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 import SendEmail from 'src/pages/RentalManagement/Quotation/SendEmail';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const Quotation = ({
   repairOrderData,
   setNextStep,
-  currencySymbol,
-  showActivity,
   renderedFrom,
   stepFullScreen,
   allowedToEdit,
@@ -52,8 +46,6 @@ const Quotation = ({
     state: { user, permissions }
   }: any = useData();
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const isMobileScreen = useMediaQuery('(max-width: 767px)');
   const [isUpdating, setUpdating] = useState(false);
 
@@ -114,10 +106,16 @@ const Quotation = ({
 
     setNextStep(quotationInfo?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false);
 
-    const currency = quotationInfo?.currency;
-    var data = await fetch_quotation_product_fields(currency);
+    var data = await fetch_quotation_product_fields(quotationInfo?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const coloum: any = [
+
+    if (allowedToEdit === false || invoiceStep === true || ![QUOTATION_STATUS.buildingQuote].includes(quotationInfo?.versions[tempCurrentVersion]?.status)) {
+      data?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
+    }
+
+    let column: any = [
       {
         accessor: 'srno',
         Header: 'Index',
@@ -133,6 +131,7 @@ const Quotation = ({
         Header: 'Detail',
         minWidth: 300,
         width: 300,
+        primaryField: true,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
@@ -158,14 +157,13 @@ const Quotation = ({
               color="primary"
               onClick={() => {
                 window.open(
-                  `${
-                    row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === 'product'
+                  `${row.original.type === 'serializedAsset'
+                    ? routes.serializedAssetDetail.path
+                    : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'package'
-                      ? routes.packagesDetail.path
-                      : routes.serviceMasterDetail.path
+                        ? routes.packagesDetail.path
+                        : routes.serviceMasterDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -177,6 +175,7 @@ const Quotation = ({
         accessor: 'productName',
         Header: 'Product',
         width: 200,
+        primaryField: true,
         Cell: ({ row }) => (
           <div className="d-flex gap-2 align-items-center">
             <p className="text-truncate" title={row.original?.productName}>
@@ -199,118 +198,20 @@ const Quotation = ({
         accessor: 'description',
         Header: 'Description',
         width: 200,
+        primaryField: true,
         Cell: ({ row }) => {
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       }
-      // {
-      //   accessor: 'leadTime',
-      //   Header: 'Lead Time (Days)',
-      //   Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
-      //   Footer: (info) => {
-      //     const total = info.rows
-      //       .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-      //       .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
-      //     return <>{total}</>;
-      //   }
-      // }
     ];
-    data.forEach((element) => {
-      let isEditable = Boolean(
-        ![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-          quotationInfo?.versions[tempCurrentVersion]?.status
-        ) &&
-          !invoiceStep &&
-          allowedToEdit &&
-          element?.isColumnEditable
-      );
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-        });
-      } else if (element.fieldName === 'supplierAccount') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? (
-              <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
-            ) : (
-              <NoDataCell />
-            ),
-          editable: isEditable
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />),
-              editable: isEditable
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  ),
-                editable: isEditable
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                ),
-              editable: isEditable
-            });
-          });
-        }
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) =>
-            row.original[element.fieldName]?.optionLabel ? (
-              <p>{row.original[element.fieldName].optionLabel}</p>
-            ) : row.original[element.fieldName] ? (
-              <p>{row.original[element.fieldName]}</p>
-            ) : (
-              <NoDataCell />
-            ),
-          editable: isEditable
-        });
-      }
-    });
-    coloum.push({
+
+    const newColumns = genrateCustomTableColumns(data, quotationInfo?.currency, renderedFrom);
+    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay'
+    }
+    column = [...column, ...newColumns];
+    column.push({
       accessor: 'action',
       Header: '',
       minWidth: 50,
@@ -322,29 +223,8 @@ const Quotation = ({
         return <></>;
       }
     });
-    coloum.forEach((element) => {
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      } else if (element.accessor.includes(`${currency.toLowerCase()}`)) {
-        element['Footer'] = (info) => {
-          const total = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return (
-            <>
-              {currencySymbol} {formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? total}
-            </>
-          );
-        };
-      }
-    });
-    setColumns(coloum);
-    setAllColumn(coloum.map((d) => d.Header));
+    setColumns(column);
+    setAllColumn(column.map((d) => d.Header));
   };
 
   const fetchProductInventory = async () => {
@@ -366,23 +246,22 @@ const Quotation = ({
 
     rows?.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDesc || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
@@ -405,23 +284,22 @@ const Quotation = ({
 
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDesc || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
@@ -657,7 +535,7 @@ const Quotation = ({
           {allowedToEdit && (
             <div>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
                   disabled={material
                     .filter((e) => e.parentId === null)
@@ -703,18 +581,18 @@ const Quotation = ({
               {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
               ) && (
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedProducts.length === 0}
-                >
-                  Actions
-                  <ExpandMore />
-                </Button>
-              )}
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedProducts.length === 0}
+                  >
+                    Actions
+                    <ExpandMore />
+                  </Button>
+                )}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
@@ -762,14 +640,9 @@ const Quotation = ({
       </Box>
       {columns && rowsData ? (
         <>
-          <Box
-            p="6px"
-            zIndex={5}
-            width={stepFullScreen ? '100%' : isTabletScreen ? '100%' : isSmallScreen ? '100%' : showActivity ? '100%' : 'calc(100vw - 100px)'}
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-          >
+          <Box p="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
@@ -782,10 +655,15 @@ const Quotation = ({
                   quotationData?.versions[currentVersion]?.status
                 )
               }
+              hideAction={
+                !allowedToEdit ||
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  quotationData?.versions[currentVersion]?.status
+                )
+              }
               onSaveEdit={onSaveInlineEdit}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              material={material}
             />
           </Box>
         </>

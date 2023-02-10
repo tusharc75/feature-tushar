@@ -67,14 +67,12 @@ import { FcFlowChart } from 'react-icons/fc';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import AssignedEntities from './AssignedEntities';
 import { isMobile, isTablet } from 'react-device-detect';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import UserSetupDialog from './UserSetupDialog';
 import moment from 'moment';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import { Line } from 'react-chartjs-2';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
-import accountClass from '../Account/account.module.scss';
 import { BiReset } from 'react-icons/all';
 import { BiEdit } from 'react-icons/bi';
 import { MdDelete } from 'react-icons/md';
@@ -102,7 +100,6 @@ const UserDetailsPage = () => {
   const {
     state: { user, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
   const [globalRoles, setGloabalRoles] = useState([]);
@@ -130,7 +127,6 @@ const UserDetailsPage = () => {
   const [userFields, setUserFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  // const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [userList, setUserList] = useState<any[]>([]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
@@ -138,7 +134,6 @@ const UserDetailsPage = () => {
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [entities, setEntities] = useState<any[]>([]);
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [showSetupUserDialog, setShowSetupUserDialog] = useState(false);
   const [timeFrame, setTimeFrame] = useState<any>('1-year');
   const [trackingTime, setTrackingTime] = useState({
@@ -166,12 +161,6 @@ const UserDetailsPage = () => {
     userSetup === 'true' && setShowSetupUserDialog(true);
     // eslint-disable-next-line
   }, [id]);
-
-  useEffect(() => {
-    if (isSmallScreen) {
-      setActivityShow(true);
-    }
-  }, [isSmallScreen]);
 
   useEffect(() => {
     fetchAllUsers();
@@ -270,10 +259,6 @@ const UserDetailsPage = () => {
       class: 'account'
     }
   ].filter((d) => d.show);
-
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
 
   const fetchUserData = async () => {
     setLoading(true);
@@ -599,6 +584,441 @@ const UserDetailsPage = () => {
   const isLoggedInUserBrandAdmin = 'userType' in user?.user && user?.user?.userType === userType.brandAdmin;
   return (
     <>
+      <Box className="main-container-v1">
+        <Box className="headerbox-v1">
+          <Box className="nav-v1">
+            <CustomBreadCrumbs routes={customizedRoutes} />
+          </Box>
+          <Box className="controls-v1">
+            <Box className="control-buttons-v1">
+              {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && (
+                <Button variant="contained" className={`btn-outline-v1`} onClick={entityDialogOpen}>
+                  Assign Entity/Role
+                </Button>
+              )}
+              {permissions?.user?.isUpdate && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className={`btn-outline-v1`}
+                  onClick={handleResetPassword}
+                  style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
+                >
+                  {isMobile && !isTablet ? <BiReset size={20} /> : 'Reset Password'}
+                </Button>
+              )}
+              {permissions?.user?.isUpdate ? (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className={`btn-outline-v1`}
+                  onClick={handleOpenUpdateDialog}
+                  disabled={!isLoggedInUserBrandAdmin && userData?.userType}
+                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              ) : null}
+              {permissions?.user?.isDelete ? (
+                <DeleteButton
+                  text={'Delete'}
+                  disabled={user?.user?._id === id || userData?.userType === userType.brandAdmin}
+                  onClick={() => handleDeleteUser(true)}
+                />
+              ) : null}
+            </Box>
+          </Box>
+        </Box>
+        <Box className={`detail-container-v1`}>
+          <Box>
+            <Box style={{ padding: '8px', minHeight: '450px' }}>
+              {loading || !userFields.length || !userData ? (
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                </Grid>
+              ) : (
+                <>
+                  <Tabs
+                    className="new-tab-container-v1"
+                    value={currentTabIndex}
+                    onChange={(index, newValue) => {
+                      setCurrentTabIndex(newValue);
+                    }}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    aria-label="icon tabs example"
+                  >
+                    <Tab
+                      className={'tabLayout'}
+                      label={<div className="d-flex align-items-center tab-font">Details</div>}
+                      aria-controls="a11y-tabpanel-0"
+                      id="a11y-tab-0"
+                    />
+                    <Tab
+                      className={'tabLayout'}
+                      label={<div className="d-flex align-items-center tab-font">Org Chart</div>}
+                      aria-controls="a11y-tabpanel-1"
+                      id="a11y-tab-1"
+                    />
+                    {userData?.proxyDOA?.optionValue && (
+                      <Tab
+                        className={'tabLayout'}
+                        label={<div className="d-flex align-items-center tab-font">DOA Proxy</div>}
+                        aria-controls="a11y-tabpanel-1"
+                        id="a11y-tab-1"
+                      />
+                    )}
+                    <Tab
+                      className={'tabLayout'}
+                      label={<div className="d-flex align-items-center tab-font">User Session</div>}
+                      aria-controls="a11y-tabpanel-2"
+                      id="a11y-tab-2"
+                    />
+                    <Tab
+                      className={'tabLayout'}
+                      label={<div className="d-flex align-items-center tab-font">Assigned Entity</div>}
+                      aria-controls="a11y-tabpanel-3"
+                      id="a11y-tab-3"
+                    />
+                    <Tab
+                      className={'tabLayout'}
+                      label={<div className="d-flex align-items-center tab-font">Approval Process</div>}
+                      aria-controls="a11y-tabpanel-4"
+                      id="a11y-tab-4"
+                    />
+                  </Tabs>
+                  <Box hidden={currentTabIndex !== 0}>
+                    <DetailsPageHeader
+                      heading={headingLbl}
+                      logo={userData?.avatar ? userData.avatar : undefined}
+                      mainPoints={mainPoints}
+                      showHeading={true}
+                    ></DetailsPageHeader>
+                    <DetailsPage data={userData} fields={userFields} />
+                  </Box>
+                  <Box hidden={currentTabIndex !== 1}>
+                    <OrgChartContainer
+                      data={orgChartData}
+                      onClick={(id) => {
+                        history.push(`${routes.userDetail.path}/${id}`);
+                      }}
+                    />
+                  </Box>
+                  {userData?.proxyDOA && (
+                    <Box hidden={currentTabIndex !== 2}>
+                      <TableContainer>
+                        <Table aria-label="DOA Proxy Table" size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>
+                                <h4 title="assignedTo" className={classes.detailLabel}>
+                                  Assigned To
+                                </h4>
+                              </TableCell>
+
+                              <TableCell align="center">
+                                <h4 title="startDate" className={classes.detailLabel}>
+                                  Start Date
+                                </h4>
+                              </TableCell>
+
+                              <TableCell align="center">
+                                <h4 title="endDate" className={classes.detailLabel}>
+                                  End Date
+                                </h4>
+                              </TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            <TableRow key={userData.proxyDOA.user}>
+                              <TableCell>
+                                <Link className="link" to={`${routes.userDetail.path}/${userData.proxyDOA.optionValue}`}>
+                                  {userData.proxyDOA.optionLabel}
+                                </Link>
+                              </TableCell>
+                              <TableCell align="center">
+                                <span className={classes.dataValue}>{displayDate(userData.proxyDOA.startDate)}</span>
+                              </TableCell>
+                              <TableCell align="center">
+                                <span className={classes.dataValue}>{displayDate(userData.proxyDOA.endDate)}</span>
+                              </TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+
+                      {/* </div> */}
+                    </Box>
+                  )}
+                  <Box hidden={userData?.proxyDOA ? currentTabIndex !== 3 : currentTabIndex !== 2}>
+                    <Box width="100%" padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between">
+                      <Grid container>
+                        <Grid item xs={8}>
+                          <Box display="flex">
+                            <Box padding="5px">
+                              <Typography variant="subtitle2">User Time Track</Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                    <Box padding="10px">
+                      <Grid item xs={12} sm={12} md={12}>
+                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                          <Grid container spacing={2}>
+                            <Grid item xs={12} sm={4}>
+                              <FormControl fullWidth size="small" variant="outlined">
+                                <InputLabel id="duration">Select Duration</InputLabel>
+                                <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
+                                  <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                                  <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                                  <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                                  <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                                  <MenuItem value={'custom'}>Custom</MenuItem>
+                                </Select>
+                              </FormControl>
+                            </Grid>
+                            <Grid item xs={6} sm={4}>
+                              <KeyboardDatePicker
+                                disabled={timeFrame !== 'custom'}
+                                inputVariant="outlined"
+                                variant="inline"
+                                fullWidth
+                                autoOk
+                                disableFuture
+                                size="small"
+                                openTo="year"
+                                format={dateFormatForInputControl}
+                                maxDate={trackingTime.between.to}
+                                label="From"
+                                views={['year', 'month', 'date']}
+                                value={trackingTime.between.from}
+                                onChange={(date) => {
+                                  setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
+                                }}
+                              />
+                            </Grid>
+                            <Grid item xs={6} sm={4}>
+                              <KeyboardDatePicker
+                                disabled={timeFrame !== 'custom'}
+                                inputVariant="outlined"
+                                variant="inline"
+                                fullWidth
+                                autoOk
+                                disableFuture
+                                size="small"
+                                minDate={trackingTime.between.from}
+                                openTo="year"
+                                format={dateFormatForInputControl}
+                                label="To"
+                                views={['year', 'month', 'date']}
+                                value={trackingTime.between.to}
+                                onChange={(date) => {
+                                  setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
+                                }}
+                              />
+                            </Grid>
+                          </Grid>
+                        </MuiPickersUtilsProvider>
+                      </Grid>
+                    </Box>
+                    <Typography className="subtitle1 m-2">
+                      {userTrackingDataLoading ? (
+                        <Grid container spacing={2} style={{ padding: '8px' }}>
+                          <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                        </Grid>
+                      ) : userTrackingData.labels.length === 0 ? (
+                        <h3>No activity found in the selected date range</h3>
+                      ) : (
+                        <Line type="line" data={userTrackingData} />
+                      )}
+                    </Typography>
+                  </Box>
+                  <Box hidden={userData?.proxyDOA ? currentTabIndex !== 4 : currentTabIndex !== 3}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={12} md={12} lg={12}>
+                        <Box width="100%" padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between">
+                          <Typography variant="subtitle2">Assigned Entity ({entities?.length || 0})</Typography>
+                          {permissions?.entity?.isUpdate && permissions?.role?.isUpdate && (
+                            <IconButton title="Assign entities" color="primary" size="small" onClick={entityDialogOpen}>
+                              <ControlPoint />
+                            </IconButton>
+                          )}
+                        </Box>
+                        <Box padding={1}>
+                          {loading ? (
+                            <Box display="flex">
+                              {[1, 2].map((i) => (
+                                <BoxWithBorder
+                                  key={i}
+                                  style={{
+                                    padding: '8px',
+                                    margin: '8px',
+                                    width: '100%'
+                                  }}
+                                >
+                                  <Box padding={1}>
+                                    <Skeleton variant="text" width="100px" height="20px" />
+                                    <Box marginTop={1} />
+                                    <Skeleton variant="text" width="100%" height="15px" />
+                                  </Box>
+                                </BoxWithBorder>
+                              ))}
+                            </Box>
+                          ) : entities?.length ? (
+                            <AssignedEntities
+                              entities={entities}
+                              permissions={permissions}
+                              userId={id}
+                              loggedInUser={user?.user}
+                              onSuccess={() => {
+                                fetchUserData();
+                              }}
+                              entityAccessIds={entityAccess}
+                              roleAccessIds={roleAccessOfLoggedInUser}
+                            />
+                          ) : (
+                            <Box textAlign="center" padding={2}>
+                              <Typography>No Entities </Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                  <Box hidden={userData?.proxyDOA ? currentTabIndex !== 5 : currentTabIndex !== 4}>
+                    <div style={{ display: 'block' }}>
+                      <Box padding={2}>
+                        <FormControl component="fieldset" fullWidth>
+                          <FormGroup>
+                            {loading ? (
+                              [1, 2, 3, 4].map((i) => (
+                                <Box padding={1} marginBottom={2} display="flex" key={i}>
+                                  <Skeleton style={{ borderRadius: 16 }} width="30px" height="30px" />
+                                  <Box marginX={1} />
+                                  <Skeleton variant="text" width="80%" height="30px" />
+                                </Box>
+                              ))
+                            ) : userPermissions ? (
+                              Object.keys(userPermissions).map((key) => (
+                                <Tooltip
+                                  title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${startCase(key)}` : ''}
+                                >
+                                  <FormControlLabel
+                                    key={key}
+                                    control={
+                                      <Switch
+                                        checked={userPermissions[key]}
+                                        name={key}
+                                        disabled={!hasPermissionToUpdateApprovalProcess}
+                                        onChange={handleChangePermissions}
+                                      />
+                                    }
+                                    label={key === 'doaSetup' ? 'DOA Setup' : startCase(key)}
+                                  />
+                                </Tooltip>
+                              ))
+                            ) : (
+                              <Typography>There are no permissions</Typography>
+                            )}
+                          </FormGroup>
+                        </FormControl>
+                      </Box>
+                      <QuickLinks quickLinks={quickLinks} />
+                    </div>
+                  </Box>
+                </>
+              )}
+            </Box>
+            <div className="pt-3 modified_style_of_accordion">
+              {permissions?.[opportunity.opportunityResource]?.isRead && (
+                <OpportunityAccordionInUserDetail
+                  opportunities={[...(opportunityRelatedData?.Owner ?? []), ...(opportunityRelatedData?.Collaborator ?? [])]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail();
+                  }}
+                  isAllowedToEdit={false}
+                />
+              )}
+              {permissions?.[lead.leadResource]?.isRead && (
+                <LeadAccordionInUserDetailPage
+                  leads={[...(leadsRelatedData?.Owner ?? []), ...(leadsRelatedData?.Collaborator ?? [])]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail();
+                  }}
+                  isAllowedToEdit={false}
+                />
+              )}
+              {permissions?.[customerAccount.accountResource]?.isRead && (
+                <AccountAccordionDetail
+                  type="customer"
+                  accounts={[...(customerAccountRelatedData?.Owner ?? []), ...(customerAccountRelatedData?.Collaborator ?? [])]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail();
+                  }}
+                  isAllowedToEdit={false}
+                />
+              )}
+              {permissions?.[supplierAccount.accountResource]?.isRead && (
+                <AccountAccordionDetail
+                  type="supplier"
+                  accounts={[...(supplierAccountRelatedData?.Owner ?? []), ...(supplierAccountRelatedData?.Collaborator ?? [])]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail();
+                  }}
+                  isAllowedToEdit={false}
+                />
+              )}
+              {permissions?.[customerContact.contactResource]?.isRead && (
+                <ContactAccordionInDetailPage
+                  type="customer"
+                  contacts={[...(customerContactRelatedData?.Owner ?? []), ...(customerContactRelatedData?.Collaborator ?? [])]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail();
+                  }}
+                  isAllowedToEdit={false}
+                />
+              )}
+              {permissions?.[supplierContact.contactResource]?.isRead && (
+                <ContactAccordionInDetailPage
+                  type="supplier"
+                  contacts={[...(supplierContactRelatedData?.Owner ?? []), ...(supplierContactRelatedData?.Collaborator ?? [])]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail();
+                  }}
+                  isAllowedToEdit={false}
+                />
+              )}
+              {permissions?.[quoteBuilder.qbResource]?.isRead && (
+                <QuotesInAccordion
+                  recordsPerLine={3}
+                  quotes={[...(quotesRelatedData?.Owner ?? []), ...(quotesRelatedData?.Collaborator ?? [])]}
+                  expanded={false}
+                  fetchData={() => fetchUserRelatedDetail()}
+                  quoteBuilderPermission={permissions?.[quoteBuilder.qbResource]}
+                  isAllowedToUpdate={false}
+                />
+              )}
+            </div>
+          </Box>
+        </Box>
+      </Box>
       {openUpdateDialog && (
         <ManageUserDialog
           open={openUpdateDialog}
@@ -645,771 +1065,6 @@ const UserDetailsPage = () => {
           />
         </Dialog>
       )}
-      <Fragment>
-        <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-        <div className={`detail-container ${showActivity ? 'grid-with-activity-user' : 'grid-without-activity-user'}`}>
-          <div>
-            <Paper>
-              {!userData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    <Box marginX={1} />
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  </Box>
-                </div>
-              ) : (
-                <DetailsPageHeader
-                  heading={headingLbl}
-                  logo={userData?.avatar ? userData.avatar : undefined}
-                  mainPoints={mainPoints}
-                  showHeading={true}
-                >
-                  {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && (
-                    <Button variant="contained" color="primary" size="small" onClick={entityDialogOpen}>
-                      Assign Entity/Role
-                    </Button>
-                  )}
-                  {permissions?.user?.isUpdate && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      onClick={handleResetPassword}
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                      style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
-                    >
-                      {isMobile && !isTablet ? <BiReset size={20} /> : 'Reset Password'}
-                    </Button>
-                  )}
-                  {permissions?.user?.isUpdate ? (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                      disabled={!isLoggedInUserBrandAdmin && userData?.userType}
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
-                  ) : null}
-                  {permissions?.user?.isDelete ? (
-                    <DeleteButton
-                      text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
-                      disabled={user?.user?._id === id || userData?.userType === userType.brandAdmin}
-                      onClick={() => handleDeleteUser(true)}
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                    />
-                  ) : null}
-                </DetailsPageHeader>
-              )}
-
-              <Box style={{ padding: '8px', minHeight: '450px' }}>
-                {loading || !userFields.length || !userData ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <>
-                    <Tabs
-                      className="oms-tab"
-                      value={currentTabIndex}
-                      onChange={(index, newValue) => {
-                        setCurrentTabIndex(newValue);
-                      }}
-                      indicatorColor="primary"
-                      textColor="primary"
-                      aria-label="icon tabs example"
-                    >
-                      <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-                      <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
-                      {userData?.proxyDOA?.optionValue && <Tab label="DOA Proxy" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />}
-                      <Tab label="User Session" aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
-                      <Tab label="Assigned Entity" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />
-                    </Tabs>
-                    <Box hidden={currentTabIndex !== 0}>
-                      <DetailsPage data={userData} fields={userFields} />
-                    </Box>
-
-                    <Box hidden={currentTabIndex !== 1}>
-                      <OrgChartContainer
-                        data={orgChartData}
-                        onClick={(id) => {
-                          history.push(`${routes.userDetail.path}/${id}`);
-                        }}
-                      />
-                    </Box>
-
-                    {userData?.proxyDOA && (
-                      <Box hidden={currentTabIndex !== 2}>
-                        {/* <div className="detail-box"> */}
-                        {/* <h3 className="form-label-style" title="DOA Proxy">
-                            DOA Proxy
-                          </h3> */}
-
-                        <TableContainer>
-                          <Table aria-label="DOA Proxy Table" size="small">
-                            <TableHead>
-                              <TableRow>
-                                <TableCell>
-                                  <h4 title="assignedTo" className={classes.detailLabel}>
-                                    Assigned To
-                                  </h4>
-                                </TableCell>
-
-                                <TableCell align="center">
-                                  <h4 title="startDate" className={classes.detailLabel}>
-                                    Start Date
-                                  </h4>
-                                </TableCell>
-
-                                <TableCell align="center">
-                                  <h4 title="endDate" className={classes.detailLabel}>
-                                    End Date
-                                  </h4>
-                                </TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              <TableRow key={userData.proxyDOA.user}>
-                                <TableCell>
-                                  <Link className="link" to={`${routes.userDetail.path}/${userData.proxyDOA.optionValue}`}>
-                                    {userData.proxyDOA.optionLabel}
-                                  </Link>
-                                </TableCell>
-                                <TableCell align="center">
-                                  <span className={classes.dataValue}>{displayDate(userData.proxyDOA.startDate)}</span>
-                                </TableCell>
-                                <TableCell align="center">
-                                  <span className={classes.dataValue}>{displayDate(userData.proxyDOA.endDate)}</span>
-                                </TableCell>
-                              </TableRow>
-                            </TableBody>
-                          </Table>
-                        </TableContainer>
-
-                        {/* </div> */}
-                      </Box>
-                    )}
-                    <Box hidden={userData?.proxyDOA ? currentTabIndex !== 3 : currentTabIndex !== 2}>
-                      <Box width="100%" padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between">
-                        <Grid container>
-                          <Grid item xs={8}>
-                            <Box display="flex">
-                              <Box padding="5px">
-                                <Typography variant="subtitle2">User Time Track</Typography>
-                              </Box>
-                            </Box>
-                          </Grid>
-                        </Grid>
-                      </Box>
-                      <Box padding="10px">
-                        <Grid item xs={12} sm={12} md={12}>
-                          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                            <Grid container spacing={2}>
-                              <Grid item xs={12} sm={4}>
-                                <FormControl fullWidth size="small" variant="outlined">
-                                  <InputLabel id="duration">Select Duration</InputLabel>
-                                  <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
-                                    <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                                    <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                                    <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                                    <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                                    <MenuItem value={'custom'}>Custom</MenuItem>
-                                  </Select>
-                                </FormControl>
-                              </Grid>
-                              <Grid item xs={6} sm={4}>
-                                <KeyboardDatePicker
-                                  disabled={timeFrame !== 'custom'}
-                                  inputVariant="outlined"
-                                  variant="inline"
-                                  fullWidth
-                                  autoOk
-                                  disableFuture
-                                  size="small"
-                                  openTo="year"
-                                  format={dateFormatForInputControl}
-                                  maxDate={trackingTime.between.to}
-                                  label="From"
-                                  views={['year', 'month', 'date']}
-                                  value={trackingTime.between.from}
-                                  onChange={(date) => {
-                                    setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
-                                  }}
-                                />
-                              </Grid>
-                              <Grid item xs={6} sm={4}>
-                                <KeyboardDatePicker
-                                  disabled={timeFrame !== 'custom'}
-                                  inputVariant="outlined"
-                                  variant="inline"
-                                  fullWidth
-                                  autoOk
-                                  disableFuture
-                                  size="small"
-                                  minDate={trackingTime.between.from}
-                                  openTo="year"
-                                  format={dateFormatForInputControl}
-                                  label="To"
-                                  views={['year', 'month', 'date']}
-                                  value={trackingTime.between.to}
-                                  onChange={(date) => {
-                                    setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
-                                  }}
-                                />
-                              </Grid>
-                            </Grid>
-                          </MuiPickersUtilsProvider>
-                        </Grid>
-                      </Box>
-                      <Typography className="subtitle1 m-2">
-                        {userTrackingDataLoading ? (
-                          <Grid container spacing={2} style={{ padding: '8px' }}>
-                            <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                          </Grid>
-                        ) : userTrackingData.labels.length === 0 ? (
-                          <h3>No activity found in the selected date range</h3>
-                        ) : (
-                          <Line type="line" data={userTrackingData} />
-                        )}
-                      </Typography>
-                    </Box>
-                    <Box hidden={userData?.proxyDOA ? currentTabIndex !== 4 : currentTabIndex !== 3}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={12} sm={12} md={12} lg={12}>
-                          <Box width="100%" padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between">
-                            <Typography variant="subtitle2">Assigned Entity ({entities?.length || 0})</Typography>
-                            {permissions?.entity?.isUpdate && permissions?.role?.isUpdate && (
-                              <IconButton title="Assign entities" color="primary" size="small" onClick={entityDialogOpen}>
-                                <ControlPoint />
-                              </IconButton>
-                            )}
-                          </Box>
-                          <Box padding={1}>
-                            {loading ? (
-                              <Box display="flex">
-                                {[1, 2].map((i) => (
-                                  <BoxWithBorder
-                                    key={i}
-                                    style={{
-                                      padding: '8px',
-                                      margin: '8px',
-                                      width: '100%'
-                                    }}
-                                  >
-                                    <Box padding={1}>
-                                      <Skeleton variant="text" width="100px" height="20px" />
-                                      <Box marginTop={1} />
-                                      <Skeleton variant="text" width="100%" height="15px" />
-                                    </Box>
-                                  </BoxWithBorder>
-                                ))}
-                              </Box>
-                            ) : entities?.length ? (
-                              <AssignedEntities
-                                entities={entities}
-                                permissions={permissions}
-                                userId={id}
-                                loggedInUser={user?.user}
-                                onSuccess={() => {
-                                  fetchUserData();
-                                }}
-                                entityAccessIds={entityAccess}
-                                roleAccessIds={roleAccessOfLoggedInUser}
-                              />
-                            ) : (
-                              <Box textAlign="center" padding={2}>
-                                <Typography>No Entities </Typography>
-                              </Box>
-                            )}
-                          </Box>
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  </>
-                )}
-              </Box>
-
-              {/* <Box style={{ padding: "0px", minHeight: "300px" }}>
-                <Box display="flex" padding={1} bgcolor="grey.200">
-                  <Grid container>
-                    <Grid item xs={8}>
-                      <Box display="flex">
-                        <Box padding="5px">
-                          <Typography variant="subtitle2">
-                            Assigned Company Wide Roles ({globalRoles.length || "0"})
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={4} container justify="flex-end">
-                      {permissions.user.isUpdate && (
-                        <IconButton
-                          color="primary"
-                          size="small"
-                          onClick={handleOpenDialog}
-                          disabled={!isLoggedInUserBrandAdmin && userData?.userType}
-                        >
-                          <ControlPoint />
-                        </IconButton>
-                      )}
-                    </Grid>
-                  </Grid>
-                </Box>
-
-                <Grid container style={{ padding: "8px" }} spacing={1}>
-                  <Grid item xs={12} sm={12} md={4}>
-                    <BoxWithBorder
-                      style={{
-                        padding: "0px",
-                        height: "352px",
-                      }}
-                    >
-                      {rolesLoading ? (
-                        [1, 2].map((i) => (
-                          <BoxWithBorder
-                            key={i}
-                            style={{ padding: "0px", margin: "8px" }}
-                          >
-                            <Box padding={1}>
-                              <Skeleton
-                                variant="text"
-                                width="100px"
-                                height="20px"
-                              />
-                              <Box marginTop={1} />
-                              <Skeleton variant="text" width="100%" height="15px" />
-                            </Box>
-                          </BoxWithBorder>
-                        ))
-                      ) : !globalRoles.length ? (
-                        <Box textAlign="center" marginTop={2}>
-                          <Typography variant="body2">
-                            User doesn't have any roles
-                          </Typography>
-                        </Box>
-                      ) : (
-                        <Box
-                          style={{
-                            height: "100%",
-                            overflowY: "auto",
-                          }}
-                        >
-                          {userData && (
-                            <UserRoles
-                              permissions={permissions}
-                              data={globalRoles}
-                              unassignRole={handleUnassignRole}
-                              loggedInUser={user?.user}
-                              currentUserId={id}
-
-                            />
-                          )}
-                        </Box>
-                      )}
-                    </BoxWithBorder>
-                  </Grid>
-                  <Grid item xs={12} sm={12} md={8} lg={8}>
-                    <BoxWithBorder
-                      style={{
-                        padding: "0px",
-                        height: "352px",
-                      }}
-                    >
-                      <RoleEngine
-                        field={unionRoleData ? unionRoleData.field : []}
-                        resource={unionRoleData ? unionRoleData.resource : []}
-                        isDisable={true}
-                      />
-                    </BoxWithBorder>
-                  </Grid>
-                </Grid>
-              </Box> */}
-
-              {/* <Box>
-                <Box
-                  width="100%"
-                  padding={1}
-                  bgcolor="grey.200"
-                  display="flex"
-                  justifyContent="space-between"
-                >
-                  <Grid container>
-                    <Grid item xs={8}>
-                      <Box display="flex">
-                        <Box padding="5px">
-                          <Typography variant="subtitle2">
-                            User Time Track
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Box>
-                <Box padding="10px">
-                  <Grid item xs={12} sm={12} md={12}>
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={12} sm={4}>
-                          <FormControl fullWidth size="small" variant="outlined">
-                            <InputLabel id="duration">Select Duration</InputLabel>
-                            <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
-                              <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                              <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                              <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                              <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                              <MenuItem value={'custom'}>Custom</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                          <KeyboardDatePicker
-                            disabled={timeFrame !== 'custom'}
-                            inputVariant="outlined"
-                            variant="inline"
-                            fullWidth
-                            autoOk
-                            disableFuture
-                            size="small"
-                            openTo="year"
-                            format={dateFormatForInputControl}
-                            maxDate={trackingTime.between.to}
-                            label="From"
-                            views={['year', 'month', 'date']}
-                            value={trackingTime.between.from}
-                            onChange={(date) => {
-                              setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
-                            }}
-                          />
-
-
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                          <KeyboardDatePicker
-                            disabled={timeFrame !== 'custom'}
-                            inputVariant="outlined"
-                            variant="inline"
-                            fullWidth
-                            autoOk
-                            disableFuture
-                            size="small"
-                            minDate={trackingTime.between.from}
-                            openTo="year"
-                            format={dateFormatForInputControl}
-                            label="To"
-                            views={['year', 'month', 'date']}
-                            value={trackingTime.between.to}
-                            onChange={(date) => {
-                              setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
-                            }}
-                          />
-                        </Grid>
-                      </Grid>
-                    </MuiPickersUtilsProvider>
-                  </Grid>
-                </Box>
-                <Typography className="subtitle1 m-2">
-                  {
-
-                    userTrackingDataLoading ?
-                      (
-                        <Grid container spacing={2} style={{ padding: "8px" }}>
-                          <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                        </Grid>
-                      )
-                      :
-                      userTrackingData.labels.length === 0 ?
-                        (
-                          <h3>No activity found in the selected date range</h3>
-                        )
-                        :
-                        <Line type="line" data={userTrackingData} />
-                  }
-                </Typography>
-              </Box> */}
-              {/* <Grid container spacing={2}>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                  <Box
-                    width="100%"
-                    padding={1}
-                    bgcolor="grey.200"
-                    display="flex"
-                    justifyContent="space-between"
-                  >
-                    <Typography variant="subtitle2">
-                      Assigned Entity ({entities?.length || 0})
-                    </Typography>
-                    {permissions.entity.isUpdate && permissions.role.isUpdate && (
-                      <IconButton
-                        title="Assign entities"
-                        color="primary"
-                        size="small"
-                        onClick={entityDialogOpen}
-                      >
-                        <ControlPoint />
-                      </IconButton>
-                    )}
-                  </Box>
-                  <Box padding={1}>
-                    {loading ? (
-                      <Box display="flex">
-                        {[1, 2].map((i) => (
-                          <BoxWithBorder
-                            key={i}
-                            style={{
-                              padding: "8px",
-                              margin: "8px",
-                              width: "100%",
-                            }}
-                          >
-                            <Box padding={1}>
-                              <Skeleton
-                                variant="text"
-                                width="100px"
-                                height="20px"
-                              />
-                              <Box marginTop={1} />
-                              <Skeleton variant="text" width="100%" height="15px" />
-                            </Box>
-                          </BoxWithBorder>
-                        ))}
-                      </Box>
-                    ) :
-                      entities?.length ? (
-                        <AssignedEntities
-                          entities={entities}
-                          permissions={permissions}
-                          userId={id}
-                          loggedInUser={user?.user}
-                          onSuccess={() => {
-                            fetchUserData();
-                          }}
-                          entityAccessIds={entityAccess}
-                          roleAccessIds={roleAccessOfLoggedInUser}
-                        />
-
-
-                      )
-                        : (
-                          <Box textAlign="center" padding={2}>
-                            <Typography>No Entities </Typography>
-                          </Box>
-                        )
-                    }
-                  </Box>
-                </Grid>
-              </Grid> */}
-
-              <div className="p-3 modified_style_of_accordion">
-                {permissions?.[opportunity.opportunityResource]?.isRead && (
-                  <OpportunityAccordionInUserDetail
-                    opportunities={[...(opportunityRelatedData?.Owner ?? []), ...(opportunityRelatedData?.Collaborator ?? [])]}
-                    recordsPerLine={3}
-                    expanded={false}
-                    userId={id}
-                    onSuccess={() => {
-                      fetchUserRelatedDetail();
-                    }}
-                    isAllowedToEdit={false}
-                  />
-                )}
-                {permissions?.[lead.leadResource]?.isRead && (
-                  <LeadAccordionInUserDetailPage
-                    leads={[...(leadsRelatedData?.Owner ?? []), ...(leadsRelatedData?.Collaborator ?? [])]}
-                    recordsPerLine={3}
-                    expanded={false}
-                    userId={id}
-                    onSuccess={() => {
-                      fetchUserRelatedDetail();
-                    }}
-                    isAllowedToEdit={false}
-                  />
-                )}
-                {permissions?.[customerAccount.accountResource]?.isRead && (
-                  <AccountAccordionDetail
-                    type="customer"
-                    accounts={[...(customerAccountRelatedData?.Owner ?? []), ...(customerAccountRelatedData?.Collaborator ?? [])]}
-                    recordsPerLine={3}
-                    expanded={false}
-                    userId={id}
-                    onSuccess={() => {
-                      fetchUserRelatedDetail();
-                    }}
-                    isAllowedToEdit={false}
-                  />
-                )}
-                {permissions?.[supplierAccount.accountResource]?.isRead && (
-                  <AccountAccordionDetail
-                    type="supplier"
-                    accounts={[...(supplierAccountRelatedData?.Owner ?? []), ...(supplierAccountRelatedData?.Collaborator ?? [])]}
-                    recordsPerLine={3}
-                    expanded={false}
-                    userId={id}
-                    onSuccess={() => {
-                      fetchUserRelatedDetail();
-                    }}
-                    isAllowedToEdit={false}
-                  />
-                )}
-                {permissions?.[customerContact.contactResource]?.isRead && (
-                  <ContactAccordionInDetailPage
-                    type="customer"
-                    contacts={[...(customerContactRelatedData?.Owner ?? []), ...(customerContactRelatedData?.Collaborator ?? [])]}
-                    recordsPerLine={3}
-                    expanded={false}
-                    userId={id}
-                    onSuccess={() => {
-                      fetchUserRelatedDetail();
-                    }}
-                    isAllowedToEdit={false}
-                  />
-                )}
-                {permissions?.[supplierContact.contactResource]?.isRead && (
-                  <ContactAccordionInDetailPage
-                    type="supplier"
-                    contacts={[...(supplierContactRelatedData?.Owner ?? []), ...(supplierContactRelatedData?.Collaborator ?? [])]}
-                    recordsPerLine={3}
-                    expanded={false}
-                    userId={id}
-                    onSuccess={() => {
-                      fetchUserRelatedDetail();
-                    }}
-                    isAllowedToEdit={false}
-                  />
-                )}
-                {permissions?.[quoteBuilder.qbResource]?.isRead && (
-                  <QuotesInAccordion
-                    recordsPerLine={3}
-                    quotes={[...(quotesRelatedData?.Owner ?? []), ...(quotesRelatedData?.Collaborator ?? [])]}
-                    expanded={false}
-                    fetchData={() => fetchUserRelatedDetail()}
-                    quoteBuilderPermission={permissions?.[quoteBuilder.qbResource]}
-                    isAllowedToUpdate={false}
-                  />
-                )}
-              </div>
-            </Paper>
-          </div>
-          <div className="position-relative">
-            {/* {showActivity ?
-              <Paper className="fixedRightPanel">
-                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropright className="icon" />
-                </span>}
-                <Box className="detailHeader">
-                  <h2 className="listingHeader single">Approval Process</h2>
-                </Box>
-                <Box padding={2}>
-                  <FormControl component="fieldset" fullWidth>
-                    <FormGroup>
-                      {loading ? (
-                        [1, 2, 3, 4].map((i) => (
-                          <Box
-                            padding={1}
-                            marginBottom={2}
-                            display="flex"
-                            key={i}
-                          >
-                            <Skeleton
-                              style={{ borderRadius: 16 }}
-                              width="30px"
-                              height="30px"
-                            />
-                            <Box marginX={1} />
-                            <Skeleton
-                              variant="text"
-                              width="80%"
-                              height="30px"
-                            />
-                          </Box>
-
-                        ))
-                      ) : userPermissions ? (
-                        Object.keys(userPermissions).map((key) => (
-                          <Tooltip title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${startCase(key)}` : ""}>
-                            <FormControlLabel
-                              key={key}
-                              control={
-                                <Switch
-                                  checked={userPermissions[key]}
-                                  name={key}
-                                  disabled={!hasPermissionToUpdateApprovalProcess}
-                                  onChange={handleChangePermissions}
-                                />
-                              }
-                              label={key === "doaSetup" ? "DOA Setup" : startCase(key)}
-                            />
-                          </Tooltip>
-                        ))
-                      ) : (
-                        <Typography>There are no permissions</Typography>
-                      )}
-                    </FormGroup>
-                  </FormControl>
-                </Box>
-                <QuickLinks quickLinks={quickLinks} />
-              </Paper>
-              :
-              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-                <IoIosArrowDropleft className="icon" />
-              </span>} */}
-
-            <Paper className={`${!isSmallScreen ? 'fixedRightPanel' : null}`}>
-              {!isSmallScreen && (
-                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                </span>
-              )}
-              <div style={{ display: showActivity ? 'block' : 'none' }}>
-                <Box className="detailHeader">
-                  <h2 className="listingHeader single">Approval Process</h2>
-                </Box>
-                <Box padding={2}>
-                  <FormControl component="fieldset" fullWidth>
-                    <FormGroup>
-                      {loading ? (
-                        [1, 2, 3, 4].map((i) => (
-                          <Box padding={1} marginBottom={2} display="flex" key={i}>
-                            <Skeleton style={{ borderRadius: 16 }} width="30px" height="30px" />
-                            <Box marginX={1} />
-                            <Skeleton variant="text" width="80%" height="30px" />
-                          </Box>
-                        ))
-                      ) : userPermissions ? (
-                        Object.keys(userPermissions).map((key) => (
-                          <Tooltip title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${startCase(key)}` : ''}>
-                            <FormControlLabel
-                              key={key}
-                              control={
-                                <Switch
-                                  checked={userPermissions[key]}
-                                  name={key}
-                                  disabled={!hasPermissionToUpdateApprovalProcess}
-                                  onChange={handleChangePermissions}
-                                />
-                              }
-                              label={key === 'doaSetup' ? 'DOA Setup' : startCase(key)}
-                            />
-                          </Tooltip>
-                        ))
-                      ) : (
-                        <Typography>There are no permissions</Typography>
-                      )}
-                    </FormGroup>
-                  </FormControl>
-                </Box>
-                <QuickLinks quickLinks={quickLinks} />
-              </div>
-            </Paper>
-          </div>
-        </div>
-      </Fragment>
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -1431,7 +1086,6 @@ const UserDetailsPage = () => {
           onOk={deleteUserRec ? DeleteUser : roleDeleteRec ? unassignUserRole : null}
         />
       ) : null}
-
       {orgChartInFullScreenDialog && (
         <FullScreenDialog
           heading="Org Chart"

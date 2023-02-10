@@ -37,12 +37,14 @@ import { dateFormat, formatAmountWithCurrency, prepareDataForGrid, quotation, QU
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import SendEmail from '../SendEmail';
+import { startCase } from 'lodash';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+
 
 const QuoteBuilder = ({
   quotationData,
   setNextStep,
   currencySymbol,
-  showActivity,
   sentToCustomer = false,
   stepFullScreen,
   fetchQuotationData,
@@ -58,8 +60,6 @@ const QuoteBuilder = ({
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
 
   useEffect(() => {
     fetchFields();
@@ -83,6 +83,31 @@ const QuoteBuilder = ({
     var data = await fetch_quotation_product_fields(quotationData?.currency);
     const coloum: any = [
       {
+        accessor: 'srno',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (<p className="text-truncate">{row.original.srno}</p>),
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        disableFilters: true,
+        sticky: isMobile ? 'none' : 'left',
+        width: 200,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {`${startCase(row.original?.type)} `}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
@@ -99,12 +124,24 @@ const QuoteBuilder = ({
                 <span>({row.original?.subRows?.length})</span>
               </Box>
             )}
-            <Chip
-              className="ml-1"
-              label={`${row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}`}
+            <IconButton
               size="small"
-              color="primary"
-            />
+              onClick={() => {
+                window.open(
+                  `${
+                    row.original.type === 'serializedAsset'
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === 'product'
+                      ? routes.productDetail.path
+                      : row.original.type === 'package'
+                      ? routes.packagesDetail.path
+                      : routes.serviceMasterDetail.path
+                  }/${row.original.materialId}`
+                );
+              }}
+            >
+             <OpenInNewIcon fontSize="small" color="primary" /> 
+            </IconButton>
           </div>
         )
       },
@@ -187,12 +224,12 @@ const QuoteBuilder = ({
             });
           });
         }
-      }  else if (element.fieldName === 'qty') {
+      } else if (element.fieldName === 'qty') {
         element.fieldName = 'qtyDisplay';
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell:({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
         });
       }
     });
@@ -235,14 +272,16 @@ const QuoteBuilder = ({
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.srno = i + 1;
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -276,13 +315,21 @@ const QuoteBuilder = ({
         return res;
       });
     }
-    setRowsData([...rows, ...serviceRows]);    
+    setRowsData([...rows, ...serviceRows]);
   };
 
   const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${_subRow.type === 'serializedAsset' ? _subRow.serializedAssetDetail?.assetNumber : _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.packageDetail?.packageName}`;
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -292,14 +339,14 @@ const QuoteBuilder = ({
       _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
     });
-    if (subRows.length === 0 && parent.type === "package") {
+    if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
     }
-    if (parent.type === "package") {
+    if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
-  }
+  };
 
   return (
     <Fragment>
@@ -312,7 +359,7 @@ const QuoteBuilder = ({
             <HtmlTooltip title={'Send to customer'}>
               <Button
                 variant="contained"
-                color="primary"
+                className="btn-outline-v1"
                 size="small"
                 disabled={sentToCustomer}
                 onClick={() => {
@@ -340,21 +387,15 @@ const QuoteBuilder = ({
       </Box>
       {columns && rowsData ? (
         <>
-          <Box
-            p="6px"
-            zIndex={5}
-            width={
-              stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 100px)'
-            }
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-          >
+          <Box p="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-              onSelect={() => { }}
+              onSelect={() => {}}
               hideSelection={true}
+              hideAction={true}
               childrenProperty="subRows"
               uniqueKey="_id"
               renderedFrom="quotation_product_package"

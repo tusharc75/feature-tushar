@@ -20,7 +20,6 @@ const BlogDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [headingLbl, setHeadingLbl] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.blog]);
   const [blogData, setBlogData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -55,7 +54,6 @@ const BlogDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/blog/${id}`);
-      setHeadingLbl(data.title);
       setBlogData(data);
       setCustomizedRoutes([routes.blog, { title: data?.title }]);
       setLoading(false);
@@ -97,55 +95,38 @@ const BlogDetail = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={customizedRoutes} />
-      </Grid>
-      <Grid container spacing={1} className="detail-container">
-        <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-          <Paper>
-            {!blogData ? (
-              <div>
-                <Skeleton variant="text" width="150px" height="40px" />
-                <Box display="flex">
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  <Box marginX={1} />
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                </Box>
-              </div>
-            ) : (
-              <DetailsPageHeader heading={headingLbl} showHeading={true}>
-                <>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-
-                  <Box component="span" marginX={1} />
-
-                  <span title={id ? "Primarily selected  can't be deleted" : 'Permanently delete'}>
-                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                  </span>
-                </>
-              </DetailsPageHeader>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {permissions?.blog?.isUpdate && (
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                className="btn-outline-v1"
+                onClick={handleOpenUpdateDialog}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+              >
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              </Button>
             )}
-            <Box>
-              {loading || !fields?.length ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              ) : (
-                <DetailsPage data={blogData} fields={fields} />
-              )}
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+            {permissions?.blog?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+          </Box>
+        </Box>
+      </Box>
+      <Box className="detail-container-v1">
+        <Box>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={blogData} fields={fields} />
+          )}
+        </Box>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -167,7 +148,7 @@ const BlogDetail = () => {
           }}
         />
       )}
-    </Fragment>
+    </Box>
   );
 };
 

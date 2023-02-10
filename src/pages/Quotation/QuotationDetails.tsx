@@ -13,7 +13,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import {
   quotation,
-  defaultActivityShow,
   getUniqueCurrencies,
   ACTIVITY_RESOURCE,
   quotationProcessSteps,
@@ -45,7 +44,6 @@ import {
 } from 'react-icons/all';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-import Activity from '../../components/Activity';
 import { camelCase } from 'lodash';
 import Service from './Service';
 import QuoteBuilder from './QuoteBuilder';
@@ -59,6 +57,7 @@ import { CircularProgress } from '@material-ui/core';
 import ManualReponseDialog from './ManualRespondDialog';
 import Versions from './Versions';
 import QuotationSummeryDialog from './QuotationSummeryDialog';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -72,8 +71,6 @@ const QuotationDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
 
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
@@ -86,7 +83,6 @@ const QuotationDetails = () => {
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [statusOptions, setStatusOptions] = useState([]);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -125,18 +121,6 @@ const QuotationDetails = () => {
     setOpenUpdateDialog(true);
     setShowAllVersionStatus(false);
   };
-
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
 
   const handleStatusChange = (o) => {
     if (o.optionValue && quotationData?.status !== o.optionValue) {
@@ -306,377 +290,295 @@ const QuotationDetails = () => {
       });
   };
 
-
-
   return (
-    <>
-      <Fragment>
-        <Grid container className="headerbox">
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
           <CustomBreadCrumbs routes={customizedRoutes} />
-        </Grid>
-        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-          <div>
-            <div>
-              <Paper>
-                {!quotationData ? (
-                  <div>
-                    <Skeleton variant="text" width="150px" height="40px" />
-                    <Box display="flex">
-                      <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                      <Box marginX={1} />
-                      <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    </Box>
-                  </div>
-                ) : (
-                  <DetailsPageHeader heading={headingLabel} mainPoints={[]} showHeading={true}>
-                    <Tooltip title="Quote Summary">
-                      <Button
-                        onClick={() => {
-                          setShowQuotationSummaryDialog(true);
-                        }}
-                        variant="outlined"
-                        size="small"
-                        className="mx-1"
-                        startIcon={<GiReceiveMoney />}
-                        color="primary"
-                      >
-                        Summary
-                      </Button>
-                    </Tooltip>
-
-                    <Tooltip title={`Version : ${currentVersion}`}>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        color="primary"
-                        size="small"
-                        className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
-                        onClick={() => {
-                          setShowAllVersionStatus(true);
-                        }}
-                        style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                        startIcon={isMobile && !isTablet ? null : <VscVersions />}
-                      >
-                        {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-                      </Button>
-                    </Tooltip>
-                    <Button
-                      variant="outlined"
-                      color="default"
-                      size="small"
-                      onClick={openActionsAction}
-                      aria-controls="action"
-                      endIcon={isMobile && !isTablet ? null : <ExpandMore />}
-                    >
-                      {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Action'}
-                    </Button>
-                    <Menu
-                      anchorEl={anchorElAction}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action"
-                      open={Boolean(anchorElAction)}
-                      onClose={closeActionsAction}
-                    >
-                      {permissions?.quotation?.isDelete && (
-                        <MenuItem>
-                          <Button
-                            variant="text"
-                            size="small"
-                            startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
-                            onClick={() => {
-                              setShowConfirmBox(true);
-                              closeActionsAction();
-                            }}
-                          >
-                            Delete Quote
-                          </Button>
-                        </MenuItem>
-                      )}
-                      {currentVersion !== 1 && permissions?.quotation?.isDelete && (
-                        <MenuItem>
-                          <Button
-                            variant="text"
-                            size="small"
-                            disabled={!allowedToEdit || loading}
-                            startIcon={<MdDeleteSweep className={isMobile ? 'mr-1' : ''} />}
-                            onClick={() => {
-                              deleteVersion();
-                              closeActionsAction();
-                            }}
-                          >
-                            Delete Version-{currentVersion}
-                          </Button>
-                        </MenuItem>
-                      )}
-                      <MenuItem>
-                        <Button
-                          disabled={!allowedToEdit || isCloning || loading}
-                          variant="text"
-                          type="button"
-                          size="small"
-                          startIcon={isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />}
-                          onClick={() => {
-                            cloneVersion();
-                            closeActionsAction();
-                          }}
-                        >
-                          {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
-                        </Button>
-                      </MenuItem>
-                      {permissions?.quotation?.isUpdate && allowedToEdit && (
-                        <MenuItem>
-                          <Button
-                            variant="text"
-                            color="primary"
-                            size="small"
-                            startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                            onClick={() => {
-                              handleOpenUpdateDialog();
-                              closeActionsAction();
-                            }}
-                          >
-                            Edit Quote
-                          </Button>
-                        </MenuItem>
-                      )}
-                    </Menu>
-                  </DetailsPageHeader>
-                )}
-                {loading ? (
-                  <Box padding={2}>
-                    <Grid container spacing={2}>
-                      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                        <Grid item sm={6} md={6} key={i}>
-                          <Skeleton variant="text" width="100px" height="16px" />
-                          <Box marginY={1} />
-                          <Skeleton width="100%" height="50px" />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Box>
-                ) : (
-                  <Tabs
-                    className="quote-tab"
-                    value={tabValue}
-                    onChange={handleMainTabChange}
-                    textColor="primary"
-                    TabIndicatorProps={{
-                      style: {
-                        display: 'none'
-                      }
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {quotationData ? (
+              <>
+                <Tooltip title="Quote Summary">
+                  <Button
+                    onClick={() => {
+                      setShowQuotationSummaryDialog(true);
                     }}
+                    variant="outlined"
+                    size="small"
+                    className="mx-1"
+                    startIcon={<GiReceiveMoney />}
+                    color="primary"
                   >
-                    <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 1 ? 'white' : '',
-                        color: tabValue === 1 ? '#163340' : '#163340'
+                    Summary
+                  </Button>
+                </Tooltip>
+
+                <Tooltip title={`Version : ${currentVersion}`}>
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="primary"
+                    size="small"
+                    className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
+                    onClick={() => {
+                      setShowAllVersionStatus(true);
+                    }}
+                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                    startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                  >
+                    {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
+                  </Button>
+                </Tooltip>
+                <Button
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={openActionsAction}
+                  aria-controls="action"
+                  endIcon={isMobile && !isTablet ? null : <ExpandMore />}
+                >
+                  {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Action'}
+                </Button>
+                <Menu
+                  anchorEl={anchorElAction}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action"
+                  open={Boolean(anchorElAction)}
+                  onClose={closeActionsAction}
+                >
+                  {permissions?.quotation?.isDelete && (
+                    <MenuItem>
+                      <Button
+                        variant="text"
+                        size="small"
+                        startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
+                        onClick={() => {
+                          setShowConfirmBox(true);
+                          closeActionsAction();
+                        }}
+                      >
+                        Delete Quote
+                      </Button>
+                    </MenuItem>
+                  )}
+                  {currentVersion !== 1 && permissions?.quotation?.isDelete && (
+                    <MenuItem>
+                      <Button
+                        variant="text"
+                        size="small"
+                        disabled={!allowedToEdit || loading}
+                        startIcon={<MdDeleteSweep className={isMobile ? 'mr-1' : ''} />}
+                        onClick={() => {
+                          deleteVersion();
+                          closeActionsAction();
+                        }}
+                      >
+                        Delete Version-{currentVersion}
+                      </Button>
+                    </MenuItem>
+                  )}
+                  <MenuItem>
+                    <Button
+                      disabled={!allowedToEdit || isCloning || loading}
+                      variant="text"
+                      type="button"
+                      size="small"
+                      startIcon={isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />}
+                      onClick={() => {
+                        cloneVersion();
+                        closeActionsAction();
                       }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                        </div>
-                      }
-                      {...a11yProps(0)}
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 2 ? 'white' : '',
-                        color: '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                        </div>
-                      }
-                      {...a11yProps(1)}
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 2 ? 'white' : '',
-                        color: tabValue === 2 ? 'blue' : '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-                        </div>
-                      }
-                      {...a11yProps(2)}
-                    />
-                    <div className={'uio'}> </div>
-                  </Tabs>
-                )}
-                <TabPanel value={tabValue} index={0}>
-                  <Box>
-                    {loading || !quotationFields.length ? (
-                      <Grid container spacing={2} style={{ padding: '8px' }}>
-                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                      </Grid>
-                    ) : (
-                      <>
-                        <DetailsPage data={quotationData} fields={quotationFields} />
-                      </>
-                    )}
-                  </Box>
-                </TabPanel>
-                <TabPanel value={tabValue} index={1}>
-                  {sentToCustomer ? (
-                    <div className="d-flex align-items-center justify-content-center flex-column m-1">
-                      <FcClock size={25} />
-                      <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-                    </div>
-                  ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-                    <div className="d-flex align-items-center justify-content-center flex-column m-1">
-                      <FcOk size={25} />
-                      <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-                    </div>
-                  ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-                    <div className="d-flex align-items-center justify-content-center flex-column m-1">
-                      <FcCancel size={25} />
-                      <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-                    </div>
-                  ) : null}
-                  <div>
-                    <Paper>
-                      <Steps
-                        isNextStep={false}
-                        nextStep={nextStep}
-                        steps={quotationProcessSteps}
-                        currentStep={currentStep}
-                        setCurrentStep={setCurrentStep}
-                        isStepEnded={quotationProcessSteps[currentStep] === 'End'}
-                        setStepFullScreen={() => setStepFullScreen(true)}
-                        isPrevStep={!sentToCustomer}
-                        updateStatus={updateProcessStatus}
-                        handleNext={
-                          currentStep > 2
-                            ? () => {
-                              setCustomerAcceptable(true);
-                            }
-                            : null
-                        }
-                      />
-                      <ContentFullScreen title={quotationProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                        {currentStep === 0 && quotationData && (
-                          <Productpackage
-                            quotationData={quotationData}
-                            setNextStep={setNextStep}
-                            currencySymbol={currencySymbol}
-                            renderedFrom={`${renderedFrom}_grid-1`}
-                            showActivity={showActivity}
-                            stepFullScreen={stepFullScreen}
-                            version={currentVersion}
-                          />
-                        )}
-                        {currentStep === 1 && quotationData && (
-                          <Service
-                            quotationData={quotationData}
-                            renderedFrom={`${renderedFrom}_grid-2`}
-                            setNextStep={setNextStep}
-                            stepFullScreen={stepFullScreen}
-                            version={currentVersion}
-                          />
-                        )}
-                        {currentStep === 2 && quotationData && (
-                          <QuoteBuilder
-                            quotationData={quotationData}
-                            setNextStep={setNextStep}
-                            currencySymbol={currencySymbol}
-                            showActivity={showActivity}
-                            stepFullScreen={stepFullScreen}
-                            fetchQuotationData={fetchQuotationData}
-                            version={currentVersion}
-                            currentStep={currentStep}
-                            versionData={quotationData?.versions[currentVersion]}
-                          />
-                        )}
-                        {currentStep === 3 && quotationData && (
-                          <QuoteBuilder
-                            quotationData={quotationData}
-                            setNextStep={setNextStep}
-                            currencySymbol={currencySymbol}
-                            sentToCustomer={sentToCustomer}
-                            showActivity={showActivity}
-                            stepFullScreen={stepFullScreen}
-                            fetchQuotationData={fetchQuotationData}
-                            version={currentVersion}
-                            currentStep={currentStep}
-                            versionData={quotationData?.versions[currentVersion]}
-                          />
-                        )}
-                        {currentStep === 4 && quotationData && (
-                          <QuoteBuilder
-                            quotationData={quotationData}
-                            setNextStep={setNextStep}
-                            currencySymbol={currencySymbol}
-                            showActivity={showActivity}
-                            stepFullScreen={stepFullScreen}
-                            fetchQuotationData={fetchQuotationData}
-                            version={currentVersion}
-                            currentStep={currentStep}
-                            versionData={quotationData?.versions[currentVersion]}
-                          />
-                        )}
-                      </ContentFullScreen>
-                    </Paper>
-                  </div>
-                </TabPanel>
-                <TabPanel value={tabValue} index={2}>
-                  <Box>
-                    <RoadmapViews quoteName={headingLabel} quoteId={id} versionId={currVersionId} status={'New'} />
-                  </Box>
-                </TabPanel>
-              </Paper>
+                    >
+                      {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
+                    </Button>
+                  </MenuItem>
+                  {permissions?.quotation?.isUpdate && allowedToEdit && (
+                    <MenuItem>
+                      <Button
+                        variant="text"
+                        color="primary"
+                        size="small"
+                        startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
+                        onClick={() => {
+                          handleOpenUpdateDialog();
+                          closeActionsAction();
+                        }}
+                      >
+                        Edit Quote
+                      </Button>
+                    </MenuItem>
+                  )}
+                </Menu>
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
+            <ActivityButton referenceId={quotationData?._id} resource={ACTIVITY_RESOURCE.quotation} />
+          </Box>
+        </Box>
+      </Box>
+
+      <Box className={`detail-container-v1`}>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            {...a11yProps(0)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
+            }
+            {...a11yProps(1)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+              </div>
+            }
+            {...a11yProps(2)}
+          />
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          <Box>
+            {loading || !quotationFields.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <>
+                <DetailsPage data={quotationData} fields={quotationFields} />
+              </>
+            )}
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          {sentToCustomer ? (
+            <div className="d-flex align-items-center justify-content-center flex-column m-1">
+              <FcClock size={25} />
+              <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
             </div>
-            <Box my={1} />
+          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+            <div className="d-flex align-items-center justify-content-center flex-column m-1">
+              <FcOk size={25} />
+              <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+            </div>
+          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+            <div className="d-flex align-items-center justify-content-center flex-column m-1">
+              <FcCancel size={25} />
+              <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+            </div>
+          ) : null}
+          <div>
+            <Steps
+              isNextStep={false}
+              nextStep={nextStep}
+              steps={quotationProcessSteps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isStepEnded={quotationProcessSteps[currentStep] === 'End'}
+              setStepFullScreen={() => setStepFullScreen(true)}
+              isPrevStep={!sentToCustomer}
+              updateStatus={updateProcessStatus}
+              handleNext={
+                currentStep > 2
+                  ? () => {
+                    setCustomerAcceptable(true);
+                  }
+                  : null
+              }
+            />
+            <ContentFullScreen title={quotationProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+              {currentStep === 0 && quotationData && (
+                <Productpackage
+                  quotationData={quotationData}
+                  setNextStep={setNextStep}
+                  currencySymbol={currencySymbol}
+                  renderedFrom={`${renderedFrom}_grid-1`}
+                  stepFullScreen={stepFullScreen}
+                  version={currentVersion}
+                />
+              )}
+              {currentStep === 1 && quotationData && (
+                <Service
+                  quotationData={quotationData}
+                  renderedFrom={`${renderedFrom}_grid-2`}
+                  setNextStep={setNextStep}
+                  stepFullScreen={stepFullScreen}
+                  version={currentVersion}
+                />
+              )}
+              {currentStep === 2 && quotationData && (
+                <QuoteBuilder
+                  quotationData={quotationData}
+                  setNextStep={setNextStep}
+                  currencySymbol={currencySymbol}
+                  stepFullScreen={stepFullScreen}
+                  fetchQuotationData={fetchQuotationData}
+                  version={currentVersion}
+                  currentStep={currentStep}
+                  versionData={quotationData?.versions[currentVersion]}
+                />
+              )}
+              {currentStep === 3 && quotationData && (
+                <QuoteBuilder
+                  quotationData={quotationData}
+                  setNextStep={setNextStep}
+                  currencySymbol={currencySymbol}
+                  sentToCustomer={sentToCustomer}
+                  stepFullScreen={stepFullScreen}
+                  fetchQuotationData={fetchQuotationData}
+                  version={currentVersion}
+                  currentStep={currentStep}
+                  versionData={quotationData?.versions[currentVersion]}
+                />
+              )}
+              {currentStep === 4 && quotationData && (
+                <QuoteBuilder
+                  quotationData={quotationData}
+                  setNextStep={setNextStep}
+                  currencySymbol={currencySymbol}
+                  stepFullScreen={stepFullScreen}
+                  fetchQuotationData={fetchQuotationData}
+                  version={currentVersion}
+                  currentStep={currentStep}
+                  versionData={quotationData?.versions[currentVersion]}
+                />
+              )}
+            </ContentFullScreen>
           </div>
-          <div className="position-relative">
-            <HideWhenOffline>
-              <Paper>
-                {!isSmallScreen && (
-                  <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                    {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                  </span>
-                )}
-                <div style={{ display: showActivity ? 'block' : 'none' }}>
-                  <Grid container>
-                    <Grid item xs={12}>
-                      {quotationData && (
-                        <div>
-                          <Activity
-                            resourceId={quotationData._id}
-                            resource={ACTIVITY_RESOURCE.quotation}
-                            restrictedAddActivities={
-                              permissions && permissions[`${ACTIVITY_RESOURCE.quotation}`] && permissions[`${ACTIVITY_RESOURCE.quotation}`].isUpdate
-                                ? []
-                                : ['Attachment', 'Case']
-                            }
-                            relatedTo={[
-                              {
-                                type: ACTIVITY_RESOURCE.quotation,
-                                referenceId: quotationData._id,
-                                access: true
-                              }
-                            ]}
-                            handleActivityRefresh={() => { }}
-                            emails={[]}
-                          />
-                        </div>
-                      )}
-                    </Grid>
-                  </Grid>
-                </div>
-              </Paper>
-            </HideWhenOffline>
-          </div>
-        </div>
-      </Fragment>
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Box>
+            <RoadmapViews quoteName={headingLabel} quoteId={id} versionId={currVersionId} status={'New'} />
+          </Box>
+        </TabPanel>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -707,15 +609,15 @@ const QuotationDetails = () => {
           quotationData={quotationData}
           versionId={currVersionId}
           onClose={() => {
-            setShowQuotationSummaryDialog(false)
-          }} />
+            setShowQuotationSummaryDialog(false);
+          }}
+        />
       )}
       {quotationData && showAllVersionStatus && (
         <Versions
           onClose={() => setShowAllVersionStatus(false)}
           quotationId={id}
-          handleChangeVersion={handleChangeVersion}
-        />
+          handleChangeVersion={handleChangeVersion} />
       )}
       {customerAcceptable && (
         <ManualReponseDialog
@@ -726,7 +628,7 @@ const QuotationDetails = () => {
           setCustomerAcceptable={setCustomerAcceptable}
         />
       )}
-    </>
+    </Box>
   );
 };
 

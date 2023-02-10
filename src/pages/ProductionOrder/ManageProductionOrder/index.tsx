@@ -21,8 +21,7 @@ import {
   setFieldsInAscendingOrder,
   yupSchema,
   generateUniqueIdOnly,
-  productionOrder,
-  PRODUCTION_ORDER_TYPE
+  productionOrder
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -30,9 +29,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { FaDiceOne } from 'react-icons/fa';
-import moment from 'moment';
 import AddIcon from '@material-ui/icons/AddCircle';
 import InfoIcon from '@material-ui/icons/Info';
 import ManageAccountDialog from '../../Account/ManageAccount';
@@ -44,10 +41,6 @@ const ManageProductionOrder = ({
   productionOrderId = null,
   onClose,
   onSuccess,
-  refrenceType = null,
-  refrenceData = null,
-  isEditable = true,
-  isAnyMaterial = false
 }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -203,13 +196,6 @@ const ManageProductionOrder = ({
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
         initialData['productionOrderNumber'] = `PO_${generateUniqueIdOnly()}`;
-        // if ('Rental Job') {
-        //   initialData['warehouse'] = refrenceData?.warehouse;
-        //   // initialData["rentalJob"] = refrenceData?._id;
-        //   initialData['customerAccount'] = refrenceData?.customerAccount;
-        //   initialData['customerContact'] = refrenceData?.customerContact;
-        //   initialData['type'] = PRODUCTION_ORDER_TYPE.external;
-        // }
         setDisablePlantIfAssetAdded(false);
         setProductionOrderInitialData({
           fields: fieldsDataForCreate,
@@ -260,9 +246,7 @@ const ManageProductionOrder = ({
       axiosInstance()
         .post(`${productionOrder.api}`, rest)
         .then(({ data: { data, message } }) => {
-          if (!refrenceType) {
-            history.push(`${routes.productionOrderDetail.path}/${data._id}`);
-          }
+          history.push(`${routes.productionOrderDetail.path}/${data._id}`);
           setLoading(false);
           onSuccess(data);
           toastConfig.setToastConfig({
@@ -297,7 +281,6 @@ const ManageProductionOrder = ({
     }));
   };
 
-  useEffect(() => {}, []);
   return (
     <Dialog
       maxWidth="md"
@@ -354,7 +337,7 @@ const ManageProductionOrder = ({
           initialValues={productionOrderInitialData.initialValues}
           validationSchema={yupSchema(productionOrderInitialData.fields)}
           validateOnMount
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
             <>
@@ -362,165 +345,243 @@ const ManageProductionOrder = ({
                 <Form>
                   {formsData &&
                     formsData.map((form, i) => {
-                      return (
-                        form.name && (
-                          <div key={i}>
-                            <div className={'detail-box-content'}>
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                            </div>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    {field.fieldName == 'customerAccount' ? (
+                      return (form.name && (
+                        <div key={i}>
+                          <div className={'detail-box-content'}>
+                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                          </div>
+                          <Box marginY={2}>
+                            <Grid spacing={3} container>
+                              {form.sectionFields.map((field) => (
+                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  {field.fieldName == 'customerAccount' ? (
+                                    <Grid container spacing={1}>
+                                      <Grid
+                                        item
+                                        xs={permissions.customerAccount?.isCreate ? 11 : 11}
+                                        sm={permissions.customerAccount?.isCreate ? 11 : 11}
+                                        md={permissions.customerAccount?.isCreate ? 11 : 11}
+                                      >
+                                        <FormTypes
+                                          {...field}
+                                          isNew={!productionOrderId}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={accountData}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          doNotShowInfoTooltip={true}
+                                          onChange={(e, value) => {
+                                            setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
+                                            if (productionOrderInitialData.fields.find((d) => d.fieldName === 'customerContact')) {
+                                              setFieldValue('customerContact', '');
+                                              handleValuesChange({
+                                                [field.fieldName]: value && value.optionValue ? value.optionValue : '',
+                                                customerContact: ''
+                                              });
+                                            }
+                                          }}
+                                        />
+                                      </Grid>
+                                      {permissions.customerAccount?.isCreate && (
+                                        <Grid item xs={1} sm={1} md={1}>
+                                          <Tooltip title="Create Account" className="mt-1">
+                                            <IconButton
+                                              onClick={() => {
+                                                setShowAddCustomerAccountDialog(true);
+                                              }}
+                                              size="small"
+                                            >
+                                              <AddIcon
+                                                color={'primary'}
+                                              />
+                                            </IconButton>
+                                          </Tooltip>
+                                        </Grid>
+                                      )}
+                                      {field?.tooltipMessage ? (
+                                        <Grid item xs={1} sm={1} md={1}>
+                                          <Tooltip title={field?.tooltipMessage ?? ''}>
+                                            <InfoIcon color="disabled" />
+                                          </Tooltip>
+                                        </Grid>
+                                      ) : null}
+                                    </Grid>
+                                  ) : field.fieldName === 'customerContact' ? (
+                                    <Grid container spacing={1}>
+                                      <Grid
+                                        item
+                                        xs={permissions.customerContact?.isCreate ? 11 : 11}
+                                        sm={permissions.customerContact?.isCreate ? 11 : 11}
+                                        md={permissions.customerContact?.isCreate ? 11 : 11}
+                                      >
+                                        <FormTypes
+                                          {...field}
+                                          isNew={!productionOrderId}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={customerContactDataSource}
+                                          doNotShowInfoTooltip={true}
+                                          setFieldValue={(name, value) => {
+                                            handleValuesChange({ [name]: value });
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={false}
+                                          size="small"
+                                          onOpen={() => onCustomerContactDropdownOpen(values['customerAccount'])}
+                                        // onChange={(e, value) => {
+                                        //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+
+                                        // }}
+                                        />
+                                      </Grid>
+                                      {permissions.customerContact?.isCreate && (
+                                        <Grid item xs={1} sm={1} md={1}>
+                                          <Tooltip title="Create Contact" className="mt-1">
+                                            <IconButton
+                                              onClick={() => {
+                                                setShowAddCustomerContactDialog(true);
+                                              }}
+                                              size="small"
+                                            >
+                                              <AddIcon
+                                                color={'primary'}
+                                              />
+                                            </IconButton>
+                                          </Tooltip>
+                                        </Grid>
+                                      )}
+                                      {field?.tooltipMessage ? (
+                                        <Grid item xs={1} sm={1} md={1}>
+                                          <Tooltip className="mt-2" title={field?.tooltipMessage ?? ''}>
+                                            <InfoIcon color="disabled" />
+                                          </Tooltip>
+                                        </Grid>
+                                      ) : null}
+                                    </Grid>
+                                  ) : field.fieldName === 'owner' ? (
+                                    <FormTypes
+                                      productionOrderId={productionOrderId}
+                                      {...field}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={ownerData}
+                                      onChange={(e, val) => {
+                                        setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
+                                        handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : '' });
+
+                                        if (val && val.optionValue !== user?.user?._id) {
+                                          const checkOwnerAddedInCollaborator = values['collaborator'].find(
+                                            (d) => d?.optionValue === user?.user?._id
+                                          );
+                                          if (!checkOwnerAddedInCollaborator) {
+                                            setFieldValue('collaborator', [
+                                              ...values['collaborator'],
+                                              collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
+                                            ]);
+                                            handleValuesChange({
+                                              collaborator: collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
+                                            });
+                                          }
+                                        }
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      disabled={productionOrderId && field.disableOnEdit}
+                                      onOpen={() => {
+                                        onOwnerDropdownOpen(values['collaborator']);
+                                      }}
+                                    />
+                                  ) : field.fieldName === 'collaborator' ? (
+                                    <FormTypes
+                                      productionOrderId={productionOrderId}
+                                      {...field}
+                                      disabled={!productionOrderId && field.disableOnEdit}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={collaboratorData}
+                                      setFieldValue={(name, value) => {
+                                        handleValuesChange({ [name]: value });
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      onOpen={() => {
+                                        onCollabOwnerMultiselectOpen(values['owner']);
+                                      }}
+                                    />
+                                  ) : field.fieldName === 'plant' || field.fieldName === 'warehouse' ? (
+                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                       <Grid container spacing={1}>
                                         <Grid
                                           item
-                                          xs={permissions.customerAccount?.isCreate ? 11 : 11}
-                                          sm={permissions.customerAccount?.isCreate ? 11 : 11}
-                                          md={permissions.customerAccount?.isCreate ? 11 : 11}
+                                          xs={permissions?.warehouse?.isCreate ? 11 : 11}
+                                          sm={permissions?.warehouse?.isCreate ? 11 : 11}
+                                          md={permissions?.warehouse?.isCreate ? 11 : 11}
                                         >
                                           <FormTypes
+                                            productionOrderId={productionOrderId}
                                             {...field}
-                                            isNew={!productionOrderId}
+                                            fieldData={field}
+                                            disabled={disablePlantIfAssetAdded || (productionOrderId && field.disableOnEdit)}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
                                             name={field.fieldName}
                                             type={field.type}
-                                            options={accountData}
-                                            disabled={
-                                              isAnyMaterial || ![PRODUCTION_ORDER_TYPE.external].includes(values['type'])
-                                                ? true
-                                                : !isClone
-                                                ? productionOrderId && field.disableOnEdit
-                                                : false || !isEditable
-                                            }
+                                            options={optionsPlantsEntity}
+                                            setFieldValue={(name, value) => {
+                                              setFieldValue(name, value);
+                                            }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
                                             tooltipMessage={field?.tooltipMessage}
                                             size="small"
-                                            doNotShowInfoTooltip={true}
-                                            onChange={(e, value) => {
-                                              setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                              if (productionOrderInitialData.fields.find((d) => d.fieldName === 'customerContact')) {
-                                                setFieldValue('customerContact', '');
-                                                handleValuesChange({
-                                                  [field.fieldName]: value && value.optionValue ? value.optionValue : '',
-                                                  customerContact: ''
-                                                });
-                                              }
-                                            }}
                                           />
                                         </Grid>
-                                        {permissions.customerAccount?.isCreate && (
+                                        {permissions?.warehouse?.isCreate && (
                                           <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title="Create Account" className="mt-1">
+                                            <Tooltip title="Create Plant" className="mt-1">
                                               <IconButton
                                                 onClick={() => {
-                                                  setShowAddCustomerAccountDialog(true);
+                                                  setShowAddWarehouseDialog(true);
                                                 }}
-                                                disabled={
-                                                  isAnyMaterial || ![PRODUCTION_ORDER_TYPE.external].includes(values['type'])
-                                                    ? true
-                                                    : !isClone
-                                                    ? productionOrderId && field.disableOnEdit
-                                                    : false
-                                                }
+                                                disabled={disablePlantIfAssetAdded || (productionOrderId && field.disableOnEdit)}
                                                 size="small"
                                               >
                                                 <AddIcon
                                                   color={
-                                                    isAnyMaterial || ![PRODUCTION_ORDER_TYPE.external].includes(values['type'])
-                                                      ? 'disabled'
-                                                      : isClone
-                                                      ? 'primary'
-                                                      : productionOrderId && field.disableOnEdit
-                                                      ? 'disabled'
-                                                      : 'primary'
-                                                  }
-                                                />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Grid>
-                                        )}
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    ) : field.fieldName === 'customerContact' ? (
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions.customerContact?.isCreate ? 11 : 11}
-                                          sm={permissions.customerContact?.isCreate ? 11 : 11}
-                                          md={permissions.customerContact?.isCreate ? 11 : 11}
-                                        >
-                                          <FormTypes
-                                            {...field}
-                                            isNew={!productionOrderId}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={customerContactDataSource}
-                                            doNotShowInfoTooltip={true}
-                                            setFieldValue={(name, value) => {
-                                              handleValuesChange({ [name]: value });
-                                              setFieldValue(name, value);
-                                            }}
-                                            disabled={
-                                              ![PRODUCTION_ORDER_TYPE.external].includes(values['type'])
-                                                ? true
-                                                : !isClone
-                                                ? productionOrderId && field.disableOnEdit
-                                                : false || !isEditable
-                                            }
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={false}
-                                            size="small"
-                                            onOpen={() => onCustomerContactDropdownOpen(values['customerAccount'])}
-                                            // onChange={(e, value) => {
-                                            //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-
-                                            // }}
-                                          />
-                                        </Grid>
-                                        {permissions.customerContact?.isCreate && (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title="Create Contact" className="mt-1">
-                                              <IconButton
-                                                onClick={() => {
-                                                  setShowAddCustomerContactDialog(true);
-                                                }}
-                                                disabled={
-                                                  ![PRODUCTION_ORDER_TYPE.external].includes(values['type'])
-                                                    ? true
-                                                    : !isClone
-                                                    ? productionOrderId && field.disableOnEdit
-                                                    : false
-                                                }
-                                                size="small"
-                                              >
-                                                <AddIcon
-                                                  color={
-                                                    ![PRODUCTION_ORDER_TYPE.external].includes(values['type'])
-                                                      ? 'disabled'
-                                                      : isClone
-                                                      ? 'primary'
-                                                      : productionOrderId && field.disableOnEdit
-                                                      ? 'disabled'
-                                                      : 'primary'
+                                                    disablePlantIfAssetAdded || (productionOrderId && field.disableOnEdit) ? 'disabled' : 'primary'
                                                   }
                                                 />
                                               </IconButton>
@@ -535,286 +596,44 @@ const ManageProductionOrder = ({
                                           </Grid>
                                         ) : null}
                                       </Grid>
-                                    ) : field.fieldName === 'owner' ? (
-                                      <FormTypes
-                                        productionOrderId={productionOrderId}
-                                        {...field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={ownerData}
-                                        onChange={(e, val) => {
-                                          setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                          handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : '' });
-
-                                          if (val && val.optionValue !== user?.user?._id) {
-                                            const checkOwnerAddedInCollaborator = values['collaborator'].find(
-                                              (d) => d?.optionValue === user?.user?._id
-                                            );
-                                            if (!checkOwnerAddedInCollaborator) {
-                                              setFieldValue('collaborator', [
-                                                ...values['collaborator'],
-                                                collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                              ]);
-                                              handleValuesChange({
-                                                collaborator: collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                              });
-                                            }
+                                    </Grid>
+                                  ) : (
+                                    <FormTypes
+                                      productionOrderId={productionOrderId}
+                                      {...field}
+                                      fieldData={field}
+                                      disabled={(productionOrderId && field.disableOnEdit) || field.fieldName === 'productionOrderNumber'}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        handleValuesChange({ [name]: value });
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      imageOrFileUploadCompletePercentage={
+                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                          ? (completePercentage) => {
+                                            setUploadingImageOrFileProgress(completePercentage);
                                           }
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        disabled={productionOrderId && field.disableOnEdit}
-                                        onOpen={() => {
-                                          onOwnerDropdownOpen(values['collaborator']);
-                                        }}
-                                      />
-                                    ) : field.fieldName === 'collaborator' ? (
-                                      <FormTypes
-                                        productionOrderId={productionOrderId}
-                                        {...field}
-                                        disabled={!productionOrderId && field.disableOnEdit}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={collaboratorData}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value });
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onOpen={() => {
-                                          onCollabOwnerMultiselectOpen(values['owner']);
-                                        }}
-                                      />
-                                    ) : field.fieldName === 'startDate' ? (
-                                      <FormTypes
-                                        productionOrderId={productionOrderId}
-                                        {...field}
-                                        disabled={productionOrderId && field.disableOnEdit}
-                                        values={values}
-                                        fieldData={field}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        minDate={new Date()}
-                                        maxDate={
-                                          values['expectedCompletionDate'] ? moment(values['expectedCompletionDate']) : moment().add(5, 'years')
-                                        }
-                                      />
-                                    ) : field.fieldName === 'expectedCompletionDate' ? (
-                                      <FormTypes
-                                        productionOrderId={productionOrderId}
-                                        {...field}
-                                        disabled={productionOrderId && field.disableOnEdit}
-                                        values={values}
-                                        fieldData={field}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        minDate={values['startDate']}
-                                      />
-                                    ) : field.fieldName === 'plant' || field.fieldName === 'warehouse' ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                        <Grid container spacing={1}>
-                                          <Grid
-                                            item
-                                            xs={permissions?.warehouse?.isCreate ? 11 : 11}
-                                            sm={permissions?.warehouse?.isCreate ? 11 : 11}
-                                            md={permissions?.warehouse?.isCreate ? 11 : 11}
-                                          >
-                                            <FormTypes
-                                              productionOrderId={productionOrderId}
-                                              {...field}
-                                              fieldData={field}
-                                              disabled={disablePlantIfAssetAdded || (productionOrderId && field.disableOnEdit) || !isEditable}
-                                              values={values}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              options={optionsPlantsEntity}
-                                              setFieldValue={(name, value) => {
-                                                setFieldValue(name, value);
-                                              }}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={field?.isTooltip || false}
-                                              tooltipMessage={field?.tooltipMessage}
-                                              size="small"
-                                            />
-                                          </Grid>
-                                          {permissions?.warehouse?.isCreate && (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title="Create Plant" className="mt-1">
-                                                <IconButton
-                                                  onClick={() => {
-                                                    setShowAddWarehouseDialog(true);
-                                                  }}
-                                                  disabled={disablePlantIfAssetAdded || (productionOrderId && field.disableOnEdit)}
-                                                  size="small"
-                                                >
-                                                  <AddIcon
-                                                    color={
-                                                      disablePlantIfAssetAdded || (productionOrderId && field.disableOnEdit) ? 'disabled' : 'primary'
-                                                    }
-                                                  />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Grid>
-                                          )}
-                                          {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip className="mt-2" title={field?.tooltipMessage ?? ''}>
-                                                <InfoIcon color="disabled" />
-                                              </Tooltip>
-                                            </Grid>
-                                          ) : null}
-                                        </Grid>
-                                      </Grid>
-                                    ) : field.fieldName === 'type' ? (
-                                      <FormTypes
-                                        productionOrderId={productionOrderId}
-                                        {...field}
-                                        fieldData={field}
-                                        disabled={(productionOrderId && field.disableOnEdit) || !isEditable}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        onChange={(e, value) => {
-                                          setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                          if (
-                                            productionOrderInitialData.fields.find((d) => d.fieldName === 'customerContact') &&
-                                            productionOrderInitialData.fields.find((d) => d.fieldName === 'customerAccount')
-                                          ) {
-                                            setFieldValue('customerContact', '');
-                                            setFieldValue('customerAccount', '');
-                                            handleValuesChange({
-                                              [field.fieldName]: value && value.optionValue ? value.optionValue : '',
-                                              customerContact: '',
-                                              customerAccount: ''
-                                            });
-                                          } else if (productionOrderInitialData.fields.find((d) => d.fieldName === 'customerAccount')) {
-                                            setFieldValue('customerAccount', '');
-                                            handleValuesChange({
-                                              [field.fieldName]: value && value.optionValue ? value.optionValue : '',
-                                              customerAccount: ''
-                                            });
-                                          } else if (productionOrderInitialData.fields.find((d) => d.fieldName === 'customerContact')) {
-                                            setFieldValue('customerContact', '');
-                                            handleValuesChange({
-                                              [field.fieldName]: value && value.optionValue ? value.optionValue : '',
-                                              customerContact: ''
-                                            });
-                                          }
-                                          setProductionOrderInitialData((prevState: any) => ({
-                                            ...prevState,
-                                            fields: [
-                                              ...prevState?.fields?.map((e) => {
-                                                if (value?.optionValue === PRODUCTION_ORDER_TYPE.internal) {
-                                                  if (e?.fieldName === 'customerAccount') {
-                                                    e.required = false;
-                                                  }
-                                                  if (e?.fieldName === 'customerContact') {
-                                                    e.required = false;
-                                                  }
-                                                }
-                                                if (value?.optionValue === PRODUCTION_ORDER_TYPE.external) {
-                                                  if (e?.fieldName === 'customerAccount') {
-                                                    e.required = true;
-                                                  }
-                                                  if (e?.fieldName === 'customerContact') {
-                                                    e.required = true;
-                                                  }
-                                                }
-                                                return e;
-                                              })
-                                            ]
-                                          }));
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    ) : (
-                                      <FormTypes
-                                        productionOrderId={productionOrderId}
-                                        {...field}
-                                        fieldData={field}
-                                        disabled={(productionOrderId && field.disableOnEdit) || field.fieldName === 'productionOrderNumber'}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value });
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                            : null
-                                        }
-                                      />
-                                    )}
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        )
+                                          : null
+                                      }
+                                    />
+                                  )}
+                                </Grid>
+                              ))}
+                            </Grid>
+                          </Box>
+                        </div>
+                      )
                       );
                     })}
                 </Form>
@@ -837,9 +656,7 @@ const ManageProductionOrder = ({
                   variant="contained"
                   color="primary"
                   disabled={
-                    // loading || Object.keys(errors).length > 0 ? true : false
                     uploadingImageOrFileProgress > 0 ||
-                    // isFieldNotTouched(productionOrderInitialData, values) ||
                     loading
                   }
                   onClick={(e) => {
@@ -879,7 +696,6 @@ const ManageProductionOrder = ({
                   onGetAddedAccount={({ data }) => {
                     setNewAddedAccountId(data._id);
                     updateAccountDropdown(data);
-
                     setFieldValue('customerAccount', data._id);
                     setFieldValue('customerContact', '');
                   }}
@@ -894,7 +710,6 @@ const ManageProductionOrder = ({
                     if (obj) {
                       setShowAddCustomerContactDialog(false);
                       updateContactDropdown(obj.data.data);
-
                       setFieldValue('customerContact', obj.id);
                     }
                   }}

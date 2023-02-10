@@ -30,22 +30,21 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AddExistingProductInventory from './AddExistingProductInventory';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import moment from 'moment';
-import { dateFormat, pricingCondition, formatAmountWithCurrency, demandOrder } from '../../../constants/helpers';
+import { dateFormat, formatAmountWithCurrency, demandOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
-import { capitalize } from 'lodash';
-import DateRangeIcon from '@material-ui/icons/DateRange';
-import SalesOrderQtyDialog from './DemandOrderQtyDialog';
-import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
-import LeadTimeDialog from './LeadTimeDialog';
+import { capitalize, startCase } from 'lodash';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import DemandOrderQTYDialog from './DemandOrderDetailDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -60,15 +59,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen }) => {
+const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedFrom, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
     state: { user, permissions }
   }: any = useData();
 
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [isUpdating, setUpdating] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -86,7 +83,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
   const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
@@ -94,14 +90,87 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
+    const fieldsToShow = [
+      {
+        _id: '630dbe1e9ec41861052354a3',
+        fieldLabel: 'Qty',
+        type: 'decimal',
+        option: [],
+        required: false,
+        isTooltip: false,
+        tooltipMessage: '',
+        editAble: true,
+        order: 2,
+        decimalPlaces: 2,
+        sectionName: 'Quantity Information',
+        fieldName: 'qty',
+        resource: 'Sales Order Product',
+        brand: '630dbe1e9ec418610523529c',
+        createdBy: {
+          user: '61b84437885fdf02d9104cb0',
+          date: '2022-08-30T07:37:02.237Z'
+        }
+      },
+      {
+        _id: '630dbe1e9ec41861052354a4',
+        fieldLabel: 'Unit',
+        type: 'dropDown',
+        option: [
+          {
+            optionLabel: 'Option 1',
+            optionValue: 'Option 1'
+          }
+        ],
+        required: false,
+        isTooltip: false,
+        tooltipMessage: '',
+        editAble: true,
+        order: 1,
+        sectionName: 'Quantity Information',
+        fieldName: 'unit',
+        resource: 'Sales Order Product',
+        brand: '630dbe1e9ec418610523529c',
+        createdBy: {
+          user: '61b84437885fdf02d9104cb0',
+          date: '2022-08-30T07:37:02.237Z'
+        }
+      }
+    ];
+
+    var data = fieldsToShow || [];
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const coloum: any = [
+    const newColumns = genrateCustomTableColumns(data, "", "");
+    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay'
+    }
+    let coloum: any = [
+      {
+        accessor: 'srno',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p>{`${startCase(row.original?.type)} `}</p>
+          </div>
+        )
+      },
       {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
         width: 300,
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {
@@ -115,13 +184,16 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
                 {row.original?.detail}
               </p>
             }
-
             {
               <Box ml={1} className="d-flex align-items-center">
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
                 <HtmlTooltip title="Add ">
                   <IconButton
-                    onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
+                    onClick={(event) => {
+                      const type = row.original.type;
+                      setAddExistingProductDialog({ open: true, type: type, parentId: row.original?._id });
+                      setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+                    }}
                     size="small"
                   >
                     <Add color="disabled" fontSize="small" />
@@ -129,105 +201,11 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
                 </HtmlTooltip>
               </Box>
             }
-
-            <Chip
-              className="ml-1"
-              label={`${row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}`}
-              size="small"
-              color="primary"
-              onClick={() => {
-                window.open(
-                  `${
-                    row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'package'
-                      ? routes.packagesDetail.path
-                      : routes.serviceMasterDetail.path
-                  }/${row.original.materialId}`
-                );
-              }}
-            />
           </div>
         )
       }
     ];
-    data.forEach((element) => {
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-        });
-      } else if (element.fieldName === 'supplierAccount') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? (
-              <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
-            ) : (
-              <NoDataCell />
-            )
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                )
-            });
-          });
-        }
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
-      }
-    });
+    coloum = [...coloum, ...newColumns];
     {
       isMobile ? (
         <Box display={'none'} />
@@ -258,50 +236,30 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
         })
       );
     }
-    coloum.forEach((element) => {
-      if (element.accessor.includes('detail')) {
-        element['Footer'] = () => {
-          return <>Total</>;
-        };
-      } else if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
-    const showColumn = ['Detail', 'Qty', 'Unit'];
-    const purifyColumn = coloum.filter((e) => showColumn?.includes(e.Header) || e.accessor === 'action');
-    setColumns(purifyColumn);
-    fetchProductInventory();
+    setColumns(coloum);
+    fetchDemandOrderProduct();
   };
 
-  const fetchProductInventory = async () => {
+  const fetchDemandOrderProduct = async () => {
     setNextStep(false);
     var data: any = [];
-    var inventory: any = [];
     const response = await axiosInstance().get(`${demandOrder.api}/productpackage/${salesOrderData._id}`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
-    inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.srno = i + 1;
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
-      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
-      parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
-      parent.subRows = generateNestedData(data.material, inventory, parent);
+      parent.subRows = generateNestedData(data.material, parent);
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(true);
@@ -312,23 +270,22 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
     setSelectedProducts([]);
   };
 
-  const generateNestedData = (material, inventory, parent) => {
+  const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
+    let productIndex = 0;
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.srno = parent.srno + '.' + `${productIndex + 1}`;
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
-      _subRow.qtyDisplay = _subRow.qty;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
+      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
-      _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
-      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
-      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+      _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -339,15 +296,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
     return subRows;
   };
 
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
-  };
-
   const handleAdd = async (rows) => {
     setAddingProducts(true);
     const material: any = [];
@@ -355,34 +303,17 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
       const element: any = {};
       element.materialId = d._id;
       element.type = addExistingProductDialog.type;
-      element.unit = d?.unit && d?.unitMain?.length ? d?.unitMain[0] : '';
+      element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addExistingProductDialog.parentId;
       material.push(element);
-    });
-
-    const priceData: any = await calculatePrice(material);
-    material.forEach((element) => {
-      const rateResult = priceData?.filter(
-        (e) =>
-          e.materialId === element.materialId &&
-          e.materialType === element.type &&
-          e.unit === element.unit &&
-          e.pricingMethod === element.pricingMethod
-      );
-      if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${salesOrderData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-        Object.assign(element, calValues);
-      }
     });
 
     axiosInstance()
       .post(`${demandOrder.api}/productpackage/${salesOrderData._id}`, { material })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        fetchProductInventory();
+        fetchDemandOrderProduct();
         setAddingProducts(false);
       })
       .catch((error) => {
@@ -393,27 +324,13 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
   };
 
   const handleSaveData = async (rows: any) => {
-    rows.forEach((element) => {
-      delete element.srno;
-      delete element.detail;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.subRows;
-      delete element.leadTime;
-      delete element.leadTimeData;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${demandOrder.api}/productpackage/${salesOrderData._id}`, { material: rows })
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
-        fetchProductInventory();
+        fetchDemandOrderProduct();
       })
       .catch((error) => {
         setUpdating(false);
@@ -427,7 +344,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
       .put(`${demandOrder.api}/productpackage/${salesOrderData?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
-        fetchProductInventory();
+        fetchDemandOrderProduct();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -442,32 +359,14 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
     setRecordToUpdate(rowData);
   };
 
-  const calculatePrice = (arr: any[]) => {
-    if (salesOrderData) {
-      const data: any = {};
-      data.conditionType = ['Rent'];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
-        currency: salesOrderData?.currency
-      }));
-      data.supplier = [];
-      data.customer = [salesOrderData?.customerAccount?.optionValue];
-      data.warehouse = [salesOrderData?.warehouse?.optionValue];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const rowData = material.find((d) => d._id === updatedData._id);
+    if (inputField.hasOwnProperty('qtyDisplay')) {
+      inputField['qty'] = inputField['qtyDisplay'];
     }
+    let rows: any = [{ ...rowData, ...updatedData }];
+    rows = await calculateRowsField(material, inputField, allFields, updatedData);
+    handleSaveData(rows);
   };
 
   const openActions = (event) => {
@@ -583,14 +482,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
       </Box>
       {columns && rowsData ? (
         <>
-          <Box
-            p="6px"
-            zIndex={5}
-            width={
-              stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 100px)'
-            }
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-          >
+          <Box p="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
               columns={columns}
@@ -599,8 +491,9 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
-              renderedFrom="sales_order_product_package"
+              renderedFrom="demand_order_product_package"
               isClientSideGrid={true}
+              onSaveEdit={onSaveInlineEdit}
             />
           </Box>
         </>
@@ -619,95 +512,37 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
         />
       )}
       {isProductEdit.open && (
-        <SalesOrderQtyDialog
-          calculatePrice={calculatePrice}
+        <DemandOrderQTYDialog
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false });
-            setRecordToUpdate(null);
           }}
-          isBulkedit={isProductEdit.isBulkedit}
-          handleSaveData={handleSaveData}
-          rowData={recordToUpdate}
-          material={material}
-          selectedProducts={selectedProducts}
-          salesOrderData={salesOrderData}
+          productionOrderData={recordToUpdate}
+          handleSave={handleSaveData}
         />
       )}
-      {addExistingProductDialog.open && (
-        <AddExistingProductInventory
-          renderedFrom={
-            addExistingProductDialog.type === 'product'
-              ? `${renderedFrom}-product`
-              : addExistingProductDialog.type === 'service'
-              ? `${renderedFrom}-service`
-              : `${renderedFrom}-package`
-          }
-          isAddingProducts={isAddingProducts}
-          addProductInventory={handleAdd}
-          handleProductInventoryClose={() => {
-            setAddExistingProductDialog({ open: false, type: '', parentId: null });
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
+        <AssignProductDialog
+          reference="demandOrder"
+          serialized={null}
+          productsDialogOpen={addExistingProductDialog.open}
+          productId={null}
+          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+          assignedProducts={rowsData?.map((e) => e?.materialId)}
+          renderedFrom={`${renderedFrom}_sub-1`}
+          onSuccess={(d) => {
+            handleAdd(d);
           }}
-          type={addExistingProductDialog.type}
-          refrenceType={'Quotation'}
-          ignoreIds={rowsData?.map((e) => e?.materialId)}
         />
       )}
-      {addchildDialog.open && (
-        <Popover
-          anchorReference="anchorPosition"
-          anchorPosition={{ top: addchildDialog.top, left: addchildDialog.bottom }}
-          anchorOrigin={{
-            vertical: 'center',
-            horizontal: 'left'
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
+        <AssignPackageDialog
+          referenceType="demandOrder"
+          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+          ids={rowsData?.map((e) => e?.materialId)}
+          onSuccess={(rows) => {
+            handleAdd(rows)
           }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'left'
-          }}
-          open={addchildDialog.open}
-          onClose={() => {
-            setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
-          }}
-        >
-          <MenuList>
-            <MenuItem
-              onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'product', parentId: addchildDialog.parentId });
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
-              }}
-            >
-              Product
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
-              }}
-            >
-              Package
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
-              }}
-            >
-              Services
-            </MenuItem>
-          </MenuList>
-        </Popover>
-      )}
-      {leadTimeDialog.open && (
-        <LeadTimeDialog
-          salesOrderId={salesOrderData._id}
-          data={leadTimeDialog?.data}
-          onClose={() => {
-            setLeadTimeDialog({ open: false, data: null });
-          }}
-          handleSucess={() => {
-            setLeadTimeDialog({ open: false, data: null });
-            fetchProductInventory();
-          }}
+          packageType={null}
         />
       )}
     </Fragment>

@@ -360,7 +360,7 @@ const Address = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-              <FaWarehouse size={20} style={{ paddingBottom: '3px' }} /> <span className="listingHeader">Address</span>
+              
             </Grid>
             <Grid
               item

@@ -33,15 +33,12 @@ import CustomAgGridEditable from '../../../components/AgGridComponents/CustomAgG
 import { Link } from 'react-router-dom';
 import { startCase } from 'lodash';
 import { fetch_invoice_product_fields } from '../../../components/Invoice/helper';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 
 const InvoiceFacility = ({ invoiceData }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [sendEmail, setSendEmail] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });

@@ -21,8 +21,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
 import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
-import { calculatePrice, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import { calculatePrice, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import AddExistingProductInventory from '../Productpackage/AddExistingProductInventory';
 
@@ -30,9 +29,6 @@ const Consumables = ({
   rentalManagementData,
   setNextStep,
   currencySymbol,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity,
   renderedFrom,
   stepFullScreen,
   allowedToEdit
@@ -323,15 +319,6 @@ const Consumables = ({
     return subRows;
   };
 
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
-  };
-
   const handleAdd = async (rows) => {
     setAddingProducts(true);
     const material: any = [];
@@ -530,23 +517,9 @@ const Consumables = ({
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
-              }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-            >
+            <Box zIndex={5} width={'100%'}>
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
@@ -554,6 +527,7 @@ const Consumables = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={isOffline || !allowedToEdit}
+                hideAction={isOffline || !allowedToEdit}
                 renderedFrom="rental_management_product_package"
                 isClientSideGrid={true}
               />

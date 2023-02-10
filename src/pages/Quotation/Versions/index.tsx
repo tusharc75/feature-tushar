@@ -24,12 +24,18 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-  const [columns] = useState([
-    { field: 'version', headerName: 'Version', show: true, width: 140, disabled: true, cellRenderer: 'nameRenderer' },
-    { field: 'quotationNumber', headerName: 'Quotation Number', show: true, cellRenderer: 'quotationNumberRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
-  ]);
+  const [columns, setColumns] = useState([]);
+
+  useEffect(() => {
+    const column: any = [];
+    column.push({ field: 'version', headerName: 'Version', show: true, width: 140, disabled: true, cellRenderer: 'nameRenderer' });
+    if (refrenceType === "rentalJob" || refrenceType === "repairOrder") {
+      column.push({ field: 'quotationNumber', headerName: 'Quotation Number', show: true, cellRenderer: 'quotationNumberRenderer' });
+    }
+    column.push({ field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' });
+    column.push({ field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' });
+    setColumns(column)
+  }, []);
 
   useEffect(() => {
     if (quotationId) {

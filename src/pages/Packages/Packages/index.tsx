@@ -11,15 +11,11 @@ import { prepareDataForGrid, packages } from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Loader from 'src/components/Loader';
 import { camelCase } from 'lodash';
-import { GrDrag } from 'react-icons/gr';
-import ArrangeView from 'src/components/Helpers/ArrangeView';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
 const PackagesTable = ({ packageId, packageData }) => {
@@ -141,11 +137,11 @@ const PackagesTable = ({ packageId, packageData }) => {
 
   const ActionsRenderer = (params) => <span>{params?.data?.qty}</span>;
 
-  const handleAssignPackage = (ids) => {
+  const handleAssignPackage = (rows) => {
     axiosInstance()
       .post(`${packages.api}/${packageId}/package`, {
         ids: [packageId],
-        packages: [...ids].map((d: any) => ({ packageId: d, qty: Number(1) }))
+        packages: rows?.map((d: any) => ({ packageId: d?._id, qty: d?.qty ? Number(d?.qty) : Number(1) }))
       })
       .then(() => {
         setShowProductAssignDialog(false);
@@ -214,9 +210,9 @@ const PackagesTable = ({ packageId, packageData }) => {
           dataRows={dataRows}
           selectedRecords={[]}
           dispatch={dispatch}
-          onEdit={(data) => {}}
+          onEdit={(data) => { }}
           extraParamsToCheckDelete={true}
-          onDelete={(data) => {}}
+          onDelete={(data) => { }}
           rowCount={rowCount}
           page={page}
           loading={loading}
@@ -232,7 +228,7 @@ const PackagesTable = ({ packageId, packageData }) => {
             setShowProductAssignDialog(true);
           }}
           showClone={true}
-          onClone={(data) => {}}
+          onClone={(data) => { }}
           renderedFrom={renderedFrom}
         />
       ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -261,22 +257,22 @@ const PackagesTable = ({ packageId, packageData }) => {
       )}
       {showProductAssignDialog && (
         <AssignPackageDialog
-          referenceType="product"
+          referenceType="packages"
           handleClose={() => setShowProductAssignDialog(false)}
           ids={[...dataRows?.map((e) => e._id), packageId]}
-          onSuccess={(ids) => {
-            handleAssignPackage(ids);
+          onSuccess={(rows) => {
+            handleAssignPackage(rows);
           }}
           packageType={'Product'}
         />
       )}
       {showServiceAssignDialog && (
         <AssignPackageDialog
-          referenceType="product"
+          referenceType="packages"
           handleClose={() => setShowServiceAssignDialog(false)}
           ids={[...dataRows?.map((e) => e._id), packageId]}
-          onSuccess={(ids) => {
-            handleAssignPackage(ids);
+          onSuccess={(rows) => {
+            handleAssignPackage(rows);
           }}
           packageType={'Service'}
         />

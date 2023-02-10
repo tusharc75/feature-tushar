@@ -311,7 +311,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
+            ? parent?.productDetail?.productDescription || ''
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : '';
@@ -350,7 +350,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
+            ? _subRow?.productDetail?.productDescription || ''
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
@@ -469,6 +469,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   childrenProperty="subRows"
                   uniqueKey="_id"
                   hideSelection={false}
+                  hideAction={false}
                   renderedFrom="rental_management_create_billing"
                   isClientSideGrid={true}
                 />

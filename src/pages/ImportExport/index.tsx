@@ -9,7 +9,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import { DataGrid } from '@material-ui/data-grid';
 import { AiOutlineImport, AiOutlineUpload, BiExport, BiImport } from 'react-icons/all';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { documentUploadMaxSize, resourceNames, RESOURCE_LABEL } from '../../constants/helpers';
+import { documentUploadMaxSize, sidebarResource, RESOURCE_LABEL } from '../../constants/helpers';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, DateTimeRenderer, NumberRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
@@ -319,7 +319,7 @@ const BrandBackup = () => {
           <Grid container xs={12} lg={5} md={5} style={{ marginBottom: '0.5rem', marginLeft: '0.5rem' }}>
             <Autocomplete
               id="export-resources"
-              options={Object.keys(resourceNames)?.map((key) => resourceNames[key])}
+              options={Object.keys(sidebarResource)?.map((key) => sidebarResource[key])}
               renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
               getOptionLabel={(option) => option}
               onChange={(e, val) => {
@@ -369,9 +369,7 @@ const BrandBackup = () => {
                   }
                   {...a11yProps(1)}
                 />
-                <div className={'uio'}> </div>
               </Tabs>
-
               <TabPanel value={tabValue} index={0}>
                 <Box mt={2} className="bg-white">
                   <Grid container xs={12} lg={5} md={5} style={{ padding: '1rem', paddingTop: 0 }}>

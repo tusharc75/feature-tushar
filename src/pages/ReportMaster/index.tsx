@@ -9,99 +9,118 @@ import { useData } from '../../StateProvider/Provider';
 import { AiFillCalendar } from 'react-icons/ai';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import styles from './index.module.scss';
+import { ReportIcon } from 'src/assets/svg/svgIcons';
+import { HiArrowRight } from 'react-icons/hi';
+
+const colorPalette = [
+  { iconsColor: ['#059825', '#059825 ', '#60D778'], color: '#F9FDEC' },
+  { iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'], color: '#FFEFEE' },
+  { iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'], color: '#F3F8FF' },
+  { iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6'], color: '#FFFAEC' },
+  { iconsColor: ['#AD14F5', '#6203AC', '#BE74E5'], color: '#F6F1FF' },
+  { iconsColor: ['#FFA800', '#E35200', '#FBC56E'], color: '#EBEBEB' },
+  { iconsColor: ['#059825', '#059825', '#60D778'], color: '#F9FDEC' },
+  { iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'], color: '#FFEFEE' },
+  { iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6 '], color: '#FFFAEC' },
+  { iconsColor: ['#059825', '#059825', '#60D778'], color: '#F9FDEC' },
+  { iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'], color: '#FFEFEE' },
+  { iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'], color: '#F3F8FF' }
+];
 
 const ReportMaster = () => {
-
-  const { state: { permissions } } = useData();
+  const {
+    state: { permissions }
+  } = useData();
   const [customReports, setCustomReports] = useState([]);
 
   useEffect(() => {
     (async () => {
-      let { data: { data } } = await axiosInstance().get(`custom-report`);
+      let {
+        data: { data }
+      } = await axiosInstance().get(`custom-report`);
       setCustomReports(data);
     })();
   }, []);
 
-
   return (
-    <div>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+    <div className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
           <CustomBreadCrumbs routes={[{ title: 'Reports', path: '' }]} />
-        </Grid>
-      </Grid>
-      <div className="main-container">
-        <div className="header-panel">
-          <Grid container>
-            <Grid item xs={4} sm={6}>
-              <Box display="flex" alignItems="center">
-                <MdDescription size={22} className="headerLogo" />
-                <span className="listingHeader">Reports</span>
-              </Box>
-            </Grid>
-            <Grid item xs={8} sm={6}>
-              <Box display="flex" alignItems="center" justifyContent="flex-end">
-                <Box mr={1}>
-                  <Link to="/custom-report">
-                    <Button variant="outlined" size="small" endIcon={<AiFillCalendar />} color="primary">
-                      Custom Report
-                    </Button>
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            <Link to="/custom-report">
+              <Button className="btn-outline-v1" size="small" endIcon={<AiFillCalendar />}>
+                Custom Report
+              </Button>
+            </Link>
+            {permissions?.scheduleReport?.isRead && (
+              <Link to={`/schedule-report`}>
+                <Button className="btn-outline-v1" size="small" endIcon={<AiFillCalendar />}>
+                  Schedule Report
+                </Button>
+              </Link>
+            )}
+          </Box>
+        </Box>
+      </Box>
+      <div className="detail-container-v1">
+        <Box className={styles.reportGrid}>
+          {REPORT_LIST.map((report: any, index: any) => {
+            return (
+              permissions[report.permission]?.isRead && (
+                <Box key={index} className={styles.singleCard}>
+                  <Link
+                    to={`/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`}
+                  >
+                    <Box className={styles.cardInner} style={{ backgroundColor: report.color }}>
+                      <ReportIcon colors={report.iconsColor} className={styles.floatIcon} />
+                      <Typography variant="h6">{report.type === 'dynamic' ? routes[report.key]?.title : report.title}</Typography>
+                      <Typography variant="body2">{/* {report.text} */}</Typography>
+                      <Link
+                        to={`/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`}
+                      >
+                        View <HiArrowRight className={styles.arrow} />
+                      </Link>
+                    </Box>
                   </Link>
                 </Box>
-                {permissions?.scheduleReport?.isRead && (
-                  <Link to={`/schedule-report`}>
-                    <Button variant="outlined" size="small" endIcon={<AiFillCalendar />} color="primary">
-                      Schedule Report
-                    </Button>
-                  </Link>
-                )}
-              </Box>
-            </Grid>
-          </Grid>
-        </div>
-        <hr />
-        <Container maxWidth="lg">
-          <Box p={3}>
-            <Grid container spacing={2}>
-              {REPORT_LIST.map((report: any, index: any) => {
-                return (
-                  permissions[report.permission]?.isRead && (
-                    <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
-                      <Link to={`/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`}  >
-                        <Box border={1} borderColor="grey.300" bgcolor="grey.100" borderRadius={1} p={2}>
-                          <Typography variant="h6">
-                            <MdDescription size={25} className="headerLogo mr-2 pt-1" />
-                            {report.type === 'dynamic' ? routes[report.key]?.title : report.title}
+              )
+            );
+          })}
+        </Box>
+        {customReports?.length ? (
+          <Box mt={3}>
+            <Typography variant="h6">Custom Reports</Typography>
+            <Box mt={2}>
+              <Box className={styles.reportGrid}>
+                {customReports?.map((item, index) => {
+                  let accessor = index % colorPalette.length;
+                  return (
+                    <Box key={index} className={styles.singleCard}>
+                      <Link to={`/reports/custom-report/${item._id}`}>
+                        <Box className={styles.cardInner} style={{ backgroundColor: colorPalette[accessor].color }}>
+                          <ReportIcon colors={colorPalette[accessor].iconsColor} className={styles.floatIcon} />
+                          <Typography variant="h6">{item.customReportName}</Typography>
+                          <Typography variant="body2" className={styles.withoutDetails}>
+                            {' '}
+                            {/* */}
                           </Typography>
+                          <Link to={`/reports/custom-report/${item._id}`}>
+                            View
+                            <HiArrowRight className={styles.arrow} />
+                          </Link>
                         </Box>
                       </Link>
-                    </Grid>
-                  )
-                );
-              })}
-            </Grid>
-            {customReports?.length ?
-              <Box mt={3}>
-                <Typography variant="h6">Custom Reports</Typography>
-                <Box mt={2}>
-                  <Grid container spacing={2}>
-                    {customReports?.map((item, index) => (
-                      <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
-                        <Link to={`/reports/custom-report/${item._id}`}>
-                          <Box border={1} borderColor="grey.300" bgcolor="grey.100" borderRadius={1} p={2}>
-                            <Typography variant="h6">
-                              <MdDescription size={25} className="headerLogo mr-2 pt-1" />
-                              {item.customReportName}
-                            </Typography>
-                          </Box>
-                        </Link>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
-              </Box> : null}
+                    </Box>
+                  );
+                })}
+              </Box>
+            </Box>
           </Box>
-        </Container>
+        ) : null}
       </div>
     </div>
   );

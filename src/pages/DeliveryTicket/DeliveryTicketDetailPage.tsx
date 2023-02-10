@@ -5,7 +5,7 @@ import { Skeleton } from "@material-ui/lab";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import queryString from 'query-string';
-import { yyyyMMDD, deliveryTicket, getObjKeysWithValues, defaultActivityShow, dateTimeFormat, ACTIVITY_RESOURCE } from "../../constants/helpers";
+import { yyyyMMDD, deliveryTicket, getObjKeysWithValues, dateTimeFormat, ACTIVITY_RESOURCE } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../../components/Helpers/Routes";
@@ -15,8 +15,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import ManageDeliveryTicket from "./ManageDeliveryTicket"
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { serializedAsset, gridLoadingTimeout } from "../../constants/helpers"
-import { IoIosArrowDropright, IoIosArrowDropleft, IoMdDownload } from 'react-icons/io';
-import Activity from "../../components/Activity";
+import { IoMdDownload } from 'react-icons/io';
 import { isMobile, isTablet } from "react-device-detect";
 import SignatureDialog from '../../components/Helpers/SignatureDialog';
 import ViewSignsDialog from './ViewSignsDialog'
@@ -38,6 +37,7 @@ import { camelCase } from 'lodash';
 import DeliveryTicketProduct from './DeliveryTicketProduct';
 import DeliveryTicketAdditionalCost from './DeliveryTicketAdditionalCost';
 import HideWhenOffline from 'src/components/HideWhenOffline';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -82,7 +82,6 @@ export default function DeliveryTicketDetail(props) {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [deliveryTicketFields, setDeliveryTicketFields] = useState([]);
   const [gridApi, setGridApi] = useState(null);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [state, dispatch] = useReducer(reducer, intialState);
   const [okBtnLoading, setOkBtnLoading] = useState(false)
   const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false)
@@ -101,7 +100,6 @@ export default function DeliveryTicketDetail(props) {
   const [downlodingFile, setDownlodingFile] = useState(false)
   const [locationKeys, setLocationKeys] = useState([])
   const { isOffline } = useContext(CustomOfflineContext);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
 
   useEffect(() => {
     return history.listen(location => {
@@ -130,9 +128,6 @@ export default function DeliveryTicketDetail(props) {
     history.push(`?tab=${newValue}`);
   };
 
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity)
-  }
   useEffect(() => {
     fetchDeliveryTicketData();
   }, [id]);
@@ -268,16 +263,6 @@ export default function DeliveryTicketDetail(props) {
   useEffect(() => {
     fetchGridColumns()
   }, [])
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true)
-    }
-    else {
-      setActivityShow(false)
-    }
-  }, [isSmallScreen, tabValue])
-
 
   const fetchGridColumns = async () => {
     try {
@@ -508,373 +493,258 @@ export default function DeliveryTicketDetail(props) {
 
   return (
     <>
-      <Fragment>
-        <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={[routes.deliveryTicket, { title: deliveryTicketData?.ticketName }]} />
-        </Grid >
-        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
-          <div>
-            <Paper>
-              {!deliveryTicketData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
-                    <Box marginX={1} />
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
-                  </Box>
-                </div>
-              ) : (
-                <DetailsPageHeader
-                  heading={deliveryTicketData ? deliveryTicketData?.ticketName : ""}
-                  mainPoints={deliveryTicketData ? getMainPoints : ""}
-                  showHeading={true}
+      <Box className="main-container-v1">
+        <Box className="headerbox-v1">
+          <Box className="nav-v1">
+            <CustomBreadCrumbs routes={[routes.deliveryTicket, { title: deliveryTicketData?.ticketName }]} />
+          </Box>
+          <Box className="controls-v1">
+            <Box className="control-buttons-v1">
+
+              {permissions?.deliveryTicket?.isUpdate && canEdit && ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.cancelled].includes(deliveryTicketData?.status) && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  color="primary"
+                  size="small"
+                  onClick={handleOpenUpdateDialog}
+                  style={isMobile && !isTablet ? { color: "var(--teal)" } : {}}
                 >
-                  {permissions?.deliveryTicket?.isUpdate && canEdit && ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.cancelled].includes(deliveryTicketData?.status) && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                      style={isMobile && !isTablet ? { color: "var(--teal)" } : {}}
-                    >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
-                    </Button>
-                  )}
-
-                  {/* {deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id || canEdit &&
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      disabled={loading}
-                      style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
-                      onClick={() => setOpenSignatureDialog(true)}>
-                      {isMobile && !isTablet ? <FaFileSignature size={18} /> :
-                        deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new ? "Sign-off - Dispatch" : "Sign-off - Delivery"
-                      }
-                    </Button>
-                  } */}
-
-                  {(deliveryTicketData?.signatures?.length > 0) ?
-                    <Button
-                      variant={isMobile && !isTablet ? "text" : "contained"}
-                      color="primary"
-                      size="small"
-                      onClick={() => setOpenSigns(true)}
-                      style={isMobile && !isTablet ? { color: "var(--info-darken)" } : {}}
-                    >
-                      {isMobile && !isTablet ? <FaSignature size={20} /> : "View Signatures"}
-                    </Button> : null
-                  }
-                  {/* {(deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading
-                    && deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob && deliveryTicketData?.status === DELIVERY_TICKET_STATUS.delivered) ?
-                    <Button
-                      variant={isMobile && !isTablet ? "text" : "contained"}
-                      color="primary"
-                      size="small"
-                      onClick={() => { handleReceiveCustomerSign() }}
-                      style={isMobile && !isTablet ? { color: "var(--info-darken)" } : {}}
-                    >
-                      {isMobile && !isTablet ? <FaMailchimp size={20} /> : "Send To Customer"}
-                    </Button> : null
-                  } */}
-                  {permissions?.deliveryTicket?.isRead && !isMobile && (
-                    <Button
-                      variant={isMobile && !isTablet ? "text" : "outlined"}
-                      color="primary"
-                      type="button"
-                      size="small"
-                      style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-                      startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
-                      disabled={downlodingFile || isOffline}
-                      onClick={() => { handleViewPdf(false) }}
-                    >
-                      {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
-                    </Button>
-                  )}
-                  {permissions?.deliveryTicket?.isRead && (
-                    <Button
-                      variant={isMobile && !isTablet ? "text" : "outlined"}
-                      color="primary"
-                      type="button"
-                      size="small"
-                      style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
-                      startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
-                      disabled={downlodingFile || isOffline}
-                      onClick={() => { handleViewPdf(true) }}
-                    >
-                      {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile ? "Please wait..." : "Download"}
-                    </Button>
-                  )}
-                </DetailsPageHeader>
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
+                </Button>
               )}
-              {loading ? (
-                <Box padding={2}>
-                  <Grid container spacing={2}>
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                      <Grid item sm={6} md={6} key={i}>
-                        <Skeleton variant="text" width="100px" height="16px" />
-                        <Box marginY={1} />
-                        <Skeleton width="100%" height="50px" />
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
-              ) : (
-                <>
-                  <Tabs
-                    className="quote-tab"
-                    value={tabValue}
-                    onChange={handleMainTabChange}
-                    textColor="primary"
-                    TabIndicatorProps={{
-                      style: {
-                        display: 'none'
-                      }
-                    }}
-                  >
-                    <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 1 ? 'white' : '',
-                        color: tabValue === 1 ? '#163340' : '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                        </div>
-                      }
-                      {...a11yProps(0)}
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 2 ? 'white' : '',
-                        color: tabValue === 2 ? '#163340' : '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Serialized Assets
-                        </div>
-                      }
-                      {...a11yProps(1)}
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 3 ? 'white' : '',
-                        color: tabValue === 3 ? '#163340' : '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Products
-                        </div>
-                      }
-                      {...a11yProps(0)}
-                    />
-                    {deliveryTicketData?.additionalCost?.length > 0 &&
-                      <Tab
-                        className={'tabLayout'}
-                        style={{
-                          background: tabValue === 4 ? 'white' : '',
-                          color: tabValue === 4 ? '#163340' : '#163340'
-                        }}
-                        label={
-                          <div className="d-flex align-items-center tab-font">
-                            <BiFoodMenu className="mr-1" fontSize="inherit" /> Services and Consumables
-                          </div>
-                        }
-                        {...a11yProps(0)}
-                      />
-                    }
-                    <div className={'uio'}> </div>
-                  </Tabs>
-                  <TabPanel value={tabValue} index={0}>
-                    {(deliveryTicketData && deliveryTicketFields.length > 0 ?
-                      <DetailsPage
-                        data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveryDate: signOffDate, creationDate: deliveryTicketData?.createdBy?.date, completionDate: deliveryTicketData?.actualDeliveryDate }}
-                        fields={[...deliveryTicketFields
-                          , {
-                          fieldData: {
-                            type: "date",
-                            fieldLabel: "Actual Delivery Date",
-                            fieldName: "actualDeliveryDate",
-                            sectionName: "Actuals"
-                          }
-                        },
-                        {
-                          fieldData: {
-                            type: "date",
-                            fieldLabel: "Creation Date",
-                            fieldName: "creationDate",
-                            sectionName: "Actuals"
-                          }
-                        },
-                        {
-                          fieldData: {
-                            type: "date",
-                            fieldLabel: "Completion Date",
-                            fieldName: "completionDate",
-                            sectionName: "Actuals"
-                          }
-                        }
-                        ]} /> : null
-                    )}
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={1}>
-                    <Grid container spacing={1} className="p-2">
-                      <Grid item xs={12} className="mt-2 d-flex gap-2">
-                        {
-                          deliveryTicketData?.status === "New" && <IconButton
-                            onClick={() => {
-                              setAddSerializedAssetDialog(true)
-                            }}
-                            disabled={isOffline}
-                            color='primary'
-                            size="small"
-                          >
-                            <Tooltip
-                              title="Add More Serialized Assets">
-                              <AddBoxRoundedIcon />
-                            </Tooltip>
-                          </IconButton>
-                        }
-                        {
-                          deliveryTicketData?.status === "New" && <IconButton
-                            disabled={selectedRecords.length === 0 || isOffline}
-                            onClick={() => {
-                              setShowRemoveAssetFromLoadingTicketDialog(true)
-                            }}
-                            color='primary'
-                            size="small"
-                          >
-                            <Tooltip
-                              title="Remove Serialized Assets">
-                              <RemoveCircleRoundedIcon />
-                            </Tooltip>
-                          </IconButton>
-                        }
-                        <Box mx={1} />
-                      </Grid>
-                      <Grid item xs={12}>
-                        {isMobile && !isTablet ? <CustomSwipableList
-                          allowSelection={true}
-                          allowSwipe={true}
-                          permissions={permissions}
-                          primaryField={columns?.find(d => d.field === "assetNumber")}
-                          onClick={(data) => {
-                            history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
-                          }}
-                          dataRows={dataRows}
-                          selectedRecords={selectedRecords}
-                          dispatch={dispatch}
-                          onEdit={() => {
 
-                          }}
-                          extraParamsToCheckDelete={true}
-                          onDelete={() => {
-                          }}
-                          rowCount={rowCount}
-                          page={page}
-                          loading={loading}
-                          chips={
-                            [{
-                              label: `Product Description: `,
-                              field: "productName",
-                              forceShow: true
-                            }]
-                          }
-                          onCreate={null}
-                          showClone={false}
-                          fullHeight={true}
-                          renderedFrom={renderedFrom}
-                          onClone={() => {
-                          }}
-                        /> :
-                          Object.keys(frameWorkComponent).length > 0 ?
-                            <CustomAgGrid
-                              isClientSideGrid={true}
-                              allowSelection={deliveryTicketData?.status === "New"}
-                              allowAction={false}
-                              columns={columns}
-                              dataRows={dataRows}
-                              frameworkComponents={frameWorkComponent}
-                              setGridApi={setGridApi}
-                              dispatch={dispatch}
-                              rowCount={rowCount}
-                              limit={limit}
-                              pageSizes={pageSizes}
-                              page={page}
-                              actionWidth={150}
-                              loading={false}
-                              renderedFrom={renderedFrom}
-                              refreshGrid={fetchProductInventory}
-                            /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-                        }
-                      </Grid>
-                    </Grid>
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={2}>
-                    <DeliveryTicketProduct
-                      renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-2`}
-                      deliveryTicketId={id} />
-                  </TabPanel>
-                  {deliveryTicketData?.additionalCost?.length > 0 &&
-                    <TabPanel value={tabValue} index={3}>
-                      <DeliveryTicketAdditionalCost
-                        renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-3`}
-                        additionalCost={deliveryTicketData?.additionalCost} />
-                    </TabPanel>}
-                </>
+
+              {(deliveryTicketData?.signatures?.length > 0) ?
+                <Button
+                  variant={isMobile && !isTablet ? "text" : "contained"}
+                  color="primary"
+                  size="small"
+                  onClick={() => setOpenSigns(true)}
+                  style={isMobile && !isTablet ? { color: "var(--info-darken)" } : {}}
+                >
+                  {isMobile && !isTablet ? <FaSignature size={20} /> : "View Signatures"}
+                </Button> : null
+              }
+              {permissions?.deliveryTicket?.isRead && !isMobile && (
+                <Button
+                  variant={isMobile && !isTablet ? "text" : "outlined"}
+                  color="primary"
+                  type="button"
+                  size="small"
+                  style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+                  startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
+                  disabled={downlodingFile || isOffline}
+                  onClick={() => { handleViewPdf(false) }}
+                >
+                  {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
+                </Button>
               )}
-            </Paper>
-          </div>
-
-          <div className="position-relative">
-            <HideWhenOffline>
-              <Paper>
-                {!isSmallScreen && (
-                  <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                    {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                  </span>
-                )}
-                <div style={{ display: showActivity ? 'block' : 'none' }}>
-                  <Grid container>
-                    <Grid item xs={12}>
-                      {deliveryTicketData && (
-                        <div>
-                          <Activity
-                            resourceId={deliveryTicketData?._id}
-                            resource={ACTIVITY_RESOURCE.deliveryTicket}
-                            relatedTo={[
-                              {
-
-                                access: true,
-                                referenceId: deliveryTicketData?._id,
-                                type: ACTIVITY_RESOURCE.deliveryTicket,
-                              }
-                            ]}
-                            handleActivityRefresh={() => { }}
-                            emails={[]}
-                          />
-                        </div>
-                      )}
-                    </Grid>
-                  </Grid>
+              {permissions?.deliveryTicket?.isRead && (
+                <Button
+                  variant={isMobile && !isTablet ? "text" : "outlined"}
+                  color="primary"
+                  type="button"
+                  size="small"
+                  style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
+                  startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
+                  disabled={downlodingFile || isOffline}
+                  onClick={() => { handleViewPdf(true) }}
+                >
+                  {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile ? "Please wait..." : "Download"}
+                </Button>
+              )}
+              <ActivityButton referenceId={deliveryTicketData?._id} resource={ACTIVITY_RESOURCE.deliveryTicket} />
+            </Box>
+          </Box>
+        </Box>
+        <Box className={`detail-container-v1`}>
+          <Tabs
+            className="new-tab-container-v1"
+            value={tabValue}
+            onChange={handleMainTabChange}
+            textColor="primary"
+            TabIndicatorProps={{
+              style: {
+                display: 'none'
+              }
+            }}
+          >
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <FaWpforms className="mr-1" fontSize="inherit" /> Header
                 </div>
-              </Paper>
-            </HideWhenOffline>
-          </div>
-        </div>
+              }
+              {...a11yProps(0)}
+            />
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Serialized Assets
+                </div>
+              }
+              {...a11yProps(1)}
+            />
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Products
+                </div>
+              }
+              {...a11yProps(0)}
+            />
+            {deliveryTicketData?.additionalCost?.length > 0 &&
+              <Tab
+                className={'tabLayout'}
+                label={
+                  <div className="d-flex align-items-center tab-font">
+                    <BiFoodMenu className="mr-1" fontSize="inherit" /> Services and Consumables
+                  </div>
+                }
+                {...a11yProps(0)}
+              />
+            }
+          </Tabs>
+          <TabPanel value={tabValue} index={0}>
+            {(deliveryTicketData && deliveryTicketFields.length > 0 ?
+              <DetailsPage
+                data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveryDate: signOffDate, creationDate: deliveryTicketData?.createdBy?.date, completionDate: deliveryTicketData?.actualDeliveryDate }}
+                fields={[...deliveryTicketFields
+                  , {
+                  fieldData: {
+                    type: "date",
+                    fieldLabel: "Actual Delivery Date",
+                    fieldName: "actualDeliveryDate",
+                    sectionName: "Actuals"
+                  }
+                },
+                {
+                  fieldData: {
+                    type: "date",
+                    fieldLabel: "Creation Date",
+                    fieldName: "creationDate",
+                    sectionName: "Actuals"
+                  }
+                },
+                {
+                  fieldData: {
+                    type: "date",
+                    fieldLabel: "Completion Date",
+                    fieldName: "completionDate",
+                    sectionName: "Actuals"
+                  }
+                }
+                ]} /> : null
+            )}
+          </TabPanel>
+          <TabPanel value={tabValue} index={1}>
+            <Grid container spacing={1} className="p-2">
+              <Grid item xs={12} className="mt-2 d-flex gap-2">
+                {
+                  deliveryTicketData?.status === "New" && <IconButton
+                    onClick={() => {
+                      setAddSerializedAssetDialog(true)
+                    }}
+                    disabled={isOffline}
+                    color='primary'
+                    size="small"
+                  >
+                    <Tooltip
+                      title="Add More Serialized Assets">
+                      <AddBoxRoundedIcon />
+                    </Tooltip>
+                  </IconButton>
+                }
+                {
+                  deliveryTicketData?.status === "New" && <IconButton
+                    disabled={selectedRecords.length === 0 || isOffline}
+                    onClick={() => {
+                      setShowRemoveAssetFromLoadingTicketDialog(true)
+                    }}
+                    color='primary'
+                    size="small"
+                  >
+                    <Tooltip
+                      title="Remove Serialized Assets">
+                      <RemoveCircleRoundedIcon />
+                    </Tooltip>
+                  </IconButton>
+                }
+                <Box mx={1} />
+              </Grid>
+              <Grid item xs={12}>
+                {isMobile && !isTablet ? <CustomSwipableList
+                  allowSelection={true}
+                  allowSwipe={true}
+                  permissions={permissions}
+                  primaryField={columns?.find(d => d.field === "assetNumber")}
+                  onClick={(data) => {
+                    history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
+                  }}
+                  dataRows={dataRows}
+                  selectedRecords={selectedRecords}
+                  dispatch={dispatch}
+                  onEdit={() => {
+
+                  }}
+                  extraParamsToCheckDelete={true}
+                  onDelete={() => {
+                  }}
+                  rowCount={rowCount}
+                  page={page}
+                  loading={loading}
+                  chips={
+                    [{
+                      label: `Product Description: `,
+                      field: "productName",
+                      forceShow: true
+                    }]
+                  }
+                  onCreate={null}
+                  showClone={false}
+                  fullHeight={true}
+                  renderedFrom={renderedFrom}
+                  onClone={() => {
+                  }}
+                /> :
+                  Object.keys(frameWorkComponent).length > 0 ?
+                    <CustomAgGrid
+                      isClientSideGrid={true}
+                      allowSelection={deliveryTicketData?.status === "New"}
+                      allowAction={false}
+                      columns={columns}
+                      dataRows={dataRows}
+                      frameworkComponents={frameWorkComponent}
+                      setGridApi={setGridApi}
+                      dispatch={dispatch}
+                      rowCount={rowCount}
+                      limit={limit}
+                      pageSizes={pageSizes}
+                      page={page}
+                      actionWidth={150}
+                      loading={false}
+                      renderedFrom={renderedFrom}
+                      refreshGrid={fetchProductInventory}
+                    /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+                }
+              </Grid>
+            </Grid>
+          </TabPanel>
+          <TabPanel value={tabValue} index={2}>
+            <DeliveryTicketProduct
+              renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-2`}
+              deliveryTicketId={id} />
+          </TabPanel>
+          {deliveryTicketData?.additionalCost?.length > 0 &&
+            <TabPanel value={tabValue} index={3}>
+              <DeliveryTicketAdditionalCost
+                renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-3`}
+                additionalCost={deliveryTicketData?.additionalCost} />
+            </TabPanel>}
+        </Box>
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
@@ -974,7 +844,7 @@ export default function DeliveryTicketDetail(props) {
             notIn={deliveryTicketData.ticketType}
           />
         }
-      </Fragment>
+      </Box>
     </>
   );
 }

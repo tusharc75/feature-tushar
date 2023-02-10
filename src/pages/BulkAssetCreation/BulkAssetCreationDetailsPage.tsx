@@ -30,13 +30,12 @@ import { isMobile, isTablet } from 'react-device-detect';
 import Product from './Product';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import Activity from '../../components/Activity';
-import { defaultActivityShow } from '../../constants/helpers';
-import accountClass from '../Account/account.module.scss';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Steps from '../RentalManagement/Steps';
 import { camelCase } from 'lodash';
 import SerializedAsset from './SerializedAsset';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const BulkAssetCreationDetailsPage = () => {
 
@@ -58,10 +57,7 @@ const BulkAssetCreationDetailsPage = () => {
     const [allowedToEdit, setAllowedToEdit] = useState(false);
     const [currentStep, setCurrentStep] = useState(null);
 
-    const isSmallScreen = useMediaQuery('(max-width:1300px)');
-
     const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
-    const [showActivity, setActivityShow] = useState(defaultActivityShow);
     const [nextStep, setNextStep] = useState(true);
     const [stepFullScreen, setStepFullScreen] = useState(false);
 
@@ -183,195 +179,114 @@ const BulkAssetCreationDetailsPage = () => {
         }
     };
 
-    const handleActivityHideShow = () => {
-        setActivityShow(!showActivity);
-    };
-
-    useEffect(() => {
-        if (isSmallScreen && tabValue === 0) {
-            setActivityShow(true)
-        }
-        else {
-            setActivityShow(false)
-        }
-    }, [isSmallScreen, tabValue])
-
-
     return (
-        <>
-            <Grid container className="headerbox">
-                <CustomBreadCrumbs routes={[routes.bulkAssetCreation, { title: `${bulkAssetCreationData?.baNumber}` }]}
-                />
-            </Grid>
-            <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-                <div>
-                    <div>
-                        <Paper>
-                            {!bulkAssetCreationData ? (
-                                <div>
-                                    <Skeleton variant="text" width="150px" height="40px" />
-                                    <Box display="flex">
-                                        <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                                        <Box marginX={1} />
-                                        <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                                    </Box>
-                                </div>
-                            ) : (
-                                <DetailsPageHeader heading={bulkAssetCreationData?.baNumber} mainPoints={null} showHeading={true}>
-                                    {permissions?.bulkAssetCreation?.isUpdate && allowedToEdit && !["Completed"]?.includes(bulkAssetCreationData?.status) &&
-                                        (
-                                            <Button
-                                                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                                                color="primary"
-                                                size="small"
-                                                onClick={handleOpenUpdateDialog}
-                                                className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                                                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                                            >
-                                                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                                            </Button>
-                                        )}
-                                </DetailsPageHeader>
-                            )}
-                            <Fragment>
-                                <Tabs
-                                    className="quote-tab"
-                                    value={tabValue}
-                                    onChange={handleMainTabChange}
-                                    textColor="primary"
-                                    TabIndicatorProps={{
-                                        style: {
-                                            display: 'none'
-                                        }
-                                    }}
+        <Box className="main-container-v1">
+            <Box className="headerbox-v1">
+                <Box className="nav-v1">
+                    <CustomBreadCrumbs routes={[routes.bulkAssetCreation, { title: `${bulkAssetCreationData?.baNumber}` }]} />
+                </Box>
+                <Box className="controls-v1">
+                    <Box className="control-buttons-v1">
+                        <>
+                            {permissions?.bulkAssetCreation?.isUpdate && allowedToEdit && !["Completed"]?.includes(bulkAssetCreationData?.status) &&
+                                <Button
+                                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                                    className={'btn-outline-v1'}
+                                    onClick={handleOpenUpdateDialog}
                                 >
-                                    <Tab
-                                        className={'tabLayout'}
-                                        style={{
-                                            background: tabValue === 1 ? 'white' : '',
-                                            color: tabValue === 1 ? '#163340' : '#163340'
-                                        }}
-                                        label={
-                                            <div className="d-flex align-items-center tab-font">
-                                                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                                            </div>
-                                        }
-                                        {...a11yProps(0)}
-                                    />
-                                    <Tab
-                                        className={'tabLayout'}
-                                        style={{
-                                            background: tabValue === 2 ? 'white' : '',
-                                            color: tabValue === 2 ? 'blue' : '#163340'
-                                        }}
-                                        label={
-                                            <div className="d-flex align-items-center tab-font">
-                                                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                                            </div>
-                                        }
-                                        {...a11yProps(1)}
-                                    />
-                                    <div className={'uio'}> </div>
-                                </Tabs>
-                                <TabPanel value={tabValue} index={0}>
-                                    <Box>
-                                        {loadingBulkAssetCreation || !bulkAssetCreationFields.length ? (
-                                            <Grid container spacing={2} style={{ padding: '8px' }}>
-                                                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                                            </Grid>
-                                        ) : (
-                                            <DetailsPage data={bulkAssetCreationData} fields={bulkAssetCreationFields} />
-                                        )}
-                                    </Box>
-                                </TabPanel>
-                                <TabPanel value={tabValue} index={1}>
-                                    <Grid item xs={12} sm={12} md={12} lg={12}>
-                                        {!bulkAssetCreationData || !bulkAssetCreationFields.length ? (
-                                            <Grid container spacing={2} style={{ padding: '8px' }}>
-                                                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                                            </Grid>
-                                        ) : (
-                                            <Grid item xs={12} sm={12} md={12} lg={12}>
-                                                <Paper>
-                                                    <Steps
-                                                        isNextStep={false}
-                                                        nextStep={nextStep}
-                                                        steps={bulkAssetCreationSteps}
-                                                        currentStep={currentStep}
-                                                        setCurrentStep={setCurrentStep}
-                                                        isStepEnded={["Completed"]?.includes(bulkAssetCreationData?.status)}
-                                                        setStepFullScreen={() => setStepFullScreen(true)}
-                                                    />
-                                                    <ContentFullScreen title={bulkAssetCreationSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
-                                                        {currentStep === 0 && (
-                                                            <Product
-                                                                bulkAssetCreationData={bulkAssetCreationData}
-                                                                setNextStep={setNextStep}
-                                                                setBulkAssetCreationProduct={setBulkAssetCreationProduct}
-                                                                renderedFrom={`${renderedFrom}_grid-1`}
-                                                                handleUpdateData={handleUpdateData}
-                                                                fetchData={fetchData}
-                                                                allowedToEdit={allowedToEdit}
-                                                            />
-                                                        )}
-                                                        {currentStep === 1 && (
-                                                            <SerializedAsset
-                                                                bulkAssetCreationData={bulkAssetCreationData}
-                                                                renderedFrom={`${renderedFrom}_grid-2`}
-                                                                allowedToEdit={allowedToEdit}
-                                                            />
-                                                        )}
-                                                    </ContentFullScreen>
-                                                </Paper>
-                                            </Grid>
-                                        )}
-                                    </Grid>
-                                </TabPanel>
-                            </Fragment>
-                        </Paper>
-                    </div>
-                    <Box my={1} />
-                </div>
-                <div className="position-relative">
-                    <HideWhenOffline>
-                        <Paper>
-                            {!isSmallScreen && (
-                                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                                    {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                                </span>
-                            )}
-                            <div style={{ display: showActivity ? 'block' : 'none' }}>
-                                <Grid container>
-                                    <Grid item xs={12}>
-                                        {bulkAssetCreationData && (
-                                            <div>
-                                                <Activity
-                                                    resourceId={bulkAssetCreationData._id}
-                                                    resource={ACTIVITY_RESOURCE.bulkAssetCreation}
-                                                    restrictedAddActivities={
-                                                        permissions && permissions[`${ACTIVITY_RESOURCE.bulkAssetCreation}`] && permissions[`${ACTIVITY_RESOURCE.bulkAssetCreation}`].isUpdate
-                                                            ? []
-                                                            : ['Attachment', 'Case']
-                                                    }
-                                                    relatedTo={[
-                                                        {
-                                                            type: ACTIVITY_RESOURCE.bulkAssetCreation,
-                                                            referenceId: bulkAssetCreationData._id,
-                                                            access: true
-                                                        }
-                                                    ]}
-                                                    handleActivityRefresh={() => { }}
-                                                    emails={[]}
-                                                />
-                                            </div>
-                                        )}
-                                    </Grid>
-                                </Grid>
+                                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                                </Button>
+                            }
+                            <ActivityButton referenceId={bulkAssetCreationData?._id} resource={ACTIVITY_RESOURCE.bulkAssetCreation} />
+                        </>
+                    </Box>
+                </Box>
+            </Box>
+            <Box className={`detail-container-v1`}>
+                <Tabs
+                    className="new-tab-container-v1"
+                    value={tabValue}
+                    onChange={handleMainTabChange}
+                    textColor="primary"
+                    TabIndicatorProps={{
+                        style: {
+                            display: 'none'
+                        }
+                    }}
+                >
+                    <Tab
+                        className={'tabLayout'}
+                        label={
+                            <div className="d-flex align-items-center tab-font">
+                                <FaWpforms className="mr-1" fontSize="inherit" /> Header
                             </div>
-                        </Paper>
-                    </HideWhenOffline>
-                </div>
-            </div>
+                        }
+                        {...a11yProps(0)}
+                    />
+                    <Tab
+                        className={'tabLayout'}
+                        label={
+                            <div className="d-flex align-items-center tab-font">
+                                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                            </div>
+                        }
+                        {...a11yProps(1)}
+                    />
+                </Tabs>
+                <TabPanel value={tabValue} index={0}>
+                    <Box>
+                        {loadingBulkAssetCreation || !bulkAssetCreationFields.length ? (
+                            <Grid container spacing={2} style={{ padding: '8px' }}>
+                                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                            </Grid>
+                        ) : (
+                            <DetailsPage data={bulkAssetCreationData} fields={bulkAssetCreationFields} />
+                        )}
+                    </Box>
+                </TabPanel>
+                <TabPanel value={tabValue} index={1}>
+                    <Grid item xs={12} sm={12} md={12} lg={12}>
+                        {!bulkAssetCreationData || !bulkAssetCreationFields.length ? (
+                            <Grid container spacing={2} style={{ padding: '8px' }}>
+                                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                            </Grid>
+                        ) : (
+                            <Grid item xs={12} sm={12} md={12} lg={12}>
+                                <Steps
+                                    isNextStep={false}
+                                    nextStep={nextStep}
+                                    steps={bulkAssetCreationSteps}
+                                    currentStep={currentStep}
+                                    setCurrentStep={setCurrentStep}
+                                    isStepEnded={["Completed"]?.includes(bulkAssetCreationData?.status)}
+                                    setStepFullScreen={() => setStepFullScreen(true)}
+                                />
+                                <ContentFullScreen title={bulkAssetCreationSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                                    {currentStep === 0 && (
+                                        <Product
+                                            bulkAssetCreationData={bulkAssetCreationData}
+                                            setNextStep={setNextStep}
+                                            setBulkAssetCreationProduct={setBulkAssetCreationProduct}
+                                            renderedFrom={`${renderedFrom}_grid-1`}
+                                            handleUpdateData={handleUpdateData}
+                                            fetchData={fetchData}
+                                            allowedToEdit={allowedToEdit}
+                                        />
+                                    )}
+                                    {currentStep === 1 && (
+                                        <SerializedAsset
+                                            bulkAssetCreationData={bulkAssetCreationData}
+                                            renderedFrom={`${renderedFrom}_grid-2`}
+                                            allowedToEdit={allowedToEdit}
+                                        />
+                                    )}
+                                </ContentFullScreen>
+                            </Grid>
+                        )}
+                    </Grid>
+                </TabPanel>
+            </Box>
+
             {showConfirmBox && (
                 <ConfirmationDialog
                     open={showConfirmBox}
@@ -382,18 +297,21 @@ const BulkAssetCreationDetailsPage = () => {
                     onOk={handleDelete}
                 />
             )}
-            {openUpdateDialog && (
-                <ManageBulkAssetCreation
-                    isClone={false}
-                    bulkAssetCreationId={id}
-                    onClose={() => setOpenUpdateDialog(false)}
-                    onSuccess={() => {
-                        setOpenUpdateDialog(false);
-                        fetchData();
-                    }}
-                />
-            )}
-        </>
+            {
+                openUpdateDialog && (
+                    <ManageBulkAssetCreation
+                        isClone={false}
+                        bulkAssetCreationId={id}
+                        onClose={() => setOpenUpdateDialog(false)}
+                        onSuccess={() => {
+                            setOpenUpdateDialog(false);
+                            fetchData();
+                        }}
+                    />
+                )
+            }
+        </Box>
+
     );
 };
 
