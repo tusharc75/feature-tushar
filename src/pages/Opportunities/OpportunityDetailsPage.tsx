@@ -124,7 +124,6 @@ function OpportunityDetailsPage() {
     }
   }, [id]);
 
-
   useEffect(() => {
     if (
       opportunityData?.staticData?.customerContact &&
@@ -560,237 +559,234 @@ function OpportunityDetailsPage() {
             <CustomBreadCrumbs routes={customizedRoutes} />
           </Box>
           <Box className="controls-v1">
-          <Box className="control-buttons-v1">
-            {opportunityData ? (
-              <>
-                 {allowedToEdit ? (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                    className={'btn-outline-v1'}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                ) : null}
-                {opportunityPermissions.isDelete &&
-                opportunityData?.owner.optionValue &&
-                user?.user?._id &&
-                opportunityData.owner.optionValue === user.user._id ? (
-                  <DeleteButton
-                    text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
-                    onClick={() => setShowConfirmBox(true)}
-                  />
-                ) : null}
-          <ActivityButton referenceId={opportunityData?._id} resource={opportunityResource} />
-              </>
-            ):(
-              <Skeleton variant="text" width="150px" height="32px" />
-            )}
+            <Box className="control-buttons-v1">
+              {opportunityData ? (
+                <>
+                  {allowedToEdit ? (
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      size="small"
+                      onClick={handleOpenUpdateDialog}
+                      className={'btn-outline-v1'}
+                    >
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    </Button>
+                  ) : null}
+                  {opportunityPermissions.isDelete &&
+                  opportunityData?.owner.optionValue &&
+                  user?.user?._id &&
+                  opportunityData.owner.optionValue === user.user._id ? (
+                    <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
+                  ) : null}
+                  <ActivityButton referenceId={opportunityData?._id} resource={opportunityResource} />
+                </>
+              ) : (
+                <Skeleton variant="text" width="150px" height="32px" />
+              )}
             </Box>
-            </Box>
+          </Box>
         </Box>
         <Box className={`detail-container-v1`}>
-        <ProcessFlow
-              disableBackNext={allowedToEdit ? false : true}
-              steps={steps}
-              activeStep={activeStep}
-              handleMarkAsCompleted={handleMarkAsCompleted}
-            />     
+          <ProcessFlow
+            disableBackNext={allowedToEdit ? false : true}
+            steps={steps}
+            activeStep={activeStep}
+            handleMarkAsCompleted={handleMarkAsCompleted}
+          />
           {loading ? (
-              <Grid container spacing={2}>
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
-                  <Grid key={index} item sm={6} md={6}>
-                    <Skeleton variant="text" width="100px" height="16px" />
-                    <Box marginY={1} />
-                    <Skeleton width="100%" height="50px" />
-                  </Grid>
-                ))}
-              </Grid>
-            ) : !opportunityFields.length ? (
-              <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-                <img src={SVG('Opportunity Placeholder')} alt="No Data" />
-              </Box>
-            ) : (
-              <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
+            <Grid container spacing={2}>
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
+                <Grid key={index} item sm={6} md={6}>
+                  <Skeleton variant="text" width="100px" height="16px" />
+                  <Box marginY={1} />
+                  <Skeleton width="100%" height="50px" />
+                </Grid>
+              ))}
+            </Grid>
+          ) : !opportunityFields.length ? (
+            <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
+              <img src={SVG('Opportunity Placeholder')} alt="No Data" />
+            </Box>
+          ) : (
+            <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
+          )}
+          <div className="pt-3 modified_style_of_accordion">
+            {opportunityData && permissions?.supplierContact?.isRead && (
+              <OpportunityContacts
+                contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
+                title="Supplier Contacts"
+                contactApi={supplierContact.contactApi}
+                isExpanded={expanded.supplierContacts}
+                onAddContact={() => {
+                  fetchSupplierContactData(true);
+                }}
+                onSetExpanded={() => {
+                  setExpanded({
+                    ...expanded,
+                    supplierContacts: !expanded.supplierContacts
+                  });
+                }}
+                recordsPerLine={recordsPerLine}
+                accounts={cloneDeep(opportunityData?.supplierAccount)}
+                isAllowedToUpdate={allowedToEdit}
+              />
             )}
-              <div className="p-3 modified_style_of_accordion">
-              {opportunityData && permissions?.supplierContact?.isRead && (
-                <OpportunityContacts
-                  contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
-                  title="Supplier Contacts"
-                  contactApi={supplierContact.contactApi}
-                  isExpanded={expanded.supplierContacts}
-                  onAddContact={() => {
-                    fetchSupplierContactData(true);
-                  }}
-                  onSetExpanded={() => {
-                    setExpanded({
-                      ...expanded,
-                      supplierContacts: !expanded.supplierContacts
-                    });
-                  }}
-                  recordsPerLine={recordsPerLine}
-                  accounts={cloneDeep(opportunityData?.supplierAccount)}
-                  isAllowedToUpdate={allowedToEdit}
-                />
-              )}
-              {opportunityData && permissions?.customerContact?.isRead && (
-                <OpportunityContacts
-                  contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
-                  title="Customer Contacts"
-                  isExpanded={expanded['customerContacts']}
-                  contactApi={customerContact.contactApi}
-                  onAddContact={() => {
-                    fetchCustomerContactData(true);
-                  }}
-                  onSetExpanded={() => {
-                    setExpanded({
-                      ...expanded,
-                      customerContacts: !expanded.customerContacts
-                    });
-                  }}
-                  recordsPerLine={recordsPerLine}
-                  saveContactToOpportunity={handleAssignContacts}
-                  accountId={opportunityData?.customerAccount?.optionValue}
-                  isAllowedToUpdate={allowedToEdit}
-                />
-              )}
-              {permissions?.projectSales?.isRead && (
-                <ProjectInAccordion
-                  recordsPerLine={3}
-                  projectSales={projectSales}
-                  type={typeCreateProjectSalesDialog}
-                  fetchData={fetchRelatedData}
-                  permissions={permissions}
-                  isAddProjectSale={true}
-                  isAllowedToEdit={allowedToEdit}
-                  accountId={opportunityData?._id}
-                  accountName={opportunityData?.opportunityName}
-                  resource={sidebarResource.opportunity}
-                />
-              )}
-              {permissions?.quoteBuilder?.isRead && (
-                <QuotesInAccordion
-                  recordsPerLine={3}
-                  quotes={quotes}
-                  fetchData={fetchRelatedData}
-                  quoteBuilderPermission={permissions.quoteBuilder}
-                  opportunityId={id}
-                  accountId={opportunityData?.customerAccount?.optionValue}
-                  opportunityName={opportunityData?.opportunityName}
-                  marketSegmentId={opportunityData?.marketSegment?.optionValue}
-                  subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
-                  currency={opportunityData?.currency}
-                  estimatedAmount={opportunityData?.estimatedAmount}
-                  isRenderedFromOpportunity={true}
-                  isAllowedToUpdate={allowedToEdit}
-                />
-              )}
-            </div>
+            {opportunityData && permissions?.customerContact?.isRead && (
+              <OpportunityContacts
+                contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
+                title="Customer Contacts"
+                isExpanded={expanded['customerContacts']}
+                contactApi={customerContact.contactApi}
+                onAddContact={() => {
+                  fetchCustomerContactData(true);
+                }}
+                onSetExpanded={() => {
+                  setExpanded({
+                    ...expanded,
+                    customerContacts: !expanded.customerContacts
+                  });
+                }}
+                recordsPerLine={recordsPerLine}
+                saveContactToOpportunity={handleAssignContacts}
+                accountId={opportunityData?.customerAccount?.optionValue}
+                isAllowedToUpdate={allowedToEdit}
+              />
+            )}
+            {permissions?.projectSales?.isRead && (
+              <ProjectInAccordion
+                recordsPerLine={3}
+                projectSales={projectSales}
+                type={typeCreateProjectSalesDialog}
+                fetchData={fetchRelatedData}
+                permissions={permissions}
+                isAddProjectSale={true}
+                isAllowedToEdit={allowedToEdit}
+                accountId={opportunityData?._id}
+                accountName={opportunityData?.opportunityName}
+                resource={sidebarResource.opportunity}
+              />
+            )}
+            {permissions?.quoteBuilder?.isRead && (
+              <QuotesInAccordion
+                recordsPerLine={3}
+                quotes={quotes}
+                fetchData={fetchRelatedData}
+                quoteBuilderPermission={permissions.quoteBuilder}
+                opportunityId={id}
+                accountId={opportunityData?.customerAccount?.optionValue}
+                opportunityName={opportunityData?.opportunityName}
+                marketSegmentId={opportunityData?.marketSegment?.optionValue}
+                subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
+                currency={opportunityData?.currency}
+                estimatedAmount={opportunityData?.estimatedAmount}
+                isRenderedFromOpportunity={true}
+                isAllowedToUpdate={allowedToEdit}
+              />
+            )}
+          </div>
         </Box>
         {showConfirmBox ? (
-        <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete this opportunity`}
-          onClose={() => setShowConfirmBox(false)}
-          onOk={handleDeleteOpportunity}
-        />
-      ) : null}
-
-      {openUpdateDialog && (
-        <ManageOpportunityDialog
-          open={openUpdateDialog}
-          onSuccess={() => {
-            setOpenUpdateDialog(false);
-            fetchOpportunityData();
-          }}
-          onClose={() => {
-            setOpenUpdateDialog(false);
-          }}
-          isNew={false}
-          dataToUpdate={opportunityData}
-          resource={null}
-          isRedirectTodetailPage={false}
-          // opportunityApi={opportunityApi}
-        />
-      )}
-
-      {showAddSupplierContactsDialog && (
-        <AssignSupplierContactsDialog
-          opportunityId={opportunityData._id}
-          open={showAddSupplierContactsDialog}
-          title="Assign Supplier Contacts"
-          onSuccess={() => {
-            fetchOpportunityData();
-            setShowAddSupplierContactsDialog(false);
-          }}
-          handleCloseDialog={() => {
-            if (selectedSupplierAccounts.length == 0) setSupplierContacts([]);
-            setShowAddSupplierContactsDialog(false);
-          }}
-          contacts={{
-            supplierContacts: supplierContacts,
-            customerContacts: customerContacts,
-            notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
-          }}
-          contactType="supplier"
-          supplierAccountOptions={supplierAccountOptions}
-          onGetSupplierAccountsContacts={fetchSupplierContactData}
-          onUpdateOpportunity={handleUpdateOpportunity}
-          currentContacts={supplierContacts}
-          selectedSupplierAccountsList={selectedSupplierAccounts}
-          handleContactSelection={handleContactSelection}
-          loadingSupplierAccounts={loadingSupplierAccounts}
-          notToBeRemovedContacts={notToBeRemovedContacts}
-        />
-      )}
-
-      {showAddCustomerContactsDialog && (
-        <AssignContactsDialog
-          opportunityId={opportunityData._id}
-          open={showAddCustomerContactsDialog}
-          title="Assign Customer Contacts"
-          onSuccess={() => {
-            fetchOpportunityData();
-            setShowAddCustomerContactsDialog(false);
-          }}
-          handleCloseDialog={() => {
-            setShowAddCustomerContactsDialog(false);
-          }}
-          contacts={{
-            supplierContacts: supplierContacts,
-            customerContacts: customerContacts,
-            notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
-          }}
-          assignedContacts={opportunityData.staticData?.customerContact ?? []}
-          contactType="customer"
-          notToBeRemovedContacts={notToBeRemovedContacts}
-        />
-      )}
-
-      {messageDialog.open && (
-        <MessageDialog
-          open={messageDialog.open}
-          onClose={() => {
-            setMessageDialog({ open: false, message: null });
-          }}
-          message={messageDialog.message}
-        />
-      )}
-      {openAdditionalDialog && (
-        <>
-          <AdditionalDialogPopUp
-            open={openAdditionalDialog}
-            close={() => setOpenAdditionalDialog(false)}
-            title="Additional Information"
-            fieldData={sectionFields}
-            handleSave={handleSave}
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={`Are you sure you want to delete this opportunity`}
+            onClose={() => setShowConfirmBox(false)}
+            onOk={handleDeleteOpportunity}
           />
-        </>
-      )}
+        ) : null}
+
+        {openUpdateDialog && (
+          <ManageOpportunityDialog
+            open={openUpdateDialog}
+            onSuccess={() => {
+              setOpenUpdateDialog(false);
+              fetchOpportunityData();
+            }}
+            onClose={() => {
+              setOpenUpdateDialog(false);
+            }}
+            isNew={false}
+            dataToUpdate={opportunityData}
+            resource={null}
+            isRedirectTodetailPage={false}
+            // opportunityApi={opportunityApi}
+          />
+        )}
+
+        {showAddSupplierContactsDialog && (
+          <AssignSupplierContactsDialog
+            opportunityId={opportunityData._id}
+            open={showAddSupplierContactsDialog}
+            title="Assign Supplier Contacts"
+            onSuccess={() => {
+              fetchOpportunityData();
+              setShowAddSupplierContactsDialog(false);
+            }}
+            handleCloseDialog={() => {
+              if (selectedSupplierAccounts.length == 0) setSupplierContacts([]);
+              setShowAddSupplierContactsDialog(false);
+            }}
+            contacts={{
+              supplierContacts: supplierContacts,
+              customerContacts: customerContacts,
+              notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
+            }}
+            contactType="supplier"
+            supplierAccountOptions={supplierAccountOptions}
+            onGetSupplierAccountsContacts={fetchSupplierContactData}
+            onUpdateOpportunity={handleUpdateOpportunity}
+            currentContacts={supplierContacts}
+            selectedSupplierAccountsList={selectedSupplierAccounts}
+            handleContactSelection={handleContactSelection}
+            loadingSupplierAccounts={loadingSupplierAccounts}
+            notToBeRemovedContacts={notToBeRemovedContacts}
+          />
+        )}
+
+        {showAddCustomerContactsDialog && (
+          <AssignContactsDialog
+            opportunityId={opportunityData._id}
+            open={showAddCustomerContactsDialog}
+            title="Assign Customer Contacts"
+            onSuccess={() => {
+              fetchOpportunityData();
+              setShowAddCustomerContactsDialog(false);
+            }}
+            handleCloseDialog={() => {
+              setShowAddCustomerContactsDialog(false);
+            }}
+            contacts={{
+              supplierContacts: supplierContacts,
+              customerContacts: customerContacts,
+              notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
+            }}
+            assignedContacts={opportunityData.staticData?.customerContact ?? []}
+            contactType="customer"
+            notToBeRemovedContacts={notToBeRemovedContacts}
+          />
+        )}
+
+        {messageDialog.open && (
+          <MessageDialog
+            open={messageDialog.open}
+            onClose={() => {
+              setMessageDialog({ open: false, message: null });
+            }}
+            message={messageDialog.message}
+          />
+        )}
+        {openAdditionalDialog && (
+          <>
+            <AdditionalDialogPopUp
+              open={openAdditionalDialog}
+              close={() => setOpenAdditionalDialog(false)}
+              title="Additional Information"
+              fieldData={sectionFields}
+              handleSave={handleSave}
+            />
+          </>
+        )}
       </Box>
-     </>
+    </>
   );
 }
 
