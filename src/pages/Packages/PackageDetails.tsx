@@ -158,61 +158,60 @@ const PackageDetails = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Grid container spacing={1}>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            {...a11yProps(0)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <MdMiscellaneousServices className="mr-1" fontSize="inherit" />
+                individual Services
+              </div>
+            }
+            {...a11yProps(1)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <RiShoppingBag3Fill className="mr-1" fontSize="inherit" />
+                individual Products
+              </div>
+            }
+            {...a11yProps(2)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiPackage className="mr-1" fontSize="inherit" /> Sub Packages
+              </div>
+            }
+            {...a11yProps(3)}
+          />
+        </Tabs>
+        <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={permissions?.leadTimeMaster?.isRead ? 8 : 12} lg={permissions?.leadTimeMaster?.isRead ? 8 : 12}>
-            <Tabs
-              className="new-tab-container-v1"
-              value={tabValue}
-              onChange={handleMainTabChange}
-              textColor="primary"
-              TabIndicatorProps={{
-                style: {
-                  display: 'none'
-                }
-              }}
-            >
-              <Tab
-                className={'tabLayout'}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                  </div>
-                }
-                {...a11yProps(0)}
-              />
-              <Tab
-                className={'tabLayout'}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <MdMiscellaneousServices className="mr-1" fontSize="inherit" />
-                    individual Services
-                  </div>
-                }
-                {...a11yProps(1)}
-              />
-              <Tab
-                className={'tabLayout'}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <RiShoppingBag3Fill className="mr-1" fontSize="inherit" />
-                    individual Products
-                  </div>
-                }
-                {...a11yProps(2)}
-              />
-              <Tab
-                className={'tabLayout'}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <BiPackage className="mr-1" fontSize="inherit" /> Sub Packages
-                  </div>
-                }
-                {...a11yProps(3)}
-              />
-            </Tabs>
-
             <TabPanel value={tabValue} index={0}>
-              <DetailsPage data={packageData} fields={packageFields} />
+              <DetailsPage data={packageData} fields={packageFields} fullHeight={true} />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               {tabValue === 1 && <Services packageData={packageData} packageId={id} />}
