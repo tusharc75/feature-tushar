@@ -294,9 +294,8 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   type={chart.chartType?.toLowerCase()}
                   chartData={chartData?.tableData}
                   isScreenSmall={isScreenSmall}
-                  isCurrency={chart.currency || false}
+                  isCurrency={chart?.currency || false}
                   currency={globalFilters.currency || currency}
-                  selectedDashboard={globalFilters?.dashboardType}
                 />
               ) : chart.graphType === 'Map' ? (
                 <MapView height={isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} />
@@ -317,8 +316,8 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                 type={chart.chartType}
                 chartData={chartData?.tableData}
                 isScreenSmall={isScreenSmall}
+                isCurrency={chart?.currency || false}
                 currency={globalFilters.currency || currency}
-                selectedDashboard={globalFilters?.dashboardType}
               />
             )}
           </Box>

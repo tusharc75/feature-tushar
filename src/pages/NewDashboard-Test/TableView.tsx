@@ -9,11 +9,10 @@ interface Props {
   isScreenSmall: boolean;
   currency: string;
   type: string;
-  selectedDashboard: string;
-  isCurrency?: boolean;
+  isCurrency: boolean;
 }
 
-const TableView = ({ id, chartData, isScreenSmall, isCurrency, currency, selectedDashboard }: Props) => {
+const TableView = ({ id, chartData, isScreenSmall, isCurrency, currency }: Props) => {
   const [tableData, setTableData] = useState([]);
   useEffect(() => {
     if (!chartData || chartData.length === 0) return;
@@ -67,10 +66,10 @@ const TableView = ({ id, chartData, isScreenSmall, isCurrency, currency, selecte
                   {isNaN(data[key])
                     ? data[key]
                     : id === 'volumeVsBudget' || key.includes('MT') || key.includes('GM')
-                    ? data[key].toFixed(2)
-                    : selectedDashboard && selectedDashboard.includes('Asset')
-                    ? data[key]
-                    : formatAmountWithCurrency(currency, Number(data[key]) ? data[key] : '00', isCurrency).fullFormatAmount}
+                      ? data[key]?.toFixed(2)
+                      : isCurrency
+                        ? formatAmountWithCurrency(currency, Number(data[key]) ? data[key] : '00').fullFormatAmount
+                        : data[key]}
                 </TableCell>
               ))}
             </TableRow>

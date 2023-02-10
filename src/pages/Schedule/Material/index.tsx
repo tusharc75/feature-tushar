@@ -22,6 +22,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE } from 'src/constants/helpers';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
 
@@ -90,7 +91,10 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
             {allowedToEdit ?
               <p
                 onClick={() => {
-                  setMaterialEdit({ open: true, data: row.original, bulkedit: false, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
+                  setMaterialEdit({
+                    open: true, data: row.original, bulkedit: false,
+                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                  });
                 }}
                 className="link text-truncate"
                 title={row.original?.detail}
@@ -135,6 +139,14 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
             </Box>
           </div>
         )
+      },
+      {
+        accessor: 'description',
+        Header: "Description",
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
       }
     ];
     coloum = [...coloum, ...newColumns];
@@ -179,6 +191,9 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       parent.index = i + 1;
       parent.detail = parent.type === 'product' ? parent.productDetail?.productName :
         parent.type === 'package' ? parent.packageDetail?.packageName : parent.serviceDetail?.serviceName;
+      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription :
+        parent.type === 'package' ? parent?.packageDetail?.packageDescription : parent?.serviceDetail?.serviceDescription
+      parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -190,12 +205,11 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === 'product'
-        ? _subRow.productDetail?.productName
-        : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-        }`;
+      _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName :
+        _subRow.type === 'package' ? _subRow.packageDetail?.packageName : _subRow.serviceDetail?.serviceName;
+      _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription :
+        _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription : _subRow?.serviceDetail?.serviceDescription
+      _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
