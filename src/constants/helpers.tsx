@@ -1125,7 +1125,7 @@ export const getUniqueCurrencies = () => {
   return uniqBy(currencies, 'currencyCode');
 };
 
-export const formatAmountWithCurrency = (currencyCode, amount, currencyShow = true) => {
+export const formatAmountWithCurrency = (currencyCode, amount) => {
   if ((!currencyCode && !amount) || !amount || isNaN(amount)) {
     return {
       shortFormatAmount: '',
@@ -1220,8 +1220,6 @@ export const formatAmountWithCurrency = (currencyCode, amount, currencyShow = tr
     style: 'currency',
     currency: currencyCode
   };
-
-  if (currencyShow === false) options.style = 'decimal';
 
   if (Number.isInteger(amount)) {
     options['maximumFractionDigits'] = 0;
