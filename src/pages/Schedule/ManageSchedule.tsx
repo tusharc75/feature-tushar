@@ -16,6 +16,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { FaDiceOne } from 'react-icons/fa';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
+import { useHistory } from "react-router-dom";
 
 const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -30,6 +31,7 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
   const ref = useRef(null);
+  const history = useHistory();
 
   useEffect(() => {
     fetchFields();
@@ -111,10 +113,10 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
     } else {
       axiosInstance()
         .post(`${routes.schedule?.path}`, values)
-        .then(({ data }) => {
+        .then(({ data}) => {
           setLoading(false);
-          onSuccess(data.data);
           setSubmitting(true);
+          history.push(`${routes.scheduleDetail.path}/${data?.data?._id}`);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -129,15 +131,9 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
     }
   };
 
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
-
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(initialData?.fields));
   }, [initialData?.fields]);
-
 
   return (
     <Dialog
@@ -158,7 +154,6 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           onSubmit={handleSubmit}
-          validate={validate}
           innerRef={ref}
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
@@ -171,13 +166,12 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
                     onClose();
                   }
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.scheduleNumber ? `(${initialData.values?.scheduleNumber})` : ''}`
                     : `Create ${routes?.schedule?.title}`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -200,58 +194,59 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                   {field.fieldName === 'type' ? (
                                     <FormTypes
-                                    {...field}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={setFieldValue}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                    imageOrFileUploadCompletePercentage={null}
-                                    onChange={(e,value)=>{
+                                      {...field}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={setFieldValue}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      imageOrFileUploadCompletePercentage={null}
+                                      onChange={(e, value) => {
                                         const prefix = checkTypeForPrefix(value?.optionValue);
                                         setFieldValue(
-                                            "scheduleNumber", 
-                                            value && value.optionValue ? `${prefix}_${generateUniqueIdOnly()}` : "")
+                                          "scheduleNumber",
+                                          value && value.optionValue ? `${prefix}_${generateUniqueIdOnly()}` : "")
                                         setFieldValue(
-                                                field.fieldName,
-                                                value && value.optionValue ? value.optionValue : ""
-                                            )}}
+                                          field.fieldName,
+                                          value && value.optionValue ? value.optionValue : ""
+                                        )
+                                      }}
                                     />
-                                  ):(
+                                  ) : (
                                     <FormTypes
-                                    {...field}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={setFieldValue}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                    imageOrFileUploadCompletePercentage={null}
-                                    disabled={field.disableOnEdit}
-                                  />
-                                   )
+                                      {...field}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={setFieldValue}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      imageOrFileUploadCompletePercentage={null}
+                                      disabled={field.disableOnEdit}
+                                    />
+                                  )
                                   }
                                 </Grid>
                               ))}
                             </Grid>
                           </Box>
                         </div>
-                      ) 
+                      )
                     })}
                 </Form>
               </CustomDialogContent>

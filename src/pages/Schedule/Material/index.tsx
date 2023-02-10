@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import routes from 'src/components/Helpers/Routes';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { genrateCustomTableColumns, flattenArray } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -16,190 +16,181 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
-import ScheduleDetailDialog from './scheduleDetailDialog';
+import MaterialDialog from './materialDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { CHILD_RESOURCE } from 'src/constants/helpers';
 
 const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
-  const {
-    state: { user, permissions }
-  }: any = useData();
+
+  const { state: { user, permissions } }: any = useData();
+
   const toastConfig = useContext(CustomToastContext);
-  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
+  const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
+
   const [rowsData, setRowsData] = useState(null);
-  const [allFields, setAllFields] = useState([]);
   const [columns, setColumns] = useState(null);
-  const [material, setMaterial] = useState([]);
+
+  const [allFields, setAllFields] = useState([]);
+  const [selectedRecords, setSelectedRecords] = useState([]);
+
+  const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false });
+
   const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
-  const [recordToUpdate, setRecordToUpdate] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
-
 
   useEffect(() => {
     fetchFields();
   }, []);
 
   const fetchFields = async () => {
-    try {
-      let fields = await axiosInstance().get('/field?resource=Schedule Material');
-      let data = fields?.data?.data.map((i: any) => {
-        return i?.fieldData
-      })
-      setAllFields(data);
-      const newColumns = genrateCustomTableColumns(data, '', '');
-      let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-      if (qtyIndex > -1) {
-        newColumns[qtyIndex].accessor = 'qtyDisplay';
-      }
-      let coloum: any = [
-        {
-          accessor: 'srno',
-          Header: 'Index',
-          width: 70,
-          sticky: isMobile ? 'none' : 'left',
-          Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
-          Footer: () => {
-            return <>Total</>;
-          }
-        },
-        {
-          accessor: 'type',
-          Header: 'Type',
-          sticky: isMobile ? 'none' : 'left',
-          Cell: ({ row }) => (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <p>{`${startCase(row.original?.type)} `}</p>
-            </div>
-          )
-        },
-        {
-          accessor: 'detail',
-          Header: 'Detail',
-          minWidth: 300,
-          width: 300,
-          sticky: isMobile ? 'none' : 'left',
-          Cell: ({ row }) => (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              {
-                <p
-                  onClick={() => {
-                    handleOpen(row.original);
-                  }}
-                  className="link text-truncate"
-                  title={row.original?.detail}
-                >
-                  {row.original?.detail}
-                </p>
-              }
-              { row?.original?.type !== 'service' &&
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
-                <HtmlTooltip title="Add ">
-                  <IconButton
-                    onClick={(event) => {
-                      const type = row.original.type;
-                      setAddExistingProductDialog({ open: true, type: type, parentId: row.original?._id  });
-                    }}
-                    size="small"
-                  >
-                    <Add color="disabled" fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
-              </Box>
-            }
-            {
-               <IconButton
-               size="small"
-               onClick={() => {
-                 if (row.original.type === 'service') {
-                   window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                 } else if (row.original.type === 'product') {
-                   window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else {
-                   window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                 }
-               }}
-             >
-               <OpenInNewIcon fontSize="small" color="primary" />
-             </IconButton>
-            }
-            </div>
-          )
-        }
-      ];
-      coloum = [...coloum, ...newColumns];
-      {
-        isMobile ? (
-          <Box display={'none'} />
-        ) : (
-          coloum.push({
-            accessor: 'action',
-            Header: 'Action',
-            minWidth: 100,
-            width: 100,
-            sticky: 'right',
-            disableFilters: true,
-            canDrag: false,
-            Cell: ({ row }) =>
-              !row.original.hideSelection && (
-                <Grid container spacing={1}>
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                      setDeleteData(obj);
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" color="error" />
-                  </IconButton>
-                </Grid>
-              )
-          })
-        );
-      }
-      setColumns(coloum);
-      fetchData();
-    } catch (err) {
-      toastConfig.setToastConfig(err);
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.scheduleMaterial}`);
+    var data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, scheduleData?.currency);
+    setAllFields(data);
+    const newColumns = genrateCustomTableColumns(data, scheduleData?.currency, renderedFrom);
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
+    let coloum: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p>{`${startCase(row.original?.type)} `}</p>
+          </div>
+        )
+      },
+      {
+        accessor: 'detail',
+        Header: 'Detail',
+        minWidth: 300,
+        width: 300,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p
+              onClick={() => {
+                setMaterialEdit({ open: true, data: row.original, bulkedit: false });
+              }}
+              className="link text-truncate"
+              title={row.original?.detail}
+            >
+              {row.original?.detail}
+            </p>
+            {row?.original?.type !== 'service' &&
+              <>
+                <Box ml={1} >
+                  <span>({row.original?.subRows?.length})</span>
+                </Box>
+                <Box ml={1} >
+                  <HtmlTooltip title="Add Product">
+                    <IconButton
+                      onClick={() => {
+                        setAddDialog({ open: true, type: "product", parentId: row.original?._id });
+                      }}
+                      size="small"
+                    >
+                      <Add fontSize="small" color="primary" />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
+              </>
+            }
+            <Box ml={1} >
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        )
+      }
+    ];
+    coloum = [...coloum, ...newColumns];
+    coloum.push({
+      accessor: 'action',
+      Header: 'Action',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) =>
+        !row.original.hideSelection && (
+          <Grid container spacing={1}>
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                setDeleteData(obj);
+              }}
+            >
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+          </Grid>
+        )
+    })
+    setColumns(coloum);
+    fetchData();
   };
 
   const fetchData = async () => {
     var data: any = [];
     const response = await axiosInstance().get(`${routes.schedule.path}/material/${scheduleData._id}`);
     data = response?.data?.data;
-    setMaterial(JSON.parse(JSON.stringify(data.material)));
     let rows = data.material.filter((e) => e.parentId === null)
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'package' ? parent.packageDetail?.packageName : parent.serviceDetail?.serviceName}`;
+      parent.index = i + 1;
+      parent.detail = parent.type === 'product' ? parent.productDetail?.productName :
+        parent.type === 'package' ? parent.packageDetail?.packageName : parent.serviceDetail?.serviceName;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
     setRowsData(rows);
-    setSelectedProducts([]);
+    setSelectedRecords([]);
   };
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
-    let productIndex = 0;
-    subRows.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + `${productIndex + 1}`;
-      _subRow.detail = `${ _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
+    subRows.forEach((_subRow, index) => {
+      _subRow.index = parent.index + '.' + `${index + 1}`;
+      _subRow.detail = `${_subRow.type === 'product'
+        ? _subRow.productDetail?.productName
+        : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
         }`;
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
+      _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === 'package') {
@@ -211,32 +202,56 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
     return subRows;
   };
 
-  const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false });
-    setRecordToUpdate(rowData);
-  };
-
-  const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = material.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
-    let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(material, inputField, allFields, updatedData);
-    handleSaveData(rows);
+  const handleAdd = async (rows) => {
+    const material: any = [];
+    rows.forEach((d) => {
+      const element: any = {};
+      element.materialId = d._id;
+      element.type = addDialog.type;
+      element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
+      element.qty = d.qty ? parseFloat(d.qty) : 1;
+      element.parentId = addDialog.parentId;
+      material.push(element);
+    });
+    axiosInstance()
+      .post(`${routes?.schedule?.path}/material/${scheduleData._id}`, { material })
+      .then(({ data }) => {
+        setAddDialog({ open: false, type: '', parentId: null });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      })
+      .catch((error) => {
+        setAddDialog({ open: false, type: '', parentId: null });
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleSaveData = async (rows: any) => {
     setUpdating(true);
+    rows.forEach((element) => {
+      delete element.index;
+      delete element.detail;
+      delete element.qtyDisplay;
+      delete element.isValid;
+      delete element.hideSelection;
+      delete element.productDetail;
+      delete element.packageDetail;
+      delete element.serviceDetail;
+      delete element.subRows;
+    });
     axiosInstance()
       .put(`${routes.schedule.path}/material/${scheduleData._id}`, { material: rows })
-      .then(() => {
+      .then(({ data }) => {
         setUpdating(false);
-        setIsProductEdit({ open: false, isBulkedit: false });
+        setMaterialEdit({ open: false, data: null, bulkedit: false });
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Record updated successfully`
+          message: data.message
         });
         fetchData();
       })
@@ -250,12 +265,12 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
     setDeleting(true);
     axiosInstance()
       .put(`${routes.schedule.path}/material/${scheduleData?._id}/delete`, { ids: rows })
-      .then(() => {
+      .then(({ data }) => {
         setDeleting(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Record deleted successfully`
+          message: data.message
         });
         fetchData();
         setDeleteData(null);
@@ -264,35 +279,6 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
         setDeleting(false);
         toastConfig.setToastConfig(error);
         setDeleteData(null);
-      });
-  };
-
-
-  const handleAdd = async (rows) => {
-    const material: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.materialId = d._id;
-      element.type = addExistingProductDialog.type;
-      element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
-      element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.parentId = addExistingProductDialog.parentId;
-      material.push(element);
-    });
-    axiosInstance()
-      .post(`${routes?.schedule?.path}/material/${scheduleData._id}`, { material })
-      .then(() => {
-        setAddExistingProductDialog({ open: false, type: '', parentId:null });
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Record added successfully`
-        });
-        fetchData();
-      })
-      .catch((error) => {
-        setAddExistingProductDialog({ open: false, type: '', parentId:null });
-        toastConfig.setToastConfig(error);
       });
   };
 
@@ -312,12 +298,29 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
     setAddAnchorEl(null);
   };
 
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    console.log(inputField)
+    console.log(updatedData)
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    if (inputField.hasOwnProperty('qtyDisplay')) {
+      inputField['qty'] = inputField['qtyDisplay'];
+    }
+    let rows: any = [{ ...rowData, ...updatedData }];
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    handleSaveData(rows);
+  };
 
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center">
-          <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
+          <Button
+            variant={'outlined'}
+            color="primary"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={openAddActions}
+            aria-controls="add-menu">
             {'Add'}
             <ExpandMore fontSize="small" />
           </Button>
@@ -336,7 +339,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
             <MenuItem
               onClick={() => {
                 closeAddActions();
-                setAddExistingProductDialog({ open: true, type: 'product', parentId:null });
+                setAddDialog({ open: true, type: 'product', parentId: null });
               }}
             >
               Add Products
@@ -344,7 +347,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
             <MenuItem
               onClick={() => {
                 closeAddActions();
-                setAddExistingProductDialog({ open: true, type: 'service', parentId:null });
+                setAddDialog({ open: true, type: 'service', parentId: null });
               }}
             >
               Add Services
@@ -352,7 +355,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
             <MenuItem
               onClick={() => {
                 closeAddActions();
-                setAddExistingProductDialog({ open: true, type: 'package', parentId:null });
+                setAddDialog({ open: true, type: 'package', parentId: null });
               }}
             >
               Add Packages
@@ -361,7 +364,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
         </Box>
         <Box display="flex">
           <Button
-            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+            disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) || isDeleting}
             variant={isMobile ? 'text' : 'outlined'}
             color="default"
             size="small"
@@ -385,8 +388,8 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
             <MenuItem
               onClick={() => {
                 const dataToDelete =
-                  selectedProducts &&
-                  selectedProducts
+                  selectedRecords &&
+                  selectedRecords
                     .filter((e) => !e.hideSelection)
                     .map((rec: any) => {
                       const obj: any = {};
@@ -398,7 +401,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
                 setDeleteData(dataToDelete);
                 closeActions();
               }}
-              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+              disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) || isDeleting}
             >
               Delete
             </MenuItem>
@@ -406,24 +409,22 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
         </Box>
       </Box>
       {columns && rowsData ? (
-        <>
-          <Box p="6px" zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={'calc(100vh - 345px)'}
-              columns={columns}
-              data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={setSelectedProducts}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              renderedFrom={renderedFrom}
-              isClientSideGrid={true}
-              onSaveEdit={onSaveInlineEdit}
-              material={material}
-              hideSelection={!allowedToEdit}
-            />
-          </Box>
-        </>
+        <Box p="6px" zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={'calc(100vh - 345px)'}
+            columns={columns}
+            data={rowsData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+            onSelect={setSelectedRecords}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            onSaveEdit={onSaveInlineEdit}
+            hideSelection={!allowedToEdit}
+            material={flattenArray(rowsData)}
+          />
+        </Box>
       ) : (
         <Box p={2} height={500} bgcolor="white">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -438,46 +439,49 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
           okBtnLoading={isDeleting}
         />
       )}
-      {isProductEdit.open && (
-        <ScheduleDetailDialog
+      {materialEdit.open && (
+        <MaterialDialog
           onClose={() => {
-            setIsProductEdit({ open: false, isBulkedit: false });
+            setMaterialEdit({ open: false, data: null, bulkedit: false });
           }}
-          productionOrderData={recordToUpdate}
-          handleSave={handleSaveData}
-          loading={isUpdating}
+          materialData={materialEdit.data}
+          scheduleData={scheduleData}
+          handleUpdate={handleSaveData}
+          loadingEdit={isUpdating}
+          bulkEdit={materialEdit.bulkedit}
+          showSaveAndNext={false}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
+      {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
           reference="schedule"
           serialized={null}
-          productsDialogOpen={addExistingProductDialog.open}
+          productsDialogOpen={addDialog.open}
           productId={null}
-          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId:null })}
-          assignedProducts={rowsData?.map((e) => e?.materialId)}
+          handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
+          assignedProducts={[]}
           renderedFrom={renderedFrom}
           onSuccess={(d) => {
             handleAdd(d);
           }}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
+      {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
           reference={"schedule"}
           referenceId={scheduleData?._id}
-          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId:null })}
-          ids={rowsData?.map((e) => e?.materialId)}
+          handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
+          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
         />
       )}
-       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
+      {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType="demandOrder"
-          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId:null})}
-          ids={rowsData?.map((e) => e?.materialId)}
+          referenceType="schedule"
+          handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
+          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows)
           }}
