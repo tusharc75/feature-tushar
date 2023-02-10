@@ -20,13 +20,7 @@ import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import accountClass from './account.module.scss';
 import ManageContactDialog from '../Contact/ManageContact/index';
 import DeleteButton from '../../components/Helpers/DeleteButton';
-import {
-  getObjKeysWithValues,
-  isObjectEmpty,
-  sidebarResource,
-  customerAccount,
-  processFieldName,
-} from '../../constants/helpers';
+import { getObjKeysWithValues, isObjectEmpty, sidebarResource, customerAccount, processFieldName } from '../../constants/helpers';
 import ManageAccount from './ManageAccount/ManageAccount';
 import ManageAccountDialog from './ManageAccount/index';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -190,7 +184,6 @@ export default function AccountDetailPage(props) {
     };
   }, [tabValue]);
 
-
   useEffect(() => {
     if ((tour.start && tour.path === '/customer-account/detail') || tour.path === '/supplier-account/detail') {
       if (tour.stepIndex === 6) {
@@ -336,9 +329,9 @@ export default function AccountDetailPage(props) {
           current: true,
           parentAccount: data.parentAccount
             ? {
-              _id: data.parentAccount.optionValue,
-              accountName: data.parentAccount.optionLabel
-            }
+                _id: data.parentAccount.optionValue,
+                accountName: data.parentAccount.optionLabel
+              }
             : null,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
           // parentAccountName: data.parentAccount?.optionLabel,
@@ -788,480 +781,477 @@ export default function AccountDetailPage(props) {
 
   const tourPaths = ['/customer-account/detail', '/supplier-account/detail'];
 
-  return (<Box className="main-container-v1">
-    <Box className="headerbox-v1">
-      <Box className="nav-v1">
-        <CustomBreadCrumbs routes={customizedRoutes} />
-      </Box>
-      <Box className="controls-v1">
-        <Box className="control-buttons-v1">
-          {!isOffline && permissions && permissions[accountResource] && permissions[accountResource].approveAccount && (
-            <>
-              <Button
-                id="detailApproveButton"
-                variant={isMobile ? 'text' : 'contained'}
-                size="small"
-                color={accountData.staticData?.approved ? 'secondary' : 'primary'}
-                className={
-                  accountData.staticData?.approved
-                    ? isMobile
-                      ? accountClass.mobile_button_layout_secondary
-                      : ''
-                    : isMobile
+  return (
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {!isOffline && permissions && permissions[accountResource] && permissions[accountResource].approveAccount && (
+              <>
+                <Button
+                  id="detailApproveButton"
+                  variant={isMobile ? 'text' : 'contained'}
+                  size="small"
+                  color={accountData.staticData?.approved ? 'secondary' : 'primary'}
+                  className={
+                    accountData.staticData?.approved
+                      ? isMobile
+                        ? accountClass.mobile_button_layout_secondary
+                        : ''
+                      : isMobile
                       ? accountClass.mobile_button_layout
                       : ''
-                }
-                onClick={() => {
-                  setShowApproveDisapproveConfirmBox(true);
-                }}
-              >
-                {accountData.staticData?.approved ? (
-                  isMobile ? (
-                    <FcDisapprove size={21} />
+                  }
+                  onClick={() => {
+                    setShowApproveDisapproveConfirmBox(true);
+                  }}
+                >
+                  {accountData.staticData?.approved ? (
+                    isMobile ? (
+                      <FcDisapprove size={21} />
+                    ) : (
+                      'Disapprove'
+                    )
+                  ) : isMobile ? (
+                    <FcApproval size={21} />
                   ) : (
-                    'Disapprove'
-                  )
-                ) : isMobile ? (
-                  <FcApproval size={21} />
-                ) : (
-                  'Approve'
-                )}
-              </Button>
-            </>
-          )}
-          {permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit && (
-            <>
-              <Button
-                variant={isMobile ? 'text' : 'contained'}
-                size="small"
-                onClick={handleOpneUpdateDialog}
-                className={'btn-outline-v1'}
-              >
-                {isMobile ? <BiEdit size={20} /> : 'Edit'}
-              </Button>
-            </>
-          )}
-          {!isOffline &&
+                    'Approve'
+                  )}
+                </Button>
+              </>
+            )}
+            {permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit && (
+              <>
+                <Button variant={isMobile ? 'text' : 'contained'} size="small" onClick={handleOpneUpdateDialog} className={'btn-outline-v1'}>
+                  {isMobile ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              </>
+            )}
+            {!isOffline &&
             permissions &&
             permissions[accountResource] &&
             permissions[accountResource].isDelete &&
             accountData?.owner?.optionValue &&
             user?.user?._id &&
             accountData.owner.optionValue === user.user._id ? (
-            <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-          ) : null}
-          <ActivityButton referenceId={accountData?._id} resource={accountResource} />
+              <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+            ) : null}
+            <ActivityButton referenceId={accountData?._id} resource={accountResource} />
+          </Box>
         </Box>
       </Box>
-    </Box>
-    <Box className={`detail-container-v1`}>
-      <ProcessFlow
-        disableBackNext={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit ? false : true}
-        steps={steps}
-        activeStep={activeStep}
-        handleMarkAsCompleted={handleMarkAsCompleted}
-      />
-      {loading ? (
-        <Grid container spacing={2}>
-          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-            <Grid item sm={6} md={6}>
-              <Skeleton variant="text" width="100px" height="16px" />
-              <Box marginY={1} />
-              <Skeleton width="100%" height="50px" />
-            </Grid>
-          ))}
-        </Grid>
-      ) : (
-        <>
-          <Tabs
-            className="new-tab-container-v1"
-            value={tabValue}
-            onChange={handleMainTabChange}
-            textColor="primary"
-            TabIndicatorProps={{
-              style: {
-                display: 'none'
-              }
-            }}
-          >
-            <Tab label={<div className="tab-font">Details</div>} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
-            <Tab label={<div className="tab-font">Account Hierarchy</div>} id="a11y-tab-1" className="tabLayout" />
-            <Tab label={<div className="tab-font">OM-Neurons</div>} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
-            {accountResource === 'customerAccount' && permissions?.productInventory && (
-              <Tab
-                label={<div className="tab-font">{routes.warehouse.title}</div>}
-                aria-controls="a11y-tabpanel-2"
-                id="a11y-tab-2"
-                className="tabLayout"
-              />
-            )}
-          </Tabs>
-          <TabPanel value={tabValue} index={0}>
-            <Box>
-              {isInOfflineSaveQueue && (
-                <div className="px-3 mt-2">
-                  <Alert variant="filled" severity="info">
-                    Updates are in offline state, it will be affected once you will be in network
-                  </Alert>
-                </div>
+      <Box className={`detail-container-v1`}>
+        <ProcessFlow
+          disableBackNext={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit ? false : true}
+          steps={steps}
+          activeStep={activeStep}
+          handleMarkAsCompleted={handleMarkAsCompleted}
+        />
+        {loading ? (
+          <Grid container spacing={2}>
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+              <Grid item sm={6} md={6}>
+                <Skeleton variant="text" width="100px" height="16px" />
+                <Box marginY={1} />
+                <Skeleton width="100%" height="50px" />
+              </Grid>
+            ))}
+          </Grid>
+        ) : (
+          <>
+            <Tabs
+              className="new-tab-container-v1"
+              value={tabValue}
+              onChange={handleMainTabChange}
+              textColor="primary"
+              TabIndicatorProps={{
+                style: {
+                  display: 'none'
+                }
+              }}
+            >
+              <Tab label={<div className="tab-font">Details</div>} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
+              <Tab label={<div className="tab-font">Account Hierarchy</div>} id="a11y-tab-1" className="tabLayout" />
+              <Tab label={<div className="tab-font">OM-Neurons</div>} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
+              {accountResource === 'customerAccount' && permissions?.productInventory && (
+                <Tab
+                  label={<div className="tab-font">{routes.warehouse.title}</div>}
+                  aria-controls="a11y-tabpanel-2"
+                  id="a11y-tab-2"
+                  className="tabLayout"
+                />
               )}
+            </Tabs>
+            <TabPanel value={tabValue} index={0}>
+              <Box>
+                {isInOfflineSaveQueue && (
+                  <div className="px-3 mt-2">
+                    <Alert variant="filled" severity="info">
+                      Updates are in offline state, it will be affected once you will be in network
+                    </Alert>
+                  </div>
+                )}
 
-              {showAtLast ? (
-                <DetailsPage data={accountData} fields={accountFields} />
-              ) : (
-                <DetailsPage data={accountData} fields={filteredAccountFields} />
-              )}
-            </Box>
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            <Box className={accountClass.set_width_table}>
-              <AccountHierarchy
-                data={accountHierarchyData}
-                currentAccountId={accountData._id}
-                accountRoute={accountRoute}
-                handleUpdate={handleUpdate}
-                onCreateNewAccount={handleCreateNewAccount}
-                canUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate}
-                canCreate={permissions && permissions[accountResource] && permissions[accountResource].isCreate}
-                canDelete={permissions && permissions[accountResource] && permissions[accountResource].isDelete}
-                handleDelete={(data) => {
-                  setDeleteAccountId(data);
-                }}
-              />
-            </Box>
-          </TabPanel>
-          <TabPanel value={tabValue} index={2}>
-            <Box>
-              <CustomNodalStructure
-                id={id}
-                graphData={graphData}
-                loadingGraphData={loadingGraphData}
-                onClick={(node) => {
-                  if (node && routes[node.route]) {
-                    history.push({
-                      pathname: `${routes[node.route].path}/${node.redirectId}`
-                    });
-                  }
-                }}
-              />
-            </Box>
-          </TabPanel>
-          {!isOffline && accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (
-            <TabPanel value={tabValue} index={3}>
-              <Warehouse reference={accountResource} api={accountApi} id={id} />
+                {showAtLast ? (
+                  <DetailsPage data={accountData} fields={accountFields} />
+                ) : (
+                  <DetailsPage data={accountData} fields={filteredAccountFields} />
+                )}
+              </Box>
             </TabPanel>
-          )}
-          <div className="p-3 modified_style_of_accordion">
-            {permissions?.opportunity?.isRead && (
-              <span id="opportunityAccordion">
-                <OpportunityInAccordian
-                  opportunityPermissions={permissions.opportunity}
-                  opportunities={opportunities}
-                  onNewOpportunityAdd={() => {
-                    fetchRelatedData();
+            <TabPanel value={tabValue} index={1}>
+              <Box className={accountClass.set_width_table}>
+                <AccountHierarchy
+                  data={accountHierarchyData}
+                  currentAccountId={accountData._id}
+                  accountRoute={accountRoute}
+                  handleUpdate={handleUpdate}
+                  onCreateNewAccount={handleCreateNewAccount}
+                  canUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate}
+                  canCreate={permissions && permissions[accountResource] && permissions[accountResource].isCreate}
+                  canDelete={permissions && permissions[accountResource] && permissions[accountResource].isDelete}
+                  handleDelete={(data) => {
+                    setDeleteAccountId(data);
                   }}
-                  accountId={accountData._id}
-                  accountName={accountData.accountName}
-                  recordsPerLine={3}
-                  resource={accountResource}
-                  isRedirect={false}
-                  isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit}
                 />
-              </span>
-            )}
-            {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource && (
-              <span id="projectsAccordion">
-                <ProjectInAccordion
-                  recordsPerLine={3}
-                  projectSales={projectSales}
-                  type={typeCreateProjectSalesDialog}
-                  fetchData={fetchRelatedData}
-                  permissions={permissions}
-                  isAddProjectSale={true}
-                  isAllowedToEdit={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit}
-                  accountId={accountData._id}
-                  accountName={accountData.accountName}
-                  resource={accountResource}
+              </Box>
+            </TabPanel>
+            <TabPanel value={tabValue} index={2}>
+              <Box>
+                <CustomNodalStructure
+                  id={id}
+                  graphData={graphData}
+                  loadingGraphData={loadingGraphData}
+                  onClick={(node) => {
+                    if (node && routes[node.route]) {
+                      history.push({
+                        pathname: `${routes[node.route].path}/${node.redirectId}`
+                      });
+                    }
+                  }}
                 />
-              </span>
+              </Box>
+            </TabPanel>
+            {!isOffline && accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (
+              <TabPanel value={tabValue} index={3}>
+                <Warehouse reference={accountResource} api={accountApi} id={id} />
+              </TabPanel>
             )}
-            {permissions?.quoteBuilder?.isRead && accountResource == customerAccount.accountResource && (
-              <span id="quotesAccordion">
-                <QuotesInAccordion
-                  recordsPerLine={3}
-                  quotes={quotes}
-                  fetchData={fetchRelatedData}
-                  quoteBuilderPermission={permissions.quoteBuilder}
-                  accountId={id}
-                  accountName={accountData.accountName}
-                  accountResource={accountResource}
-                  isRenderedFromCustomerAccount={true}
-                  isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit}
-                />
-              </span>
-            )}
-            {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
-            {/* {permissions?.lead?.isRead && accountData.staticData?.lead && (
+            <div className="pt-3 modified_style_of_accordion">
+              {permissions?.opportunity?.isRead && (
+                <span id="opportunityAccordion">
+                  <OpportunityInAccordian
+                    opportunityPermissions={permissions.opportunity}
+                    opportunities={opportunities}
+                    onNewOpportunityAdd={() => {
+                      fetchRelatedData();
+                    }}
+                    accountId={accountData._id}
+                    accountName={accountData.accountName}
+                    recordsPerLine={3}
+                    resource={accountResource}
+                    isRedirect={false}
+                    isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit}
+                  />
+                </span>
+              )}
+              {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource && (
+                <span id="projectsAccordion">
+                  <ProjectInAccordion
+                    recordsPerLine={3}
+                    projectSales={projectSales}
+                    type={typeCreateProjectSalesDialog}
+                    fetchData={fetchRelatedData}
+                    permissions={permissions}
+                    isAddProjectSale={true}
+                    isAllowedToEdit={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit}
+                    accountId={accountData._id}
+                    accountName={accountData.accountName}
+                    resource={accountResource}
+                  />
+                </span>
+              )}
+              {permissions?.quoteBuilder?.isRead && accountResource == customerAccount.accountResource && (
+                <span id="quotesAccordion">
+                  <QuotesInAccordion
+                    recordsPerLine={3}
+                    quotes={quotes}
+                    fetchData={fetchRelatedData}
+                    quoteBuilderPermission={permissions.quoteBuilder}
+                    accountId={id}
+                    accountName={accountData.accountName}
+                    accountResource={accountResource}
+                    isRenderedFromCustomerAccount={true}
+                    isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit}
+                  />
+                </span>
+              )}
+              {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
+              {/* {permissions?.lead?.isRead && accountData.staticData?.lead && (
                   <LeadInAccordion
                     recordsPerLine={3}
                     lead={accountData.staticData?.lead}
                   />
                 )} */}
-          </div>
-          
-          <Grid item xs={12}>
-            <QuickLinks quickLinks={quickLinks} />
-          </Grid>
+            </div>
 
-          {permissions && permissions[contactResource] && permissions[contactResource].isRead && (
             <Grid item xs={12}>
-              <BoxWithBorder style={{ marginTop: '3%', padding: '0px' }}>
-                <div className={`${accountClass.detail_page_div3}`}>
-                  <div className={`${accountClass.related_contacts}`}>
-                    <Typography color="primary" variant="h6" style={{ margin: '0 10px' }}>
-                      Related Contacts
-                    </Typography>
-                    {permissions[contactResource].isCreate && (
-                      <span>
-                        <IconButton onClick={handleCreateContact} color="primary" size="small">
-                          <ControlPointIcon />
-                        </IconButton>
-                      </span>
+              <QuickLinks quickLinks={quickLinks} />
+            </Grid>
+
+            {permissions && permissions[contactResource] && permissions[contactResource].isRead && (
+              <Grid item xs={12}>
+                <BoxWithBorder style={{ marginTop: '3%', padding: '0px' }}>
+                  <div className={`${accountClass.detail_page_div3}`}>
+                    <div className={`${accountClass.related_contacts}`}>
+                      <Typography color="primary" variant="h6" style={{ margin: '0 10px' }}>
+                        Related Contacts
+                      </Typography>
+                      {permissions[contactResource].isCreate && (
+                        <span>
+                          <IconButton onClick={handleCreateContact} color="primary" size="small">
+                            <ControlPointIcon />
+                          </IconButton>
+                        </span>
+                      )}
+                    </div>
+                    {relatedContactsLoading ? (
+                      <CommonSkeleton lenArray={[...Array(4).keys()]} />
+                    ) : (
+                      <>
+                        <Box className={`${accountClass.custom_box1}`}>
+                          <RelatedContacts
+                            contacts={_reverse(relatedContacts.slice(0, 2))}
+                            accountId={accountData._id}
+                            accountName={accountData.accountName}
+                            contactApi={contactApi}
+                            contactRoute={contactRoute}
+                          />
+                        </Box>
+                      </>
                     )}
                   </div>
-                  {relatedContactsLoading ? (
-                    <CommonSkeleton lenArray={[...Array(4).keys()]} />
-                  ) : (
-                    <>
-                      <Box className={`${accountClass.custom_box1}`}>
-                        <RelatedContacts
-                          contacts={_reverse(relatedContacts.slice(0, 2))}
-                          accountId={accountData._id}
-                          accountName={accountData.accountName}
-                          contactApi={contactApi}
-                          contactRoute={contactRoute}
-                        />
-                      </Box>
-                    </>
-                  )}
-                </div>
-              </BoxWithBorder>
-            </Grid>
-          )}
-          {accountData?.staticData?.lead && permissions && permissions.lead && permissions.lead.isRead && (
-            <Grid item xs={12}>
-              <BoxWithBorder style={{ marginTop: '3%', padding: '0px' }}>
-                <div id="contactsAccordion" className={`${accountClass.detail_page_div3}`}>
-                  <div className={`${accountClass.leads_data}`}>
-                    <Typography color="primary" variant="h6" style={{ margin: '0 10px' }}>
-                      Related Lead
-                    </Typography>
+                </BoxWithBorder>
+              </Grid>
+            )}
+            {accountData?.staticData?.lead && permissions && permissions.lead && permissions.lead.isRead && (
+              <Grid item xs={12}>
+                <BoxWithBorder style={{ marginTop: '3%', padding: '0px' }}>
+                  <div id="contactsAccordion" className={`${accountClass.detail_page_div3}`}>
+                    <div className={`${accountClass.leads_data}`}>
+                      <Typography color="primary" variant="h6" style={{ margin: '0 10px' }}>
+                        Related Lead
+                      </Typography>
+                    </div>
+                    {relatedContactsLoading ? (
+                      <CommonSkeleton lenArray={[...Array(4).keys()]} />
+                    ) : (
+                      <>
+                        <Box className={`${accountClass.custom_box1}`}>
+                          <Card>
+                            <CardContent className="detailListing">
+                              <Grid container className="detailCardHeader">
+                                <Grid item xs={12} sm={12}>
+                                  {accountData?.staticData?.lead?.entity === selectedEntity ? (
+                                    <Link className="link f_size" to={`/lead/detail/${accountData?.staticData?.lead?._id}`}>
+                                      {accountData?.staticData?.lead?.concatedName || ''}
+                                    </Link>
+                                  ) : hasAccessToEntity(accountData?.staticData?.lead?.entity) ? (
+                                    <Link
+                                      className="link f_size"
+                                      onClick={() => {
+                                        handleEntityChange(accountData?.staticData?.lead?.entity);
+                                        history.push(`/lead/detail/${accountData?.staticData?.lead?._id}`);
+                                      }}
+                                    >
+                                      {accountData?.staticData?.lead?.concatedName || ''}
+                                    </Link>
+                                  ) : (
+                                    <span>{accountData?.staticData?.lead?.concatedName || ''}</span>
+                                  )}
+                                </Grid>
+                              </Grid>
+                              <Grid container>
+                                <Grid item xs={12} sm={6}>
+                                  <DisplayData label="Title" value={accountData?.staticData?.lead?.title || '-'} icon={<BsPerson size={20} />} />
+                                </Grid>
+                              </Grid>
+                            </CardContent>
+                          </Card>
+                        </Box>
+                      </>
+                    )}
                   </div>
-                  {relatedContactsLoading ? (
-                    <CommonSkeleton lenArray={[...Array(4).keys()]} />
-                  ) : (
-                    <>
-                      <Box className={`${accountClass.custom_box1}`}>
-                        <Card>
-                          <CardContent className="detailListing">
-                            <Grid container className="detailCardHeader">
-                              <Grid item xs={12} sm={12}>
-                                {accountData?.staticData?.lead?.entity === selectedEntity ? (
-                                  <Link className="link f_size" to={`/lead/detail/${accountData?.staticData?.lead?._id}`}>
-                                    {accountData?.staticData?.lead?.concatedName || ''}
-                                  </Link>
-                                ) : hasAccessToEntity(accountData?.staticData?.lead?.entity) ? (
-                                  <Link
-                                    className="link f_size"
-                                    onClick={() => {
-                                      handleEntityChange(accountData?.staticData?.lead?.entity);
-                                      history.push(`/lead/detail/${accountData?.staticData?.lead?._id}`);
-                                    }}
-                                  >
-                                    {accountData?.staticData?.lead?.concatedName || ''}
-                                  </Link>
-                                ) : (
-                                  <span>{accountData?.staticData?.lead?.concatedName || ''}</span>
-                                )}
-                              </Grid>
-                            </Grid>
-                            <Grid container>
-                              <Grid item xs={12} sm={6}>
-                                <DisplayData label="Title" value={accountData?.staticData?.lead?.title || '-'} icon={<BsPerson size={20} />} />
-                              </Grid>
-                            </Grid>
-                          </CardContent>
-                        </Card>
-                      </Box>
-                    </>
-                  )}
-                </div>
-              </BoxWithBorder>
-            </Grid>
-          )}
-        </>
+                </BoxWithBorder>
+              </Grid>
+            )}
+          </>
+        )}
+      </Box>
+      {showConfirmBox ? (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this Account ${
+            deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
+          }`}
+          onClose={() => {
+            setShowConfirmBox(false);
+            setDeleteAccountId({});
+          }}
+          onOk={handleDeleteAcc}
+        />
+      ) : null}
+      {showApproveDisapproveConfirmBox ? (
+        <ConfirmationDialog
+          open={showApproveDisapproveConfirmBox}
+          message={`Are you sure you want to ${accountData.staticData?.approved ? 'disapprove' : 'approve'} this Account ?`}
+          onClose={() => setShowApproveDisapproveConfirmBox(false)}
+          onOk={handleApproveDisapprove}
+        />
+      ) : null}
+      {openUpdateDialog && showAtLast ? (
+        <ManageAccount
+          isNew={false}
+          open={openUpdateDialog}
+          onClose={closeUpdateDIalog}
+          accountData={{
+            fields: accountFields.map((f) => {
+              return f.fieldData;
+            }),
+            initialValues: getObjKeysWithValues(
+              accountData,
+              accountFields.map((f) => {
+                return f.fieldData;
+              })
+            )
+          }}
+          loading={loading}
+          handleSubmit={onUpdateAccount}
+          accountId={accountData?._id}
+          formValues={formValues}
+          handleValuesChange={handleValuesChange}
+        />
+      ) : openUpdateDialog ? (
+        <ManageAccount
+          isNew={false}
+          open={openUpdateDialog}
+          onClose={closeUpdateDIalog}
+          accountData={{
+            fields: filteredAccountFields.map((f) => {
+              return f.fieldData;
+            }),
+            initialValues: getObjKeysWithValues(
+              Object.keys(editAccountData).length ? editAccountData : accountData,
+              filteredAccountFields.map((f) => {
+                return f.fieldData;
+              })
+            )
+          }}
+          loading={loading}
+          handleSubmit={onUpdateAccount}
+          accountId={editAccountData._id ? editAccountData._id : accountData?._id}
+          formValues={formValues}
+          handleValuesChange={handleValuesChange}
+          handleAddressDataSource={() => {}}
+        />
+      ) : null}
+
+      {showCreateOpportunityDialog && (
+        <ManageOpportunityDialog
+          open={showCreateOpportunityDialog}
+          onClose={() => setShowCreateOpportunityDialog(false)}
+          onSuccess={() => {
+            setShowCreateOpportunityDialog(false);
+            fetchRelatedData();
+          }}
+          accountId={accountData._id}
+          resource={accountResource}
+          isRedirectTodetailPage={false}
+        />
+      )}
+      {showCreateContactDialog && (
+        <ManageContactDialog
+          open={showCreateContactDialog}
+          onClose={() => {
+            setShowCreateContactDialog(false);
+            fetchRelatedData();
+          }}
+          contactResource={contactResource}
+          accountId={accountData._id}
+          contactApi={contactApi}
+          account={props?.account}
+        />
+      )}
+      {showAccountHierarchyInFullScreenDialog && (
+        <FullScreenDialog
+          heading="Account Hierarchy"
+          open={showAccountHierarchyInFullScreenDialog}
+          close={() => {
+            setShowAccountHierarchyInFullScreenDialog(false);
+          }}
+        >
+          <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} accountRoute={accountRoute} />
+        </FullScreenDialog>
+      )}
+      {showCreateAccountDialog ? (
+        <ManageAccountDialog
+          open={showCreateAccountDialog}
+          onClose={() => {
+            setShowCreateAccountDialog(false);
+            setParentId(undefined);
+            fetchAccountData();
+          }}
+          parentId={parentId}
+          id={null}
+          accountResource={accountResource}
+          accountApi={accountApi}
+          isClone={false}
+          accountNameForClone={''}
+          isRedirectToDetailPage={false}
+        />
+      ) : null}
+      {openAdditionalDialog && (
+        // <Dialog
+        //   disableBackdropClick={true}
+        //   fullWidth
+        //   maxWidth="sm"
+        //   open={openAdditionalDialog}
+        //   onClose={() => setOpenAdditionalDialog(false)}
+        //   aria-labelledby="form-dialog-title"
+        //   fullScreen={isMobile || isTablet}
+        // >
+        //   <CustomDialogHeader
+        //     title="Additonal Information"
+        //     onClose={() => setOpenAdditionalDialog(false)}
+        //   ></CustomDialogHeader>
+        //   {sectionFields.map((item) => (
+        //     <CustomDialogContent>{item}</CustomDialogContent>
+        //   ))}
+
+        //   <CustomDialogFooter>
+        //     <Button
+        //       color="primary"
+        //       size="small"
+        //       onClick={() => setOpenAdditionalDialog(false)}
+        //     >
+        //       Close
+        //     </Button>
+        //     <Button color="primary" size="small" onClick={handleSave}>
+        //       Save
+        //     </Button>
+        //   </CustomDialogFooter>
+        // </Dialog>
+        <AdditionalDialogPopUp
+          open={openAdditionalDialog}
+          close={() => setOpenAdditionalDialog(false)}
+          title="Additional Dialog"
+          handleSave={handleSave}
+          fieldData={sectionFields}
+        />
       )}
     </Box>
-    {showConfirmBox ? (
-      <ConfirmationDialog
-        open={showConfirmBox}
-        message={`Are you sure you want to delete this Account ${deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
-          }`}
-        onClose={() => {
-          setShowConfirmBox(false);
-          setDeleteAccountId({});
-        }}
-        onOk={handleDeleteAcc}
-      />
-    ) : null}
-    {showApproveDisapproveConfirmBox ? (
-      <ConfirmationDialog
-        open={showApproveDisapproveConfirmBox}
-        message={`Are you sure you want to ${accountData.staticData?.approved ? 'disapprove' : 'approve'} this Account ?`}
-        onClose={() => setShowApproveDisapproveConfirmBox(false)}
-        onOk={handleApproveDisapprove}
-      />
-    ) : null}
-    {openUpdateDialog && showAtLast ? (
-      <ManageAccount
-        isNew={false}
-        open={openUpdateDialog}
-        onClose={closeUpdateDIalog}
-        accountData={{
-          fields: accountFields.map((f) => {
-            return f.fieldData;
-          }),
-          initialValues: getObjKeysWithValues(
-            accountData,
-            accountFields.map((f) => {
-              return f.fieldData;
-            })
-          )
-        }}
-        loading={loading}
-        handleSubmit={onUpdateAccount}
-        accountId={accountData?._id}
-        formValues={formValues}
-        handleValuesChange={handleValuesChange}
-      />
-    ) : openUpdateDialog ? (
-      <ManageAccount
-        isNew={false}
-        open={openUpdateDialog}
-        onClose={closeUpdateDIalog}
-        accountData={{
-          fields: filteredAccountFields.map((f) => {
-            return f.fieldData;
-          }),
-          initialValues: getObjKeysWithValues(
-            Object.keys(editAccountData).length ? editAccountData : accountData,
-            filteredAccountFields.map((f) => {
-              return f.fieldData;
-            })
-          )
-        }}
-        loading={loading}
-        handleSubmit={onUpdateAccount}
-        accountId={editAccountData._id ? editAccountData._id : accountData?._id}
-        formValues={formValues}
-        handleValuesChange={handleValuesChange}
-        handleAddressDataSource={() => { }}
-      />
-    ) : null}
-
-    {showCreateOpportunityDialog && (
-      <ManageOpportunityDialog
-        open={showCreateOpportunityDialog}
-        onClose={() => setShowCreateOpportunityDialog(false)}
-        onSuccess={() => {
-          setShowCreateOpportunityDialog(false);
-          fetchRelatedData();
-        }}
-        accountId={accountData._id}
-        resource={accountResource}
-        isRedirectTodetailPage={false}
-      />
-    )}
-    {showCreateContactDialog && (
-      <ManageContactDialog
-        open={showCreateContactDialog}
-        onClose={() => {
-          setShowCreateContactDialog(false);
-          fetchRelatedData();
-        }}
-        contactResource={contactResource}
-        accountId={accountData._id}
-        contactApi={contactApi}
-        account={props?.account}
-      />
-    )}
-    {showAccountHierarchyInFullScreenDialog && (
-      <FullScreenDialog
-        heading="Account Hierarchy"
-        open={showAccountHierarchyInFullScreenDialog}
-        close={() => {
-          setShowAccountHierarchyInFullScreenDialog(false);
-        }}
-      >
-        <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} accountRoute={accountRoute} />
-      </FullScreenDialog>
-    )}
-    {showCreateAccountDialog ? (
-      <ManageAccountDialog
-        open={showCreateAccountDialog}
-        onClose={() => {
-          setShowCreateAccountDialog(false);
-          setParentId(undefined);
-          fetchAccountData();
-        }}
-        parentId={parentId}
-        id={null}
-        accountResource={accountResource}
-        accountApi={accountApi}
-        isClone={false}
-        accountNameForClone={''}
-        isRedirectToDetailPage={false}
-      />
-    ) : null}
-    {openAdditionalDialog && (
-      // <Dialog
-      //   disableBackdropClick={true}
-      //   fullWidth
-      //   maxWidth="sm"
-      //   open={openAdditionalDialog}
-      //   onClose={() => setOpenAdditionalDialog(false)}
-      //   aria-labelledby="form-dialog-title"
-      //   fullScreen={isMobile || isTablet}
-      // >
-      //   <CustomDialogHeader
-      //     title="Additonal Information"
-      //     onClose={() => setOpenAdditionalDialog(false)}
-      //   ></CustomDialogHeader>
-      //   {sectionFields.map((item) => (
-      //     <CustomDialogContent>{item}</CustomDialogContent>
-      //   ))}
-
-      //   <CustomDialogFooter>
-      //     <Button
-      //       color="primary"
-      //       size="small"
-      //       onClick={() => setOpenAdditionalDialog(false)}
-      //     >
-      //       Close
-      //     </Button>
-      //     <Button color="primary" size="small" onClick={handleSave}>
-      //       Save
-      //     </Button>
-      //   </CustomDialogFooter>
-      // </Dialog>
-      <AdditionalDialogPopUp
-        open={openAdditionalDialog}
-        close={() => setOpenAdditionalDialog(false)}
-        title="Additional Dialog"
-        handleSave={handleSave}
-        fieldData={sectionFields}
-      />
-    )}
-  </Box>
   );
 }
