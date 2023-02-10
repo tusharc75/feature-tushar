@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
@@ -9,15 +9,18 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, generateUniqueIdOnly, isFieldNotTouched } from 'src/constants/helpers';
+import { CustomDialogTransition, generateUniqueIdOnly, isFieldNotTouched, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import { FaDiceOne } from 'react-icons/fa';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import FormTypes from 'src/components/Helpers/FormTypes';
 
 const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
@@ -25,11 +28,22 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [formsData, setFormsData] = useState([]);
   const ref = useRef(null);
 
   useEffect(() => {
     fetchFields();
   }, []);
+
+  const checkTypeForPrefix = (type) => {
+    if (type === 'Rental Job') {
+      return 'RJ';
+    } else if (type === 'Sales Order') {
+      return 'SO';
+    } else if (type === 'Field Service Order') {
+      return 'FSO';
+    }
+  };
 
   const fetchFields = async () => {
     try {
@@ -48,7 +62,7 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
             if (isClone) {
               fields = fieldsDataForCreate;
               const { scheduleNumber, ...rest } = data;
-              rest.scheduleNumber = `SC_${generateUniqueIdOnly()}`
+              rest.scheduleNumber = `${scheduleNumber?.split('_')[0]}_${generateUniqueIdOnly()}`
               setCloneHeading(scheduleNumber);
               tempData = rest;
             }
@@ -60,10 +74,11 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
-      }
-      else {
+      } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
-        tempInitialData['scheduleNumber'] = `SC_${generateUniqueIdOnly()}`;
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+          tempInitialData['currency'] = user.user?.brandCurrency;
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -77,37 +92,40 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const handleSubmit = (values) => {
     setSubmitting(true);
     if (id && !isClone) {
-      values._id = id
-      axiosInstance().put(`${routes.schedule?.path}`, values).then(({ data }) => {
-        setSubmitting(false);
-        onSuccess()
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
+      values._id = id;
+      axiosInstance()
+        .put(`${routes.schedule?.path}`, values)
+        .then(({ data }) => {
+          setSubmitting(false);
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     } else {
       axiosInstance()
         .post(`${routes.schedule?.path}`, values)
         .then(({ data }) => {
           setLoading(false);
-         onSuccess(data.data);
+          onSuccess(data.data);
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
         })
         .catch((error) => {
           setLoading(false);
           setSubmitting(false);
           toastConfig.setToastConfig(error);
-        })
+        });
     }
   };
 
@@ -115,6 +133,11 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
     const errors = {};
     return errors;
   }
+
+  useEffect(() => {
+    setFormsData(setFieldsInAscendingOrder(initialData?.fields));
+  }, [initialData?.fields]);
+
 
   return (
     <Dialog
@@ -148,12 +171,13 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
                     onClose();
                   }
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.scheduleNumber ? `(${initialData.values?.scheduleNumber})` : ''}`
-                  : `Create ${routes?.schedule?.title}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.scheduleNumber ? `(${initialData.values?.scheduleNumber})` : ''}`
+                    : `Create ${routes?.schedule?.title}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -162,15 +186,73 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <InputField
-                    errors={errors}
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    touched={touched}
-                    fieldsData={initialData.fields}
-                    size="small"
-                    fullWidth
-                  />
+                  {formsData &&
+                    formsData.map((form, index1) => {
+                      return form.name && (
+                        <div key={index1}>
+                          <div className={'detail-box-content'}>
+                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                          </div>
+                          <Box marginY={2}>
+                            <Grid spacing={3} container>
+                              {form.sectionFields.map((field, index2) => (
+                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                  {field.fieldName === 'type' ? (
+                                    <FormTypes
+                                    {...field}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={setFieldValue}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    imageOrFileUploadCompletePercentage={null}
+                                    onChange={(e,value)=>{
+                                        const prefix = checkTypeForPrefix(value?.optionValue);
+                                        setFieldValue(
+                                            "scheduleNumber", 
+                                            value && value.optionValue ? `${prefix}_${generateUniqueIdOnly()}` : "")
+                                        setFieldValue(
+                                                field.fieldName,
+                                                value && value.optionValue ? value.optionValue : ""
+                                            )}}
+                                    />
+                                  ):(
+                                    <FormTypes
+                                    {...field}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={setFieldValue}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    imageOrFileUploadCompletePercentage={null}
+                                    disabled={field.disableOnEdit}
+                                  />
+                                   )
+                                  }
+                                </Grid>
+                              ))}
+                            </Grid>
+                          </Box>
+                        </div>
+                      ) 
+                    })}
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
@@ -198,6 +280,7 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
                   disabled={loading || submitting}
                   variant="contained"
                   color="primary"
+                  size="small"
                   type="submit"
                   onClick={submitForm}
                   endIcon={submitting && <CircularProgress color="inherit" size={18} />}
