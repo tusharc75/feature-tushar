@@ -366,8 +366,8 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitio
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
               onSaveEdit={onSaveInlineEdit}
-              material={material}
               hideSelection={!allowedToEdit}
+              hideAction={!allowedToEdit}
               hideExpander={true}
             />
           </Box>

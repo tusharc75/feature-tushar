@@ -370,6 +370,7 @@ const Technician = ({
                                 childrenProperty="subRows"
                                 uniqueKey="_id"
                                 hideSelection={!allowedToEdit}
+                                hideAction={!allowedToEdit}
                                 renderedFrom={`${renderedFrom}_technician`}
                                 isClientSideGrid={true}
                             />

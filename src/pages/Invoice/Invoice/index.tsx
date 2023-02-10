@@ -251,6 +251,7 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
                 hideSelection={true}
+                hideAction={true}
                 onSelect={() => {}}
                 childrenProperty="subRows"
                 uniqueKey="_id"

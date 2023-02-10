@@ -568,12 +568,12 @@ const Services = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={isOffline || !allowedToEdit}
+                hideAction={isOffline || !allowedToEdit}
                 renderedFrom="rental_management_sevices_1"
                 onSaveEdit={async (inputField, updatedData) => {
                   let rows = await calculateRowsField(material, inputField, allFields, updatedData);
                   handleSaveData(rows);
                 }}
-                material={material}
                 isClientSideGrid={true}
               />
             </Box>
