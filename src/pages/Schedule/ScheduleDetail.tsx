@@ -19,11 +19,13 @@ import ManageSchedule from './ManageSchedule';
 import { FaWpforms } from 'react-icons/fa';
 
 const ScheduleDetail = () => {
-    const renderedFrom = camelCase(routes?.schedule.title);
+  const renderedFrom = camelCase(routes?.schedule.title);
+
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.schedule]);
+  const { state: { permissions, user } }: any = useData();
+
   const [scheduleData, setScheduleData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -32,9 +34,6 @@ const ScheduleDetail = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
-  const {
-    state: { permissions, user }
-  }: any = useData();
 
   useEffect(() => {
     if (id) {
@@ -64,7 +63,6 @@ const ScheduleDetail = () => {
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setScheduleData(data);
-      setCustomizedRoutes([routes.schedule, { title: data?.scheduleNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -109,25 +107,25 @@ const ScheduleDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[routes.schedule, { title: scheduleData?.scheduleNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.schedule?.isUpdate && allowedToEdit && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className="btn-outline-v1"
-                    onClick={handleOpenUpdateDialog}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.schedule?.isDelete && allowedToDelete && (
-                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                )}
-              </>
+            <>
+              {permissions?.schedule?.isUpdate && allowedToEdit && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className="btn-outline-v1"
+                  onClick={handleOpenUpdateDialog}
+                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.schedule?.isDelete && allowedToDelete && (
+                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+              )}
+            </>
           </Box>
         </Box>
       </Box>
@@ -146,7 +144,7 @@ const ScheduleDetail = () => {
           <Tab
             className={'tabLayout'}
             label={
-                <div className="d-flex align-items-center tab-font">
+              <div className="d-flex align-items-center tab-font">
                 <FaWpforms className="mr-1" fontSize="inherit" /> Header
               </div>
             }
@@ -157,7 +155,7 @@ const ScheduleDetail = () => {
           <Tab
             className={'tabLayout'}
             label={
-                <div className="d-flex align-items-center tab-font">
+              <div className="d-flex align-items-center tab-font">
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
               </div>
             }
@@ -176,15 +174,15 @@ const ScheduleDetail = () => {
               <DetailsPage data={scheduleData} fields={fields} />
             )}
           </Box>
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            {scheduleData && (
-                <Material 
-                renderedFrom={`${renderedFrom}_grid-1`}
-                allowedToEdit={allowedToEdit}
-                scheduleData={scheduleData}
-                />
-            )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          {scheduleData && (
+            <Material
+              renderedFrom={`${renderedFrom}_grid-1`}
+              allowedToEdit={allowedToEdit && permissions?.schedule?.isUpdate ? true : false}
+              scheduleData={scheduleData}
+            />
+          )}
         </TabPanel>
       </Box>
       {showConfirmBox && (
