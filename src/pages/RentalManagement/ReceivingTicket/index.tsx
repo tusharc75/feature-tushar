@@ -1362,7 +1362,7 @@ const ReceivingTicket = ({
                     setShowConformationRevertTicket(true)
                   }}
                 >
-                  Revert Receiving Ticket
+                  Revert Line Items
                 </MenuItem>
                 <MenuItem
                   onClick={() => {

@@ -11,7 +11,7 @@ import { genrateCustomTableColumns, flattenArray } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -36,7 +36,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
   const [allFields, setAllFields] = useState([]);
   const [selectedRecords, setSelectedRecords] = useState([]);
 
-  const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false });
+  const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
@@ -85,18 +85,20 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
+        Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p
-              onClick={() => {
-                setMaterialEdit({ open: true, data: row.original, bulkedit: false });
-              }}
-              className="link text-truncate"
-              title={row.original?.detail}
-            >
-              {row.original?.detail}
-            </p>
-            {row?.original?.type !== 'service' &&
+            {allowedToEdit ?
+              <p
+                onClick={() => {
+                  setMaterialEdit({ open: true, data: row.original, bulkedit: false, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
+                }}
+                className="link text-truncate"
+                title={row.original?.detail}
+              >
+                {row.original?.detail}
+              </p>
+              : <p className="text-truncate">{row.original?.detail}</p>}
+            {row?.original?.type !== 'service' && allowedToEdit &&
               <>
                 <Box ml={1} >
                   <span>({row.original?.subRows?.length})</span>
@@ -144,22 +146,26 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) =>
-        !row.original.hideSelection && (
-          <Grid container spacing={1}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                setDeleteData(obj);
-              }}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          </Grid>
-        )
+      Cell: ({ row }) => allowedToEdit && (
+        <Grid container spacing={1}>
+          <IconButton
+            size="small"
+            aria-label="Details"
+            onClick={() => {
+              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+              setDeleteData(obj);
+            }}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </Grid>
+      )
     })
+    if (!allowedToEdit) {
+      coloum?.forEach((e: any) => {
+        e.editable = false;
+      })
+    }
     setColumns(coloum);
     fetchData();
   };
@@ -193,12 +199,6 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
-    if (subRows.length === 0 && parent.type === 'package') {
-      parent.isValid = false;
-    }
-    if (parent.type === 'package') {
-      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
-    }
     return subRows;
   };
 
@@ -230,7 +230,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       });
   };
 
-  const handleSaveData = async (rows: any) => {
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
     rows.forEach((element) => {
       delete element.index;
@@ -247,13 +247,19 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       .put(`${routes.schedule.path}/material/${scheduleData._id}`, { material: rows })
       .then(({ data }) => {
         setUpdating(false);
-        setMaterialEdit({ open: false, data: null, bulkedit: false });
+        fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        fetchData();
+        if (saveAndNext) {
+          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          setMaterialEdit({ open: true, data: rowsData[rowIndex + 1], bulkedit: false, showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+        }
+        else {
+          setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
+        }
       })
       .catch((error) => {
         setUpdating(false);
@@ -299,8 +305,6 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    console.log(inputField)
-    console.log(updatedData)
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qtyDisplay')) {
       inputField['qty'] = inputField['qtyDisplay'];
@@ -312,102 +316,107 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center">
-          <Button
-            variant={'outlined'}
-            color="primary"
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={openAddActions}
-            aria-controls="add-menu">
-            {'Add'}
-            <ExpandMore fontSize="small" />
-          </Button>
-          <Menu
-            anchorEl={addAnchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="add-menu"
-            open={Boolean(addAnchorEl)}
-            onClose={closeAddActions}
-          >
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddDialog({ open: true, type: 'product', parentId: null });
+      {allowedToEdit &&
+        <Box display="flex" justifyContent="space-between" m={1}>
+          <Box display="flex" alignItems="center">
+            <Button
+              variant={'outlined'}
+              color="primary"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={openAddActions}
+              aria-controls="add-menu">
+              {'Add'}
+              <ExpandMore fontSize="small" />
+            </Button>
+            <Menu
+              anchorEl={addAnchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
               }}
+              id="add-menu"
+              open={Boolean(addAnchorEl)}
+              onClose={closeAddActions}
             >
-              Add Products
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddDialog({ open: true, type: 'service', parentId: null });
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddDialog({ open: true, type: 'product', parentId: null });
+                }}
+              >
+                Add Products
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddDialog({ open: true, type: 'service', parentId: null });
+                }}
+              >
+                Add Services
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddDialog({ open: true, type: 'package', parentId: null });
+                }}
+              >
+                Add Packages
+              </MenuItem>
+            </Menu>
+          </Box>
+          <Box display="flex">
+            <Button
+              disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
+              variant={isMobile ? 'text' : 'outlined'}
+              color="default"
+              size="small"
+              onClick={openActions}
+              aria-controls="action-menu"
+            >
+              {isMobile ? '' : 'Actions'} <ExpandMore />
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
               }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
             >
-              Add Services
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddDialog({ open: true, type: 'package', parentId: null });
-              }}
-            >
-              Add Packages
-            </MenuItem>
-          </Menu>
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+                }}
+              >
+                Bulk Edit
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection).map((rec: any) => {
+                    const obj: any = {};
+                    obj.id = rec._id;
+                    obj.type = rec?.type;
+                    obj.materialId = rec?.materialId;
+                    return obj;
+                  });
+                  setDeleteData(dataToDelete);
+                  closeActions();
+                }}
+              >
+                Delete
+              </MenuItem>
+            </Menu>
+          </Box>
         </Box>
-        <Box display="flex">
-          <Button
-            disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) || isDeleting}
-            variant={isMobile ? 'text' : 'outlined'}
-            color="default"
-            size="small"
-            onClick={openActions}
-            aria-controls="action-menu"
-          >
-            {isMobile ? '' : 'Actions'} <ExpandMore />
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorEl)}
-            onClose={closeActions}
-          >
-            <MenuItem
-              onClick={() => {
-                const dataToDelete =
-                  selectedRecords &&
-                  selectedRecords
-                    .filter((e) => !e.hideSelection)
-                    .map((rec: any) => {
-                      const obj: any = {};
-                      obj.id = rec._id;
-                      obj.type = rec?.type;
-                      obj.materialId = rec?.materialId;
-                      return obj;
-                    });
-                setDeleteData(dataToDelete);
-                closeActions();
-              }}
-              disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) || isDeleting}
-            >
-              Delete
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Box>
+      }
       {columns && rowsData ? (
         <Box p="6px" zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -442,14 +451,14 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       {materialEdit.open && (
         <MaterialDialog
           onClose={() => {
-            setMaterialEdit({ open: false, data: null, bulkedit: false });
+            setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
           }}
           materialData={materialEdit.data}
           scheduleData={scheduleData}
           handleUpdate={handleSaveData}
           loadingEdit={isUpdating}
           bulkEdit={materialEdit.bulkedit}
-          showSaveAndNext={false}
+          showSaveAndNext={materialEdit.showSaveAndNext}
         />
       )}
       {addDialog.open && addDialog.type === 'product' && (

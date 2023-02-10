@@ -6,6 +6,7 @@ import {
   arrayToDropwdownOption,
   CHILD_RESOURCE,
   CustomDialogTransition,
+  getObjKeys,
   getObjKeysWithValues,
   yupSchema
 } from 'src/constants/helpers';
@@ -31,26 +32,56 @@ const MaterialDialog = ({ onClose, materialData, scheduleData, handleUpdate, loa
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [materialData]);
 
   const fetchFields = async () => {
+    setInitialData({ fields: [], values: {} });
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.scheduleMaterial}`);
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, scheduleData?.currency);
-    let unitOptions: any = []
-    if (materialData?.[`${materialData.type}Detail`]?.unit) {
-      unitOptions = arrayToDropwdownOption(materialData?.[`${materialData.type}Detail`]?.unit);
+    if (bulkEdit) {
+      let unitArray: any = []
+      materialData?.forEach(element => {
+        if (element?.[`${element.type}Detail`]?.unit) {
+          unitArray.push([...element?.[`${element.type}Detail`]?.unit])
+        }
+      });
+      let unit: any = unitArray?.shift()?.filter(function (v) {
+        return unitArray.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      const unitOptions: any = arrayToDropwdownOption(unit)
+      data.forEach((element) => {
+        if (element.fieldName === "unit") {
+          element.option = unitOptions;
+        }
+        element.required = false;
+        element.isFormula = false;
+        element.isMulitFormula = false;
+      })
+      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
+      setInitialData({
+        fields: data,
+        values: getObjKeys("", data),
+      });
     }
-    data.forEach(element => {
-      if (element.fieldName === "unit") {
-        element.option = unitOptions;
+    else {
+      let unitOptions: any = []
+      if (materialData?.[`${materialData.type}Detail`]?.unit) {
+        unitOptions = arrayToDropwdownOption(materialData?.[`${materialData.type}Detail`]?.unit);
       }
-    });
-    setAllFields(JSON.parse(JSON.stringify(data)))
-    setInitialData({
-      fields: data,
-      values: getObjKeysWithValues(materialData, data)
-    });
+      data.forEach(element => {
+        if (element.fieldName === "unit") {
+          element.option = unitOptions;
+        }
+      });
+      setAllFields(JSON.parse(JSON.stringify(data)))
+      setInitialData({
+        fields: data,
+        values: getObjKeysWithValues(materialData, data)
+      });
+    }
     EvaluteproductFields(data);
   };
 
