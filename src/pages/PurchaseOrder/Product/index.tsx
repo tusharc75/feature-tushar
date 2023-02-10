@@ -676,10 +676,10 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             childrenProperty="subRows"
             uniqueKey="_id"
             hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
             renderedFrom="purchase_order_product"
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
-            material={material}
             hideExpander={true}
           />
         </Box>

@@ -810,6 +810,7 @@ const Quotation = ({
               childrenProperty="subRows"
               uniqueKey="_id"
               hideSelection={true}
+              hideAction={true}
               renderedFrom="quotation_product_package_quotation"
               isClientSideGrid={true}
             />

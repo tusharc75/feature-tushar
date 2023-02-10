@@ -250,6 +250,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                           renderedFrom="quotation_product_package"
                           isClientSideGrid={true}
                           hideSelection={true}
+                          hideAction={true}
                           displayCustomReactTableHeaderOptions={false}
                           hideExpander={true}
                         />

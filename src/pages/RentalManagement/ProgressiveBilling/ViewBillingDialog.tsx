@@ -469,6 +469,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   childrenProperty="subRows"
                   uniqueKey="_id"
                   hideSelection={false}
+                  hideAction={false}
                   renderedFrom="rental_management_create_billing"
                   isClientSideGrid={true}
                 />

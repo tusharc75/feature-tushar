@@ -46,14 +46,12 @@ const ReceivingAsset = ({
   const [selectedRecords, setSelectedRecords] = useState([]);
 
   useEffect(() => {
-    if (purchaseOrderData?.status === PURCHASE_ORDER_STATUS.closed) {
-      setColumns(null);
-    }
     fetchColumns();
     fetchProduct();
   }, [purchaseOrderData]);
 
   const fetchColumns = async () => {
+    setColumns(null);
     const column = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
     const productFields = productResult?.data?.data?.filter((e) => ['productCategory', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName));
@@ -259,23 +257,25 @@ const ReceivingAsset = ({
           Cell: ({ row }) =>
             row?.original?.type === 'Product' ? (
               <>
-                {permissions?.purchaseOrder?.isUpdate &&
-                  allowedToEdit &&
-                  row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) ? (
-                  <HtmlTooltip title="Reject">
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="reject"
-                        onClick={() => {
-                          setRejectProductDialog(row.original);
-                        }}
-                      >
-                        <TransformIcon fontSize="small" color={'primary'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                ) : null}
+                {permissions?.purchaseOrder?.isUpdate
+                  && allowedToEdit
+                  && row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0)
+                  && ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status)
+                  ? (
+                    <HtmlTooltip title="Reject">
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="reject"
+                          onClick={() => {
+                            setRejectProductDialog(row.original);
+                          }}
+                        >
+                          <TransformIcon fontSize="small" color={'primary'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                  ) : null}
                 <HtmlTooltip title="History">
                   <span>
                     <IconButton

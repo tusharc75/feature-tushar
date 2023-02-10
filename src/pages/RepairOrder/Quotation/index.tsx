@@ -655,10 +655,15 @@ const Quotation = ({
                   quotationData?.versions[currentVersion]?.status
                 )
               }
+              hideAction={
+                !allowedToEdit ||
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  quotationData?.versions[currentVersion]?.status
+                )
+              }
               onSaveEdit={onSaveInlineEdit}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              material={material}
             />
           </Box>
         </>

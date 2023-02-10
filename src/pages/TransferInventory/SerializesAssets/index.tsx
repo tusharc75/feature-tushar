@@ -261,6 +261,7 @@ const SerialzedAssets = ({
             childrenProperty="subRows"
             uniqueKey="_id"
             hideSelection={false}
+            hideAction={false}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             setWholeRowsCellColor={(rowData) => {

@@ -631,6 +631,7 @@ const WorkOrder = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={allowedToEdit ? false : isPostWorkService ? false : true}
+                hideAction={allowedToEdit ? false : isPostWorkService ? false : true}
                 renderedFrom="repair_order_workorder"
                 isClientSideGrid={true}
               />

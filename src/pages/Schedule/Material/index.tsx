@@ -431,7 +431,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
             hideSelection={!allowedToEdit}
-            material={flattenArray(rowsData)}
+            hideAction={!allowedToEdit}
           />
         </Box>
       ) : (

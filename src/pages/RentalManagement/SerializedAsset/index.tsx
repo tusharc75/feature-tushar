@@ -915,6 +915,7 @@ const SerializedAsset = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={!allowedToEdit}
+                hideAction={!allowedToEdit}
                 renderedFrom="rental_management_serialized_asset"
                 isClientSideGrid={true}
               />
@@ -1013,7 +1014,6 @@ const SerializedAsset = ({
           refrenceData={{ wellName: rentalManagementData?.wellName?.optionValue, afeNumber: rentalManagementData?.afeNumber }}
           rentalManagementId={rentalManagementData._id}
           warehouseId={rentalManagementData?.warehouse?.optionValue}
-          deliveryDateMax={rentalManagementData.estimateStartDate}
         />
       )}
       {showOrderDialog.open && showOrderDialog.type === 'sublease' && (
