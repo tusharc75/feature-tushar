@@ -64,7 +64,7 @@ const ContactDetailsPage = (props) => {
     state: { user, permissions, selectedEntity, tour },
     dispatch
   }: any = useData();
-  
+
   const [headingLbl, setHeadingLbl] = useState('');
   const [contactData, setContactData] = useState<any>({});
   const [loading, setLoading] = useState(false);
@@ -736,7 +736,7 @@ const ContactDetailsPage = (props) => {
             </>
           )}
         </Box>
-        <div className={`p-3 modified_style_of_accordion`}>
+        <div className={`pt-3 modified_style_of_accordion`}>
           {permissions?.opportunity?.isRead && (
             <span id={`opportunityAccordion `}>
               <OpportunityInAccordian
