@@ -3,9 +3,8 @@ import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Skeleton } from '@material-ui/lab';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { useData } from 'src/StateProvider/Provider';
 import { useParams, useHistory } from 'react-router-dom';
@@ -13,22 +12,20 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import Steps from 'src/pages/RentalManagement/Steps';
-import { scheduleSteps } from 'src/constants/helpers';
-import ContentFullScreen from '../../components/ContentFullScreen';
 import TabPanel from '../../components/TabPanel';
 import Material from './Material';
 import { camelCase } from 'lodash';
 import ManageSchedule from './ManageSchedule';
-
-
+import { FaWpforms } from 'react-icons/fa';
 
 const ScheduleDetail = () => {
-    const renderedFrom = camelCase(routes?.schedule.title);
+  const renderedFrom = camelCase(routes?.schedule.title);
+
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.schedule]);
+  const { state: { permissions, user } }: any = useData();
+
   const [scheduleData, setScheduleData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -37,13 +34,6 @@ const ScheduleDetail = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
-  const [nextStep, setNextStep] = useState(true);
-  const [currentStep, setCurrentStep] = useState(null);
-  const [stepFullScreen, setStepFullScreen] = useState(false);
-
-  const {
-    state: { permissions, user }
-  }: any = useData();
 
   useEffect(() => {
     if (id) {
@@ -51,22 +41,6 @@ const ScheduleDetail = () => {
       fetchData();
     }
   }, [id]);
-
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
-      updateProcessStatus(scheduleSteps[currentStep]);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${routes?.schedule?.path}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
 
   const fetchFields = async () => {
     axiosInstance()
@@ -86,11 +60,9 @@ const ScheduleDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.schedule.path}/${id}`);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      setCurrentStep(scheduleSteps.indexOf(data?.processStatus) !== -1 ? scheduleSteps.indexOf(data?.processStatus) : 0);
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setScheduleData(data);
-      setCustomizedRoutes([routes.schedule, { title: data?.scheduleNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -135,25 +107,25 @@ const ScheduleDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[routes.schedule, { title: scheduleData?.scheduleNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.schedule?.isUpdate && allowedToEdit && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className="btn-outline-v1"
-                    onClick={handleOpenUpdateDialog}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.schedule?.isDelete && allowedToDelete && (
-                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                )}
-              </>
+            <>
+              {permissions?.schedule?.isUpdate && allowedToEdit && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className="btn-outline-v1"
+                  onClick={handleOpenUpdateDialog}
+                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.schedule?.isDelete && allowedToDelete && (
+                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+              )}
+            </>
           </Box>
         </Box>
       </Box>
@@ -171,14 +143,22 @@ const ScheduleDetail = () => {
         >
           <Tab
             className={'tabLayout'}
-            label={<div className="d-flex align-items-center tab-font">Header</div>}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
             value={0}
             aria-controls="a11y-tabpanel-0"
             id="a11y-tab-0"
           />
           <Tab
             className={'tabLayout'}
-            label={<div className="d-flex align-items-center tab-font">Details</div>}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
+            }
             value={1}
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
@@ -194,27 +174,15 @@ const ScheduleDetail = () => {
               <DetailsPage data={scheduleData} fields={fields} />
             )}
           </Box>
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-          <Steps
-          isNextStep={false}
-          nextStep={nextStep}
-          steps={scheduleSteps}
-          currentStep={currentStep}
-          setCurrentStep={setCurrentStep}
-          isStepEnded={['Closed'].includes(scheduleData?.status)}
-        />
-        <ContentFullScreen title={scheduleSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {currentStep === 0 && scheduleData && (
-                <Material 
-                renderedFrom={`${renderedFrom}_grid-1`}
-                allowedToEdit={allowedToEdit}
-                setNextStep={setNextStep}
-                scheduleData={scheduleData}
-                stepFullScreen={stepFullScreen}
-                />
-            )}
-        </ContentFullScreen>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          {scheduleData && (
+            <Material
+              renderedFrom={`${renderedFrom}_grid-1`}
+              allowedToEdit={allowedToEdit && permissions?.schedule?.isUpdate ? true : false}
+              scheduleData={scheduleData}
+            />
+          )}
         </TabPanel>
       </Box>
       {showConfirmBox && (

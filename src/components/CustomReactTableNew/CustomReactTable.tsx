@@ -217,77 +217,77 @@ function CustomReactTable({
     () =>
       expander
         ? [
-            {
-              id: 'expander', // Make sure it has an ID
-              Header: ({ isAllRowsExpanded }) => (
+          {
+            id: 'expander', // Make sure it has an ID
+            Header: ({ isAllRowsExpanded }) => (
+              <span
+                style={{
+                  paddingLeft: '0.3rem',
+                  color: 'black'
+                }}
+              >
+                {isAllRowsExpanded ? (
+                  <FaAngleDown
+                    style={{ color: 'white' }}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      toggleAllRowsExpanded(false);
+                    }}
+                  />
+                ) : (
+                  <FaAngleRight
+                    style={{ color: 'white' }}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      toggleAllRowsExpanded(true);
+                    }}
+                  />
+                )}
+              </span>
+            ),
+            sticky: 'left',
+            width: isMobile && !isTablet ? 40 : 70,
+            minWidth: isMobile && !isTablet ? 40 : 70,
+            //maxWidth: 70,
+            canDrag: false,
+            Cell: ({ row }) =>
+              row.canExpand ? (
                 <span
-                  style={{
-                    paddingLeft: '0.3rem',
-                    color: 'black'
-                  }}
+                  {...row.getToggleRowExpandedProps({
+                    style: {
+                      paddingLeft: `${row.depth * 2}rem`
+                    }
+                  })}
                 >
-                  {isAllRowsExpanded ? (
-                    <FaAngleDown
-                      style={{ color: 'white' }}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        toggleAllRowsExpanded(false);
-                      }}
-                    />
-                  ) : (
-                    <FaAngleRight
-                      style={{ color: 'white' }}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        toggleAllRowsExpanded(true);
-                      }}
-                    />
-                  )}
+                  {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
                 </span>
-              ),
-              sticky: 'left',
-              width: isMobile && !isTablet ? 40 : 70,
-              minWidth: isMobile && !isTablet ? 40 : 70,
-              //maxWidth: 70,
-              canDrag: false,
-              Cell: ({ row }) =>
-                row.canExpand ? (
-                  <span
-                    {...row.getToggleRowExpandedProps({
-                      style: {
-                        paddingLeft: `${row.depth * 2}rem`
-                      }
-                    })}
-                  >
-                    {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
-                  </span>
-                ) : null
-            },
-            {
-              id: 'selection',
-              minWidth: 50,
-              width: 50,
-              maxWidth: 50,
-              Header: ({ getToggleAllRowsSelectedProps }) => <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />,
-              Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-            },
-            ...baseColumns.map((m) => {
-              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-            })
-          ]
+              ) : null
+          },
+          {
+            id: 'selection',
+            minWidth: 50,
+            width: 50,
+            maxWidth: 50,
+            Header: ({ getToggleAllRowsSelectedProps }) => <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />,
+            Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+          },
+          ...baseColumns.map((m) => {
+            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+          })
+        ]
         : [
-            {
-              id: 'selection',
-              minWidth: 50,
-              width: 50,
-              maxWidth: 50,
-              Header: ({ getToggleAllRowsSelectedProps }) => <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />,
-              Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-            },
-            ...baseColumns.map((m) => {
-              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-            })
-          ],
+          {
+            id: 'selection',
+            minWidth: 50,
+            width: 50,
+            maxWidth: 50,
+            Header: ({ getToggleAllRowsSelectedProps }) => <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />,
+            Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+          },
+          ...baseColumns.map((m) => {
+            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+          })
+        ],
     [baseColumns]
   );
 
@@ -298,7 +298,7 @@ function CustomReactTable({
     []
   );
 
-  const updateData = () => {};
+  const updateData = () => { };
 
   const {
     getTableProps,
@@ -357,9 +357,9 @@ function CustomReactTable({
         hiddenColumns: hideSelection ? ['selection', 'action'] : [],
         selectedRowIds: localStorage.getItem(`${renderedFrom}_selected`)
           ? Object.assign(
-              {},
-              data.map((d) => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some((obj) => obj._id === d._id))
-            )
+            {},
+            data.map((d) => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some((obj) => obj._id === d._id))
+          )
           : {}
       },
       getSubRows: (row: any) => row.subRows,
@@ -662,28 +662,25 @@ function CustomReactTable({
                               //     setRowState(k, { ...rowState[k], original: { ...rowState[k].original, isEditing: false } });
                               //   }
                               // });
-                              setCellValue(cell?.value || '');
-                              setIsCellEditing(true);
-                              setCurrentRowEditing(row);
-                              setCellState(row.id, cell.column.id, { isEditing: true });
-                              Object.keys(rowState).forEach((rowId) => {
-                                Object.keys(rowState[rowId].cellState).forEach((colId) => {
-                                  if (rowState[rowId]?.cellState[colId] !== cell.column?.id && rowState[rowId]?.cellState[colId]?.isEditing) {
-                                    setCellState(rowId, colId, { isEditing: false });
-                                  }
-                                });
-                              });
+                              // setCellValue(cell?.value || '');
+                              // setIsCellEditing(true);
+                              // setCurrentRowEditing(row);
+                              // setCellState(row.id, cell.column.id, { isEditing: true });
+                              // Object.keys(rowState).forEach((rowId) => {
+                              //   Object.keys(rowState[rowId].cellState).forEach((colId) => {
+                              //     if (rowState[rowId]?.cellState[colId] !== cell.column?.id && rowState[rowId]?.cellState[colId]?.isEditing) {
+                              //       setCellState(rowId, colId, { isEditing: false });
+                              //     }
+                              //   });
+                              // });
                             }}
                             key={index2}
                             {...cell.getCellProps()}
-                            className={`td 
-                          ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} 
-                          ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
-                          >
+                            className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`} >
                             {!['selection'].includes(cell?.column.id) &&
-                            rowState &&
-                            rowState.hasOwnProperty(row.id) &&
-                            rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
+                              rowState &&
+                              rowState.hasOwnProperty(row.id) &&
+                              rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
                               <input
                                 autoFocus
                                 onBlur={submitInput}
@@ -781,13 +778,13 @@ const DraggableHeader = ({ column, index, reorder }: { column: any; index: numbe
     collect: (monitor) => ({
       isDragging: monitor.isDragging()
     }),
-    canDrag: !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action'
+    canDrag: !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action' || column?.id !== 'expand'
   });
 
   drag(drop(ref));
 
   return (
-    <TableCell ref={ref} {...column.getHeaderProps()} className="th text-truncate table-header">
+    <TableCell {...column.getHeaderProps()} className="th text-truncate table-header">
       <div className="d-flex align-items-center justify-content-space-between pos-rel" style={{ width: '100%' }}>
         <div style={{ opacity: isDragging ? 0.2 : 1 }} className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
           <span>{column.render('Header')}</span>
@@ -797,8 +794,5 @@ const DraggableHeader = ({ column, index, reorder }: { column: any; index: numbe
       </div>
       <div {...column.getResizerProps()} className="resizer" />
     </TableCell>
-    // <div {...column.getHeaderProps()}>
-    //   {memoizedColumn}
-    // </div>
   );
 };

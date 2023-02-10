@@ -40,7 +40,14 @@ export const DateTimeRenderer = (params) =>
     <NoDataCell />
   );
 
-export const CheckboxRenderer = (params) => (params?.node?.rowPinned ? <NoDataCell /> : <span>{Boolean(params?.value) ? 'Yes' : 'No'}</span>);
+export const CheckboxRenderer = (params) =>
+  params?.node?.rowPinned ? (
+    <NoDataCell />
+  ) : (
+    <span className="fs-span" style={{ fontSize: '15px' }}>
+      {Boolean(params?.value) ? 'Yes' : 'No'}
+    </span>
+  );
 
 export const UpdatedByRenderer = (params) =>
   params.value ? (

@@ -756,7 +756,7 @@ const LoadingTicket = ({
                         setShowConformationRevertTicket(true);
                       }}
                     >
-                      Revert Loading Ticket
+                      Revert Line Items
                     </MenuItem>
                     <MenuItem
                       onClick={() => {

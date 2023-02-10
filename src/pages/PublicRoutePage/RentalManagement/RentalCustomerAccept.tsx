@@ -335,6 +335,7 @@ const RJCustomerAccept = ({ openAuthId }) => {
                     setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
                     onSelect={() => {}}
                     hideSelection={true}
+                    hideAction={true}
                     childrenProperty="subRows"
                     uniqueKey="_id"
                     renderedFrom="quotation_product_package"

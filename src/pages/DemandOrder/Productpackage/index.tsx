@@ -494,7 +494,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
               renderedFrom="demand_order_product_package"
               isClientSideGrid={true}
               onSaveEdit={onSaveInlineEdit}
-              material={material}
             />
           </Box>
         </>

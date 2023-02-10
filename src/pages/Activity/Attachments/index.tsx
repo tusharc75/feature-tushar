@@ -31,7 +31,6 @@ import { get_activity_resource } from '../../../components/Activity/Helpers/util
 import CustomReactTable from 'src/components/CustomReactTableNew/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import moment from 'moment';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -130,7 +129,7 @@ export default function Attachment() {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(null);
-  const [open, setOpen] = useState({ open: false, type: null, parentFolder: null });
+  const [open, setOpen] = useState({ open: false, type: null, parentFolder: null, parentResource: null });
   const [attachmentData, setAttachmentData] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isConfirmDialogVisible, setIsConfirmDialogVisible] = useState(false);
@@ -149,7 +148,7 @@ export default function Attachment() {
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
-  const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
+  const [addchildDialog, setAddchildDialog] = useState({ open: false, data: null, top: null, bottom: null });
 
   const column: any = [
     {
@@ -179,7 +178,7 @@ export default function Attachment() {
                 <IconButton
                   size="small"
                   onClick={(e) => {
-                    setAddchildDialog({ open: true, parentId: row.original._id, top: e.clientY, bottom: e.clientX });
+                    setAddchildDialog({ open: true, data: row.original, top: e.clientY, bottom: e.clientX });
                   }}
                 >
                   <AddOutlined fontSize="small" />
@@ -449,11 +448,12 @@ export default function Attachment() {
   };
 
   const handleActivityOpen = (data) => {
-    setOpen({ open: true, type: data?.type ? data.type : 'file', parentFolder: data?._id });
+    setOpen({ open: true, type: data?.type ? data.type : 'file', parentFolder: data?.parentFolder, parentResource: null });
     setAttachmentData(data);
   };
+
   const handleClose = () => {
-    setOpen({ open: false, type: null, parentFolder: null });
+    setOpen({ open: false, type: null, parentFolder: null, parentResource: null });
     setAttachmentData(null);
   };
   const showConfirmBox = (row) => {
@@ -562,7 +562,7 @@ export default function Attachment() {
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
                         color="primary"
                         size="small"
-                        onClick={() => setOpen({ open: true, type: 'file', parentFolder: null })}
+                        onClick={() => setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null })}
                         className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                         startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                       >
@@ -622,7 +622,7 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => {}}
+              setWholeRowsCellColor={() => { }}
               renderedFrom={'attachment_render_form'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -651,22 +651,36 @@ export default function Attachment() {
             }}
             open={addchildDialog.open}
             onClose={() => {
-              setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+              setAddchildDialog({ open: false, data: null, top: null, bottom: null });
             }}
           >
             <MenuList>
               <MenuItem
                 onClick={() => {
-                  setOpen({ open: true, type: 'folder', parentFolder: addchildDialog.parentId });
-                  setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+                  var parentResource = null;
+                  if (addchildDialog.data?.relatedTo?.length) {
+                    parentResource = {
+                      referenceId: addchildDialog.data?.relatedTo[0]?.referenceId,
+                      type: addchildDialog.data?.relatedTo[0]?.type
+                    }
+                  }
+                  setOpen({ open: true, type: 'folder', parentFolder: addchildDialog.data._id, parentResource: parentResource });
+                  setAddchildDialog({ open: false, data: null, top: null, bottom: null });
                 }}
               >
                 Add Folder
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  setOpen({ open: true, type: 'file', parentFolder: addchildDialog.parentId });
-                  setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+                  var parentResource = null;
+                  if (addchildDialog.data?.relatedTo?.length) {
+                    parentResource = {
+                      referenceId: addchildDialog.data?.relatedTo[0]?.referenceId,
+                      type: addchildDialog.data?.relatedTo[0]?.type
+                    }
+                  }
+                  setOpen({ open: true, type: 'file', parentFolder: addchildDialog.data._id, parentResource: parentResource });
+                  setAddchildDialog({ open: false, data: null, top: null, bottom: null });
                 }}
               >
                 Add File
@@ -693,8 +707,8 @@ export default function Attachment() {
               attachmentId={attachmentData?.id}
               relatedTo={[
                 {
-                  type: resource && selectedResourceData ? resource.optionValue : 'user',
-                  referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
+                  type: open.parentResource ? open.parentResource?.type : resource && selectedResourceData ? resource.optionValue : 'user',
+                  referenceId: open.parentResource ? open.parentResource?.referenceId : resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
                   access: true
                 }
               ]}

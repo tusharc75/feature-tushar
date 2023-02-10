@@ -453,9 +453,9 @@ const Services = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={!allowedToEdit}
+                hideAction={!allowedToEdit}
                 renderedFrom={`${renderedFrom}_sevices_1`}
                 onSaveEdit={onSaveInlineEdit}
-                material={material}
                 isClientSideGrid={true}
               />
             </Box>

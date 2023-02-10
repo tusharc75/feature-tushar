@@ -510,6 +510,7 @@ const Productpackage = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={!allowedToEdit}
+                hideAction={!allowedToEdit}
                 renderedFrom="sublease_product_package"
                 isClientSideGrid={true}
               />
