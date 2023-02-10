@@ -26,8 +26,8 @@ import ManageAccountDialog from "../Account/ManageAccount";
 import ManageContactDialog from "../Contact/ManageContact";
 
 const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, productId = null, productCategory = null,
-    productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null, warehouseId = null, currencyDisable = false
-    , deliveryDateMax = null, isFromSerializedAssetStepFromSalesOrder = false, salesOrderId = null, refrenceData = null }) => {
+    productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null, warehouseId = null, disableEdit = false
+    , isFromSerializedAssetStepFromSalesOrder = false, refrenceData = null }) => {
 
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
@@ -65,7 +65,6 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     setPurchaseOrderData(data)
                     if (isClone) {
                         const { _id, createdBy, updatedBy, serialNumber, purchaseOrderNumber, ...rest } = data
-                        //rest['purchaseOrderNumber'] = `PO_${generateUniqueIdOnly()}`
                         rest["status"] = PURCHASE_ORDER_STATUS.open
                         if (fieldsDataForCreate?.filter((e) => e.fieldName === "purchaseOrderDate").length) {
                             rest["purchaseOrderDate"] = new Date();
@@ -80,9 +79,9 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                         setCloneHeading(purchaseOrderNumber);
                         setLoading(false)
                     } else {
-                        if (data?.status === PURCHASE_ORDER_STATUS.received) {
+                        if (disableEdit) {
                             fieldsDataForUpdate?.forEach((e) => {
-                                if (e?.fieldName === 'warehouse') {
+                                if (['supplierAccount', 'purchaseOrderDate', 'warehouse', 'currency']?.includes(e?.fieldName)) {
                                     e.disableOnEdit = true
                                 }
                             })
@@ -98,7 +97,6 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
             }
             else {
                 let createValues: any = getObjKeys("", fieldsDataForCreate)
-                //createValues.purchaseOrderNumber = `PO_${generateUniqueIdOnly()}`
                 if (productId && createValues) {
                     createValues["product"] = productId
                 }
@@ -127,7 +125,6 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     values: createValues
                 });
             }
-
             const supplierAccountOptions = fieldsDataForCreate.find(
                 (d) => d.fieldName === "supplierAccount"
             );
@@ -344,6 +341,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                         >
                                                                             <FormTypes
                                                                                 {...field}
+                                                                                disabled={!isClone ? field?.disableOnEdit : false}
                                                                                 values={values}
                                                                                 errors={errors}
                                                                                 touched={touched}
@@ -352,15 +350,10 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                 fieldData={field}
                                                                                 type={field.type}
                                                                                 options={accountData}
-
                                                                                 required={field.required}
                                                                                 fullWidth
-                                                                                isTooltip={
-                                                                                    field?.isTooltip || false
-                                                                                }
-                                                                                tooltipMessage={
-                                                                                    field?.tooltipMessage
-                                                                                }
+                                                                                isTooltip={field?.isTooltip || false}
+                                                                                tooltipMessage={field?.tooltipMessage}
                                                                                 size="small"
                                                                                 doNotShowInfoTooltip={true}
                                                                                 onChange={(e, value) => {
@@ -592,7 +585,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                 : <FormTypes
                                                                                     isNew={Boolean(purchaseOrderId)}
                                                                                     {...field}
-                                                                                    disabled={(Boolean(purchaseOrderId) && field.disableOnEdit && !isClone) || field.fieldName === "purchaseOrderNumber" || field.fieldName === "status" || (field.fieldName === "currency" && currencyDisable)}
+                                                                                    disabled={(Boolean(purchaseOrderId) && field.disableOnEdit && !isClone) || field.fieldName === "purchaseOrderNumber" || field.fieldName === "status"}
                                                                                     values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}

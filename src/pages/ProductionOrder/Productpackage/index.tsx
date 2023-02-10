@@ -408,10 +408,10 @@ const Productpackage = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={!allowedToEdit}
+                hideAction={!allowedToEdit}
                 renderedFrom="repair_order_product_package"
                 isClientSideGrid={true}
                 onSaveEdit={onSaveInlineEdit}
-                material={material}
               />
             </Box>
           ) : (

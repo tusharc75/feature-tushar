@@ -260,7 +260,6 @@ const UserDetailsPage = () => {
     }
   ].filter((d) => d.show);
 
-
   const fetchUserData = async () => {
     setLoading(true);
 
@@ -379,9 +378,9 @@ const UserDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`
-      }))
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`
+        }))
       : [];
 
     setUserList(rows);
@@ -691,8 +690,8 @@ const UserDetailsPage = () => {
                       heading={headingLbl}
                       logo={userData?.avatar ? userData.avatar : undefined}
                       mainPoints={mainPoints}
-                      showHeading={true}>
-                    </DetailsPageHeader>
+                      showHeading={true}
+                    ></DetailsPageHeader>
                     <DetailsPage data={userData} fields={userFields} />
                   </Box>
                   <Box hidden={currentTabIndex !== 1}>
@@ -929,7 +928,7 @@ const UserDetailsPage = () => {
                 </>
               )}
             </Box>
-            <div className="p-3 modified_style_of_accordion">
+            <div className="pt-3 modified_style_of_accordion">
               {permissions?.[opportunity.opportunityResource]?.isRead && (
                 <OpportunityAccordionInUserDetail
                   opportunities={[...(opportunityRelatedData?.Owner ?? []), ...(opportunityRelatedData?.Collaborator ?? [])]}
@@ -1076,8 +1075,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
               : roleDeleteRec
-                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
-                : ''
+              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
+              : ''
           }
           onClose={() => {
             setShowConfirmBox(false);

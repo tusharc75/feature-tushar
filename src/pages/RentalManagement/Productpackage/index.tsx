@@ -652,10 +652,10 @@ const Productpackage = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={isOffline || !allowedToEdit}
+                hideAction={isOffline || !allowedToEdit}
                 renderedFrom="rental_management_product_package"
                 isClientSideGrid={true}
                 onSaveEdit={onSaveInlineEdit}
-                material={material}
               />
             </Box>
           ) : (

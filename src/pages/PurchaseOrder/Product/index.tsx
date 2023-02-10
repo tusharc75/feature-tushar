@@ -120,7 +120,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 if (row.original.type === 'Service') {
                   setShowServiceDialog({ open: true, data: row.original, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
                 }
-                if (row.original.type === 'Expense') {
+                if (row.original.type === 'Manual Entry') {
                   setShowCostDialog({ open: true, data: row.original, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
                 }
               }}
@@ -282,7 +282,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         []),
       ...((costResponce?.data?.data?.length &&
         costResponce?.data?.data?.map((e: any) => {
-          return { ...e, type: 'Expense' };
+          return { ...e, type: 'Manual Entry' };
         })) ||
         [])
     ];
@@ -395,7 +395,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
               setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
             }
-            else if (rowsData[rowIndex + 1]?.type === "Expense") {
+            else if (rowsData[rowIndex + 1]?.type === "Manual Entry") {
               setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
               setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
             }
@@ -419,7 +419,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   const handleDelete = async () => {
     const product = deletePurchaseOrderItem?.filter((e) => e.type === "Product");
     const service = deletePurchaseOrderItem?.filter((e) => e.type === "Service");
-    const cost = deletePurchaseOrderItem?.filter((e) => e.type === "Expense");
+    const cost = deletePurchaseOrderItem?.filter((e) => e.type === "Manual Entry");
 
     if (product?.length) {
       await axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/delete`, { ids: product?.map((e) => e._id) })
@@ -466,7 +466,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
               setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
             }
-            else if (rowsData[rowIndex + 1]?.type === "Expense") {
+            else if (rowsData[rowIndex + 1]?.type === "Manual Entry") {
               setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
             }
             else {
@@ -517,7 +517,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             else if (rowsData[rowIndex + 1]?.type === "Service") {
               setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
             }
-            else if (rowsData[rowIndex + 1]?.type === "Expense") {
+            else if (rowsData[rowIndex + 1]?.type === "Manual Entry") {
               setShowServiceDialog({ open: false, data: null, showSaveAndNext: false });
               setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
             }
@@ -548,7 +548,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       rows = await calculateRowsField(material, inputField, serviceFields, updatedData);
       handleUpdateService(rows);
     }
-    else if (rowData?.type === "Expense") {
+    else if (rowData?.type === "Manual Entry") {
       let rows: any = [{ ...rowData, ...updatedData }];
       rows = await calculateRowsField(material, inputField, costFields, updatedData);
       handleUpdateCost(rows);
@@ -600,7 +600,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
                 }}
               >
-                Add Expense
+                Add Manual Entry
               </MenuItem>
             </Menu>
           </Box>
@@ -676,10 +676,10 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             childrenProperty="subRows"
             uniqueKey="_id"
             hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
             renderedFrom="purchase_order_product"
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
-            material={material}
             hideExpander={true}
           />
         </Box>

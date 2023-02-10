@@ -476,9 +476,7 @@ const SerializedAsset = ({ salesOrderData, setNextStep, currencySymbol, rendered
         productsToSave={[...showManagePurchaseOrderDialog.products]}
         isFromSerializedAssetStepFromSalesOrder={true}
         currency={salesOrderData.currencyCode}
-        salesOrderId={salesOrderData._id}
         warehouseId={salesOrderData?.warehouse?.optionValue}
-        deliveryDateMax={salesOrderData.estimateStartDate}
       />
     }
   </Fragment>

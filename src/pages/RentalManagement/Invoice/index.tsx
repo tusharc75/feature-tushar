@@ -607,6 +607,7 @@ const Invoice = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}
+                hideAction={true}
                 renderedFrom="rental_management_serialized_asset"
                 isClientSideGrid={true}
               />

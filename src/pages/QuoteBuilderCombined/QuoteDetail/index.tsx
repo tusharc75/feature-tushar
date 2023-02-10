@@ -975,7 +975,7 @@ export default function QuoteDetail() {
               />
             )}
             {permissions?.projectSales?.isRead && (
-              <div className="p-3 modified_style_of_accordion">
+              <div className="pt-3 modified_style_of_accordion">
                 <ProjectInAccordion
                   recordsPerLine={3}
                   projectSales={(relatedTo && relatedTo['Project Sales']?.Quotes) || []}
