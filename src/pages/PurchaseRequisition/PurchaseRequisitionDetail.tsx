@@ -5,7 +5,7 @@ import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Skeleton } from '@material-ui/lab';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { useData } from 'src/StateProvider/Provider';
 import { useParams, useHistory } from 'react-router-dom';
@@ -14,12 +14,10 @@ import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
-import Steps from 'src/pages/RentalManagement/Steps';
-import { purchaseRequisitionSteps } from 'src/constants/helpers';
-import ContentFullScreen from '../../components/ContentFullScreen';
 import TabPanel from '../../components/TabPanel';
 import Material from './Material';
 import { camelCase } from 'lodash';
+import { FaWpforms } from 'react-icons/fa';
 
 
 
@@ -37,9 +35,6 @@ const PurchaseRequisitionDetail = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
-  const [nextStep, setNextStep] = useState(true);
-  const [currentStep, setCurrentStep] = useState(null);
-  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const {
     state: { permissions, user }
@@ -51,21 +46,6 @@ const PurchaseRequisitionDetail = () => {
       fetchData();
     }
   }, [id]);
-
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
-      updateProcessStatus(purchaseRequisitionSteps[currentStep]);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${routes?.purchaseRequisition?.path}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
 
 
   const fetchFields = async () => {
@@ -86,7 +66,6 @@ const PurchaseRequisitionDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.purchaseRequisition.path}/${id}`);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      setCurrentStep(purchaseRequisitionSteps.indexOf(data?.processStatus) !== -1 ? purchaseRequisitionSteps.indexOf(data?.processStatus) : 0);
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setPurchaseRequisitionData(data);
@@ -171,14 +150,22 @@ const PurchaseRequisitionDetail = () => {
         >
           <Tab
             className={'tabLayout'}
-            label={<div className="d-flex align-items-center tab-font">Header</div>}
+            label={
+              <div className="d-flex align-items-center tab-font">
+              <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            </div>
+            }
             value={0}
             aria-controls="a11y-tabpanel-0"
             id="a11y-tab-0"
           />
           <Tab
             className={'tabLayout'}
-            label={<div className="d-flex align-items-center tab-font">Details</div>}
+            label={
+              <div className="d-flex align-items-center tab-font">
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+            </div>
+            }
             value={1}
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
@@ -196,25 +183,13 @@ const PurchaseRequisitionDetail = () => {
           </Box>
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
-          <Steps
-          isNextStep={false}
-          nextStep={nextStep}
-          steps={purchaseRequisitionSteps}
-          currentStep={currentStep}
-          setCurrentStep={setCurrentStep}
-          isStepEnded={['Closed'].includes(purchaseRequisitionData?.status)}
-        />
-        <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {currentStep === 0 && purchaseRequisitionData && (
+            { purchaseRequisitionData && (
                 <Material 
                 renderedFrom={`${renderedFrom}_grid-1`}
                 allowedToEdit={allowedToEdit}
-                setNextStep={setNextStep}
                 purchaseRequisitionData={purchaseRequisitionData}
-                stepFullScreen={stepFullScreen}
                 />
             )}
-        </ContentFullScreen>
         </TabPanel>
       </Box>
       {showConfirmBox && (
