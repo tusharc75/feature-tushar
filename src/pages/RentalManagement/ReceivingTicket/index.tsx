@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import { Button, Tooltip, IconButton, Menu, MenuItem, Dialog, TextField, CircularProgress } from '@material-ui/core';
-import { AiFillFilePdf, AiOutlineDeliveredProcedure } from 'react-icons/ai';
+import { AiFillFilePdf } from 'react-icons/ai';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
@@ -15,7 +15,6 @@ import {
   gridLoadingTimeout,
   deliveryTicket,
   rentalManagement,
-  sidebarResource,
   serializedAsset as productInventoryHelperObject,
   INVENTORY_STATUS,
   DELIVERY_TICKET_STATUS,
@@ -59,6 +58,7 @@ import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import ReturnTicketDialog from './ReturnTicketDialog';
 import Edit from '@material-ui/icons/Edit';
 import ChangeActualDateDialog from './ChangeActualDateDialog';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -112,10 +112,8 @@ const ReceivingTicket = ({
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
 
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
-  const [repairJobCount, setRepairJobCount] = useState(0);
 
   const [showRepairOrderDialog, setShowRepairOrderDialog] = useState(false);
-  const [repairOrderCount, setRepairOrderCount] = useState(0);
 
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
@@ -155,11 +153,6 @@ const ReceivingTicket = ({
   useEffect(() => {
     getColumn();
     fetchRecords();
-    if (!isOffline) {
-      if (permissions?.repairJob?.isRead) {
-        fetchRepairJob();
-      }
-    }
   }, []);
 
   const fetchRecords = async () => {
@@ -177,6 +170,7 @@ const ReceivingTicket = ({
       var products: any = [];
       var nonSerializeAsset: any = [];
       var consumeProducts: any = [];
+      var transactionData: any = []
 
       var invoiceData: any = [];
 
@@ -237,6 +231,9 @@ const ReceivingTicket = ({
             manualEndDate: u?.manualEndDate,
           }));
 
+        const transactionResult = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`);
+        transactionData = transactionResult?.data?.data;
+
         const result = await axiosInstance().get(
           `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`
         );
@@ -253,13 +250,26 @@ const ReceivingTicket = ({
         setInvoiceData(invoiceData);
       }
 
+      if (transactionData?.repairJob?.length || transactionData?.repairOrder?.length) {
+        productAssets?.forEach((element) => {
+          const repairJob = transactionData?.repairJob?.find((e) => e?.assetId === element?._id);
+          if (repairJob) {
+            element.isRepairJob = true;
+            element.repairJob = repairJob?._id;
+          }
+          const repairOrder = transactionData?.repairOrder?.find((e) => e?.assetId === element?._id);
+          if (repairOrder) {
+            element.isRepairOrder = true;
+            element.repairOrder = repairOrder?._id;
+          }
+        })
+      }
+
       const loadingTicketProducts = [];
       const returnTicketProducts = {};
       deliveryTicketList?.forEach((element) => {
         if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products && element?.products?.length) {
           element?.products?.forEach((ele) => {
-            // returnTicketProducts['ticketId'] = element?._id;
-            // returnTicketProducts[ele?.product] = ele?.qty;
             loadingTicketProducts.push({
               ...ele,
               loadingTicketId: element._id,
@@ -270,7 +280,6 @@ const ReceivingTicket = ({
         }
         if (element.ticketType === DELIVERY_TICKET_TYPE.return && element?.products && element?.products?.length) {
           element?.products?.forEach((ele) => {
-            // returnTicketProducts['ticketId'] = element?._id;
             returnTicketProducts[ele?.product] = ele?.qty;
           });
         }
@@ -468,22 +477,6 @@ const ReceivingTicket = ({
     }
   };
 
-  const fetchRepairJob = async () => {
-    setLoadingData(true)
-    let filterById = [];
-    filterById.push({ field: 'rentalJob', term: rentalManagementData?._id });
-    const queryString = `?filterById=${JSON.stringify(filterById)}`;
-    axiosInstance()
-      .get(`${repairJob.api}${queryString}`)
-      .then(({ data: { data } }) => {
-        setRepairJobCount(data.length);
-        setLoadingData(false)
-      })
-      .catch((error) => {
-        setLoadingData(false)
-      });
-  };
-
   const InventoryRenderer = (params) => (
     <Fragment>
       <Link
@@ -521,6 +514,30 @@ const ReceivingTicket = ({
         <Box ml={1}>
           <HtmlTooltip title={`This Asset has been Replaced by ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}>
             <InfoIcon fontSize="small" color={'primary'} />
+          </HtmlTooltip>
+        </Box>
+      )}
+      {params?.data?.isRepairJob && (
+        <Box ml={1}>
+          <HtmlTooltip title={`${routes.repairJob.title}`}>
+            <IconButton
+              size="small"
+              onClick={() => { history.push(`${routes.repairJobDetail.path}/${params?.data?.repairJob}`) }}
+            >
+              <OpenInNewIcon fontSize="small" color='primary' />
+            </IconButton>
+          </HtmlTooltip>
+        </Box>
+      )}
+      {params?.data?.isRepairOrder && (
+        <Box ml={1}>
+          <HtmlTooltip title={`${routes.repairOrder.title}`}>
+            <IconButton
+              size="small"
+              onClick={() => { history.push(`${routes.repairOrderDetail.path}/${params?.data?.repairOrder}`) }}
+            >
+              <OpenInNewIcon fontSize="small" color='primary' />
+            </IconButton>
           </HtmlTooltip>
         </Box>
       )}
@@ -694,6 +711,7 @@ const ReceivingTicket = ({
       if (selectedRecords.length) {
         data['deliveryTo'] = selectedRecords[0].owner;
         data['deliveryToAddress'] = '';
+        data['isDeliveryToDisable'] = true;
       }
     } else {
       data['deliveryTo'] = rentalManagementData?.warehouse?.optionValue;
@@ -1195,6 +1213,7 @@ const ReceivingTicket = ({
               }
               onClick={() => {
                 handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
+                closeActions();
               }}
             >
               Create Receiving Ticket (Chargeable)
@@ -1206,6 +1225,7 @@ const ReceivingTicket = ({
               <MenuItem
                 onClick={() => {
                   setShowRemoveAssetFromReceivingTicketDialog(true);
+                  closeActions();
                 }}
               >
                 Remove Receiving Ticket
@@ -1216,6 +1236,7 @@ const ReceivingTicket = ({
               onClick={() => {
                 setShowQtyDialog({ open: true, data: null });
                 handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
+                closeActions();
               }}
               disabled={
                 selectedRecords.length === 0 ||
@@ -1248,7 +1269,10 @@ const ReceivingTicket = ({
             </MenuItem>
 
             <MenuItem
-              onClick={() => handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier)}
+              onClick={() => {
+                closeActions();
+                handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier)
+              }}
               disabled={
                 selectedRecords.length === 0 ||
                 isOffline ||
@@ -1294,7 +1318,10 @@ const ReceivingTicket = ({
                   checkUniqWarehouse()
               )?.length === selectedRecords?.length &&
               !isOffline ? (
-              <MenuItem onClick={() => setShowRepairJobDialog(true)}>Create Repair Job</MenuItem>
+              <MenuItem onClick={() => {
+                closeActions();
+                setShowRepairJobDialog(true)
+              }}>Create Repair Job</MenuItem>
             ) : null}
 
             {permissions?.repairOrder?.isCreate &&
@@ -1315,7 +1342,10 @@ const ReceivingTicket = ({
                   checkUniqWarehouse()
               )?.length === selectedRecords?.length &&
               !isOffline ? (
-              <MenuItem onClick={() => setShowRepairOrderDialog(true)}>Create Repair Order</MenuItem>
+              <MenuItem onClick={() => {
+                closeActions();
+                setShowRepairOrderDialog(true)
+              }}>Create Repair Order</MenuItem>
             ) : null}
 
             {/* <MenuItem
@@ -1427,40 +1457,6 @@ const ReceivingTicket = ({
                   {isMobile && !isTablet ? <AddBoxRoundedIcon /> : 'Process Ticket'}
                 </Button>
               </Tooltip>
-              <Box mx={1} />
-            </Fragment>
-          )}
-          {repairJobCount > 0 && (
-            <Fragment>
-              <HtmlTooltip title={`Created ${routes.repairJob.title}`}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    history.push(routes.repairJob.path, {
-                      rental: rentalManagementData
-                    });
-                  }}
-                >
-                  <InfoIcon color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
-              <Box mx={1} />
-            </Fragment>
-          )}
-          {repairOrderCount > 0 && (
-            <Fragment>
-              <HtmlTooltip title={`Created ${routes.repairOrder.title}`}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    history.push(routes.repairOrder.path, {
-                      rental: rentalManagementData
-                    });
-                  }}
-                >
-                  <InfoIcon color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
               <Box mx={1} />
             </Fragment>
           )}
@@ -1704,9 +1700,6 @@ const ReceivingTicket = ({
           onSuccess={(obj) => {
             handleAddAssetToRepairJob(obj?._id);
             setShowRepairJobDialog(false);
-            if (permissions?.repairJob?.isRead) {
-              fetchRepairJob();
-            }
             fetchRecords();
           }}
         />

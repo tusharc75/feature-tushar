@@ -1,30 +1,24 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tabs, Tab, useMediaQuery, Menu, MenuItem } from '@material-ui/core';
+import { useState, useEffect, useContext } from 'react';
+import { Grid, Box, Button, Tabs, Tab } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { defaultActivityShow, salesOrderProcessSteps, getUniqueCurrencies, demandOrder, demandOrderSteps } from '../../constants/helpers';
+import { demandOrder } from '../../constants/helpers';
 import ManageSalesOrderDialog from './ManageDemandOrderDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import Steps from '../RentalManagement/Steps';
-import Productpackage from './Productpackage';
-import { isMobile, isTablet } from 'react-device-detect';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import { GrStatusInfo } from 'react-icons/all';
+import {  BiFoodMenu } from 'react-icons/bi';
+import Material from './Material';
 import { camelCase } from 'lodash';
-import ContentFullScreen from 'src/components/ContentFullScreen';
 
 const DemandOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -47,13 +41,7 @@ const DemandOrderDetails = () => {
   const [salesOrderFields, setSalesOrderFields] = useState([]);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
-  const [nextStep, setNextStep] = useState(true);
-  const [currentStep, setCurrentStep] = useState(null);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -67,20 +55,6 @@ const DemandOrderDetails = () => {
     };
   }
 
-  const handleStatusChange = (o) => {
-    if (o.optionValue && salesOrderData?.status !== o.optionValue) {
-      updateJobStatus(o.optionValue);
-    }
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   useEffect(() => {
     if (id) {
       getRessourceFields();
@@ -88,27 +62,11 @@ const DemandOrderDetails = () => {
     }
   }, [id]);
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
-      updateProcessStatus(salesOrderProcessSteps[currentStep]);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${demandOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const getRessourceFields = async () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Demand Order');
       response?.data?.data.some((o) => {
         if (o?.fieldData?.fieldName === 'status') {
-          setStatusOptions([...o.fieldData.option]);
           return true;
         }
       });
@@ -125,15 +83,10 @@ const DemandOrderDetails = () => {
       let data;
       const response: any = await axiosInstance().get(`${demandOrder.api}/${id}`);
       data = response?.data?.data;
-
-      setCurrentStep(salesOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? salesOrderProcessSteps.indexOf(data?.processStatus) : 0);
       setHeadingLabel(data.demandOrderNumber);
       setCustomizedRoutes([routes.demandOrder, { title: `${data.demandOrderNumber}` }]);
       setSalesOrderData(data);
-
-      setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-
       setAllowedToEdit(isAllowedToEdit && ['Invoiced', 'Closed'].indexOf(data.status) === -1);
 
       if (isAllowedToEdit && openEdit === 'true') {
@@ -163,26 +116,6 @@ const DemandOrderDetails = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setShowConfirmBox(false);
-      });
-  };
-
-  const updateJobStatus = (status) => {
-    // need to change the api
-    axiosInstance()
-      .patch(`${demandOrder.api}/status/${salesOrderData._id}`, { status: status })
-      .then(({ data: { data } }) => {
-        fetchSalesOrderData();
-        if (status === 'Invoiced') {
-          setCurrentStep(1);
-        }
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Status changed to ${status}`
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
       });
   };
 
@@ -263,25 +196,13 @@ const DemandOrderDetails = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps
-            isNextStep={false}
-            nextStep={nextStep}
-            steps={demandOrderSteps}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            isStepEnded={['Closed'].includes(salesOrderData?.status)}
-          />
-          <ContentFullScreen title={demandOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {currentStep === 0 && salesOrderData && (
-              <Productpackage
+            {salesOrderData && (
+              <Material
                 salesOrderData={salesOrderData}
-                setNextStep={setNextStep}
-                currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-1`}
-                stepFullScreen={stepFullScreen}
+                allowedToEdit={allowedToEdit && permissions?.demandOrder?.isUpdate ? true : false}
               />
             )}
-          </ContentFullScreen>
         </TabPanel>
       </Box>
       {showConfirmBox && (

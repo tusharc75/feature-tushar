@@ -346,7 +346,8 @@ export const CHILD_RESOURCE = {
   quotationService: 'Quotation Service',
   repairOrderProduct: 'Repair Order Product',
   serviceOrderDetails: 'Service Order Detail',
-  scheduleMaterial: 'Schedule Material'
+  scheduleMaterial: 'Schedule Material',
+  purchaseRequisition: 'Purchase Requisition Detail',
 };
 
 export const sidebarResourceObjectFromValues = () => {

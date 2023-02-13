@@ -271,6 +271,23 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                             }
                         }
                     }
+
+                    if (!tempInitialData["deliveryToAddress"]) {
+                        if (refrenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
+                            const customerAccountData = fieldsDataForCreate?.find((d) => d?.fieldName === "customerAccount")?.option || [];
+                            const customerShippingAddress = customerAccountData?.find((d) => d?.optionValue === refrenceData?.deliveryTo)?.shippingAddress || [];
+                            if (customerShippingAddress?.length === 1) {
+                                tempInitialData["deliveryToAddress"] = customerShippingAddress[0];
+                            }
+                        }
+                        else if (refrenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
+                            const supplierAccountData = fieldsDataForCreate?.find((d) => d?.fieldName === "supplierAccount")?.option || [];
+                            const supplierShippingAddress = supplierAccountData?.find((d) => d?.optionValue === refrenceData?.deliveryTo)?.shippingAddress || [];
+                            if (supplierShippingAddress?.length === 1) {
+                                tempInitialData["deliveryToAddress"] = supplierShippingAddress[0];
+                            }
+                        }
+                    }
                 }
                 fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, tempInitialData["pickupFromType"],
                     tempInitialData["deliveryToType"], tempInitialData["ticketType"], tempInitialData["pickupFrom"], tempInitialData["deliveryTo"],
