@@ -694,6 +694,7 @@ const ReceivingTicket = ({
       if (selectedRecords.length) {
         data['deliveryTo'] = selectedRecords[0].owner;
         data['deliveryToAddress'] = '';
+        data['isDeliveryToDisable'] = true;
       }
     } else {
       data['deliveryTo'] = rentalManagementData?.warehouse?.optionValue;
@@ -1195,6 +1196,7 @@ const ReceivingTicket = ({
               }
               onClick={() => {
                 handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
+                closeActions();
               }}
             >
               Create Receiving Ticket (Chargeable)
@@ -1206,6 +1208,7 @@ const ReceivingTicket = ({
               <MenuItem
                 onClick={() => {
                   setShowRemoveAssetFromReceivingTicketDialog(true);
+                  closeActions();
                 }}
               >
                 Remove Receiving Ticket
@@ -1216,6 +1219,7 @@ const ReceivingTicket = ({
               onClick={() => {
                 setShowQtyDialog({ open: true, data: null });
                 handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
+                closeActions();
               }}
               disabled={
                 selectedRecords.length === 0 ||
@@ -1248,7 +1252,10 @@ const ReceivingTicket = ({
             </MenuItem>
 
             <MenuItem
-              onClick={() => handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier)}
+              onClick={() => {
+                closeActions();
+                handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier)
+              }}
               disabled={
                 selectedRecords.length === 0 ||
                 isOffline ||
@@ -1294,7 +1301,10 @@ const ReceivingTicket = ({
                   checkUniqWarehouse()
               )?.length === selectedRecords?.length &&
               !isOffline ? (
-              <MenuItem onClick={() => setShowRepairJobDialog(true)}>Create Repair Job</MenuItem>
+              <MenuItem onClick={() => {
+                closeActions();
+                setShowRepairJobDialog(true)
+              }}>Create Repair Job</MenuItem>
             ) : null}
 
             {permissions?.repairOrder?.isCreate &&
@@ -1315,7 +1325,10 @@ const ReceivingTicket = ({
                   checkUniqWarehouse()
               )?.length === selectedRecords?.length &&
               !isOffline ? (
-              <MenuItem onClick={() => setShowRepairOrderDialog(true)}>Create Repair Order</MenuItem>
+              <MenuItem onClick={() => {
+                closeActions();
+                setShowRepairOrderDialog(true)
+              }}>Create Repair Order</MenuItem>
             ) : null}
 
             {/* <MenuItem

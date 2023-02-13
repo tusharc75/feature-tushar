@@ -151,7 +151,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '', handelClose = null }) => {
+const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '', handelClose = null }) => {
 
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -164,11 +164,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
+  const { state: { user: { user } } } = useData();
   const [viewStep, setViewStep] = React.useState({ open: false, step: null });
   const [isAllStepDone, setIsAllStepDone] = React.useState(false);
 
