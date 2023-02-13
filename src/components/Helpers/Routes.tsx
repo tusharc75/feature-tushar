@@ -466,6 +466,13 @@ const routes = {
         : 'Resource Calendar',
     path: '/resource-calendar'
   },
+  scheduleCalendar: {
+    title:
+      storedRoutes && storedRoutes.scheduleCalendar && storedRoutes.scheduleCalendar.title
+        ? storedRoutes.scheduleCalendar?.title
+        : 'Schedule Calendar',
+    path: '/schedule-calendar'
+  },
   eCommercePolicy: {
     title:
       storedRoutes && storedRoutes.eCommercePolicy && storedRoutes.eCommercePolicy.title ? storedRoutes.eCommercePolicy?.title : 'e-Commerce Policy',

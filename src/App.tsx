@@ -187,6 +187,7 @@ import PurchaseRequisition from './pages/PurchaseRequisition';
 import PurchaseRequisitionDetail from './pages/PurchaseRequisition/PurchaseRequisitionDetail';
 import ScheduleDetail from './pages/Schedule/ScheduleDetail';
 import Schedule from './pages/Schedule';
+import ScheduleCalendar from './pages/ScheduleCalendar';
 
 var notificationInterval: any = null;
 
@@ -747,6 +748,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}/custom-report/:id`}>
               <CustomReports />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.scheduleCalendar.path}`}>
+              <ScheduleCalendar />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
               <ResourceCalendar />
