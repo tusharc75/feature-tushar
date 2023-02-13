@@ -9,6 +9,7 @@ import routes from 'src/components/Helpers/Routes';
 import { Box } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
+import { useData } from 'src/StateProvider/Provider';
 
 const localizer = momentLocalizer(moment);
 
@@ -20,6 +21,9 @@ const formats = {
 
 const ScheduleCalendar = (props: Props) => {
   const history = useHistory();
+  const {
+    state: { permissions, selectedEntity, user }
+  }: any = useData();
   const [events, setEvents] = useState([]);
   const [range, setRange] = useState();
   const [dateRange, setDateRange] = useState({
@@ -39,20 +43,21 @@ const ScheduleCalendar = (props: Props) => {
         term: dateRange.estimateEndDate
       }
     ];
-    // axiosInstance()
-    //   .get(`${resource}?deepFilter=${JSON.stringify(deepFilter)}`)
-    //   .then(({ data: { data } }) => {
-    //     const eventsData = data.map((d: any) => ({
-    //       id: d._id,
-    //       title: d.rentalJobName,
-    //       start: d.estimateStartDate,
-    //       end: d.estimateEndDate,
-    //       allDay: true,
-    //       desc: d.jobDescription
-    //     }));
-    //     setEvents(eventsData);
-    //   })
-    //   .catch((err) => {});
+
+    axiosInstance()
+      .get(`${routes?.schedule.path}?entity=${selectedEntity}&deepFilter=${JSON.stringify(deepFilter)}`)
+      .then(({ data: { data } }) => {
+        const eventsData = data.map((d: any) => ({
+          id: d._id,
+          title: d.rentalJobName,
+          start: d.estimateStartDate,
+          end: d.estimateEndDate,
+          allDay: true,
+          desc: d.jobDescription
+        }));
+        setEvents(eventsData);
+      })
+      .catch((err) => { });
   }, [dateRange]);
 
   const onRangeChange = useCallback(
@@ -100,7 +105,6 @@ const ScheduleCalendar = (props: Props) => {
           views={{ month: true, week: true, day: true }}
           eventPropGetter={(obj) => ({})}
           onSelectEvent={(event: any) => {
-            // history.push(`${routes[resourcecamelCase].path}/detail/${event.id}`);
           }}
           onRangeChange={onRangeChange}
           onView={onView}
