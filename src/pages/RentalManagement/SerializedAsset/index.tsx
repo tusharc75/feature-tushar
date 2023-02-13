@@ -10,14 +10,11 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import AddSerializedAsset from './AddSerializedAsset';
 import {
-  dateFormat,
-  formatAmountWithCurrency,
   rentalManagement,
   sidebarResource,
   treeToFlatArray,
   INVENTORY_STATUS
 } from '../../../constants/helpers';
-import moment from 'moment';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
