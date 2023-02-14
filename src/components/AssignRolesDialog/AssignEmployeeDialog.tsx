@@ -30,8 +30,6 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
   const renderedFrom = `${routes.employeeMaster.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-  console.log(defaultCompetency)
-
   const {
     state: { permissions, selectedEntity }
   }: any = useData();

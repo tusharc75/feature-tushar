@@ -61,7 +61,6 @@ const CalendarView = (props: Props) => {
           type: d.type
         }));
         setEvents(eventsData);
-        console.log(eventsData)
       })
       .catch((err) => { });
   }, [dateRange]);
