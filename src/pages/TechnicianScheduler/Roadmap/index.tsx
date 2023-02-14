@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Typography, Box, Button, ButtonGroup, IconButton } from '@material-ui/core';
+import { Typography, Box, Button, ButtonGroup, IconButton, Dialog, DialogTitle } from '@material-ui/core';
 import { Close, Map } from '@material-ui/icons';
 import moment from 'moment';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -10,9 +10,9 @@ import ActivityList from './ActivityList';
 import Calander from './Calander';
 import CalanderList from './CalanderList';
 import MapView from '../Map';
+import AssignTechnicianDialog from './AssignTechnicianDialog';
 
-function Roadmap({ filter }) {
-
+function Roadmap({ filter, handleAssignTechnician }) {
   const scrollRef = React.useRef(null);
   const executeScroll = () => {
     var pageElement = document.getElementById('dayLiner');
@@ -24,6 +24,7 @@ function Roadmap({ filter }) {
   const [activity, setActivity] = useState([]);
   const [treeList, setTreeList] = useState([]);
   const [loadingRoadmap, setLoadingRoadmap] = useState(false);
+  const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
@@ -63,8 +64,8 @@ function Roadmap({ filter }) {
 
   let height = window.innerHeight / 2;
   const today = new Date();
-  let startDate = moment("2021-01-01");
-  let endDate = moment("2023-12-31");
+  let startDate = moment('2021-01-01');
+  let endDate = moment('2023-12-31');
   let totalDay = endDate.diff(startDate, 'days');
 
   var dayPixel = 0;
@@ -130,6 +131,7 @@ function Roadmap({ filter }) {
                   selected={selected}
                   handleToggle={handleToggle}
                   handleSelect={handleSelect}
+                  handleAssignTechnician={handleAssignTechnician}
                 />
                 <Box height={20}></Box>
               </Box>
@@ -174,7 +176,7 @@ function Roadmap({ filter }) {
               <MapView technician={selected} />
               <IconButton
                 onClick={() => {
-                  setSelected(null)
+                  setSelected(null);
                   setTimeout(() => executeScroll(), 500);
                 }}
                 style={{

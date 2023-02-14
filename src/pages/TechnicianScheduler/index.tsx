@@ -1,4 +1,4 @@
-import { Box, Grid, makeStyles, Paper, TextField } from '@material-ui/core';
+import { Box, Dialog, DialogTitle, Grid, makeStyles, Paper, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import React, { Fragment, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -7,18 +7,37 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { serviceOrder } from 'src/constants/helpers';
 import Roadmap from './Roadmap';
+import AssignTechnicianDialog from './Roadmap/AssignTechnicianDialog';
 import ServiceOrder from './ServiceOrder';
 
-
 function TechnicianScheduler() {
-
   const [filter, setFilter] = useState({ view: 'Technician View', resource: '', serviceOrder: '' });
 
   const [serviceOrders, setServiceOrders] = useState([]);
 
+  const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, data: null });
+
+  const handleAssignTechnician = async (technician) => {
+    setAssignTechnicianDialog({ open: true, data: technician });
+  };
+
+  const assignTechnician = async (technicianId) => {
+    // await axiosInstance()
+    //   .post(`/technician-scheduler/assign-technician`, {
+    //     serviceOrderId: selected,
+    //     technicianId: technicianId
+    //   })
+    //   .then(({ data: { data } }) => {
+    //     fetchRoadmap();
+    //   })
+    //   .catch((err) => {});
+  };
+
   useEffect(() => {
     fetchServiceOrders();
   }, [filter.resource]);
+
+  const fetchData = () => {};
 
   const fetchServiceOrders = async () => {
     const response: any = await axiosInstance().get(`${serviceOrder.api}`);
@@ -93,8 +112,8 @@ function TechnicianScheduler() {
             )}
           </Grid>
         </Box> */}
-        <Roadmap filter={filter} />
-        <ServiceOrder />
+        <Roadmap filter={filter} handleAssignTechnician={handleAssignTechnician} />
+        <ServiceOrder assignTechnicianDialog={assignTechnicianDialog} setAssignTechnicianDialog={setAssignTechnicianDialog} />
       </Box>
     </Box>
   );
