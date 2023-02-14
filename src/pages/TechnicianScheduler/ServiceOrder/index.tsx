@@ -9,11 +9,10 @@ import { dateTimeFormat } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 
-function ServiceOrder({ assignTechnicianDialog, setAssignTechnicianDialog }) {
+function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selectedRecords, setSelectedRecords }) {
+
   const toastConfig = useContext(CustomToastContext);
   const [rowsData, setRowsData] = useState(null);
-  //   const [selectedRecords, setSelectedRecords] = useState([]);
-  const [selectedServiceOrder, setSelectedServiceOrder] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -109,7 +108,7 @@ function ServiceOrder({ assignTechnicianDialog, setAssignTechnicianDialog }) {
             height={`${height}px`}
             columns={columns}
             data={rowsData}
-            onSelect={setSelectedServiceOrder}
+            onSelect={setSelectedRecords}
             childrenProperty="subRows"
             uniqueKey="_id"
             hideAction={true}
@@ -126,13 +125,13 @@ function ServiceOrder({ assignTechnicianDialog, setAssignTechnicianDialog }) {
       {assignTechnicianDialog.open && (
         <AssignTechnicianDialog
           technicianData={assignTechnicianDialog.data}
-          selectedServiceOrder={selectedServiceOrder}
-          onOk={() => {
+          selectedServiceOrder={selectedRecords}
+          handleSucess={() => {
             fetchData();
-            setAssignTechnicianDialog({ open: false, data: null });
+            handleSucess()
           }}
-          onClose={() => {
-            setAssignTechnicianDialog({ open: false, data: null });
+          handleClose={() => {
+            handleClose()
           }}
         />
       )}

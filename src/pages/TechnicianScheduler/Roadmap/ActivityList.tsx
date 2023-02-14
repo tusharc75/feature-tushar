@@ -31,9 +31,8 @@ const useStyles = makeStyles((theme) => ({
 export default function ActivityList(props) {
   const classes = useStyles();
 
-  const { activity, expanded, selected, handleToggle, handleSelect, handleAssignTechnician } = props;
+  const { activity, expanded, selected, handleToggle, handleSelect } = props;
 
-  console.log(selected);
   const getTreeNodes = (treeList) => {
     return treeList.map((data, index) => {
       let children = [];
@@ -47,15 +46,15 @@ export default function ActivityList(props) {
           width={'100%'}
           height={99}
           className="d-flex align-items-center"
-          onClick={() => {
-            handleAssignTechnician(data);
+          onClick={(event) => {
+            handleSelect(event, data, "technician");
           }}
         >
           <Box width={'80%'} className="d-flex align-items-center">
             <Avatar variant="circle" sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo} />
             <Box ml={2} flex style={{ flexDirection: 'column' }}>
               <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${data?.firstName} ${data?.lastName}`}</Typography>
-              <p style={{ fontSize: '0.6rem', color: 'grey' }}>{`${data?.employeeNumber}`}</p>
+              <p style={{ fontSize: '0.6rem', color: 'grey' }}>{`${data?.competency?.map((e) => e.optionLabel)?.toString()}`}</p>
             </Box>
           </Box>
           <Box width={'20%'} className="d-flex align-items-center">
@@ -63,7 +62,7 @@ export default function ActivityList(props) {
               style={{ padding: 0 }}
               onClick={(event) => {
                 event.stopPropagation();
-                handleSelect(event, data._id);
+                handleSelect(event, data, "map");
               }}
             >
               <Map fontSize="medium" />
@@ -96,7 +95,7 @@ export default function ActivityList(props) {
         expanded={expanded}
         selected={selected}
         onNodeToggle={handleToggle}
-        // onNodeSelect={handleSelect}
+      // onNodeSelect={handleSelect}
       >
         {TreeNodes.map((node) => {
           return node;

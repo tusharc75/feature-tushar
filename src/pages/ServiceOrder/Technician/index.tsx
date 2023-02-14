@@ -38,7 +38,7 @@ const Technician = ({
     const [deleteData, setDeleteData] = useState(null);
     const [isDeleting, setDeleting] = useState(false);
 
-    const [addEmployeeMasterDialog, setAddEmployeeMasterDialog] = useState({ open: false });
+    const [addEmployeeMasterDialog, setAddEmployeeMasterDialog] = useState({ open: false, data: null });
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
 
@@ -166,6 +166,7 @@ const Technician = ({
                         ? parent?.serviceDetail?.serviceName
                         : parent?.packageDetail?.packageName;
             parent.competency = parent.type === 'service' ? parent?.serviceDetail?.competency?.map((e) => e?.optionLabel)?.toString() : null
+            parent.serviceCompetency = parent.type === 'service' ? parent?.serviceDetail?.competency || [] : []
             parent.subRows = generateNestedData(data.material, technician, parent);
         });
 
@@ -199,6 +200,7 @@ const Technician = ({
             _subRow.srno = parent.srno + '.' + (j + 1);
             _subRow.detail = _subRow.type === 'product' ? _subRow?.productDetail?.productName : _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName : _subRow?.packageDetail?.packageName;
             _subRow.competency = _subRow.type === 'service' ? _subRow?.serviceDetail?.competency?.map((e) => e.optionLabel)?.toString() : null
+            _subRow.serviceCompetency = _subRow.type === 'service' ? _subRow?.serviceDetail?.competency || [] : []
             _subRow.subRows = generateNestedData(material, technician, _subRow);
         });
 
@@ -218,7 +220,7 @@ const Technician = ({
         })
         axiosInstance().post(`${serviceOrder.api}/${serviceOrderData._id}/technician`, sendData)
             .then(() => {
-                setAddEmployeeMasterDialog({ open: false });
+                setAddEmployeeMasterDialog({ open: false, data: null });
                 fetchData()
             })
             .catch((error) => {
@@ -284,7 +286,7 @@ const Technician = ({
                                     size="small"
                                     disabled={selectedProducts?.length === 1 ? false : true}
                                     onClick={() => {
-                                        setAddEmployeeMasterDialog({ open: true });
+                                        setAddEmployeeMasterDialog({ open: true, data: selectedProducts[0] });
                                     }}
                                 >
                                     {`Assign Technician`}
@@ -365,8 +367,9 @@ const Technician = ({
                         handleAssignTechnician(data);
                     }}
                     handleClose={() => {
-                        setAddEmployeeMasterDialog({ open: false });
+                        setAddEmployeeMasterDialog({ open: false, data: null });
                     }}
+                    defaultCompetency={addEmployeeMasterDialog?.data?.serviceCompetency}
                     ids={[]}
                 />
             )}
