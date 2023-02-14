@@ -7,29 +7,13 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { serviceOrder } from 'src/constants/helpers';
 import Roadmap from './Roadmap';
+import ServiceOrder from './ServiceOrder';
 
-const capitalize = (string) => {
-  return string?.charAt(0)?.toUpperCase() + string?.slice(1);
-};
-
-const useStyles = makeStyles((theme) => ({
-  activityContainer: {
-    padding: '0 10px 10px'
-  },
-  activityHeader: {
-    background: '#dfdfdf',
-    margin: '6px 6px',
-    borderRadius: '6px',
-    '& .MuiGrid-spacing-xs-1': {
-      width: 'calc(100% + 14px)'
-    }
-  }
-}));
 
 function TechnicianScheduler() {
 
-  const classes = useStyles();
   const [filter, setFilter] = useState({ view: 'Technician View', resource: '', serviceOrder: '' });
+
   const [serviceOrders, setServiceOrders] = useState([]);
 
   useEffect(() => {
@@ -48,11 +32,11 @@ function TechnicianScheduler() {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: capitalize(routes.technicianScheduler.title) }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.technicianScheduler.title }]} />
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Box p={1}>
+        {/* <Box p={1}>
           <Grid container xs={12} md={12} sm={12} spacing={2}>
             <Grid item xs={12} md={4} sm={4}>
               <Autocomplete
@@ -108,10 +92,9 @@ function TechnicianScheduler() {
               </Grid>
             )}
           </Grid>
-        </Box>
-        <Box className={classes.activityContainer}>
-          <Roadmap filter={filter} />
-        </Box>
+        </Box> */}
+        <Roadmap filter={filter} />
+        <ServiceOrder />
       </Box>
     </Box>
   );
