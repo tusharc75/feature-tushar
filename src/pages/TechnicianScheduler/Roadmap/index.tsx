@@ -135,7 +135,6 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
                   handleToggle={handleToggle}
                   handleSelect={handleSelect}
                 />
-                <Box height={20}></Box>
               </Box>
             </div>
           </Box>

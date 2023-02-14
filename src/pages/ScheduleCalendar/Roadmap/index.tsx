@@ -5,7 +5,8 @@ import React, { useContext, useEffect, useState } from "react";
 import axiosInstance from "src/axios/axiosInstance";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import Calander from '../../TechnicianScheduler/Roadmap/Calander';
-
+import ActivityList from './ActivityList';
+import CalanderList from './CalanderList';
 
 const RoadMap = () => {
 
@@ -15,6 +16,20 @@ const RoadMap = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [calendarType, setCalendarType] = useState('week');
   const scrollRef = React.useRef(null);
+
+  const [activity, setActivity] = useState([]);
+
+  const [expanded, setExpanded] = React.useState([]);
+  const [selected, setSelected] = React.useState(null);
+
+  const handleToggle = (event, nodeIds) => {
+    setExpanded(nodeIds);
+  };
+
+  const handleSelect = (event, data) => {
+    setSelected(data?._id);
+  };
+
   const executeScroll = () => {
     var pageElement = document.getElementById('dayLiner');
     var LeftPos = pageElement.offsetLeft;
@@ -32,13 +47,14 @@ const RoadMap = () => {
 
   useEffect(() => {
     if (selectedProduct) {
-      fetchData()
+      fetchRoadmap()
     }
   }, [selectedProduct]);
 
-  const fetchData = () => {
+  const fetchRoadmap = () => {
     axiosInstance().get(`/schedule/product-status?products=${selectedProduct}`).then(({ data: { data } }) => {
-
+      setActivity(data)
+      executeScroll()
     }).catch((error) => {
       toastConfig.setToastConfig(error);
     });
@@ -106,7 +122,14 @@ const RoadMap = () => {
               }}
             >
               <Box>
-
+                <ActivityList
+                  fetchRoadmap={fetchRoadmap}
+                  activity={[{ _id: "1", name: "Planed", color: "#FEF5D6" }, { _id: "2", name: "Required", color: "#FFEEF3" }, { _id: "3", name: "Available", color: "#EFF8FF" }]}
+                  expanded={expanded}
+                  selected={selected}
+                  handleToggle={handleToggle}
+                  handleSelect={handleSelect}
+                />
               </Box>
             </div>
           </Box>
@@ -119,7 +142,7 @@ const RoadMap = () => {
             />
             <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
               <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
-                {/* <CalanderList
+                <CalanderList
                   fetchRoadmap={fetchRoadmap}
                   activity={activity}
                   expanded={expanded}
@@ -129,7 +152,7 @@ const RoadMap = () => {
                   endDate={endDate}
                   totalDay={totalDay}
                   calendarType={calendarType}
-                /> */}
+                />
               </Box>
             </Box>
             <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
@@ -148,7 +171,6 @@ const RoadMap = () => {
               </div>
             </Box>
           </Box>
-
         </Box>
       </Box>
     </Box>
