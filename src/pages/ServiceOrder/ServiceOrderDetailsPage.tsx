@@ -255,7 +255,6 @@ const ServiceOrderDetailsPage = () => {
               <Services
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
-                currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={true}
