@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { Calendar, momentLocalizer, View } from 'react-big-calendar';
 import { useParams, useHistory } from 'react-router-dom';
 import moment from 'moment';
@@ -6,6 +6,9 @@ import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
+import { Box, Grid, makeStyles } from '@material-ui/core';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const localizer = momentLocalizer(moment);
 
@@ -15,8 +18,23 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
+const useStyles = makeStyles((theme) => ({
+  topbar: {
+    backgroundColor: '#fff'
+  },
+  whiteBg: {
+    backgroundColor: '#fff'
+  },
+  indicators: {
+    padding: '8px 16px',
+    borderRadius: '4px',
+    fontSize: '14px',
+    lineHeight: '17px'
+  }
+}));
+
 const CalendarView = (props: Props) => {
-  const history = useHistory();
+  const classes = useStyles();
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
@@ -27,31 +45,23 @@ const CalendarView = (props: Props) => {
     estimateEndDate: moment().endOf('month').format('MM/DD/YYYY')
   });
   const [view, setView] = useState<View>('month');
+  const [converSchedule, setConvertSchedule] = useState({ open: false, data: null });
+  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    const deepFilter = [
-      {
-        field: 'estimateStartDate',
-        term: dateRange.estimateStartDate
-      },
-      {
-        field: 'estimateEndDate',
-        term: dateRange.estimateEndDate
-      }
-    ];
-
     axiosInstance()
-      .get(`${routes?.schedule.path}?entity=${selectedEntity}&deepFilter=${JSON.stringify(deepFilter)}`)
+      .get(`${routes?.schedule.path}?entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
-        const eventsData = data.map((d: any) => ({
+        const eventsData = data.data.map((d: any) => ({
           id: d._id,
-          title: d.rentalJobName,
-          start: d.estimateStartDate,
-          end: d.estimateEndDate,
+          title: d.scheduleNumber,
+          start: d.startDate,
+          end: d.endDate,
           allDay: true,
-          desc: d.jobDescription
+          type: d.type
         }));
         setEvents(eventsData);
+        console.log(eventsData)
       })
       .catch((err) => { });
   }, [dateRange]);
@@ -72,6 +82,30 @@ const CalendarView = (props: Props) => {
 
   return (
     <>
+      <div className={`bgLight ${classes.whiteBg}`}>
+        <Grid container className={`greyBox ${classes.topbar}`}>
+          <Grid item xs={12} sm={5}>
+            <Box display="flex" alignItems="center">
+
+              <Box component="span" mx={1} />
+              {['Rental Job', 'Sales Order', 'Field Service Order'].map((item) => (
+                <>
+                  <Box
+                    display="flex"
+                    bgcolor={item === 'Rental Job' ? 'rgba(255, 232, 204, 1)' : item === 'Sales Order' ? 'rgba(234, 239, 254, 1)' : 'rgba(253, 220, 228, 1)'}
+                    className={`${classes.indicators}`}
+                    style={{
+                      color: `${item === 'Rental Job' ? 'rgba(236, 85, 0, 1)' : item === 'Sales Order' ? 'rgba(4, 50, 161, 1)' : 'rgba(165, 4, 43, 1)'}`
+                    }}
+                  >
+                    {item}
+                  </Box>
+                  <Box component="span" ml={1} />
+                </>
+              ))}
+            </Box>
+          </Grid>
+        </Grid>
         <Calendar
           defaultDate={moment().toDate()}
           defaultView="day"
@@ -88,13 +122,61 @@ const CalendarView = (props: Props) => {
             }
           }}
           views={{ month: true, week: true, day: true }}
-          eventPropGetter={(obj) => ({})}
+          eventPropGetter={(obj) => {
+            const newStyles = {
+              backgroundColor:
+                obj.type === 'Rental Job' ? 'rgba(255, 232, 204, 1)' : obj.type === 'Sales Order' ? 'rgba(234, 239, 254, 1)' : 'rgba(253, 220, 228, 1)',
+              color: obj.type === 'Rental Job' ? 'rgba(236, 85, 0, 1)' : obj.type === 'Sales Order' ? 'rgba(4, 50, 161, 1)' : 'rgba(165, 4, 43, 1)',
+              borderRadius: '4px',
+              border: 'none',
+              padding: '8px 16px'
+            };
+
+            return {
+              style: newStyles
+            };
+          }}
           onSelectEvent={(event: any) => {
+            setConvertSchedule({
+              open: true,
+              data: event
+            });
           }}
           onRangeChange={onRangeChange}
           onView={onView}
           view={view}
         />
+      </div>
+      {converSchedule.open && (
+        <ConfirmationDialog
+          open={converSchedule.open}
+          message={`Are you sure you want to convert Schedule  ${converSchedule?.data?.title || ''} ?`}
+          onClose={() => {
+            setConvertSchedule({
+              open: false,
+              data: null
+            });
+          }}
+          onOk={() => {
+            axiosInstance()
+              .post(`${routes?.schedule?.path}/convert-schedule`, { id: converSchedule?.data?.id })
+              .then(({ data }) => {
+                setConvertSchedule({
+                  open: false,
+                  data: null
+                });
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: 'success',
+                  message: data?.message
+                });
+              })
+              .catch((error) => {
+                toastConfig.setToastConfig(error);
+              });
+          }}
+        />
+      )}
     </>
   );
 };
