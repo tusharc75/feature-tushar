@@ -1,4 +1,4 @@
-import { Box, Grid, makeStyles, Paper, TextField } from '@material-ui/core';
+import { Box, Dialog, DialogTitle, Grid, makeStyles, Paper, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import React, { Fragment, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -7,30 +7,16 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { serviceOrder } from 'src/constants/helpers';
 import Roadmap from './Roadmap';
-
-const capitalize = (string) => {
-  return string?.charAt(0)?.toUpperCase() + string?.slice(1);
-};
-
-const useStyles = makeStyles((theme) => ({
-  activityContainer: {
-    padding: '0 10px 10px'
-  },
-  activityHeader: {
-    background: '#dfdfdf',
-    margin: '6px 6px',
-    borderRadius: '6px',
-    '& .MuiGrid-spacing-xs-1': {
-      width: 'calc(100% + 14px)'
-    }
-  }
-}));
+import ServiceOrder from './ServiceOrder';
 
 function TechnicianScheduler() {
 
-  const classes = useStyles();
   const [filter, setFilter] = useState({ view: 'Technician View', resource: '', serviceOrder: '' });
+
   const [serviceOrders, setServiceOrders] = useState([]);
+
+  const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, data: null });
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     fetchServiceOrders();
@@ -44,15 +30,17 @@ function TechnicianScheduler() {
     setServiceOrders(serviceOrdersData);
   };
 
+  const [selectedRecords, setSelectedRecords] = useState([]);
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: capitalize(routes.technicianScheduler.title) }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.technicianScheduler.title }]} />
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Box p={1}>
+        {/* <Box p={1}>
           <Grid container xs={12} md={12} sm={12} spacing={2}>
             <Grid item xs={12} md={4} sm={4}>
               <Autocomplete
@@ -108,10 +96,26 @@ function TechnicianScheduler() {
               </Grid>
             )}
           </Grid>
-        </Box>
-        <Box className={classes.activityContainer}>
-          <Roadmap filter={filter} />
-        </Box>
+        </Box> */}
+        <Roadmap
+          filter={filter}
+          selectedRecords={selectedRecords}
+          refresh={refresh}
+          handleAssignTechnician={(data) => {
+            setAssignTechnicianDialog({ open: true, data: data });
+          }} />
+        <ServiceOrder
+          setSelectedRecords={setSelectedRecords}
+          selectedRecords={selectedRecords}
+          assignTechnicianDialog={assignTechnicianDialog}
+          handleSucess={() => {
+            setRefresh(!refresh)
+            setAssignTechnicianDialog({ open: false, data: null });
+          }}
+          handleClose={() => {
+            setAssignTechnicianDialog({ open: false, data: null });
+          }}
+        />
       </Box>
     </Box>
   );
