@@ -12,6 +12,7 @@ import CalanderList from './CalanderList';
 import MapView from '../Map';
 
 function Roadmap({ filter }) {
+
   const scrollRef = React.useRef(null);
   const executeScroll = () => {
     var pageElement = document.getElementById('dayLiner');
@@ -60,10 +61,8 @@ function Roadmap({ filter }) {
       });
   };
 
-  let height = window.innerHeight - 220;
+  let height = window.innerHeight / 2;
   const today = new Date();
-  // let startDate = moment(today).subtract(365, 'days');
-  // let endDate = moment(today).add(365, 'days');
   let startDate = moment("2021-01-01");
   let endDate = moment("2023-12-31");
   let totalDay = endDate.diff(startDate, 'days');
@@ -191,7 +190,7 @@ function Roadmap({ filter }) {
           )}
         </Box>
       </Box>
-      {!selected &&
+      {/* {!selected &&
         <Box display="flex" justifyContent="flex-end" className="mt-2">
           <ButtonGroup disableElevation color="primary">
             <Button size="small" variant={calendarType === 'week' ? 'contained' : 'outlined'} onClick={() => handelChangeCalendarType('week')}>
@@ -204,7 +203,7 @@ function Roadmap({ filter }) {
               Quaters
             </Button>
           </ButtonGroup>
-        </Box>}
+        </Box>} */}
     </Box>
   ) : (
     <Loader text="" />
