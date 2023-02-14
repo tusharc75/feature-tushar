@@ -51,7 +51,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = (
   }, []);
 
   const fetchData = async () => {
-    var { fields: data } = await fetch_service_order_detail_fields(serviceOrderData?.currency);
+    var data = await fetch_service_order_detail_fields(serviceOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)))
     let unitOptions: any = []
     let pricingMethodOptions: any = []
