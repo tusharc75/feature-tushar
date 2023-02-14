@@ -4,7 +4,7 @@ import { useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import CalendarView from './CalendarView';
-import RoadMap from './RoadMap';
+import Roadmap from './Roadmap';
 
 const viewTypes = [
   {
@@ -17,42 +17,45 @@ const viewTypes = [
   }
 ];
 
-
 const ScheduleCalendar = () => {
 
   const [viewType, setViewType] = useState(1);
 
-  return (
-    <>
-      <Grid container className="headerbox">
-        <Grid item md={10} sm={9} xs={8}>
-          <CustomBreadCrumbs
-            routes={[
-              {
-                title: 'Schedule Calender',
-                path: '/schedule-calendar'
-              }
-            ]}
-          />
-        </Grid>
-        <Grid item md={2} sm={3} xs={4}>
-          <ToggleButtonGroup size="small" value={viewType} exclusive onChange={(event, newFilter) => { setViewType(newFilter) }}>
-            {viewTypes.map((k, index) => {
-              return (
-                <ToggleButton value={k.value} key={index}>
-                  {k.key}
-                </ToggleButton>
-              );
-            })}
-          </ToggleButtonGroup>
-        </Grid>
+  return (<>
+    <Grid container className="headerbox">
+      <Grid item md={10} sm={9} xs={8}>
+        <CustomBreadCrumbs
+          routes={[
+            {
+              title: 'Schedule Calender',
+              path: '/schedule-calendar'
+            }
+          ]}
+        />
       </Grid>
-
-      <CustomContainer styles={{ minHeight: 'calc(100vh-200px)' }}>
-        {viewType === 1 && <RoadMap />}
-        {viewType === 2 && <CalendarView />}
-      </CustomContainer>
-    </>
+      <Grid container justify="flex-end" md={2} sm={3} xs={4} >
+        <ToggleButtonGroup
+          size="small"
+          value={viewType}
+          exclusive
+          onChange={(event, newFilter) => { setViewType(newFilter) }}>
+          {viewTypes.map((k, index) => {
+            return (<ToggleButton
+              size="small"
+              value={k.value}
+              key={index}>
+              {k.key}
+            </ToggleButton>
+            );
+          })}
+        </ToggleButtonGroup>
+      </Grid>
+    </Grid>
+    <CustomContainer styles={{ minHeight: 'calc(100vh-200px)' }}>
+      {viewType === 1 && <Roadmap />}
+      {viewType === 2 && <CalendarView />}
+    </CustomContainer>
+  </>
   );
 };
 
