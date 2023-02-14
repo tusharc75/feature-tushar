@@ -7,37 +7,20 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { serviceOrder } from 'src/constants/helpers';
 import Roadmap from './Roadmap';
-import AssignTechnicianDialog from './Roadmap/AssignTechnicianDialog';
 import ServiceOrder from './ServiceOrder';
 
 function TechnicianScheduler() {
+
   const [filter, setFilter] = useState({ view: 'Technician View', resource: '', serviceOrder: '' });
 
   const [serviceOrders, setServiceOrders] = useState([]);
 
   const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, data: null });
-
-  const handleAssignTechnician = async (technician) => {
-    setAssignTechnicianDialog({ open: true, data: technician });
-  };
-
-  const assignTechnician = async (technicianId) => {
-    // await axiosInstance()
-    //   .post(`/technician-scheduler/assign-technician`, {
-    //     serviceOrderId: selected,
-    //     technicianId: technicianId
-    //   })
-    //   .then(({ data: { data } }) => {
-    //     fetchRoadmap();
-    //   })
-    //   .catch((err) => {});
-  };
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     fetchServiceOrders();
   }, [filter.resource]);
-
-  const fetchData = () => {};
 
   const fetchServiceOrders = async () => {
     const response: any = await axiosInstance().get(`${serviceOrder.api}`);
@@ -46,6 +29,8 @@ function TechnicianScheduler() {
     });
     setServiceOrders(serviceOrdersData);
   };
+
+  const [selectedRecords, setSelectedRecords] = useState([]);
 
   return (
     <Box className="main-container-v1">
@@ -112,8 +97,25 @@ function TechnicianScheduler() {
             )}
           </Grid>
         </Box> */}
-        <Roadmap filter={filter} handleAssignTechnician={handleAssignTechnician} />
-        <ServiceOrder assignTechnicianDialog={assignTechnicianDialog} setAssignTechnicianDialog={setAssignTechnicianDialog} />
+        <Roadmap
+          filter={filter}
+          selectedRecords={selectedRecords}
+          refresh={refresh}
+          handleAssignTechnician={(data) => {
+            setAssignTechnicianDialog({ open: true, data: data });
+          }} />
+        <ServiceOrder
+          setSelectedRecords={setSelectedRecords}
+          selectedRecords={selectedRecords}
+          assignTechnicianDialog={assignTechnicianDialog}
+          handleSucess={() => {
+            setRefresh(!refresh)
+            setAssignTechnicianDialog({ open: false, data: null });
+          }}
+          handleClose={() => {
+            setAssignTechnicianDialog({ open: false, data: null });
+          }}
+        />
       </Box>
     </Box>
   );

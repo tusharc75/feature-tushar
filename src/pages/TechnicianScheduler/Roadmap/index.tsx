@@ -1,18 +1,17 @@
 import React, { memo, useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { Typography, Box, Button, ButtonGroup, IconButton, Dialog, DialogTitle } from '@material-ui/core';
 import { Close, Map } from '@material-ui/icons';
 import moment from 'moment';
 import { isMobile, isTablet } from 'react-device-detect';
-import Loader from 'src/components/Loader';
 import axiosInstance from 'src/axios/axiosInstance';
 import ActivityList from './ActivityList';
 import Calander from './Calander';
 import CalanderList from './CalanderList';
 import MapView from '../Map';
-import AssignTechnicianDialog from './AssignTechnicianDialog';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-function Roadmap({ filter, handleAssignTechnician }) {
+function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
+
   const scrollRef = React.useRef(null);
   const executeScroll = () => {
     var pageElement = document.getElementById('dayLiner');
@@ -24,11 +23,10 @@ function Roadmap({ filter, handleAssignTechnician }) {
   const [activity, setActivity] = useState([]);
   const [treeList, setTreeList] = useState([]);
   const [loadingRoadmap, setLoadingRoadmap] = useState(false);
-  const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
-  }, [filter.view]);
+  }, [filter.view, refresh]);
 
   useEffect(() => {
     filter.serviceOrder !== '' && fetchServiceOrders(filter.serviceOrder);
@@ -95,8 +93,13 @@ function Roadmap({ filter, handleAssignTechnician }) {
     setExpanded(nodeIds);
   };
 
-  const handleSelect = (event, nodeIds) => {
-    setSelected(nodeIds);
+  const handleSelect = (event, data, type) => {
+    if (type === "map") {
+      setSelected(data?._id);
+    }
+    else if (selectedRecords?.length === 1) {
+      handleAssignTechnician(data)
+    }
   };
 
   return !loadingRoadmap ? (
@@ -131,7 +134,6 @@ function Roadmap({ filter, handleAssignTechnician }) {
                   selected={selected}
                   handleToggle={handleToggle}
                   handleSelect={handleSelect}
-                  handleAssignTechnician={handleAssignTechnician}
                 />
                 <Box height={20}></Box>
               </Box>
@@ -208,7 +210,9 @@ function Roadmap({ filter, handleAssignTechnician }) {
         </Box>} */}
     </Box>
   ) : (
-    <Loader text="" />
+    <Box p={2} height={height} bgcolor="white">
+      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+    </Box>
   );
 }
 
