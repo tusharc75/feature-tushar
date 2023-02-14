@@ -52,7 +52,7 @@ const CalendarView = (props: Props) => {
     axiosInstance()
       .get(`${routes?.schedule.path}?entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
-        const eventsData = data.data.map((d: any) => ({
+        const eventsData = data.data.filter(d => d.status === 'Open').map((d: any) => ({
           id: d._id,
           title: d.scheduleNumber,
           start: d.startDate,
@@ -63,7 +63,7 @@ const CalendarView = (props: Props) => {
         setEvents(eventsData);
       })
       .catch((err) => { });
-  }, [dateRange]);
+  }, []);
 
   const onRangeChange = useCallback(
     (range) => {
@@ -113,12 +113,12 @@ const CalendarView = (props: Props) => {
           formats={formats}
           popup={true}
           onNavigate={(date) => {
-            if (view === 'month') {
-              setDateRange({
-                estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
-                estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
-              });
-            }
+            // if (view === 'month') {
+            //   setDateRange({
+            //     estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
+            //     estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
+            //   });
+            // }
           }}
           views={{ month: true, week: true, day: true }}
           eventPropGetter={(obj) => {
@@ -149,7 +149,7 @@ const CalendarView = (props: Props) => {
       {converSchedule.open && (
         <ConfirmationDialog
           open={converSchedule.open}
-          message={`Are you sure you want to convert Schedule  ${converSchedule?.data?.title || ''} ?`}
+          message={`Are you sure you want to convert  ${converSchedule?.data?.title || ''} to ${converSchedule?.data?.type || ''} ?`}
           onClose={() => {
             setConvertSchedule({
               open: false,
