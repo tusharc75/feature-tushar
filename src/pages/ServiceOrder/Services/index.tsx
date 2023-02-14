@@ -11,10 +11,8 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { dateTimeFormat, formatAmountWithCurrency, serviceOrder, sidebarResource } from '../../../constants/helpers';
+import { serviceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -22,15 +20,15 @@ import { startCase } from 'lodash';
 import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ServiceOrderQty from './ServiceOrderQty';
-import moment from 'moment';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 import { genrateCustomTableColumns } from 'src/constants/columns';
 import CustomEditableGrid from 'src/components/CustomEditableGrid';
+import { flattenArray } from 'src/constants/columns';
+
 
 const Services = ({
   serviceOrderData,
   setNextStep,
-  currencySymbol,
   renderedFrom,
   stepFullScreen,
   allowedToEdit
@@ -50,7 +48,6 @@ const Services = ({
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
 
-  const [material, setMaterial] = useState([]);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -66,7 +63,7 @@ const Services = ({
   }, [columns]);
 
   const fetchFields = async () => {
-    var { fields: data, allFields } = await fetch_service_order_detail_fields(serviceOrderData?.currency);
+    var allFields = await fetch_service_order_detail_fields(serviceOrderData?.currency);
     setAllFields(allFields)
     const newColumns = genrateCustomTableColumns(allFields, serviceOrderData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
@@ -185,12 +182,11 @@ const Services = ({
 
     const response = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
     data = response?.data?.data;
-    setMaterial(JSON.parse(JSON.stringify(data.material)));
-    let rows = data.material.filter((e) => e.parentId === null);
+
     const responseTechnician = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/technician`);
     const technician = responseTechnician?.data?.data;
 
-    rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
+    let rows = data.material.filter((e) => e.parentId === null);
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
@@ -357,12 +353,12 @@ const Services = ({
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = material.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qtyDisplay')) {
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(material, inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
