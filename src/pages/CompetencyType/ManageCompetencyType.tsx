@@ -11,12 +11,12 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, generateUniqueIdOnly, isFieldNotTouched } from 'src/constants/helpers';
+import { CustomDialogTransition, isFieldNotTouched } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
-const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManageCompetencyType = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const { state: { user } }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -34,22 +34,21 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
   const fetchFields = async () => {
     try {
       let data;
-      const response = await axiosInstance().get('/field?resource=Purchase Requisition');
+      const response = await axiosInstance().get('/field?resource=Competency Type');
       data = response?.data?.data;
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       if (id) {
         axiosInstance()
-          .get(`${routes?.purchaseRequisition?.path}/${id}`)
+          .get(`${routes?.competencyType?.path}/${id}`)
           .then(({ data: { data } }) => {
             let fields = fieldsDataForUpdate;
             let tempData = data;
             if (isClone) {
               fields = fieldsDataForCreate;
-              const { purchaseRequisitionNumber, ...rest } = data;
-              rest.purchaseRequisitionNumber = `PR_${generateUniqueIdOnly()}`
-              setCloneHeading(purchaseRequisitionNumber);
+              const { competencyType, ...rest } = data;
+              setCloneHeading(competencyType);
               tempData = rest;
             }
             setInitialData({
@@ -63,7 +62,6 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
       }
       else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
-        tempInitialData['purchaseRequisitionNumber'] = `PR_${generateUniqueIdOnly()}`;
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -78,7 +76,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
     setSubmitting(true);
     if (id && !isClone) {
       values._id = id
-      axiosInstance().put(`${routes.purchaseRequisition?.path}`, values).then(({ data }) => {
+      axiosInstance().put(`${routes.competencyType?.path}`, values).then(({ data }) => {
         setSubmitting(false);
         onSuccess()
         toastConfig.setToastConfig({
@@ -92,7 +90,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
       });
     } else {
       axiosInstance()
-        .post(`${routes.purchaseRequisition?.path}`, values)
+        .post(`${routes.competencyType?.path}`, values)
         .then(({ data }) => {
           setLoading(false);
          onSuccess(data.data);
@@ -151,8 +149,8 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
                 title={`${id
                   ? isClone
                     ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.purchaseRequisitionNumber ? `(${initialData.values?.purchaseRequisitionNumber})` : ''}`
-                  : `Create ${routes?.purchaseRequisition?.title}`
+                    : `Update ${initialData.values?.competencyType ? `(${initialData.values?.competencyType})` : ''}`
+                  : `Create ${routes?.competencyType?.title}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -172,8 +170,6 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
                     fullWidth
                   />
                 </Form>
-
-
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button
@@ -200,8 +196,8 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
                   disabled={loading || submitting}
                   variant="contained"
                   color="primary"
-                  type="submit"
                   size="small"
+                  type="submit"
                   onClick={submitForm}
                   endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
@@ -235,4 +231,4 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
   );
 };
 
-export default ManagePurchaseRequisition;
+export default ManageCompetencyType;

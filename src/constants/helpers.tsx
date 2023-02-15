@@ -222,7 +222,8 @@ export const sidebarResource = {
   technicianScheduler: 'Technician Scheduler',
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
-  schedule: 'Schedule'
+  schedule: 'Schedule',
+  competencyType: 'Competency Type'
 
 };
 
@@ -326,7 +327,8 @@ export const RESOURCE_LABEL = {
   technicianScheduler: 'Technician Scheduler',
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
-  schedule: 'Schedule'
+  schedule: 'Schedule',
+  competencyType: 'Competency Type'
 };
 
 export const CHILD_RESOURCE = {
@@ -2349,3 +2351,12 @@ export const ECOM_SECTIONS = [
     label: 'Product List'
   }
 ];
+
+export const TOOLTIP_MESSAGE = {
+  add: "You don't have permissions to add",
+  edit: "You don't have permissions to edit",
+  remove: "You don't have permissions to remove",
+}
+
+
+
