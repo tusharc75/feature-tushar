@@ -2349,3 +2349,12 @@ export const ECOM_SECTIONS = [
     label: 'Product List'
   }
 ];
+
+export const TOOLTIP_MESSAGE = {
+  add: "You don't have permissions to add",
+  edit: "You don't have permissions to edit",
+  remove: "You don't have permissions to remove",
+}
+
+
+
