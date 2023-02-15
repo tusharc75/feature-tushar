@@ -188,6 +188,8 @@ import PurchaseRequisitionDetail from './pages/PurchaseRequisition/PurchaseRequi
 import ScheduleDetail from './pages/Schedule/ScheduleDetail';
 import Schedule from './pages/Schedule';
 import ScheduleCalendar from './pages/ScheduleCalendar';
+import CompetencyType from './pages/CompetencyType';
+import CompetencyTypeDetail from './pages/CompetencyType/CompetencyTypeDetail';
 
 var notificationInterval: any = null;
 
@@ -940,6 +942,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.scheduleDetail.path}/:id`}>
               <ScheduleDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.competencyType.path}`}>
+              <CompetencyType />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.competencyTypeDetail.path}/:id`}>
+              <CompetencyTypeDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
