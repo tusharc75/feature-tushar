@@ -24,10 +24,10 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const types = ["planed", "required", "available"]
+const types = ["planned", "inUse", "available"]
 const colors = {
-  planed: "#FEF5D6",
-  required: "#FFEEF3",
+  planned: "#FEF5D6",
+  inUse: "#FFEEF3",
   available: "#EFF8FF",
 }
 
@@ -36,7 +36,6 @@ export default function CalanderList(props) {
   const classes = useStyles();
 
   const getTreeNodes = (activity) => {
-
     return types.map((type, index) => {
       let children = [];
       const productQty: any = activity?.filter((e) => e.type === type)
@@ -52,7 +51,7 @@ export default function CalanderList(props) {
                 display="flex"
                 style={{
                   position: 'absolute',
-                  backgroundColor: colors[type],
+                  backgroundColor: colors[type] || "#FEF5D6",
                   left: (100 * moment(data.startDate).diff(startDate, 'days')) / totalDay + '%',
                   right: (100 * endDate.diff(moment(data.endDate), 'days')) / totalDay + '%'
                 }}
