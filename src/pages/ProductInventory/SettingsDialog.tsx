@@ -1,7 +1,7 @@
 import { Button, Dialog, Grid, TextField } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { Form, Formik } from 'formik';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -10,9 +10,13 @@ import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import { dateFormat, productInventory } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 function SettingsDialog({ onClose }) {
-  const [initialData, setInitialData] = useState({ lockDate: '' });
+
+  const toastConfig = useContext(CustomToastContext);
+
+  const [initialData, setInitialData] = useState({ lockDate: new Date() });
   const [settingLoading, setSettingLoading] = useState(false);
 
   useEffect(() => {
@@ -24,15 +28,32 @@ function SettingsDialog({ onClose }) {
     axiosInstance()
       .get(`${productInventory.api}/setting`)
       .then(({ data: { data } }) => {
-        console.log(data);
-        setInitialData({
-          lockDate: data?.lockDate
-        });
+        if (data?.lockDate) {
+          setInitialData({
+            lockDate: data?.lockDate
+          });
+        }
         setSettingLoading(false);
       })
-      .catch((err) => {
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
         setSettingLoading(false);
-        console.log(err);
+      });
+  };
+
+  const handleSubmit = (values) => {
+    axiosInstance()
+      .post(`${productInventory.api}/setting`, values)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        onClose();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -44,29 +65,26 @@ function SettingsDialog({ onClose }) {
     return errors;
   };
 
-  const handleSubmit = (values) => {
-    axiosInstance()
-      .post(`${productInventory.api}/setting`, values)
-      .then((res) => {
-        onClose();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
   return (
-    <Dialog maxWidth="md" fullWidth open={true} onClose={onClose}>
-      <CustomDialogHeader title="Settings" onClose={onClose} />
+    <Dialog
+      maxWidth="sm"
+      fullWidth
+      open={true}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          onClose();
+        }
+      }}
+    >
+      <CustomDialogHeader title="Inventory Setting" onClose={onClose} />
       {!settingLoading ? (
         <Formik
           initialValues={initialData}
-          // validationSchema={yupSchema(quotationInitialData.fields)}
-          validateOnMount
+          validateOnMount={false}
           validate={validate}
           onSubmit={handleSubmit}
         >
-          {({ submitForm, values, setFieldValue, errors }) => (
+          {({ submitForm, values, setFieldValue, errors, touched }) => (
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
@@ -83,11 +101,12 @@ function SettingsDialog({ onClose }) {
                             format={dateFormat}
                             value={values['lockDate']}
                             margin="dense"
+                            required
                             maxDate={new Date()}
                             onChange={(event) => {
                               setFieldValue('lockDate', moment(event).format('YYYY-MM-DD'));
                             }}
-                            error={!!errors['lockDate']}
+                            error={errors['lockDate'] ? true : false}
                             helperText={errors['lockDate']}
                           />
                         </MuiPickersUtilsProvider>
@@ -97,10 +116,18 @@ function SettingsDialog({ onClose }) {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button variant="outlined" color="primary" onClick={onClose}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                  onClick={onClose}>
                   Close
                 </Button>
-                <Button variant="contained" color="primary" onClick={submitForm}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={submitForm}>
                   Save
                 </Button>
               </CustomDialogFooter>

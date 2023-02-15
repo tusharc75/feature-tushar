@@ -218,9 +218,9 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-            .filter((d) => d._id !== 'All')
-            .map((d) => d._id)
-            .toString()
+          .filter((d) => d._id !== 'All')
+          .map((d) => d._id)
+          .toString()
         : plantId;
 
     let deepFilter = '';
@@ -529,16 +529,17 @@ const InventoryProduct = () => {
                   </Menu>
                 </Box>
               ) : null}
-              <Box ml={1} />
               {user?.role?.selectedEntity?.policy?.isProductInventorySettings && (
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setSettingDialogOpen(true);
-                  }}
-                >
-                  <SettingsIcon />
-                </IconButton>
+                <Box ml={1}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setSettingDialogOpen(true);
+                    }}
+                  >
+                    <SettingsIcon color='primary' />
+                  </IconButton>
+                </Box>
               )}
             </Grid>
           </Grid>
@@ -577,9 +578,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d._id !== 'All')
-                    .map((d) => d._id)
-                    .toString()
+                  .filter((d) => d._id !== 'All')
+                  .map((d) => d._id)
+                  .toString()
                 : plantId
             }
           />
@@ -592,9 +593,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d._id !== 'All')
-                    .map((d) => d._id)
-                    .toString()
+                  .filter((d) => d._id !== 'All')
+                  .map((d) => d._id)
+                  .toString()
                 : plantId
             }
             productName={showHistory.productName}
@@ -609,9 +610,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d._id !== 'All')
-                    .map((d) => d._id)
-                    .toString()
+                  .filter((d) => d._id !== 'All')
+                  .map((d) => d._id)
+                  .toString()
                 : plantId
             }
           />
