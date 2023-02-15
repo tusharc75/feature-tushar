@@ -201,6 +201,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
                   variant="contained"
                   color="primary"
                   type="submit"
+                  size="small"
                   onClick={submitForm}
                   endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
