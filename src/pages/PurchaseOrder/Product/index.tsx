@@ -27,6 +27,7 @@ import ServiceDialog from './ServiceDialog';
 import AddIcon from '@material-ui/icons/Add';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { map, uniq } from 'lodash';
+import EditIcon from '@material-ui/icons/Edit';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -113,17 +114,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             <p className='text-truncate'> {row.original.detail}</p>
           ) : (
             <p
-              onClick={() => {
-                if (row.original.type === 'Product') {
-                  setShowProductDialog({ open: true, data: row.original, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
-                }
-                if (row.original.type === 'Service') {
-                  setShowServiceDialog({ open: true, data: row.original, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
-                }
-                if (row.original.type === 'Manual Entry') {
-                  setShowCostDialog({ open: true, data: row.original, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
-                }
-              }}
+              onClick={() => { openMaterial(row.original, rows) }}
               className="link text-truncate"
               title={row.original.detail}
             >
@@ -213,14 +204,25 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     columns.push({
       accessor: 'action',
       Header: '',
-      minWidth: 50,
-      width: 50,
+      width: permissions?.irtTicket?.isCreate ? 150 : 100,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) => {
+      Cell: ({ row, rows }) => {
         return allowedToEdit ? (
           <>
+            <HtmlTooltip title="Edit">
+              <IconButton
+                color="primary"
+                size="small"
+                aria-label="Edit"
+                onClick={() => {
+                  openMaterial(row.original, rows)
+                }}
+              >
+                <EditIcon color="primary" />
+              </IconButton>
+            </HtmlTooltip>
             {permissions?.irtTicket?.isCreate && row.original?.type === 'Product' && (
               <HtmlTooltip title="Explore Inventory">
                 <IconButton
@@ -263,6 +265,18 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     }
     setColumns([...columns]);
   };
+
+  const openMaterial = (data, rows) => {
+    if (data.type === 'Product') {
+      setShowProductDialog({ open: true, data: data, showSaveAndNext: data?.index < rows?.length - 1 ? true : false });
+    }
+    if (data.type === 'Service') {
+      setShowServiceDialog({ open: true, data: data, showSaveAndNext: data?.index < rows?.length - 1 ? true : false });
+    }
+    if (data.type === 'Manual Entry') {
+      setShowCostDialog({ open: true, data: data, showSaveAndNext: data?.index < rows?.length - 1 ? true : false });
+    }
+  }
 
   const fetchData = async () => {
     setNextStep(false);
