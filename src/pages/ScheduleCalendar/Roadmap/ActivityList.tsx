@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Box, Button, Dialog, Avatar, IconButton } from '@material-ui/core';
+import { Typography, Box } from '@material-ui/core';
 import { TreeView, TreeItem } from '@material-ui/lab';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -22,12 +21,14 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: 0,
   },
   group: {
-    marginLeft: 0,
+    paddingLeft: 0,
     '& $content': {
       paddingLeft: 0,
     },
   }
 }));
+
+const types = [{ _id: "1", name: "Planned", color: "#FEF5D6" }, { _id: "2", name: "In-Use", color: "#FFEEF3" }, { _id: "3", name: "Available", color: "#EFF8FF" }];
 
 export default function ActivityList(props) {
 
@@ -38,25 +39,23 @@ export default function ActivityList(props) {
   const getTreeNodes = (treeList) => {
     return treeList.map((data, index) => {
       let children = [];
-      // if (data.child && data.child.length > 0) {
-      //   children = getTreeNodes(data.child);
-      //   children.push(<div></div>);
-      // }
-
+      if (data?.productName) {
+        children = getTreeNodes(types);
+        children.push(<div></div>);
+      }
       let label = (
         <Box
           width={'100%'}
           height={50}
           className="d-flex align-items-center"
-          style={{ backgroundColor: data?.color }}
+          style={{ backgroundColor: data?.color || "white" }}
           onClick={(event) => {
             handleSelect(event, data);
           }}
         >
-          <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{data?.name}</Typography>
+          <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{data?.name || data?.productName}</Typography>
         </Box>
       );
-
       return (
         <TreeItem
           key={index}
