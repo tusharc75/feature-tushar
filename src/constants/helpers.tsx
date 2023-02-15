@@ -222,7 +222,8 @@ export const sidebarResource = {
   technicianScheduler: 'Technician Scheduler',
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
-  schedule: 'Schedule'
+  schedule: 'Schedule',
+  competencyType: 'Competency Type'
 
 };
 
@@ -326,7 +327,8 @@ export const RESOURCE_LABEL = {
   technicianScheduler: 'Technician Scheduler',
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
-  schedule: 'Schedule'
+  schedule: 'Schedule',
+  competencyType: 'Competency Type'
 };
 
 export const CHILD_RESOURCE = {
