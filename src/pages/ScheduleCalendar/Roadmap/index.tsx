@@ -20,6 +20,7 @@ const RoadMap = () => {
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
 
   const [calendarType, setCalendarType] = useState('week');
+
   const scrollRef = React.useRef(null);
 
   const [activity, setActivity] = useState([]);
@@ -52,16 +53,14 @@ const RoadMap = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedProduct) {
-      fetchRoadmap()
-    }
+    fetchRoadmap()
   }, [selectedProduct, selectedWarehouse]);
 
   const fetchRoadmap = () => {
     var api = '/schedule/product-status'
     var query = ''
     if (selectedProduct) {
-      query = query + `?products=${selectedProduct}&`
+      query = query + `?product=${selectedProduct}&`
     }
     if (selectedWarehouse) {
       query = query + `warehouse=${selectedWarehouse}`
@@ -92,6 +91,7 @@ const RoadMap = () => {
     var target = event.nativeEvent.target;
     taskScroolRef.current.scrollTop = target.scrollTop;
   };
+
 
   const handleExport = () => {
     var api = '/schedule/product-status/export'
@@ -197,12 +197,13 @@ const RoadMap = () => {
               <Box>
                 <ActivityList
                   fetchRoadmap={fetchRoadmap}
-                  activity={[{ _id: "1", name: "Planned", color: "#FEF5D6" }, { _id: "2", name: "In-Use", color: "#FFEEF3" }, { _id: "3", name: "Available", color: "#EFF8FF" }]}
+                  activity={activity}
                   expanded={expanded}
                   selected={selected}
                   handleToggle={handleToggle}
                   handleSelect={handleSelect}
                 />
+                <Box height={20}></Box>
               </Box>
             </div>
           </Box>
