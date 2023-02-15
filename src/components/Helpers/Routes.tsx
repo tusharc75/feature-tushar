@@ -829,6 +829,20 @@ const routes = {
         : RESOURCE_LABEL.schedule,
     path: '/schedule/detail'
   },
+  competencyType: {
+    title:
+      storedRoutes && storedRoutes.competencyType && storedRoutes.competencyType.title
+        ? storedRoutes.competencyType?.title
+        : RESOURCE_LABEL.competencyType,
+    path: '/competency-type'
+  },
+  competencyTypeDetail: {
+    title:
+      storedRoutes && storedRoutes.competencyType && storedRoutes.competencyType.title
+        ? storedRoutes.competencyType?.title
+        : RESOURCE_LABEL.competencyType,
+    path: '/competency-type/detail'
+  },
 };
 
 export default routes;
