@@ -245,6 +245,7 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
                   variant="contained"
                   color="primary"
                   type="submit"
+                  size="small"
                   onClick={submitForm}
                   endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
