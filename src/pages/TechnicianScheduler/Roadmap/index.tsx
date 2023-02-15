@@ -1,17 +1,17 @@
 import React, { memo, useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import { Typography, Box, Button, ButtonGroup, IconButton } from '@material-ui/core';
+import { Typography, Box, Button, ButtonGroup, IconButton, Dialog, DialogTitle } from '@material-ui/core';
 import { Close, Map } from '@material-ui/icons';
 import moment from 'moment';
 import { isMobile, isTablet } from 'react-device-detect';
-import Loader from 'src/components/Loader';
 import axiosInstance from 'src/axios/axiosInstance';
 import ActivityList from './ActivityList';
 import Calander from './Calander';
 import CalanderList from './CalanderList';
 import MapView from '../Map';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-function Roadmap({ filter }) {
+function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
+
   const scrollRef = React.useRef(null);
   const executeScroll = () => {
     var pageElement = document.getElementById('dayLiner');
@@ -26,7 +26,7 @@ function Roadmap({ filter }) {
 
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
-  }, [filter.view]);
+  }, [filter.view, refresh]);
 
   useEffect(() => {
     filter.serviceOrder !== '' && fetchServiceOrders(filter.serviceOrder);
@@ -60,12 +60,10 @@ function Roadmap({ filter }) {
       });
   };
 
-  let height = window.innerHeight - 220;
+  let height = window.innerHeight / 2;
   const today = new Date();
-  // let startDate = moment(today).subtract(365, 'days');
-  // let endDate = moment(today).add(365, 'days');
-  let startDate = moment("2021-01-01");
-  let endDate = moment("2023-12-31");
+  let startDate = moment('2021-01-01');
+  let endDate = moment('2023-12-31');
   let totalDay = endDate.diff(startDate, 'days');
 
   var dayPixel = 0;
@@ -95,8 +93,13 @@ function Roadmap({ filter }) {
     setExpanded(nodeIds);
   };
 
-  const handleSelect = (event, nodeIds) => {
-    setSelected(nodeIds);
+  const handleSelect = (event, data, type) => {
+    if (type === "map") {
+      setSelected(data?._id);
+    }
+    else if (selectedRecords?.length === 1) {
+      handleAssignTechnician(data)
+    }
   };
 
   return !loadingRoadmap ? (
@@ -132,7 +135,6 @@ function Roadmap({ filter }) {
                   handleToggle={handleToggle}
                   handleSelect={handleSelect}
                 />
-                <Box height={20}></Box>
               </Box>
             </div>
           </Box>
@@ -175,7 +177,7 @@ function Roadmap({ filter }) {
               <MapView technician={selected} />
               <IconButton
                 onClick={() => {
-                  setSelected(null)
+                  setSelected(null);
                   setTimeout(() => executeScroll(), 500);
                 }}
                 style={{
@@ -191,7 +193,7 @@ function Roadmap({ filter }) {
           )}
         </Box>
       </Box>
-      {!selected &&
+      {/* {!selected &&
         <Box display="flex" justifyContent="flex-end" className="mt-2">
           <ButtonGroup disableElevation color="primary">
             <Button size="small" variant={calendarType === 'week' ? 'contained' : 'outlined'} onClick={() => handelChangeCalendarType('week')}>
@@ -204,10 +206,12 @@ function Roadmap({ filter }) {
               Quaters
             </Button>
           </ButtonGroup>
-        </Box>}
+        </Box>} */}
     </Box>
   ) : (
-    <Loader text="" />
+    <Box p={2} height={height} bgcolor="white">
+      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+    </Box>
   );
 }
 

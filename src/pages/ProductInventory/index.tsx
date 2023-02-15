@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, IconButton, Tooltip, Button, Menu, MenuItem, Chip } from "@material-ui/core";
+import { Grid, IconButton, Button, Menu, MenuItem, Chip } from "@material-ui/core";
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,7 +11,7 @@ import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { isObjectEmpty, gridLoadingTimeout, productInventory, getLocalStorageArrayData, removeLocalStorage } from 'src/constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, productInventory, getLocalStorageArrayData, removeLocalStorage, TOOLTIP_MESSAGE } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -283,42 +283,45 @@ const InventoryProduct = () => {
   );
 
   const ActionsRenderer = (params) => (
-    <>
-      {(params?.data?.plantId !== "All") &&
-        <Fragment>
-          {permissions?.productInventory?.isCreate ?
-            <Box>
-              <Tooltip title="Add">
-                <IconButton
-                  size="small"
-                  aria-label="Clone"
-                  onClick={() => {
-                    setInventory({ open: true, product: [params?.data], type: 'add' })
-                  }}
-                >
-                  <AddCircleOutlineIcon fontSize="small" color="secondary" />
-                </IconButton>
-              </Tooltip>
-            </Box> : null}
-          {permissions?.productInventory?.isUpdate ?
-            <Box pl={1}>
-              <Tooltip title="Remove">
-                <IconButton
-                  size="small"
-                  aria-label="Clone"
-                  disabled={params?.data?.availableInventory ? false : true}
-                  onClick={() => {
-                    setInventory({ open: true, product: [params?.data], type: 'remove' })
-                  }}
-                >
-                  <RemoveCircleOutlineIcon fontSize="small" color={params?.data?.availableInventory ? "error" : "disabled"} />
-                </IconButton>
-              </Tooltip>
-            </Box> : null}
-        </Fragment>
-      }
+    <Fragment>
+      <HtmlTooltip title={!permissions?.productInventory?.isCreate ? TOOLTIP_MESSAGE.add :
+        params?.data?.plantId === "All" ? "Select Plant" : "Add"}>
+        <span>
+          <IconButton
+            size="small"
+            aria-label="Add"
+            disabled={permissions?.productInventory?.isCreate && params?.data?.plantId !== "All" ? false : true}
+            onClick={() => {
+              setInventory({ open: true, product: [params?.data], type: 'add' })
+            }}
+          >
+            <AddCircleOutlineIcon
+              fontSize="small"
+              color={permissions?.productInventory?.isCreate && params?.data?.plantId !== "All" ? "secondary" : "disabled"} />
+          </IconButton>
+        </span>
+      </HtmlTooltip>
       <Box pl={1}>
-        <Tooltip title="History">
+        <HtmlTooltip title={!permissions?.productInventory?.isUpdate ? TOOLTIP_MESSAGE.remove :
+          params?.data?.plantId === "All" ? "Select Plant" : !params?.data?.availableInventory ? "Inventory not available" : "Remove"}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={permissions?.productInventory?.isUpdate && params?.data?.availableInventory && params?.data?.plantId !== "All" ? false : true}
+              onClick={() => {
+                setInventory({ open: true, product: [params?.data], type: 'remove' })
+              }}
+            >
+              <RemoveCircleOutlineIcon
+                fontSize="small"
+                color={permissions?.productInventory?.isUpdate && params?.data?.availableInventory && params?.data?.plantId !== "All" ? "error" : "disabled"} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </Box>
+      <Box pl={1}>
+        <HtmlTooltip title="History">
           <IconButton
             size="small"
             aria-label="Clone"
@@ -328,11 +331,11 @@ const InventoryProduct = () => {
           >
             <HistoryIcon fontSize="small" color="primary" />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       </Box>
       {params?.data?.serializedProduct &&
         <Box pl={1}>
-          <Tooltip title="View Serial Number">
+          <HtmlTooltip title="View Serial Number">
             <IconButton
               size="small"
               aria-label="Clone"
@@ -342,10 +345,10 @@ const InventoryProduct = () => {
             >
               <VisibilityOutlinedIcon fontSize="small" color="primary" />
             </IconButton>
-          </Tooltip>
+          </HtmlTooltip>
         </Box>
       }
-    </>
+    </Fragment>
   );
 
   const replaceFieldName = (field) => {

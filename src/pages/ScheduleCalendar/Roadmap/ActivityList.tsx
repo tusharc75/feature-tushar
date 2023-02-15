@@ -4,8 +4,6 @@ import { Typography, Box, Button, Dialog, Avatar, IconButton } from '@material-u
 import { TreeView, TreeItem } from '@material-ui/lab';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import moment from 'moment';
-import { Map } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -21,14 +19,18 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   label: {
-    paddingLeft: 0
+    paddingLeft: 0,
   },
   group: {
-    marginLeft: 0
+    marginLeft: 0,
+    '& $content': {
+      paddingLeft: 0,
+    },
   }
 }));
 
 export default function ActivityList(props) {
+
   const classes = useStyles();
 
   const { activity, expanded, selected, handleToggle, handleSelect } = props;
@@ -36,38 +38,22 @@ export default function ActivityList(props) {
   const getTreeNodes = (treeList) => {
     return treeList.map((data, index) => {
       let children = [];
-      if (data.child && data.child.length > 0) {
-        children = getTreeNodes(data.child);
-        children.push(<div></div>);
-      }
+      // if (data.child && data.child.length > 0) {
+      //   children = getTreeNodes(data.child);
+      //   children.push(<div></div>);
+      // }
 
       let label = (
         <Box
           width={'100%'}
-          height={99}
+          height={50}
           className="d-flex align-items-center"
+          style={{ backgroundColor: data?.color }}
           onClick={(event) => {
-            handleSelect(event, data, "technician");
+            handleSelect(event, data);
           }}
         >
-          <Box width={'80%'} className="d-flex align-items-center">
-            <Avatar variant="circle" sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo} />
-            <Box ml={2} flex style={{ flexDirection: 'column' }}>
-              <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${data?.firstName} ${data?.lastName}`}</Typography>
-              <p style={{ fontSize: '0.6rem', color: 'grey' }}>{`${data?.competency?.map((e) => e.optionLabel)?.toString()}`}</p>
-            </Box>
-          </Box>
-          <Box width={'20%'} className="d-flex align-items-center">
-            <IconButton
-              style={{ padding: 0 }}
-              onClick={(event) => {
-                event.stopPropagation();
-                handleSelect(event, data, "map");
-              }}
-            >
-              <Map fontSize="medium" />
-            </IconButton>
-          </Box>
+          <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{data?.name}</Typography>
         </Box>
       );
 
@@ -77,9 +63,9 @@ export default function ActivityList(props) {
           nodeId={data._id.toString()}
           label={label}
           children={children}
-          style={{ borderBottom: '1px solid lightgray' }}
           classes={{
-            root: classes.root
+            root: classes.root,
+            group: classes.group,
           }}
         />
       );
