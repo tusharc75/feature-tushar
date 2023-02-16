@@ -117,11 +117,10 @@ function SettingsDialog({ onClose }) {
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button
-                  variant="outlined"
                   color="primary"
                   size="small"
                   onClick={onClose}>
-                  Close
+                  Cancel
                 </Button>
                 <Button
                   variant="contained"
