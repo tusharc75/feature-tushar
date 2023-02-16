@@ -506,7 +506,7 @@ const ServiceOrder = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchServiceOrders}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={false}
+              showFilters={true}
               resource={RESOURCE_LABEL.serviceOrder}
             />
           )

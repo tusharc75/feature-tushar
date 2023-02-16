@@ -12,11 +12,11 @@ import { dateFormat, productInventory } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-function SettingsDialog({ onClose }) {
+function SettingsDialog({ onClose, warehouse }) {
 
   const toastConfig = useContext(CustomToastContext);
 
-  const [initialData, setInitialData] = useState({ lockDate: new Date() });
+  const [initialData, setInitialData] = useState({ lockDate: '' });
   const [settingLoading, setSettingLoading] = useState(false);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ function SettingsDialog({ onClose }) {
   const fetchSettingsData = () => {
     setSettingLoading(true);
     axiosInstance()
-      .get(`${productInventory.api}/setting`)
+      .get(`${productInventory.api}/setting?warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
         if (data?.lockDate) {
           setInitialData({
@@ -43,7 +43,7 @@ function SettingsDialog({ onClose }) {
 
   const handleSubmit = (values) => {
     axiosInstance()
-      .post(`${productInventory.api}/setting`, values)
+      .post(`${productInventory.api}/setting`, { ...values, warehouse: warehouse })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -100,11 +100,15 @@ function SettingsDialog({ onClose }) {
                             fullWidth
                             format={dateFormat}
                             value={values['lockDate']}
+                            placeholder="Lock Date"
                             margin="dense"
                             required
                             maxDate={new Date()}
                             onChange={(event) => {
                               setFieldValue('lockDate', moment(event).format('YYYY-MM-DD'));
+                            }}
+                            InputLabelProps={{
+                              shrink: true
                             }}
                             error={errors['lockDate'] ? true : false}
                             helperText={errors['lockDate']}

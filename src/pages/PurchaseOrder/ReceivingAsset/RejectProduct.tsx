@@ -37,7 +37,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
 
   const fetchSettingsData = () => {
     axiosInstance()
-      .get(`${productInventory.api}/setting`)
+      .get(`${productInventory.api}/setting?warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
         if (data?.lockDate) {
           setLockDate(data?.lockDate || null);

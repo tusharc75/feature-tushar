@@ -1,39 +1,19 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from 'react';
+import  { useState, useEffect, useContext, Fragment } from 'react';
 import {
-  Grid,
   Box,
   Button,
-  Paper,
-  Typography,
   IconButton,
-  CircularProgress,
-  Tab,
-  Tabs,
-  ButtonGroup,
-  Container,
-  InputAdornment,
-  useMediaQuery,
-  Menu,
-  MenuItem,
-  Tooltip,
-  Chip,
-  capitalize
 } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import { ExpandMore } from '@material-ui/icons';
-import { isMobile, isTablet } from 'react-device-detect';
-import { FiDownloadCloud } from 'react-icons/fi';
-import { AiFillEdit, AiOutlineEye, AiOutlineFileExcel, AiOutlineFilePdf } from 'react-icons/ai';
-import { GiVintageRobot } from 'react-icons/gi';
-import { utils } from 'xlsx';
-import { fetch_quotation_product_fields, handleViewPdf } from 'src/components/Quotation/helper';
+import { isMobile } from 'react-device-detect';
+import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { dateFormat, formatAmountWithCurrency, prepareDataForGrid, quotation, QUOTATION_STATUS } from 'src/constants/helpers';
+import { dateFormat, formatAmountWithCurrency, prepareDataForGrid, quotation } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import SendEmail from '../SendEmail';
@@ -320,7 +300,8 @@ const QuoteBuilder = ({
 
   const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
-    subRows.forEach((_subRow, j) => {
+    subRows.forEach((_subRow, index) => {
+      _subRow.srno = parent.srno + '.' + `${index + 1}`;
       _subRow.detail = `${
         _subRow.type === 'serializedAsset'
           ? _subRow.serializedAssetDetail?.assetNumber

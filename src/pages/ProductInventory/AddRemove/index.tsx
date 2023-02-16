@@ -52,7 +52,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
   }, [type, product]);
 
   const fetchSettingsData = () => {
-    axiosInstance().get(`${productInventory.api}/setting`)
+    axiosInstance().get(`${productInventory.api}/setting?warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
         if (data?.lockDate) {
           setLockDate(data?.lockDate || null);

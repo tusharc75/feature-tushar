@@ -18,7 +18,6 @@ import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { FaDiceOne } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
-import moment from "moment";
 import { useData } from "../../StateProvider/Provider";
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
@@ -81,7 +80,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     } else {
                         if (disableEdit) {
                             fieldsDataForUpdate?.forEach((e) => {
-                                if (['supplierAccount', 'purchaseOrderDate', 'warehouse', 'currency']?.includes(e?.fieldName)) {
+                                if (['supplierAccount', 'warehouse', 'currency']?.includes(e?.fieldName)) {
                                     e.disableOnEdit = true
                                 }
                             })

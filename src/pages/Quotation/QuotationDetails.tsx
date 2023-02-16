@@ -245,7 +245,7 @@ const QuotationDetails = () => {
 
   const deleteVersion = () => {
     axiosInstance()
-      .delete(`/quotation/${quotationData._id}/${currVersionId}`)
+      .delete(`/quotation/${quotationData._id}/${currentVersion}`)
       .then(() => {
         fetchQuotationData();
       })
