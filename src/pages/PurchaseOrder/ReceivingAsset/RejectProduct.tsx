@@ -30,9 +30,9 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    user?.role?.selectedEntity?.policy?.isProductInventorySettings && fetchSettingsData();
     if (!product && !warehouse) return;
     fetchData();
+    fetchSettingsData();
   }, []);
 
   const fetchSettingsData = () => {
@@ -40,7 +40,6 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
       .get(`${productInventory.api}/setting`)
       .then(({ data: { data } }) => {
         if (data?.lockDate) {
-          console.log(data?.lockDate, user?.role?.selectedEntity?.policy?.isProductInventorySettings);
           setLockDate(data?.lockDate || null);
         }
       })
@@ -102,6 +101,14 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
     if (serialNumbersList?.length > parseInt(values?.qty)) {
       errors['serialNumbers'] = `Please select serial numbers same as quantity`;
     }
+
+
+    if (lockDate) {
+      if (!moment(values["rejectDate"]).isSameOrAfter(moment(lockDate))) {
+        errors['rejectDate'] = `Please selecte valid date`;
+      }
+    }
+
     return errors;
   }
 
@@ -143,6 +150,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                       component={TextFieldFormik}
                       margin="dense"
                       type="number"
+                      required
                       onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                       label="Qty"
                       name="qty"
@@ -215,6 +223,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                     variant="inline"
                     inputVariant="outlined"
                     autoOk
+                    required
                     size="small"
                     margin="dense"
                     component={KeyboardDatePicker}
@@ -237,6 +246,12 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                 </Box>
               </CustomDialogContent>
               <CustomDialogFooter>
+                <Button
+                  color="primary"
+                  size="small"
+                  onClick={handleClose}>
+                  Cancel
+                </Button>
                 <CustomButton
                   loading={loading}
                   disabled={loading}

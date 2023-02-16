@@ -24,8 +24,9 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const [lockDate, setLockDate] = useState(null);
+  
   useEffect(() => {
-    user?.role?.selectedEntity?.policy?.isProductInventorySettings && fetchSettingsData();
+    fetchSettingsData();
   }, []);
 
   const fetchSettingsData = () => {
@@ -33,7 +34,6 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
       .get(`${productInventory.api}/setting`)
       .then(({ data: { data } }) => {
         if (data?.lockDate) {
-          console.log(data?.lockDate, user?.role?.selectedEntity?.policy?.isProductInventorySettings);
           setLockDate(data?.lockDate || null);
         }
       })
@@ -126,7 +126,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({ values, setFieldValue, errors }) => (
             <>
