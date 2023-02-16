@@ -41,7 +41,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
 
   const fetchSettingsData = () => {
     axiosInstance()
-      .get(`${productInventory.api}/setting`)
+      .get(`${productInventory.api}/setting?warehouse=${purchaseOrderData?.warehouse?.optionValue}`)
       .then(({ data: { data } }) => {
         if (data?.lockDate) {
           setLockDate(data?.lockDate || null);

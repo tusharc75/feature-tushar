@@ -531,14 +531,19 @@ const InventoryProduct = () => {
               ) : null}
               {user?.role?.selectedEntity?.policy?.isProductInventorySettings && (
                 <Box ml={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setSettingDialogOpen(true);
-                    }}
-                  >
-                    <SettingsIcon color='primary' />
-                  </IconButton>
+                  <HtmlTooltip title={plantId === 'All' ? "Select Plant" : "Setting"}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        disabled={plantId !== 'All' ? false : true}
+                        onClick={() => {
+                          setSettingDialogOpen(true);
+                        }}
+                      >
+                        <SettingsIcon color={plantId === 'All' ? 'disabled' : 'primary'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
                 </Box>
               )}
             </Grid>
@@ -630,7 +635,11 @@ const InventoryProduct = () => {
             warehouse={plantId}
           />
         )}
-        {settingDialogOpen && <SettingsDialog onClose={() => setSettingDialogOpen(false)} />}
+        {settingDialogOpen &&
+          <SettingsDialog
+            warehouse={plantId}
+            onClose={() => setSettingDialogOpen(false)}
+          />}
       </div>
     </Fragment>
   );
