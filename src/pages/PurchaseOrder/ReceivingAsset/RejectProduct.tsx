@@ -15,19 +15,39 @@ import { KeyboardDatePicker } from 'formik-material-ui-pickers';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import { dateFormat, purchaseOrder } from '../../../constants/helpers';
-
+import { useData } from 'src/StateProvider/Provider';
+import moment from 'moment';
 
 const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, purchaseOrderData }) => {
+  const {
+    state: { user }
+  }: any = useData();
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
+  const [lockDate, setLockDate] = useState(null);
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
+    user?.role?.selectedEntity?.policy?.isProductInventorySettings && fetchSettingsData();
     if (!product && !warehouse) return;
     fetchData();
   }, []);
+
+  const fetchSettingsData = () => {
+    axiosInstance()
+      .get(`${productInventory.api}/setting`)
+      .then(({ data: { data } }) => {
+        if (data?.lockDate) {
+          console.log(data?.lockDate, user?.role?.selectedEntity?.policy?.isProductInventorySettings);
+          setLockDate(data?.lockDate || null);
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const fetchData = () => {
     setLoading(true);
@@ -47,18 +67,22 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
 
   const handleSubmit = (values) => {
     const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers']?.indexOf(item?.serialNumber) > -1);
-    const data = [{
-      _id: product._id,
-      comment: values?.comment === "" ? "Rejected" : values?.comment,
-      product: product.productId,
-      qty: parseInt(values.qty),
-      serialNumber: serialNumberIds?.map((item) => item?._id),
-    }];
+    const data = [
+      {
+        _id: product._id,
+        comment: values?.comment === '' ? 'Rejected' : values?.comment,
+        product: product.productId,
+        qty: parseInt(values.qty),
+        serialNumber: serialNumberIds?.map((item) => item?._id)
+      }
+    ];
     setLoading(true);
-    axiosInstance().post(`/purchase-order/reject-inventory/${POId}`, { products: data, rejectDate: values?.rejectDate }).then(() => {
-      setLoading(false);
-      handleSuccess();
-    })
+    axiosInstance()
+      .post(`/purchase-order/reject-inventory/${POId}`, { products: data, rejectDate: values?.rejectDate })
+      .then(() => {
+        setLoading(false);
+        handleSuccess();
+      })
       .catch((error) => {
         setLoading(false);
         toastConfig.setToastConfig(error);
@@ -111,7 +135,10 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
               <CustomDialogContent>
                 <List style={{ padding: 0 }}>
                   <ListItem key={product.productId}>
-                    <ListItemText primary={product?.productName} secondary={`Quantity : ${product?.qty - (product?.rejectQuantity || 0) - (product?.assetQty || 0)}`} />
+                    <ListItemText
+                      primary={product?.productName}
+                      secondary={`Quantity : ${product?.qty - (product?.rejectQuantity || 0) - (product?.assetQty || 0)}`}
+                    />
                     <Field
                       component={TextFieldFormik}
                       margin="dense"
@@ -184,7 +211,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                 <Box m={1}>
                   <Field
                     fullWidth
-                    label='Reject Date'
+                    label="Reject Date"
                     variant="inline"
                     inputVariant="outlined"
                     autoOk
@@ -195,7 +222,13 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                     placeholder="Reject Date"
                     value={values.rejectDate}
                     format={dateFormat}
-                    minDate={purchaseOrderData?.purchaseOrderDate}
+                    minDate={
+                      lockDate
+                        ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                          ? lockDate
+                          : purchaseOrderData?.purchaseOrderDate
+                        : purchaseOrderData?.purchaseOrderDate
+                    }
                     maxDate={new Date()}
                     onChange={(value) => {
                       setFieldValue('rejectDate', value);
