@@ -3,11 +3,13 @@ import { Autocomplete } from '@material-ui/lab';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from "react";
 import axiosInstance from "src/axios/axiosInstance";
-import { downloadExcel } from 'src/constants/helpers';
+import { dateFormat, downloadExcel } from 'src/constants/helpers';
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import Calander from '../../TechnicianScheduler/Roadmap/Calander';
 import ActivityList from './ActivityList';
 import CalanderList from './CalanderList';
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
+import MomentUtils from '@date-io/moment';
 
 const RoadMap = () => {
 
@@ -27,6 +29,18 @@ const RoadMap = () => {
 
   const [expanded, setExpanded] = React.useState([]);
   const [selected, setSelected] = React.useState(null);
+
+  const [startDate, setStartDate] = React.useState(`${new Date().getFullYear()}-01-01`);
+  const [endDate, setEndDate] = React.useState(`${new Date().getFullYear()}-12-31`);
+  const [totalDay, setTotalDay] = React.useState(0);
+
+  useEffect(() => {
+    const date1 = moment(startDate)
+    const date2 = moment(endDate)
+    const diff = date2.diff(date1, 'days');
+    setTotalDay(diff)
+    executeScroll()
+  }, [startDate, endDate]);
 
   const handleToggle = (event, nodeIds) => {
     setExpanded(nodeIds);
@@ -58,15 +72,16 @@ const RoadMap = () => {
 
   const fetchRoadmap = () => {
     var api = '/schedule/product-status'
-    var query = ''
+    var query = `?startDate=${startDate}&endDate=${endDate}`
     if (selectedProduct) {
-      query = query + `?product=${selectedProduct}&`
+      query = query + `&product=${selectedProduct}`
     }
     if (selectedWarehouse) {
-      query = query + `warehouse=${selectedWarehouse}`
+      query = query + `&warehouse=${selectedWarehouse}`
     }
     axiosInstance().get(api + query).then(({ data: { data } }) => {
       setActivity(data)
+      setExpanded(data?.map((e) => e?._id))
       executeScroll()
     }).catch((error) => {
       toastConfig.setToastConfig(error);
@@ -74,9 +89,6 @@ const RoadMap = () => {
   };
 
   let height = window.innerHeight - 300;
-  let startDate = moment("2021-01-01");
-  let endDate = moment("2023-12-31");
-  let totalDay = endDate.diff(startDate, 'days');
   var dayPixel = 0;
   if (calendarType === 'month') {
     dayPixel = 8.5;
@@ -92,11 +104,10 @@ const RoadMap = () => {
     taskScroolRef.current.scrollTop = target.scrollTop;
   };
 
-
   const handleExport = () => {
-    var api = '/schedule/product-status/export'
+    var api = `/schedule/product-status/export?startDate=${startDate}&endDate=${endDate}`
     if (selectedWarehouse) {
-      api = api + `?warehouse=${selectedWarehouse}`
+      api = api + `&warehouse=${selectedWarehouse}`
     }
     axiosInstance().get(api, {
       responseType: 'arraybuffer'
@@ -118,48 +129,90 @@ const RoadMap = () => {
   return (<Box>
     <Box display="flex" justifyContent="space-between" >
       <Box display="flex">
-        <Box>
-          <Autocomplete
-            style={{ width: '300px' }}
-            options={products}
-            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-            getOptionSelected={(option: any, val) => option.optionValue === val}
-            value={products.filter((data) => data.optionValue === selectedProduct).length ? products.filter((data) => data.optionValue === selectedProduct)[0] : ''}
-            onChange={(e, val) => {
-              setSelectedProduct(val && val.optionValue ? val.optionValue : '');
-            }}
-            renderInput={(params) =>
-              <TextField
-                {...params}
-                margin="dense"
-                name="product"
-                label="Product"
-                variant="outlined"
-                fullWidth />
-            }
-          />
-        </Box>
-        <Box ml={2}>
-          <Autocomplete
-            style={{ width: '300px' }}
-            options={warehouse}
-            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-            getOptionSelected={(option: any, val) => option.optionValue === val}
-            value={warehouse.filter((data) => data.optionValue === selectedWarehouse).length ? warehouse.filter((data) => data.optionValue === selectedWarehouse)[0] : ''}
-            onChange={(e, val) => {
-              setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
-            }}
-            renderInput={(params) =>
-              <TextField
-                {...params}
-                margin="dense"
-                name="plant"
-                label="Plant"
-                variant="outlined"
-                fullWidth />
-            }
-          />
-        </Box>
+        <MuiPickersUtilsProvider utils={MomentUtils}>
+          <Box>
+            <Autocomplete
+              style={{ width: '300px' }}
+              options={products}
+              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+              getOptionSelected={(option: any, val) => option.optionValue === val}
+              value={products.filter((data) => data.optionValue === selectedProduct).length ? products.filter((data) => data.optionValue === selectedProduct)[0] : ''}
+              onChange={(e, val) => {
+                setSelectedProduct(val && val.optionValue ? val.optionValue : '');
+              }}
+              renderInput={(params) =>
+                <TextField
+                  {...params}
+                  margin="dense"
+                  name="product"
+                  label="Product"
+                  variant="outlined"
+                  fullWidth />
+              }
+            />
+          </Box>
+          <Box ml={2}>
+            <Autocomplete
+              style={{ width: '300px' }}
+              options={warehouse}
+              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+              getOptionSelected={(option: any, val) => option.optionValue === val}
+              value={warehouse.filter((data) => data.optionValue === selectedWarehouse).length ? warehouse.filter((data) => data.optionValue === selectedWarehouse)[0] : ''}
+              onChange={(e, val) => {
+                setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
+              }}
+              renderInput={(params) =>
+                <TextField
+                  {...params}
+                  margin="dense"
+                  name="plant"
+                  label="Plant"
+                  variant="outlined"
+                  fullWidth />
+              }
+            />
+          </Box>
+          <Box ml={2}>
+            <KeyboardDatePicker
+              autoOk
+              fullWidth
+              size="small"
+              variant="inline"
+              inputVariant="outlined"
+              value={new Date(startDate)}
+              name="startDate"
+              label="Start Date"
+              onChange={(date: any) => {
+                setStartDate(moment(date).format("YYYY-MM-DD"));
+              }}
+              format={dateFormat}
+              InputLabelProps={{
+                shrink: true
+              }}
+              margin="dense"
+            />
+          </Box>
+          <Box ml={2}>
+            <KeyboardDatePicker
+              autoOk
+              fullWidth
+              size="small"
+              variant="inline"
+              inputVariant="outlined"
+              value={new Date(endDate)}
+              name="endDate"
+              label="End Date"
+              onChange={(date: any) => {
+                setEndDate(moment(date).format("YYYY-MM-DD"));
+              }}
+              format={dateFormat}
+              InputLabelProps={{
+                shrink: true
+              }}
+              margin="dense"
+            />
+          </Box>
+        </MuiPickersUtilsProvider>
       </Box>
       <Box display="flex">
         <Box pt={1}>
@@ -211,8 +264,8 @@ const RoadMap = () => {
             <Calander
               calendarType={calendarType}
               dayPixel={dayPixel}
-              startDate={startDate}
-              endDate={endDate}
+              startDate={moment(startDate)}
+              endDate={moment(endDate)}
             />
             <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
               <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
@@ -222,8 +275,8 @@ const RoadMap = () => {
                   expanded={expanded}
                   selected={selected}
                   handleSelect={handleSelect}
-                  startDate={startDate}
-                  endDate={endDate}
+                  startDate={moment(startDate)}
+                  endDate={moment(endDate)}
                   totalDay={totalDay}
                   calendarType={calendarType}
                 />
@@ -236,7 +289,7 @@ const RoadMap = () => {
                   height={'100%'}
                   style={{
                     position: 'absolute',
-                    left: (100 * moment().diff(startDate, 'days')) / totalDay + '%',
+                    left: (100 * moment().diff(moment(startDate), 'days')) / totalDay + '%',
                     width: dayPixel
                   }}
                 >
