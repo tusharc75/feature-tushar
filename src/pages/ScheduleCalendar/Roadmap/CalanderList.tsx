@@ -24,56 +24,63 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const types = ["planed", "required", "available"]
-const colors = {
-  planed: "#FEF5D6",
-  required: "#FFEEF3",
-  available: "#EFF8FF",
-}
+const types = [
+  { _id: "1", name: "Planned", type: "planned", color: "#FEF5D6" },
+  { _id: "2", name: "In-Use", type: "inUse", color: "#FFEEF3" },
+  { _id: "3", name: "Available", type: "available", color: "#EFF8FF" }
+];
 
 export default function CalanderList(props) {
   const { activity, expanded, selected, handleSelect, startDate, endDate, totalDay, calendarType } = props;
   const classes = useStyles();
 
-  const getTreeNodes = (activity) => {
+  const getTreeNodes = (activity, schedule = []) => {
+    return activity.map((obj, i) => {
 
-    return types.map((type, index) => {
       let children = [];
-      const productQty: any = activity?.filter((e) => e.type === type)
-      let label = (
-        <Box key={index} width={'100%'} height={50} className="d-flex align-items-center">
-          {productQty?.map((data, index) => {
-            return <Tooltip title={data.qty} placement="right">
-              <Box
-                key={index}
-                minWidth={calendarType !== 'week' ? '100px' : ''}
-                height={45}
-                borderRadius="borderRadius"
-                display="flex"
-                style={{
-                  position: 'absolute',
-                  backgroundColor: colors[type],
-                  left: (100 * moment(data.startDate).diff(startDate, 'days')) / totalDay + '%',
-                  right: (100 * endDate.diff(moment(data.endDate), 'days')) / totalDay + '%'
-                }}
-              >
-                <Typography variant='subtitle2' style={{ margin: "auto" }}>{data.qty}</Typography>
-              </Box>
-            </Tooltip>
-          })}
-        </Box>
-      );
+      if (obj?.productName) {
+        children = getTreeNodes(types, obj?.schedule);
+        children.push(<div></div>);
+      }
+
+      var child: any = schedule?.filter((e) => e.type === obj?.type)
+    
+      let label = (<Box
+        key={i}
+        width={'100%'}
+        height={50}
+        className="d-flex align-items-center">
+        {child?.map((data, index) => {
+          return <Tooltip title={data.qty} placement="right">
+            <Box
+              key={index}
+              minWidth={calendarType !== 'week' ? '100px' : ''}
+              height={45}
+              borderRadius="borderRadius"
+              display="flex"
+              style={{
+                position: 'absolute',
+                backgroundColor: obj?.color || "white",
+                left: (100 * moment(data.startDate).diff(startDate, 'days')) / totalDay + '%',
+                right: (100 * endDate.diff(moment(data.endDate), 'days')) / totalDay + '%'
+              }}
+            >
+              <Typography variant='subtitle2' style={{ margin: "auto" }}>{data.qty}</Typography>
+            </Box>
+          </Tooltip>
+        })}
+      </Box>);
 
       return (
         <TreeItem
-          key={index}
-          nodeId={index.toString()}
+          key={i}
+          nodeId={obj._id.toString()}
           label={label}
           children={children}
           classes={{
             group: classes.group,
             iconContainer: classes.iconContainer,
-            label: classes.label
+            label: classes.label,
           }}
         />
       );

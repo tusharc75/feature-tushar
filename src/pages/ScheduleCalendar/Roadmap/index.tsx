@@ -1,8 +1,9 @@
-import { Grid, Box, TextField, Typography } from '@material-ui/core';
+import { Grid, Box, TextField, Typography, Button } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from "react";
 import axiosInstance from "src/axios/axiosInstance";
+import { downloadExcel } from 'src/constants/helpers';
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import Calander from '../../TechnicianScheduler/Roadmap/Calander';
 import ActivityList from './ActivityList';
@@ -13,8 +14,13 @@ const RoadMap = () => {
 
   const toastConfig = useContext(CustomToastContext);
   const [products, setProducts] = useState([]);
+  const [warehouse, setWarehouse] = useState([]);
+
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+
   const [calendarType, setCalendarType] = useState('week');
+
   const scrollRef = React.useRef(null);
 
   const [activity, setActivity] = useState([]);
@@ -37,8 +43,9 @@ const RoadMap = () => {
   };
 
   useEffect(() => {
-    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Product`).then(({ data: { data } }) => {
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Product,Warehouse`).then(({ data: { data } }) => {
       setProducts(data["Product"])
+      setWarehouse(data["Warehouse"])
     })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -46,13 +53,19 @@ const RoadMap = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedProduct) {
-      fetchRoadmap()
-    }
-  }, [selectedProduct]);
+    fetchRoadmap()
+  }, [selectedProduct, selectedWarehouse]);
 
   const fetchRoadmap = () => {
-    axiosInstance().get(`/schedule/product-status?products=${selectedProduct}`).then(({ data: { data } }) => {
+    var api = '/schedule/product-status'
+    var query = ''
+    if (selectedProduct) {
+      query = query + `?product=${selectedProduct}&`
+    }
+    if (selectedWarehouse) {
+      query = query + `warehouse=${selectedWarehouse}`
+    }
+    axiosInstance().get(api + query).then(({ data: { data } }) => {
       setActivity(data)
       executeScroll()
     }).catch((error) => {
@@ -73,7 +86,6 @@ const RoadMap = () => {
     dayPixel = 3;
   }
 
-
   const taskScroolRef = React.useRef(null);
   const onscroll = (event) => {
     var target = event.nativeEvent.target;
@@ -81,26 +93,87 @@ const RoadMap = () => {
   };
 
 
+  const handleExport = () => {
+    var api = '/schedule/product-status/export'
+    if (selectedWarehouse) {
+      api = api + `?warehouse=${selectedWarehouse}`
+    }
+    axiosInstance().get(api, {
+      responseType: 'arraybuffer'
+    })
+      .then((response) => {
+        const fileName = response.headers['content-disposition'].split('filename=')[1];
+        downloadExcel(response.data, fileName);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Exported to excel successfully.'
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (<Box>
-    <Autocomplete
-      style={{ width: '300px' }}
-      options={products}
-      getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-      getOptionSelected={(option: any, val) => option.optionValue === val}
-      value={products.filter((data) => data.optionValue === selectedProduct).length ? products.filter((data) => data.optionValue === selectedProduct)[0] : ''}
-      onChange={(e, val) => {
-        setSelectedProduct(val && val.optionValue ? val.optionValue : '');
-      }}
-      renderInput={(params) =>
-        <TextField
-          {...params}
-          margin="dense"
-          name="product"
-          label="Product"
-          variant="outlined"
-          fullWidth />
-      }
-    />
+    <Box display="flex" justifyContent="space-between" >
+      <Box display="flex">
+        <Box>
+          <Autocomplete
+            style={{ width: '300px' }}
+            options={products}
+            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+            getOptionSelected={(option: any, val) => option.optionValue === val}
+            value={products.filter((data) => data.optionValue === selectedProduct).length ? products.filter((data) => data.optionValue === selectedProduct)[0] : ''}
+            onChange={(e, val) => {
+              setSelectedProduct(val && val.optionValue ? val.optionValue : '');
+            }}
+            renderInput={(params) =>
+              <TextField
+                {...params}
+                margin="dense"
+                name="product"
+                label="Product"
+                variant="outlined"
+                fullWidth />
+            }
+          />
+        </Box>
+        <Box ml={2}>
+          <Autocomplete
+            style={{ width: '300px' }}
+            options={warehouse}
+            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+            getOptionSelected={(option: any, val) => option.optionValue === val}
+            value={warehouse.filter((data) => data.optionValue === selectedWarehouse).length ? warehouse.filter((data) => data.optionValue === selectedWarehouse)[0] : ''}
+            onChange={(e, val) => {
+              setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
+            }}
+            renderInput={(params) =>
+              <TextField
+                {...params}
+                margin="dense"
+                name="plant"
+                label="Plant"
+                variant="outlined"
+                fullWidth />
+            }
+          />
+        </Box>
+      </Box>
+      <Box display="flex">
+        <Box pt={1}>
+          <Button
+            variant='contained'
+            size="small"
+            className={'btn-outline-v1'}
+            onClick={handleExport}
+          >
+            Export to Excel
+          </Button>
+        </Box>
+      </Box>
+    </Box>
     <Box bgcolor="white" pt={2}>
       <Box border={1} borderColor="grey.300" display="flex" height={height} style={{ position: 'relative' }}>
         <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
@@ -124,12 +197,13 @@ const RoadMap = () => {
               <Box>
                 <ActivityList
                   fetchRoadmap={fetchRoadmap}
-                  activity={[{ _id: "1", name: "Planed", color: "#FEF5D6" }, { _id: "2", name: "Required", color: "#FFEEF3" }, { _id: "3", name: "Available", color: "#EFF8FF" }]}
+                  activity={activity}
                   expanded={expanded}
                   selected={selected}
                   handleToggle={handleToggle}
                   handleSelect={handleSelect}
                 />
+                <Box height={20}></Box>
               </Box>
             </div>
           </Box>
