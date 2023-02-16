@@ -45,19 +45,16 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
   }: any = useData();
 
   useEffect(() => {
-    user?.role?.selectedEntity?.policy?.isProductInventorySettings && fetchSettingsData();
-    console.log(user?.role?.selectedEntity?.policy?.isProductInventorySettings);
     if (product.length === 1 && type === 'remove') {
       fetchData();
     }
+    fetchSettingsData();
   }, [type, product]);
 
   const fetchSettingsData = () => {
-    axiosInstance()
-      .get(`${productInventory.api}/setting`)
+    axiosInstance().get(`${productInventory.api}/setting`)
       .then(({ data: { data } }) => {
         if (data?.lockDate) {
-          console.log(data?.lockDate, user?.role?.selectedEntity?.policy?.isProductInventorySettings);
           setLockDate(data?.lockDate || null);
         }
       })
@@ -91,11 +88,11 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
           product.length > 1
             ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: [] }))
             : product?.map((e) => ({
-                product: e._id,
-                qty: parseInt(values.qty),
-                price: parseFloat(values.price),
-                serialNumber: values['serialNumbers']
-              })),
+              product: e._id,
+              qty: parseInt(values.qty),
+              price: parseFloat(values.price),
+              serialNumber: values['serialNumbers']
+            })),
         warehouse: warehouse,
         receiveDate: values.customDate,
         comment: values.comment
@@ -161,7 +158,6 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
         errors['qty'] = 'qty not more than inventory';
       }
     }
-
     if (type === 'add') {
       if (parseFloat(values.price) <= 0) {
         errors['price'] = 'Please enter valid price';
@@ -176,6 +172,12 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
       errors['serialNumbers'] = `Please ${type === 'add' ? 'enter' : 'select'} serial numbers same as quantity`;
     } else if (duplicates.length > 0) {
       errors['serialNumbers'] = `Serial numbers cannot be duplicate`;
+    }
+
+    if (lockDate) {
+      if (!moment(values["customDate"]).isSameOrAfter(moment(lockDate))) {
+        errors['customDate'] = `Please selecte valid date`;
+      }
     }
     return errors;
   }
@@ -273,6 +275,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                         type="number"
                         label="Qty"
                         name="qty"
+                        required
                         variant="outlined"
                         value={values['qty']}
                         error={touched['qty'] && Boolean(errors['qty'])}
@@ -292,6 +295,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                         type="number"
                         label="Price"
                         name="price"
+                        required
                         fullWidth
                         variant="outlined"
                         value={values['price']}
@@ -305,72 +309,39 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                     </Box>
                   ) : null}
                   <Box m={1}>
-                    {user?.role?.selectedEntity?.policy?.isProductInventorySettings && lockDate ? (
-                      <Field
-                        fullWidth
-                        label="Custom Date"
-                        variant="inline"
-                        inputVariant="outlined"
-                        autoOk
-                        size="small"
-                        margin="dense"
-                        component={KeyboardDatePicker}
-                        name="customDate"
-                        placeholder={type === 'add' ? 'Receive Date' : 'Remove Date'}
-                        minDate={lockDate}
-                        value={values.customDate}
-                        format={dateFormat}
-                        maxDate={new Date()}
-                        onChange={(value) => {
-                          setFieldValue('customDate', value);
-                          if (type === 'remove' && product.length === 1) {
-                            var date = moment(value);
-                            if (date.isValid()) {
-                              axiosInstance()
-                                .get(`${productInventory.api}/inventory-at-date?date=${value}&warehouse=${warehouse}&product=${product[0]._id}`)
-                                .then(({ data: { data } }) => {
-                                  setAvailableQtyOnRemoveDate(data);
-                                })
-                                .catch((err) => {
-                                  toastConfig.setToastConfig(err);
-                                });
-                            }
+                    <Field
+                      fullWidth
+                      label="Custom Date"
+                      variant="inline"
+                      inputVariant="outlined"
+                      autoOk
+                      required
+                      size="small"
+                      margin="dense"
+                      component={KeyboardDatePicker}
+                      name="customDate"
+                      placeholder={type === 'add' ? 'Receive Date' : 'Remove Date'}
+                      value={values.customDate}
+                      format={dateFormat}
+                      maxDate={new Date()}
+                      onChange={(value) => {
+                        setFieldValue('customDate', value);
+                        if (type === 'remove' && product.length === 1) {
+                          var date = moment(value);
+                          if (date.isValid()) {
+                            axiosInstance()
+                              .get(`${productInventory.api}/inventory-at-date?date=${value}&warehouse=${warehouse}&product=${product[0]._id}`)
+                              .then(({ data: { data } }) => {
+                                setAvailableQtyOnRemoveDate(data);
+                              })
+                              .catch((err) => {
+                                toastConfig.setToastConfig(err);
+                              });
                           }
-                        }}
-                      />
-                    ) : (
-                      <Field
-                        fullWidth
-                        label="Custom Date"
-                        variant="inline"
-                        inputVariant="outlined"
-                        autoOk
-                        size="small"
-                        margin="dense"
-                        component={KeyboardDatePicker}
-                        name="customDate"
-                        placeholder={type === 'add' ? 'Receive Date' : 'Remove Date'}
-                        value={values.customDate}
-                        format={dateFormat}
-                        maxDate={new Date()}
-                        onChange={(value) => {
-                          setFieldValue('customDate', value);
-                          if (type === 'remove' && product.length === 1) {
-                            var date = moment(value);
-                            if (date.isValid()) {
-                              axiosInstance()
-                                .get(`${productInventory.api}/inventory-at-date?date=${value}&warehouse=${warehouse}&product=${product[0]._id}`)
-                                .then(({ data: { data } }) => {
-                                  setAvailableQtyOnRemoveDate(data);
-                                })
-                                .catch((err) => {
-                                  toastConfig.setToastConfig(err);
-                                });
-                            }
-                          }
-                        }}
-                      />
-                    )}
+                        }
+                      }}
+                      {...(lockDate ? { minDate: lockDate } : {})}
+                    />
                     {availableQtyOnRemoveDate || availableQtyOnRemoveDate === 0 ? (
                       <Typography variant="caption">{`Inventory on custom date : ${availableQtyOnRemoveDate}`}</Typography>
                     ) : null}
@@ -460,7 +431,19 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                   )}
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                  <Button
+                    color="primary"
+                    size="small"
+                    onClick={handleClose}>
+                    Cancel
+                  </Button>
+                  <CustomButton
+                    loading={loading}
+                    disabled={loading}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={submitForm}>
                     {capitalize(type)}
                   </CustomButton>
                 </CustomDialogFooter>

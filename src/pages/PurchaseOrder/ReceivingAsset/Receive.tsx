@@ -30,13 +30,13 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    user?.role?.selectedEntity?.policy?.isProductInventorySettings && fetchSettingsData();
     axiosInstance()
       .get(`/warehouse`)
       .then(({ data: { data } }) => {
         setDefaultWareHouse(data.find((d) => d?._id === purchaseOrderData?.warehouse?.optionValue));
         setwareHouseList(data);
       });
+    fetchSettingsData();
   }, []);
 
   const fetchSettingsData = () => {
@@ -44,7 +44,6 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
       .get(`${productInventory.api}/setting`)
       .then(({ data: { data } }) => {
         if (data?.lockDate) {
-          console.log(data?.lockDate, user?.role?.selectedEntity?.policy?.isProductInventorySettings);
           setLockDate(data?.lockDate || null);
         }
       })
@@ -189,7 +188,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({ values, setFieldValue, errors }) => (
             <>
