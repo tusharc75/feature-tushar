@@ -857,6 +857,13 @@ const routes = {
         : RESOURCE_LABEL.fieldTicket,
     path: '/field-ticket/detail'
   },
+  fieldServiceTechnician: {
+    title:
+      storedRoutes && storedRoutes.fieldServiceTechnician && storedRoutes.fieldServiceTechnician.title
+        ? storedRoutes.fieldServiceTechnician?.title
+        : RESOURCE_LABEL.fieldServiceTechnician,
+    path: '/field-service-technician'
+  },
 };
 
 export default routes;
