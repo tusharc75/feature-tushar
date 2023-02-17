@@ -7,7 +7,7 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -15,56 +15,43 @@ import { serviceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { startCase } from 'lodash';
-import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
+import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import ServiceOrderQty from './ServiceOrderQty';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 import { genrateCustomTableColumns } from 'src/constants/columns';
-import CustomEditableGrid from 'src/components/CustomEditableGrid';
-import { flattenArray } from 'src/constants/columns';
 
+const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
 
-const Services = ({
-  serviceOrderData,
-  setNextStep,
-  renderedFrom,
-  stepFullScreen,
-  allowedToEdit
-}: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
 
-  const [isUpdating, setUpdating] = useState(false);
-
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null });
-  const [isAddingProducts, setAddingProducts] = useState(false);
 
+  const [addProductDialog, setAddProductDialog] = useState({ open: false, parentId: null });
+  const [isAddingProducts, setAddingProducts] = useState(false);
 
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
 
-  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [allFields, setAllFields] = useState([]);
-  const [openBulkEdit, setOpenBulkEdit] = useState({ open: false, data: null });
 
   useEffect(() => {
     fetchFields();
   }, []);
 
   useEffect(() => {
-    fetchProductInventory();
+    fetchData();
   }, [columns]);
 
   const fetchFields = async () => {
     var allFields = await fetch_service_order_detail_fields(serviceOrderData?.currency);
-    setAllFields(allFields)
+    allFields?.forEach((e) => {
+      e.isColumnEditable = false;
+    });
     const newColumns = genrateCustomTableColumns(allFields, serviceOrderData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
     if (qtyIndex > -1) {
@@ -104,13 +91,7 @@ const Services = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p
-              onClick={() => {
-                setIsProductEdit({ open: true, data: row.original });
-              }}
-              className="link text-truncate"
-              title={row.original.detail}
-            >
+            <p className="text-truncate" title={row.original.detail}  >
               {row.original.detail}
             </p>
             <IconButton
@@ -119,6 +100,9 @@ const Services = ({
               onClick={() => {
                 if (row.original.type === 'service') {
                   window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                }
+                else if (row.original.type === 'product') {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                 } else {
                   window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                 }
@@ -140,51 +124,35 @@ const Services = ({
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }) => {
-        return allowedToEdit ? (
-          (!row.original.canDelete) ? (
-            <HtmlTooltip title={'Asset is already assigned'}>
-              <span>
-                <IconButton size="small" aria-label="Details" disabled={true}>
-                  <DeleteIcon fontSize="small" color={'disabled'} />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          ) : (
-            <HtmlTooltip title={'Delete'}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                    getNestedSubRows(obj, row.original);
-                    setDeleteData(obj);
-                  }}
-                >
-                  <DeleteIcon fontSize="small" color={'error'} />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          )
-        ) : (
-          ''
-        );
+        return allowedToEdit && row.original.type === 'product' ? (
+          <HtmlTooltip title={'Delete'}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  getNestedSubRows(obj, row.original);
+                  setDeleteData(obj);
+                }}
+              >
+                <DeleteIcon fontSize="small" color={'error'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        ) : null;
       }
     });
     setColumns(column);
   };
 
-  const fetchProductInventory = async () => {
-
+  const fetchData = async () => {
     setNextStep(false);
 
     var data: any = [];
 
     const response = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
     data = response?.data?.data;
-
-    const responseTechnician = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/technician`);
-    const technician = responseTechnician?.data?.data;
 
     let rows = data.material.filter((e) => e.parentId === null);
 
@@ -205,10 +173,7 @@ const Services = ({
               ? parent?.packageDetail?.packageDescription || ''
               : '';
       parent.qtyDisplay = parent.qty;
-      parent.canDelete = technician.some(d => d._id === parent._id) ? false : true;
-      parent.estimateStartDate = parent.estimateStartDate ? parent.estimateStartDate : serviceOrderData?.estimateStartDate
-      parent.estimateEndDate = parent.estimateEndDate ? parent.estimateEndDate : serviceOrderData?.estimateEndDate
-      parent.subRows = generateNestedData(data.material, parent, technician);
+      parent.subRows = generateNestedData(data.material, parent);
     });
 
     if (rows?.length > 0) {
@@ -219,7 +184,7 @@ const Services = ({
     setSelectedProducts([]);
   };
 
-  const generateNestedData = (material, parent, technician) => {
+  const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
@@ -238,10 +203,7 @@ const Services = ({
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
-      _subRow.canDelete = technician.some(d => d.service.optionValue === _subRow._id) ? false : true;
-      _subRow.estimateStartDate = _subRow.estimateStartDate ? _subRow.estimateStartDate : serviceOrderData?.estimateStartDate
-      _subRow.estimateEndDate = _subRow.estimateEndDate ? _subRow.estimateEndDate : serviceOrderData?.estimateEndDate
-      _subRow.subRows = generateNestedData(material, _subRow, technician);
+      _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
   };
@@ -252,64 +214,21 @@ const Services = ({
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
-      element.type = addExistingProductDialog.type;
+      element.type = 'product';
       element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
-      element.pricingMethod = d?.pricingMethodMain && d?.pricingMethodMain?.length ? d.pricingMethodMain[0] : d?.pricingMethod ? d?.pricingMethod : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.parentId = addExistingProductDialog.parentId;
-      element.estimateStartDate = serviceOrderData?.estimateStartDate
-      element.estimateEndDate = serviceOrderData?.estimateEndDate
+      element.parentId = addProductDialog.parentId;
       material.push(element);
     });
     axiosInstance()
       .post(`${serviceOrder.api}/${serviceOrderData._id}/material`, { material: material })
       .then(({ data }) => {
-        setUpdating(false);
-        setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        setOpenBulkEdit({
-          open: true, data: data.data.material.map(d => {
-            return {
-              ...d, detail:
-                d.type === 'product'
-                  ? d?.productDetail?.productName
-                  : d.type === 'service'
-                    ? d?.serviceDetail?.serviceName
-                    : d?.packageDetail?.packageName
-            }
-          })
-        })
-        fetchProductInventory();
+        setAddingProducts(false);
+        setAddProductDialog({ open: false, parentId: null });
+        fetchData();
       })
       .catch((error) => {
-        setUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleSaveData = async (rows: any) => {
-    rows.forEach((element) => {
-      delete element.srno;
-      delete element.detail;
-      delete element.isValid;
-      delete element.canDelete;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.serializedAssetDetail;
-      delete element.parentName;
-      delete element.subRows;
-    });
-    setUpdating(true);
-    axiosInstance()
-      .put(`${serviceOrder.api}/${serviceOrderData._id}/material`, { material: rows })
-      .then(() => {
-        setUpdating(false);
-        setIsProductEdit({ open: false, data: null });
-        fetchProductInventory();
-      })
-      .catch((error) => {
-        setUpdating(false);
+        setAddingProducts(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -320,7 +239,7 @@ const Services = ({
       .put(`${serviceOrder.api}/${serviceOrderData?._id}/material/delete `, { ids: rows.map(d => d.id) })
       .then(() => {
         setDeleting(false);
-        fetchProductInventory();
+        fetchData();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -343,7 +262,7 @@ const Services = ({
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
-    const dataToDelete = selectedProducts && selectedProducts.filter((e) => e.canDelete);
+    const dataToDelete = selectedProducts.filter((e) => e.type === "product");
     dataToDelete?.forEach((ele) => {
       obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
     });
@@ -353,16 +272,6 @@ const Services = ({
     setDeleteData(obj);
   };
 
-  const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
-    let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
-    handleSaveData(rows);
-  };
-
   return (
     <Fragment>
       <Grid container spacing={2}>
@@ -370,27 +279,6 @@ const Services = ({
           <Grid item xs={12} md={12} sm={12}>
             <Box display="flex" justifyContent="space-between" m={1} mb={0}>
               <Box display="flex">
-                {permissions?.serviceMaster?.isRead && (
-                  <Button
-                    className={'btn-outline-v1'} variant="contained" size="small"
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
-                    }}
-                  >
-                    {isMobile && !isTablet ? 'Service' : `Add Services`}
-                  </Button>
-                )}
-                <Box mx={isMobile ? 0.5 : 1} />
-                {permissions?.packages?.isRead && (
-                  <Button
-                    className={'btn-outline-v1'} variant="contained" size="small"
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                    }}
-                  >
-                    {isMobile && !isTablet ? 'Package' : `Add Service ${routes.packages.title}`}
-                  </Button>
-                )}
               </Box>
               <Box display="flex">
                 <Button
@@ -398,7 +286,7 @@ const Services = ({
                   color="primary"
                   size="small"
                   onClick={handleClick}
-                  disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => e.canDelete).length)}
+                  disabled={selectedProducts.length ? false : true}
                   endIcon={<BiChevronDown />}
                 >
                   Actions
@@ -413,27 +301,24 @@ const Services = ({
                   }}
                   onClose={handleClose}
                 >
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                    <MenuItem
-                      disabled={isDeleting}
-                      onClick={() => {
-                        handleDeleteMultiple();
-                        handleClose();
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                    <MenuItem
-                      onClick={() => {
-                        setOpenBulkEdit({ open: true, data: selectedProducts });
-                        handleClose();
-                      }}
-                    >
-                      Bulk Edit
-                    </MenuItem>
-                  </HtmlTooltip>
+                  <MenuItem
+                    disabled={selectedProducts?.filter((e) => e.type === "service")?.length === 1 ? false : true}
+                    onClick={() => {
+                      setAddProductDialog({ open: true, parentId: selectedProducts?.filter((e) => e.type === "service")[0]?._id });
+                      handleClose();
+                    }}
+                  >
+                    Add Product
+                  </MenuItem>
+                  <MenuItem
+                    disabled={selectedProducts?.filter((e) => e.type === "product")?.length > 0 ? false : true}
+                    onClick={() => {
+                      handleDeleteMultiple();
+                      handleClose();
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
                 </Menu>
               </Box>
             </Box>
@@ -451,8 +336,7 @@ const Services = ({
                 uniqueKey="_id"
                 hideSelection={!allowedToEdit}
                 hideAction={!allowedToEdit}
-                renderedFrom={`${renderedFrom}_sevices_1`}
-                onSaveEdit={onSaveInlineEdit}
+                renderedFrom={renderedFrom}
                 isClientSideGrid={true}
               />
             </Box>
@@ -463,6 +347,20 @@ const Services = ({
           )}
         </Grid>
       </Grid>
+      {addProductDialog.open && (
+        <AssignProductDialog
+          reference="serviceOrder"
+          serialized={null}
+          productsDialogOpen={addProductDialog.open}
+          productId={null}
+          handleCloseDialog={() => setAddProductDialog({ open: false, parentId: null })}
+          assignedProducts={[]}
+          renderedFrom={renderedFrom}
+          onSuccess={(row) => {
+            handleAdd(row);
+          }}
+        />
+      )}
       {deleteData && (
         <ConfirmationDialog
           open={true}
@@ -472,54 +370,8 @@ const Services = ({
           okBtnLoading={isDeleting}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
-        <AssignPackageDialog
-          referenceType={"serviceOrder"}
-          onSuccess={(rows) => {
-            handleAdd(rows);
-          }}
-          handleClose={() => {
-            setAddExistingProductDialog({ open: false, type: '', parentId: null });
-          }}
-          packageType="service"
-          ids={[]}
-        />
-      )}
-      {isProductEdit.open && (
-        <ServiceOrderQty
-          onClose={() => {
-            setIsProductEdit({ open: false, data: null });
-          }}
-          rowData={isProductEdit.data}
-          serviceOrderData={serviceOrderData}
-          handleSaveData={handleSaveData}
-        />
-      )}
-      {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
-        <AssignServiceDialog
-          reference={'serviceOrder'}
-          onSuccess={(services) => {
-            handleAdd(services);
-          }}
-          handleClose={() => {
-            setAddExistingProductDialog({ open: false, type: '', parentId: null });
-          }}
-          ids={[]}
-        />
-      )}
-      {openBulkEdit.open &&
-        <CustomEditableGrid
-          onClose={() => setOpenBulkEdit({ open: false, data: null })}
-          data={openBulkEdit.data}
-          fields={allFields}
-          currency={serviceOrderData?.currency}
-          handleSave={(rows) => {
-            handleSaveData(rows)
-            setOpenBulkEdit({ open: false, data: null })
-          }} />
-      }
     </Fragment>
   );
 };
 
-export default Services;
+export default Products;

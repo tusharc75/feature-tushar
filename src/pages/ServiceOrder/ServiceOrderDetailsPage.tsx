@@ -6,12 +6,10 @@ import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { serviceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies } from '../../constants/helpers';
-import HideWhenOffline from '../../components/HideWhenOffline';
+import { serviceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies, serviceOrderSteps } from '../../constants/helpers';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
@@ -23,6 +21,7 @@ import ManageServiceOrderDialog from './ManageServiceOrder';
 import Steps from '../RentalManagement/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Services from './Services';
+import Products from './Products';
 import Technician from './Technician';
 import TechnicianDispatch from './TechnicianDispatch';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -30,6 +29,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ServiceOrderViews from './RoadMapViews';
 
 const ServiceOrderDetailsPage = () => {
+
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.serviceOrder.title);
 
@@ -55,7 +55,6 @@ const ServiceOrderDetailsPage = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [nextStep, setNextStep] = useState(false);
-  const [serviceSteps, setServiceSteps] = useState(['Add Services', 'Assign Technician', 'Technician Dispatch', 'Invoice']);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [currentStep, setCurrentStep] = useState(null);
 
@@ -81,7 +80,7 @@ const ServiceOrderDetailsPage = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
-      updateProcessStatus(serviceSteps[currentStep]);
+      updateProcessStatus(serviceOrderSteps[currentStep]);
     }
   }, [currentStep]);
 
@@ -115,7 +114,7 @@ const ServiceOrderDetailsPage = () => {
       setAllowedToDelete(data.owner.optionValue === user?.user?._id);
       setServiceOrderData(data);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
-      setCurrentStep(serviceSteps.indexOf(data?.processStatus) !== -1 ? serviceSteps.indexOf(data?.processStatus) : 0);
+      setCurrentStep(serviceOrderSteps.indexOf(data?.processStatus) !== -1 ? serviceOrderSteps.indexOf(data?.processStatus) : 0);
       if (isAllowedToEdit && openEdit === 'true') {
         setOpenUpdateDialog(true);
         const params = new URLSearchParams();
@@ -134,7 +133,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const getServiceOrderFields = async () => {
@@ -244,14 +243,14 @@ const ServiceOrderDetailsPage = () => {
           <Steps
             isNextStep={false}
             nextStep={nextStep}
-            steps={serviceSteps}
+            steps={serviceOrderSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={false}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
-          <ContentFullScreen title={serviceSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {serviceSteps[currentStep] === 'Add Services' && serviceOrderData && (
+          <ContentFullScreen title={serviceOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            {currentStep === 0 && serviceOrderData && (
               <Services
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -260,31 +259,40 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={true}
               />
             )}
-            {serviceSteps[currentStep] === 'Assign Technician' && serviceOrderData && (
-              <Technician
+            {currentStep === 1 && serviceOrderData && (
+              <Products
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
-                currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-2`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={true}
               />
             )}
-            {serviceSteps[currentStep] === 'Technician Dispatch' && serviceOrderData && (
-              <TechnicianDispatch
+            {currentStep === 2 && serviceOrderData && (
+              <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
+                currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-3`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={true}
               />
             )}
-            {serviceSteps[currentStep] === 'Invoice' && serviceOrderData && (
+            {currentStep === 3 && serviceOrderData && (
+              <TechnicianDispatch
+                serviceOrderData={serviceOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-4`}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={true}
+              />
+            )}
+            {currentStep === 4 && serviceOrderData && (
               <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
                 currencySymbol={currencySymbol}
-                renderedFrom={`${renderedFrom}_grid-4`}
+                renderedFrom={`${renderedFrom}_grid-5`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={false}
                 fromInvoice={true}
