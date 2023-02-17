@@ -71,7 +71,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           tempInitialData['service'] = referenceData?.service;
           tempInitialData['startDateTime'] = referenceData?.startDateTime;
           tempInitialData['endDateTime'] = referenceData?.endDateTime;
-          tempInitialData['owner'] = referenceData?.owner;
+          tempInitialData['technician'] = referenceData?.technician;
         }
         setInitialData({
           fields: fieldsDataForCreate,

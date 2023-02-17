@@ -12,30 +12,43 @@ import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { getColumnData, getFrameworkComponents, getStaticFields } from 'src/constants/columns';
-import { DateTimeRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import { getFrameworkComponents, getStaticFields } from 'src/constants/columns';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import useColumns from 'src/constants/useColumns';
 
 const FieldTicket = ({ selectedFieldService }) => {
-  const renderedFrom = camelCase(routes?.fieldServiceTechnician.title);
+
+  const renderedFrom = camelCase(`${routes.fieldTicket?.title}`);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
+
+  const { getColumnData } = useColumns();
+  
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [state, dispatch] = useReducer(reducer, intialState);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [gridApi, setGridApi] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [fieldTicketId, setFieldTicketId] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedFieldService]);
+
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -44,46 +57,18 @@ const FieldTicket = ({ selectedFieldService }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.fieldData?.primaryField === true) {
-            columns = [
-              ...columns,
-              {
-                field: o?.fieldData?.fieldName,
-                headerName: o?.fieldData?.fieldLabel,
-                show: true,
-                disabled: true,
-                cellRenderer: 'nameRenderer',
-                primaryField: true
-              }
-            ];
-          } else if (o?.fieldData?.fieldName === 'startDateTime' || o?.fieldData?.fieldName === 'endDateTime') {
-            columns = [
-              ...columns,
-              {
-                field: o?.fieldData?.fieldName,
-                headerName: o?.fieldData?.fieldLabel,
-                cellRenderer: 'dateTimeRenderer',
-                disabled: false,
-                show: true
-              }
-            ];
-          } else {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldServiceTechnician.path);
-
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName);
-              }
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicketDetail.path)
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer,
-          dateTimeRenderer: DateTimeRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
@@ -91,10 +76,9 @@ const FieldTicket = ({ selectedFieldService }) => {
       });
   };
 
-  const fetchFieldTicketData = () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
@@ -102,17 +86,11 @@ const FieldTicket = ({ selectedFieldService }) => {
       .get(`${routes?.fieldTicket.path}${queryString}`)
       .then(({ data: { data } }) => {
         let count = data?.count;
-        let filteredData = data?.data.filter((i) => {
-          if  (i.serviceOrder?.optionValue === selectedFieldService?._id && i.service.optionValue === selectedFieldService?.service?._id){
-            return i;
-          }
-        });
-        let rows = filteredData?.map((u: any) => {
+        let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.fieldServiceTechnician?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.fieldServiceTechnician?.isUpdate;
-
           return {
             ...finalObject
           };
@@ -132,24 +110,8 @@ const FieldTicket = ({ selectedFieldService }) => {
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
-        }
         dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+        setTimeout(() => { dispatch({ type: 'loading', loading: false }); }, gridLoadingTimeout);
       });
   };
 
@@ -172,22 +134,25 @@ const FieldTicket = ({ selectedFieldService }) => {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
+    const filterById = [];
+    filterById.push({ field: 'serviceOrder', term: selectedFieldService._id });
+    filterById.push({ field: 'service', term: selectedFieldService?.service._id });
+    filterById.push({ field: 'technician', term: selectedFieldService?.technicianAssign?.technician });
+    deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
+
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
-
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
     }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
@@ -209,7 +174,7 @@ const FieldTicket = ({ selectedFieldService }) => {
       .put(`${routes?.fieldTicket?.path}/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
-        fetchFieldTicketData();
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
@@ -229,16 +194,6 @@ const FieldTicket = ({ selectedFieldService }) => {
 
   const closeActions = () => {
     setAnchorEl(null);
-  };
-
-  const NameRenderer = (params) => {
-    return (
-      <span className=" d-flex gap-2 align-items-center">
-        <Link className="link" to={`${routes.fieldTicketDetail.path}/${params.data._id}`}>
-          {params.value}
-        </Link>
-      </span>
-    );
   };
 
   const ActionsRenderer = (params) => (
@@ -286,17 +241,8 @@ const FieldTicket = ({ selectedFieldService }) => {
     </Fragment>
   );
 
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
-
-  useEffect(() => {
-    fetchFieldTicketData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedFieldService]);
-
-
   return (
-    <Box className="main-container-v1">
+    <Box>
       <Box p={2}>
         <Grid container style={{ display: 'flex' }}>
           <Grid xs={12} md={6} sm={12}></Grid>
@@ -311,9 +257,8 @@ const FieldTicket = ({ selectedFieldService }) => {
               color="primary"
               startIcon={<AddOutlined />}
             >
-              {'Add'}
+              {`Create ${routes.fieldTicket.title}`}
             </Button>
-
             {permissions?.fieldServiceTechnician?.isDelete && (
               <>
                 <Button
@@ -323,7 +268,7 @@ const FieldTicket = ({ selectedFieldService }) => {
                   onClick={openActions}
                   disabled={selectedRecords.length ? false : true}
                   aria-controls="action-menu"
-                  style={{marginLeft:'0.4rem'}}
+                  style={{ marginLeft: '0.4rem' }}
                 >
                   {'Actions'} <ExpandMore />
                 </Button>
@@ -360,7 +305,7 @@ const FieldTicket = ({ selectedFieldService }) => {
           </Grid>
         </Grid>
         {Object.keys(frameWorkComponent).length > 0 && (
-          <Box py={2}>
+          <Box pt={2}>
             <CustomAgGrid
               columns={columns}
               dataRows={dataRows}
@@ -374,7 +319,7 @@ const FieldTicket = ({ selectedFieldService }) => {
               allowAction={true}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={fetchFieldTicketData}
+              refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
             />
           </Box>
@@ -398,14 +343,14 @@ const FieldTicket = ({ selectedFieldService }) => {
           onClose={() => setOpen({ open: false, isClone: false })}
           onSuccess={() => {
             setOpen({ open: false, isClone: false });
-            fetchFieldTicketData();
+            fetchData();
           }}
           referenceData={{
             serviceOrder: selectedFieldService._id,
             service: selectedFieldService?.service._id,
             startDateTime: selectedFieldService?.estimateStartDate,
             endDateTime: selectedFieldService?.estimateEndDate,
-            owner: selectedFieldService?.technicianAssign?.technician
+            technician: selectedFieldService?.technicianAssign?.technician
           }}
         />
       )}
