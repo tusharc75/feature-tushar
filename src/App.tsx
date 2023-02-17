@@ -190,6 +190,8 @@ import Schedule from './pages/Schedule';
 import ScheduleCalendar from './pages/ScheduleCalendar';
 import CompetencyType from './pages/CompetencyType';
 import CompetencyTypeDetail from './pages/CompetencyType/CompetencyTypeDetail';
+import FieldTicket from './pages/FieldTicket';
+import FieldTicketDetail from './pages/FieldTicket/FieldTicketDetail';
 
 var notificationInterval: any = null;
 
@@ -948,6 +950,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.competencyTypeDetail.path}/:id`}>
               <CompetencyTypeDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldTicket.path}`}>
+              <FieldTicket />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldTicketDetail.path}/:id`}>
+              <FieldTicketDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

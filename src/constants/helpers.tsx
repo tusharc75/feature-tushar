@@ -223,7 +223,8 @@ export const sidebarResource = {
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
   schedule: 'Schedule',
-  competencyType: 'Competency Type'
+  competencyType: 'Competency Type',
+  fieldTicket: 'Field Ticket',
 
 };
 
@@ -328,7 +329,8 @@ export const RESOURCE_LABEL = {
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
   schedule: 'Schedule',
-  competencyType: 'Competency Type'
+  competencyType: 'Competency Type',
+  fieldTicket: 'Field Ticket',
 };
 
 export const CHILD_RESOURCE = {

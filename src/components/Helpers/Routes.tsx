@@ -843,6 +843,20 @@ const routes = {
         : RESOURCE_LABEL.competencyType,
     path: '/competency-type/detail'
   },
+  fieldTicket: {
+    title:
+      storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title
+        ? storedRoutes.fieldTicket?.title
+        : RESOURCE_LABEL.fieldTicket,
+    path: '/field-ticket'
+  },
+  fieldTicketDetail: {
+    title:
+      storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title
+        ? storedRoutes.fieldTicket?.title
+        : RESOURCE_LABEL.fieldTicket,
+    path: '/field-ticket/detail'
+  },
 };
 
 export default routes;
