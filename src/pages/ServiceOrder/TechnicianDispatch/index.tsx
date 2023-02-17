@@ -126,9 +126,14 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
                                         const obj: any = [{
                                             _id: row.original._id,
                                             technician: row.original?.technician?._id,
-                                            products: row.original?.products
+                                            material: row.original?.material
                                         }];
-                                        setShowDispatchMaterial({ open: true, data: obj })
+                                        if (row.original?.material?.length) {
+                                            setShowDispatchMaterial({ open: true, data: obj })
+                                        }
+                                        else {
+                                            handleDispatch(obj)
+                                        }
                                     }}
                                 >
                                     <SendIcon fontSize="small" color={'primary'} />
@@ -177,7 +182,7 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
                 obj.technician = element?.technician
                 obj.estimateStartDate = element?.estimateStartDate
                 obj.estimateEndDate = element?.estimateEndDate
-                obj.products = data?.filter((ele) => ele.parentId === parent._id && ele.type === "product")
+                obj.material = data?.filter((ele) => ele.parentId === parent._id && ele.type === "product")
                 obj.status = element?.status
                 rows.push(obj)
             });
@@ -267,7 +272,13 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
                                     <MenuItem
                                         disabled={selectedRecords?.filter((e) => e.status === "Assigned")?.length === selectedRecords?.length ? false : true}
                                         onClick={() => {
-                                            const obj: any = selectedRecords.map(ele => { return { _id: ele?._id, technician: ele?.technician?._id } });
+                                            const obj: any = selectedRecords.map(ele => {
+                                                return {
+                                                    _id: ele?._id,
+                                                    technician: ele?.technician?._id,
+                                                    material: ele?.material?.map((e) => { return { _id: e._id, type: "product", product: e.materialId } })
+                                                }
+                                            });
                                             handleDispatch(obj)
                                             handleClose();
                                         }}

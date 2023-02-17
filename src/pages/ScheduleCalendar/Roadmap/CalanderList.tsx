@@ -48,14 +48,14 @@ export default function CalanderList(props) {
       let label = (<Box
         key={i}
         width={'100%'}
-        height={50}
+        height={30}
         className="d-flex align-items-center">
         {child?.map((data, index) => {
           return <Tooltip title={data.qty} placement="right">
             <Box
               key={index}
               minWidth={calendarType !== 'week' ? '100px' : ''}
-              height={45}
+              height={25}
               borderRadius="borderRadius"
               display="flex"
               style={{
