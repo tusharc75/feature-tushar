@@ -15,20 +15,16 @@ import { BiChevronDown } from 'react-icons/bi';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import SendIcon from '@material-ui/icons/Send'
 import CheckCircleIcon from '@material-ui/icons/CheckCircle'
+import DispatchMaterial from './DispatchMaterial';
 import moment from 'moment';
 
-const TechnicianDispatch = ({
-    serviceOrderData,
-    setNextStep,
-    renderedFrom,
-    stepFullScreen,
-    allowedToEdit
-}: any) => {
+const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
 
     const [selectedRecords, setSelectedRecords] = useState([]);
+    const [showDispatchMaterial, setShowDispatchMaterial] = useState({ open: false, data: [] });
 
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
@@ -44,27 +40,6 @@ const TechnicianDispatch = ({
     const fetchFields = async () => {
         const column: any = [
             {
-                accessor: 'technician',
-                Header: 'Technician',
-                minWidth: 300,
-                width: 300,
-                sticky: isMobile ? 'none' : 'left',
-                Cell: ({ row }) => (
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        {`${row.original?.technician?.firstName} ${row.original?.technician?.lastName} - (${row.original?.technician?.employeeNumber})`}
-                        <IconButton
-                            size="small"
-                            style={{ marginLeft: "10px" }}
-                            onClick={() => {
-                                window.open(`${routes.employeeMasterDetail.path}/${row.original?.technician?._id}`);
-                            }}
-                        >
-                            <OpenInNewIcon fontSize="small" color="primary" />
-                        </IconButton>
-                    </div>
-                )
-            },
-            {
                 accessor: 'service',
                 Header: ' Service',
                 minWidth: 300,
@@ -78,6 +53,27 @@ const TechnicianDispatch = ({
                             style={{ marginLeft: "10px" }}
                             onClick={() => {
                                 window.open(`${routes.serviceMasterDetail.path}/${row.original?.service?._id}`);
+                            }}
+                        >
+                            <OpenInNewIcon fontSize="small" color="primary" />
+                        </IconButton>
+                    </div>
+                )
+            },
+            {
+                accessor: 'technician',
+                Header: 'Technician',
+                minWidth: 300,
+                width: 300,
+                sticky: isMobile ? 'none' : 'left',
+                Cell: ({ row }) => (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {`${row.original?.technician?.firstName} ${row.original?.technician?.lastName} - (${row.original?.technician?.employeeNumber})`}
+                        <IconButton
+                            size="small"
+                            style={{ marginLeft: "10px" }}
+                            onClick={() => {
+                                window.open(`${routes.employeeMasterDetail.path}/${row.original?.technician?._id}`);
                             }}
                         >
                             <OpenInNewIcon fontSize="small" color="primary" />
@@ -127,8 +123,12 @@ const TechnicianDispatch = ({
                                     size="small"
                                     aria-label="Dispatch"
                                     onClick={() => {
-                                        const obj: any = [{ _id: row.original._id, technician: row.original?.technician?._id }];
-                                        handleDispatch(obj);
+                                        const obj: any = [{
+                                            _id: row.original._id,
+                                            technician: row.original?.technician?._id,
+                                            products: row.original?.products
+                                        }];
+                                        setShowDispatchMaterial({ open: true, data: obj })
                                     }}
                                 >
                                     <SendIcon fontSize="small" color={'primary'} />
@@ -162,15 +162,14 @@ const TechnicianDispatch = ({
 
         var data: any = [];
         const response = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
+        data = response?.data?.data?.material;
 
         const responseTechnician = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/technician`);
         const technician = responseTechnician?.data?.data;
 
-        data = response?.data?.data;
-        let rows = data.material.filter((e) => e.parentId === null);
-        const rowsTechnician: any = [];
-        
-        rows.forEach((parent, i) => {
+        const rows: any = [];
+
+        data.filter((e) => e.parentId === null && e.type === 'service').forEach((parent, i) => {
             technician.filter((e) => e._id === parent._id)?.forEach((element, i) => {
                 const obj: any = {};
                 obj._id = parent._id;
@@ -178,26 +177,32 @@ const TechnicianDispatch = ({
                 obj.technician = element?.technician
                 obj.estimateStartDate = element?.estimateStartDate
                 obj.estimateEndDate = element?.estimateEndDate
+                obj.products = data?.filter((ele) => ele.parentId === parent._id && ele.type === "product")
                 obj.status = element?.status
-                rowsTechnician.push(obj)
+                rows.push(obj)
             });
         });
-
-        setRowsData(rowsTechnician);
-        if (rowsTechnician.some(d => d.status !== 'Completed')) {
+        if (rows.some(d => d.status !== 'Completed')) {
             setNextStep(false)
         }
         else {
             setNextStep(true);
         }
+        setRowsData(rows);
         setSelectedRecords([]);
     };
 
     const handleDispatch = (rows) => {
         axiosInstance()
             .put(`${serviceOrder.api}/${serviceOrderData?._id}/technician/dispatched`, rows)
-            .then(() => {
+            .then(({ data }) => {
+                setShowDispatchMaterial({ open: false, data: [] });
                 fetchData();
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: data.message
+                });
             })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -207,8 +212,13 @@ const TechnicianDispatch = ({
     const handleCompleted = (rows) => {
         axiosInstance()
             .put(`${serviceOrder.api}/${serviceOrderData?._id}/technician/complete`, rows)
-            .then(() => {
+            .then(({ data }) => {
                 fetchData();
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: data.message
+                });
             })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -307,6 +317,17 @@ const TechnicianDispatch = ({
                     )}
                 </Grid>
             </Grid>
+            {showDispatchMaterial.open && (
+                <DispatchMaterial
+                    handleClose={() => {
+                        setShowDispatchMaterial({ open: false, data: [] });
+                    }}
+                    data={showDispatchMaterial.data}
+                    handleSubmit={(rows) => {
+                        handleDispatch(rows)
+                    }}
+                />
+            )}
         </Fragment>
     );
 };
