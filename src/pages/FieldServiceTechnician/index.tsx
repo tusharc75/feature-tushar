@@ -25,6 +25,9 @@ const FieldServiceTechnician = () => {
     axiosInstance().get(`/field-service-technician`)
       .then(({ data: { data } }) => {
         setFieldService(data?.data)
+        if (data?.data?.length) {
+          setSelectedFieldService(data?.data[0])
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -57,6 +60,12 @@ const FieldServiceTechnician = () => {
                 >
                   <Box p={3}>
                     <Typography>{data?.serviceOrderNumber}</Typography>
+                    <Typography>{data?.service?.serviceName}</Typography>
+                    <Typography>{data?.technicianAssign?.status}</Typography>
+                    <Typography>{data?.technicianAssign?.estimateStartDate}</Typography>
+                    <Typography>{data?.technicianAssign?.estimateEndDate}</Typography>
+                    <Typography>{data?.customerAccount?.optionLabel}</Typography>
+                    <Typography>{data?.shippingAddress?.optionLabel}</Typography>
                   </Box>
                 </Box>;
               })}
