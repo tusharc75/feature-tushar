@@ -277,9 +277,7 @@ const AssignProductDialog = ({
           toastConfig.setToastConfig(error);
         });
     }
-    else if (reference === routes.productionOrder.title) {
-      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
-    } else {
+    else {
       onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
     }
   };
