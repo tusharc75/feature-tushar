@@ -20,7 +20,7 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
     useEffect(() => {
         if (data?.length) {
             const rows: any = [];
-            data[0].products?.forEach((e) => {
+            data[0].material?.forEach((e) => {
                 const obj: any = {};
                 obj._id = e._id;
                 obj.detail = e?.productDetail?.productName;
