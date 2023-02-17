@@ -30,6 +30,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import styles from '../Leads/Header.module.scss';
 import ManageFieldTicket from './ManageFieldTicket';
+import { DateTimeRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 
 
 const FieldTicket = () => {
@@ -67,8 +68,18 @@ const FieldTicket = () => {
                 disabled: true,
                 cellRenderer: 'nameRenderer',
                 primaryField: true
-              }
+              },
             ];
+          } else if  (o?.fieldData?.fieldName === 'startDateTime' || o?.fieldData?.fieldName === 'endDateTime'){
+            columns = [...columns, 
+              {
+                field: o?.fieldData?.fieldName,
+                headerName: o?.fieldData?.fieldLabel,
+                cellRenderer:'dateTimeRenderer',
+                disabled: false,
+                show:true
+              },
+            ]
           } else {
             let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicket.path);
 
@@ -84,7 +95,8 @@ const FieldTicket = () => {
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
           nameRenderer: NameRenderer,
-          actionsRenderer: ActionsRenderer
+          actionsRenderer: ActionsRenderer,
+          dateTimeRenderer: DateTimeRenderer,
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
