@@ -46,14 +46,17 @@ export default function ActivityList(props) {
       let label = (
         <Box
           width={'100%'}
-          height={50}
+          height={30}
           className="d-flex align-items-center"
           style={{ backgroundColor: data?.color || "white" }}
           onClick={(event) => {
             handleSelect(event, data);
           }}
         >
-          <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{data?.name || data?.productName}</Typography>
+          {data?.productName ?
+            <Typography variant='subtitle2'>{data?.productName}</Typography>
+            : <Typography >{data?.name}</Typography>
+          }
         </Box>
       );
       return (
