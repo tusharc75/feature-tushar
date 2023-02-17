@@ -7,7 +7,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { camelCase } from 'lodash';
-import { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
@@ -22,7 +22,6 @@ import {
   removeLocalStorage,
   sidebarResource
 } from 'src/constants/helpers';
-import { getColumnData } from 'src/constants/columns';
 import { Link } from 'react-router-dom';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -30,11 +29,13 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import styles from '../Leads/Header.module.scss';
 import ManageFieldTicket from './ManageFieldTicket';
-import { DateTimeRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 
 
 const FieldTicket = () => {
+
   const renderedFrom = camelCase(routes?.fieldTicket.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, selectedEntity, user }
@@ -49,7 +50,7 @@ const FieldTicket = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const { getColumnData } = useColumns();
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -58,36 +59,11 @@ const FieldTicket = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.fieldData?.primaryField === true) {
-            columns = [
-              ...columns,
-              {
-                field: o?.fieldData?.fieldName,
-                headerName: o?.fieldData?.fieldLabel,
-                show: true,
-                disabled: true,
-                cellRenderer: 'nameRenderer',
-                primaryField: true
-              },
-            ];
-          } else if  (o?.fieldData?.fieldName === 'startDateTime' || o?.fieldData?.fieldName === 'endDateTime'){
-            columns = [...columns, 
-              {
-                field: o?.fieldData?.fieldName,
-                headerName: o?.fieldData?.fieldLabel,
-                cellRenderer:'dateTimeRenderer',
-                disabled: false,
-                show:true
-              },
-            ]
-          } else {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicket.path);
-
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName);
-              }
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicketDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
         });
@@ -96,7 +72,6 @@ const FieldTicket = () => {
           ...tempFrameworkComponent,
           nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer,
-          dateTimeRenderer: DateTimeRenderer,
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
@@ -107,7 +82,6 @@ const FieldTicket = () => {
   const fetchFieldTicketData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
@@ -117,10 +91,9 @@ const FieldTicket = () => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.fieldTicket?.isDelete  && finalObject?.ownerId === user?.user?._id ;
+          finalObject['canDelete'] = permissions?.fieldTicket?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
-
           return {
             ...finalObject
           };
@@ -140,20 +113,6 @@ const FieldTicket = () => {
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
-        }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -165,10 +124,8 @@ const FieldTicket = () => {
     switch (field) {
       case 'createdBy':
         return 'createdBy.user.concatedName';
-
       case 'updatedBy':
         return 'updatedBy.user.concatedName';
-
       default:
         return field;
     }
@@ -236,7 +193,7 @@ const FieldTicket = () => {
             size="small"
             aria-label="Clone"
             onClick={() => {
-             setFieldTicketId(params.data.id);
+              setFieldTicketId(params.data.id);
               setOpen({ open: true, isClone: true });
             }}
           >
