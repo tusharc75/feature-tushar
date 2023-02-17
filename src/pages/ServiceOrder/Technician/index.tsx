@@ -155,8 +155,8 @@ const Technician = ({
         const responseTechnician = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/technician`);
         const technician = responseTechnician?.data?.data;
 
-        data = response?.data?.data;
-        let rows = data.material.filter((e) => e.parentId === null);
+        data = response?.data?.data?.material?.filter((e) => e.type !== "product");
+        let rows = data.filter((e) => e.parentId === null);
         rows.forEach((parent, i) => {
             parent.index = i + 1;
             parent.detail =
@@ -167,7 +167,7 @@ const Technician = ({
                         : parent?.packageDetail?.packageName;
             parent.competency = parent.type === 'service' ? parent?.serviceDetail?.competency?.map((e) => e?.optionLabel)?.toString() : null
             parent.serviceCompetency = parent.type === 'service' ? parent?.serviceDetail?.competency || [] : []
-            parent.subRows = generateNestedData(data.material, technician, parent);
+            parent.subRows = generateNestedData(data, technician, parent);
         });
 
         if (technician?.length) {

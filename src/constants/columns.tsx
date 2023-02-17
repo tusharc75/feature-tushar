@@ -10,7 +10,8 @@ import {
   LinkRenderer,
   ImageRenderer,
   NameRenderer,
-  CheckboxRenderer
+  CheckboxRenderer,
+  DateTimeRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
 import { dateFormat, dateTimeFormat, formatAmountWithCurrency, sidebarResourceObjectFromValues, getUniqueCurrencies } from './helpers';
@@ -78,6 +79,11 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
       result = {
         ...result,
         dateRenderer: DateRenderer
+      };
+    } else if (o === 'dateTimeRenderer') {
+      result = {
+        ...result,
+        dateTimeRenderer: DateTimeRenderer
       };
     } else if (o === 'checkboxRenderer') {
       result = {
@@ -209,12 +215,12 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
         pathName = detailPagePath[joinedFieldName]
           ? detailPagePath[joinedFieldName]
           : field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-          ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-          : routes[joinedFieldName]?.path
-          ? routes[joinedFieldName]?.path
-          : routes[`${joinedFieldName}Detail`]?.path
-          ? routes[`${joinedFieldName}Detail`]?.path
-          : '';
+            ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+            : routes[joinedFieldName]?.path
+              ? routes[joinedFieldName]?.path
+              : routes[`${joinedFieldName}Detail`]?.path
+                ? routes[`${joinedFieldName}Detail`]?.path
+                : '';
       }
       return {
         columnData: {
@@ -255,6 +261,14 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
           cellRenderer: 'dateRenderer'
         },
         rendererName: 'dateRenderer'
+      };
+    } else if (field?.type === 'dateTime') {
+      return {
+        columnData: {
+          ...commonFieldData,
+          cellRenderer: 'dateTimeRenderer'
+        },
+        rendererName: 'dateTimeRenderer'
       };
     } else if (field?.type === 'checkBox') {
       return {

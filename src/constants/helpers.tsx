@@ -67,6 +67,7 @@ export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post 
 export const demandOrderSteps = ['Add Products'];
 export const purchaseRequisitionSteps = ['Add Products'];
 export const scheduleSteps = ['Add Products'];
+export const serviceOrderSteps = ['Add Services', 'Add Products', 'Assign Technician', 'Technician Dispatch', 'Invoice'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -223,8 +224,9 @@ export const sidebarResource = {
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
   schedule: 'Schedule',
-  competencyType: 'Competency Type'
-
+  competencyType: 'Competency Type',
+  fieldTicket: 'Field Ticket',
+  fieldServiceTechnician: `Field Service Technician`
 };
 
 export const primaryFields = {
@@ -328,7 +330,9 @@ export const RESOURCE_LABEL = {
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
   schedule: 'Schedule',
-  competencyType: 'Competency Type'
+  competencyType: 'Competency Type',
+  fieldTicket: 'Field Ticket',
+  fieldServiceTechnician: `Field Service Technician`
 };
 
 export const CHILD_RESOURCE = {

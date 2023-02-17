@@ -843,6 +843,27 @@ const routes = {
         : RESOURCE_LABEL.competencyType,
     path: '/competency-type/detail'
   },
+  fieldTicket: {
+    title:
+      storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title
+        ? storedRoutes.fieldTicket?.title
+        : RESOURCE_LABEL.fieldTicket,
+    path: '/field-ticket'
+  },
+  fieldTicketDetail: {
+    title:
+      storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title
+        ? storedRoutes.fieldTicket?.title
+        : RESOURCE_LABEL.fieldTicket,
+    path: '/field-ticket/detail'
+  },
+  fieldServiceTechnician: {
+    title:
+      storedRoutes && storedRoutes.fieldServiceTechnician && storedRoutes.fieldServiceTechnician.title
+        ? storedRoutes.fieldServiceTechnician?.title
+        : RESOURCE_LABEL.fieldServiceTechnician,
+    path: '/field-service-technician'
+  },
 };
 
 export default routes;
