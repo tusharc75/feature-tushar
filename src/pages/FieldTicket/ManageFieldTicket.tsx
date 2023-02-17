@@ -16,7 +16,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
-const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const { state: { user } }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -64,6 +64,15 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null }) =
       else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`
+        
+        if (referenceData) {
+          tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
+          tempInitialData['serviceOrder'] = referenceData?.serviceOrder;
+          tempInitialData['service'] = referenceData?.service;
+          tempInitialData['startDateTime'] = referenceData?.startDateTime;
+          tempInitialData['endDateTime'] = referenceData?.endDateTime;
+          tempInitialData['owner'] = referenceData?.owner;
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
