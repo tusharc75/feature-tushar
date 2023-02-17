@@ -192,6 +192,7 @@ import CompetencyType from './pages/CompetencyType';
 import CompetencyTypeDetail from './pages/CompetencyType/CompetencyTypeDetail';
 import FieldTicket from './pages/FieldTicket';
 import FieldTicketDetail from './pages/FieldTicket/FieldTicketDetail';
+import FieldServiceTechnician from './pages/FieldServiceTechnician';
 
 var notificationInterval: any = null;
 
@@ -956,6 +957,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldTicketDetail.path}/:id`}>
               <FieldTicketDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldServiceTechnician.path}`}>
+              <FieldServiceTechnician />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

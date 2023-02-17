@@ -226,7 +226,7 @@ export const sidebarResource = {
   schedule: 'Schedule',
   competencyType: 'Competency Type',
   fieldTicket: 'Field Ticket',
-
+  fieldServiceTechnician: `Field Service Technician`
 };
 
 export const primaryFields = {
@@ -332,6 +332,7 @@ export const RESOURCE_LABEL = {
   schedule: 'Schedule',
   competencyType: 'Competency Type',
   fieldTicket: 'Field Ticket',
+  fieldServiceTechnician: `Field Service Technician`
 };
 
 export const CHILD_RESOURCE = {
