@@ -154,8 +154,8 @@ const FieldServiceTechnician = () => {
                         <Typography style={{ fontWeight: '500' }}>{data?.technicianAssign?.status}</Typography>
                       </Box>
 
-                      <Box sx={style.serviceItem} style={{ fontSize: '14px' }}>
-                        <Typography>Customer: {data?.customerAccount?.optionLabel}</Typography>
+                      <Box sx={style.serviceItem}>
+                        <Typography style={{ fontSize: '14px' }}>Customer: {data?.customerAccount?.optionLabel}</Typography>
                       </Box>
                       <Box sx={style.serviceItem}>
                         <Typography style={{ fontSize: '14px' }}>Location: {data?.shippingAddress?.optionLabel}</Typography>
