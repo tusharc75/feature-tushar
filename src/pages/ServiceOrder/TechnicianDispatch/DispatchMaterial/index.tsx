@@ -79,6 +79,7 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
     >
         <CustomDialogHeader
             title={"Dispatch"}
+            showRequiredLabel={false}
             onClose={handleClose}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {

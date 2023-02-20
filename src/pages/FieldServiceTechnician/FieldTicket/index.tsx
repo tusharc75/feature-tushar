@@ -29,7 +29,7 @@ const FieldTicket = ({ selectedFieldService }) => {
   }: any = useData();
 
   const { getColumnData } = useColumns();
-  
+
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -84,9 +84,8 @@ const FieldTicket = ({ selectedFieldService }) => {
     }
     axiosInstance()
       .get(`${routes?.fieldTicket.path}${queryString}`)
-      .then(({ data: { data } }) => {
-        let count = data?.count;
-        let rows = data?.data?.map((u: any) => {
+      .then(({ data: { data, count } }) => {
+        let rows = data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.fieldServiceTechnician?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);

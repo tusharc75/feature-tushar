@@ -16,7 +16,6 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
 import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
-import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();

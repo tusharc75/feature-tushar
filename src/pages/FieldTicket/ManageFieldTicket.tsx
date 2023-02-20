@@ -64,7 +64,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`
-        
+
         if (referenceData) {
           tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
           tempInitialData['serviceOrder'] = referenceData?.serviceOrder;
@@ -72,6 +72,9 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           tempInitialData['startDateTime'] = referenceData?.startDateTime;
           tempInitialData['endDateTime'] = referenceData?.endDateTime;
           tempInitialData['technician'] = referenceData?.technician;
+        }
+        if (fieldsDataForCreate?.some((e) => e.fieldName === "currency")) {
+          tempInitialData["currency"] = user.user?.brandCurrency;
         }
         setInitialData({
           fields: fieldsDataForCreate,
@@ -104,7 +107,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         .post(`${routes.fieldTicket?.path}`, values)
         .then(({ data }) => {
           setLoading(false);
-         onSuccess(data.data);
+          onSuccess(data.data);
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
