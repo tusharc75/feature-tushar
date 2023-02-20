@@ -1,105 +1,120 @@
-import { Box, Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import AddIcon from '@material-ui/icons/Add';
 import { camelCase } from 'lodash';
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { CHILD_RESOURCE, removeLocalStorage } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { getColumnData } from 'src/constants/columns';
-import { getFrameworkComponents } from 'src/constants/columns';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AddCostDialog from './AddCostDialog';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import useColumns from 'src/constants/useColumns';
+import { isMobile, isTablet } from 'react-device-detect';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { AiFillFilePdf } from 'react-icons/ai';
+import { IoMdDownload } from 'react-icons/io';
 
-const AddCost = ({ id, fieldTicketData }) => {
-
+const AddCost = ({ id, fieldTicketData, allowedToEdit }) => {
   const renderedFrom = camelCase(routes?.fieldTicket.title);
   const toastConfig = useContext(CustomToastContext);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const {
-    state: { permissions, selectedEntity, user }
+    state: { permissions }
   }: any = useData();
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const [rowsData, setRowsData] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
+  const [selectedRecords, setSelectedRecords] = useState([]);
   const [columns, setColumns] = useState([]);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [addDialog, setAddDialog] = useState({ open: false, data: null });
+  const [allFields, setAllFields] = useState([]);
+  const [downlodingFile, setDownlodingFile] = useState(null);
+  const [generatingPdfFile, setGeneratingFile] = useState(false);
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${CHILD_RESOURCE.fieldTicketCost}`)
+      .get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`)
       .then(({ data: { data } }) => {
-        data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || "USD");
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          if (o?.fieldData?.fieldName === 'description') {
-            columns = [
-              ...columns,
-              {
-                field: o?.fieldData?.fieldName,
-                headerName: o?.fieldData?.fieldLabel,
-                show: true,
-                disabled: true,
-                cellRenderer: 'nameRenderer',
-              }
-            ];
-          } else {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicket.path);
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName);
-              }
-            }
+        data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || 'USD');
+        setAllFields(data);
+        const newColumns = genrateCustomTableColumns(data, fieldTicketData?.currency, renderedFrom);
+        let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
+        if (qtyIndex > -1) {
+          newColumns[qtyIndex].accessor = 'qtyDisplay';
+        }
+        newColumns.forEach((element) => {
+          if (element.accessor === 'qtyDisplay') {
+            element['Footer'] = (info) => {
+              const qtyTotal = info.rows
+                .filter((f) => f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+                .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+              return <>{qtyTotal}</>;
+            };
           }
         });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        setColumns([...columns]);
+        let columns: any = [
+          {
+            accessor: 'index',
+            Header: 'Index',
+            width: 70,
+            sticky: isMobile ? 'none' : 'left',
+            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+            Footer: () => {
+              return <>Total</>;
+            }
+          }
+        ];
+        columns = [...columns, ...newColumns];
+        columns.push({
+          accessor: 'action',
+          Header: 'Action',
+          minWidth: 100,
+          width: 100,
+          sticky: 'right',
+          disableFilters: true,
+          canDrag: false,
+          Cell: ({ row }) => (
+            <Grid container spacing={1}>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  setDeleteRecord(row.original);
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
+            </Grid>
+          )
+        });
+        setColumns(columns);
+        fetchCostData();
       });
-  }
+  };
 
   const fetchCostData = () => {
-    dispatch({ type: 'loading', loading: true });
     axiosInstance()
       .get(`/field-ticket/${id}/cost`)
       .then(({ data }) => {
-        let rows = data?.data.map((i) => {
-          return {
-            ...i,
-            price: i.price_cur,
-            totalPrice: i.totalPrice_cur,
-            finalPrice: i.finalPrice_cur
-          }
-        })
-        dispatch({
-          type: 'initialize',
-          data: rows,
-          count: data?.data.length
+        let rows = data?.data.map((i, index) => {
+          return { index: index + 1, ...i };
         });
-        dispatch({ type: 'loading', loading: false });
+        setRowsData(rows);
+        setSelectedRecords([]);
       })
       .catch((err) => {
-        dispatch({ type: 'loading', loading: false });
         toastConfig.setToastConfig(err);
       });
-  }
+  };
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -134,47 +149,29 @@ const AddCost = ({ id, fieldTicketData }) => {
       });
   };
 
-  const NameRenderer = (params) => {
-    return (
-      <span
-        onClick={() => setAddDialog({ open: true, data: params.data })}
-        className="link text-truncate">
-        {params.value}
-      </span>
-    );
+  const handlePDF = (type, PDFType) => {
   };
 
-  const ActionsRenderer = (params) => (
-    <Fragment>
-      {permissions.fieldTicket.isDelete ? (
-        <Tooltip title="Delete">
-          <IconButton
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to delete">
-          <IconButton aria-label="Delete" size="small">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Fragment>
-  )
+  const generateBase64forFile = (blobData, type) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data: any = reader.result;
+      if (type === 'pdf') {
+        const attachments = [
+          {
+            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+            contentType: base64data.split(';')[0].split(':')[1],
+            name: `Invoice-${fieldTicketData.fieldTicektNumber}`
+          }
+        ];
+      }
+    };
+  };
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
-
-  useEffect(() => {
-    fetchCostData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   return (
     <Fragment>
@@ -192,6 +189,34 @@ const AddCost = ({ id, fieldTicketData }) => {
           </Button>
         </Box>
         <Box display="flex">
+          <Button
+            variant="outlined"
+            className="btn-outline-v1"
+            color="primary"
+            type="button"
+            size="small"
+            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
+            onClick={(e) => {
+                handlePDF(downlodingFile, "Preview")
+            }}
+          >
+            Preview
+          </Button>
+          <Box mx={0.5} />
+          <Button
+            className="btn-outline-v1"
+            variant="outlined"
+            color="primary"
+            type="button"
+            size="small"
+            startIcon={<IoMdDownload />}
+            onClick={(e) => {
+                handlePDF(downlodingFile, "Download")
+            }}
+          >
+           Downlaod
+          </Button>
+          <Box mx={0.5} />
           <Button
             disabled={selectedRecords.length ? false : true}
             variant={'outlined'}
@@ -215,9 +240,7 @@ const AddCost = ({ id, fieldTicketData }) => {
             onClose={closeActions}
           >
             <MenuItem
-              disabled={
-                !((selectedRecords?.length > 0 && selectedRecords?.length))
-              }
+              disabled={!(selectedRecords?.length > 0 && selectedRecords?.length)}
               onClick={() => {
                 closeActions();
                 // eslint-disable-next-line no-lone-blocks
@@ -232,24 +255,26 @@ const AddCost = ({ id, fieldTicketData }) => {
           </Menu>
         </Box>
       </Box>
-      {Object.keys(frameWorkComponent).length > 0 && (
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={true}
-          loading={loading}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchCostData}
-          showOnlyShowFilteredRecordSwitch={true}
-          isClientSideGrid={true}
-        />
+      {columns && rowsData ? (
+        <Box p="6px" zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={'calc(100vh - 345px)'}
+            columns={columns}
+            data={rowsData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+            onSelect={setSelectedRecords}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            hideSelection={false}
+            hideAction={false}
+          />
+        </Box>
+      ) : (
+        <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
       )}
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
@@ -266,8 +291,8 @@ const AddCost = ({ id, fieldTicketData }) => {
         <AddCostDialog
           onClose={() => setAddDialog({ open: false, data: null })}
           onSuccess={() => {
-            setAddDialog({ open: false, data: null })
-            fetchCostData()
+            setAddDialog({ open: false, data: null });
+            fetchCostData();
           }}
           fieldTicketData={fieldTicketData}
           costData={addDialog.data}
