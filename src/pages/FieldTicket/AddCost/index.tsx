@@ -14,52 +14,37 @@ import AddCostDialog from './AddCostDialog';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import useColumns from 'src/constants/useColumns';
 import { isMobile, isTablet } from 'react-device-detect';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
 
-const AddCost = ({ id, fieldTicketData, allowedToEdit }) => {
+const AddCost = ({ id, fieldTicketData }) => {
+
   const renderedFrom = camelCase(routes?.fieldTicket.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const toastConfig = useContext(CustomToastContext);
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const {
-    state: { permissions }
-  }: any = useData();
+  const { state: { permissions } }: any = useData();
   const [rowsData, setRowsData] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [columns, setColumns] = useState([]);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [addDialog, setAddDialog] = useState({ open: false, data: null });
-  const [allFields, setAllFields] = useState([]);
-  const [downlodingFile, setDownlodingFile] = useState(null);
-  const [generatingPdfFile, setGeneratingFile] = useState(false);
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
 
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`)
       .then(({ data: { data } }) => {
         data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || 'USD');
-        setAllFields(data);
         const newColumns = genrateCustomTableColumns(data, fieldTicketData?.currency, renderedFrom);
-        let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-        if (qtyIndex > -1) {
-          newColumns[qtyIndex].accessor = 'qtyDisplay';
-        }
-        newColumns.forEach((element) => {
-          if (element.accessor === 'qtyDisplay') {
-            element['Footer'] = (info) => {
-              const qtyTotal = info.rows
-                .filter((f) => f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-                .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-              return <>{qtyTotal}</>;
-            };
-          }
-        });
         let columns: any = [
           {
             accessor: 'index',
@@ -149,29 +134,37 @@ const AddCost = ({ id, fieldTicketData, allowedToEdit }) => {
       });
   };
 
-  const handlePDF = (type, PDFType) => {
+  const handleViewPdf = (download) => {
+    axiosInstance().get(`/field-ticket/${fieldTicketData._id}/pdf`)
+      .then(({ data }) => {
+        axiosInstance()
+          .get(`user/download?fileName=${data.data.fileName}`, {
+            responseType: 'blob'
+          })
+          .then(({ data }) => {
+            if (download) {
+              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', `FieldTicket-${fieldTicketData.fieldTicketNumber}.pdf`);
+              document.body.appendChild(link);
+              link.click();
+            } else {
+              const file = new Blob([data], { type: 'application/pdf' });
+              const fileURL = URL.createObjectURL(file);
+              const pdfWindow = window.open();
+              pdfWindow.location.href = fileURL;
+              toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+            }
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+          });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
-
-  const generateBase64forFile = (blobData, type) => {
-    let reader = new FileReader();
-    reader.readAsDataURL(blobData);
-    reader.onloadend = function () {
-      let base64data: any = reader.result;
-      if (type === 'pdf') {
-        const attachments = [
-          {
-            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-            contentType: base64data.split(';')[0].split(':')[1],
-            name: `Invoice-${fieldTicketData.fieldTicektNumber}`
-          }
-        ];
-      }
-    };
-  };
-
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
 
   return (
     <Fragment>
@@ -197,7 +190,7 @@ const AddCost = ({ id, fieldTicketData, allowedToEdit }) => {
             size="small"
             startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
             onClick={(e) => {
-                handlePDF(downlodingFile, "Preview")
+              handleViewPdf(false)
             }}
           >
             Preview
@@ -211,10 +204,10 @@ const AddCost = ({ id, fieldTicketData, allowedToEdit }) => {
             size="small"
             startIcon={<IoMdDownload />}
             onClick={(e) => {
-                handlePDF(downlodingFile, "Download")
+              handleViewPdf(true)
             }}
           >
-           Downlaod
+            Downlaod
           </Button>
           <Box mx={0.5} />
           <Button
