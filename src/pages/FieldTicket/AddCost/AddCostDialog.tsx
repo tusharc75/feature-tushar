@@ -122,7 +122,7 @@ const AddCostDialog = ({costData, onClose, onSuccess, id}) => {
                     onClose();
                   }
                 }}
-                title={`Create AddOn`}
+                title={costData ? `Edit ${costData.description}` : `Add Cost`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
