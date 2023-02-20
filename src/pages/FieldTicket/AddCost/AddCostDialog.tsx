@@ -13,83 +13,81 @@ import InputField from 'src/components/Helpers/InputField';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
-const AddCostDialog = ({costData, onClose, onSuccess, id}) => {
-    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    const [initialData, setInitialData] = useState({ fields: [], values: {} });
-    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const toastConfig = useContext(CustomToastContext);
-    const ref = useRef(null);
-  
-    useEffect(() => {
-        fetchFields();
-      }, []);
-    
-      const fetchFields = async () => {
-        setInitialData({ fields: [], values: {} });
-        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`);
-        var data = response?.data?.data;
-        if (costData) {
-          setInitialData({
-            fields: data,
-            values: getObjKeysWithValues(costData, data)
-          });
-        } else {
-          setInitialData({
-            fields: data,
-            values: getObjKeys('', data)
-          });
-        }
-      };
+const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [initialData, setInitialData] = useState({ fields: [], values: {} });
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const toastConfig = useContext(CustomToastContext);
+  const ref = useRef(null);
 
-      const handleSubmit = (values) => {
-        setSubmitting(true)
-        if (costData) {
-          axiosInstance()
-            .put(`${routes.fieldTicket?.path}/${id}/cost`, [{...values, _id:costData._id}])
-            .then(({ data }) => {
-              setLoading(false);
-              onSuccess(data.data);
-              setSubmitting(false);
-              toastConfig.setToastConfig({
-                open: true,
-                type: 'success',
-                message: data.message
-              });
-            })
-            .catch((error) => {
-              setLoading(false);
-              setSubmitting(false);
-              toastConfig.setToastConfig(error);
-            });
-        }else{
-          axiosInstance()
-          .post(`${routes.fieldTicket?.path}/${id}/cost`, [values])
-          .then(({ data }) => {
-            setLoading(false);
-            onSuccess(data.data);
-            setSubmitting(false);
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: data.message
-            });
-          })
-          .catch((error) => {
-            setLoading(false);
-            setSubmitting(false);
-            toastConfig.setToastConfig(error);
+  useEffect(() => {
+    fetchFields();
+  }, []);
+
+  const fetchFields = async () => {
+    setInitialData({ fields: [], values: {} });
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`);
+    var data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || "USD");
+    if (costData) {
+      setInitialData({
+        fields: data,
+        values: getObjKeysWithValues(costData, data)
+      });
+    } else {
+      setInitialData({
+        fields: data,
+        values: getObjKeys('', data)
+      });
+    }
+  };
+
+  const handleSubmit = (values) => {
+    setSubmitting(true)
+    if (costData) {
+      axiosInstance()
+        .put(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [{ ...values, _id: costData._id }])
+        .then(({ data }) => {
+          setLoading(false);
+          onSuccess(data.data);
+          setSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
           });
-        } 
-      };
-    
-      function validate(values) {
-        const errors = {};
-        return errors;
-      }
-    
+        })
+        .catch((error) => {
+          setLoading(false);
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    } else {
+      axiosInstance()
+        .post(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [values])
+        .then(({ data }) => {
+          setLoading(false);
+          onSuccess(data.data);
+          setSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setLoading(false);
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
+
   return (
     <Dialog
       maxWidth="md"
@@ -109,7 +107,6 @@ const AddCostDialog = ({costData, onClose, onSuccess, id}) => {
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           onSubmit={handleSubmit}
-          validate={validate}
           innerRef={ref}
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
@@ -172,7 +169,6 @@ const AddCostDialog = ({costData, onClose, onSuccess, id}) => {
                   onClick={submitForm}
                   endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
-                  {' '}
                   Save
                 </Button>
               </CustomDialogFooter>
