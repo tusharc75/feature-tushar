@@ -1,10 +1,10 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { useData } from 'src/StateProvider/Provider';
 import { useParams, useHistory } from 'react-router-dom';
@@ -15,6 +15,9 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from './ManageFieldTicket';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import TabPanel from '../../components/TabPanel';
+import { FaWpforms } from 'react-icons/fa';
+import AddCost from './AddCost';
 
 const FieldTicketDetail = () => {
 
@@ -30,6 +33,7 @@ const FieldTicketDetail = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [tabValue, setTabValue] = useState(0)
 
   useEffect(() => {
     if (id) {
@@ -94,6 +98,10 @@ const FieldTicketDetail = () => {
     setOpenUpdateDialog(false);
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
 
   return (
     <Box className="main-container-v1">
@@ -121,13 +129,55 @@ const FieldTicketDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        {loading || !fields?.length ? (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
-          </Grid>
-        ) : (
-          <DetailsPage data={fieldTicketData} fields={fields} />
-        )}
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              height: 0
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            value={0}
+            aria-controls="a11y-tabpanel-0"
+            id="a11y-tab-0"
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
+            }
+            value={1}
+            aria-controls="a11y-tabpanel-1"
+            id="a11y-tab-1"
+          />
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={fieldTicketData} fields={fields} />
+          )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <AddCost
+            fieldTicketData={fieldTicketData}
+            id={id}
+          />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
