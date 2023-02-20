@@ -1,26 +1,14 @@
 import React, { useState, useEffect, useRef, useContext, Fragment } from 'react';
-import { nanoid } from 'nanoid';
 import {
     Box,
-    Container,
     TextField,
     Grid,
     Button,
-    CircularProgress,
-    Typography,
     IconButton,
-    FormControlLabel,
-    Checkbox,
-    Chip,
     Dialog,
-    DialogContent,
-    DialogContentText,
-    DialogActions,
-    DialogTitle,
     FormControl,
     InputLabel,
     MenuItem,
-    Slide,
     Select
 } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -34,12 +22,14 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import FormTypes from '../Helpers/FormTypes';
-import { dateFormat } from 'src/constants/helpers';
+import { dateFormat, dateTimeFormat } from 'src/constants/helpers';
 import moment from 'moment';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import SaveFilterDialog from './SaveFilterDialog';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 
 function GridFilter({ resource, currentGridApi, handleClose }) {
 
@@ -52,9 +42,8 @@ function GridFilter({ resource, currentGridApi, handleClose }) {
     const [selectedUserFilter, setSelectedUserFilter] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
 
-
-    const [isSaveFilter, setIsSaveFilter] = useState(false);
-
+    const [isSaveFilter, setIsSaveFilter] = useState({ open: false, data: null });
+    const [isFilterDeleteConfirm, setIsFilterDeleteConfirm] = useState({ open: false, ids: null });
 
     const [statusTimeFrame, setStatusTimeFrame] = useState<any>('custom');
     const [betweenDate, setBetweenDate] = useState(null);
@@ -131,9 +120,77 @@ function GridFilter({ resource, currentGridApi, handleClose }) {
         }
     };
 
+    const createFilterModel = () => {
+        const filterModel = {};
+        coloums.forEach((col) => {
+            const key = col?.fieldName;
+            if (col.type === "singleLine" && formValues[key]) {
+                filterModel[key] = {
+                    filterType: 'text',
+                    type: 'contains',
+                    filter: formValues[key]
+                };
+            }
+            if (col.type === "dropDown" && formValues[key]) {
+                filterModel[key] = {
+                    filterType: 'text',
+                    type: 'contains',
+                    filter: col[key]?.optionLabel
+                };
+            }
+            if (col.type === "dateTime" && formValues[key]) {
+                if (key.toLocaleLowerCase().includes('start')) {
+                    filterModel[key] = {
+                        filterType: 'text',
+                        type: 'greaterThan',
+                        filter: moment(col[key]).format(dateTimeFormat)
+                    };
+                } else if (key.toLocaleLowerCase().includes('end')) {
+                    filterModel[key] = {
+                        filterTo: null,
+                        type: 'lessThan',
+                        filter: moment(col[key]).format(dateTimeFormat)
+                    };
+                } else {
+                    filterModel[key] = {
+                        filterType: 'text',
+                        type: 'greaterThan',
+                        filter: moment(col[key]).format(dateTimeFormat)
+                    };
+                }
+            }
+            if (col.type === "multiSelect" && formValues[key]) {
+                filterModel[key] = {
+                    filterType: 'set',
+                    values: col[key]?.map((item) => item.optionLabel)
+                };
+            }
+        });
+        return filterModel;
+    };
+
     const handleApplyFilter = () => {
         console.log(formValues)
+        console.log(createFilterModel())
+        currentGridApi.setFilterModel(createFilterModel());
         handleClose();
+    };
+
+    const handleDeleteUserFilter = () => {
+        axiosInstance().put(`/user-resource-filter/remove`, { ids: isFilterDeleteConfirm.ids })
+            .then(({ data }) => {
+                fetchUserFilters()
+                setIsFilterDeleteConfirm({ open: false, ids: null })
+                setSelectedUserFilter(null)
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: data.message
+                });
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
     };
 
     return (<MuiPickersUtilsProvider utils={MomentUtils}>
@@ -141,158 +198,169 @@ function GridFilter({ resource, currentGridApi, handleClose }) {
             maxWidth={'md'}
             open={true}
             fullWidth
-            onClose={handleClose}
+            onClose={(e, reason) => {
+                if (reason !== 'backdropClick') {
+                    handleClose();
+                }
+            }}
             aria-describedby="Filter Dialog">
             <CustomDialogHeader
-                title="Filters"
+                title={`${resource} Filters`}
                 onClose={handleClose}
                 showRequiredLabel={false} />
             <CustomDialogContent>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <Autocomplete
-                            fullWidth
-                            size="small"
-                            value={selectedUserFilter}
-                            onChange={(event: any, newValue: any) => {
-                                setSelectedUserFilter(newValue);
-                            }}
-                            getOptionLabel={(option) => option.title}
-                            renderOption={(option) => (
-                                <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
-                                    <span
-                                        onClick={() => setIsEditing(false)}
-                                        style={{ width: 'calc(100% - 71px)' }}>
-                                        {option?.title}
-                                    </span>
-                                    <Box>
-                                        <IconButton
-                                            size="small"
-                                            style={{ marginRight: '20px' }}
-                                            onClick={() => {
-                                                setIsEditing(true);
-                                            }}
-                                        >
-                                            <AiFillEdit />
-                                        </IconButton>
-                                        <IconButton size="small"
-                                        // onClick={() => openDeleteConFirmation(option._id, option.title)}
-                                        >
-                                            <RiDeleteBin6Fill />
-                                        </IconButton>
+                <Box pt={2} pb={2}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <Autocomplete
+                                fullWidth
+                                size="small"
+                                value={selectedUserFilter}
+                                onChange={(event: any, newValue: any) => {
+                                    setSelectedUserFilter(newValue);
+                                    setFormValues(newValue?.filterValue);
+                                }}
+                                getOptionLabel={(option) => option.title}
+                                renderOption={(option) => (
+                                    <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
+                                        <span
+                                            onClick={() => setIsEditing(false)}
+                                            style={{ width: 'calc(100% - 71px)' }}>
+                                            {option?.title}
+                                        </span>
+                                        <Box>
+                                            <IconButton
+                                                size="small"
+                                                style={{ marginRight: '20px' }}
+                                            >
+                                                <AiFillEdit />
+                                            </IconButton>
+                                            <IconButton size="small"
+                                                onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}
+                                            >
+                                                <RiDeleteBin6Fill />
+                                            </IconButton>
+                                        </Box>
                                     </Box>
-                                </Box>
-                            )}
-                            id="controllable-states-demo"
-                            options={userFilters}
-                            renderInput={(params) => <TextField fullWidth {...params} label="Select a Filter Set" variant="outlined" />}
-                        />
+                                )}
+                                id="controllable-states-demo"
+                                options={userFilters}
+                                renderInput={(params) =>
+                                    <TextField
+                                        {...params}
+                                        fullWidth
+                                        label="Select a Filter Set"
+                                        variant="outlined" />}
+                            />
+                        </Grid>
                     </Grid>
-                    {coloums ? (
-                        coloums?.map((field) => {
-                            return <Fragment key={field._id}>
-                                {field.type === 'date' || field.type === 'dateTime' ? (
-                                    <Fragment>
-                                        <Grid item xs={12} sm={6}>
-                                            <FormControl fullWidth size="small" variant="outlined">
-                                                <InputLabel id={field.fieldName}>Select Duration</InputLabel>
-                                                <Select
-                                                    labelId={field.fieldName}
-                                                    id={`time-${field.fieldName}`}
-                                                    value={statusTimeFrame}
-                                                    onChange={(e) => {
-                                                        handleDuration(e.target.value, field);
-                                                        // const tempArray = [...selectedResources];
-                                                        // let tempIndex = tempArray.findIndex((d) => d?.fieldName === field?.fieldName);
-                                                        // tempArray[tempIndex].timeFrame = e.target.value;
-                                                        // setSelectedResources(tempArray);
+                </Box>
+                <Box pt={2} pb={2}>
+                    <Grid container spacing={2}>
+                        {coloums ? (
+                            coloums?.map((field) => {
+                                return <Fragment key={field._id}>
+                                    {field.type === 'date' || field.type === 'dateTime' ? (
+                                        <Fragment>
+                                            <Grid item xs={12} sm={6}>
+                                                <FormControl fullWidth size="small" variant="outlined">
+                                                    <InputLabel id={field.fieldName}>Select Duration</InputLabel>
+                                                    <Select
+                                                        labelId={field.fieldName}
+                                                        id={`time-${field.fieldName}`}
+                                                        value={statusTimeFrame}
+                                                        onChange={(e) => {
+                                                            handleDuration(e.target.value, field);
+                                                        }}
+                                                    >
+                                                        <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                                                        <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                                                        <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                                                        <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                                                        <MenuItem value={'custom'}>Custom</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12} sm={6}>
+                                                <KeyboardDatePicker
+                                                    autoOk
+                                                    disabled={field.timeFrame !== 'custom'}
+                                                    fullWidth
+                                                    size="small"
+                                                    variant="inline"
+                                                    inputVariant="outlined"
+                                                    name={`from_${field.fieldName}`}
+                                                    label={`From ${field.fieldLabel}`}
+                                                    value={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : null}
+                                                    onChange={(date: any) => {
+                                                        setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
                                                     }}
-                                                >
-                                                    <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                                                    <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                                                    <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                                                    <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                                                    <MenuItem value={'custom'}>Custom</MenuItem>
-                                                </Select>
-                                            </FormControl>
-                                        </Grid>
-                                        <Grid item xs={12} sm={6}>
-                                            <KeyboardDatePicker
-                                                autoOk
-                                                disabled={field.timeFrame !== 'custom'}
+                                                    format={dateFormat}
+                                                    InputLabelProps={{
+                                                        shrink: true
+                                                    }}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} sm={6}>
+                                                <KeyboardDatePicker
+                                                    autoOk
+                                                    fullWidth
+                                                    disabled={field.timeFrame !== 'custom'}
+                                                    size="small"
+                                                    variant="inline"
+                                                    inputVariant="outlined"
+                                                    name={`to_${field.fieldName}`}
+                                                    label={`To ${field.fieldLabel}`}
+                                                    value={betweenDate && betweenDate[`to_${field.fieldName}`] ? betweenDate[`to_${field.fieldName}`] : null}
+                                                    onChange={(date: any) => {
+                                                        setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
+                                                    }}
+                                                    format={dateFormat}
+                                                    InputLabelProps={{
+                                                        shrink: true
+                                                    }}
+                                                    minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
+                                                />
+                                            </Grid>
+                                        </Fragment>
+                                    ) :
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <FormTypes
+                                                disabled={false}
+                                                values={formValues}
+                                                errors={{}}
+                                                touched={{}}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type === 'dropDown' ? 'multiSelect' : field.type}
+                                                options={field.option}
+                                                setFieldValue={handleSelectFilter}
+                                                required={false}
                                                 fullWidth
                                                 size="small"
-                                                variant="inline"
-                                                inputVariant="outlined"
-                                                name={`from_${field.fieldName}`}
-                                                label={`From ${field.fieldLabel}`}
-                                                value={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : null}
-                                                onChange={(date: any) => {
-                                                    setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
-                                                }}
-                                                format={dateFormat}
-                                                InputLabelProps={{
-                                                    shrink: true
-                                                }}
                                             />
                                         </Grid>
-                                        <Grid item xs={12} sm={6}>
-                                            <KeyboardDatePicker
-                                                autoOk
-                                                fullWidth
-                                                disabled={field.timeFrame !== 'custom'}
-                                                size="small"
-                                                variant="inline"
-                                                inputVariant="outlined"
-                                                name={`to_${field.fieldName}`}
-                                                label={`To ${field.fieldLabel}`}
-                                                value={betweenDate && betweenDate[`to_${field.fieldName}`] ? betweenDate[`to_${field.fieldName}`] : null}
-                                                onChange={(date: any) => {
-                                                    setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
-                                                }}
-                                                format={dateFormat}
-                                                InputLabelProps={{
-                                                    shrink: true
-                                                }}
-                                                minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
-                                            />
-                                        </Grid>
-                                    </Fragment>
-                                ) :
-                                    <Grid item xs={12} sm={6} md={6}>
-                                        <FormTypes
-                                            fieldData={field}
-                                            values={formValues}
-                                            errors={{}}
-                                            touched={{}}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type === 'dropDown' ? 'multiSelect' : field.type}
-                                            options={field.option}
-                                            setFieldValue={handleSelectFilter}
-                                            required={false}
-                                            fullWidth
-                                            size="small"
-                                        />
-                                    </Grid>
-                                }
-                            </Fragment>
-                        })
-                    ) : (
-                        <Box p={2} height={500} bgcolor="white">
-                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                        </Box>
-                    )}
-                </Grid>
+                                    }
+                                </Fragment>
+                            })
+                        ) : (
+                            <Box p={2} height={500} bgcolor="white">
+                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                            </Box>
+                        )}
+                    </Grid>
+                </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
                 <Button
                     onClick={() => {
-                        setIsSaveFilter(true)
+                        setIsSaveFilter({ open: true, data: selectedUserFilter })
                     }}
-                    className="btn-outline-v1 light"
+                    size="small"
+                    color="primary"
+                    variant="contained"
                 >
-                    {isEditing ? 'Update Filter' : 'Save Filter'}
+                    {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
                 </Button>
                 <Button
                     onClick={handleApplyFilter}
@@ -304,6 +372,29 @@ function GridFilter({ resource, currentGridApi, handleClose }) {
                 </Button>
             </CustomDialogFooter>
         </Dialog>
+        {isFilterDeleteConfirm.open && (
+            <ConfirmationDialog
+                open={true}
+                message={`Are you sure you want to delete ?`}
+                onClose={() => setIsFilterDeleteConfirm({ open: false, ids: null })}
+                onOk={handleDeleteUserFilter}
+            />
+        )}
+        {isSaveFilter.open &&
+            <SaveFilterDialog
+                handleClose={() => {
+                    setIsSaveFilter({ open: false, data: null })
+                }}
+                resource={resource}
+                handleSucess={() => {
+                    setIsSaveFilter({ open: false, data: null })
+                    setFormValues({})
+                    fetchUserFilters()
+                }}
+                filterData={isSaveFilter.data}
+                filterValue={formValues}
+            />
+        }
     </MuiPickersUtilsProvider>
     );
 }
