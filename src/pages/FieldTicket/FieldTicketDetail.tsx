@@ -13,6 +13,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from './ManageFieldTicket';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
 
 const FieldTicketDetail = () => {
 
@@ -101,32 +103,31 @@ const FieldTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <>
-              {permissions?.fieldTicket?.isUpdate && allowedToEdit &&  (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                </Button>
-              )}
-              {permissions?.fieldTicket?.isDelete && allowedToDelete  && (
-                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-              )}
-            </>
+            {permissions?.fieldTicket?.isUpdate && allowedToEdit && (
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                className="btn-outline-v1"
+                onClick={handleOpenUpdateDialog}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+              >
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              </Button>
+            )}
+            {permissions?.fieldTicket?.isDelete && allowedToDelete && (
+              <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+            )}
+            <ActivityButton referenceId={fieldTicketData?._id} resource={ACTIVITY_RESOURCE.fieldTicket} />
           </Box>
         </Box>
       </Box>
       <Box className="detail-container-v1">
-      {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={fieldTicketData} fields={fields} />
-            )}
+        {loading || !fields?.length ? (
+          <Grid container spacing={2} style={{ padding: '8px' }}>
+            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+          </Grid>
+        ) : (
+          <DetailsPage data={fieldTicketData} fields={fields} />
+        )}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
