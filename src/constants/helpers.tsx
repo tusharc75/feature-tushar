@@ -1862,7 +1862,8 @@ export const ACTIVITY_RESOURCE = {
   productionOrder: 'productionOrder',
   serviceOrder: 'serviceOrder',
   workOrder: 'workOrder',
-  demandOrder: 'demandOrder'
+  demandOrder: 'demandOrder',
+  fieldTicket: 'fieldTicket',
 };
 
 export const REPORT_LIST = [
@@ -2125,6 +2126,11 @@ export const getData = (resource: string, data: any) => {
     case 'work-order':
       return {
         name: `${data?.workOrderNumber}`,
+        id: data._id
+      };
+    case 'field-ticket':
+      return {
+        name: `${data?.fieldTicketNumber}`,
         id: data._id
       };
     default:
