@@ -176,6 +176,7 @@ const FieldTicketDetail = () => {
           <AddCost
             fieldTicketData={fieldTicketData}
             id={id}
+            allowedToEdit={allowedToEdit}
           />
         </TabPanel>
       </Box>
