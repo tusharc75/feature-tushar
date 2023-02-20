@@ -103,7 +103,7 @@ const FieldTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.fieldTicket?.isUpdate && allowedToEdit && (
+            {permissions?.fieldTicket?.isUpdate && (
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
                 className="btn-outline-v1"
@@ -113,7 +113,7 @@ const FieldTicketDetail = () => {
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
-            {permissions?.fieldTicket?.isDelete && allowedToDelete && (
+            {permissions?.fieldTicket?.isDelete && (
               <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
             )}
             <ActivityButton referenceId={fieldTicketData?._id} resource={ACTIVITY_RESOURCE.fieldTicket} />
