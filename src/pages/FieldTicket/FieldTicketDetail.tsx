@@ -129,7 +129,7 @@ const FieldTicketDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-      <Tabs
+        <Tabs
           className="new-tab-container-v1"
           value={tabValue}
           onChange={handleMainTabChange}
@@ -140,24 +140,23 @@ const FieldTicketDetail = () => {
             }
           }}
         >
-           <Tab
+          <Tab
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-              <FaWpforms className="mr-1" fontSize="inherit" /> Header
-            </div>
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
             }
             value={0}
             aria-controls="a11y-tabpanel-0"
             id="a11y-tab-0"
           />
-
-           <Tab
+          <Tab
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-            </div>
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
             }
             value={1}
             aria-controls="a11y-tabpanel-1"
@@ -165,19 +164,20 @@ const FieldTicketDetail = () => {
           />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
-        {loading || !fields?.length ? (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
-          </Grid>
-        ) : (
-          <DetailsPage data={fieldTicketData} fields={fields} />
-        )}
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={fieldTicketData} fields={fields} />
+          )}
         </TabPanel>
-       <TabPanel value={tabValue} index={1}>
-         <AddCost 
-         id={id}
-        />
-       </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <AddCost
+            fieldTicketData={fieldTicketData}
+            id={id}
+          />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
