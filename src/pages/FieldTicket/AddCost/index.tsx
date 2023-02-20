@@ -18,6 +18,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
+import EditIcon from "@material-ui/icons/Edit";
 
 const AddCost = ({ id, fieldTicketData }) => {
 
@@ -44,7 +45,7 @@ const AddCost = ({ id, fieldTicketData }) => {
       .get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`)
       .then(({ data: { data } }) => {
         data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || 'USD');
-        const newColumns = genrateCustomTableColumns(data, fieldTicketData?.currency, renderedFrom);
+        const newColumns = genrateCustomTableColumns(data, fieldTicketData?.currency || 'USD', renderedFrom);
         let columns: any = [
           {
             accessor: 'index',
@@ -72,6 +73,15 @@ const AddCost = ({ id, fieldTicketData }) => {
                 size="small"
                 aria-label="Details"
                 onClick={() => {
+                  setAddDialog({ open: true, data: row.original });
+                }}
+              >
+                <EditIcon fontSize="small" color="primary" />
+              </IconButton>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
                   setDeleteRecord(row.original);
                   setShowDeleteConfirmBox(true);
                 }}
@@ -89,10 +99,13 @@ const AddCost = ({ id, fieldTicketData }) => {
   const fetchCostData = () => {
     axiosInstance()
       .get(`/field-ticket/${id}/cost`)
-      .then(({ data }) => {
-        let rows = data?.data.map((i, index) => {
-          return { index: index + 1, ...i };
-        });
+      .then(({ data: { data } }) => {
+        let rows = []
+        if (data) {
+          rows = data?.map((i, index) => {
+            return { index: index + 1, ...i };
+          });
+        }
         setRowsData(rows);
         setSelectedRecords([]);
       })
@@ -260,8 +273,6 @@ const AddCost = ({ id, fieldTicketData }) => {
             uniqueKey="_id"
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            hideSelection={false}
-            hideAction={false}
           />
         </Box>
       ) : (
