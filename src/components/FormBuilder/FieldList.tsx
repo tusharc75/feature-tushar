@@ -159,6 +159,11 @@ const FieldList = {
     type: "signature",
     icon: "far fa-calendar-check",
   },
+  LOOKUPDISPLAY: {
+    label: "Look Up Display",
+    type: "lookUpDisplay",
+    icon: "far fa-calendar-check",
+  },
 };
 
 export default FieldList;

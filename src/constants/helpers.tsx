@@ -742,6 +742,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
         });
     } else if (key.type === 'decimal') {
       obj[key.fieldName] = value && value !== '' ? parseFloat(value) : value;
+    } else if (key.type === 'lookUpDisplay') {
     } else {
       obj[key.fieldName] = value;
     }
@@ -809,6 +810,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
       }
     } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : defaultValue || 0;
+    } else if (key.type === 'lookUpDisplay') {
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue || '';
     }
