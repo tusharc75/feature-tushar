@@ -6,7 +6,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, removeLocalStorage } from 'src/constants/helpers';
+import { CHILD_RESOURCE, prepareDataForGrid, removeLocalStorage } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { genrateCustomTableColumns } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -106,6 +106,13 @@ const AddCost = ({ id, fieldTicketData }) => {
             return { index: index + 1, ...i };
           });
         }
+        rows = rows.map((item, index) => {
+          let finalObject = prepareDataForGrid(item);
+            return {
+              ...finalObject,
+              parentId: null
+            }
+        })
         setRowsData(rows);
         setSelectedRecords([]);
       })
@@ -220,7 +227,7 @@ const AddCost = ({ id, fieldTicketData }) => {
               handleViewPdf(true)
             }}
           >
-            Downlaod
+            Download
           </Button>
           <Box mx={0.5} />
           <Button
