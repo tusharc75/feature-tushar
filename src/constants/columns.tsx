@@ -470,7 +470,7 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
             },
             Footer: (info) => {
               const total = info?.rows
-                ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
+                ?.filter((f) => !f.original.parentId && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
                 .reduce((sum, row) => row.values[fieldName] + sum, 0);
               return (
                 <>
@@ -519,7 +519,7 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
             Cell: ({ row }) => (row.original[ele.fieldName] ? <p>{row.original[ele.fieldName]}</p> : <NoDataCell />),
             Footer: (info) => {
               const qtyTotal = info.rows
-                .filter((f) => f.original.parentId === null && f.original.hasOwnProperty(ele.fieldName) && !isNaN(f.original[ele.fieldName]))
+                .filter((f) => !f.original.parentId && f.original.hasOwnProperty(ele.fieldName) && !isNaN(f.original[ele.fieldName]))
                 .reduce((sum, row) => row.original[currentColumn.accessor] + sum, 0);
               return <>{qtyTotal}</>;
             }

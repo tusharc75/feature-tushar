@@ -220,7 +220,7 @@ const AddCost = ({ id, fieldTicketData }) => {
               handleViewPdf(true)
             }}
           >
-            Downlaod
+            Download
           </Button>
           <Box mx={0.5} />
           <Button
