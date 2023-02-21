@@ -113,6 +113,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
         if (fieldsDataForCreate?.some((e) => e.fieldName === "expectedCompletionDate")) {
           initialData["expectedCompletionDate"] = null;
         }
+        
         if (refrenceType === "Rental Job") {
           initialData["warehouse"] = refrenceData?.warehouse
           initialData["rentalJob"] = refrenceData?._id
