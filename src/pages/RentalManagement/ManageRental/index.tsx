@@ -262,7 +262,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     initialData["currency"] = user.user?.brandCurrency;
                 }
                 if (fieldsDataForCreate?.some((e) => e.fieldName === "estimateEndDate")) {
-                    initialData["estimateEndDate"] = "";
+                    initialData["estimateEndDate"] = null;
                 }
                 initialData["actualStartDate"] = "";
                 initialData["actualEndDate"] = "";
