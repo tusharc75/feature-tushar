@@ -416,7 +416,6 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, setOpen,
   };
 
 
-  console.log(allColumns)
 
   return (
     <>

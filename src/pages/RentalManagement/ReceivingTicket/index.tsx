@@ -1771,7 +1771,7 @@ const ReceivingTicket = ({
       {showConformationRevertTicket && (
         <ConfirmationDialog
           open={showConformationRevertTicket}
-          message={`Are you sure you want to revert receiving ticket?`}
+          message={`Are you sure you want to revert receiving ticket for the selected line item ?`}
           onClose={() => {
             setShowConformationRevertTicket(false);
           }}
@@ -1785,7 +1785,7 @@ const ReceivingTicket = ({
       {showConformationCancleTicket && (
         <ConfirmationDialog
           open={showConformationCancleTicket}
-          message={`Are you sure you want to cancel receiving ticket?`}
+          message={`This action will cancel the complete Receiving Ticket. Are you sure?`}
           onClose={() => {
             setShowConformationCancleTicket(false);
           }}

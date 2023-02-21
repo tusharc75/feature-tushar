@@ -1081,7 +1081,7 @@ const LoadingTicket = ({
       {showConformationRevertTicket && (
         <ConfirmationDialog
           open={showConformationRevertTicket}
-          message={`Are you sure you want to revert loading ticket?`}
+          message={`Are you sure you want to revert loading ticket for the selected line item ?`}
           onClose={() => {
             setShowConformationRevertTicket(false);
           }}
@@ -1095,7 +1095,7 @@ const LoadingTicket = ({
       {showConformationCancleTicket && (
         <ConfirmationDialog
           open={showConformationCancleTicket}
-          message={`Are you sure you want to cancel loading ticket?`}
+          message={`This action will cancel the complete Loading Ticket. Are you sure?`}
           onClose={() => {
             setShowConformationCancleTicket(false);
           }}

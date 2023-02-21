@@ -49,17 +49,24 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
 
   const fetchFields = async () => {
     const column = [];
-    const productResult = await axiosInstance().get('/field?resource=Product&view=true')
-    const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "serializedProduct"].includes(e?.fieldData?.fieldName));
+    const { data: { data } } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+          fieldNames: ['productName', 'productNumber', 'productDescription', 'serializedProduct']
+        }
+      ]
+    });
+    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
     productFields?.forEach((e) => {
-      if (e?.fieldData?.fieldName === "productName") {
-        column.push({ field: "productName", primaryField: true, headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" })
+      if (e?.fieldName === "productName") {
+        column.push({ field: "productName", primaryField: true, headerName: e?.fieldLabel, show: true, disabled: true, cellRenderer: "productNameRenderer" })
       }
-      if (e?.fieldData?.fieldName === "productNumber") {
-        column.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+      else if (e?.fieldName === "serializedProduct") {
+        column.push({ field: "serializedProductShow", headerName: e?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
       }
-      if (e?.fieldData?.fieldName === "serializedProduct") {
-        column.push({ field: "serializedProductShow", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+      else {
+        column.push({ field: e?.fieldName, headerName: e?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
       }
     })
     column.push({
@@ -116,6 +123,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           finalObject['productId'] = u?.product;
           finalObject['productName'] = u?.productDetail?.productName;
           finalObject['productNumber'] = u?.productDetail?.productNumber;
+          finalObject['productDescription'] = u?.productDetail?.productDescription;
           finalObject['serializedProduct'] = u?.productDetail?.serializedProduct;
           finalObject['serializedProductShow'] = u?.productDetail?.serializedProduct ? "Yes" : "No";
           finalObject['qty'] = u.qty;
@@ -189,7 +197,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     }
   };
 
-  const NameRenderer = (params) => (
+  const ProductNameRenderer = (params) => (
     <Link className="link" title={params.value} to={`/product/detail/${params.data.product}`}>
       {params.value}
     </Link>
@@ -234,7 +242,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const frameworkComponents = {
     serialNumberRenderer: SerialNumberRenderer,
     commonRenderer: CommonRenderer,
-    nameRenderer: NameRenderer,
+    productNameRenderer: ProductNameRenderer,
     actionsRenderer: ActionRenderer
   };
 
