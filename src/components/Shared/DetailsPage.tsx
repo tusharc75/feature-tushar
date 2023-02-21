@@ -247,7 +247,6 @@ const Details = (props: DetailProps) => {
    */
   const renderData = (val: any, fieldData: any) => {
     const value = normalizeValues(val, fieldData);
-    console.log(value)
     if (
       fieldData?.hasOwnProperty('lookup') &&
       fieldData?.lookup &&

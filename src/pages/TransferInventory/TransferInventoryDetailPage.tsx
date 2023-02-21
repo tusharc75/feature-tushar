@@ -18,7 +18,6 @@ import queryString from 'query-string';
 import Steps from 'src/pages/RentalManagement/Steps';
 import { MdEdit } from 'react-icons/md';
 import { transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
-import Activity from 'src/components/Activity';
 import TabPanel from 'src/components/TabPanel';
 import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
