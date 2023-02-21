@@ -346,7 +346,7 @@ export default function CustomAgGrid({
       return (
         <AgGridColumn
           key={generateUniqueId()}
-          width={130}
+          width={actionWidth}
           field="actions"
           headerName={actionLabel ? actionLabel : 'Actions'}
           pinned={'right'}

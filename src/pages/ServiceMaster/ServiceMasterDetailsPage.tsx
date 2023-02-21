@@ -132,7 +132,7 @@ const ServiceMasterDetailsPage = () => {
           />
         </Tabs>
         <Grid container spacing={2}>
-          <Grid item xs={permissions?.leadTimeMaster?.isRead ? 8 : 12}>
+          <Grid item xs={12}>
             {tabValue === 0 && (
               <Box className="form-v1">
                 {loading || (!fields.length && serviceMasterDetailData != null) ? (
@@ -140,20 +140,24 @@ const ServiceMasterDetailsPage = () => {
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
                 ) : (
-                  <DetailsPage data={serviceMasterDetailData} fields={fields} />
+                  <>
+                    <DetailsPage data={serviceMasterDetailData} fields={fields} />
+                    {permissions?.leadTimeMaster?.isRead && (
+                      <Box mb={2} mt={2}>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <LeadTimeMaster Id={id} type={'service'} />
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    )}
+                  </>
                 )}
               </Box>
             )}
             {tabValue === 1 && <Steps serviceId={id} />}
             {tabValue === 2 && <Product id={id} />}
           </Grid>
-          {permissions?.leadTimeMaster?.isRead && (
-            <Grid item xs={4}>
-              <Box mb={2}>
-                <LeadTimeMaster Id={id} type={'service'} />
-              </Box>
-            </Grid>
-          )}
         </Grid>
       </Box>
       {showConfirmBox && (
