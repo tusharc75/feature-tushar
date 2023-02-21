@@ -53,7 +53,8 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        data = data.filter((d) => !["currentOwnerType", "currentOwner", "purchaseOrder", "bulkAssetCreation"].includes(d.fieldData.fieldName));
+        data = data.filter((d) => d.fieldData.type !== 'lookUpDisplay' && !["currentOwnerType", "currentOwner", "purchaseOrder", "bulkAssetCreation"].includes(d.fieldData.fieldName));
+
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         var fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
