@@ -170,8 +170,6 @@ function GridFilter({ resource, currentGridApi, handleClose }) {
     };
 
     const handleApplyFilter = () => {
-        console.log(formValues)
-        console.log(createFilterModel())
         currentGridApi.setFilterModel(createFilterModel());
         handleClose();
     };
