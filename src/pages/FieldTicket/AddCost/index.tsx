@@ -91,6 +91,15 @@ const AddCost = ({ id, fieldTicketData }) => {
             </Grid>
           )
         });
+        columns.forEach((element) => {
+          if (element.accessor === 'qty' || element.accessor.includes('price') || element.accessor.includes('totalPrice') || element.accessor.includes('finalPrice')) {
+            element['Footer'] = (info) => {
+              const qtyTotal = info.rows
+                .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+              return <>{qtyTotal}</>;
+            };
+          }
+        })
         setColumns(columns);
         fetchCostData();
       });
@@ -220,7 +229,7 @@ const AddCost = ({ id, fieldTicketData }) => {
               handleViewPdf(true)
             }}
           >
-            Downlaod
+            Download
           </Button>
           <Box mx={0.5} />
           <Button
