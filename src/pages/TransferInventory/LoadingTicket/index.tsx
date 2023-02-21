@@ -52,17 +52,24 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
 
   const fetchFields = async () => {
     const column = [];
-    const productResult = await axiosInstance().get('/field?resource=Product&view=true')
-    const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "serializedProduct"].includes(e?.fieldData?.fieldName));
+    const { data: { data } } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+          fieldNames: ['productName', 'productNumber', 'productDescription', 'serializedProduct']
+        }
+      ]
+    });
+    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
     productFields?.forEach((e) => {
-      if (e?.fieldData?.fieldName === "productName") {
-        column.push({ field: "productName", primaryField: true, headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "productNameRenderer" })
+      if (e?.fieldName === "productName") {
+        column.push({ field: "productName", primaryField: true, headerName: e?.fieldLabel, show: true, disabled: true, cellRenderer: "productNameRenderer" })
       }
-      if (e?.fieldData?.fieldName === "productNumber") {
-        column.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+      else if (e?.fieldName === "serializedProduct") {
+        column.push({ field: "serializedProductShow", headerName: e?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
       }
-      if (e?.fieldData?.fieldName === "serializedProduct") {
-        column.push({ field: "serializedProductShow", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+      else {
+        column.push({ field: e?.fieldName, headerName: e?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
       }
     })
     const extracolumns = [
@@ -147,10 +154,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         let obj = { ...product };
         obj['productId'] = product?.product;
         obj['_id'] = product.product;
-        obj['productName'] = product.productDetail.productName;
-        obj['productNumber'] = product.productDetail.productNumber;
-        obj['serializedProduct'] = product.productDetail.serializedProduct;
-        obj['serializedProductShow'] = product.productDetail.serializedProduct ? "Yes" : "No";
+        obj['productName'] = product?.productDetail?.productName;
+        obj['productNumber'] = product?.productDetail?.productNumber;
+        obj['productDescription'] = product?.productDetail?.productDescription;
+        obj['serializedProduct'] = product?.productDetail?.serializedProduct;
+        obj['serializedProductShow'] = product?.productDetail?.serializedProduct ? "Yes" : "No";
         obj['qty'] = product.qty;
         obj['type'] = 'Product';
         obj['isChecked'] = false;
