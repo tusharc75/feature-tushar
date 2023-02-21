@@ -89,14 +89,14 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original.type === 'addon' ? (
+            {row.original.type === 'Manual Entry' ? (
               <p
                 onClick={() => {
                   setShowAddOnDialog({
                     open: true,
                     data: row.original,
                     showSaveAndNext: false,
-                    parentId: selectedProducts?.filter((e) => e.type === 'service')[0]?._id
+                    parentId: row?.original?.parentId
                   });
                 }}
                 className="link text-truncate"
@@ -109,22 +109,22 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                 {row.original.detail}
               </p>
             )}
-
-           {row.original.type !== 'addon' && <IconButton
-              size="small"
-              style={{ marginLeft: '10px' }}
-              onClick={() => {
-                if (row.original.type === 'service') {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'product') {
-                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                } else {
-                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                }
-              }}
-            >
-              <OpenInNewIcon fontSize="small" color="primary" />
-            </IconButton>}
+            {["product", "service", "package"]?.includes(row.original.type) &&
+              <IconButton
+                size="small"
+                style={{ marginLeft: '10px' }}
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>}
           </div>
         )
       }
@@ -139,7 +139,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }) => {
-        return (allowedToEdit && row.original.type === 'product') || row.original.type === 'addon' ? (
+        return allowedToEdit && (row.original.type === 'product' || row.original.type === 'Manual Entry') ? (
           <HtmlTooltip title={'Delete'}>
             <span>
               <IconButton
@@ -166,34 +166,30 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
 
     var data: any = [];
 
-    const response = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
+    const materialResponse = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
+    const materialData = materialResponse?.data?.data?.material
+
     const addOnResponse: any = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/addon`);
+    const addOnData = addOnResponse?.data?.data
 
-    if (addOnResponse) {
-      data = addOnResponse.data.data.map((i) => {
-        return { ...i, type: 'addon', materialId:i._id };
-      });
-    }
-
-    data = [...data, ...response?.data?.data?.material];
+    data = [...materialData, ...addOnData?.map((e) => { return { ...e, type: "Manual Entry" } })];
 
     let rows = data.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
       parent.detail =
-        parent.type === 'product'
-          ? parent?.productDetail?.productName
-          : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent?.packageDetail?.packageName;
+        parent.type === 'product' ? parent?.productDetail?.productName
+          : parent.type === 'service' ? parent?.serviceDetail?.serviceName
+            : parent.type === 'package' ? parent?.packageDetail?.packageName
+              : parent?.description;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent?.description;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data, parent);
     });
@@ -210,24 +206,15 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail =
-        _subRow.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === 'addon'
-          ? _subRow?.description || ''
-          : _subRow?.packageDetail?.packageName;
+      _subRow.detail = _subRow.type === 'product' ? _subRow?.productDetail?.productName
+        : _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === 'package' ? _subRow?.packageDetail?.packageName
+            : _subRow?.description
       _subRow.description =
-        _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : _subRow.type === 'addon'
-          ? _subRow?.description || ''
-          : '';
+        _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product' ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow?.description || ''
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -262,12 +249,13 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   const handleDelete = async (rows) => {
     setDeleting(true);
     try {
-      const addOn = rows?.filter((e) => e.type === 'addon');
-      if (addOn) {
-        await axiosInstance().put(`${serviceOrder.api}/${serviceOrderData._id}/addon/delete`, { ids: addOn?.map((e) => e.id) });
-      }else{
-        const ids = rows?.filter((e) => e.type !== 'addon');
-       await axiosInstance().put(`${serviceOrder.api}/${serviceOrderData?._id}/material/delete `, { ids: ids.map((d) => d.id) });
+      const addOnDelete = rows?.filter((e) => e.type === 'Manual Entry');
+      if (addOnDelete?.length) {
+        await axiosInstance().put(`${serviceOrder.api}/${serviceOrderData._id}/addon/delete`, { ids: addOnDelete?.map((e) => e.id) });
+      }
+      const productDelete = rows?.filter((e) => e.type === 'product');
+      if (productDelete?.length) {
+        await axiosInstance().put(`${serviceOrder.api}/${serviceOrderData?._id}/material/delete `, { ids: productDelete.map((d) => d.id) });
       }
       setDeleting(false);
       fetchData();
@@ -289,7 +277,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
-    const dataToDelete = selectedProducts.filter((e) => e.type === 'product');
+    const dataToDelete = selectedProducts.filter((e) => e.type === 'product' || e.type === 'Manual Entry');
     dataToDelete?.forEach((ele) => {
       obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
     });
@@ -348,7 +336,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                       handleClose();
                     }}
                   >
-                    Add Addon
+                    Add Manual Entry
                   </MenuItem>
                   <MenuItem
                     disabled={selectedProducts?.filter((e) => e.type === 'product')?.length > 0 ? false : true}
@@ -414,12 +402,12 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         <AddOnDialog
           onClose={() => setShowAddOnDialog({ open: false, data: null, showSaveAndNext: false, parentId: null })}
           addOnData={showAddOnDialog.data}
-          id={serviceOrderData?._id}
           parentId={showAddOnDialog.parentId}
           onSuccess={(data) => {
             setShowAddOnDialog({ open: false, data: null, showSaveAndNext: false, parentId: null });
             fetchData();
           }}
+          serviceOrderData={serviceOrderData}
         />
       )}
     </Fragment>
