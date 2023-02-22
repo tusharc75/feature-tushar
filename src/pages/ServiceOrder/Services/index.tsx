@@ -512,6 +512,7 @@ const Services = ({
           onClose={() => setOpenBulkEdit({ open: false, data: null })}
           data={openBulkEdit.data}
           fields={allFields}
+          columns={columns}
           currency={serviceOrderData?.currency}
           handleSave={(rows) => {
             handleSaveData(rows)
