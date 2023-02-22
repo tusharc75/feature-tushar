@@ -89,7 +89,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {allowedToEdit ?
+            {allowedToEdit  && row.original.type !== 'serializedAsset' ?
               <p
                 onClick={() => {
                   setMaterialEdit({
@@ -212,10 +212,12 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName :
         _subRow.type === 'package' ? _subRow.packageDetail?.packageName :
-        _subRow.type === 'serializedAsset' ? startCase(_subRow.type) :
+        _subRow.type === 'serializedAsset' ?  _subRow.assetDetail.assetNumber :
         _subRow.serviceDetail?.serviceName;
       _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription :
-        _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription : _subRow?.serviceDetail?.serviceDescription
+        _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription :
+        _subRow.type === 'serializedAsset' ?  _subRow.assetDetail.assetNumber :
+        _subRow?.serviceDetail?.serviceDescription
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
