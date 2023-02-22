@@ -524,6 +524,7 @@ const Productpackage = ({
                 hideAction={!allowedToEdit}
                 renderedFrom="repair_order_product_package"
                 isClientSideGrid={true}
+                hideExpander={true}
               />
             </Box>
           ) : (
