@@ -211,7 +211,8 @@ const ReceivingTicket = ({
               manualEndDate: d.manualEndDate,
               isReplaced: d.isReplaced,
               replaceReason: d.replaceReason,
-              replaceAsset: d?.replaceAsset ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset : ""
+              replaceAsset: d?.replaceAsset ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset : "",
+              description: d?.product?.productDescription,
             })
           })
           .map((u) => ({
@@ -663,17 +664,12 @@ const ReceivingTicket = ({
         return null;
       }
     },
-    {
-      field: 'description',
-      headerName: 'Description',
-      show: true,
-      cellRenderer: 'commonRenderer'
-    },
     { field: 'displayType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: findHeader(columnHeader?.assetFields, 'serialNumber'), show: true, cellRenderer: 'commonRenderer' },
     { field: 'productName', headerName: findHeader(columnHeader?.productFields, 'productName'), show: true, cellRenderer: 'productNameRenderer' },
+    { field: 'description', headerName: 'Description', show: true, cellRenderer: 'commonRenderer' },
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'deliveryTicketRenderer' },
     { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, cellRenderer: 'receivingTicketRenderer' },
@@ -1775,7 +1771,7 @@ const ReceivingTicket = ({
       {showConformationRevertTicket && (
         <ConfirmationDialog
           open={showConformationRevertTicket}
-          message={`Are you sure you want to revert receiving ticket?`}
+          message={`Are you sure you want to revert receiving ticket for the selected line item ?`}
           onClose={() => {
             setShowConformationRevertTicket(false);
           }}
@@ -1789,7 +1785,7 @@ const ReceivingTicket = ({
       {showConformationCancleTicket && (
         <ConfirmationDialog
           open={showConformationCancleTicket}
-          message={`Are you sure you want to cancel receiving ticket?`}
+          message={`This action will cancel the complete Receiving Ticket. Are you sure?`}
           onClose={() => {
             setShowConformationCancleTicket(false);
           }}

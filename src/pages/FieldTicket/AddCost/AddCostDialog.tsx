@@ -1,30 +1,27 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
-import { Form, Formik } from 'formik';
-import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
-import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, generateUniqueIdOnly, isFieldNotTouched } from 'src/constants/helpers';
+import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Form, Formik } from 'formik';
+import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, isFieldNotTouched, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from 'src/StateProvider/Provider';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { isEqual } from 'lodash';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import InputField from 'src/components/Helpers/InputField';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
-const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
-  const { state: { user } }: any = useData();
-  const toastConfig = useContext(CustomToastContext);
-  const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
-  const [loading, setLoading] = useState(false);
+const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [submitting, setSubmitting] = useState(false);
-  const [cloneHeading, setCloneHeading] = useState('');
+  const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const toastConfig = useContext(CustomToastContext);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -32,101 +29,64 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   }, []);
 
   const fetchFields = async () => {
-    try {
-      let data;
-      const response = await axiosInstance().get('/field?resource=Field Ticket');
-      data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-      if (id) {
-        axiosInstance()
-          .get(`${routes?.fieldTicket?.path}/${id}`)
-          .then(({ data: { data } }) => {
-            let fields = fieldsDataForUpdate;
-            let tempData = data;
-            if (isClone) {
-              fields = fieldsDataForCreate;
-              const { fieldTicketNumber, ...rest } = data;
-              rest.fieldTicketNumber = `FT_${generateUniqueIdOnly()}`
-              setCloneHeading(fieldTicketNumber);
-              tempData = rest;
-            }
-            setInitialData({
-              fields: fields,
-              values: getObjKeysWithValues(tempData, fields)
-            });
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
-      }
-      else {
-        const tempInitialData = getObjKeys('', fieldsDataForCreate);
-        tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`
-
-        if (referenceData) {
-          tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
-          tempInitialData['serviceOrder'] = referenceData?.serviceOrder;
-          tempInitialData['service'] = referenceData?.service;
-          tempInitialData['startDateTime'] = referenceData?.startDateTime;
-          tempInitialData['endDateTime'] = referenceData?.endDateTime;
-          tempInitialData['technician'] = referenceData?.technician;
-        }
-        if (fieldsDataForCreate?.some((e) => e.fieldName === "currency")) {
-          tempInitialData["currency"] = user.user?.brandCurrency;
-        }
-        setInitialData({
-          fields: fieldsDataForCreate,
-          values: tempInitialData
-        });
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
+    setInitialData({ fields: [], values: {} });
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`);
+    var data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || "USD");
+    if (costData) {
+      setInitialData({
+        fields: data,
+        values: getObjKeysWithValues(costData, data)
+      });
+    } else {
+      setInitialData({
+        fields: data,
+        values: getObjKeys('', data)
+      });
     }
   };
 
   const handleSubmit = (values) => {
-    setSubmitting(true);
-    if (id && !isClone) {
-      values._id = id
-      axiosInstance().put(`${routes.fieldTicket?.path}`, values).then(({ data }) => {
-        setSubmitting(false);
-        onSuccess()
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
-        });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
-    } else {
+    setSubmitting(true)
+    if (costData) {
       axiosInstance()
-        .post(`${routes.fieldTicket?.path}`, values)
+        .put(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [{ ...values, _id: costData._id }])
         .then(({ data }) => {
           setLoading(false);
           onSuccess(data.data);
-          setSubmitting(true);
+          setSubmitting(false);
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
         })
         .catch((error) => {
           setLoading(false);
           setSubmitting(false);
           toastConfig.setToastConfig(error);
+        });
+    } else {
+      axiosInstance()
+        .post(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [values])
+        .then(({ data }) => {
+          setLoading(false);
+          onSuccess(data.data);
+          setSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
         })
+        .catch((error) => {
+          setLoading(false);
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
     }
   };
 
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
 
   return (
     <Dialog
@@ -147,7 +107,6 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           onSubmit={handleSubmit}
-          validate={validate}
           innerRef={ref}
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
@@ -160,12 +119,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                     onClose();
                   }
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
-                  : `Create ${routes?.fieldTicket?.title}`
-                  }`}
+                title={costData ? `Edit ${costData.description}` : `Add Cost`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -215,7 +169,6 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   onClick={submitForm}
                   endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
-                  {' '}
                   Save
                 </Button>
               </CustomDialogFooter>
@@ -242,7 +195,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         </Box>
       )}
     </Dialog>
-  );
-};
+  )
+}
 
-export default ManageFieldTicket;
+export default AddCostDialog

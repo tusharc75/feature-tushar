@@ -354,6 +354,8 @@ export const CHILD_RESOURCE = {
   serviceOrderDetails: 'Service Order Detail',
   scheduleMaterial: 'Schedule Material',
   purchaseRequisition: 'Purchase Requisition Detail',
+  serviceOrderAddon: 'Service Order Addon',
+  fieldTicketCost: 'Field Ticket Cost',
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -740,6 +742,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
         });
     } else if (key.type === 'decimal') {
       obj[key.fieldName] = value && value !== '' ? parseFloat(value) : value;
+    } else if (key.type === 'lookUpDisplay') {
     } else {
       obj[key.fieldName] = value;
     }
@@ -807,6 +810,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
       }
     } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : defaultValue || 0;
+    } else if (key.type === 'lookUpDisplay') {
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue || '';
     }
@@ -1861,7 +1865,8 @@ export const ACTIVITY_RESOURCE = {
   productionOrder: 'productionOrder',
   serviceOrder: 'serviceOrder',
   workOrder: 'workOrder',
-  demandOrder: 'demandOrder'
+  demandOrder: 'demandOrder',
+  fieldTicket: 'fieldTicket',
 };
 
 export const REPORT_LIST = [
@@ -1985,7 +1990,8 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.invoice, value: sidebarResource.invoice, key: 'invoice' },
   { title: sidebarResource.demandOrder, value: sidebarResource.demandOrder, key: 'demandOrder' },
   { title: sidebarResource.productionOrder, value: sidebarResource.productionOrder, key: 'productionOrder' },
-  { title: sidebarResource.serviceOrder, value: sidebarResource.serviceOrder, key: 'serviceOrder' }
+  { title: sidebarResource.serviceOrder, value: sidebarResource.serviceOrder, key: 'serviceOrder' },
+  { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' }
 ];
 
 export const getApi = (resource: string) => {
@@ -2124,6 +2130,11 @@ export const getData = (resource: string, data: any) => {
     case 'work-order':
       return {
         name: `${data?.workOrderNumber}`,
+        id: data._id
+      };
+    case 'field-ticket':
+      return {
+        name: `${data?.fieldTicketNumber}`,
         id: data._id
       };
     default:

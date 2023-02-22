@@ -10,7 +10,8 @@ import {
   LinkRenderer,
   ImageRenderer,
   NameRenderer,
-  CheckboxRenderer
+  CheckboxRenderer,
+  DateTimeRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
 import { dateFormat, dateTimeFormat, formatAmountWithCurrency, sidebarResourceObjectFromValues, getUniqueCurrencies } from './helpers';
@@ -78,6 +79,11 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
       result = {
         ...result,
         dateRenderer: DateRenderer
+      };
+    } else if (o === 'dateTimeRenderer') {
+      result = {
+        ...result,
+        dateTimeRenderer: DateTimeRenderer
       };
     } else if (o === 'checkboxRenderer') {
       result = {
@@ -209,12 +215,12 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
         pathName = detailPagePath[joinedFieldName]
           ? detailPagePath[joinedFieldName]
           : field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-          ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-          : routes[joinedFieldName]?.path
-          ? routes[joinedFieldName]?.path
-          : routes[`${joinedFieldName}Detail`]?.path
-          ? routes[`${joinedFieldName}Detail`]?.path
-          : '';
+            ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+            : routes[joinedFieldName]?.path
+              ? routes[joinedFieldName]?.path
+              : routes[`${joinedFieldName}Detail`]?.path
+                ? routes[`${joinedFieldName}Detail`]?.path
+                : '';
       }
       return {
         columnData: {
@@ -255,6 +261,14 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
           cellRenderer: 'dateRenderer'
         },
         rendererName: 'dateRenderer'
+      };
+    } else if (field?.type === 'dateTime') {
+      return {
+        columnData: {
+          ...commonFieldData,
+          cellRenderer: 'dateTimeRenderer'
+        },
+        rendererName: 'dateTimeRenderer'
       };
     } else if (field?.type === 'checkBox') {
       return {
@@ -456,7 +470,7 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
             },
             Footer: (info) => {
               const total = info?.rows
-                ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
+                ?.filter((f) => !f.original.parentId && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
                 .reduce((sum, row) => row.values[fieldName] + sum, 0);
               return (
                 <>
@@ -505,7 +519,7 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
             Cell: ({ row }) => (row.original[ele.fieldName] ? <p>{row.original[ele.fieldName]}</p> : <NoDataCell />),
             Footer: (info) => {
               const qtyTotal = info.rows
-                .filter((f) => f.original.parentId === null && f.original.hasOwnProperty(ele.fieldName) && !isNaN(f.original[ele.fieldName]))
+                .filter((f) => !f.original.parentId && f.original.hasOwnProperty(ele.fieldName) && !isNaN(f.original[ele.fieldName]))
                 .reduce((sum, row) => row.original[currentColumn.accessor] + sum, 0);
               return <>{qtyTotal}</>;
             }

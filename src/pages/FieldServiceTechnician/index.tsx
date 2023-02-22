@@ -8,12 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FieldTicket from './FieldTicket';
 import moment from 'moment';
-
 import { dateFormat } from 'src/constants/helpers';
-
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import InfoIcon from '@material-ui/icons/Info';
-import { FiExternalLink } from 'react-icons/fi';
 import EventNoteIcon from '@material-ui/icons/EventNote';
 
 const status = {
@@ -32,12 +27,12 @@ const style = {
     '& p': {
       display: 'flex',
       alignItems: 'center',
-      gap: '5px'
+      gap: '5px',
+      fontWeight: 500
     },
     '& p:first-of-type': {
       gap: '0',
-      color: 'var(--link)',
-      fontWeight: '500'
+      fontWeight: 500
     }
   },
   borderBottom: {
@@ -61,10 +56,9 @@ const style = {
 };
 
 const FieldServiceTechnician = () => {
+
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions, selectedEntity, user }
-  }: any = useData();
+  const { state: { permissions, selectedEntity, user } }: any = useData();
 
   const [fieldService, setFieldService] = useState(null);
   const [selectedFieldService, setSelectedFieldService] = useState(null);
@@ -106,7 +100,7 @@ const FieldServiceTechnician = () => {
     }
     return color;
   };
-  console.log({ selectedFieldService, fieldService });
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -136,13 +130,10 @@ const FieldServiceTechnician = () => {
                     <Box p={3}>
                       <Box sx={style.serviceHead}>
                         <Typography>
-                          {/* <ExpandMoreIcon /> */}
                           <span>{data?.serviceOrderNumber}</span>
-                          <FiExternalLink style={{ fontSize: '15px' }} />
                         </Typography>
                         <Typography>
                           {data?.service?.serviceName}
-                          <InfoIcon style={{ fontSize: '15px', color: selectedFieldService === data ? 'white' : 'gray' }} />
                         </Typography>
                       </Box>
                       <Box sx={{ ...style.serviceItem, ...style.borderBottom }}>
@@ -153,7 +144,6 @@ const FieldServiceTechnician = () => {
                         </Typography>
                         <Typography style={{ fontWeight: '500' }}>{data?.technicianAssign?.status}</Typography>
                       </Box>
-
                       <Box sx={style.serviceItem}>
                         <Typography style={{ fontSize: '14px' }}>Customer: {data?.customerAccount?.optionLabel}</Typography>
                       </Box>

@@ -1,18 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { nanoid } from 'nanoid';
 import {
-  Button,
-  Dialog,
-  DialogActions,
+  Box,
+  Container,
   TextField,
+  Grid,
+  Button,
+  CircularProgress,
+  Typography,
+  IconButton,
+  FormControlLabel,
+  Checkbox,
+  Chip,
+  Dialog,
   DialogContent,
   DialogContentText,
+  DialogActions,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
   Slide,
-  Box,
-  IconButton,
-  Grid,
-  Chip
+  Select
 } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { TransitionProps } from '@material-ui/core/transitions';
@@ -25,10 +34,11 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import FormTypes from '../Helpers/FormTypes';
-import { dateTimeFormat } from 'src/constants/helpers';
+import { dateFormat, dateTimeFormat } from 'src/constants/helpers';
 import moment from 'moment';
 import FormTypesSimple, { inputTypes } from 'src/components/Helpers/FromTypesSimple';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -39,10 +49,13 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, setOpen, resource }) => {
+const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, setOpen, resource }) => {
+
   const [isSaveFilterOpen, setIsSaveFilterOpen] = useState(false);
 
   const [allColumns, setAllColumns] = useState(null);
+
+
   const [savedFilters, setSavedFilters] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [colsWithFilterValue, setColsWithFilterValue] = useState([]);
@@ -54,7 +67,7 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
   const [confrimDialogParam, setConfrimDialogParam] = useState({
     head: '',
     body: '',
-    onConfirm: () => {}
+    onConfirm: () => { }
   });
   const toastConfig = React.useContext(CustomToastContext);
 
@@ -88,8 +101,8 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${resource}`)
-      .then((columns) => {
-        setAllColumns(columns?.data?.data || []);
+      .then(({ data: { data } }) => {
+        setAllColumns(data?.map((e) => { return { ...e.fieldData } }));
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -305,12 +318,118 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
     setColsWithFilterValue(oldFilters);
   };
 
+  const [formValues, setFormValues] = React.useState({});
+  const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
+  const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);
+  const [betweenDate, setBetweenDate] = React.useState(null);
+
+  const handleSelectFilter = (name, value) => {
+    // let fieldProps: any = {};
+    // if (!name?.includes('Date')) {
+    //   fieldProps.type = resourceOptions[name].type;
+    //   fieldProps.lookup = resourceOptions[name].lookup;
+    // } else {
+    //   fieldProps.type = 'date';
+    //   fieldProps.lookup = false;
+    // }
+
+    // const newData: any = {
+    //   type: fieldProps.type,
+    //   lookup: fieldProps.lookup
+    // };
+
+    // if (Array.isArray(value)) {
+    //   newData.value = resourceOptions[name].options?.filter((d) => value?.includes(d.optionValue));
+    //   setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
+    // } else {
+    //   newData.value = value;
+    //   setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
+    // }
+    setFormValues((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  const handleDuration = (timeFrameTemp, field, isStatus = false) => {
+    switch (timeFrameTemp) {
+      case '1-month':
+        setStatusTimeFrame('1-month');
+        isStatus
+          ? setStatusPeriodDate((prevState) => ({
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
+          : setBetweenDate((prevState) => ({
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
+
+        break;
+      case '3-months':
+        setStatusTimeFrame('3-months');
+        isStatus
+          ? setStatusPeriodDate((prevState) => ({
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
+          : setBetweenDate((prevState) => ({
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
+        break;
+
+      case '6-months':
+        setStatusTimeFrame('6-months');
+        isStatus
+          ? setStatusPeriodDate((prevState) => ({
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
+          : setBetweenDate((prevState) => ({
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
+        break;
+
+      case '1-year':
+        setStatusTimeFrame('1-year');
+        isStatus
+          ? setStatusPeriodDate((prevState) => ({
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
+          : setBetweenDate((prevState) => ({
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
+        break;
+
+      default:
+        break;
+    }
+  };
+
+
+
   return (
-    <div className="table-filter-v1">
-      {/* <<<<<<<<<<<<<<<<<<<<<<<<< FILTER DIALOG >>>>>>>>>>>>>>>>>>>>>>>>> */}
-      <Dialog maxWidth={'md'} open={open} TransitionComponent={Transition} onClose={handleClose} aria-describedby="Filter Dialog">
-        {/* <DialogTitle className="white-bg">Filters</DialogTitle> */}
-        <CustomDialogHeader title="Filters" onClose={handleClose} showRequiredLabel={false} />
+    <>
+      <Dialog
+        maxWidth={'md'}
+        open={true}
+        fullWidth
+        TransitionComponent={Transition}
+        onClose={handleClose}
+        aria-describedby="Filter Dialog">
+        <CustomDialogHeader
+          title="Filters"
+          onClose={handleClose}
+          showRequiredLabel={false} />
         <CustomDialogContent>
           <Grid container spacing={2}>
             <Grid item xs={12}>
@@ -352,12 +471,95 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
             </Grid>
             {allColumns ? (
               allColumns?.map((field, index) => {
-                const value = getFieldValue(field.fieldData?.fieldName);
-                return (
-                  <Grid item xs={12} sm={6} md={4}>
-                    <FormTypesSimple key={index} index={index} field={field.fieldData} value={value} onChange={formOnChange} />
-                  </Grid>
-                );
+                return <React.Fragment key={field._id}>
+                  {field.type !== 'date' && (
+                    <Grid item xs={12} sm={6} md={6}>
+                      <FormTypes
+                        values={formValues}
+                        errors={{}}
+                        touched={{}}
+                        label={field.fieldLabel}
+                        name={field.fieldName}
+                        type={field.type === 'dropDown' ? 'multiSelect' : field.type}
+                        options={field.option}
+                        setFieldValue={handleSelectFilter}
+                        required={false}
+                        fullWidth
+                        size="small"
+                      />
+                    </Grid>
+                  )}
+                  {field.type === 'date' && (
+                    <Grid item xs={12} sm={6}>
+                      <FormControl fullWidth size="small" variant="outlined">
+                        <InputLabel id={field.fieldName}>Select Duration</InputLabel>
+                        <Select
+                          labelId={field.fieldName}
+                          id={`time-${field.fieldName}`}
+                          value={statusTimeFrame}
+                          onChange={(e) => {
+                            handleDuration(e.target.value, field);
+                            // const tempArray = [...selectedResources];
+                            // let tempIndex = tempArray.findIndex((d) => d?.fieldName === field?.fieldName);
+                            // tempArray[tempIndex].timeFrame = e.target.value;
+                            // setSelectedResources(tempArray);
+                          }}
+                        >
+                          <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                          <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                          <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                          <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                          <MenuItem value={'custom'}>Custom</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  )}
+                  {field.type === 'date' && (
+                    <Grid item xs={12} sm={6}>
+                      <KeyboardDatePicker
+                        autoOk
+                        disabled={field.timeFrame !== 'custom'}
+                        fullWidth
+                        size="small"
+                        variant="inline"
+                        inputVariant="outlined"
+                        name={`from_${field.fieldName}`}
+                        label={`From ${field.fieldLabel}`}
+                        value={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : null}
+                        onChange={(date: any) => {
+                          setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
+                        }}
+                        format={dateFormat}
+                        InputLabelProps={{
+                          shrink: true
+                        }}
+                      />
+                    </Grid>
+                  )}
+                  {field.type === 'date' && (
+                    <Grid item xs={12} sm={6}>
+                      <KeyboardDatePicker
+                        autoOk
+                        fullWidth
+                        disabled={field.timeFrame !== 'custom'}
+                        size="small"
+                        variant="inline"
+                        inputVariant="outlined"
+                        name={`to_${field.fieldName}`}
+                        label={`To ${field.fieldLabel}`}
+                        value={betweenDate && betweenDate[`to_${field.fieldName}`] ? betweenDate[`to_${field.fieldName}`] : null}
+                        onChange={(date: any) => {
+                          setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
+                        }}
+                        format={dateFormat}
+                        InputLabelProps={{
+                          shrink: true
+                        }}
+                        minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
+                      />
+                    </Grid>
+                  )}
+                </React.Fragment>
               })
             ) : (
               <Box p={2} height={500} bgcolor="white">
@@ -438,7 +640,7 @@ const GridFilters = ({ currentGridApi, columnApi, columns, tableSource, open, se
         handleClearSingleFilter={handleClearSingleFilter}
         handleOpen={() => setOpen(true)}
       />
-    </div>
+    </>
   );
 };
 

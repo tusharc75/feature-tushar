@@ -13,16 +13,16 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { serviceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
 import { startCase } from 'lodash';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 import { genrateCustomTableColumns } from 'src/constants/columns';
+import AddOnDialog from './AddOnDialog';
 
 const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -33,11 +33,16 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   const [addProductDialog, setAddProductDialog] = useState({ open: false, parentId: null });
   const [isAddingProducts, setAddingProducts] = useState(false);
 
+  const [showAddOnDialog, setShowAddOnDialog] = useState({ open: false, data: null, showSaveAndNext: false, parentId: null });
+
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
 
   useEffect(() => {
     fetchFields();
@@ -53,9 +58,9 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       e.isColumnEditable = false;
     });
     const newColumns = genrateCustomTableColumns(allFields, serviceOrderData?.currency, renderedFrom);
-    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay'
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
     let column: any = [
       {
@@ -74,14 +79,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         disableFilters: true,
         sticky: isMobile ? 'none' : 'left',
         width: 200,
-        Cell: ({ row }) =>
-          row.original['type'] ? (
-            <p>
-              {`${startCase(row.original?.type)} `}
-            </p>
-          ) : (
-            <NoDataCell />
-          )
+        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       },
       {
         accessor: 'detail',
@@ -91,25 +89,42 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p className="text-truncate" title={row.original.detail}  >
-              {row.original.detail}
-            </p>
-            <IconButton
-              size="small"
-              style={{ marginLeft: "10px" }}
-              onClick={() => {
-                if (row.original.type === 'service') {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                }
-                else if (row.original.type === 'product') {
-                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                } else {
-                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                }
-              }}
-            >
-              <OpenInNewIcon fontSize="small" color="primary" />
-            </IconButton>
+            {row.original.type === 'Manual Entry' ? (
+              <p
+                onClick={() => {
+                  setShowAddOnDialog({
+                    open: true,
+                    data: row.original,
+                    showSaveAndNext: false,
+                    parentId: row?.original?.parentId
+                  });
+                }}
+                className="link text-truncate"
+                title={row.original.detail}
+              >
+                {row.original.detail}
+              </p>
+            ) : (
+              <p className="text-truncate" title={row.original.detail}>
+                {row.original.detail}
+              </p>
+            )}
+            {["product", "service", "package"]?.includes(row.original.type) &&
+              <IconButton
+                size="small"
+                style={{ marginLeft: '10px' }}
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>}
           </div>
         )
       }
@@ -124,7 +139,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }) => {
-        return allowedToEdit && row.original.type === 'product' ? (
+        return allowedToEdit && (row.original.type === 'product' || row.original.type === 'Manual Entry') ? (
           <HtmlTooltip title={'Delete'}>
             <span>
               <IconButton
@@ -151,19 +166,22 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
 
     var data: any = [];
 
-    const response = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
-    data = response?.data?.data;
+    const materialResponse = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
+    const materialData = materialResponse?.data?.data?.material
 
-    let rows = data.material.filter((e) => e.parentId === null);
+    const addOnResponse: any = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/addon`);
+    const addOnData = addOnResponse?.data?.data
 
+    data = [...materialData, ...addOnData?.map((e) => { return { ...e, type: "Manual Entry" } })];
+
+    let rows = data.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
       parent.detail =
-        parent.type === 'product'
-          ? parent?.productDetail?.productName
-          : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent?.packageDetail?.packageName;
+        parent.type === 'product' ? parent?.productDetail?.productName
+          : parent.type === 'service' ? parent?.serviceDetail?.serviceName
+            : parent.type === 'package' ? parent?.packageDetail?.packageName
+              : parent?.description;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -171,9 +189,9 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             ? parent?.productDetail?.productDescription || ''
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
-              : '';
+              : parent?.description;
       parent.qtyDisplay = parent.qty;
-      parent.subRows = generateNestedData(data.material, parent);
+      parent.subRows = generateNestedData(data, parent);
     });
 
     if (rows?.length > 0) {
@@ -188,20 +206,15 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail =
-        _subRow.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName;
+      _subRow.detail = _subRow.type === 'product' ? _subRow?.productDetail?.productName
+        : _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === 'package' ? _subRow?.packageDetail?.packageName
+            : _subRow?.description
       _subRow.description =
-        _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+        _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product' ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow?.description || ''
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -233,24 +246,26 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       });
   };
 
-  const handleDelete = (rows) => {
+  const handleDelete = async (rows) => {
     setDeleting(true);
-    axiosInstance()
-      .put(`${serviceOrder.api}/${serviceOrderData?._id}/material/delete `, { ids: rows.map(d => d.id) })
-      .then(() => {
-        setDeleting(false);
-        fetchData();
-        setDeleteData(null);
-      })
-      .catch((error) => {
-        setDeleting(false);
-        toastConfig.setToastConfig(error);
-        setDeleteData(null);
-      });
+    try {
+      const addOnDelete = rows?.filter((e) => e.type === 'Manual Entry');
+      if (addOnDelete?.length) {
+        await axiosInstance().put(`${serviceOrder.api}/${serviceOrderData._id}/addon/delete`, { ids: addOnDelete?.map((e) => e.id) });
+      }
+      const productDelete = rows?.filter((e) => e.type === 'product');
+      if (productDelete?.length) {
+        await axiosInstance().put(`${serviceOrder.api}/${serviceOrderData?._id}/material/delete `, { ids: productDelete.map((d) => d.id) });
+      }
+      setDeleting(false);
+      fetchData();
+      setDeleteData(null);
+    } catch (err) {
+      setDeleting(false);
+      toastConfig.setToastConfig(err);
+      setDeleteData(null);
+    }
   };
-
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -262,7 +277,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
-    const dataToDelete = selectedProducts.filter((e) => e.type === "product");
+    const dataToDelete = selectedProducts.filter((e) => e.type === 'product' || e.type === 'Manual Entry');
     dataToDelete?.forEach((ele) => {
       obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
     });
@@ -278,8 +293,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         {allowedToEdit && (
           <Grid item xs={12} md={12} sm={12}>
             <Box display="flex" justifyContent="space-between" m={1} mb={0}>
-              <Box display="flex">
-              </Box>
+              <Box display="flex"></Box>
               <Box display="flex">
                 <Button
                   variant={'outlined'}
@@ -302,16 +316,30 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                   onClose={handleClose}
                 >
                   <MenuItem
-                    disabled={selectedProducts?.filter((e) => e.type === "service")?.length === 1 ? false : true}
+                    disabled={selectedProducts?.filter((e) => e.type === 'service')?.length === 1 ? false : true}
                     onClick={() => {
-                      setAddProductDialog({ open: true, parentId: selectedProducts?.filter((e) => e.type === "service")[0]?._id });
+                      setAddProductDialog({ open: true, parentId: selectedProducts?.filter((e) => e.type === 'service')[0]?._id });
                       handleClose();
                     }}
                   >
                     Add Product
                   </MenuItem>
                   <MenuItem
-                    disabled={selectedProducts?.filter((e) => e.type === "product")?.length > 0 ? false : true}
+                    disabled={selectedProducts?.filter((e) => e.type === 'service')?.length === 1 ? false : true}
+                    onClick={() => {
+                      setShowAddOnDialog({
+                        open: true,
+                        data: null,
+                        showSaveAndNext: false,
+                        parentId: selectedProducts?.filter((e) => e.type === 'service')[0]?._id
+                      });
+                      handleClose();
+                    }}
+                  >
+                    Add Manual Entry
+                  </MenuItem>
+                  <MenuItem
+                    disabled={selectedProducts?.filter((e) => e.type === 'product')?.length > 0 ? false : true}
                     onClick={() => {
                       handleDeleteMultiple();
                       handleClose();
@@ -326,7 +354,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}  >
+            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
@@ -368,6 +396,18 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}
+        />
+      )}
+      {showAddOnDialog.open && (
+        <AddOnDialog
+          onClose={() => setShowAddOnDialog({ open: false, data: null, showSaveAndNext: false, parentId: null })}
+          addOnData={showAddOnDialog.data}
+          parentId={showAddOnDialog.parentId}
+          onSuccess={(data) => {
+            setShowAddOnDialog({ open: false, data: null, showSaveAndNext: false, parentId: null });
+            fetchData();
+          }}
+          serviceOrderData={serviceOrderData}
         />
       )}
     </Fragment>
