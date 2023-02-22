@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField, MenuItem, Menu } from "@material-ui/core";
-import { Autocomplete, Skeleton } from "@material-ui/lab";
-import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "src/axios/axiosInstance";
 import routes from "src/components/Helpers/Routes";
 import { useData } from "src/StateProvider/Provider";
@@ -13,7 +11,6 @@ import CustomAgGrid, { intialState, reducer } from "src/components/AgGridCompone
 import { CommonRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
 import AddExistingProductInventory from "../../Sublease/Productpackage/AddExistingProductInventory";
 import GridDeleteIcon from "src/components/Helpers/GridDeleteIcon";
-import CreateProduct from "src/components/Product/CreateProduct";
 import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
@@ -23,7 +20,7 @@ import { getFrameworkComponents, genrateColoum } from "src/constants/columns"
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
 import CustomRenderCell from "src/components/Helpers/CustomRenderCell";
-import InfoIcon from "@material-ui/icons/Info";
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import BulkAssetCreationQtyDialog from "./BulkAssetCreationQtyDialog";
 import styles from "../../Leads/Header.module.scss";
 import { CURReplaceByCurrencySingle } from "src/constants/formulaUtility";
@@ -34,8 +31,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     const { state: { user, permissions } }: any = useData();
     const [anchorEl, setAnchorEl] = useState(null);
 
-    const [columns, setColumns] = useState([{ field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "nameRenderer" },
-    { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" }])
+    const [columns, setColumns] = useState([])
 
     const [addProductDialog, setAddProductDialog] = useState(false);
     const [isAddingProducts, setAddingProducts] = useState(false);
@@ -61,11 +57,29 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     }, [columns]);
 
     const fetchFields = async () => {
+        const productFieldResponce = await axiosInstance().put(`/field/find-field-labels`, {
+            fields: [
+                {
+                    resource: 'Product',
+                    fieldNames: ['productName', 'productNumber', 'productDescription']
+                },
+            ]
+        });
+        var productField = productFieldResponce?.data?.data?.find((e) => e.resource === "Product")?.fieldNames || [];
+        const coloum = [];
+        productField?.forEach((ele) => {
+            if (ele?.fieldName === "productName") {
+                coloum.push({ field: "productName", headerName: ele?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" })
+            }
+            else {
+                coloum.push({ field: ele?.fieldName, headerName: ele?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+            }
+        })
         const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.bulkAssetCreationProduct}`);
         var fields = response?.data?.data;
-        fields = CURReplaceByCurrencySingle(fields, bulkAssetCreationData?.currency ? bulkAssetCreationData?.currency : "USD");
+        fields = CURReplaceByCurrencySingle(fields, bulkAssetCreationData?.currency ? bulkAssetCreationData?.currency : "USD");  
         let rendererNames = [];
-        genrateColoum(fields, columns, rendererNames, false, renderedFrom);
+        genrateColoum(fields, coloum, rendererNames, false, renderedFrom);
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
             nameRenderer: NameRenderer,
@@ -74,7 +88,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
             ...tempFrameworkComponent,
         }
         setFrameWorkComponent({ ...tempFrameworkComponent })
-        setColumns([...columns])
+        setColumns([...coloum])
     }
 
     const fetchBulkAssetCreationProduct = () => {
@@ -95,6 +109,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                 };
                 res.productName = item.productDetail?.productName
                 res.productNumber = item.productDetail?.productNumber
+                res.productDescription = item.productDetail?.productDescription
                 res.productDetail = item.productDetail
                 res.actualReceived = item.createdQty || 0
                 if (item?.qty === 0) {
@@ -147,7 +162,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                     window.open(`${routes.productDetail.path}/${params.data.productId}`);
                 }}
             >
-                <InfoIcon fontSize="small" />
+                <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
         </HtmlTooltip>}
     </span >
