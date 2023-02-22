@@ -43,7 +43,7 @@ const FormTypes = (props) => {
             type="text"
             label={fieldData?.fieldLabel}
             required={fieldData?.required}
-            name={`${values._id}_${fieldData?.fieldName}`}
+            name={`${fieldData?.fieldName}`}
             value={values[fieldData?.fieldName]}
             error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
             helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
@@ -56,7 +56,7 @@ const FormTypes = (props) => {
             type="text"
             multiline
             label={fieldData?.label}
-            name={`${values._id}_${fieldData?.fieldName}`}
+            name={`${fieldData?.fieldName}`}
             required={fieldData?.required}
             rows={3}
             value={values[fieldData?.fieldName]}
@@ -71,7 +71,7 @@ const FormTypes = (props) => {
             variant="outlined"
             label={fieldData?.label}
             required={fieldData?.required}
-            name={`${values._id}_${fieldData?.fieldName}`}
+            name={`${fieldData?.fieldName}`}
             value={values[fieldData?.fieldName]}
             InputProps={{
                 endAdornment: '% ',
@@ -89,7 +89,7 @@ const FormTypes = (props) => {
             variant="outlined"
             label={fieldData?.label}
             required={fieldData?.required}
-            name={`${values._id}_${fieldData?.fieldName}`}
+            name={`${fieldData?.fieldName}`}
             value={values[fieldData?.fieldName]}
             InputProps={{
                 startAdornment: <InputAdornment position="start">
@@ -126,7 +126,7 @@ const FormTypes = (props) => {
             type="number"
             label={fieldData?.label}
             required={fieldData?.required}
-            name={`${values._id}_${fieldData?.fieldName}`}
+            name={`${fieldData?.fieldName}`}
             value={values[fieldData?.fieldName]}
             margin="dense"
             error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
@@ -142,7 +142,7 @@ const FormTypes = (props) => {
             control={
                 <Checkbox
                     required={fieldData?.required}
-                    name={`${values._id}_${fieldData?.fieldName}`}
+                    name={`${fieldData?.fieldName}`}
                     checked={values[fieldData?.fieldName]}
                     onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
                     color="secondary"
@@ -161,7 +161,7 @@ const FormTypes = (props) => {
                 variant="inline"
                 inputVariant="outlined"
                 value={values[fieldData?.fieldName]}
-                name={`${values._id}_${fieldData?.fieldName}`}
+                name={`${fieldData?.fieldName}`}
                 label={fieldData?.label}
                 onChange={(date) => onChange(fieldData?.fieldName, date)}
                 format={dateFormatForInputControl}
@@ -183,7 +183,7 @@ const FormTypes = (props) => {
                 inputVariant="outlined"
                 ampm={false}
                 value={values[fieldData?.fieldName]}
-                name={`${values._id}_${fieldData?.fieldName}`}
+                name={`${fieldData?.fieldName}`}
                 label={fieldData?.label}
                 onChange={(date) => onChange(fieldData?.fieldName, date)}
                 onError={console.error}
