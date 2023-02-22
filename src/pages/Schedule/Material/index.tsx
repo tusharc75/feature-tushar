@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, makeStyles, Grid, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, Grid, Menu, MenuItem } from '@material-ui/core';
 import { Add, ExpandMore } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -23,6 +23,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 
 const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
 
@@ -102,7 +103,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
                 {row.original?.detail}
               </p>
               : <p className="text-truncate">{row.original?.detail}</p>}
-            {row?.original?.type !== 'service' && allowedToEdit &&
+            {row?.original?.type !== 'service' || row.original.type !== 'serializedAsset' && allowedToEdit &&
               <>
                 <Box ml={1} >
                   <span>({row.original?.subRows?.length})</span>
@@ -129,7 +130,10 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === 'product') {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else {
+                  }else if (row.original.type === 'serializedAsset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  }  
+                  else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   }
                 }}
@@ -192,7 +196,8 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       parent.detail = parent.type === 'product' ? parent.productDetail?.productName :
         parent.type === 'package' ? parent.packageDetail?.packageName : parent.serviceDetail?.serviceName;
       parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription :
-        parent.type === 'package' ? parent?.packageDetail?.packageDescription : parent?.serviceDetail?.serviceDescription
+        parent.type === 'package' ? parent?.packageDetail?.packageDescription : 
+        parent?.serviceDetail?.serviceDescription
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
@@ -206,7 +211,9 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName :
-        _subRow.type === 'package' ? _subRow.packageDetail?.packageName : _subRow.serviceDetail?.serviceName;
+        _subRow.type === 'package' ? _subRow.packageDetail?.packageName :
+        _subRow.type === 'serializedAsset' ? startCase(_subRow.type) :
+        _subRow.serviceDetail?.serviceName;
       _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription :
         _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription : _subRow?.serviceDetail?.serviceDescription
       _subRow.qty = _subRow.qty;
@@ -328,6 +335,15 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
     handleSaveData(rows);
   };
 
+  const disableAssignSerializedAssets = () => {
+    if (selectedRecords.length === 0) return true;
+    const flatArray = selectedRecords.filter(
+      (f) => f.type === 'product' && f.productDetail.serializedProduct 
+    );
+    return flatArray.length === 0;
+  };
+
+
   return (
     <Fragment>
       {allowedToEdit &&
@@ -404,6 +420,18 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
               open={Boolean(anchorEl)}
               onClose={closeActions}
             >
+             {scheduleData.type === 'Rental Job' && <MenuItem
+              disabled={
+                disableAssignSerializedAssets()
+              }
+              onClick={() => {
+                let parentId = selectedRecords.filter((i) => i.type === 'product' && i.productDetail.serializedProduct && i.parentId === null)[0]._id 
+                 closeActions();
+                 setAddDialog({ open:true, type:'serializedAsset', parentId:parentId ? parentId : null  })
+              }}
+              >
+              Assign Serialized Asset
+              </MenuItem>}
               <MenuItem
                 onClick={() => {
                   closeActions();
@@ -509,6 +537,16 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
             handleAdd(rows)
           }}
           packageType={null}
+        />
+      )}
+      {addDialog.open && addDialog.type === 'serializedAsset' && (
+        <AssignSerializedAssetDialog 
+        reference={'schedue'}
+        handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
+        ids={[]}
+        handleSucess={(rows) => {
+          handleAdd(rows)
+        }}
         />
       )}
     </Fragment>
