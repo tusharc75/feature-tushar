@@ -343,7 +343,7 @@ const ProductsTable = ({ packageId, packageData }) => {
 
   const assignAssets = (data) => {
     const assets = data.map((d) => d._id);
-    const products = selectedRecords.map((d) => d._id);
+    const products = selectedRecords?.filter((d) => d.type === 'product')?.map((d) => d._id);
     axiosInstance()
       .post(`${packages.api}/${packageId}/products/assign-assets`, {
         packageId,
