@@ -218,6 +218,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
                     id="height"
                     name="height"
                     type="number"
+                    onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                     size="small"
                     label="Height"
                     defaultValue={imageDetails.height}

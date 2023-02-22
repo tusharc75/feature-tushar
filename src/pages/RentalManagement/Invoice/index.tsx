@@ -137,13 +137,14 @@ const Invoice = ({
                     <a className="link text-truncate" href={`${routes.packagesDetail.path}/${row.original.materialId}`} target="_blank">
                       {row.original.detail}
                     </a>
-                  ) : (
+                  ) : row.original?.type === 'Asset' ? (
                     <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original._id}`} target="_blank">
                       {row.original.detail}
                     </a>
-                  )
+                  ) :
+                    <p className="text-truncate">{row.original.detail}</p>
                 ) : (
-                  row.original.detail
+                  <p className="text-truncate">{row.original.detail}</p>
                 )}
               </p>
             </div>
