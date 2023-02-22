@@ -33,6 +33,7 @@ const RoadMap = () => {
   const [startDate, setStartDate] = React.useState(`${new Date().getFullYear()}-01-01`);
   const [endDate, setEndDate] = React.useState(`${new Date().getFullYear()}-12-31`);
   const [totalDay, setTotalDay] = React.useState(0);
+  const [day, setDay] = React.useState([]);
 
   useEffect(() => {
     const date1 = moment(startDate)
@@ -41,6 +42,14 @@ const RoadMap = () => {
     setTotalDay(diff)
     executeScroll()
   }, [startDate, endDate]);
+
+  useEffect(() => {
+    const arr = []
+    for (let i = 0; i <= totalDay; i++) {
+      arr.push(i)
+    }
+    setDay(arr)
+  }, [totalDay])
 
   const handleToggle = (event, nodeIds) => {
     setExpanded(nodeIds);
@@ -284,6 +293,23 @@ const RoadMap = () => {
             </Box>
             <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
               <div ref={scrollRef}>
+                {
+                  day?.map((day) => {
+                    return (
+                      <Box
+                        id="dayLiner"
+                        height={'100%'}
+                        style={{
+                          position: 'absolute',
+                          left: day * dayPixel,
+                          width: dayPixel,
+                          background: (day % 2) === 0 ? '#F0F8FF' : '#FAEBD7'
+                        }}
+                      >
+                      </Box>
+                    )
+                  })
+                }
                 <Box
                   id="dayLiner"
                   height={'100%'}
