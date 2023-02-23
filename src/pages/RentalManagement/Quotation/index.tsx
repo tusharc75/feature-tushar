@@ -79,6 +79,7 @@ const Quotation = ({
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
   const [allColumn, setAllColumn] = useState([]);
+  const [sendMail, setSendMail] = useState(false)
 
   useEffect(() => {
     if (quotationData && quotationData?.versions[currentVersion]?._id) {
@@ -521,7 +522,7 @@ const Quotation = ({
                         )}
                       onClick={() => {
                         axiosInstance()
-                          .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
+                          .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}?sendmail=${sendMail}`)
                           .then(() => {
                             fetchQuotationData(currentVersion);
                             toastConfig.setToastConfig({
@@ -539,7 +540,7 @@ const Quotation = ({
                       className="mx-1"
                       color="primary"
                     >
-                      Send to customer
+                     Process Quote
                     </Button>
                   ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
                     <Button
@@ -689,7 +690,7 @@ const Quotation = ({
                         )}
                       onClick={() => {
                         axiosInstance()
-                          .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
+                          .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}?sendMail=${sendMail}`)
                           .then(() => {
                             fetchQuotationData(currentVersion);
                             toastConfig.setToastConfig({
@@ -707,7 +708,7 @@ const Quotation = ({
                       className="mx-1"
                       color="primary"
                     >
-                      Send to customer
+                     Process Quote
                     </Button>
                   ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
                     <Button

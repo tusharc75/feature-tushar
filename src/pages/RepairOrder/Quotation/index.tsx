@@ -71,6 +71,7 @@ const Quotation = ({
   const [allColumn, setAllColumn] = useState([]);
   const [isInlineEdit, setIsInlineEdit] = useState(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
+  const [sendMail, setSendMail] = useState(false)
 
   useEffect(() => {
     fetchFields();
@@ -430,7 +431,7 @@ const Quotation = ({
 
   const handleSendToCustomer = () => {
     axiosInstance()
-      .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
+      .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}?sendMail=${sendMail}`)
       .then(() => {
         fetchFields();
         toastConfig.setToastConfig({
@@ -557,7 +558,7 @@ const Quotation = ({
                   className="mx-1"
                   color="primary"
                 >
-                  Send to customer
+                 Process Quote
                 </Button>
               ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
                 <Button
