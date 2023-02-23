@@ -38,12 +38,13 @@ const FormTypes = (props) => {
 
     return fieldData?.type === 'singleLine' ? (
         <TextField
+            style={{ paddingRight: 1 }}
             disabled={fieldData?.isUneditable}
             variant="outlined"
             type="text"
             label={fieldData?.fieldLabel}
             required={fieldData?.required}
-            name={`${values._id}_${fieldData?.fieldName}`}
+            name={`${fieldData?.fieldName}`}
             value={values[fieldData?.fieldName]}
             error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
             helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
@@ -52,11 +53,12 @@ const FormTypes = (props) => {
         />
     ) : fieldData?.type === 'multiLine' ? (
         <TextField
+            style={{ paddingRight: 1 }}
             variant="outlined"
             type="text"
             multiline
             label={fieldData?.label}
-            name={`${values._id}_${fieldData?.fieldName}`}
+            name={`${fieldData?.fieldName}`}
             required={fieldData?.required}
             rows={3}
             value={values[fieldData?.fieldName]}
@@ -67,11 +69,12 @@ const FormTypes = (props) => {
         />
     ) : fieldData?.type === 'percent' ? (
         <TextField
+            style={{ paddingRight: 1 }}
             type="number"
             variant="outlined"
             label={fieldData?.label}
             required={fieldData?.required}
-            name={`${values._id}_${fieldData?.fieldName}`}
+            name={`${fieldData?.fieldName}`}
             value={values[fieldData?.fieldName]}
             InputProps={{
                 endAdornment: '% ',
@@ -85,11 +88,12 @@ const FormTypes = (props) => {
         />
     ) : fieldData?.type === "currencyAmount" ? (
         <TextField
+            style={{ paddingRight: 1 }}
             type="number"
             variant="outlined"
             label={fieldData?.label}
             required={fieldData?.required}
-            name={`${values._id}_${fieldData?.fieldName}`}
+            name={`${fieldData?.fieldName}`}
             value={values[fieldData?.fieldName]}
             InputProps={{
                 startAdornment: <InputAdornment position="start">
@@ -113,6 +117,7 @@ const FormTypes = (props) => {
             getOptionSelected={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
             onChange={(e, val) => onChange(fieldData?.fieldName, val?.optionValue)}
             renderInput={(params) => <TextField
+                style={{ paddingRight: 1 }}
                 {...params}
                 error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
                 helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
@@ -122,11 +127,12 @@ const FormTypes = (props) => {
         />
     ) : fieldData?.type === 'decimal' ? (
         <TextField
+            style={{ paddingRight: 1 }}
             variant="outlined"
             type="number"
             label={fieldData?.label}
             required={fieldData?.required}
-            name={`${values._id}_${fieldData?.fieldName}`}
+            name={`${fieldData?.fieldName}`}
             value={values[fieldData?.fieldName]}
             margin="dense"
             error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
@@ -142,7 +148,7 @@ const FormTypes = (props) => {
             control={
                 <Checkbox
                     required={fieldData?.required}
-                    name={`${values._id}_${fieldData?.fieldName}`}
+                    name={`${fieldData?.fieldName}`}
                     checked={values[fieldData?.fieldName]}
                     onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
                     color="secondary"
@@ -154,6 +160,7 @@ const FormTypes = (props) => {
     ) : fieldData?.type === 'date' ? (
         <MuiPickersUtilsProvider utils={DateUtils}>
             <KeyboardDatePicker
+                style={{ paddingRight: 1 }}
                 disabled={fieldData?.isUneditable}
                 clearable
                 autoOk
@@ -161,7 +168,7 @@ const FormTypes = (props) => {
                 variant="inline"
                 inputVariant="outlined"
                 value={values[fieldData?.fieldName]}
-                name={`${values._id}_${fieldData?.fieldName}`}
+                name={`${fieldData?.fieldName}`}
                 label={fieldData?.label}
                 onChange={(date) => onChange(fieldData?.fieldName, date)}
                 format={dateFormatForInputControl}
@@ -178,16 +185,17 @@ const FormTypes = (props) => {
             <KeyboardDateTimePicker
                 autoOk
                 clearable
+                style={{ paddingRight: 1 }}
                 required={fieldData?.required}
                 variant="inline"
                 inputVariant="outlined"
                 ampm={false}
                 value={values[fieldData?.fieldName]}
-                name={`${values._id}_${fieldData?.fieldName}`}
+                name={`${fieldData?.fieldName}`}
                 label={fieldData?.label}
                 onChange={(date) => onChange(fieldData?.fieldName, date)}
                 onError={console.error}
-                format="yyyy/MM/dd HH:mm"
+                format={dateFormatForInputControl + " HH:mm"}
                 InputLabelProps={{
                     shrink: true
                 }}

@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import {  useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -160,13 +160,12 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
                     onClose();
                   }
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
                     : `Create New Competency`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -241,7 +240,7 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
                   Cancel
                 </Button>
                 <Button
-                  disabled={loading || submitting}
+                  disabled={loading || submitting || isEqual(values, initialData.values)}
                   variant="contained"
                   color="primary"
                   type="submit"

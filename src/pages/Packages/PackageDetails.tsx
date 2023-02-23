@@ -209,9 +209,18 @@ const PackageDetails = () => {
           />
         </Tabs>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={12} md={permissions?.leadTimeMaster?.isRead ? 8 : 12} lg={permissions?.leadTimeMaster?.isRead ? 8 : 12}>
+          <Grid item xs={12} sm={12} md={12}>
             <TabPanel value={tabValue} index={0}>
-              <DetailsPage data={packageData} fields={packageFields} fullHeight={true} />
+              <DetailsPage data={packageData} fields={packageFields} />
+              {permissions?.leadTimeMaster?.isRead && (
+                <Box mb={2} mt={2}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6} md={6}>
+                      <LeadTimeMaster Id={id} type={'package'} />
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               {tabValue === 1 && <Services packageData={packageData} packageId={id} />}
@@ -222,13 +231,6 @@ const PackageDetails = () => {
             <TabPanel value={tabValue} index={3}>
               {tabValue === 3 && <Packages packageData={packageData} packageId={id} />}
             </TabPanel>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
-            {permissions?.leadTimeMaster?.isRead && (
-              <Box mb={2}>
-                <LeadTimeMaster Id={id} type={'package'} />
-              </Box>
-            )}
           </Grid>
         </Grid>
       </Box>

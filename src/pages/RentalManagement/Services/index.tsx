@@ -475,11 +475,11 @@ const Services = ({
       <Grid container spacing={2}>
         {allowedToEdit && (
           <Grid item xs={12} md={12} sm={12}>
-            <Box display="flex" justifyContent="space-between" m={1} mb={0}>
+            <Box display="flex" justifyContent="space-between" mt={1} mb={1}>
               <Box display="flex">
                 {permissions?.serviceMaster?.isRead && (
                   <Button
-                    className="btn-outline-v1"
+                    color="primary"
                     size="small"
                     disabled={isOffline}
                     variant={'contained'}
@@ -493,7 +493,7 @@ const Services = ({
                 <Box mx={isMobile ? 0.5 : 1} />
                 {permissions?.packages?.isRead && (
                   <Button
-                    className="btn-outline-v1"
+                    color="primary"
                     size="small"
                     variant={'contained'}
                     disabled={isOffline}
