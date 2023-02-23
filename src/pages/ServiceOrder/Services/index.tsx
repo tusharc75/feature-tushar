@@ -267,7 +267,7 @@ const Services = ({
         setUpdating(false);
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         setOpenBulkEdit({
-          open: true, data: data.data.material.map(d => {
+          open: true, data: data.data.map(d => {
             return {
               ...d, detail:
                 d.type === 'product'

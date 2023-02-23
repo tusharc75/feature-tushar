@@ -38,6 +38,7 @@ const FormTypes = (props) => {
 
     return fieldData?.type === 'singleLine' ? (
         <TextField
+            style={{ paddingRight: 1 }}
             disabled={fieldData?.isUneditable}
             variant="outlined"
             type="text"
@@ -52,6 +53,7 @@ const FormTypes = (props) => {
         />
     ) : fieldData?.type === 'multiLine' ? (
         <TextField
+            style={{ paddingRight: 1 }}
             variant="outlined"
             type="text"
             multiline
@@ -67,6 +69,7 @@ const FormTypes = (props) => {
         />
     ) : fieldData?.type === 'percent' ? (
         <TextField
+            style={{ paddingRight: 1 }}
             type="number"
             variant="outlined"
             label={fieldData?.label}
@@ -85,6 +88,7 @@ const FormTypes = (props) => {
         />
     ) : fieldData?.type === "currencyAmount" ? (
         <TextField
+            style={{ paddingRight: 1 }}
             type="number"
             variant="outlined"
             label={fieldData?.label}
@@ -113,6 +117,7 @@ const FormTypes = (props) => {
             getOptionSelected={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
             onChange={(e, val) => onChange(fieldData?.fieldName, val?.optionValue)}
             renderInput={(params) => <TextField
+                style={{ paddingRight: 1 }}
                 {...params}
                 error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
                 helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
@@ -122,6 +127,7 @@ const FormTypes = (props) => {
         />
     ) : fieldData?.type === 'decimal' ? (
         <TextField
+            style={{ paddingRight: 1 }}
             variant="outlined"
             type="number"
             label={fieldData?.label}
@@ -154,6 +160,7 @@ const FormTypes = (props) => {
     ) : fieldData?.type === 'date' ? (
         <MuiPickersUtilsProvider utils={DateUtils}>
             <KeyboardDatePicker
+                style={{ paddingRight: 1 }}
                 disabled={fieldData?.isUneditable}
                 clearable
                 autoOk
@@ -178,6 +185,7 @@ const FormTypes = (props) => {
             <KeyboardDateTimePicker
                 autoOk
                 clearable
+                style={{ paddingRight: 1 }}
                 required={fieldData?.required}
                 variant="inline"
                 inputVariant="outlined"
@@ -187,7 +195,7 @@ const FormTypes = (props) => {
                 label={fieldData?.label}
                 onChange={(date) => onChange(fieldData?.fieldName, date)}
                 onError={console.error}
-                format="yyyy/MM/dd HH:mm"
+                format={dateFormatForInputControl + " HH:mm"}
                 InputLabelProps={{
                     shrink: true
                 }}
