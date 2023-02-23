@@ -261,8 +261,8 @@ export default function StepDialog({
                   showManimizeMaximize={true}
                   showRequiredLabel={false}
                 />
-                <CustomDialogContent>
-                  <Form autoComplete="off" autoCorrect="off" noValidate>
+                <Form autoComplete="off" autoCorrect="off" noValidate>
+                  <CustomDialogContent>
                     <Grid container spacing={2}>
                       <Grid xs={12} md={6} sm={6} item>
                         <Field
@@ -724,24 +724,31 @@ export default function StepDialog({
                         </Button>
                       </Box>
                     )}
-                  </Form>
-                </CustomDialogContent>
-                <CustomDialogFooter>
-                  <Button
-                    size="small"
-                    color="primary"
-                    onClick={() => {
-                      handleClose();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  {reference === 'workOrder' && notEditable ? null : (
-                    <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit">
-                      Save
-                    </CustomButton>
-                  )}
-                </CustomDialogFooter>
+
+                  </CustomDialogContent>
+                  <CustomDialogFooter>
+                    <Button
+                      size="small"
+                      color="primary"
+                      onClick={() => {
+                        handleClose();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    {reference === 'workOrder' && notEditable ? null : (
+                      <CustomButton
+                        loading={loading}
+                        disabled={loading}
+                        onSubmit={submitForm}
+                        variant="contained"
+                        color="primary"
+                        type="submit">
+                        Save
+                      </CustomButton>
+                    )}
+                  </CustomDialogFooter>
+                </Form>
               </Fragment>
             )}
           </Formik>
