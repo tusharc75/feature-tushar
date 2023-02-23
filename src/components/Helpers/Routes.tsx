@@ -473,6 +473,13 @@ const routes = {
         : 'Schedule Calendar',
     path: '/schedule-calendar'
   },
+  rentalPlanningCalendar: {
+    title:
+      storedRoutes && storedRoutes.rentalPlanningCalendar && storedRoutes.rentalPlanningCalendar.title
+        ? storedRoutes.rentalPlanningCalendar?.title
+        : 'Rental Planning Calendar',
+    path: '/rental-planning-calendar'
+  },
   eCommercePolicy: {
     title:
       storedRoutes && storedRoutes.eCommercePolicy && storedRoutes.eCommercePolicy.title ? storedRoutes.eCommercePolicy?.title : 'e-Commerce Policy',
