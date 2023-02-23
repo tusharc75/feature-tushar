@@ -255,7 +255,7 @@ const AssignSerializedAssetDialog = ({
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
-                  disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
+                  disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0 || serializedProducts.some(d => d?.qty < 0)}
                   onClick={() => {
                     handleSucess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                   }}
