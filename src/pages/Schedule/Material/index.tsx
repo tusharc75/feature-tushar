@@ -231,28 +231,29 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
     if(assetAssignedProduct?.length > 0) {
       assetAssignedProduct.map((i)=>{
         rows.forEach((d) => {
-          const element: any = {};
-          element.materialId = d._id;
-          element.type = addDialog.type;
-          element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
-          element.qty = d.qty ? parseFloat(d.qty) : 1;
-          element.parentId = i._id;
-          material.push(element);
+          if(d.productId === i.materialId){
+            const element: any = {};
+            element.materialId = d._id;
+            element.type = addDialog.type;
+            element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
+            element.qty = d.qty ? parseFloat(d.qty) : 1;
+            element.parentId = i._id;
+            material.push(element);
+          }         
         });
       })
       setAssetAssignedProduct([])
+    }else{
+      rows.forEach((d) => {
+        const element: any = {};
+        element.materialId = d._id;
+        element.type = addDialog.type;
+        element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
+        element.qty = d.qty ? parseFloat(d.qty) : 1;
+        element.parentId = addDialog.parentId;
+        material.push(element);
+      });
     }
-   else{
-    rows.forEach((d) => {
-      const element: any = {};
-      element.materialId = d._id;
-      element.type = addDialog.type;
-      element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
-      element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.parentId = addDialog.parentId;
-      material.push(element);
-    });
-   }
     axiosInstance()
       .post(`${routes?.schedule?.path}/material/${scheduleData._id}`, { material })
       .then(({ data }) => {
