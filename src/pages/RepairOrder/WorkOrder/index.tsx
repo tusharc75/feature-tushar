@@ -22,7 +22,7 @@ import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { sortBy } from 'lodash';
+import { capitalize, sortBy } from 'lodash';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
@@ -72,51 +72,38 @@ const WorkOrder = ({
   const fetchFields = async () => {
     const coloum: any = [
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.type === "serializedAsset" ? "Asset" : capitalize(row.original.type)}</p>
       },
       {
         accessor: 'detail',
         Header: 'Detail',
-        minWidth: 300,
-        width: 300,
+        width: 250,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{row.original.detail}</p>
-            <Box ml={1} className="d-flex align-items-center">
-              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-              </span>
-            </Box>
-            <Chip
-              className="ml-1"
-              label={`${row.original.type === 'service'
-                ? 'Service'
-                : row.original.type === 'product'
-                  ? 'Product'
-                  : row.original.type === 'serializedAsset'
-                    ? 'Asset'
-                    : 'Package'
-                }`}
-              size="small"
-              color="primary"
-              onClick={() => {
-                window.open(
-                  `${row.original.type === 'service'
-                    ? routes.serviceMasterDetail.path
-                    : row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : routes.packagesDetail.path
-                  }/${row.original.materialId}`
-                );
-              }}
-            />
+            <a className="link text-truncate" target='_blank' href={`${row.original.type === 'service'
+              ? routes.serviceMasterDetail.path
+              : row.original.type === 'product'
+                ? routes.productDetail.path
+                : row.original.type === 'serializedAsset'
+                  ? routes.serializedAssetDetail.path
+                  : routes.packagesDetail.path
+              }/${row.original.materialId}`}>{row.original.detail}</a>
+            {row.original?.subRows?.length ?
+              <Box ml={1} className="d-flex align-items-center">
+                {`(${row.original?.subRows?.length})`}
+              </Box> : null}
             {row.original.type === 'service' && (
               <Box ml={1}>
                 {row?.original?.preWork ? (
@@ -136,6 +123,18 @@ const WorkOrder = ({
             )}
           </div>
         )
+      },
+      {
+        accessor: 'workOrderNumber',
+        Header: 'Work Order',
+        Cell: ({ row }) =>
+          row.original['workOrder'] ? (
+            <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`} target="_blank">
+              {row.original['workOrderNumber']}
+            </a>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'productName',
@@ -178,18 +177,6 @@ const WorkOrder = ({
         Cell: ({ row }) => (row?.original['serviceStatus'] ? <p> {row?.original?.serviceStatus}</p> : <NoDataCell />)
       },
       {
-        accessor: 'workOrderNumber',
-        Header: 'Work Order',
-        Cell: ({ row }) =>
-          row.original['workOrder'] ? (
-            <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`} target="_blank">
-              {row.original['workOrderNumber']}
-            </a>
-          ) : (
-            <NoDataCell />
-          )
-      },
-      {
         accessor: 'assignedUsers',
         Header: 'Assigned Technician',
         disableFilters: true,
@@ -215,15 +202,6 @@ const WorkOrder = ({
         Header: 'Qty',
         Cell: ({ row }) => (row.original['qty'] ? <p> {row?.original?.qty}</p> : <NoDataCell />)
       }
-      // {
-      //     accessor: 'unit',
-      //     Header: 'Unit',
-      //     Cell: ({ row }) => (
-      //         row.original['unit'] ?
-      //             <p> {row?.original?.unit}</p>
-      //             : <NoDataCell />
-      //     )
-      // },
     ];
     setColumns([
       ...coloum,
@@ -348,7 +326,7 @@ const WorkOrder = ({
 
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
+      parent.index = i + 1;
       parent.detail = `${parent.type === 'service'
         ? parent?.serviceDetail?.serviceName
         : parent.type === 'product'
@@ -416,7 +394,7 @@ const WorkOrder = ({
     let productIndex = 0;
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
+      _subRow.index = parent.index + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
       _subRow.detail =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
@@ -529,8 +507,8 @@ const WorkOrder = ({
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="flex-end" pt={1} pb={2}>
-        <Box display="flex" alignItems="center" justifyContent={'flex-end'} paddingX={1} gridColumnGap={8} flex={1}>
+      <Box display="flex" justifyContent="flex-end" mt={1} mb={2}>
+        <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1}>
           {allowedToEdit && (
             <Box display="flex" gridColumnGap={5}>
               <Button
