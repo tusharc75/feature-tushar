@@ -24,6 +24,9 @@ import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/h
 import { genrateCustomTableColumns } from 'src/constants/columns';
 import CustomEditableGrid from 'src/components/CustomEditableGrid';
 import { flattenArray } from 'src/constants/columns';
+import AddIcon from '@material-ui/icons/Add'
+import { ExpandMore } from '@material-ui/icons';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 
 const Services = ({
@@ -51,6 +54,7 @@ const Services = ({
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
+  const [addAnchorEl, setAddAnchorEl] = useState(null)
   const [allFields, setAllFields] = useState([]);
   const [openBulkEdit, setOpenBulkEdit] = useState({ open: false, data: null });
 
@@ -86,7 +90,7 @@ const Services = ({
         Header: 'Type',
         disableFilters: true,
         sticky: isMobile ? 'none' : 'left',
-        width: 200,
+        width: 70,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -113,12 +117,31 @@ const Services = ({
             >
               {row.original.detail}
             </p>
-            <IconButton
+           {row.original.type === 'package' && (
+            <>
+             <Box ml={1}>
+            <HtmlTooltip title="Add Product">
+                    <IconButton
+                      onClick={() => {
+                        setAddExistingProductDialog({ open: true, type: "product", parentId: row.original?._id });
+                      }}
+                      size="small"
+                    >
+                      <AddIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </HtmlTooltip>
+            </Box>
+            </>
+           )}
+          <Box ml={1}>
+          <IconButton
               size="small"
               style={{ marginLeft: "10px" }}
               onClick={() => {
                 if (row.original.type === 'service') {
                   window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'product') {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                 } else {
                   window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                 }
@@ -126,6 +149,7 @@ const Services = ({
             >
               <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
+          </Box>
           </div>
         )
       }
@@ -363,6 +387,14 @@ const Services = ({
     handleSaveData(rows);
   };
 
+  const openAddActions = (event) =>{
+    setAddAnchorEl(event.currentTarget)
+  }
+
+  const closeAddActions = () => {
+    setAddAnchorEl(null);
+  };
+
   return (
     <Fragment>
       <Grid container spacing={2}>
@@ -370,28 +402,46 @@ const Services = ({
           <Grid item xs={12} md={12} sm={12}>
             <Box display="flex" justifyContent="space-between" m={1} mb={0}>
               <Box display="flex">
-                {permissions?.serviceMaster?.isRead && (
-                  <Button
-                    className={'btn-outline-v1'} variant="contained" size="small"
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
-                    }}
-                  >
-                    {isMobile && !isTablet ? 'Service' : `Add Services`}
-                  </Button>
-                )}
-                <Box mx={isMobile ? 0.5 : 1} />
-                {permissions?.packages?.isRead && (
-                  <Button
-                    className={'btn-outline-v1'} variant="contained" size="small"
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                    }}
-                  >
-                    {isMobile && !isTablet ? 'Package' : `Add Service ${routes.packages.title}`}
-                  </Button>
-                )}
-              </Box>
+              <Button
+              variant={'outlined'}
+              color="primary"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={openAddActions}
+              aria-controls="add-menu">
+              {'Add'}
+              <ExpandMore fontSize="small" />
+            </Button>
+            <Menu
+              anchorEl={addAnchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="add-menu"
+              open={Boolean(addAnchorEl)}
+              onClose={closeAddActions}
+            >
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
+                }}
+              >
+                Add Services
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+                }}
+              >
+               Add Service Packages
+              </MenuItem>
+            </Menu>
+            </Box>
               <Box display="flex">
                 <Button
                   variant={'outlined'}
@@ -505,6 +555,20 @@ const Services = ({
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           ids={[]}
+        />
+      )}
+        {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
+        <AssignProductDialog
+          reference={'serviceOrder'}
+          serialized={null}
+          productsDialogOpen={addExistingProductDialog.open}
+          productId={null}
+          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+          assignedProducts={[]}
+          renderedFrom={renderedFrom}
+          onSuccess={(product) => {
+            handleAdd(product);
+          }}
         />
       )}
       {openBulkEdit.open &&
