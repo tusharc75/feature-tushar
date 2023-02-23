@@ -134,12 +134,12 @@ const Quotation = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -289,23 +289,22 @@ const Quotation = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow?.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow?.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName
-      }`;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = parent?.qty * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -347,25 +346,24 @@ const Quotation = ({
     const rows = [...rowsMaterial, ...additionalCostData];
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.type === 'package'
-          ? parent.packageDetail?.packageName
-          : parent.detail
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.type === 'package'
+              ? parent.packageDetail?.packageName
+              : parent.detail
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent?.description;
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent?.description;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -479,11 +477,27 @@ const Quotation = ({
     setShowAllVersionStatus(false);
   };
 
+  const handleSendToCustomer = () => {
+    axiosInstance()
+      .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
+      .then(({ data }) => {
+        fetchQuotationData(currentVersion);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Process Sucessfully'
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (
     <Fragment>
-      <Box
-        display="flex"
-        m={1}
+      <Box display="flex"
+        mt={1}
+        mb={2}
         sx={{ flexWrap: isMobile ? 'wrap' : 'no-wrap', justifyContent: isMobile ? 'center' : 'space-between' }}
         style={{ gap: isMobile ? '8px' : '0px' }}
       >
@@ -509,7 +523,7 @@ const Quotation = ({
               {allowedToEdit && (
                 <div>
                   {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                    quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                     <Button
                       disabled={material
                         .filter((e) => e.parentId === null)
@@ -519,36 +533,20 @@ const Quotation = ({
                             d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
                             d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
                         )}
-                      onClick={() => {
-                        axiosInstance()
-                          .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
-                          .then(() => {
-                            fetchQuotationData(currentVersion);
-                            toastConfig.setToastConfig({
-                              open: true,
-                              type: 'success',
-                              message: 'Sent to customer Sucessfully'
-                            });
-                          })
-                          .catch((error) => {
-                            toastConfig.setToastConfig(error);
-                          });
-                      }}
-                      variant="outlined"
+                      onClick={handleSendToCustomer}
+                      variant="contained"
                       size="small"
-                      className="mx-1"
                       color="primary"
                     >
-                      Send to customer
+                      Process Quote
                     </Button>
                   ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
                     <Button
                       onClick={() => {
                         setCustomerAcceptable(true);
                       }}
-                      variant="outlined"
+                      variant="contained"
                       size="small"
-                      className="mx-1"
                       color="primary"
                     >
                       Accept / Reject
@@ -558,67 +556,13 @@ const Quotation = ({
                       onClick={() => {
                         cloneVersion();
                       }}
-                      variant="outlined"
+                      variant="contained"
                       size="small"
-                      className="mx-1"
                       color="primary"
                     >
                       {`Clone Version-${currentVersion}`}
                     </Button>
                   ) : null}
-                  {/* <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedProducts.length === 0}
-              >
-                Actions
-                <ExpandMore />
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setIsProductEdit({ open: true, isBulkedit: true });
-                  }}
-                >
-                  Bulk Edit
-                </MenuItem>
-                {allowedToDelete && (
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      const dataToDelete =
-                        selectedProducts &&
-                        selectedProducts
-                          .filter((e) => !e.hideSelection)
-                          .map((rec: any) => {
-                            const obj: any = {};
-                            obj.id = rec._id;
-                            obj.type = rec?.type;
-                            obj.materialId = rec?.materialId;
-                            return obj;
-                          });
-                      setDeleteData(dataToDelete);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                )}
-              </Menu> */}
                 </div>
               )}
             </Box>
@@ -677,7 +621,7 @@ const Quotation = ({
               {allowedToEdit && (
                 <div>
                   {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                    quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                     <Button
                       disabled={material
                         .filter((e) => e.parentId === null)
@@ -687,36 +631,20 @@ const Quotation = ({
                             d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
                             d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
                         )}
-                      onClick={() => {
-                        axiosInstance()
-                          .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
-                          .then(() => {
-                            fetchQuotationData(currentVersion);
-                            toastConfig.setToastConfig({
-                              open: true,
-                              type: 'success',
-                              message: 'Sent to customer Sucessfully'
-                            });
-                          })
-                          .catch((error) => {
-                            toastConfig.setToastConfig(error);
-                          });
-                      }}
-                      variant="outlined"
+                      onClick={handleSendToCustomer}
+                      variant="contained"
                       size="small"
-                      className="mx-1"
                       color="primary"
                     >
-                      Send to customer
+                      Process Quote
                     </Button>
                   ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
                     <Button
                       onClick={() => {
                         setCustomerAcceptable(true);
                       }}
-                      variant="outlined"
+                      variant="contained"
                       size="small"
-                      className="mx-1"
                       color="primary"
                     >
                       Accept / Reject
@@ -726,9 +654,8 @@ const Quotation = ({
                       onClick={() => {
                         cloneVersion();
                       }}
-                      variant="outlined"
+                      variant="contained"
                       size="small"
-                      className="mx-1"
                       color="primary"
                     >
                       {`Clone Version-${currentVersion}`}
@@ -794,28 +721,21 @@ const Quotation = ({
         )}
       </Box>
       {columns && rowsData ? (
-        <>
-          <Box
-            p="6px"
-            zIndex={5}
-            width={'100%'}
+        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}   >
+          <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-          >
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-              columns={columns}
-              data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={setSelectedProducts}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              hideSelection={true}
-              hideAction={true}
-              renderedFrom="quotation_product_package_quotation"
-              isClientSideGrid={true}
-            />
-          </Box>
-        </>
+            columns={columns}
+            data={rowsData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+            onSelect={setSelectedProducts}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            hideSelection={true}
+            hideAction={true}
+            renderedFrom="quotation_product_package_quotation"
+            isClientSideGrid={true}
+          />
+        </Box>
       ) : (
         <Box p={2} height={500} bgcolor="white">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

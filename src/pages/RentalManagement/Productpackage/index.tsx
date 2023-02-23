@@ -545,14 +545,14 @@ const Productpackage = ({
       <Grid container spacing={2}>
         {allowedToEdit && (
           <Grid item xs={12} md={12} sm={12}>
-            <Box display="flex" justifyContent="space-between" m={1} mb={0}>
+            <Box display="flex" justifyContent="space-between" mt={1} mb={1}>
               <Box display="flex">
                 {permissions?.product?.isRead && (
                   <Button
-                    className="btn-outline-v1"
                     size="small"
                     disabled={isOffline}
                     variant={'contained'}
+                    color="primary"
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
                     }}
@@ -563,7 +563,7 @@ const Productpackage = ({
                 <Box mx={isMobile ? 0.5 : 1} />
                 {permissions?.packages?.isRead && (
                   <Button
-                    className="btn-outline-v1"
+                    color="primary"
                     size="small"
                     variant='contained'
                     disabled={isOffline}
