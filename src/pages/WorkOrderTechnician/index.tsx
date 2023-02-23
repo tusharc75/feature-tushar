@@ -27,6 +27,7 @@ import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import React from 'react';
+import { useData } from 'src/StateProvider/Provider';
 
 const useStyles = makeStyles(() => ({
   activityMainBlock: {
@@ -97,6 +98,8 @@ const WorkOrderTechnician = () => {
   const [loading, setLoading] = useState(false);
   const [servicesToKeep, setServicesToKeep] = useState(['pending', 'inProgress']);
 
+  const { state: { permissions } }: any = useData();
+
   const WORKORDER_TECHNICIAN_SERVICE_STATUS = {
     backlog: 'Backlog',
     pending: 'Pending',
@@ -142,6 +145,7 @@ const WorkOrderTechnician = () => {
             tempServiceData['uniqueId'] = tempSelected?._id;
             tempServiceData['status'] = tempSelected?.status;
             tempServiceData['assetNumber'] = tempSelected?.workOrderDetail?.serializedAsset?.optionLabel
+            tempServiceData['assetId'] = tempSelected?.workOrderDetail?.serializedAsset?.optionValue
             tempServiceData['workOrderId'] = tempSelected?.workOrderDetail?._id
             setSelectedService(tempServiceData);
           }
@@ -274,6 +278,7 @@ const WorkOrderTechnician = () => {
                             tempServiceData['uniqueId'] = data?._id;
                             tempServiceData['status'] = data?.status;
                             tempServiceData['assetNumber'] = data?.workOrderDetail?.serializedAsset?.optionLabel
+                            tempServiceData['assetId'] = data?.workOrderDetail?.serializedAsset?.optionValue
                             tempServiceData['workOrderId'] = data?.workOrderDetail?._id
                             setSelectedService(tempServiceData);
                             setServiceOpen(true)
@@ -316,20 +321,19 @@ const WorkOrderTechnician = () => {
                                     </Box>
                                   )}
                                 </div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', paddingTop: "10px" }}>
-                                  <Box>
-                                    <Chip size="small" label={data?.workOrderDetail?.workOrderNumber} />
+                                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                                  <Box mt={1} mr={1}>
+                                    <Chip size="small" label={`Work Order : ${data?.workOrderDetail?.workOrderNumber}`} />
                                   </Box>
                                   {data?.workOrderDetail?.serializedAsset?.optionLabel &&
-                                    <Box ml={1}>
-                                      <Chip size="small" label={data?.workOrderDetail?.serializedAsset?.optionLabel} />
+                                    <Box mt={1}>
+                                      <Chip size="small" label={`Asset : ${data?.workOrderDetail?.serializedAsset?.optionLabel}`} />
                                     </Box>
                                   }
                                 </div>
                               </Grid>
                             </Grid>
                           </Box>
-                          <Box pt={2}></Box>
                         </Box>
                       );
                     })
@@ -360,11 +364,21 @@ const WorkOrderTechnician = () => {
           open={true}>
           <CustomDialogHeader
             showRequiredLabel={false}
-            title={`${selectedService?.serviceName} Steps [${selectedService?.assetNumber}]`}
+            title={`${selectedService?.serviceName} Steps`}
             onClose={() => {
               setServiceOpen(false)
               setSelectedService(null);
             }}
+            additionalTitle={<Box ml={2}>
+              <Typography variant="h6" className={`title-layout text-truncate`} >
+                {`Asset : `}
+                {permissions?.serializedAsset?.isRead ?
+                  <a target='_blank' style={{ textDecoration: 'underline', textUnderlineOffset: "5px" }}
+                    href={`${routes.serializedAssetDetail.path}/${selectedService?.assetId}`}>
+                    {selectedService?.assetNumber}
+                  </a> : selectedService?.assetNumber}
+              </Typography>
+            </Box>}
           ></CustomDialogHeader>
           <Steps
             workOrderId={selectedService?.workOrderId}

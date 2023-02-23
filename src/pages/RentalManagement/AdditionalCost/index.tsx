@@ -195,10 +195,10 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" justifyContent="space-between" mt={1} mb={1}>
           <Box display="flex">
             <Button
-              className="btn-outline-v1"
+              color="primary"
               variant="contained"
               size="small"
               disabled={isOffline}

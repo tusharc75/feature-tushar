@@ -712,7 +712,6 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
           <StepFieldsDialog
             workOrderId={workOrderId}
             fieldData={getFields(selectedStep)?.fieldData}
-            isStepValid={getFields(selectedStep)?.isStepValid}
             handleClose={() => {
               setSelectedStep(null);
               fetchServiceData();
