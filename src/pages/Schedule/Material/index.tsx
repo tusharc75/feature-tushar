@@ -45,6 +45,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
+  const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -227,6 +228,21 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
 
   const handleAdd = async (rows) => {
     const material: any = [];
+    if(assetAssignedProduct?.length > 0) {
+      assetAssignedProduct.map((i)=>{
+        rows.forEach((d) => {
+          const element: any = {};
+          element.materialId = d._id;
+          element.type = addDialog.type;
+          element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
+          element.qty = d.qty ? parseFloat(d.qty) : 1;
+          element.parentId = i._id;
+          material.push(element);
+        });
+      })
+      setAssetAssignedProduct([])
+    }
+   else{
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
@@ -236,6 +252,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       element.parentId = addDialog.parentId;
       material.push(element);
     });
+   }
     axiosInstance()
       .post(`${routes?.schedule?.path}/material/${scheduleData._id}`, { material })
       .then(({ data }) => {
@@ -427,9 +444,9 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
                 disableAssignSerializedAssets()
               }
               onClick={() => {
-                let parentId = selectedRecords.filter((i) => i.type === 'product' && i.productDetail.serializedProduct && i.parentId === null)[0]._id 
                  closeActions();
-                 setAddDialog({ open:true, type:'serializedAsset', parentId:parentId ? parentId : null  })
+                 setAssetAssignedProduct( selectedRecords.filter((i) => i.type === 'product' && i.productDetail.serializedProduct))
+                 setAddDialog({ open:true, type:'serializedAsset', parentId:null  })
               }}
               >
               Assign Serialized Asset
