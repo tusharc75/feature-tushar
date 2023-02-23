@@ -26,22 +26,34 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 let searchTimeout;
 
-const AssignSerializedAssetDialog = ({ reference, referenceId = null, referenceData = null, handleClose, handleSucess, ids, extraStaticFilter = [] }) => {
-
+const AssignSerializedAssetDialog = ({
+  reference,
+  referenceId = null,
+  referenceData = null,
+  handleClose,
+  handleSucess,
+  ids,
+  extraStaticFilter = [],
+  selectedProducts = []
+}) => {
   const renderedFrom = `${routes.serializedAsset.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-  const { state: { permissions, selectedEntity } }: any = useData();
+  const {
+    state: { permissions, selectedEntity }
+  }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [isAssigning, setAssigning] = useState(false);
   const [disableSaveButton, setDisableSaveButton] = useState(false);
 
   const [gridApi, setGridApi] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [columns, setColumns] = useState([]);
   const { getColumnData } = useColumns();
+  const [serializedProducts, setSerializedProducts] = useState([]);
 
   useEffect(() => {
     localStorage.removeItem(localStorageSelectedRecords);
@@ -56,7 +68,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, referenceD
     searchTimeout = setTimeout(() => {
       fetchData();
     }, millisec);
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedProduct]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -75,7 +87,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, referenceD
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
-          ...tempFrameworkComponent,
+          ...tempFrameworkComponent
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
@@ -88,7 +100,19 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, referenceD
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    const queryString = getQueryString();
+    let queryString = getQueryString();
+    if (selectedProducts.length > 0) {
+      var updatedFilters = [];
+      if (selectedProduct) {
+        updatedFilters.push({ field: 'product', term: selectedProduct });
+      } else {
+        updatedFilters = selectedProducts.map((m) => {
+          return { field: 'product', term: m?.materialId ?? '' };
+        });
+      }
+      queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterByIdType=or`;
+    }
+
     axiosInstance()
       .get(`${serializedAsset.api}${queryString}`)
       .then(({ data }) => {
@@ -118,9 +142,9 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, referenceD
   const getQueryString = () => {
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
-    if (reference === "repairOrder") {
+    if (reference === 'repairOrder') {
       deepFilter = `${deepFilter}&entityWise=0`;
-      deepFilter += "&repairOrder=1"
+      deepFilter += '&repairOrder=1';
       if (referenceData?.customerAccount) {
         deepFilter = `${deepFilter}&owner=${referenceData?.customerAccount}`;
       }
@@ -162,6 +186,30 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, referenceD
     dispatch({ type: 'search', search: e.target.value });
   };
 
+  useEffect(() => {
+    let tempProducts = serializedProducts;
+    const alreadyStoredSelectedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
+    if (tempProducts.length === 0) {
+      selectedProducts.map((d) => {
+        if (tempProducts.find((obj) => obj.id === d.materialId)) {
+          tempProducts.find((obj) => obj.id === d.id).qty = d?.qty + tempProducts.find((obj) => obj.id === d.materialId).qty;
+        } else {
+          tempProducts.push({ id: d.materialId, name: d.productDetail.productName, qty: d?.qty });
+        }
+      });
+    } else {
+      tempProducts = [];
+      selectedProducts.map((d) => {
+        tempProducts.push({
+          id: d.materialId,
+          name: d.productDetail.productName,
+          qty: d?.qty - alreadyStoredSelectedRecords?.filter((obj) => obj.productId === d.materialId).length
+        });
+      });
+    }
+    setSerializedProducts(tempProducts);
+  }, [selectedRecords]);
+
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader
@@ -173,7 +221,36 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, referenceD
       <CustomDialogContent>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={6} className="d-flex align-items-center gap-1"></Grid>
+            <Grid item xs={6} className="d-flex align-items-center gap-1">
+              <Box style={{ display: 'inline' }}>
+                {serializedProducts.length > 0
+                  ? serializedProducts.map((d) => (
+                      <Box
+                        m={0.5}
+                        p={1}
+                        border={1}
+                        className="cursor-pointer"
+                        borderColor="grey.300"
+                        onClick={() => {
+                          if (selectedProduct === d.id) {
+                            setSelectedProduct(null);
+                          } else {
+                            setSelectedProduct(d.id);
+                          }
+                        }}
+                        style={{ display: 'inline-block' }}
+                        bgcolor={d.id === selectedProduct && 'primary.main'}
+                        color={d.id === selectedProduct && 'white'}
+                      >
+                    {d?.qty < 0 ?
+                      <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                      : (d?.qty === 0 ? <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span> :
+                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>)}
+                      </Box>
+                    ))
+                  : null}
+              </Box>
+            </Grid>
             <Grid item xs={6} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
@@ -187,7 +264,8 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, referenceD
                   variant="contained"
                   endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
                 >
-                  Add{' '}  {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
+                  Add{' '}
+                  {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
                     ? '(' + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ')'
                     : ''}
                 </Button>
@@ -209,7 +287,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, referenceD
             allowAction={false}
             loading={loading}
             allowSelection={true}
-            onCellValueChanged={() => { }}
+            onCellValueChanged={() => {}}
             showOnlyShowFilteredRecordSwitch={true}
             refreshGrid={fetchData}
             renderedFrom={renderedFrom}

@@ -561,11 +561,15 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       {addDialog.open && addDialog.type === 'serializedAsset' && (
         <AssignSerializedAssetDialog 
         reference={'schedue'}
-        handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
+        handleClose={() => {
+          setAddDialog({ open: false, type: '', parentId: null })
+          setAssetAssignedProduct(null)
+        }}
         ids={[]}
         handleSucess={(rows) => {
           handleAdd(rows)
         }}
+        selectedProducts={assetAssignedProduct}
         />
       )}
     </Fragment>
