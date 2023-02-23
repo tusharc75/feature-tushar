@@ -15,9 +15,9 @@ import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrderId, stepData, isStepValid, referencType, allowedToEdit, selectedService = null }) => {
+const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrderId, stepData, referencType, allowedToEdit, selectedService = null }) => {
 
-  const [isEditing, setEditing] = React.useState(false);
+  const [isEditing, setEditing] = React.useState(true);
   const [viewStep, setViewStep] = React.useState(false);
   const toastConfig = useContext(CustomToastContext);
 
@@ -118,7 +118,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrde
             <>
               <div className={styles.content}>
                 {fieldData?.fields?.length ?
-                  isStepValid && !isEditing ? (
+                  !isEditing ? (
                     <Details
                       containerPadding={'0px'}
                       gridSize={12}
@@ -227,7 +227,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrde
                     justifyContent: 'right'
                   }}
                 >
-                  {isStepValid && !isEditing ? (
+                  {!isEditing ? (
                     <>
                       <Button variant="outlined" size="small" onClick={handleClose} color="primary">
                         Close

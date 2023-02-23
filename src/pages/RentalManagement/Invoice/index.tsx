@@ -295,30 +295,24 @@ const Invoice = ({
         }
       });
       additionalcost?.forEach((e) => {
-        e.type = 'Add-on';
+        e.type = 'Add On';
         e.detail = e.description;
+        e.description = e.description;
         e.parentId = null;
       });
       combinedData = [...combinedData, ...additionalcost];
       const rows = combinedData.filter((e) => e.parentId === null);
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${parent.type === 'Add-on'
-          ? parent.detail
-          : parent.type === 'product'
-            ? parent?.productDetail?.productName
-            : parent.type === 'service'
-              ? parent?.serviceDetail?.serviceName
-              : parent.packageDetail?.packageName
-          }`;
+        parent.detail = parent.type === 'Add On' ? parent.detail
+          : parent.type === 'product' ? parent?.productDetail?.productName
+            : parent.type === 'service' ? parent?.serviceDetail?.serviceName
+              : parent.packageDetail?.packageName;
         parent.description =
-          parent?.type === 'service'
-            ? parent?.serviceDetail?.serviceDescription || ''
-            : parent?.type === 'product'
-              ? parent?.productDetail?.productDescription || ''
-              : parent?.type === 'package'
-                ? parent?.packageDetail?.packageDescription || ''
-                : '';
+          parent?.type === 'service' ? parent?.serviceDetail?.serviceDescription || ''
+            : parent?.type === 'product' ? parent?.productDetail?.productDescription || ''
+              : parent?.type === 'package' ? parent?.packageDetail?.packageDescription || ''
+                : parent.type === 'Add On' ? parent.description : '';
         parent.qty = parent.qty;
         parent.subRows = generateNestedData(material, inventory, parent);
       });
@@ -480,7 +474,7 @@ const Invoice = ({
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between" m={1}>
+      <Box display="flex" justifyContent="space-between" mt={1} mb={2}>
         <Box display="flex" alignItems="center">
           {!isOffline && ![RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData.status) && allowedToEdit && (
             <Fragment>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconButton, Typography, makeStyles } from '@material-ui/core';
+import { IconButton, Typography, makeStyles, Box } from '@material-ui/core';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import CloseIcon from '@material-ui/icons/Close';
 import PropTypes from 'prop-types';
@@ -29,18 +29,23 @@ function CustomDialogHeader({
   showManimizeMaximize = false,
   showRequiredLabel = true,
   isMinimized = true,
-  onMinimizeMaximize = () => {},
-  style = {}
+  onMinimizeMaximize = () => { },
+  style = {},
+  additionalTitle = null
 }) {
   const classes = useStyles();
 
   return (
     <React.Fragment>
       <MuiDialogTitle disableTypography className={classes.root}>
-        <Typography variant="h6" className={`${classes.dialogTitle} title-layout text-truncate`} style={style}>
-          {title}
-        </Typography>
-
+        <Box display={'flex'}>
+          <Box>
+            <Typography variant="h6" className={`${classes.dialogTitle} title-layout text-truncate`} style={style}>
+              {title}
+            </Typography>
+          </Box>
+          {additionalTitle && additionalTitle}
+        </Box>
         <div className={`${classes.closeButton} close`}>
           {showRequiredLabel && (
             <span className="form-label-style required-text mr-2" style={{ borderBottom: 'none' }}>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, MenuList, ListItemIcon, ListItemText } from '@material-ui/core';
+import { Grid, Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -10,17 +10,15 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AddExistingProductInventory from './AddExistingProductInventory';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import moment from 'moment';
-import { repairOrder, dateFormat } from '../../../constants/helpers';
+import { repairOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { ExpandMore } from '@material-ui/icons';
-import { sortBy } from 'lodash';
+import { capitalize, sortBy } from 'lodash';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
@@ -71,56 +69,43 @@ const Productpackage = ({
     setColumns(null);
     const coloum: any = [
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
       },
       {
+        accessor: 'type',
+        Header: 'Type',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>,
+      },
+      {
         accessor: 'detail',
-        Header: 'Asset Details',
-        minWidth: 300,
-        width: 300,
+        Header: 'Details',
+        width: 250,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {!allowedToEdit ? <p>{row.original.detail}</p> : <p title={row.original.detail}>{row.original.detail}</p>}
-            {
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-                </span>
-              </Box>
-            }
-            <Chip
-              className="ml-1"
-              label={`${row.original.type === 'service'
-                ? 'Service'
-                : row.original.type === 'product'
-                  ? 'Product'
-                  : row.original.type === 'serializedAsset'
-                    ? 'Asset'
-                    : 'Package'
-                }`}
-              size="small"
-              color="primary"
-              onClick={() => {
-                window.open(
-                  `${row.original.type === 'service'
-                    ? routes.serviceMasterDetail.path
-                    : row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : routes.packagesDetail.path
-                  }/${row.original.materialId}`
-                );
-              }}
-            />
+
+            <a className="link text-truncate" target='_blank' href={`${row.original.type === 'service'
+              ? routes.serviceMasterDetail.path
+              : row.original.type === 'product'
+                ? routes.productDetail.path
+                : row.original.type === 'serializedAsset'
+                  ? routes.serializedAssetDetail.path
+                  : routes.packagesDetail.path
+              }/${row.original.materialId}`}>{row.original.detail}</a>
+            <Box ml={1} className="d-flex align-items-center">
+              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+              </span>
+            </Box>
           </div>
         )
       },
@@ -212,7 +197,7 @@ const Productpackage = ({
     const rows = data.material.filter((e) => e.parentId === null);
 
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
+      parent.index = i + 1;
       parent.detail = `${parent.type === 'service'
         ? parent.serviceDetail?.serviceName
         : parent.type === 'product'
@@ -267,7 +252,7 @@ const Productpackage = ({
     let productIndex = 0;
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
+      _subRow.index = parent.index + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
       _subRow.detail = `${_subRow.type === 'service'
         ? _subRow.serviceDetail?.serviceName
         : _subRow.type === 'product'
@@ -338,7 +323,7 @@ const Productpackage = ({
 
   const handleSaveData = async (rows: any) => {
     rows.forEach((element) => {
-      delete element.srno;
+      delete element.index;
       delete element.detail;
       delete element.serializedProduct;
       delete element.qtyDisplay;

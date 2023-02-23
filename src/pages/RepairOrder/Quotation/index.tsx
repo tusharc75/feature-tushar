@@ -71,7 +71,6 @@ const Quotation = ({
   const [allColumn, setAllColumn] = useState([]);
   const [isInlineEdit, setIsInlineEdit] = useState(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
-  const [sendMail, setSendMail] = useState(false)
 
   useEffect(() => {
     fetchFields();
@@ -431,7 +430,7 @@ const Quotation = ({
 
   const handleSendToCustomer = () => {
     axiosInstance()
-      .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}?sendMail=${sendMail}`)
+      .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
       .then(() => {
         fetchFields();
         toastConfig.setToastConfig({
@@ -553,7 +552,7 @@ const Quotation = ({
                         d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
                     )}
                   onClick={handleSendToCustomer}
-                  variant="outlined"
+                  variant="contained"
                   size="small"
                   className="mx-1"
                   color="primary"
@@ -565,7 +564,7 @@ const Quotation = ({
                   onClick={() => {
                     setCustomerAcceptable(true);
                   }}
-                  variant="outlined"
+                  variant="contained"
                   size="small"
                   className="mx-1"
                   color="primary"
@@ -577,7 +576,7 @@ const Quotation = ({
                   onClick={() => {
                     cloneVersion();
                   }}
-                  variant="outlined"
+                  variant="contained"
                   size="small"
                   className="mx-1"
                   color="primary"
