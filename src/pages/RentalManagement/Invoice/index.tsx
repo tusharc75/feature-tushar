@@ -6,16 +6,10 @@ import { Button, Chip, Dialog, IconButton, Menu, MenuItem } from '@material-ui/c
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import {
   CustomDialogTransition,
-  customerContact,
   dateFormat,
   formatAmountWithCurrency,
-  gridLoadingTimeout,
-  INVENTORY_STATUS,
-  purchaseOrder,
   rentalManagement,
   RENTAL_STATUS,
-  serializedAsset,
-  sidebarResource
 } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -343,6 +337,7 @@ const Invoice = ({
         srno: `${parent.srno}.${k + 1}`,
         detail: _inventory.inventoryDetail?.assetNumber,
         status: _inventory.inventoryDetail?.status,
+        description: parent?.description || '',
         actualStartDate: _inventory.startDate,
         actualEndDate: _inventory.endDate,
         type: 'Asset',

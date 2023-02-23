@@ -109,8 +109,10 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
       } else {
         setTitle('Create Repair Job')
         setDisablePlantIfAssetAdded(false);
-        let initialData = { ...getObjKeys('', fieldsDataForCreate), expectedCompletionDate: "", repairJobName: `RJ_${generateUniqueIdOnly()}` };
-
+        let initialData = { ...getObjKeys('', fieldsDataForCreate), repairJobName: `RJ_${generateUniqueIdOnly()}` };
+        if (fieldsDataForCreate?.some((e) => e.fieldName === "expectedCompletionDate")) {
+          initialData["expectedCompletionDate"] = null;
+        }
         if (refrenceType === "Rental Job") {
           initialData["warehouse"] = refrenceData?.warehouse
           initialData["rentalJob"] = refrenceData?._id
