@@ -42,15 +42,11 @@ import {
   RiFlowChart,
   VscVersions
 } from 'react-icons/all';
-import HideWhenOffline from '../../components/HideWhenOffline';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { camelCase } from 'lodash';
 import Service from './Service';
 import QuoteBuilder from './QuoteBuilder';
 import RoadmapViews from './RoadMapViews';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import Steps from 'src/pages/RentalManagement/Steps';
 import contactClass from '../Contact/contact.module.scss';
 import { CircularProgress } from '@material-ui/core';
