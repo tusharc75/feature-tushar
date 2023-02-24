@@ -52,8 +52,8 @@ const SendEmail = ({
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [pdfFileBase64, setPdfFileBase64] = useState(null);
   const [loading, setLoading] = useState(null);
-  const [visibleColumnsExcel, setVisibleColumnsExcel] = useState([]);
-  const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
+  const [visibleColumnsExcel, setVisibleColumnsExcel] = useState(["Index", "Details", "Type", "Unit", "Qty"]);
+  const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState({ open: false, type: '' });
   const [excelArrangeColumnLoading, setExcelArrangeColumnLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [downlodingFile, setDownlodingFile] = useState(null);
@@ -129,7 +129,16 @@ const SendEmail = ({
     handleAttachments();
   };
 
-  const handleViewPdf = (type, PDFType) => {
+  const handleViewPdf = (type, PDFType, visibleColumns) => {
+    let tempColumns = columns
+      .filter((d) => visibleColumns?.includes(d?.Header))
+      .map((d) => {
+        if (d?.accessor === 'qtyDisplay') {
+          return 'qty';
+        } else {
+          return d?.accessor.split('_')[0];
+        }
+      })
     if (type === 'Download') {
       setLoading('download');
     } else {
@@ -138,8 +147,8 @@ const SendEmail = ({
     axiosInstance()
       .get(
         PDFType === 'Detail'
-          ? `${quotation.api}/${quotationData._id}/pdf/${versionData._id}/detail`
-          : `${quotation.api}/${quotationData._id}/pdf/${versionData._id}`
+          ? `${quotation.api}/${quotationData._id}/pdf/${versionData._id}/detail?columns=${tempColumns}`
+          : `${quotation.api}/${quotationData._id}/pdf/${versionData._id}?columns=${tempColumns}`
       )
       .then(({ data }) => {
         axiosInstance()
@@ -148,6 +157,8 @@ const SendEmail = ({
           })
           .then(({ data }) => {
             setLoading(null);
+            setExcelArrangeColumnLoading(false);
+            setShowExcelArrangeColumns({ open: false, type: '' });
             if (type === 'Download') {
               const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
               const link = document.createElement('a');
@@ -244,7 +255,7 @@ const SendEmail = ({
               size="small"
               className={'btn-outline-v1 mx-1'}
               onClick={() => {
-                setShowExcelArrangeColumns(true);
+                setShowExcelArrangeColumns({ open: true, type: 'Excel' });
               }}
               style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
               startIcon={isMobile && !isTablet ? null : <AiOutlineFileExcel />}
@@ -262,7 +273,7 @@ const SendEmail = ({
               disabled={loading === 'view'}
               onClick={(e) => {
                 setDownlodingFile('Preview');
-                handleClick(e);
+                setShowExcelArrangeColumns({ open: true, type: 'PDF' });
               }}
             >
               {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : loading === 'view' ? 'Please wait...' : 'Preview'}
@@ -280,14 +291,14 @@ const SendEmail = ({
                   disabled={loading === 'download'}
                   onClick={(e) => {
                     setDownlodingFile('Download');
-                    handleClick(e);
+                    setShowExcelArrangeColumns({ open: true, type: 'PDF' });
                   }}
                 >
                   {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === 'download' ? 'Please wait...' : 'Download'}
                 </Button>
               </>
             )}
-            <Menu
+            {/* <Menu
               id="simple-menu"
               anchorEl={anchorEl}
               keepMounted
@@ -306,7 +317,8 @@ const SendEmail = ({
               <MenuItem
                 onClick={() => {
                   setAnchorEl(null);
-                  handleViewPdf(downlodingFile, 'Regular');
+                  // handleViewPdf(downlodingFile, 'Regular');
+                  setShowExcelArrangeColumns({ open: true, type: 'PDF' });
                 }}
               >
                 Regular
@@ -314,12 +326,13 @@ const SendEmail = ({
               <MenuItem
                 onClick={() => {
                   setAnchorEl(null);
-                  handleViewPdf(downlodingFile, 'Detail');
+                  // handleViewPdf(downlodingFile, 'Detail');
+                  setShowExcelArrangeColumns({ open: true, type: 'PDF' });
                 }}
               >
                 Detail
               </MenuItem>
-            </Menu>
+            </Menu> */}
             {isSendEmail && (
               <>
                 <Box mx={0.5} />
@@ -379,22 +392,22 @@ const SendEmail = ({
           />
         </Dialog>
       )}
-      {showExcelArrangeColumns && (
+      {showExcelArrangeColumns.open && (
         <Dialog
-          open={showExcelArrangeColumns}
+          open={showExcelArrangeColumns.open}
           aria-labelledby="customized-dialog-title"
           maxWidth="sm"
           onClose={() => {
-            setShowExcelArrangeColumns(false);
+            setShowExcelArrangeColumns({ open: false, type: '' });
           }}
           fullWidth
           fullScreen={fullScreen || isMobile || isTablet}
           TransitionComponent={CustomDialogTransition}
         >
           <CustomDialogHeader
-            title={`View Columns Excel`}
+            title={`Visible Columns in ${showExcelArrangeColumns.type}`}
             onClose={() => {
-              setShowExcelArrangeColumns(false);
+              setShowExcelArrangeColumns({ open: false, type: '' });
             }}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
@@ -404,7 +417,7 @@ const SendEmail = ({
           />
           <CustomDialogContent>
             <Grid container justify="space-between" alignItems="center">
-              <Grid item xs={12} md={12} sm={12}>
+              <Grid item style={{ padding: 5, marginTop: 10 }} xs={12} md={12} sm={12}>
                 <FormControl fullWidth>
                   <Autocomplete
                     id="demo-mutiple-chip"
@@ -419,7 +432,7 @@ const SendEmail = ({
                       } else if (['Select All', ...allColumn].sort().toString() === val.sort().toString()) {
                         setVisibleColumnsExcel([]);
                       } else {
-                        setVisibleColumnsExcel(val);
+                        setVisibleColumnsExcel(allColumn.filter(d => val.includes(d)));
                       }
                     }}
                     options={['Select All', ...allColumn]}
@@ -433,7 +446,7 @@ const SendEmail = ({
                           style={{ marginRight: 8 }}
                           checked={
                             showExcelArrangeColumns &&
-                            ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
+                              ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
                               ? true
                               : selected
                           }
@@ -442,7 +455,7 @@ const SendEmail = ({
                       </React.Fragment>
                     )}
                     renderInput={(params) => (
-                      <TextField {...params} variant="outlined" label={`Visible Columns in Quote Excel`} placeholder="Select " />
+                      <TextField {...params} variant="outlined" label={`Visible Columns in ${showExcelArrangeColumns.type}`} placeholder="Select " />
                     )}
                   />
                 </FormControl>
@@ -450,51 +463,74 @@ const SendEmail = ({
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <CustomButton
-              variant="contained"
-              color="primary"
-              size="small"
-              loading={excelArrangeColumnLoading}
-              disabled={visibleColumnsExcel.length === 0}
-              onClick={(e) => {
-                e.preventDefault();
-                setExcelArrangeColumnLoading(true);
-                axiosInstance()
-                  .post(
-                    `${quotation.api}/template`,
-                    {
-                      id: quotationData._id,
-                      versionId: versionId,
-                      columns: columns
-                        .filter((d) => visibleColumnsExcel?.includes(d?.Header))
-                        .map((d) => {
-                          if (d?.accessor === 'qtyDisplay') {
-                            return 'qty';
-                          } else {
-                            return d?.accessor.split('_')[0];
-                          }
-                        })
-                    },
-                    { responseType: 'blob' }
-                  )
-                  .then(({ data }) => {
-                    setExcelArrangeColumnLoading(false);
-                    setShowExcelArrangeColumns(false);
-                    const url = window.URL.createObjectURL(new Blob([data]));
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.setAttribute('download', quotationData.quotationNumber + '.' + 'xlsx');
-                    document.body.appendChild(link);
-                    link.click();
-                  })
-                  .catch((err) => {
-                    setExcelArrangeColumnLoading(false);
-                    toastConfig.setToastConfig(err);
-                  });
-              }}
-            >
-              Download
-            </CustomButton>
+            {showExcelArrangeColumns.type === 'PDF' ?
+              <>
+                <CustomButton
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  loading={excelArrangeColumnLoading}
+                  disabled={visibleColumnsExcel.length === 0}
+                  onClick={(e) => { handleViewPdf(downlodingFile, 'Regular', visibleColumnsExcel); }}
+                >
+                  Regular
+                </CustomButton>
+                <CustomButton
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  loading={excelArrangeColumnLoading}
+                  disabled={visibleColumnsExcel.length === 0}
+                  onClick={(e) => { handleViewPdf(downlodingFile, 'Detail', visibleColumnsExcel); }}
+                >
+                  Detail
+                </CustomButton>
+              </>
+              : <CustomButton
+                variant="contained"
+                color="primary"
+                size="small"
+                loading={excelArrangeColumnLoading}
+                disabled={visibleColumnsExcel.length === 0}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setExcelArrangeColumnLoading(true);
+                  axiosInstance()
+                    .post(
+                      `${quotation.api}/template`,
+                      {
+                        id: quotationData._id,
+                        versionId: versionId,
+                        columns: columns
+                          .filter((d) => visibleColumnsExcel?.includes(d?.Header))
+                          .map((d) => {
+                            if (d?.accessor === 'qtyDisplay') {
+                              return 'qty';
+                            } else {
+                              return d?.accessor.split('_')[0];
+                            }
+                          })
+                      },
+                      { responseType: 'blob' }
+                    )
+                    .then(({ data }) => {
+                      setExcelArrangeColumnLoading(false);
+                      setShowExcelArrangeColumns({ open: false, type: '' });
+                      const url = window.URL.createObjectURL(new Blob([data]));
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.setAttribute('download', quotationData.quotationNumber + '.' + 'xlsx');
+                      document.body.appendChild(link);
+                      link.click();
+                    })
+                    .catch((err) => {
+                      setExcelArrangeColumnLoading(false);
+                      toastConfig.setToastConfig(err);
+                    });
+                }}
+              >
+                Download
+              </CustomButton>}
           </CustomDialogFooter>
         </Dialog>
       )}

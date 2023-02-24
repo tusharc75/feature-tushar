@@ -265,7 +265,7 @@ const RoadMap = () => {
                   handleToggle={handleToggle}
                   handleSelect={handleSelect}
                 />
-                <Box height={20}></Box>
+                <Box height={70}></Box>
               </Box>
             </div>
           </Box>
@@ -293,22 +293,20 @@ const RoadMap = () => {
             </Box>
             <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
               <div ref={scrollRef}>
-                {
-                  day?.map((day) => {
-                    return (
-                      <Box
-                        id="dayLiner"
-                        height={'100%'}
-                        style={{
-                          position: 'absolute',
-                          left: day * dayPixel,
-                          width: dayPixel,
-                          background: (day % 2) === 0 ? '#F0F8FF' : '#FAEBD7'
-                        }}
-                      >
-                      </Box>
-                    )
-                  })
+                {day?.map((day) => {
+                  return (
+                    <Box
+                      height={'100%'}
+                      style={{
+                        position: 'absolute',
+                        left: day * dayPixel,
+                        width: dayPixel,
+                        background: (day % 2) === 0 ? '#f8fffe' : 'white'
+                      }}
+                    >
+                    </Box>
+                  )
+                })
                 }
                 <Box
                   id="dayLiner"

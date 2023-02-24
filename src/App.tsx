@@ -188,6 +188,7 @@ import PurchaseRequisitionDetail from './pages/PurchaseRequisition/PurchaseRequi
 import ScheduleDetail from './pages/Schedule/ScheduleDetail';
 import Schedule from './pages/Schedule';
 import ScheduleCalendar from './pages/ScheduleCalendar';
+import RentalPlanningCalendar from './pages/RentalPlanningCalendar';
 import CompetencyType from './pages/CompetencyType';
 import CompetencyTypeDetail from './pages/CompetencyType/CompetencyTypeDetail';
 import FieldTicket from './pages/FieldTicket';
@@ -756,6 +757,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.scheduleCalendar.path}`}>
               <ScheduleCalendar />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.rentalPlanningCalendar.path}`}>
+              <RentalPlanningCalendar />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
               <ResourceCalendar />
