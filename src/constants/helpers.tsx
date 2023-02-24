@@ -226,7 +226,8 @@ export const sidebarResource = {
   schedule: 'Schedule',
   competencyType: 'Competency Type',
   fieldTicket: 'Field Ticket',
-  fieldServiceTechnician: `Field Service Technician`
+  fieldServiceTechnician: `Field Service Technician`,
+  rentalPlanningCalendar: `Rental Planning Calendar`
 };
 
 export const primaryFields = {
