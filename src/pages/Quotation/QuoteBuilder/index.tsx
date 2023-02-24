@@ -1,4 +1,4 @@
-import  { useState, useEffect, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import {
   Box,
   Button,
@@ -75,9 +75,8 @@ const QuoteBuilder = ({
       {
         accessor: 'type',
         Header: 'Type',
-        disableFilters: true,
         sticky: isMobile ? 'none' : 'left',
-        width: 200,
+        width: 100,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -94,34 +93,33 @@ const QuoteBuilder = ({
         width: 300,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {
-              <p className="text-truncate" title={row.original?.detail}>
-                {row.original?.detail}
-              </p>
-            }
-            {row.original?.parentId === null && row.original?.type !== 'Service' && (
-              <Box ml={1} className="d-flex align-items-center">
+            <p className="text-truncate" title={row.original?.detail}>
+              {row.original?.detail}
+            </p>
+            {row.original?.subRows?.length ? (
+              <Box ml={1} >
                 <span>({row.original?.subRows?.length})</span>
               </Box>
-            )}
-            <IconButton
-              size="small"
-              onClick={() => {
-                window.open(
-                  `${
-                    row.original.type === 'serializedAsset'
+            ) : null}
+            <Box ml={1} >
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(
+                    `${row.original.type === 'serializedAsset'
                       ? routes.serializedAssetDetail.path
                       : row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'package'
-                      ? routes.packagesDetail.path
-                      : routes.serviceMasterDetail.path
-                  }/${row.original.materialId}`
-                );
-              }}
-            >
-             <OpenInNewIcon fontSize="small" color="primary" /> 
-            </IconButton>
+                        ? routes.productDetail.path
+                        : row.original.type === 'package'
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
+                    }/${row.original.materialId}`
+                  );
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
           </div>
         )
       },
@@ -253,15 +251,14 @@ const QuoteBuilder = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -302,15 +299,14 @@ const QuoteBuilder = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.srno = parent.srno + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -340,12 +336,12 @@ const QuoteBuilder = ({
             <HtmlTooltip title={'Send to customer'}>
               <Button
                 variant="contained"
-                className="btn-outline-v1"
                 size="small"
+                color="primary"
                 disabled={sentToCustomer}
                 onClick={() => {
                   axiosInstance()
-                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${versionData._id}`)
+                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${versionData._id}?sendMail=true`)
                     .then(() => {
                       fetchQuotationData(version, false);
                       toastConfig.setToastConfig({
@@ -374,7 +370,7 @@ const QuoteBuilder = ({
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-              onSelect={() => {}}
+              onSelect={() => { }}
               hideSelection={true}
               hideAction={true}
               childrenProperty="subRows"
