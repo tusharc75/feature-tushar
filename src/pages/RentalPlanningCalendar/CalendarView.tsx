@@ -3,8 +3,9 @@ import { Calendar, View, momentLocalizer } from 'react-big-calendar'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import moment from 'moment';
-import { Box, Grid, makeStyles } from '@material-ui/core';
+import { Grid, makeStyles, Checkbox, TextField } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
+import { Autocomplete } from '@material-ui/lab';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any)
 const localizer = momentLocalizer(moment);
@@ -34,10 +35,62 @@ export default function CalendarView() {
     const [events, setEvents] = useState([])
     const [view, setView] = useState<View>('month');
     const [staticEvents, setStaticEvents] = useState([])
+    const [filterToKeep, setFilterToKeep] = useState([]);
+
+    const [warehouse, setWarehouse] = useState([])
+    const [product, setProduct] = useState([])
+    const [asset, setAsset] = useState([])
+
+    const [selectedWarehouse, setSelectedWarehouse] = useState(null)
+    const [selectedProduct, setSelectedProduct] = useState(null)
+    const [selectedAsset, setSelectedAsset] = useState(null)
+
+    const [dateRange, setDateRange] = useState({
+        estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
+        estimateEndDate: moment().endOf('month').format('MM/DD/YYYY')
+    })
+
+    const defaultDate = useMemo(() => moment().toDate(), [])
+
+    const RENTAL_PLANNING_CALENDAR_FILTER = {
+        warehouse: 'Plant',
+        product: 'Product',
+        asset: 'Asset'
+    }
+
+    useEffect(() => {
+        axiosInstance()
+            .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Product,Serialized Asset')
+            .then(({ data: { data } }) => {
+                setProduct(data['Product'])
+                setAsset(data['Serialized Asset'])
+                setWarehouse(data['Warehouse'])
+            })
+            .catch((err) => { });
+    }, [])
+
+    const getQueryString = () => {
+        const api = '/rental-planning-calendar';
+        const date = `{"from": "${dateRange.estimateStartDate}", "to": "${dateRange.estimateEndDate}"}`
+        let query = `${api}?date=${date}`
+
+        if (selectedWarehouse) {
+            query = `${query}&warehouse=${selectedWarehouse?.optionValue}`
+        }
+        if (selectedProduct) {
+            query = `${query}&product=${selectedProduct?.optionValue}`
+        }
+        if (selectedAsset) {
+            query = `${query}&asset=${selectedAsset?.optionValue}`
+        }
+
+        return query;
+    }
 
     const fetchData = () => {
+        const queryString = getQueryString();
         axiosInstance()
-            .get(`/rental-planning-calendar?date={"to":"2/28/2023","from":"2/1/2023"}`)
+            .get(queryString)
             .then(({ data: { data } }) => {
                 const rentalData = data?.rental.map((d: any) => {
                     return (
@@ -90,7 +143,7 @@ export default function CalendarView() {
 
     useEffect(() => {
         fetchData()
-    }, []);
+    }, [selectedWarehouse, selectedProduct, selectedAsset, dateRange]);
 
     const moveEvent = ({ event, start, end }) => {
         const filterEvents = staticEvents.filter(ev => ev.id !== event.id)
@@ -106,8 +159,6 @@ export default function CalendarView() {
         updateData(event, start, end)
     }
 
-    const defaultDate = useMemo(() => moment().toDate(), [])
-
     const onView = useCallback(
         (view) => {
             setView(view);
@@ -118,27 +169,79 @@ export default function CalendarView() {
     return (
         <>
             <div className={`bgLight ${classes.whiteBg}`}>
-                <Grid container className={`greyBox ${classes.topbar}`}>
-                    <Grid item xs={12} sm={5}>
-                        <Box display="flex" alignItems="center">
-
-                            <Box component="span" mx={1} />
-                            {['Rental Job', 'Sales Order', 'Field Service Order'].map((item) => (
-                                <>
-                                    <Box
-                                        display="flex"
-                                        bgcolor={item === 'Rental Job' ? 'rgba(255, 232, 204, 1)' : item === 'Sales Order' ? 'rgba(234, 239, 254, 1)' : 'rgba(253, 220, 228, 1)'}
-                                        className={`${classes.indicators}`}
-                                        style={{
-                                            color: `${item === 'Rental Job' ? 'rgba(236, 85, 0, 1)' : item === 'Sales Order' ? 'rgba(4, 50, 161, 1)' : 'rgba(165, 4, 43, 1)'}`
+                <Grid container spacing={2} className={`greyBox ${classes.topbar}`}>
+                    <Grid item xs={12} sm={6} md={4} lg={4}>
+                        <Autocomplete
+                            fullWidth
+                            multiple
+                            options={Object.keys(RENTAL_PLANNING_CALENDAR_FILTER)?.map((key) => key) || []}
+                            disableCloseOnSelect
+                            getOptionLabel={(option) => RENTAL_PLANNING_CALENDAR_FILTER[option]}
+                            renderOption={(option: any) => (
+                                <React.Fragment>
+                                    <Checkbox checked={filterToKeep?.includes(option)} />
+                                    {RENTAL_PLANNING_CALENDAR_FILTER[option]}
+                                </React.Fragment>
+                            )}
+                            size="small"
+                            renderInput={(params) => <TextField {...params} label="Filters" placeholder="filter" variant="outlined" />}
+                            value={filterToKeep}
+                            onChange={(event: any, newValue: any) => {
+                                setFilterToKeep(newValue);
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={8} lg={8}>
+                        <Grid container spacing={1}>
+                            {filterToKeep?.includes('warehouse') &&
+                                < Grid item xs={12} sm={6} md={4} lg={4}>
+                                    <Autocomplete
+                                        options={warehouse}
+                                        fullWidth
+                                        getOptionLabel={(option: any) => option.optionLabel}
+                                        getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                                        value={selectedWarehouse}
+                                        onChange={(event, newValue) => {
+                                            setSelectedWarehouse(newValue);
                                         }}
-                                    >
-                                        {item}
-                                    </Box>
-                                    <Box component="span" ml={1} />
-                                </>
-                            ))}
-                        </Box>
+                                        size="small"
+                                        renderInput={(params) => <TextField {...params} label={`Select Plant`} variant="outlined" />}
+                                    />
+                                </Grid>
+                            }
+                            {filterToKeep?.includes('product') &&
+                                < Grid item xs={12} sm={6} md={4} lg={4}>
+                                    <Autocomplete
+                                        options={product}
+                                        fullWidth
+                                        getOptionLabel={(option: any) => option.optionLabel}
+                                        getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                                        value={selectedProduct}
+                                        onChange={(event, newValue) => {
+                                            setSelectedProduct(newValue);
+                                        }}
+                                        size="small"
+                                        renderInput={(params) => <TextField {...params} label={`Select Product`} variant="outlined" />}
+                                    />
+                                </Grid>
+                            }
+                            {filterToKeep?.includes('asset') &&
+                                < Grid item xs={12} sm={6} md={4} lg={4}>
+                                    <Autocomplete
+                                        options={asset}
+                                        fullWidth
+                                        getOptionLabel={(option: any) => option.optionLabel}
+                                        getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                                        value={selectedAsset}
+                                        onChange={(event, newValue) => {
+                                            setSelectedAsset(newValue);
+                                        }}
+                                        size="small"
+                                        renderInput={(params) => <TextField {...params} label={`Select Asset`} variant="outlined" />}
+                                    />
+                                </Grid>
+                            }
+                        </Grid>
                     </Grid>
                 </Grid>
                 <DragAndDropCalendar
@@ -166,6 +269,14 @@ export default function CalendarView() {
                         return {
                             style: newStyles
                         };
+                    }}
+                    onNavigate={(date) => {
+                        if (view === 'month') {
+                            setDateRange({
+                                estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
+                                estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
+                            });
+                        }
                     }}
                 />
             </div>
