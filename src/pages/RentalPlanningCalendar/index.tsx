@@ -1,6 +1,7 @@
 import { Grid } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
+import routes from 'src/components/Helpers/Routes';
 import CalendarView from './CalendarView';
 
 const RentalPlanningCalendar = () => {
@@ -11,8 +12,8 @@ const RentalPlanningCalendar = () => {
                 <CustomBreadCrumbs
                     routes={[
                         {
-                            title: 'Rental Planning Calendar',
-                            path: '/Rental-planning-calendar'
+                            title: routes.rentalPlanningCalendar.title,
+                            path: routes.rentalPlanningCalendar.path,
                         }
                     ]}
                 />
