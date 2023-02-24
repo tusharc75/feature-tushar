@@ -9,7 +9,7 @@ import { disabledColumns, getSortedColumns } from '../../constants/columns';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import ArrangeViewDialog from './ArrangeViewDialog';
 import ReportArrangeView from './ReportArrangeView';
-import { BiFilterAlt } from 'react-icons/bi';
+
 // import { BsArrowLeftRight } from 'react-icons/bs';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 
@@ -19,10 +19,7 @@ export default function CustomGridHeaderOptions({
   renderedFrom = null,
   dispatch: gridDispatch = null,
   showOnlyShowFilteredRecordSwitch = false,
-  selectedRecords = [],
-  showFilters = false,
-
-  handleFilterOpen = () => {}
+  selectedRecords = []
 }) {
   const [disableSelectionSwitch, setDisableSelectionSwitch] = useState(true);
 
@@ -237,12 +234,6 @@ export default function CustomGridHeaderOptions({
         </div>
 
         <div style={{ marginLeft: 'auto' }}>
-          {showFilters && (
-            <Button startIcon={<BiFilterAlt />} size={'small'} className="btn-outline-v1 light " onClick={handleFilterOpen}>
-              Filter
-            </Button>
-          )}
-
           {refreshGrid && (
             <>
               {/* <Divider orientation="vertical" flexItem /> */}
