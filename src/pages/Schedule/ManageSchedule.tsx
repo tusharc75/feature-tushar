@@ -140,11 +140,10 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
 
   const fetchFields = async () => {
     try {
-      let data;
       const response = await axiosInstance().get('/field?resource=Schedule');
-      data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      const data = response?.data?.data;
+      let fieldsDataForCreate = data.filter((obj) => obj.isCreate && !["rentalJob", "salesOrder", "serviceOrder"]?.includes(obj.fieldData?.fieldName)).map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !["rentalJob", "salesOrder", "serviceOrder"]?.includes(obj.fieldData?.fieldName)).map((d: any) => d.fieldData);
 
       if (id) {
         axiosInstance()
@@ -292,13 +291,12 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
                     onClose();
                   }
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.scheduleNumber ? `(${initialData.values?.scheduleNumber})` : ''}`
-                    : `Create ${routes?.schedule?.title}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.scheduleNumber ? `(${initialData.values?.scheduleNumber})` : ''}`
+                  : `Create ${routes?.schedule?.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -339,7 +337,7 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                         imageOrFileUploadCompletePercentage={null}
                                         onChange={(e, value) => {
                                           const prefix = checkTypeForPrefix(value?.optionValue);
-                                          setFieldValue('scheduleNumber', value && value.optionValue ? `${prefix}_${generateUniqueIdOnly()}` : '');
+                                          setFieldValue('scheduleNumber', value && value.optionValue ? `SC_${prefix}_${generateUniqueIdOnly()}` : '');
                                           setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
                                         }}
                                       />

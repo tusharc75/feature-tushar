@@ -30,26 +30,33 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ManageSchedule from './ManageSchedule';
 import styles from '../Leads/Header.module.scss';
-
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import { useHistory } from 'react-router-dom';
 
 const Schedule = () => {
+
   const renderedFrom = camelCase(routes?.schedule.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
+
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
   const [scheduleId, setScheduleId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [showConverConfirmBox, setShowConverConfirmBox] = useState({ open: false, id: null, scheduleNumber: "" });
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -93,7 +100,7 @@ const Schedule = () => {
       });
   };
 
-  const fetchScheduleData = () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
@@ -109,7 +116,6 @@ const Schedule = () => {
           finalObject['canDelete'] = permissions?.schedule?.isDelete && finalObject?.ownerId === user?.user?._id;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.schedule?.isUpdate;
-
           return {
             ...finalObject
           };
@@ -128,20 +134,6 @@ const Schedule = () => {
             count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
-        }
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
         }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
@@ -217,48 +209,88 @@ const Schedule = () => {
     );
   };
 
+  const handleConvert = () => {
+    axiosInstance().post(`${routes?.schedule?.path}/convert-schedule`, { id: showConverConfirmBox?.id })
+      .then(({ data }) => {
+        setShowConverConfirmBox({ open: false, id: null, scheduleNumber: "" });
+        fetchData()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   const ActionsRenderer = (params) => (
     <Fragment>
-      {permissions?.schedule?.isCreate ? (
-        <Tooltip title="Clone">
+      <HtmlTooltip title={permissions?.schedule?.isCreate ? "Clone" : "You do not have permission to clone/create"}>
+        <span>
           <IconButton
-            size="small"
+            disabled={permissions?.schedule?.isCreate ? false : true}
             aria-label="Clone"
+            size="small"
             onClick={() => {
-             setScheduleId(params.data.id);
+              setScheduleId(params.data.id);
               setOpen({ open: true, isClone: true });
             }}
           >
-            <FileCopyIcon fontSize="small" color="primary" />
+            <FileCopyIcon fontSize="small" color={permissions?.schedule?.isCreate ? "primary" : "disabled"} />
           </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-          <IconButton aria-label="Clone" size="small">
-            <FileCopyIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-
-      {params?.data?.canDelete ? (
-        <Tooltip title="Delete">
+        </span>
+      </HtmlTooltip>
+      {params?.data?.status === "Closed" ?
+        <HtmlTooltip title={`View Converted ${params?.data?.type}`}>
+          <span>
+            <IconButton
+              aria-label="Convert"
+              onClick={() => {
+                if (params?.data?.type === "Rental Job") {
+                  history.push(`${routes.rentalManagementDetail.path}/${params?.data?.rentalJobId}`)
+                }
+                if (params?.data?.type === "Sales Order") {
+                  history.push(`${routes.salesOrderDetail.path}/${params?.data?.salesOrderId}`)
+                }
+                if (params?.data?.type === "Field Service Order") {
+                  history.push(`${routes.serviceOrderDetail.path}/${params?.data?.serviceOrderId}`)
+                }
+              }}
+            >
+              <VisibilityIcon fontSize="small" color={"primary"} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        : <HtmlTooltip title={permissions?.schedule?.isUpdate ? "Convert" : "You do not have permission to convert"}>
+          <span>
+            <IconButton
+              disabled={permissions?.schedule?.isUpdate ? false : true}
+              aria-label="Convert"
+              onClick={() => {
+                setShowConverConfirmBox({ open: true, id: params?.data?._id, scheduleNumber: params?.data?.scheduleNumber })
+              }}
+            >
+              <AutorenewIcon fontSize="small" color={permissions?.schedule?.isUpdate ? "primary" : "disabled"} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>}
+      <HtmlTooltip title={params?.data?.canDelete ? "Delete" : "You do not have permission to delete"}>
+        <span>
           <IconButton
+            disabled={params?.data?.canDelete ? false : true}
             aria-label="Delete"
+            size="small"
             onClick={() => {
               setDeleteRecord(params.data);
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon fontSize="small" color="error" />
+            <DeleteIcon fontSize="small" color={params?.data?.canDelete ? "error" : "disabled"} />
           </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to delete">
-          <IconButton aria-label="Delete" size="small">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
+        </span>
+      </HtmlTooltip>
     </Fragment>
   );
 
@@ -273,7 +305,7 @@ const Schedule = () => {
       .put(`${routes?.schedule?.path}/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
-        fetchScheduleData();
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
@@ -292,7 +324,7 @@ const Schedule = () => {
   }, []);
 
   useEffect(() => {
-    fetchScheduleData();
+    fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   return (
@@ -307,7 +339,7 @@ const Schedule = () => {
             module="schedule"
             api={'schedule'}
             afterImportCompleted={() => {
-              fetchScheduleData();
+              fetchData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
@@ -319,7 +351,7 @@ const Schedule = () => {
             }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
-              else fetchScheduleData();
+              else fetchData();
             }}
             additionalParams={getQueryString(true)}
           />
@@ -360,7 +392,7 @@ const Schedule = () => {
                   {permissions?.schedule?.isDelete && (
                     <>
                       <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
                         color="default"
                         size="small"
                         onClick={openActions}
@@ -459,7 +491,7 @@ const Schedule = () => {
               allowAction={true}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={fetchScheduleData}
+              refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
             />
           )
@@ -475,6 +507,16 @@ const Schedule = () => {
             onOk={handleDelete}
           />
         )}
+        {showConverConfirmBox.open && (
+          <ConfirmationDialog
+            open={true}
+            message={`Are you sure you want to convert Schedule  ${showConverConfirmBox?.scheduleNumber} ?`}
+            onClose={() => {
+              setShowConverConfirmBox({ open: false, id: null, scheduleNumber: "" })
+            }}
+            onOk={handleConvert}
+          />
+        )}
         {open?.open && (
           <ManageSchedule
             id={scheduleId}
@@ -482,7 +524,7 @@ const Schedule = () => {
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
-              fetchScheduleData();
+              fetchData();
             }}
           />
         )}
