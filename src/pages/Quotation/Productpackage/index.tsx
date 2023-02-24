@@ -83,7 +83,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) =>  (<p className="text-truncate">{row.original.srno}</p>),
+        Cell: ({ row }) => (<p className="text-truncate">{row.original.srno}</p>),
         Footer: () => {
           return <>Total</>;
         }
@@ -91,9 +91,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
       {
         accessor: 'type',
         Header: 'Type',
-        disableFilters: true,
         sticky: isMobile ? 'none' : 'left',
-        width: 200,
+        width: 100,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -110,50 +109,49 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
         width: 300,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {
-              <p
-                onClick={() => {
-                  handleOpen(row.original);
-                }}
-                className="link text-truncate"
-                title={row.original?.detail}
-              >
-                {row.original?.detail}
-              </p>
-            }
-
-            {
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
-                <HtmlTooltip title="Add ">
-                  <IconButton
-                    onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
-                    size="small"
-                  >
-                    <Add color="disabled" fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
-              </Box>
-            }
-
-            <IconButton
-              size="small"
+            <p
               onClick={() => {
-                window.open(
-                  `${
-                    row.original.type === 'serializedAsset'
+                handleOpen(row.original);
+              }}
+              className="link text-truncate"
+              title={row.original?.detail}
+            >
+              {row.original?.detail}
+            </p>
+            {row.original?.subRows?.length ?
+              <Box ml={1} >
+                <span>({row.original?.subRows?.length})</span>
+              </Box>
+              : null}
+            <Box ml={1} >
+              <HtmlTooltip title="Add ">
+                <IconButton
+                  onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
+                  size="small"
+                >
+                  <Add color="disabled" fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            </Box>
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(
+                    `${row.original.type === 'serializedAsset'
                       ? routes.serializedAssetDetail.path
                       : row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'package'
-                      ? routes.packagesDetail.path
-                      : routes.serviceMasterDetail.path
-                  }/${row.original.materialId}`
-                );
-              }}
-            >
-             <OpenInNewIcon fontSize="small" color="primary" /> 
-            </IconButton>
+                        ? routes.productDetail.path
+                        : row.original.type === 'package'
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
+                    }/${row.original.materialId}`
+                  );
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
           </div>
         )
       },
@@ -324,15 +322,14 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -354,15 +351,14 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.srno = parent.srno + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -555,53 +551,53 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center">
-        <Button
-              variant={'outlined'}
-              color="primary"
-              size="small"
-              startIcon={<Add />}
-              onClick={openAddActions}
-              aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
+          <Button
+            variant={'outlined'}
+            color="primary"
+            size="small"
+            startIcon={<Add />}
+            onClick={openAddActions}
+            aria-controls="add-menu">
+            {'Add'}
+            <ExpandMore fontSize="small" />
+          </Button>
+          <Menu
+            anchorEl={addAnchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="add-menu"
+            open={Boolean(addAnchorEl)}
+            onClose={closeAddActions}
+          >
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddDialog({ open: true, type: 'product', parentId: null });
               }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
             >
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'product', parentId: null });
-                }}
-              >
-                Add Products
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'package', parentId: null });
-                }}
-              >
-                   Add Packages
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'service', parentId: null });
-                }}
-              >
-                 Add Services
-              </MenuItem>
-            </Menu>
+              Add Products
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddDialog({ open: true, type: 'package', parentId: null });
+              }}
+            >
+              Add Packages
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddDialog({ open: true, type: 'service', parentId: null });
+              }}
+            >
+              Add Services
+            </MenuItem>
+          </Menu>
         </Box>
         <Box display="flex">
           <div className="d-flex gap-2">
@@ -677,27 +673,27 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
                   closeActions();
                 }}
               >
-              Bulk Edit
+                Bulk Edit
               </MenuItem>
               <MenuItem
-               disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-               onClick={() => {
-                const dataToDelete =
-                  selectedProducts &&
-                  selectedProducts
-                    .filter((e) => !e.hideSelection)
-                    .map((rec: any) => {
-                      const obj: any = {};
-                      obj.id = rec._id;
-                      obj.type = rec?.type;
-                      obj.materialId = rec?.materialId;
-                      return obj;
-                    });
-                setDeleteData(dataToDelete);
-                closeActions();
-              }}
+                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+                onClick={() => {
+                  const dataToDelete =
+                    selectedProducts &&
+                    selectedProducts
+                      .filter((e) => !e.hideSelection)
+                      .map((rec: any) => {
+                        const obj: any = {};
+                        obj.id = rec._id;
+                        obj.type = rec?.type;
+                        obj.materialId = rec?.materialId;
+                        return obj;
+                      });
+                  setDeleteData(dataToDelete);
+                  closeActions();
+                }}
               >
-              Delete
+                Delete
               </MenuItem>
             </Menu>
           </div>
@@ -754,8 +750,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
             addDialog.type === 'product'
               ? `${renderedFrom}-product`
               : addDialog.type === 'service'
-              ? `${renderedFrom}-service`
-              : `${renderedFrom}-package`
+                ? `${renderedFrom}-service`
+                : `${renderedFrom}-package`
           }
           isAddingProducts={isAddingProducts}
           addProductInventory={handleAdd}
