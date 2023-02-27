@@ -1,8 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { Calendar, momentLocalizer, View } from 'react-big-calendar';
-import { useParams, useHistory } from 'react-router-dom';
 import moment from 'moment';
-
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -45,16 +43,16 @@ const CalendarView = (props: Props) => {
     estimateEndDate: moment().endOf('month').format('MM/DD/YYYY')
   });
   const [view, setView] = useState<View>('month');
-  const [converSchedule, setConvertSchedule] = useState({ open: false, data: null });
+  const [converPlanning, setConvertPlanning] = useState({ open: false, data: null });
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     axiosInstance()
-      .get(`${routes?.schedule.path}?entity=${selectedEntity}`)
+      .get(`${routes?.planning.path}?entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
         const eventsData = data.data.filter(d => d.status === 'Open').map((d: any) => ({
           id: d._id,
-          title: d.scheduleNumber,
+          title: d.planningNumber,
           start: d.startDate,
           end: d.endDate,
           allDay: true,
@@ -136,7 +134,7 @@ const CalendarView = (props: Props) => {
             };
           }}
           onSelectEvent={(event: any) => {
-            setConvertSchedule({
+            setConvertPlanning({
               open: true,
               data: event
             });
@@ -146,21 +144,21 @@ const CalendarView = (props: Props) => {
           view={view}
         />
       </div>
-      {converSchedule.open && (
+      {converPlanning.open && (
         <ConfirmationDialog
-          open={converSchedule.open}
-          message={`Are you sure you want to convert  ${converSchedule?.data?.title || ''} to ${converSchedule?.data?.type || ''} ?`}
+          open={converPlanning.open}
+          message={`Are you sure you want to convert  ${converPlanning?.data?.title || ''} to ${converPlanning?.data?.type || ''} ?`}
           onClose={() => {
-            setConvertSchedule({
+            setConvertPlanning({
               open: false,
               data: null
             });
           }}
           onOk={() => {
             axiosInstance()
-              .post(`${routes?.schedule?.path}/convert-schedule`, { id: converSchedule?.data?.id })
+              .post(`${routes?.planning?.path}/convert-planning`, { id: converPlanning?.data?.id })
               .then(({ data }) => {
-                setConvertSchedule({
+                setConvertPlanning({
                   open: false,
                   data: null
                 });

@@ -66,7 +66,6 @@ export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
 export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Loading Ticket', 'Invoice'];
 export const demandOrderSteps = ['Add Products'];
 export const purchaseRequisitionSteps = ['Add Products'];
-export const scheduleSteps = ['Add Products'];
 export const serviceOrderSteps = ['Add Services', 'Add Products', 'Assign Technician', 'Technician Dispatch', 'Invoice'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
@@ -193,7 +192,6 @@ export const sidebarResource = {
   repairType: 'Repair Type',
   report: 'Report',
   resourceCalendar: 'Resource Calendar',
-  scheduleCalendar: 'Schedule Calendar',
   cageManagement: 'Cage Management',
   productAuction: 'Product Auction',
   inventoryToAsset: 'Inventory to Asset',
@@ -223,7 +221,8 @@ export const sidebarResource = {
   technicianScheduler: 'Technician Scheduler',
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
-  schedule: 'Schedule',
+  planning: 'Planning',
+  planningCalendar: 'Planning Calendar',
   competencyType: 'Competency Type',
   fieldTicket: 'Field Ticket',
   fieldServiceTechnician: `Field Service Technician`,
@@ -330,7 +329,7 @@ export const RESOURCE_LABEL = {
   technicianScheduler: 'Technician Scheduler',
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
-  schedule: 'Schedule',
+  planning: 'Planning',
   competencyType: 'Competency Type',
   fieldTicket: 'Field Ticket',
   fieldServiceTechnician: `Field Service Technician`
@@ -353,7 +352,7 @@ export const CHILD_RESOURCE = {
   quotationService: 'Quotation Service',
   repairOrderProduct: 'Repair Order Product',
   serviceOrderDetails: 'Service Order Detail',
-  scheduleMaterial: 'Schedule Material',
+  planningMaterial: 'Planning Material',
   purchaseRequisition: 'Purchase Requisition Detail',
   serviceOrderAddon: 'Service Order Addon',
   fieldTicketCost: 'Field Ticket Cost',

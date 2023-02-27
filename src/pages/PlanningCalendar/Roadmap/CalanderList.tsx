@@ -34,16 +34,16 @@ export default function CalanderList(props) {
   const { activity, expanded, selected, handleSelect, startDate, endDate, totalDay, calendarType } = props;
   const classes = useStyles();
 
-  const getTreeNodes = (activity, schedule = []) => {
+  const getTreeNodes = (activity, planning = []) => {
     return activity.map((obj, i) => {
 
       let children = [];
       if (obj?.productName) {
-        children = getTreeNodes(types, obj?.schedule);
+        children = getTreeNodes(types, obj?.planning);
         children.push(<div></div>);
       }
 
-      var child: any = schedule?.filter((e) => e.type === obj?.type)
+      var child: any = planning?.filter((e) => e.type === obj?.type)
     
       let label = (<Box
         key={i}

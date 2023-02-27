@@ -25,7 +25,7 @@ import { CHILD_RESOURCE } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 
-const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
+const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
 
   const { state: { user, permissions } }: any = useData();
 
@@ -53,11 +53,11 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
   }, []);
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.scheduleMaterial}`);
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.planningMaterial}`);
     var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, scheduleData?.currency);
+    data = CURReplaceByCurrencySingle(data, planningData?.currency);
     setAllFields(data);
-    const newColumns = genrateCustomTableColumns(data, scheduleData?.currency, renderedFrom);
+    const newColumns = genrateCustomTableColumns(data, planningData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -191,7 +191,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
   const fetchData = async () => {
     var data: any = [];
     let assignedAssets = []
-    const response = await axiosInstance().get(`${routes.schedule.path}/material/${scheduleData._id}`);
+    const response = await axiosInstance().get(`${routes.planning.path}/material/${planningData._id}`);
     data = response?.data?.data;
     let rows = data.material.filter((e) => e.parentId === null)
     assignedAssets = data.material.filter((e) => e.type === 'serializedAsset')
@@ -261,7 +261,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       });
     }
     axiosInstance()
-      .post(`${routes?.schedule?.path}/material/${scheduleData._id}`, { material })
+      .post(`${routes?.planning?.path}/material/${planningData._id}`, { material })
       .then(({ data }) => {
         setAddDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig({
@@ -291,7 +291,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       delete element.subRows;
     });
     axiosInstance()
-      .put(`${routes.schedule.path}/material/${scheduleData._id}`, { material: rows })
+      .put(`${routes.planning.path}/material/${planningData._id}`, { material: rows })
       .then(({ data }) => {
         setUpdating(false);
         fetchData();
@@ -317,7 +317,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${routes.schedule.path}/material/${scheduleData?._id}/delete`, { ids: rows })
+      .put(`${routes.planning.path}/material/${planningData?._id}/delete`, { ids: rows })
       .then(({ data }) => {
         setDeleting(false);
         toastConfig.setToastConfig({
@@ -445,7 +445,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
               open={Boolean(anchorEl)}
               onClose={closeActions}
             >
-             {scheduleData.type === 'Rental Job' && <MenuItem
+             {planningData.type === 'Rental Job' && <MenuItem
               disabled={
                 disableAssignSerializedAssets()
               }
@@ -521,7 +521,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
             setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
           }}
           materialData={materialEdit.data}
-          scheduleData={scheduleData}
+          planningData={planningData}
           handleUpdate={handleSaveData}
           loadingEdit={isUpdating}
           bulkEdit={materialEdit.bulkedit}
@@ -530,7 +530,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference="schedule"
+          reference="planning"
           serialized={null}
           productsDialogOpen={addDialog.open}
           productId={null}
@@ -544,8 +544,8 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       )}
       {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={"schedule"}
-          referenceId={scheduleData?._id}
+          reference={"planning"}
+          referenceId={planningData?._id}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           ids={[]}
           onSuccess={(rows) => {
@@ -555,7 +555,7 @@ const Material = ({ renderedFrom, allowedToEdit, scheduleData }) => {
       )}
       {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType="schedule"
+          referenceType="planning"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           ids={[]}
           onSuccess={(rows) => {

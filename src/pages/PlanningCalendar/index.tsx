@@ -3,6 +3,7 @@ import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
+import routes from 'src/components/Helpers/Routes';
 import CalendarView from './CalendarView';
 import Roadmap from './Roadmap';
 
@@ -17,21 +18,14 @@ const viewTypes = [
   }
 ];
 
-const ScheduleCalendar = () => {
+const PlanningCalendar = () => {
 
   const [viewType, setViewType] = useState(1);
 
   return (<>
     <Grid container className="headerbox">
       <Grid item md={10} sm={9} xs={8}>
-        <CustomBreadCrumbs
-          routes={[
-            {
-              title: 'Schedule Calender',
-              path: '/schedule-calendar'
-            }
-          ]}
-        />
+        <CustomBreadCrumbs routes={[{ title: routes.planningCalendar.title, path: routes.planningCalendar.path }]} />
       </Grid>
       <Grid container justify="flex-end" md={2} sm={3} xs={4} >
         <ToggleButtonGroup
@@ -59,4 +53,4 @@ const ScheduleCalendar = () => {
   );
 };
 
-export default ScheduleCalendar;
+export default PlanningCalendar;

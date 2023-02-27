@@ -466,12 +466,12 @@ const routes = {
         : 'Resource Calendar',
     path: '/resource-calendar'
   },
-  scheduleCalendar: {
+  planningCalendar: {
     title:
-      storedRoutes && storedRoutes.scheduleCalendar && storedRoutes.scheduleCalendar.title
-        ? storedRoutes.scheduleCalendar?.title
-        : 'Schedule Calendar',
-    path: '/schedule-calendar'
+      storedRoutes && storedRoutes.planningCalendar && storedRoutes.planningCalendar.title
+        ? storedRoutes.planningCalendar?.title
+        : 'Planning Calendar',
+    path: '/planning-calendar'
   },
   rentalPlanningCalendar: {
     title:
@@ -822,19 +822,19 @@ const routes = {
         : RESOURCE_LABEL.purchaseRequisition,
     path: '/purchase-requisition/detail'
   },
-  schedule: {
+  planning: {
     title:
-      storedRoutes && storedRoutes.schedule && storedRoutes.schedule.title
-        ? storedRoutes.schedule?.title
-        : RESOURCE_LABEL.schedule,
-    path: '/schedule'
+      storedRoutes && storedRoutes.planning && storedRoutes.planning.title
+        ? storedRoutes.planning?.title
+        : RESOURCE_LABEL.planning,
+    path: '/planning'
   },
-  scheduleDetail: {
+  planningDetail: {
     title:
-      storedRoutes && storedRoutes.schedule && storedRoutes.schedule.title
-        ? storedRoutes.schedule?.title
-        : RESOURCE_LABEL.schedule,
-    path: '/schedule/detail'
+      storedRoutes && storedRoutes.planning && storedRoutes.planning.title
+        ? storedRoutes.planning?.title
+        : RESOURCE_LABEL.planning,
+    path: '/planning/detail'
   },
   competencyType: {
     title:
