@@ -389,25 +389,18 @@ const RentalManagementDetailsPage = () => {
 
   const handleDownload = () => {
     setIsDownloading(true)
-    axiosInstance().get(`/download-attachment?referenceType=rentalManagement&referenceId=${rentalManagementData?._id}`)
+    axiosInstance().get(`/download-attachment?referenceType=rentalManagement&referenceId=${rentalManagementData?._id}`,
+      {
+        responseType: 'blob'
+      })
       .then(({ data }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
-            responseType: "blob",
-          })
-          .then(({ data }) => {
-            const url = window.URL.createObjectURL(new Blob([data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', rentalManagementData?.rentalJobName + '.zip');
-            document.body.appendChild(link);
-            link.click();
-            setIsDownloading(false)
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-            setIsDownloading(false)
-          });
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', rentalManagementData?.rentalJobName + '.zip');
+        document.body.appendChild(link);
+        link.click();
+        setIsDownloading(false)
       }).catch((err) => {
         toastConfig.setToastConfig(err);
         setIsDownloading(false)
