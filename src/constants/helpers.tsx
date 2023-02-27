@@ -330,7 +330,8 @@ export const RESOURCE_LABEL = {
   purchaseRequisition: 'Purchase Requisition',
   planning: 'Planning',
   fieldTicket: 'Field Ticket',
-  fieldServiceTechnician: `Field Service Technician`
+  fieldServiceTechnician: `Field Service Technician`,
+  resourceLogs: `Resource Logs`
 };
 
 export const CHILD_RESOURCE = {
