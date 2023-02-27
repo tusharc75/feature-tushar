@@ -505,7 +505,6 @@ const Quotation = ({
           <SendEmail
             versionData={quotationData?.versions[currentVersion]}
             quotationData={quotationData}
-            previewOnly={true}
             allowedToEdit={allowedToEdit}
             versionId={quotationData?.versions[currentVersion]?._id}
             columns={columns}

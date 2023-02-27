@@ -30,7 +30,6 @@ const SendEmail = ({
   quotationData,
   versionData,
   isSendEmail = false,
-  previewOnly = false,
   allowedToEdit,
   versionId,
   allColumn,
@@ -39,7 +38,8 @@ const SendEmail = ({
   setShowQuotationSummaryDialog,
   currentVersion,
   hideSummary = false,
-  hideVersions = false
+  hideVersions = false,
+  currency = '',
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -52,7 +52,7 @@ const SendEmail = ({
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [pdfFileBase64, setPdfFileBase64] = useState(null);
   const [loading, setLoading] = useState(null);
-  const [visibleColumnsExcel, setVisibleColumnsExcel] = useState(["Index", "Details", "Type", "Unit", "Qty"]);
+  const [visibleColumnsExcel, setVisibleColumnsExcel] = useState([]);
   const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState({ open: false, type: '' });
   const [excelArrangeColumnLoading, setExcelArrangeColumnLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -61,6 +61,10 @@ const SendEmail = ({
   useEffect(() => {
     fetchEmailsData();
   }, []);
+
+  useEffect(() => {
+    setVisibleColumnsExcel(["Index", "Details", "Type", "Unit", "Qty", `Price ${currency}`, `Final Price ${currency}`]);
+  }, [currency]);
 
   const fetchEmailsData = () => {
     let ownerCollaboratorEmails = [];
@@ -87,8 +91,18 @@ const SendEmail = ({
   }
 
   const fetchEmailAttachment = () => {
+    let tempColumns = columns
+      .filter((d) => visibleColumnsExcel?.includes(d?.Header))
+      .map((d) => {
+        if (d?.accessor === 'qtyDisplay') {
+          return 'qty';
+        } else {
+          return d?.accessor.split('_')[0];
+        }
+      })
+
     axiosInstance()
-      .get(`${quotation.api}/${quotationData?._id}/pdf/${versionData._id}/detail`)
+      .get(`${quotation.api}/${quotationData?._id}/pdf/${versionData._id}/detail?columns=${tempColumns}`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -139,10 +153,10 @@ const SendEmail = ({
           return d?.accessor.split('_')[0];
         }
       })
-    if (type === 'Download') {
-      setLoading('download');
+    if (PDFType === 'Regular') {
+      setLoading('Regular');
     } else {
-      setLoading('view');
+      setLoading('Detail');
     }
     axiosInstance()
       .get(
@@ -278,26 +292,24 @@ const SendEmail = ({
             >
               {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : loading === 'view' ? 'Please wait...' : 'Preview'}
             </Button>
-            {!previewOnly && (
-              <>
-                <Box mx={0.5} />
-                <Button
-                  className="btn-outline-v1"
-                  variant="outlined"
-                  color="primary"
-                  type="button"
-                  size="small"
-                  startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
-                  disabled={loading === 'download'}
-                  onClick={(e) => {
-                    setDownlodingFile('Download');
-                    setShowExcelArrangeColumns({ open: true, type: 'PDF' });
-                  }}
-                >
-                  {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === 'download' ? 'Please wait...' : 'Download'}
-                </Button>
-              </>
-            )}
+            <>
+              <Box mx={0.5} />
+              <Button
+                className="btn-outline-v1"
+                variant="outlined"
+                color="primary"
+                type="button"
+                size="small"
+                startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
+                disabled={loading === 'download'}
+                onClick={(e) => {
+                  setDownlodingFile('Download');
+                  setShowExcelArrangeColumns({ open: true, type: 'PDF' });
+                }}
+              >
+                {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === 'download' ? 'Please wait...' : 'Download'}
+              </Button>
+            </>
             {/* <Menu
               id="simple-menu"
               anchorEl={anchorEl}
@@ -469,8 +481,8 @@ const SendEmail = ({
                   variant="contained"
                   color="primary"
                   size="small"
-                  loading={excelArrangeColumnLoading}
-                  disabled={visibleColumnsExcel.length === 0}
+                  loading={loading === 'Regular' || excelArrangeColumnLoading}
+                  disabled={loading || visibleColumnsExcel.length === 0}
                   onClick={(e) => { handleViewPdf(downlodingFile, 'Regular', visibleColumnsExcel); }}
                 >
                   Regular
@@ -479,8 +491,8 @@ const SendEmail = ({
                   variant="contained"
                   color="primary"
                   size="small"
-                  loading={excelArrangeColumnLoading}
-                  disabled={visibleColumnsExcel.length === 0}
+                  loading={loading === 'Detail' || excelArrangeColumnLoading}
+                  disabled={loading || visibleColumnsExcel.length === 0}
                   onClick={(e) => { handleViewPdf(downlodingFile, 'Detail', visibleColumnsExcel); }}
                 >
                   Detail

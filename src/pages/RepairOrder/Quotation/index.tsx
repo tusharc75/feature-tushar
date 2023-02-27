@@ -25,10 +25,10 @@ import Versions from 'src/pages/Quotation/Versions';
 import { FcCancel, FcClock, FcOk } from 'react-icons/all';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
-import SendEmail from 'src/pages/RentalManagement/Quotation/SendEmail';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { genrateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import SendEmail from 'src/pages/RentalManagement/Quotation/SendEmail';
 
 const Quotation = ({
   repairOrderData,
@@ -504,7 +504,6 @@ const Quotation = ({
           <SendEmail
             versionData={quotationData?.versions[currentVersion]}
             quotationData={quotationData}
-            previewOnly={true}
             allowedToEdit={invoiceStep ? !allowedToEdit : allowedToEdit}
             versionId={quotationData?.versions[currentVersion]?._id}
             columns={columns}
