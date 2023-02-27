@@ -54,7 +54,7 @@ const CompetencyMasterDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/competency-master/${id}`);
       setCompetencyMasterData(data);
-      setCustomizedRoutes([routes.competencyMaster, { title: data?.competencyName }]);
+      setCustomizedRoutes([routes.competencyMaster, { title: data?.competencyType }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

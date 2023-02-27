@@ -189,8 +189,6 @@ import Planning from './pages/Planning';
 import PlanningDetail from './pages/Planning/PlanningDetail';
 import PlanningCalendar from './pages/PlanningCalendar';
 import RentalPlanningCalendar from './pages/RentalPlanningCalendar';
-import CompetencyType from './pages/CompetencyType';
-import CompetencyTypeDetail from './pages/CompetencyType/CompetencyTypeDetail';
 import FieldTicket from './pages/FieldTicket';
 import FieldTicketDetail from './pages/FieldTicket/FieldTicketDetail';
 import FieldServiceTechnician from './pages/FieldServiceTechnician';
@@ -949,12 +947,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.planningCalendar.path}`}>
               <PlanningCalendar />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competencyType.path}`}>
-              <CompetencyType />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competencyTypeDetail.path}/:id`}>
-              <CompetencyTypeDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldTicket.path}`}>
               <FieldTicket />
