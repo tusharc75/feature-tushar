@@ -8,7 +8,7 @@ import GridFilter from '../GridFilter';
 const CustomGridFilterHeader = (props) => {
   const { resource, currentGridApi } = props;
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState({});
+  const [selectedFilter, setSelectedFilter] = useState(null);
   const [chipData, setChipData] = useState([]);
   const [currentFomValue, setCurrentFomValue] = useState({});
 
@@ -30,7 +30,7 @@ const CustomGridFilterHeader = (props) => {
 
   const clearFilterAll = () => {
     currentGridApi.setFilterModel({});
-    setSelectedFilter({});
+    setSelectedFilter(null);
     setChipData([]);
     setCurrentFomValue({});
   };
@@ -73,8 +73,10 @@ export default CustomGridFilterHeader;
 const DisplyaFilters = (props) => {
   const { selectedFilter, chipData, handleFilterOpen, clearSingleFilter, clearFilterAll } = props;
   const [hiddenItems, setHiddenItems] = useState(0);
-  const isAppliedFilterPresent = Object.keys(selectedFilter).length > 0;
+  const isAppliedFilterPresent = Object.keys(selectedFilter || {}).length > 0;
   const containerRef = useRef(null);
+  const countRef = useRef(null);
+  const COUNT_PADDING = 10;
 
   useEffect(() => {
     setHiddenItems(0);
@@ -87,18 +89,46 @@ const DisplyaFilters = (props) => {
     const containerWidth = container?.clientWidth - 103;
     const childItems = [...container?.children];
 
+    let lastVisibleItem = null;
+
     let tempChildWIdth = 0;
     let count = 0;
-    childItems.forEach((item) => {
+
+    for (let i = 0; i < childItems.length; i++) {
+      const item = childItems[i];
       const itemWidth = item.clientWidth;
       tempChildWIdth += itemWidth;
       if (tempChildWIdth > containerWidth) {
         item.style.display = 'none';
       }
-    });
-    childItems.forEach((item) => {
-      if (item.style.display === 'none') setHiddenItems((prev) => prev + 1);
-    });
+    }
+
+    for (let i = 0; i < childItems.length; i++) {
+      const item = childItems[i];
+      if (item.style.display === 'none') {
+        if (!lastVisibleItem) {
+          if (i != 0) {
+            lastVisibleItem = childItems[i - 1];
+          } else {
+            lastVisibleItem = childItems[i];
+          }
+        }
+        count += 1;
+        setHiddenItems((prev) => prev + 1);
+      }
+    }
+
+    const deltaX = lastVisibleItem?.offsetLeft + lastVisibleItem?.clientWidth;
+
+    if (countRef.current) {
+      countRef.current.style.cssText = `
+      left: ${deltaX + COUNT_PADDING}px;
+      display: ${count === 0 ? 'none' : 'block'};
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      `;
+    }
   };
 
   return (
@@ -115,7 +145,7 @@ const DisplyaFilters = (props) => {
         </div>
       ) : (
         chipData?.length > 0 && (
-          <div className="chip-container">
+          <div className="chip-container" style={{ paddingRight: `${55 + COUNT_PADDING}px` }}>
             <div className={'chip-group'} ref={containerRef}>
               {chipData?.map((filter) => (
                 <Chip
@@ -127,11 +157,14 @@ const DisplyaFilters = (props) => {
                 />
               ))}
             </div>
-            {hiddenItems !== 0 && (
-              <div style={{ cursor: 'pointer' }} onClick={handleFilterOpen}>
-                +{hiddenItems} more
-              </div>
-            )}
+
+            <div
+              ref={countRef}
+              style={{ cursor: 'pointer', position: 'absolute', top: '50%', transform: 'translateY(-50%)' }}
+              onClick={handleFilterOpen}
+            >
+              +{hiddenItems} more
+            </div>
           </div>
         )
       )}

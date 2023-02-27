@@ -303,7 +303,7 @@ function GridFilter({
                   size="small"
                   value={selectedUserFilter}
                   onChange={(event: any, newValue: any) => {
-                    setSelectedUserFilter(newValue || {});
+                    setSelectedUserFilter(newValue || null);
                     setFormValues(newValue?.filterValue || {});
                   }}
                   getOptionLabel={(option) => option.title}
