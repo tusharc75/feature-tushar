@@ -268,13 +268,13 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
 
   const openMaterial = (data, rows) => {
     if (data.type === 'Product') {
-      setShowProductDialog({ open: true, data: data, showSaveAndNext: data?.index < rows?.length - 1 ? true : false });
+      setShowProductDialog({ open: true, data: data, showSaveAndNext: data?.index < rows?.length ? true : false });
     }
     if (data.type === 'Service') {
-      setShowServiceDialog({ open: true, data: data, showSaveAndNext: data?.index < rows?.length - 1 ? true : false });
+      setShowServiceDialog({ open: true, data: data, showSaveAndNext: data?.index < rows?.length ? true : false });
     }
     if (data.type === 'Manual Entry') {
-      setShowCostDialog({ open: true, data: data, showSaveAndNext: data?.index < rows?.length - 1 ? true : false });
+      setShowCostDialog({ open: true, data: data, showSaveAndNext: data?.index < rows?.length ? true : false });
     }
   }
 
