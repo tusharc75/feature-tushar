@@ -186,12 +186,10 @@ import IrtTicket from './pages/IrtTicket';
 import IrtTicketDetail from './pages/IrtTicket/IrtTicketDetail';
 import PurchaseRequisition from './pages/PurchaseRequisition';
 import PurchaseRequisitionDetail from './pages/PurchaseRequisition/PurchaseRequisitionDetail';
-import ScheduleDetail from './pages/Schedule/ScheduleDetail';
-import Schedule from './pages/Schedule';
-import ScheduleCalendar from './pages/ScheduleCalendar';
+import Planning from './pages/Planning';
+import PlanningDetail from './pages/Planning/PlanningDetail';
+import PlanningCalendar from './pages/PlanningCalendar';
 import RentalPlanningCalendar from './pages/RentalPlanningCalendar';
-import CompetencyType from './pages/CompetencyType';
-import CompetencyTypeDetail from './pages/CompetencyType/CompetencyTypeDetail';
 import FieldTicket from './pages/FieldTicket';
 import FieldTicketDetail from './pages/FieldTicket/FieldTicketDetail';
 import FieldServiceTechnician from './pages/FieldServiceTechnician';
@@ -759,9 +757,6 @@ function App() {
             <PrivateRoute exact path={`${routes.reports.path}/custom-report/:id`}>
               <CustomReports />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.scheduleCalendar.path}`}>
-              <ScheduleCalendar />
-            </PrivateRoute>
             <PrivateRoute exact path={`${routes.rentalPlanningCalendar.path}`}>
               <RentalPlanningCalendar />
             </PrivateRoute>
@@ -948,17 +943,14 @@ function App() {
             <PrivateRoute exact path={`${routes.purchaseRequisitionDetail.path}/:id`}>
               <PurchaseRequisitionDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.schedule.path}`}>
-              <Schedule />
+            <PrivateRoute exact path={`${routes.planning.path}`}>
+              <Planning />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.scheduleDetail.path}/:id`}>
-              <ScheduleDetail />
+            <PrivateRoute exact path={`${routes.planningDetail.path}/:id`}>
+              <PlanningDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competencyType.path}`}>
-              <CompetencyType />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competencyTypeDetail.path}/:id`}>
-              <CompetencyTypeDetail />
+            <PrivateRoute exact path={`${routes.planningCalendar.path}`}>
+              <PlanningCalendar />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldTicket.path}`}>
               <FieldTicket />

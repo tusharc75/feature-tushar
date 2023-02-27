@@ -21,7 +21,7 @@ import { uniq, map, orderBy } from 'lodash';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const MaterialDialog = ({ onClose, materialData, scheduleData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
+const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -36,9 +36,9 @@ const MaterialDialog = ({ onClose, materialData, scheduleData, handleUpdate, loa
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.scheduleMaterial}`);
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.planningMaterial}`);
     var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, scheduleData?.currency);
+    data = CURReplaceByCurrencySingle(data, planningData?.currency);
     if (bulkEdit) {
       let unitArray: any = []
       materialData?.forEach(element => {

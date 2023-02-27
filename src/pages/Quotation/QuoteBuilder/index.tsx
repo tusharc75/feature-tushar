@@ -40,6 +40,8 @@ const QuoteBuilder = ({
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
+  const [allColumn, setAllColumn] = useState([]);
+
 
   useEffect(() => {
     fetchFields();
@@ -237,6 +239,7 @@ const QuoteBuilder = ({
       }
     });
     setColumns(coloum);
+    setAllColumn(coloum.map((d) => d.Header));
   };
 
   const fetchProductInventory = async () => {
@@ -329,7 +332,15 @@ const QuoteBuilder = ({
     <Fragment>
       <Box pb={2} display="flex" justifyContent="space-between">
         <Box display="flex">
-          <SendEmail versionData={versionData} quotationData={quotationData} />
+          <SendEmail 
+          versionData={versionData} 
+          quotationData={quotationData} 
+          columns={columns}
+          versionId={versionData._id}
+          allColumn={allColumn}
+          isSendEmail={true}
+          
+          />
         </Box>
         <Box display="flex">
           {versionData?.processStatus === 'Send To Customer' && (

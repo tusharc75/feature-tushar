@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const options = ['All', 'Rental', 'Schedule'];
+const options = ['All', 'Rental', 'Planning'];
 
 export default function CalendarView() {
 
@@ -69,7 +69,7 @@ export default function CalendarView() {
 
     const defaultDate = useMemo(() => moment().toDate(), [])
 
-    const RENTAL_PLANNING_CALENDAR_FILTER = {
+    const FILTERS = {
         warehouse: 'Plant',
         product: 'Product',
         asset: 'Asset'
@@ -121,9 +121,9 @@ export default function CalendarView() {
 
     const createDataForCalendar = (data: [], type: string) => {
         const createdData = data?.map((d: any) => {
-            const title = type === 'rental' ? d.rentalJobName : type === 'schedule' ? d.scheduleNumber : '- - -'
-            const start = type === 'rental' ? new Date(d.estimateStartDate) : type === 'schedule' ? new Date(d.startDate) : '- - -'
-            const end = type === 'rental' ? new Date(d.estimateEndDate) : type === 'schedule' ? new Date(d.endDate) : '- - -'
+            const title = type === 'rental' ? d.rentalJobName : type === 'planning' ? d.planningNumber : '- - -'
+            const start = type === 'rental' ? new Date(d.estimateStartDate) : type === 'planning' ? new Date(d.startDate) : '- - -'
+            const end = type === 'rental' ? new Date(d.estimateEndDate) : type === 'planning' ? new Date(d.endDate) : '- - -'
             return (
                 {
                     id: d._id,
@@ -144,10 +144,10 @@ export default function CalendarView() {
             .get(queryString)
             .then(({ data: { data } }) => {
                 const rentalData = createDataForCalendar(data.rental, 'rental')
-                const scheduleData = createDataForCalendar(data.schedule, 'schedule')
-                setTotalEvents([...rentalData, ...scheduleData])
-                setStaticEvents([...rentalData, ...scheduleData])
-                setEvents([...rentalData, ...scheduleData]);
+                const planningData = createDataForCalendar(data.planning, 'planning')
+                setTotalEvents([...rentalData, ...planningData])
+                setStaticEvents([...rentalData, ...planningData])
+                setEvents([...rentalData, ...planningData]);
                 setUpdateCount(updateCount + 1)
             })
             .catch((err) => { });
@@ -157,8 +157,8 @@ export default function CalendarView() {
         let route = ''
         if (event.type === 'rental') {
             route = 'change-rental-date'
-        } else if (event.type === 'schedule') {
-            route = 'change-schedule-date'
+        } else if (event.type === 'planning') {
+            route = 'change-planning-date'
         }
         axiosInstance()
             .put(`/rental-planning-calendar/${route}`, {
@@ -231,7 +231,7 @@ export default function CalendarView() {
     };
 
     const filterEvent = () => {
-        const option = selectedOption === options[1] ? 'rental' : selectedOption === options[2] ? 'schedule' : null
+        const option = selectedOption === options[1] ? 'rental' : selectedOption === options[2] ? 'planning' : null
         if (option) {
             const filteredEvents = totalEvents.filter((item) => item.type === option)
             setEvents(filteredEvents)
@@ -313,13 +313,13 @@ export default function CalendarView() {
                         <Autocomplete
                             fullWidth
                             multiple
-                            options={Object.keys(RENTAL_PLANNING_CALENDAR_FILTER)?.map((key) => key) || []}
+                            options={Object.keys(FILTERS)?.map((key) => key) || []}
                             disableCloseOnSelect
-                            getOptionLabel={(option) => RENTAL_PLANNING_CALENDAR_FILTER[option]}
+                            getOptionLabel={(option) => FILTERS[option]}
                             renderOption={(option: any) => (
                                 <React.Fragment>
                                     <Checkbox checked={filterToKeep?.includes(option)} />
-                                    {RENTAL_PLANNING_CALENDAR_FILTER[option]}
+                                    {FILTERS[option]}
                                 </React.Fragment>
                             )}
                             size="small"
@@ -425,8 +425,8 @@ export default function CalendarView() {
             onSelectEvent={(event: any) => {
                 if (event.type === 'rental') {
                     history.push(`${routes.rentalManagementDetail.path}/${event.id}`);
-                } else if (event.type === 'schedule') {
-                    history.push(`${routes.scheduleDetail.path}/${event.id}`);
+                } else if (event.type === 'planning') {
+                    history.push(`${routes.planningDetail.path}/${event.id}`);
                 }
             }}
         />
