@@ -50,9 +50,9 @@ export default function CalendarView() {
     const [product, setProduct] = useState([])
     const [asset, setAsset] = useState([])
 
-    const [selectedWarehouse, setSelectedWarehouse] = useState(null)
-    const [selectedProduct, setSelectedProduct] = useState(null)
-    const [selectedAsset, setSelectedAsset] = useState(null)
+    const [selectedWarehouse, setSelectedWarehouse] = useState([])
+    const [selectedProduct, setSelectedProduct] = useState([])
+    const [selectedAsset, setSelectedAsset] = useState([])
 
     const [dateRange, setDateRange] = useState({
         estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
@@ -82,19 +82,34 @@ export default function CalendarView() {
             .catch((err) => { });
     }, [])
 
+    const queryData = (data) => {
+        let queryData = null;
+        data.forEach((item, i) => {
+            if (i === 0) {
+                queryData = item.optionValue;
+            } else {
+                queryData = queryData + ',' + item.optionValue
+            }
+        });
+        return queryData;
+    }
+
     const getQueryString = () => {
         const api = '/rental-planning-calendar';
         const date = `{"from": "${dateRange.estimateStartDate}", "to": "${dateRange.estimateEndDate}"}`
         let query = `${api}?date=${date}`
 
-        if (selectedWarehouse) {
-            query = `${query}&warehouse=${selectedWarehouse?.optionValue}`
+        if (selectedWarehouse.length > 0) {
+            const warehouse = queryData(selectedWarehouse);
+            query = `${query}&warehouse=${warehouse}`
         }
-        if (selectedProduct) {
-            query = `${query}&product=${selectedProduct?.optionValue}`
+        if (selectedProduct.length > 0) {
+            const product = queryData(selectedProduct)
+            query = `${query}&product=${product}`
         }
-        if (selectedAsset) {
-            query = `${query}&asset=${selectedAsset?.optionValue}`
+        if (selectedAsset.length > 0) {
+            const asset = queryData(selectedAsset)
+            query = `${query}&asset=${asset}`
         }
 
         return query;
@@ -156,6 +171,18 @@ export default function CalendarView() {
     useEffect(() => {
         fetchData()
     }, [selectedWarehouse, selectedProduct, selectedAsset, dateRange]);
+
+    // useEffect(() => {
+    //     if (!filterToKeep.includes('warehouse')) {
+    //         setSelectedWarehouse([])
+    //     }
+    //     if (!filterToKeep.includes('product')) {
+    //         setSelectedProduct([])
+    //     }
+    //     if (!filterToKeep.includes('asset')) {
+    //         setSelectedAsset([])
+    //     }
+    // }, [filterToKeep])
 
     const moveEvent = ({ event, start, end }) => {
         const filterEvents = staticEvents.filter(ev => ev.id !== event.id)
@@ -302,8 +329,9 @@ export default function CalendarView() {
                                     <Autocomplete
                                         options={warehouse}
                                         fullWidth
+                                        multiple
+                                        disableCloseOnSelect
                                         getOptionLabel={(option: any) => option.optionLabel}
-                                        getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                                         value={selectedWarehouse}
                                         onChange={(event, newValue) => {
                                             setSelectedWarehouse(newValue);
@@ -318,8 +346,9 @@ export default function CalendarView() {
                                     <Autocomplete
                                         options={product}
                                         fullWidth
+                                        multiple
+                                        disableCloseOnSelect
                                         getOptionLabel={(option: any) => option.optionLabel}
-                                        getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                                         value={selectedProduct}
                                         onChange={(event, newValue) => {
                                             setSelectedProduct(newValue);
@@ -334,6 +363,8 @@ export default function CalendarView() {
                                     <Autocomplete
                                         options={asset}
                                         fullWidth
+                                        multiple
+                                        disableCloseOnSelect
                                         getOptionLabel={(option: any) => option.optionLabel}
                                         getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                                         value={selectedAsset}
