@@ -836,20 +836,6 @@ const routes = {
         : RESOURCE_LABEL.planning,
     path: '/planning/detail'
   },
-  competencyType: {
-    title:
-      storedRoutes && storedRoutes.competencyType && storedRoutes.competencyType.title
-        ? storedRoutes.competencyType?.title
-        : RESOURCE_LABEL.competencyType,
-    path: '/competency-type'
-  },
-  competencyTypeDetail: {
-    title:
-      storedRoutes && storedRoutes.competencyType && storedRoutes.competencyType.title
-        ? storedRoutes.competencyType?.title
-        : RESOURCE_LABEL.competencyType,
-    path: '/competency-type/detail'
-  },
   fieldTicket: {
     title:
       storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title
