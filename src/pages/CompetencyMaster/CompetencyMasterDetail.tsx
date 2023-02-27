@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Menu, MenuItem, Paper } from '@material-ui/core';
+import { Box, Button, Grid, Menu, MenuItem, Paper, Typography } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -101,34 +101,89 @@ const CompetencyMasterDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.competencyMaster?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className="btn-outline-v1"
-                    onClick={handleOpenUpdateDialog}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.competencyMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </>
+            <>
+              {permissions?.competencyMaster?.isUpdate && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className="btn-outline-v1"
+                  onClick={handleOpenUpdateDialog}
+                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.competencyMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            </>
           </Box>
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Paper>
-          <Box>
-            {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={competencyMasterData} fields={fields} />
-            )}
-          </Box>
-        </Paper>
+        <Grid container spacing={1}>
+          <Grid item xs={12} sm={12} md={8}>
+            <Paper>
+              <Box>
+                {loading || !fields?.length ? (
+                  <Grid container spacing={2} style={{ padding: '8px' }}>
+                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  </Grid>
+                ) : (
+                  <DetailsPage data={competencyMasterData} fields={fields} />
+                )}
+              </Box>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={12} md={4}>
+            <Paper style={{ overflow: 'hidden' }}>
+              <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
+                <Box display={'flex'}>
+                  <Box>
+                    <Typography variant="subtitle2">Competency</Typography>
+                  </Box>
+                </Box>
+              </Box>
+              {competencyMasterData?.competency?.length ? (
+                <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                  <Grid container>
+                    <Grid item xs={2}>
+                      <Typography variant="body1">#</Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="body1">Name</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body1">Description</Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              ) : null}
+              {competencyMasterData?.competency?.length ? (
+                competencyMasterData?.competency?.map((steps, index) => (
+                  <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                    <Grid container>
+                      <Grid item xs={2}>
+                        <Typography variant="body2">{index + 1}</Typography>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Typography variant="body2">{steps?.name || ''}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2">{steps?.description || 0}</Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                ))
+              ) : (
+                <Box bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                  <Grid container>
+                    <Grid item xs={6} justifyContent={'center'}>
+                      <Typography variant="body2">No Data Found</Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
+            </Paper>
+          </Grid>
+        </Grid>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

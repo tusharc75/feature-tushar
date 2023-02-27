@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typography } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -15,6 +15,8 @@ import { CustomDialogTransition, isFieldNotTouched, setFieldsInAscendingOrder } 
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 
 const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -29,6 +31,7 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
   const [formValues, setFormValues] = useState({});
+  const [competencySteps, setCompetencySteps] = useState([]);
 
   const ref = useRef(null);
 
@@ -50,6 +53,7 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
           .then(({ data: { data } }) => {
             let fields = fieldsDataForUpdate;
             let tempData = data;
+            setCompetencySteps(data?.competency || []);
             if (isClone) {
               fields = fieldsDataForCreate;
               const { label, ...rest } = data;
@@ -80,6 +84,7 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
 
   const handleSubmit = (values) => {
     setSubmitting(true);
+    values.competency = competencySteps;
     if (id && !isClone) {
       values._id = id;
       axiosInstance()
@@ -128,6 +133,28 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
     }));
   };
 
+  const handleAddLTMSteps = () => {
+    setCompetencySteps([...competencySteps, { name: '', description: '' }]);
+  };
+
+  const handleRemoveLTMSteps = (index) => {
+    const data = competencySteps?.filter((e, i) => i !== index);
+    setCompetencySteps(data);
+  };
+
+  const handleOnDescriptionChangeValue = (index, value) => {
+    const data = [...competencySteps];
+    data[index].description = value;
+    setCompetencySteps(data);
+    // setTotalDays(data?.reduce((acc, curr) => acc + parseInt(curr.days), 0));
+  };
+
+  const handleOnNameChangeValue = (index, value) => {
+    const data = [...competencySteps];
+    data[index].name = value;
+    setCompetencySteps(data);
+  };
+
   return (
     <Dialog
       maxWidth="md"
@@ -160,12 +187,13 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
                     onClose();
                   }
                 }}
-                title={`${id
+                title={`${
+                  id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
                     : `Create New Competency`
-                  }`}
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -216,6 +244,88 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
                         )
                       );
                     })}
+                  <div className={'detail-box-content'}>
+                    <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                    <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Competency</h2>
+                  </div>
+                  <Grid container>
+                    <Grid item xs={12}>
+                      <Box
+                        style={{ maxHeight: '350px', overflow: 'auto' }}
+                        bgcolor="white"
+                        border={1}
+                        mt={2}
+                        mb={1}
+                        borderColor="grey.300"
+                        width={'100%'}
+                      >
+                        <Box p={1} bgcolor="grey.200">
+                          <Grid container xs={12}>
+                            <Grid item xs={6}>
+                              <Typography variant="body2">Name</Typography>
+                            </Grid>
+                            <Grid item xs={4}>
+                              <Typography variant="body2">Description</Typography>
+                            </Grid>
+                            <Grid item xs={2}>
+                              <Grid container justifyContent="flex-end">
+                                <IconButton
+                                  size="small"
+                                  aria-label="setting"
+                                  onClick={() => {
+                                    handleAddLTMSteps();
+                                  }}
+                                >
+                                  <AddCircleOutlineIcon fontSize="small" />
+                                </IconButton>
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                        </Box>
+                        {competencySteps?.map((steps, index) => (
+                          <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                            <Grid container spacing={1}>
+                              <Grid item xs={6}>
+                                <TextField
+                                  id="Days-Field"
+                                  variant="outlined"
+                                  margin="dense"
+                                  name="name"
+                                  label="Name"
+                                  type="name"
+                                  fullWidth
+                                  style={{ margin: 0 }}
+                                  value={steps?.name || ''}
+                                  onChange={(event) => handleOnNameChangeValue(index, event.target.value)}
+                                />
+                              </Grid>
+                              <Grid item xs={4}>
+                                <TextField
+                                  id="Days-Field"
+                                  variant="outlined"
+                                  margin="dense"
+                                  name="description"
+                                  label="Description"
+                                  type="description"
+                                  fullWidth
+                                  style={{ margin: 0 }}
+                                  value={steps?.description || ''}
+                                  onChange={(event) => handleOnDescriptionChangeValue(index, event.target.value)}
+                                />
+                              </Grid>
+                              <Grid item xs={2}>
+                                <Grid container justifyContent="flex-end">
+                                  <IconButton size="small" aria-label="setting" onClick={() => handleRemoveLTMSteps(index)}>
+                                    <RemoveCircleOutlineIcon fontSize="small" />
+                                  </IconButton>
+                                </Grid>
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        ))}
+                      </Box>
+                    </Grid>
+                  </Grid>
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
@@ -240,7 +350,7 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
                   Cancel
                 </Button>
                 <Button
-                  disabled={loading || submitting || isEqual(values, initialData.values)}
+                  disabled={loading || submitting}
                   variant="contained"
                   color="primary"
                   type="submit"
