@@ -333,7 +333,8 @@ export const RESOURCE_LABEL = {
   schedule: 'Schedule',
   competencyType: 'Competency Type',
   fieldTicket: 'Field Ticket',
-  fieldServiceTechnician: `Field Service Technician`
+  fieldServiceTechnician: `Field Service Technician`,
+  resourceLogs: `Resource Logs`
 };
 
 export const CHILD_RESOURCE = {

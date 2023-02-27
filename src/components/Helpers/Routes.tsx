@@ -64,6 +64,11 @@ const routes = {
     path: '/lead',
     data: {}
   },
+  resourceLogs: {
+    title: storedRoutes && storedRoutes.resourceLogs && storedRoutes.resourceLogs.title ? storedRoutes.resourceLogs?.title : RESOURCE_LABEL.resourceLogs,
+    path: '/resource-logs',
+    data: {}
+  },
   leadDetail: {
     title: storedRoutes && storedRoutes.lead && storedRoutes.lead.title ? storedRoutes.lead?.title : RESOURCE_LABEL.lead,
     path: '/lead/detail',

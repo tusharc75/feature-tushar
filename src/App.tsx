@@ -18,6 +18,7 @@ import ErrorBoundaryComponent from './ErrorBoundary';
 import Login from './pages/Auth/Login';
 import AzureLogin from './pages/Auth/AzureLogin';
 import Leads from './pages/Leads';
+import ResourceLogs from './pages/ResourceLogs';
 import LeadDetailsPage from './pages/Leads/LeadDetailsPage';
 import NewLead from './pages/Leads/NewLead';
 import Opportunities from './pages/Opportunities';
@@ -299,7 +300,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -435,6 +436,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.lead.path}>
               <Leads />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.resourceLogs.path}>
+              <ResourceLogs />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.leadDetail.path}/:id`}>
               <LeadDetailsPage />
