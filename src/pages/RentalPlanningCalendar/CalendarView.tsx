@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const options = ['All', 'Rental', 'Schedule'];
+const options = ['All', 'Rental', 'Planning'];
 
 export default function CalendarView() {
 
@@ -54,9 +54,9 @@ export default function CalendarView() {
     const [product, setProduct] = useState([])
     const [asset, setAsset] = useState([])
 
-    const [selectedWarehouse, setSelectedWarehouse] = useState(null)
-    const [selectedProduct, setSelectedProduct] = useState(null)
-    const [selectedAsset, setSelectedAsset] = useState(null)
+    const [selectedWarehouse, setSelectedWarehouse] = useState([])
+    const [selectedProduct, setSelectedProduct] = useState([])
+    const [selectedAsset, setSelectedAsset] = useState([])
 
     const [dateRange, setDateRange] = useState({
         estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
@@ -69,7 +69,7 @@ export default function CalendarView() {
 
     const defaultDate = useMemo(() => moment().toDate(), [])
 
-    const RENTAL_PLANNING_CALENDAR_FILTER = {
+    const FILTERS = {
         warehouse: 'Plant',
         product: 'Product',
         asset: 'Asset'
@@ -86,19 +86,34 @@ export default function CalendarView() {
             .catch((err) => { });
     }, [])
 
+    const queryData = (data) => {
+        let queryData = null;
+        data.forEach((item, i) => {
+            if (i === 0) {
+                queryData = item.optionValue;
+            } else {
+                queryData = queryData + ',' + item.optionValue
+            }
+        });
+        return queryData;
+    }
+
     const getQueryString = () => {
         const api = '/rental-planning-calendar';
         const date = `{"from": "${dateRange.estimateStartDate}", "to": "${dateRange.estimateEndDate}"}`
         let query = `${api}?date=${date}`
 
-        if (selectedWarehouse) {
-            query = `${query}&warehouse=${selectedWarehouse?.optionValue}`
+        if (selectedWarehouse.length > 0) {
+            const warehouse = queryData(selectedWarehouse);
+            query = `${query}&warehouse=${warehouse}`
         }
-        if (selectedProduct) {
-            query = `${query}&product=${selectedProduct?.optionValue}`
+        if (selectedProduct.length > 0) {
+            const product = queryData(selectedProduct)
+            query = `${query}&product=${product}`
         }
-        if (selectedAsset) {
-            query = `${query}&asset=${selectedAsset?.optionValue}`
+        if (selectedAsset.length > 0) {
+            const asset = queryData(selectedAsset)
+            query = `${query}&asset=${asset}`
         }
 
         return query;
@@ -106,9 +121,9 @@ export default function CalendarView() {
 
     const createDataForCalendar = (data: [], type: string) => {
         const createdData = data?.map((d: any) => {
-            const title = type === 'rental' ? d.rentalJobName : type === 'schedule' ? d.scheduleNumber : '- - -'
-            const start = type === 'rental' ? new Date(d.estimateStartDate) : type === 'schedule' ? new Date(d.startDate) : '- - -'
-            const end = type === 'rental' ? new Date(d.estimateEndDate) : type === 'schedule' ? new Date(d.endDate) : '- - -'
+            const title = type === 'rental' ? d.rentalJobName : type === 'planning' ? d.planningNumber : '- - -'
+            const start = type === 'rental' ? new Date(d.estimateStartDate) : type === 'planning' ? new Date(d.startDate) : '- - -'
+            const end = type === 'rental' ? new Date(d.estimateEndDate) : type === 'planning' ? new Date(d.endDate) : '- - -'
             return (
                 {
                     id: d._id,
@@ -129,10 +144,10 @@ export default function CalendarView() {
             .get(queryString)
             .then(({ data: { data } }) => {
                 const rentalData = createDataForCalendar(data.rental, 'rental')
-                const scheduleData = createDataForCalendar(data.schedule, 'schedule')
-                setTotalEvents([...rentalData, ...scheduleData])
-                setStaticEvents([...rentalData, ...scheduleData])
-                setEvents([...rentalData, ...scheduleData]);
+                const planningData = createDataForCalendar(data.planning, 'planning')
+                setTotalEvents([...rentalData, ...planningData])
+                setStaticEvents([...rentalData, ...planningData])
+                setEvents([...rentalData, ...planningData]);
                 setUpdateCount(updateCount + 1)
             })
             .catch((err) => { });
@@ -142,8 +157,8 @@ export default function CalendarView() {
         let route = ''
         if (event.type === 'rental') {
             route = 'change-rental-date'
-        } else if (event.type === 'schedule') {
-            route = 'change-schedule-date'
+        } else if (event.type === 'planning') {
+            route = 'change-planning-date'
         }
         axiosInstance()
             .put(`/rental-planning-calendar/${route}`, {
@@ -168,6 +183,7 @@ export default function CalendarView() {
     useEffect(() => {
         fetchData()
     }, [selectedWarehouse, selectedProduct, selectedAsset, dateRange]);
+
 
     const moveEvent = ({ event, start, end }) => {
         const filterEvents = staticEvents.filter(ev => ev.id !== event.id)
@@ -202,7 +218,7 @@ export default function CalendarView() {
     };
 
     const filterEvent = () => {
-        const option = selectedOption === options[1] ? 'rental' : selectedOption === options[2] ? 'schedule' : null
+        const option = selectedOption === options[1] ? 'rental' : selectedOption === options[2] ? 'planning' : null
         if (option) {
             const filteredEvents = totalEvents.filter((item) => item.type === option)
             setEvents(filteredEvents)
@@ -284,13 +300,13 @@ export default function CalendarView() {
                         <Autocomplete
                             fullWidth
                             multiple
-                            options={Object.keys(RENTAL_PLANNING_CALENDAR_FILTER)?.map((key) => key) || []}
+                            options={Object.keys(FILTERS)?.map((key) => key) || []}
                             disableCloseOnSelect
-                            getOptionLabel={(option) => RENTAL_PLANNING_CALENDAR_FILTER[option]}
+                            getOptionLabel={(option) => FILTERS[option]}
                             renderOption={(option: any) => (
                                 <React.Fragment>
                                     <Checkbox checked={filterToKeep?.includes(option)} />
-                                    {RENTAL_PLANNING_CALENDAR_FILTER[option]}
+                                    {FILTERS[option]}
                                 </React.Fragment>
                             )}
                             size="small"
@@ -302,7 +318,6 @@ export default function CalendarView() {
                         />
                     </Grid>
                 </Grid>
-
             </Grid>
             <Grid item xs={12} sm={6} md={6} lg={6}>
                 <Grid container spacing={1}>
@@ -311,8 +326,9 @@ export default function CalendarView() {
                             <Autocomplete
                                 options={warehouse}
                                 fullWidth
+                                multiple
+                                disableCloseOnSelect
                                 getOptionLabel={(option: any) => option.optionLabel}
-                                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                                 value={selectedWarehouse}
                                 onChange={(event, newValue) => {
                                     setSelectedWarehouse(newValue);
@@ -327,8 +343,9 @@ export default function CalendarView() {
                             <Autocomplete
                                 options={product}
                                 fullWidth
+                                multiple
+                                disableCloseOnSelect
                                 getOptionLabel={(option: any) => option.optionLabel}
-                                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                                 value={selectedProduct}
                                 onChange={(event, newValue) => {
                                     setSelectedProduct(newValue);
@@ -343,6 +360,8 @@ export default function CalendarView() {
                             <Autocomplete
                                 options={asset}
                                 fullWidth
+                                multiple
+                                disableCloseOnSelect
                                 getOptionLabel={(option: any) => option.optionLabel}
                                 getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                                 value={selectedAsset}
@@ -394,8 +413,8 @@ export default function CalendarView() {
             onSelectEvent={(event: any) => {
                 if (event.type === 'rental') {
                     history.push(`${routes.rentalManagementDetail.path}/${event.id}`);
-                } else if (event.type === 'schedule') {
-                    history.push(`${routes.scheduleDetail.path}/${event.id}`);
+                } else if (event.type === 'planning') {
+                    history.push(`${routes.planningDetail.path}/${event.id}`);
                 }
             }}
         />

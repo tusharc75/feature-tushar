@@ -80,7 +80,7 @@ const RoadMap = () => {
   }, [selectedProduct, selectedWarehouse]);
 
   const fetchRoadmap = () => {
-    var api = '/schedule/product-status'
+    var api = '/planning/product-status'
     var query = `?startDate=${startDate}&endDate=${endDate}`
     if (selectedProduct) {
       query = query + `&product=${selectedProduct}`
@@ -114,7 +114,7 @@ const RoadMap = () => {
   };
 
   const handleExport = () => {
-    var api = `/schedule/product-status/export?startDate=${startDate}&endDate=${endDate}`
+    var api = `/planning/product-status/export?startDate=${startDate}&endDate=${endDate}`
     if (selectedWarehouse) {
       api = api + `&warehouse=${selectedWarehouse}`
     }

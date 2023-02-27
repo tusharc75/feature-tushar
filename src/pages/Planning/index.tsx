@@ -28,32 +28,40 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ManageCompetencyType from './ManageCompetencyType';
+import ManagePlanning from './ManagePlanning';
 import styles from '../Leads/Header.module.scss';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import { useHistory } from 'react-router-dom';
 
+const Planning = () => {
 
-const CompetencyType = () => {
-  const renderedFrom = camelCase(routes?.competencyType.title);
+  const renderedFrom = camelCase(routes?.planning.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
+
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [competencyTypeId, setCompetencyTypeId] = useState(null);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  
+  const [planningId, setPlanningId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [showConverConfirmBox, setShowConverConfirmBox] = useState({ open: false, id: null, planningNumber: "" });
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.competencyType}`)
+      .get(`/field?resource=${sidebarResource?.planning}`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
@@ -71,7 +79,7 @@ const CompetencyType = () => {
               }
             ];
           } else {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.competencyType.path);
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.planning.path);
 
             if (currentColumn !== null) {
               columns = [...columns, currentColumn?.columnData];
@@ -93,7 +101,7 @@ const CompetencyType = () => {
       });
   };
 
-  const fetchCompetencyTypeData = () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
@@ -101,15 +109,14 @@ const CompetencyType = () => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes?.competencyType.path}${queryString}`)
+      .get(`${routes?.planning.path}${queryString}`)
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.competencyType?.isDelete 
+          finalObject['canDelete'] = permissions?.planning?.isDelete && finalObject?.ownerId === user?.user?._id;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.competencyType?.isUpdate;
-
+          finalObject['allowedToEdit'] = permissions?.planning?.isUpdate;
           return {
             ...finalObject
           };
@@ -128,20 +135,6 @@ const CompetencyType = () => {
             count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
-        }
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
         }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
@@ -210,55 +203,95 @@ const CompetencyType = () => {
   const NameRenderer = (params) => {
     return (
       <span className=" d-flex gap-2 align-items-center">
-        <Link className="link" to={`${routes.competencyTypeDetail.path}/${params.data._id}`}>
+        <Link className="link" to={`${routes.planning.path}/detail/${params.data._id}`}>
           {params.value}
         </Link>
       </span>
     );
   };
 
+  const handleConvert = () => {
+    axiosInstance().post(`${routes?.planning?.path}/convert-planning`, { id: showConverConfirmBox?.id })
+      .then(({ data }) => {
+        setShowConverConfirmBox({ open: false, id: null, planningNumber: "" });
+        fetchData()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   const ActionsRenderer = (params) => (
     <Fragment>
-      {permissions?.competencyType?.isCreate ? (
-        <Tooltip title="Clone">
+      <HtmlTooltip title={permissions?.planning?.isCreate ? "Clone" : "You do not have permission to clone/create"}>
+        <span>
           <IconButton
-            size="small"
+            disabled={permissions?.planning?.isCreate ? false : true}
             aria-label="Clone"
+            size="small"
             onClick={() => {
-             setCompetencyTypeId(params.data.id);
+              setPlanningId(params.data.id);
               setOpen({ open: true, isClone: true });
             }}
           >
-            <FileCopyIcon fontSize="small" color="primary" />
+            <FileCopyIcon fontSize="small" color={permissions?.planning?.isCreate ? "primary" : "disabled"} />
           </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-          <IconButton aria-label="Clone" size="small">
-            <FileCopyIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-
-      {params?.data?.canDelete ? (
-        <Tooltip title="Delete">
+        </span>
+      </HtmlTooltip>
+      {params?.data?.status === "Closed" ?
+        <HtmlTooltip title={`View Converted ${params?.data?.type}`}>
+          <span>
+            <IconButton
+              aria-label="Convert"
+              onClick={() => {
+                if (params?.data?.type === "Rental Job") {
+                  history.push(`${routes.rentalManagementDetail.path}/${params?.data?.rentalJobId}`)
+                }
+                if (params?.data?.type === "Sales Order") {
+                  history.push(`${routes.salesOrderDetail.path}/${params?.data?.salesOrderId}`)
+                }
+                if (params?.data?.type === "Field Service Order") {
+                  history.push(`${routes.serviceOrderDetail.path}/${params?.data?.serviceOrderId}`)
+                }
+              }}
+            >
+              <VisibilityIcon fontSize="small" color={"primary"} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        : <HtmlTooltip title={permissions?.planning?.isUpdate ? "Convert" : "You do not have permission to convert"}>
+          <span>
+            <IconButton
+              disabled={permissions?.planning?.isUpdate ? false : true}
+              aria-label="Convert"
+              onClick={() => {
+                setShowConverConfirmBox({ open: true, id: params?.data?._id, planningNumber: params?.data?.planningNumber })
+              }}
+            >
+              <AutorenewIcon fontSize="small" color={permissions?.planning?.isUpdate ? "primary" : "disabled"} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>}
+      <HtmlTooltip title={params?.data?.canDelete ? "Delete" : "You do not have permission to delete"}>
+        <span>
           <IconButton
+            disabled={params?.data?.canDelete ? false : true}
             aria-label="Delete"
+            size="small"
             onClick={() => {
               setDeleteRecord(params.data);
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon fontSize="small" color="error" />
+            <DeleteIcon fontSize="small" color={params?.data?.canDelete ? "error" : "disabled"} />
           </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to delete">
-          <IconButton aria-label="Delete" size="small">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
+        </span>
+      </HtmlTooltip>
     </Fragment>
   );
 
@@ -270,10 +303,10 @@ const CompetencyType = () => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`${routes?.competencyType?.path}/remove`, { ids: ids })
+      .put(`${routes?.planning?.path}/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
-        fetchCompetencyTypeData();
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
@@ -292,22 +325,22 @@ const CompetencyType = () => {
   }, []);
 
   useEffect(() => {
-    fetchCompetencyTypeData();
+    fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   return (
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.competencyType.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.planning.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.competencyType}
-            module="competencyType"
-            api={'competency-type'}
+            permissions={permissions.planning}
+            module="planning"
+            api={'planning'}
             afterImportCompleted={() => {
-              fetchCompetencyTypeData();
+              fetchData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
@@ -319,7 +352,7 @@ const CompetencyType = () => {
             }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
-              else fetchCompetencyTypeData();
+              else fetchData();
             }}
             additionalParams={getQueryString(true)}
           />
@@ -342,11 +375,11 @@ const CompetencyType = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.competencyType.isCreate && (
+                  {permissions.planning.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
-                        setCompetencyTypeId(null);
+                        setPlanningId(null);
                         setOpen({ open: true, isClone: false });
                       }}
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -357,10 +390,10 @@ const CompetencyType = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions?.competencyType?.isDelete && (
+                  {permissions?.planning?.isDelete && (
                     <>
                       <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
                         color="default"
                         size="small"
                         onClick={openActions}
@@ -413,17 +446,17 @@ const CompetencyType = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.competencyType}
+              permissions={permissions.planning}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
-                setCompetencyTypeId(data.id);
+                setPlanningId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                setCompetencyTypeId(data.id);
+                setPlanningId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               extraParamsToCheckDelete={true}
@@ -439,7 +472,7 @@ const CompetencyType = () => {
               onCreate={false}
               showClone={true}
               onClone={(data) => {
-                setCompetencyTypeId(data.id);
+                setPlanningId(data.id);
                 setOpen({ open: true, isClone: true });
               }}
               chips={[]}
@@ -459,7 +492,7 @@ const CompetencyType = () => {
               allowAction={true}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={fetchCompetencyTypeData}
+              refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
             />
           )
@@ -467,7 +500,7 @@ const CompetencyType = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete Competency Type  ${deleteRecord?.competencyType || ''} ?`}
+            message={`Are you sure you want to delete planning  ${deleteRecord?.planningNumber || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -475,14 +508,24 @@ const CompetencyType = () => {
             onOk={handleDelete}
           />
         )}
+        {showConverConfirmBox.open && (
+          <ConfirmationDialog
+            open={true}
+            message={`Are you sure you want to convert planning  ${showConverConfirmBox?.planningNumber} ?`}
+            onClose={() => {
+              setShowConverConfirmBox({ open: false, id: null, planningNumber: "" })
+            }}
+            onOk={handleConvert}
+          />
+        )}
         {open?.open && (
-          <ManageCompetencyType
-            id={competencyTypeId}
+          <ManagePlanning
+            id={planningId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
-              fetchCompetencyTypeData();
+              fetchData();
             }}
           />
         )}
@@ -491,4 +534,4 @@ const CompetencyType = () => {
   );
 };
 
-export default CompetencyType;
+export default Planning;

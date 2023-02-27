@@ -1,10 +1,10 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { useData } from 'src/StateProvider/Provider';
 import { useParams, useHistory } from 'react-router-dom';
@@ -12,20 +12,28 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageCompetencyType from './ManageCompetencyType';
+import TabPanel from '../../components/TabPanel';
+import Material from './Material';
+import { camelCase } from 'lodash';
+import ManagePlanning from './ManagePlanning';
+import { FaWpforms } from 'react-icons/fa';
 
-const CompetencyTypeDetail = () => {
+const PlanningDetail = () => {
+  const renderedFrom = camelCase(routes?.planning.title);
 
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const { state: { permissions, user } }: any = useData();
 
-  const [competencyTypeData, setCompetencyTypeData] = useState(null);
+  const [planningData, setPlanningData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     if (id) {
@@ -36,7 +44,7 @@ const CompetencyTypeDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get('/field?resource=Competency Type')
+      .get('/field?resource=Planning')
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
       })
@@ -50,8 +58,11 @@ const CompetencyTypeDetail = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`${routes.competencyType.path}/${id}`);
-      setCompetencyTypeData(data);
+      } = await axiosInstance().get(`${routes.planning.path}/${id}`);
+      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      setAllowedToEdit(isAllowedToEdit);
+      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+      setPlanningData(data);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -61,7 +72,7 @@ const CompetencyTypeDetail = () => {
   const handleDelete = () => {
     if (id) {
       axiosInstance()
-        .put(`${routes?.competencyType?.path}/remove`, { ids: [id] })
+        .put(`${routes?.planning?.path}/remove`, { ids: [id] })
         .then(({ data }) => {
           setShowConfirmBox(false);
 
@@ -88,17 +99,20 @@ const CompetencyTypeDetail = () => {
     setOpenUpdateDialog(false);
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
 
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.competencyType, { title: competencyTypeData?.competencyType }]} />
+          <CustomBreadCrumbs routes={[routes.planning, { title: planningData?.planningNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.competencyType?.isUpdate && (
+              {permissions?.planning?.isUpdate && allowedToEdit && (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   className="btn-outline-v1"
@@ -108,7 +122,7 @@ const CompetencyTypeDetail = () => {
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.competencyType?.isDelete  && (
+              {permissions?.planning?.isDelete && allowedToDelete && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
             </>
@@ -116,18 +130,65 @@ const CompetencyTypeDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-      {loading || !fields?.length ? (
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              height: 0
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            value={0}
+            aria-controls="a11y-tabpanel-0"
+            id="a11y-tab-0"
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
+            }
+            value={1}
+            aria-controls="a11y-tabpanel-1"
+            id="a11y-tab-1"
+          />
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          <Box>
+            {loading || !fields?.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </Grid>
             ) : (
-              <DetailsPage data={competencyTypeData} fields={fields} />
+              <DetailsPage data={planningData} fields={fields} />
             )}
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          {planningData && (
+            <Material
+              renderedFrom={`${renderedFrom}_grid-1`}
+              allowedToEdit={allowedToEdit && permissions?.planning?.isUpdate ? true : false}
+              planningData={planningData}
+            />
+          )}
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.competencyType?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${routes?.planning?.title?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -135,7 +196,7 @@ const CompetencyTypeDetail = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageCompetencyType
+        <ManagePlanning
           id={id}
           isClone={false}
           onClose={closeUpdateDialog}
@@ -149,4 +210,4 @@ const CompetencyTypeDetail = () => {
   );
 };
 
-export default CompetencyTypeDetail;
+export default PlanningDetail;
