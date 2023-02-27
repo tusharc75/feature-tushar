@@ -307,63 +307,6 @@ export default function CalendarView() {
                             )}
                         </Popper>
                     </Grid>
-<<<<<<< HEAD
-                    <Grid item xs={12} sm={6} md={6} lg={6}>
-                        <Grid container spacing={1}>
-                            {filterToKeep?.includes('warehouse') &&
-                                < Grid item xs={12} sm={6} md={4} lg={4}>
-                                    <Autocomplete
-                                        options={warehouse}
-                                        fullWidth
-                                        multiple
-                                        disableCloseOnSelect
-                                        getOptionLabel={(option: any) => option.optionLabel}
-                                        value={selectedWarehouse}
-                                        onChange={(event, newValue) => {
-                                            setSelectedWarehouse(newValue);
-                                        }}
-                                        size="small"
-                                        renderInput={(params) => <TextField {...params} label={`Select Plant`} variant="outlined" />}
-                                    />
-                                </Grid>
-                            }
-                            {filterToKeep?.includes('product') &&
-                                < Grid item xs={12} sm={6} md={4} lg={4}>
-                                    <Autocomplete
-                                        options={product}
-                                        fullWidth
-                                        multiple
-                                        disableCloseOnSelect
-                                        getOptionLabel={(option: any) => option.optionLabel}
-                                        value={selectedProduct}
-                                        onChange={(event, newValue) => {
-                                            setSelectedProduct(newValue);
-                                        }}
-                                        size="small"
-                                        renderInput={(params) => <TextField {...params} label={`Select Product`} variant="outlined" />}
-                                    />
-                                </Grid>
-                            }
-                            {filterToKeep?.includes('asset') &&
-                                < Grid item xs={12} sm={6} md={4} lg={4}>
-                                    <Autocomplete
-                                        options={asset}
-                                        fullWidth
-                                        multiple
-                                        disableCloseOnSelect
-                                        getOptionLabel={(option: any) => option.optionLabel}
-                                        getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                                        value={selectedAsset}
-                                        onChange={(event, newValue) => {
-                                            setSelectedAsset(newValue);
-                                        }}
-                                        size="small"
-                                        renderInput={(params) => <TextField {...params} label={`Select Asset`} variant="outlined" />}
-                                    />
-                                </Grid>
-                            }
-                        </Grid>
-=======
                     <Grid item xs={12} sm={12} md={9} lg={9}>
                         <Autocomplete
                             fullWidth
@@ -384,10 +327,8 @@ export default function CalendarView() {
                                 setFilterToKeep(newValue);
                             }}
                         />
->>>>>>> 6c8da7fd46a6c1d696feb820def1ce1af3df048d
                     </Grid>
                 </Grid>
-
             </Grid>
             <Grid item xs={12} sm={6} md={6} lg={6}>
                 <Grid container spacing={1}>
@@ -396,8 +337,9 @@ export default function CalendarView() {
                             <Autocomplete
                                 options={warehouse}
                                 fullWidth
+                                multiple
+                                disableCloseOnSelect
                                 getOptionLabel={(option: any) => option.optionLabel}
-                                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                                 value={selectedWarehouse}
                                 onChange={(event, newValue) => {
                                     setSelectedWarehouse(newValue);
@@ -412,8 +354,9 @@ export default function CalendarView() {
                             <Autocomplete
                                 options={product}
                                 fullWidth
+                                multiple
+                                disableCloseOnSelect
                                 getOptionLabel={(option: any) => option.optionLabel}
-                                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                                 value={selectedProduct}
                                 onChange={(event, newValue) => {
                                     setSelectedProduct(newValue);
@@ -428,6 +371,8 @@ export default function CalendarView() {
                             <Autocomplete
                                 options={asset}
                                 fullWidth
+                                multiple
+                                disableCloseOnSelect
                                 getOptionLabel={(option: any) => option.optionLabel}
                                 getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                                 value={selectedAsset}
