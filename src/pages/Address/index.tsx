@@ -40,7 +40,10 @@ import { useHistory } from 'react-router-dom';
 import { camelCase } from 'lodash';
 
 const Address = () => {
+
   const renderedFrom = camelCase(routes?.address.title)
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const location = useLocation();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -49,21 +52,11 @@ const Address = () => {
   }: any = useData();
   const { getColumnData } = useColumns();
 
-  const [addressPermissions] = useState({
-    isCreate: permissions?.address?.isCreate,
-    isUpdate: permissions?.address?.isUpdate,
-    isRead: permissions?.address?.isRead,
-    isDelete: permissions?.address?.isDelete
-  });
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [open, setOpen] = useState({ title: '', open: false, isClone: false, edit: false });
-  const [addressResource, setAddressResource] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [showEntityDialog, setShowEntityDialog] = useState(false);
-  const [addressId, setAddressId] = useState('');
-  const [entities, setEntities] = useState([]);
   const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false);
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
@@ -72,32 +65,6 @@ const Address = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
-  // const [showGridFilters, setShowGridFilters] = useState(true)
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-  //  Grid Variables - End
-
-  const storedRoutes = localStorage.getItem('routes') ? JSON.parse(localStorage.getItem('routes')) : null;
-
-  // useEffect(() => {
-  //   const parsedParams = queryString.parse(location?.search);
-  //   if (parsedParams?.id) {
-  //     setAddressResource({ id: parsedParams?.id });
-  //     setOpen({ open: true, isClone: false });
-  //   }
-  // }, [location])
 
   useEffect(() => {
     fetchGridColumns();
@@ -110,33 +77,17 @@ const Address = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.fieldData?.primaryField === true) {
-            columns = [
-              ...columns,
-              {
-                field: o?.fieldData?.fieldName,
-                headerName: o?.fieldData?.fieldLabel,
-                primaryField: true,
-                show: true,
-                disabled: true,
-                cellRenderer: 'nameRenderer'
-              }
-            ];
-          } else {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.address.path);
-
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName);
-              }
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.addressDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -163,15 +114,12 @@ const Address = () => {
         }) => {
           let rows = data.map((u) => {
             let finalObject = prepareDataForGrid(u, user);
-            finalObject['canDelete'] = addressPermissions.isDelete;
-            finalObject['allowedToEdit'] = addressPermissions.isUpdate;
+            finalObject['canDelete'] = permissions?.address?.isDelete;
+            finalObject['allowedToEdit'] = permissions?.address?.isUpdate;
             finalObject['isChecked'] = false;
 
             return finalObject;
           });
-
-          setIsAllChecked(false);
-          setClonedData(data);
           if (appendRows) {
             dispatch({
               type: 'initialize',
@@ -204,37 +152,18 @@ const Address = () => {
     fetchAddresses();
   }, [page, limit, filters, sorting, search, selectedEntity]);
 
-  const NameRenderer = (params) => (
-    <span className="d-flex gap-2 align-items-center">
-      <Link to={`${routes.addressDetail.path}/${params.data._id}`}>
-        <span
-          className="link"
-          onClick={() => {
-            if (params.data?.isAllowedToUpdate) {
-              setAddressResource(params.data);
-              setOpen({ title: `Edit Address`, open: true, edit: true, isClone: false });
-            }
-          }}
-        >
-          <CustomRenderCell value={params.value} />
-        </span>
-      </Link>
-    </span>
-  );
-
   const ActionsRenderer = (params) => (
     <>
       <Tooltip
-        className={addressPermissions.isCreate ? '' : 'cursor-stop'}
-        title={addressPermissions.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
+        className={permissions?.address?.isCreate ? '' : 'cursor-stop'}
+        title={permissions?.address?.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
       >
         <span>
           <IconButton
-            disabled={!addressPermissions.isCreate}
+            disabled={!permissions?.address?.isCreate}
             size="small"
             aria-label="Clone"
             onClick={() => {
-              setAddressResource(params.data);
               setOpen({ title: 'Clone Address', open: true, edit: false, isClone: true });
             }}
           >
@@ -242,10 +171,10 @@ const Address = () => {
           </IconButton>
         </span>
       </Tooltip>
-      <Tooltip className={addressPermissions.isDelete ? '' : 'cursor-stop'} title={addressPermissions.isDelete ? 'Delete' : "You don't have permission to delete"} >
+      <Tooltip className={permissions?.address?.isDelete ? '' : 'cursor-stop'} title={permissions?.address?.isDelete ? 'Delete' : "You don't have permission to delete"} >
         <span>
           <IconButton
-            disabled={!addressPermissions.isDelete}
+            disabled={!permissions?.address?.isDelete}
             aria-label="Delete"
             onClick={() => {
               setDeleteRecord(params.data);
@@ -339,7 +268,7 @@ const Address = () => {
         </Grid>
         {/* <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={addressPermissions}
+            permissions={permissions?.address}
             module="address"
             api={'address'}
             afterImportCompleted={() => {
@@ -360,7 +289,7 @@ const Address = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-              
+
             </Grid>
             <Grid
               item
@@ -384,10 +313,9 @@ const Address = () => {
                 </Grid>
 
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {addressPermissions.isCreate && (
+                  {permissions?.address?.isCreate && (
                     <Button
                       onClick={() => {
-                        setAddressResource(null);
                         setOpen({ title: 'Add New Address', open: true, edit: false, isClone: false });
                       }}
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -400,7 +328,7 @@ const Address = () => {
                     </Button>
                   )}
 
-                  {addressPermissions.isDelete && (
+                  {permissions?.address?.isDelete && (
                     <>
                       {' '}
                       <Button

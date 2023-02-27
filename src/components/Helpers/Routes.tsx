@@ -283,6 +283,10 @@ const routes = {
     title: storedRoutes && storedRoutes.budget && storedRoutes.budget ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: '/budget'
   },
+  budgetDetail: {
+    title: storedRoutes && storedRoutes.budget && storedRoutes.budget ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
+    path: '/budget/detail'
+  },
   pricingCondition: {
     title:
       storedRoutes && storedRoutes.pricingCondition && storedRoutes.pricingCondition
@@ -301,6 +305,11 @@ const routes = {
     title:
       storedRoutes && storedRoutes.marketSegment && storedRoutes.marketSegment ? storedRoutes.marketSegment?.title : RESOURCE_LABEL.marketSegment,
     path: '/market-segment'
+  },
+  marketSegmentDetail: {
+    title:
+      storedRoutes && storedRoutes.marketSegment && storedRoutes.marketSegment ? storedRoutes.marketSegment?.title : RESOURCE_LABEL.marketSegment,
+    path: '/market-segment/detail'
   },
   quotePdfTemplate: {
     title:
