@@ -246,7 +246,7 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
                     })}
                   <div className={'detail-box-content'}>
                     <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                    <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Competency Steps</h2>
+                    <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Competency</h2>
                   </div>
                   <Grid container>
                     <Grid item xs={12}>

@@ -137,7 +137,7 @@ const CompetencyMasterDetail = () => {
               <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
                 <Box display={'flex'}>
                   <Box>
-                    <Typography variant="subtitle2">Competency Steps</Typography>
+                    <Typography variant="subtitle2">Competency</Typography>
                   </Box>
                 </Box>
               </Box>
