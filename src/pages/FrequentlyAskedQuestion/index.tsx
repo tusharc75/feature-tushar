@@ -25,27 +25,25 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const FrequentlyAskedQuestion = () => {
+
   const renderedFrom = camelCase(routes?.frequentlyAskedQuestion.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
-  //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const { getColumnData } = useColumns();
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [open, setOpen] = useState({ open: false, isClone: false });
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
   const [freqentlyAskedQuestionId, setFrequentlyAskedQuestionId] = useState(null);
 
   const openActions = (event) => {
@@ -63,41 +61,17 @@ const FrequentlyAskedQuestion = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (['label'].find((d) => d === o?.fieldData?.fieldName)) {
-            columns = [
-              ...columns,
-              {
-                disabled: false,
-                field: 'label',
-                headerName: 'Label',
-                pivotIndex: 0,
-                show: true,
-                cellRenderer: 'nameRenderer',
-                primaryField: true
-              }
-            ];
-          } else {
-            if (o?.fieldData?.primaryField === true) {
-              columns = [
-                ...columns,
-                { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
-              ];
-            } else {
-              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.frequentlyAskedQuestion.path);
-
-              if (currentColumn !== null) {
-                columns = [...columns, currentColumn?.columnData];
-                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                  rendererNames.push(currentColumn?.rendererName);
-                }
-              }
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.frequentlyAskedQuestionDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -128,8 +102,6 @@ const FrequentlyAskedQuestion = () => {
             ...finalObject
           };
         });
-        setIsAllChecked(false);
-        setClonedData(data);
         if (appendRows) {
           dispatch({
             type: 'initialize',
@@ -145,20 +117,6 @@ const FrequentlyAskedQuestion = () => {
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
-        }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -168,16 +126,6 @@ const FrequentlyAskedQuestion = () => {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const NameRenderer = (params) => {
-    return (
-      <span className=" d-flex gap-2 align-items-center">
-        <Link className="link" to={`${routes.frequentlyAskedQuestionDetail.path}/${params.data._id}`}>
-          {params.value}
-        </Link>
-      </span>
-    );
   };
 
   const ActionsRenderer = (params) => (
@@ -335,7 +283,7 @@ const FrequentlyAskedQuestion = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-        
+
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">

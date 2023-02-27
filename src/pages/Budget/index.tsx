@@ -126,33 +126,17 @@ function Budget() {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.fieldData?.primaryField === true) {
-            columns = [
-              ...columns,
-              {
-                field: o?.fieldData?.fieldName,
-                headerName: o?.fieldData?.fieldLabel,
-                show: true,
-                disabled: true,
-                cellRenderer: 'nameRenderer',
-                primaryField: true
-              }
-            ];
-          } else{
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.budget.path, true);
-
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName);
-              }
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.budgetDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
-          }  
+          }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -160,26 +144,6 @@ function Budget() {
         setColumns([...columns]);
       });
   };
-
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-
-  if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId == item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-  const NameRenderer = (params) => (
-      <span className=" d-flex gap-2 align-items-center">
-        <Link className="link" to={`${routes.budget.path}/detail/${params.data._id}`}>
-          {params.value}
-        </Link>
-      </span>
-  
-  );
 
   const ActionsRenderer = (params) => (
     <>

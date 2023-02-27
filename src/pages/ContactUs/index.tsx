@@ -30,19 +30,13 @@ const ContactUs = () => {
     state: { permissions, selectedEntity }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
-  const [contactUsPermission, setContactUsPermission] = useState({
-    isCreate: permissions.contactUs?.isCreate,
-    isUpdate: permissions.contactUs?.isUpdate,
-    isRead: permissions.contactUs?.isRead,
-    isDelete: permissions.contactUs?.isDelete
-  });
+
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const { getColumnData } = useColumns();
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -50,8 +44,6 @@ const ContactUs = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [open, setOpen] = useState({ open: false, isClone: false });
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
   const [contactUsId, setContactUsId] = useState(null);
 
   const openActions = (event) => {
@@ -69,41 +61,17 @@ const ContactUs = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (['name'].find((d) => d === o?.fieldData?.fieldName)) {
-            columns = [
-              ...columns,
-              {
-                disabled: false,
-                field: 'name',
-                headerName: 'Name',
-                pivotIndex: 0,
-                show: true,
-                cellRenderer: 'nameRenderer',
-                primaryField: true
-              }
-            ];
-          } else {
-            if (o?.fieldData?.primaryField === true) {
-              columns = [
-                ...columns,
-                { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
-              ];
-            } else {
-              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.blog.path);
-
-              if (currentColumn !== null) {
-                columns = [...columns, currentColumn?.columnData];
-                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                  rendererNames.push(currentColumn?.rendererName);
-                }
-              }
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.contactUsDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -126,16 +94,13 @@ const ContactUs = () => {
         let count = data?.count;
         let rows = data?.data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = contactUsPermission.isDelete;
+          finalObject['canDelete'] = permissions?.contactUs?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = contactUsPermission.isUpdate;
-
+          finalObject['allowedToEdit'] = permissions?.contactUs?.isUpdate;
           return {
             ...finalObject
           };
         });
-        setIsAllChecked(false);
-        setClonedData(data);
         if (appendRows) {
           dispatch({
             type: 'initialize',
@@ -151,20 +116,6 @@ const ContactUs = () => {
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
-        }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -176,15 +127,6 @@ const ContactUs = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const NameRenderer = (params) => {
-    return (
-      <span className=" d-flex gap-2 align-items-center">
-        <Link className="link" to={`${routes.contactUsDetail.path}/${params.data._id}`}>
-          {params.value}
-        </Link>
-      </span>
-    );
-  };
 
   const ActionsRenderer = (params) => (
     <Fragment>
@@ -291,11 +233,6 @@ const ContactUs = () => {
     fetchContactUsData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-  useEffect(() => {
-    if (permissions && permissions.contactUs) {
-      setContactUsPermission(permissions.contactUs);
-    }
-  }, [permissions]);
 
   return (
     <Fragment>
@@ -382,7 +319,7 @@ const ContactUs = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={!contactUsPermission?.isDelete}
+                      disabled={!permissions?.contactUs?.isDelete}
                       onClick={() => {
                         closeActions();
                         // eslint-disable-next-line no-lone-blocks
