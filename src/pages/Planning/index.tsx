@@ -28,16 +28,16 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ManageSchedule from './ManageSchedule';
+import ManagePlanning from './ManagePlanning';
 import styles from '../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { useHistory } from 'react-router-dom';
 
-const Schedule = () => {
+const Planning = () => {
 
-  const renderedFrom = camelCase(routes?.schedule.title);
+  const renderedFrom = camelCase(routes?.planning.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -48,19 +48,20 @@ const Schedule = () => {
   }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
-  const [scheduleId, setScheduleId] = useState(null);
+  
+  const [planningId, setPlanningId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [showConverConfirmBox, setShowConverConfirmBox] = useState({ open: false, id: null, scheduleNumber: "" });
+  const [showConverConfirmBox, setShowConverConfirmBox] = useState({ open: false, id: null, planningNumber: "" });
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.schedule}`)
+      .get(`/field?resource=${sidebarResource?.planning}`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
@@ -78,7 +79,7 @@ const Schedule = () => {
               }
             ];
           } else {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.schedule.path);
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.planning.path);
 
             if (currentColumn !== null) {
               columns = [...columns, currentColumn?.columnData];
@@ -108,14 +109,14 @@ const Schedule = () => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes?.schedule.path}${queryString}`)
+      .get(`${routes?.planning.path}${queryString}`)
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.schedule?.isDelete && finalObject?.ownerId === user?.user?._id;
+          finalObject['canDelete'] = permissions?.planning?.isDelete && finalObject?.ownerId === user?.user?._id;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.schedule?.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.planning?.isUpdate;
           return {
             ...finalObject
           };
@@ -202,7 +203,7 @@ const Schedule = () => {
   const NameRenderer = (params) => {
     return (
       <span className=" d-flex gap-2 align-items-center">
-        <Link className="link" to={`${routes.schedule.path}/detail/${params.data._id}`}>
+        <Link className="link" to={`${routes.planning.path}/detail/${params.data._id}`}>
           {params.value}
         </Link>
       </span>
@@ -210,9 +211,9 @@ const Schedule = () => {
   };
 
   const handleConvert = () => {
-    axiosInstance().post(`${routes?.schedule?.path}/convert-schedule`, { id: showConverConfirmBox?.id })
+    axiosInstance().post(`${routes?.planning?.path}/convert-planning`, { id: showConverConfirmBox?.id })
       .then(({ data }) => {
-        setShowConverConfirmBox({ open: false, id: null, scheduleNumber: "" });
+        setShowConverConfirmBox({ open: false, id: null, planningNumber: "" });
         fetchData()
         toastConfig.setToastConfig({
           open: true,
@@ -227,18 +228,18 @@ const Schedule = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      <HtmlTooltip title={permissions?.schedule?.isCreate ? "Clone" : "You do not have permission to clone/create"}>
+      <HtmlTooltip title={permissions?.planning?.isCreate ? "Clone" : "You do not have permission to clone/create"}>
         <span>
           <IconButton
-            disabled={permissions?.schedule?.isCreate ? false : true}
+            disabled={permissions?.planning?.isCreate ? false : true}
             aria-label="Clone"
             size="small"
             onClick={() => {
-              setScheduleId(params.data.id);
+              setPlanningId(params.data.id);
               setOpen({ open: true, isClone: true });
             }}
           >
-            <FileCopyIcon fontSize="small" color={permissions?.schedule?.isCreate ? "primary" : "disabled"} />
+            <FileCopyIcon fontSize="small" color={permissions?.planning?.isCreate ? "primary" : "disabled"} />
           </IconButton>
         </span>
       </HtmlTooltip>
@@ -263,16 +264,16 @@ const Schedule = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        : <HtmlTooltip title={permissions?.schedule?.isUpdate ? "Convert" : "You do not have permission to convert"}>
+        : <HtmlTooltip title={permissions?.planning?.isUpdate ? "Convert" : "You do not have permission to convert"}>
           <span>
             <IconButton
-              disabled={permissions?.schedule?.isUpdate ? false : true}
+              disabled={permissions?.planning?.isUpdate ? false : true}
               aria-label="Convert"
               onClick={() => {
-                setShowConverConfirmBox({ open: true, id: params?.data?._id, scheduleNumber: params?.data?.scheduleNumber })
+                setShowConverConfirmBox({ open: true, id: params?.data?._id, planningNumber: params?.data?.planningNumber })
               }}
             >
-              <AutorenewIcon fontSize="small" color={permissions?.schedule?.isUpdate ? "primary" : "disabled"} />
+              <AutorenewIcon fontSize="small" color={permissions?.planning?.isUpdate ? "primary" : "disabled"} />
             </IconButton>
           </span>
         </HtmlTooltip>}
@@ -302,7 +303,7 @@ const Schedule = () => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`${routes?.schedule?.path}/remove`, { ids: ids })
+      .put(`${routes?.planning?.path}/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
         fetchData();
@@ -331,13 +332,13 @@ const Schedule = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.schedule.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.planning.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.schedule}
-            module="schedule"
-            api={'schedule'}
+            permissions={permissions.planning}
+            module="planning"
+            api={'planning'}
             afterImportCompleted={() => {
               fetchData();
             }}
@@ -374,11 +375,11 @@ const Schedule = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.schedule.isCreate && (
+                  {permissions.planning.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
-                        setScheduleId(null);
+                        setPlanningId(null);
                         setOpen({ open: true, isClone: false });
                       }}
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -389,7 +390,7 @@ const Schedule = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions?.schedule?.isDelete && (
+                  {permissions?.planning?.isDelete && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -445,17 +446,17 @@ const Schedule = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.schedule}
+              permissions={permissions.planning}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
-                setScheduleId(data.id);
+                setPlanningId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                setScheduleId(data.id);
+                setPlanningId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               extraParamsToCheckDelete={true}
@@ -471,7 +472,7 @@ const Schedule = () => {
               onCreate={false}
               showClone={true}
               onClone={(data) => {
-                setScheduleId(data.id);
+                setPlanningId(data.id);
                 setOpen({ open: true, isClone: true });
               }}
               chips={[]}
@@ -499,7 +500,7 @@ const Schedule = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete Schedule  ${deleteRecord?.scheduleNumber || ''} ?`}
+            message={`Are you sure you want to delete planning  ${deleteRecord?.planningNumber || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -510,16 +511,16 @@ const Schedule = () => {
         {showConverConfirmBox.open && (
           <ConfirmationDialog
             open={true}
-            message={`Are you sure you want to convert Schedule  ${showConverConfirmBox?.scheduleNumber} ?`}
+            message={`Are you sure you want to convert planning  ${showConverConfirmBox?.planningNumber} ?`}
             onClose={() => {
-              setShowConverConfirmBox({ open: false, id: null, scheduleNumber: "" })
+              setShowConverConfirmBox({ open: false, id: null, planningNumber: "" })
             }}
             onOk={handleConvert}
           />
         )}
         {open?.open && (
-          <ManageSchedule
-            id={scheduleId}
+          <ManagePlanning
+            id={planningId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
@@ -533,4 +534,4 @@ const Schedule = () => {
   );
 };
 
-export default Schedule;
+export default Planning;

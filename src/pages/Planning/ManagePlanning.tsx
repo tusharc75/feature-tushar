@@ -32,7 +32,7 @@ import ManageAccountDialog from '../Account/ManageAccount';
 import ManageContactDialog from '../Contact/ManageContact';
 import ManageAddressDialog from 'src/components/Address/ManageAddressDialog';
 
-const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
     state: { user, permissions }
   }: any = useData();
@@ -128,34 +128,24 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
     }
   };
 
-  const checkTypeForPrefix = (type) => {
-    if (type === 'Rental Job') {
-      return 'RJ';
-    } else if (type === 'Sales Order') {
-      return 'SO';
-    } else if (type === 'Field Service Order') {
-      return 'FSO';
-    }
-  };
-
   const fetchFields = async () => {
     try {
-      const response = await axiosInstance().get('/field?resource=Schedule');
+      const response = await axiosInstance().get('/field?resource=Planning');
       const data = response?.data?.data;
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate && !["rentalJob", "salesOrder", "serviceOrder"]?.includes(obj.fieldData?.fieldName)).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !["rentalJob", "salesOrder", "serviceOrder"]?.includes(obj.fieldData?.fieldName)).map((d: any) => d.fieldData);
 
       if (id) {
         axiosInstance()
-          .get(`${routes?.schedule?.path}/${id}`)
+          .get(`${routes?.planning?.path}/${id}`)
           .then(({ data: { data } }) => {
             let fields = fieldsDataForUpdate;
             let tempData = data;
             if (isClone) {
               fields = fieldsDataForCreate;
-              const { scheduleNumber, ...rest } = data;
-              rest.scheduleNumber = `${scheduleNumber?.split('_')[0]}_${generateUniqueIdOnly()}`;
-              setCloneHeading(scheduleNumber);
+              const { planningNumber, ...rest } = data;
+              rest.planningNumber = `PLO_${generateUniqueIdOnly()}`;
+              setCloneHeading(planningNumber);
               tempData = rest;
             }
             setInitialData({
@@ -167,7 +157,8 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
             toastConfig.setToastConfig(error);
           });
       } else {
-        const tempInitialData = getObjKeys('', fieldsDataForCreate);
+        const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
+        tempInitialData["planningNumber"] = `PLO_${generateUniqueIdOnly()}`;
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           tempInitialData['currency'] = user.user?.brandCurrency;
         }
@@ -187,7 +178,7 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
     if (id && !isClone) {
       values._id = id;
       axiosInstance()
-        .put(`${routes.schedule?.path}`, values)
+        .put(`${routes.planning?.path}`, values)
         .then(({ data }) => {
           setSubmitting(false);
           onSuccess();
@@ -203,11 +194,11 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
         });
     } else {
       axiosInstance()
-        .post(`${routes.schedule?.path}`, values)
+        .post(`${routes.planning?.path}`, values)
         .then(({ data }) => {
           setLoading(false);
           setSubmitting(true);
-          history.push(`${routes.scheduleDetail.path}/${data?.data?._id}`);
+          history.push(`${routes.planningDetail.path}/${data?.data?._id}`);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -294,8 +285,8 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
                 title={`${id
                   ? isClone
                     ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.scheduleNumber ? `(${initialData.values?.scheduleNumber})` : ''}`
-                  : `Create ${routes?.schedule?.title}`
+                    : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
+                  : `Create ${routes?.planning?.title}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -318,30 +309,7 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field, index2) => (
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
-                                    {field.fieldName === 'type' ? (
-                                      <FormTypes
-                                        {...field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={setFieldValue}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={null}
-                                        onChange={(e, value) => {
-                                          const prefix = checkTypeForPrefix(value?.optionValue);
-                                          setFieldValue('scheduleNumber', value && value.optionValue ? `SC_${prefix}_${generateUniqueIdOnly()}` : '');
-                                          setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                        }}
-                                      />
-                                    ) : field.fieldName === 'customerAccount' ? (
+                                    {field.fieldName === 'customerAccount' ? (
                                       <Grid container spacing={1}>
                                         <Grid
                                           item
@@ -804,4 +772,4 @@ const ManageSchedule = ({ onClose, onSuccess, isClone = false, id = null }) => {
   );
 };
 
-export default ManageSchedule;
+export default ManagePlanning;

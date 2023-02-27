@@ -15,18 +15,18 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import TabPanel from '../../components/TabPanel';
 import Material from './Material';
 import { camelCase } from 'lodash';
-import ManageSchedule from './ManageSchedule';
+import ManagePlanning from './ManagePlanning';
 import { FaWpforms } from 'react-icons/fa';
 
-const ScheduleDetail = () => {
-  const renderedFrom = camelCase(routes?.schedule.title);
+const PlanningDetail = () => {
+  const renderedFrom = camelCase(routes?.planning.title);
 
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const { state: { permissions, user } }: any = useData();
 
-  const [scheduleData, setScheduleData] = useState(null);
+  const [planningData, setPlanningData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -44,7 +44,7 @@ const ScheduleDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get('/field?resource=Schedule')
+      .get('/field?resource=Planning')
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
       })
@@ -58,11 +58,11 @@ const ScheduleDetail = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`${routes.schedule.path}/${id}`);
+      } = await axiosInstance().get(`${routes.planning.path}/${id}`);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
-      setScheduleData(data);
+      setPlanningData(data);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -72,7 +72,7 @@ const ScheduleDetail = () => {
   const handleDelete = () => {
     if (id) {
       axiosInstance()
-        .put(`${routes?.schedule?.path}/remove`, { ids: [id] })
+        .put(`${routes?.planning?.path}/remove`, { ids: [id] })
         .then(({ data }) => {
           setShowConfirmBox(false);
 
@@ -107,12 +107,12 @@ const ScheduleDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.schedule, { title: scheduleData?.scheduleNumber }]} />
+          <CustomBreadCrumbs routes={[routes.planning, { title: planningData?.planningNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.schedule?.isUpdate && allowedToEdit && (
+              {permissions?.planning?.isUpdate && allowedToEdit && (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   className="btn-outline-v1"
@@ -122,7 +122,7 @@ const ScheduleDetail = () => {
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.schedule?.isDelete && allowedToDelete && (
+              {permissions?.planning?.isDelete && allowedToDelete && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
             </>
@@ -171,16 +171,16 @@ const ScheduleDetail = () => {
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </Grid>
             ) : (
-              <DetailsPage data={scheduleData} fields={fields} />
+              <DetailsPage data={planningData} fields={fields} />
             )}
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          {scheduleData && (
+          {planningData && (
             <Material
               renderedFrom={`${renderedFrom}_grid-1`}
-              allowedToEdit={allowedToEdit && permissions?.schedule?.isUpdate ? true : false}
-              scheduleData={scheduleData}
+              allowedToEdit={allowedToEdit && permissions?.planning?.isUpdate ? true : false}
+              planningData={planningData}
             />
           )}
         </TabPanel>
@@ -188,7 +188,7 @@ const ScheduleDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.schedule?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${routes?.planning?.title?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -196,7 +196,7 @@ const ScheduleDetail = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageSchedule
+        <ManagePlanning
           id={id}
           isClone={false}
           onClose={closeUpdateDialog}
@@ -210,4 +210,4 @@ const ScheduleDetail = () => {
   );
 };
 
-export default ScheduleDetail;
+export default PlanningDetail;
