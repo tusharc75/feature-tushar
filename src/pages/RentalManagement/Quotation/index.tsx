@@ -42,10 +42,10 @@ import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyD
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 import { orderBy, startCase } from 'lodash';
-import SendEmail from './SendEmail';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
+import SendEmail from 'src/pages/Quotation/SendEmail';
 
 const Quotation = ({
   rentalManagementData,
@@ -505,7 +505,6 @@ const Quotation = ({
           <SendEmail
             versionData={quotationData?.versions[currentVersion]}
             quotationData={quotationData}
-            previewOnly={true}
             allowedToEdit={allowedToEdit}
             versionId={quotationData?.versions[currentVersion]?._id}
             columns={columns}
