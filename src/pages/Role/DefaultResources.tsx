@@ -3,7 +3,7 @@ import { Autocomplete } from '@material-ui/lab';
 
 const DefaultResources = ({ resourceList, resourceName, setResourceName }) => {
   return (
-    <Box pb={2}>
+    <Box>
       <Box p={1}>
         <Autocomplete
           id="tags-outlined"

@@ -44,6 +44,7 @@ import { RiNurseFill } from 'react-icons/ri';
 import PolicyResources from './PolicyResources';
 import DashboardResources from './DashboardResources';
 import DefaultResources from './DefaultResources';
+import SuperAdminAccess from './SuperAdminAccess';
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -109,6 +110,7 @@ const RoleDetailsPage = () => {
   const [dashBoardOption, setDashBoardOption] = useState([]);
   const [dashboardName, setDashboardName] = useState([]);
   const [defaultResourceName, setDefaultResourceName] = useState([]);
+  const [superAdminAccess, setSuperAdminAccess] = useState(false)
 
   const policyResources = [
     {
@@ -294,6 +296,7 @@ const RoleDetailsPage = () => {
         }) || [];
       setResourceOption([...copyOfDashBoardOption]);
       setDefaultResourceName(data?.defaultResource || '');
+      setSuperAdminAccess(data?.superAdminAccess || false);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -354,7 +357,8 @@ const RoleDetailsPage = () => {
         type: roleData.type,
         policy: policyFieldCheckBox,
         dashBoards: dashBoardIds,
-        defaultResource: defaultResourceName
+        defaultResource: defaultResourceName,
+        superAdminAccess: superAdminAccess
       })
       .then(({ data }) => {
         fetchRoleData();
@@ -565,6 +569,7 @@ const RoleDetailsPage = () => {
                       <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} />
                     )}
                     <DefaultResources resourceList={resourceOption} resourceName={defaultResourceName} setResourceName={setDefaultResourceName} />
+                    <SuperAdminAccess superAdminAccess={superAdminAccess} setSuperAdminAccess={setSuperAdminAccess} />
                   </>
                 )
               )}
@@ -763,10 +768,10 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-              : entityDeleteRec
-              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-              : ''
+                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+                : entityDeleteRec
+                  ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+                  : ''
           }
           onClose={() => {
             setShowConfirmBox(false);
