@@ -105,12 +105,12 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -122,14 +122,19 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
+        Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {isOffline || !allowedToEdit ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
                 onClick={() => {
-                  handleOpen(row.original);
+                  setIsProductEdit({
+                    open: true,
+                    data: row.original,
+                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                  });
+                  setIsBulkEdit(false);
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -254,23 +259,22 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'service'
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.packageDetail?.packageName
-      }`;
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -294,23 +298,22 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'package'
+      _subRow.detail = `${_subRow.type === 'service'
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'package'
           ? _subRow.packageDetail?.packageName
           : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : ''
-      } `;
+            ? _subRow.productDetail?.productName
+            : ''
+        } `;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -422,17 +425,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       .then(() => {
         fetchProductInventory();
         if (saveAndNext) {
-          const rowsInData = [];
-          rowsData?.forEach((d) => {
-            rowsInData.push(d);
-            if (d?.subRows && d?.subRows?.length) {
-              d?.subRows?.forEach((e) => {
-                rowsInData.push(e);
-              });
-            }
-          });
-          const rowIndex = rowsInData?.findIndex((d) => d._id === rows[0]?._id);
-          setIsProductEdit({ open: true, data: rowsInData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsInData?.length - 1 ? true : false });
+          const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
+          setIsProductEdit({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
         } else {
           setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
         }
@@ -462,18 +456,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   };
 
   const handleOpen = (data) => {
-    const rowsInData = [];
-    rowsData?.forEach((d) => {
-      rowsInData.push(d);
-      if (d?.subRows && d?.subRows?.length) {
-        d?.subRows?.forEach((e) => {
-          rowsInData.push(e);
-        });
-      }
-    });
-    const rowIndex = rowsInData?.findIndex((d) => d._id === data?._id);
-    setIsProductEdit({ open: true, data: rowsInData[rowIndex], showSaveAndNext: rowIndex < rowsInData?.length - 1 ? true : false });
-    // setIsProductEdit({ open: true, data: data, showSaveAndNext: data?.index < rowsInData?.length ? true : false });
+    setIsProductEdit({ open: true, data: data, showSaveAndNext: false });
     setIsBulkEdit(false);
   };
 

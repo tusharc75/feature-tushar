@@ -12,8 +12,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import moment from 'moment';
-import { rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency } from '../../../constants/helpers';
+import { rentalManagement } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -38,8 +37,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
-
-  // const [recordToUpdate, setRecordToUpdate] = useState(null);
 
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -102,12 +99,12 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -119,23 +116,29 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
+        Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {isOffline || !allowedToEdit ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
                 onClick={() => {
-                  handleOpen(row.original);
+                  setIsProductEdit({
+                    open: true,
+                    data: row.original,
+                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                  });
+                  setIsBulkEdit(false);
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
               >
                 {row.original.detail}
               </p>
-            )}
+            )
+            }
             {
-              <Box ml={1} className="d-flex align-items-center">
+              < Box ml={1} className="d-flex align-items-center" >
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
@@ -150,29 +153,31 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                     </IconButton>
                   </HtmlTooltip>
                 )}
-              </Box>
+              </Box >
             }
-            {!isOffline && (
-              <>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === 'service') {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'product') {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'asset') {
-                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                    } else {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </>
-            )}
-          </div>
+            {
+              !isOffline && (
+                <>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      if (row.original.type === 'service') {
+                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                      } else if (row.original.type === 'product') {
+                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                      } else if (row.original.type === 'asset') {
+                        window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                      } else {
+                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                      }
+                    }}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </>
+              )
+            }
+          </div >
         )
       },
       {
@@ -255,16 +260,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent?.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent?.packageDetail?.packageName;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
@@ -297,16 +302,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -413,20 +418,10 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       .put(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: rows })
       .then(() => {
         setUpdating(false);
-        // setIsProductEdit({ open: false, isBulkedit: false });
         fetchProductInventory();
         if (saveAndNext) {
-          const rowsInData = [];
-          rowsData?.forEach((d) => {
-            rowsInData.push(d);
-            if (d?.subRows && d?.subRows?.length) {
-              d?.subRows?.forEach((e) => {
-                rowsInData.push(e);
-              });
-            }
-          });
-          const rowIndex = rowsInData?.findIndex((d) => d._id === rows[0]?._id);
-          setIsProductEdit({ open: true, data: rowsInData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsInData?.length - 1 ? true : false });
+          const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
+          setIsProductEdit({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
         } else {
           setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
         }
@@ -451,22 +446,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         toastConfig.setToastConfig(error);
         setDeleteData(null);
       });
-  };
-
-  const handleOpen = (data) => {
-    const rowsInData = [];
-    rowsData?.forEach((d) => {
-      rowsInData.push(d);
-      if (d?.subRows && d?.subRows?.length) {
-        d?.subRows?.forEach((e) => {
-          rowsInData.push(e);
-        });
-      }
-    });
-    const rowIndex = rowsInData?.findIndex((d) => d._id === data?._id);
-    setIsProductEdit({ open: true, data: rowsInData[rowIndex], showSaveAndNext: rowIndex < rowsInData?.length - 1 ? true : false });
-    // setIsProductEdit({ open: true, data: data, showSaveAndNext: data?.index < rowsInData?.length ? true : false });
-    setIsBulkEdit(false);
   };
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -629,7 +608,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         <RentalJobQtyDialog
           onClose={() => {
             setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
-            // setRecordToUpdate(null);
             setIsBulkEdit(false);
           }}
           isBulkedit={isBulkEdit}
