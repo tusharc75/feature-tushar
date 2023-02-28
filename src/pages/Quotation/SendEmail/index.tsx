@@ -39,7 +39,6 @@ const SendEmail = ({
   currentVersion,
   hideSummary = false,
   hideVersions = false,
-  currency = '',
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -63,8 +62,8 @@ const SendEmail = ({
   }, []);
 
   useEffect(() => {
-    setVisibleColumnsExcel(["Index", "Details", "Type", "Unit", "Qty", `Price ${currency}`, `Final Price ${currency}`]);
-  }, [currency]);
+    setVisibleColumnsExcel(["Index", "Details", "Type", "Unit", "Qty", `Price ${quotationData?.currency}`, `Final Price ${quotationData?.currency}`]);
+  }, [quotationData?.currency]);
 
   const fetchEmailsData = () => {
     let ownerCollaboratorEmails = [];
