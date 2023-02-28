@@ -8,14 +8,9 @@ import SearchBox from '../Helpers/SearchBox';
 import {
   gridLoadingTimeout,
   isObjectEmpty,
-  packages,
   prepareDataForGrid,
   getLocalStorageArrayData,
-  serviceMaster,
-  workOrder,
   serializedAsset,
-  INVENTORY_STATUS,
-  COLOUR_MASTER
 } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
@@ -28,11 +23,11 @@ let searchTimeout;
 
 const AssignSerializedAssetDialog = ({
   reference,
-  referenceId = null,
   referenceData = null,
   handleClose,
   handleSucess,
   ids,
+  isAssigning,
   extraStaticFilter = [],
   selectedProducts = []
 }) => {
@@ -43,7 +38,6 @@ const AssignSerializedAssetDialog = ({
     state: { permissions, selectedEntity }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
-  const [isAssigning, setAssigning] = useState(false);
   const [disableSaveButton, setDisableSaveButton] = useState(false);
 
   const [gridApi, setGridApi] = useState(null);
@@ -53,7 +47,8 @@ const AssignSerializedAssetDialog = ({
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [columns, setColumns] = useState([]);
   const { getColumnData } = useColumns();
-  const [serializedProducts, setSerializedProducts] = useState([]);
+
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     localStorage.removeItem(localStorageSelectedRecords);
@@ -107,7 +102,7 @@ const AssignSerializedAssetDialog = ({
         updatedFilters.push({ field: 'product', term: selectedProduct });
       } else {
         updatedFilters = selectedProducts.map((m) => {
-          return { field: 'product', term: m?.materialId ?? '' };
+          return { field: 'product', term: m?.product ?? '' };
         });
       }
       queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterByIdType=or`;
@@ -187,27 +182,27 @@ const AssignSerializedAssetDialog = ({
   };
 
   useEffect(() => {
-    let tempProducts = serializedProducts;
+    let tempProducts = products;
     const alreadyStoredSelectedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
     if (tempProducts.length === 0) {
-      selectedProducts.map((d) => {
-        if (tempProducts.find((obj) => obj.id === d.materialId)) {
-          tempProducts.find((obj) => obj.id === d.id).qty = d?.qty + tempProducts.find((obj) => obj.id === d.materialId).qty;
+      selectedProducts?.map((d) => {
+        if (tempProducts.find((obj) => obj.id === d.product)) {
+          tempProducts.find((obj) => obj.id === d.id).qty = d?.qty + tempProducts.find((obj) => obj.id === d.product).qty;
         } else {
-          tempProducts.push({ id: d.materialId, name: d.productDetail.productName, qty: d?.qty });
+          tempProducts.push({ id: d.product, name: d.productName, qty: d?.qty });
         }
       });
     } else {
       tempProducts = [];
       selectedProducts.map((d) => {
         tempProducts.push({
-          id: d.materialId,
-          name: d.productDetail.productName,
-          qty: d?.qty - alreadyStoredSelectedRecords?.filter((obj) => obj.productId === d.materialId).length
+          id: d.product,
+          name: d.productName,
+          qty: d?.qty - alreadyStoredSelectedRecords?.filter((obj) => obj.productId === d.product).length
         });
       });
     }
-    setSerializedProducts(tempProducts);
+    setProducts(tempProducts);
   }, [selectedRecords]);
 
   return (
@@ -223,31 +218,31 @@ const AssignSerializedAssetDialog = ({
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={6} className="d-flex align-items-center gap-1">
               <Box style={{ display: 'inline' }}>
-                {serializedProducts.length > 0
-                  ? serializedProducts.map((d) => (
-                      <Box
-                        m={0.5}
-                        p={1}
-                        border={1}
-                        className="cursor-pointer"
-                        borderColor="grey.300"
-                        onClick={() => {
-                          if (selectedProduct === d.id) {
-                            setSelectedProduct(null);
-                          } else {
-                            setSelectedProduct(d.id);
-                          }
-                        }}
-                        style={{ display: 'inline-block' }}
-                        bgcolor={d.id === selectedProduct && 'primary.main'}
-                        color={d.id === selectedProduct && 'white'}
-                      >
-                    {d?.qty < 0 ?
-                      <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                      : (d?.qty === 0 ? <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span> :
+                {products.length > 0
+                  ? products?.map((d) => (
+                    <Box
+                      m={0.5}
+                      p={1}
+                      border={1}
+                      className="cursor-pointer"
+                      borderColor="grey.300"
+                      onClick={() => {
+                        if (selectedProduct === d.id) {
+                          setSelectedProduct(null);
+                        } else {
+                          setSelectedProduct(d.id);
+                        }
+                      }}
+                      style={{ display: 'inline-block' }}
+                      bgcolor={d.id === selectedProduct && 'primary.main'}
+                      color={d.id === selectedProduct && 'white'}
+                    >
+                      {d?.qty < 0 ?
+                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                        : (d?.qty === 0 ? <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span> :
                           <span key={d.name}>{`${d.name} (${d?.qty})`}</span>)}
-                      </Box>
-                    ))
+                    </Box>
+                  ))
                   : null}
               </Box>
             </Grid>
@@ -255,9 +250,21 @@ const AssignSerializedAssetDialog = ({
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
-                  disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0 || serializedProducts.some(d => d?.qty < 0)}
+                  disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0 || products?.some(d => d?.qty < 0)}
                   onClick={() => {
-                    handleSucess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+                    if (selectedProducts?.length) {
+                      const data = [];
+                      selectedProducts?.forEach((ele) => {
+                        const assets = ([...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.productId === ele.product))?.map((e) => e._id)
+                        assets?.forEach((asset) => {
+                          data.push({ ...ele, asset: asset })
+                        })
+                      })
+                      handleSucess(data);
+                    }
+                    else {
+                      handleSucess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+                    }
                   }}
                   color="primary"
                   size="small"
@@ -287,7 +294,7 @@ const AssignSerializedAssetDialog = ({
             allowAction={false}
             loading={loading}
             allowSelection={true}
-            onCellValueChanged={() => {}}
+            onCellValueChanged={() => { }}
             showOnlyShowFilteredRecordSwitch={true}
             refreshGrid={fetchData}
             renderedFrom={renderedFrom}
@@ -298,7 +305,7 @@ const AssignSerializedAssetDialog = ({
           </Box>
         )}
       </CustomDialogContent>
-    </Dialog>
+    </Dialog >
   );
 };
 

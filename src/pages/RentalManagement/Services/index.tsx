@@ -12,8 +12,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import moment from 'moment';
-import { rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency } from '../../../constants/helpers';
+import { rentalManagement } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -27,13 +26,7 @@ import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { genrateCustomTableColumns } from 'src/constants/columns';
 
-const Services = ({
-  rentalManagementData,
-  setNextStep,
-  renderedFrom,
-  stepFullScreen,
-  allowedToEdit
-}: any) => {
+const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -42,10 +35,8 @@ const Services = ({
   const [isUpdating, setUpdating] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
-
-  const [recordToUpdate, setRecordToUpdate] = useState(null);
 
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -56,6 +47,8 @@ const Services = ({
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
+  const [isBulkEdit, setIsBulkEdit] = useState(false);
+
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
@@ -76,9 +69,9 @@ const Services = ({
     }
     setAllFields(JSON.parse(JSON.stringify(allFields)));
     const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
-    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay'
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
     let column: any = [
       {
@@ -123,23 +116,29 @@ const Services = ({
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
+        Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {isOffline || !allowedToEdit ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
                 onClick={() => {
-                  handleOpen(row.original);
+                  setIsProductEdit({
+                    open: true,
+                    data: row.original,
+                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                  });
+                  setIsBulkEdit(false);
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
               >
                 {row.original.detail}
               </p>
-            )}
+            )
+            }
             {
-              <Box ml={1} className="d-flex align-items-center">
+              < Box ml={1} className="d-flex align-items-center" >
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
@@ -154,29 +153,31 @@ const Services = ({
                     </IconButton>
                   </HtmlTooltip>
                 )}
-              </Box>
+              </Box >
             }
-            {!isOffline && (
-              <>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === 'service') {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'product') {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'asset') {
-                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                    } else {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </>
-            )}
-          </div>
+            {
+              !isOffline && (
+                <>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      if (row.original.type === 'service') {
+                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                      } else if (row.original.type === 'product') {
+                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                      } else if (row.original.type === 'asset') {
+                        window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                      } else {
+                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                      }
+                    }}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </>
+              )
+            }
+          </div >
         )
       },
       {
@@ -395,7 +396,7 @@ const Services = ({
       });
   };
 
-  const handleSaveData = async (rows: any) => {
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
       element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
       delete element.srno;
@@ -417,8 +418,13 @@ const Services = ({
       .put(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: rows })
       .then(() => {
         setUpdating(false);
-        setIsProductEdit({ open: false, isBulkedit: false });
         fetchProductInventory();
+        if (saveAndNext) {
+          const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
+          setIsProductEdit({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+        } else {
+          setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
+        }
       })
       .catch((error) => {
         setUpdating(false);
@@ -440,11 +446,6 @@ const Services = ({
         toastConfig.setToastConfig(error);
         setDeleteData(null);
       });
-  };
-
-  const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false });
-    setRecordToUpdate(rowData);
   };
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -529,7 +530,8 @@ const Services = ({
                   <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
                     <MenuItem
                       onClick={() => {
-                        setIsProductEdit({ open: true, isBulkedit: true });
+                        setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
+                        setIsBulkEdit(true);
                         handleClose();
                       }}
                     >
@@ -554,11 +556,7 @@ const Services = ({
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={'100%'}
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-            >
+            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
@@ -609,17 +607,18 @@ const Services = ({
       {isProductEdit.open && (
         <RentalJobQtyDialog
           onClose={() => {
-            setIsProductEdit({ open: false, isBulkedit: false });
-            setRecordToUpdate(null);
+            setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
+            setIsBulkEdit(false);
           }}
-          isBulkedit={isProductEdit.isBulkedit}
+          isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
-          rowData={recordToUpdate}
+          rowData={!isBulkEdit ? isProductEdit.data : selectedProducts}
           material={material}
           selectedProducts={selectedProducts}
           loading={isUpdating}
           from={'service'}
+          showSaveAndNext={isProductEdit.showSaveAndNext}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (

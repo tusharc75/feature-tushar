@@ -1,15 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import {
-  Grid,
-  Box,
-  Button,
-  IconButton,
-  Menu,
-  MenuItem,
-  MenuList,
-  Popover
-} from '@material-ui/core';
+import { Grid, Box, Button, IconButton, Menu, MenuItem, MenuList, Popover } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -35,13 +26,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { genrateCustomTableColumns, flattenArray } from 'src/constants/columns';
 
-const Productpackage = ({
-  rentalManagementData,
-  setNextStep,
-  renderedFrom,
-  stepFullScreen,
-  allowedToEdit
-}) => {
+const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -50,10 +35,10 @@ const Productpackage = ({
   const [isUpdating, setUpdating] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
 
-  const [recordToUpdate, setRecordToUpdate] = useState(null);
+  // const [recordToUpdate, setRecordToUpdate] = useState(null);
 
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -68,9 +53,9 @@ const Productpackage = ({
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
   const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
+  const [isBulkEdit, setIsBulkEdit] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
-
 
   useEffect(() => {
     fetchFields();
@@ -90,9 +75,9 @@ const Productpackage = ({
     }
     setAllFields(JSON.parse(JSON.stringify(allFields)));
     const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
-    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay'
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
     let column: any = [
       {
@@ -137,14 +122,19 @@ const Productpackage = ({
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
+        Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {isOffline || !allowedToEdit ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
                 onClick={() => {
-                  handleOpen(row.original);
+                  setIsProductEdit({
+                    open: true,
+                    data: row.original,
+                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                  });
+                  setIsBulkEdit(false);
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -412,7 +402,7 @@ const Productpackage = ({
       });
   };
 
-  const handleSaveData = async (rows: any) => {
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
       element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
       delete element.srno;
@@ -433,9 +423,15 @@ const Productpackage = ({
     axiosInstance()
       .put(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: rows })
       .then(() => {
-        setUpdating(false);
-        setIsProductEdit({ open: false, isBulkedit: false });
         fetchProductInventory();
+        if (saveAndNext) {
+          const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
+          setIsProductEdit({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+        } else {
+          setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
+        }
+        setUpdating(false);
+        setIsBulkEdit(false);
       })
       .catch((error) => {
         setUpdating(false);
@@ -459,9 +455,9 @@ const Productpackage = ({
       });
   };
 
-  const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false });
-    setRecordToUpdate(rowData);
+  const handleOpen = (data) => {
+    setIsProductEdit({ open: true, data: data, showSaveAndNext: false });
+    setIsBulkEdit(false);
   };
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -527,7 +523,9 @@ const Productpackage = ({
         inputField['qty'] = inputField['qtyDisplay'];
         if (rowData.hideSelection && inputField['qty'] < rowData?.assetQty) {
           toastConfig.setToastConfig({
-            open: true, type: "error", message: "The quantity is less than what was assigned."
+            open: true,
+            type: 'error',
+            message: 'The quantity is less than what was assigned.'
           });
           setShowConfirmationDialog({ open: false, data: {} });
           return;
@@ -565,7 +563,7 @@ const Productpackage = ({
                   <Button
                     color="primary"
                     size="small"
-                    variant='contained'
+                    variant="contained"
                     disabled={isOffline}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
@@ -611,7 +609,8 @@ const Productpackage = ({
                   >
                     <MenuItem
                       onClick={() => {
-                        setIsProductEdit({ open: true, isBulkedit: true });
+                        setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
+                        setIsBulkEdit(true);
                         handleClose();
                       }}
                     >
@@ -642,7 +641,7 @@ const Productpackage = ({
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}  >
+            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
@@ -677,20 +676,22 @@ const Productpackage = ({
       {isProductEdit.open && (
         <RentalJobQtyDialog
           onClose={() => {
-            setIsProductEdit({ open: false, isBulkedit: false });
-            setRecordToUpdate(null);
+            setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
+            setIsBulkEdit(false);
+            // setRecordToUpdate(null);
 
             if (isInlineEdit) {
               setIsInlineEdit(false);
             }
           }}
-          isBulkedit={isProductEdit.isBulkedit}
+          isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
-          rowData={recordToUpdate}
+          rowData={!isBulkEdit ? isProductEdit.data : selectedProducts}
           material={material}
           selectedProducts={selectedProducts.filter((e) => !e.hideSelection)}
           loading={isUpdating}
+          showSaveAndNext={isProductEdit.showSaveAndNext}
           from={'product'}
           isInlineEdit={isInlineEdit}
         />
