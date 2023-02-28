@@ -103,9 +103,9 @@ const SerializedAssetDetailsPage = () => {
     <>
       {params.value ? (
         params.data.type === 'Loading Ticket' ||
-        params.data.type === 'Receiving Ticket' ||
-        params.data.type === 'Return Ticket' ||
-        params.data.type === 'Delivery Ticket' ? (
+          params.data.type === 'Receiving Ticket' ||
+          params.data.type === 'Return Ticket' ||
+          params.data.type === 'Delivery Ticket' ? (
           <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link>
@@ -331,7 +331,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { ids: [id] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -505,8 +505,7 @@ const SerializedAssetDetailsPage = () => {
                           Asset History
                         </h3>
                       </div>
-
-                      <Grid item xs={12} sm={12} md={12} lg={12} className=" formdata-v1">
+                      <Grid item xs={12} sm={12} md={12} lg={12} className="formdata-v1">
                         {columns ? (
                           <CustomAgGrid
                             columns={columns}
@@ -597,25 +596,7 @@ const SerializedAssetDetailsPage = () => {
                         </h3>
                       </div>
                       <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
-                        {!isMobile && columns ? (
-                          <CustomAgGrid
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameworkComponents}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            allowAction={false}
-                            allowSelection={false}
-                            isClientSideGrid={true}
-                            loading={loading}
-                            renderedFrom={`${renderedFrom}_grid-1`}
-                            refreshGrid={fetchProductInventoryHistory}
-                          />
-                        ) : isMobile ? (
+                        {columns ? (
                           <div>
                             <CustomTimeline dataRows={dataRows} />
                           </div>
