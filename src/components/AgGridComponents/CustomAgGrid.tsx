@@ -163,7 +163,7 @@ export default function CustomAgGrid({
   customGridOptions = null,
   actionLabel = null,
   actionEditable = false,
-  onCellValueChanged = () => {},
+  onCellValueChanged = () => { },
   showOnlyShowFilteredRecordSwitch = false,
   idProperty = '_id',
   allowHeaderSelection = true,
@@ -193,12 +193,12 @@ export default function CustomAgGrid({
         }
       }, 300);
     }
-    // else {
-    //   timer = setTimeout(() => {
-    //     dispatch({ type: 'search', search: '' });
-    //     dispatch({ type: 'loading', loading: false });
-    //   }, 300);
-    // }
+    else {
+      timer = setTimeout(() => {
+        dispatch({ type: 'search', search: '' });
+        dispatch({ type: 'loading', loading: false });
+      }, 300);
+    }
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
@@ -384,15 +384,15 @@ export default function CustomAgGrid({
                 ? true
                 : checkStaticField(renderedFrom, column.field)
               : column.hasOwnProperty('show') && !column?.show
-              ? true
-              : false
+                ? true
+                : false
           }
           floatingFilterComponent="customFloatingFilter"
           valueGetter={column.valueGetter ?? null}
-          // floatingFilterComponent={column.floatingFilterComponent ?? null}
-          // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-          //   suppressFilterButton: true,
-          // }}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
         ></AgGridColumn>
       )
     ) : column.isAction ? (
@@ -418,18 +418,18 @@ export default function CustomAgGrid({
               ? true
               : checkStaticField(renderedFrom, column.field)
             : column.hasOwnProperty('show') && !column?.show
-            ? true
-            : false
+              ? true
+              : false
         }
         comparator={() => {
           return 0;
         }}
         floatingFilterComponent="customFloatingFilter"
         valueGetter={column.valueGetter ?? null}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+      // floatingFilterComponent={column.floatingFilterComponent ?? null}
+      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+      //   suppressFilterButton: true,
+      // }}
       ></AgGridColumn>
     );
   });
