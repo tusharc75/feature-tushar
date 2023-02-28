@@ -109,7 +109,7 @@ const Layout = ({ children, width }) => {
         setTimeout(() => {
           setTourActions(true, tour.path, stepIndex);
         }, 400);
-      } else if (toggleDrawer && tour.path === '/' && index === 1) {
+      } else if (toggleDrawer && tour.path === '/' && index === 1 && action !== ACTIONS.CLOSE) {
         setTourActions(false, tour.path, stepIndex);
         setToggleDrawer(false);
         setTimeout(() => {
@@ -127,6 +127,9 @@ const Layout = ({ children, width }) => {
         setTimeout(() => {
           setTourActions(true, tour.path, stepIndex);
         }, 400);
+      } else if (action === ACTIONS.CLOSE) {
+        setToggleDrawer(false);
+        setTourActions(false);
       } else {
         setToggleDrawer(false);
         setTourActions(tour.start, tour.path, stepIndex);
@@ -204,7 +207,7 @@ const Layout = ({ children, width }) => {
           stepIndex={tour.stepIndex}
           scrollToFirstStep={true}
           showProgress={true}
-          showSkipButton={true}
+          showSkipButton={false}
           steps={grapSteps()}
           styles={{
             options: {
