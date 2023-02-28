@@ -423,10 +423,10 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
         fetchProductInventory();
         if (saveAndNext) {
           const rowsInData = [];
-          rowsData.forEach((d) => {
+          rowsData?.forEach((d) => {
             rowsInData.push(d);
-            if (d.subRows && d.subRows.length) {
-              d.subRows.forEach((e) => {
+            if (d?.subRows && d?.subRows?.length) {
+              d?.subRows?.forEach((e) => {
                 rowsInData.push(e);
               });
             }
@@ -463,10 +463,10 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
   const handleOpen = (data) => {
     const rowsInData = [];
-    rowsData.forEach((d) => {
+    rowsData?.forEach((d) => {
       rowsInData.push(d);
-      if (d.subRows && d.subRows.length) {
-        d.subRows.forEach((e) => {
+      if (d?.subRows && d?.subRows?.length) {
+        d?.subRows?.forEach((e) => {
           rowsInData.push(e);
         });
       }
