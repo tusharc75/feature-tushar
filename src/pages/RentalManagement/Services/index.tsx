@@ -27,13 +27,7 @@ import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { genrateCustomTableColumns } from 'src/constants/columns';
 
-const Services = ({
-  rentalManagementData,
-  setNextStep,
-  renderedFrom,
-  stepFullScreen,
-  allowedToEdit
-}: any) => {
+const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -42,10 +36,10 @@ const Services = ({
   const [isUpdating, setUpdating] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
 
-  const [recordToUpdate, setRecordToUpdate] = useState(null);
+  // const [recordToUpdate, setRecordToUpdate] = useState(null);
 
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -56,6 +50,8 @@ const Services = ({
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
+  const [isBulkEdit, setIsBulkEdit] = useState(false);
+
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
@@ -76,9 +72,9 @@ const Services = ({
     }
     setAllFields(JSON.parse(JSON.stringify(allFields)));
     const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
-    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay'
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
     let column: any = [
       {
@@ -106,12 +102,12 @@ const Services = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -259,16 +255,16 @@ const Services = ({
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent?.packageDetail?.packageName;
+          ? parent?.serviceDetail?.serviceName
+          : parent?.packageDetail?.packageName;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
@@ -301,16 +297,16 @@ const Services = ({
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -395,7 +391,7 @@ const Services = ({
       });
   };
 
-  const handleSaveData = async (rows: any) => {
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
       element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
       delete element.srno;
@@ -417,8 +413,23 @@ const Services = ({
       .put(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: rows })
       .then(() => {
         setUpdating(false);
-        setIsProductEdit({ open: false, isBulkedit: false });
+        // setIsProductEdit({ open: false, isBulkedit: false });
         fetchProductInventory();
+        if (saveAndNext) {
+          const rowsInData = [];
+          rowsData?.forEach((d) => {
+            rowsInData.push(d);
+            if (d?.subRows && d?.subRows?.length) {
+              d?.subRows?.forEach((e) => {
+                rowsInData.push(e);
+              });
+            }
+          });
+          const rowIndex = rowsInData?.findIndex((d) => d._id === rows[0]?._id);
+          setIsProductEdit({ open: true, data: rowsInData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsInData?.length - 1 ? true : false });
+        } else {
+          setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
+        }
       })
       .catch((error) => {
         setUpdating(false);
@@ -442,9 +453,20 @@ const Services = ({
       });
   };
 
-  const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false });
-    setRecordToUpdate(rowData);
+  const handleOpen = (data) => {
+    const rowsInData = [];
+    rowsData?.forEach((d) => {
+      rowsInData.push(d);
+      if (d?.subRows && d?.subRows?.length) {
+        d?.subRows?.forEach((e) => {
+          rowsInData.push(e);
+        });
+      }
+    });
+    const rowIndex = rowsInData?.findIndex((d) => d._id === data?._id);
+    setIsProductEdit({ open: true, data: rowsInData[rowIndex], showSaveAndNext: rowIndex < rowsInData?.length - 1 ? true : false });
+    // setIsProductEdit({ open: true, data: data, showSaveAndNext: data?.index < rowsInData?.length ? true : false });
+    setIsBulkEdit(false);
   };
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -529,7 +551,8 @@ const Services = ({
                   <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
                     <MenuItem
                       onClick={() => {
-                        setIsProductEdit({ open: true, isBulkedit: true });
+                        setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
+                        setIsBulkEdit(true);
                         handleClose();
                       }}
                     >
@@ -554,11 +577,7 @@ const Services = ({
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={'100%'}
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-            >
+            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
@@ -609,17 +628,19 @@ const Services = ({
       {isProductEdit.open && (
         <RentalJobQtyDialog
           onClose={() => {
-            setIsProductEdit({ open: false, isBulkedit: false });
-            setRecordToUpdate(null);
+            setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
+            // setRecordToUpdate(null);
+            setIsBulkEdit(false);
           }}
-          isBulkedit={isProductEdit.isBulkedit}
+          isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
-          rowData={recordToUpdate}
+          rowData={!isBulkEdit ? isProductEdit.data : selectedProducts}
           material={material}
           selectedProducts={selectedProducts}
           loading={isUpdating}
           from={'service'}
+          showSaveAndNext={isProductEdit.showSaveAndNext}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
