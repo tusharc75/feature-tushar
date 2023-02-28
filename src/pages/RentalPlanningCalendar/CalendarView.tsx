@@ -184,6 +184,19 @@ export default function CalendarView() {
         fetchData()
     }, [selectedWarehouse, selectedProduct, selectedAsset, dateRange]);
 
+    useEffect(() => {
+        if (selectedWarehouse.length > 0 || selectedProduct.length > 0 || selectedAsset.length > 0) {
+            if (!filterToKeep.includes('warehouse')) {
+                setSelectedWarehouse([])
+            }
+            if (!filterToKeep.includes('product')) {
+                setSelectedProduct([])
+            }
+            if (!filterToKeep.includes('asset')) {
+                setSelectedAsset([])
+            }
+        }
+    }, [filterToKeep])
 
     const moveEvent = ({ event, start, end }) => {
         const filterEvents = staticEvents.filter(ev => ev.id !== event.id)
@@ -322,7 +335,7 @@ export default function CalendarView() {
             <Grid item xs={12} sm={6} md={6} lg={6}>
                 <Grid container spacing={1}>
                     {filterToKeep?.includes('warehouse') &&
-                        < Grid item xs={12} sm={6} md={4} lg={4}>
+                        < Grid item xs={12} sm={6} md={4} lg={filterToKeep.length === 1 ? 12 : filterToKeep.length === 2 ? 6 : filterToKeep.length === 3 ? 4 : 4}>
                             <Autocomplete
                                 options={warehouse}
                                 fullWidth
@@ -339,7 +352,7 @@ export default function CalendarView() {
                         </Grid>
                     }
                     {filterToKeep?.includes('product') &&
-                        < Grid item xs={12} sm={6} md={4} lg={4}>
+                        < Grid item xs={12} sm={6} md={4} lg={filterToKeep.length === 1 ? 12 : filterToKeep.length === 2 ? 6 : filterToKeep.length === 3 ? 4 : 4}>
                             <Autocomplete
                                 options={product}
                                 fullWidth
@@ -356,14 +369,13 @@ export default function CalendarView() {
                         </Grid>
                     }
                     {filterToKeep?.includes('asset') &&
-                        < Grid item xs={12} sm={6} md={4} lg={4}>
+                        < Grid item xs={12} sm={6} md={4} lg={filterToKeep.length === 1 ? 12 : filterToKeep.length === 2 ? 6 : filterToKeep.length === 3 ? 4 : 4}>
                             <Autocomplete
                                 options={asset}
                                 fullWidth
                                 multiple
                                 disableCloseOnSelect
                                 getOptionLabel={(option: any) => option.optionLabel}
-                                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                                 value={selectedAsset}
                                 onChange={(event, newValue) => {
                                     setSelectedAsset(newValue);

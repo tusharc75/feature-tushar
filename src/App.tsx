@@ -18,6 +18,7 @@ import ErrorBoundaryComponent from './ErrorBoundary';
 import Login from './pages/Auth/Login';
 import AzureLogin from './pages/Auth/AzureLogin';
 import Leads from './pages/Leads';
+import ResourceLogs from './pages/ResourceLogs';
 import LeadDetailsPage from './pages/Leads/LeadDetailsPage';
 import NewLead from './pages/Leads/NewLead';
 import Opportunities from './pages/Opportunities';
@@ -189,8 +190,6 @@ import Planning from './pages/Planning';
 import PlanningDetail from './pages/Planning/PlanningDetail';
 import PlanningCalendar from './pages/PlanningCalendar';
 import RentalPlanningCalendar from './pages/RentalPlanningCalendar';
-import CompetencyType from './pages/CompetencyType';
-import CompetencyTypeDetail from './pages/CompetencyType/CompetencyTypeDetail';
 import FieldTicket from './pages/FieldTicket';
 import FieldTicketDetail from './pages/FieldTicket/FieldTicketDetail';
 import FieldServiceTechnician from './pages/FieldServiceTechnician';
@@ -299,7 +298,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -435,6 +434,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.lead.path}>
               <Leads />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.resourceLogs.path}>
+              <ResourceLogs />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.leadDetail.path}/:id`}>
               <LeadDetailsPage />
@@ -668,7 +670,7 @@ function App() {
             <PrivateRoute exact path={routes.budget.path}>
               <Budget />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.budget.path}/detail/:id`}>
+            <PrivateRoute exact path={`${routes.budgetDetail.path}/:id`}>
               <BudgetDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.pricingCondition.path}>
@@ -949,12 +951,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.planningCalendar.path}`}>
               <PlanningCalendar />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competencyType.path}`}>
-              <CompetencyType />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competencyTypeDetail.path}/:id`}>
-              <CompetencyTypeDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldTicket.path}`}>
               <FieldTicket />

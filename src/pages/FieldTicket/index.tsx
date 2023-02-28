@@ -52,6 +52,7 @@ const FieldTicket = () => {
   const [gridApi, setGridApi] = useState(null);
   const { getColumnData } = useColumns();
 
+
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.fieldTicket}`)
@@ -70,7 +71,6 @@ const FieldTicket = () => {
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer,
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -172,16 +172,6 @@ const FieldTicket = () => {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const NameRenderer = (params) => {
-    return (
-      <span className=" d-flex gap-2 align-items-center">
-        <Link className="link" to={`${routes.fieldTicketDetail.path}/${params.data._id}`}>
-          {params.value}
-        </Link>
-      </span>
-    );
   };
 
   const ActionsRenderer = (params) => (

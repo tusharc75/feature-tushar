@@ -40,22 +40,17 @@ import MobileFilterDialog from "src/components/MobileFilterDialog"
 import { camelCase } from 'lodash'
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const AddressResource = () => {
+const Warehouse = () => {
+
   const renderedFrom = camelCase(routes?.warehouse.title)
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const location = useLocation();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions, user, selectedEntity }
-  }: any = useData();
+  const { state: { permissions, user, selectedEntity } }: any = useData();
   const { getColumnData } = useColumns();
 
-  const [warehousePermissions, setWarehousePermissions] = useState({
-    isCreate: permissions?.warehouse?.isCreate,
-    isUpdate: permissions?.warehouse?.isUpdate,
-    isRead: permissions?.warehouse?.isRead,
-    isDelete: permissions?.warehouse?.isDelete,
-  });
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -66,44 +61,16 @@ const AddressResource = () => {
   const [warehouseId, setWarehouseId] = useState("")
   const [entities, setEntities] = useState([])
   const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false)
-  const [columns, setColumns] = useState([
-
-  ])
+  const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
-
 
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([])
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [sortOpen, setSortOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false)
-
-
-
-
-  // const [showGridFilters, setShowGridFilters] = useState(true)
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-  //  Grid Variables - End
-
-  useEffect(() => {
-    if (permissions && permissions?.warehouse) {
-      setWarehousePermissions(permissions?.warehouse);
-    }
-  }, [permissions]);
 
   useEffect(() => {
     const parsedParams = queryString.parse(location?.search);
@@ -124,25 +91,17 @@ const AddressResource = () => {
         let columns = []
         let rendererNames = []
         data.forEach(o => {
-          if (o?.fieldData?.primaryField === true) {
-            columns = [...columns,
-            { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, primaryField: true, show: true, disabled: true, cellRenderer: 'nameRenderer' }]
-          }
-          else {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.warehouse.path)
-
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData]
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName)
-              }
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.warehouseDetail.path)
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
             }
           }
         })
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer
         }
         setFrameWorkComponent({ ...tempFrameworkComponent })
@@ -165,15 +124,12 @@ const AddressResource = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject["canDelete"] = warehousePermissions.isDelete;
+          finalObject["canDelete"] = permissions?.warehouse?.isDelete;
           finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-          finalObject["allowedToEdit"] = warehousePermissions.isUpdate;
+          finalObject["allowedToEdit"] = permissions?.warehouse?.isUpdate;
 
           return finalObject
         });
-
-        setIsAllChecked(false);
-        setClonedData(data);
         if (appendRows) {
           dispatch({
             type: "initialize", data: [...dataRows, ...rows],
@@ -201,44 +157,25 @@ const AddressResource = () => {
     fetchWarehouses();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-  const NameRenderer = (params) => (
-    <span className="d-flex gap-2 align-items-center">
-      <Link to={`${routes.warehouseDetail.path}/${params.data._id}`} title={params.value}>
-        <span
-          className="link"
-          onClick={() => {
-            if (params.data?.isAllowedToUpdate) {
-              setAddressResource(params.data);
-              setOpen({ open: true, isClone: false });
-            }
-          }}
-        >
-          <CustomRenderCell value={params.value} />
-        </span>
-      </Link>
-    </span>
-  );
-
-
 
   const ActionsRenderer = (params) => (
     <>
-      <HtmlTooltip className={warehousePermissions.isCreate ? "" : "cursor-stop"}
-        title={warehousePermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+      <HtmlTooltip className={permissions?.warehouse?.isCreate ? "" : "cursor-stop"}
+        title={permissions?.warehouse?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
         <span>
           <IconButton
             size="small"
             aria-label="Clone"
-            disabled={!warehousePermissions.isCreate}
+            disabled={!permissions?.warehouse?.isCreate}
             onClick={() => {
               setAddressResource(params.data);
               setOpen({ open: true, isClone: true })
             }}>
-            <FileCopyIcon fontSize="small" color={warehousePermissions.isCreate ? "primary" : "inherit"} />
+            <FileCopyIcon fontSize="small" color={permissions?.warehouse?.isCreate ? "primary" : "inherit"} />
           </IconButton>
         </span>
       </HtmlTooltip>
-      {warehousePermissions.isDelete ? (
+      {permissions?.warehouse?.isDelete ? (
         <HtmlTooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -257,7 +194,7 @@ const AddressResource = () => {
           </IconButton>
         </HtmlTooltip>
       )}
-      {warehousePermissions.isUpdate && params.data?.isAllowedToUpdate ?
+      {permissions?.warehouse?.isUpdate && params.data?.isAllowedToUpdate ?
         <HtmlTooltip title="Entity">
           <IconButton
             size="small"
@@ -395,7 +332,7 @@ const AddressResource = () => {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={warehousePermissions}
+            permissions={permissions?.warehouse}
             module="warehouse"
             api={'warehouse'}
 
@@ -481,7 +418,7 @@ const AddressResource = () => {
                 </Grid>
 
                 <Grid style={{ display: "flex", gap: "5px" }}>
-                  {warehousePermissions.isCreate && (
+                  {permissions?.warehouse?.isCreate && (
                     <Button
                       onClick={() => {
                         setAddressResource(null);
@@ -522,10 +459,10 @@ const AddressResource = () => {
                     open={Boolean(anchorEl)}
                     onClose={closeActions}
                   >
-                    {warehousePermissions.isDelete ?
+                    {permissions?.warehouse?.isDelete ?
                       <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
                       : null}
-                    {warehousePermissions.isUpdate && (
+                    {permissions?.warehouse?.isUpdate && (
                       <MenuItem
                         disabled={selectedRecords.length === 0}
                         onClick={() => {
@@ -670,4 +607,4 @@ const AddressResource = () => {
   );
 };
 
-export default AddressResource;
+export default Warehouse;

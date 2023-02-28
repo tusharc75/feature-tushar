@@ -223,7 +223,6 @@ export const sidebarResource = {
   purchaseRequisition: 'Purchase Requisition',
   planning: 'Planning',
   planningCalendar: 'Planning Calendar',
-  competencyType: 'Competency Type',
   fieldTicket: 'Field Ticket',
   fieldServiceTechnician: `Field Service Technician`,
   rentalPlanningCalendar: `Rental Planning Calendar`
@@ -330,9 +329,9 @@ export const RESOURCE_LABEL = {
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
   planning: 'Planning',
-  competencyType: 'Competency Type',
   fieldTicket: 'Field Ticket',
-  fieldServiceTechnician: `Field Service Technician`
+  fieldServiceTechnician: `Field Service Technician`,
+  resourceLogs: `Resource Logs`
 };
 
 export const CHILD_RESOURCE = {
