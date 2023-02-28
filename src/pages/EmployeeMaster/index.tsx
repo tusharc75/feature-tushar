@@ -32,7 +32,10 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const EmployeeMaster = () => {
+
   const renderedFrom = camelCase(routes?.employeeMaster.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
@@ -45,16 +48,13 @@ const EmployeeMaster = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const { getColumnData } = useColumns();
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [open, setOpen] = useState({ open: false, isClone: false });
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
+
   const [employeeMasterId, setEmployeeMasterId] = useState(null);
 
   const fetchGridColumns = () => {
@@ -64,33 +64,17 @@ const EmployeeMaster = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.fieldData?.primaryField === true) {
-            columns = [
-              ...columns,
-              {
-                field: o?.fieldData?.fieldName,
-                headerName: o?.fieldData?.fieldLabel,
-                show: true,
-                disabled: true,
-                cellRenderer: 'nameRenderer',
-                primaryField: true
-              }
-            ];
-          } else {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.employeeMaster.path);
-
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName);
-              }
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.employeeMasterDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -121,8 +105,6 @@ const EmployeeMaster = () => {
             ...finalObject
           };
         });
-        setIsAllChecked(false);
-        setClonedData(data);
         if (appendRows) {
           dispatch({
             type: 'initialize',
@@ -137,20 +119,6 @@ const EmployeeMaster = () => {
             count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
-        }
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
         }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
@@ -214,16 +182,6 @@ const EmployeeMaster = () => {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const NameRenderer = (params) => {
-    return (
-      <span className=" d-flex gap-2 align-items-center">
-        <Link className="link" to={`${routes.employeeMasterDetail.path}/${params.data._id}`}>
-          {params.value}
-        </Link>
-      </span>
-    );
   };
 
   const ActionsRenderer = (params) => (

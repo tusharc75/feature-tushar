@@ -35,8 +35,10 @@ import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 
 const Zone = () => {
+
   const renderedFrom = camelCase(routes?.zone.title);
-  const history = useHistory();
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -54,9 +56,6 @@ const Zone = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -84,41 +83,17 @@ const Zone = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (['name'].find((d) => d === o?.fieldData?.fieldName)) {
-            columns = [
-              ...columns,
-              {
-                disabled: true,
-                field: 'name',
-                headerName: 'Zone Name',
-                pivotIndex: 0,
-                show: true,
-                cellRenderer: 'nameRenderer',
-                primaryField: true
-              }
-            ];
-          } else {
-            if (o?.fieldData?.primaryField === true) {
-              columns = [
-                ...columns,
-                { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
-              ];
-            } else {
-              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.zone.path);
-
-              if (currentColumn !== null) {
-                columns = [...columns, currentColumn?.columnData];
-                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                  rendererNames.push(currentColumn?.rendererName);
-                }
-              }
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.zoneDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -126,12 +101,6 @@ const Zone = () => {
         setColumns([...columns]);
       });
   };
-
-  const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.zoneDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
 
   const ActionsRenderer = (params) => (
     <Fragment>
@@ -236,8 +205,6 @@ const Zone = () => {
             ...finalObject
           };
         });
-        setIsAllChecked(false);
-        setClonedData(data);
         if (appendRows) {
           dispatch({
             type: 'initialize',
@@ -252,21 +219,6 @@ const Zone = () => {
             count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
-        }
-
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
         }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {

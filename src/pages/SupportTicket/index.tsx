@@ -15,7 +15,6 @@ import { MdAdd } from 'react-icons/md';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
 import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage } from 'src/constants/helpers';
-import { getColumnData } from 'src/constants/columns';
 import { Link } from 'react-router-dom';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -41,9 +40,8 @@ const SupportTicket = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const { getColumnData } = useColumns();
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -52,33 +50,17 @@ const SupportTicket = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.fieldData?.primaryField === true) {
-            columns = [
-              ...columns,
-              {
-                field: o?.fieldData?.fieldName,
-                headerName: o?.fieldData?.fieldLabel,
-                show: true,
-                disabled: true,
-                cellRenderer: 'nameRenderer',
-                primaryField: true
-              }
-            ];
-          } else {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.supportTicket.path);
-
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName);
-              }
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.supportTicketDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -108,8 +90,6 @@ const SupportTicket = () => {
             ...finalObject
           };
         });
-        setIsAllChecked(false);
-        setClonedData(data);
         if (appendRows) {
           dispatch({
             type: 'initialize',
@@ -124,20 +104,6 @@ const SupportTicket = () => {
             count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
-        }
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
         }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
@@ -203,15 +169,6 @@ const SupportTicket = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const NameRenderer = (params) => {
-    return (
-      <span className=" d-flex gap-2 align-items-center">
-        <Link className="link" to={`${routes.supportTicketDetail.path}/${params.data._id}`}>
-          {params.value}
-        </Link>
-      </span>
-    );
-  };
 
   const ActionsRenderer = (params) => (
     <Fragment>

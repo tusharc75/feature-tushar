@@ -151,22 +151,8 @@ const Leads = () => {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path);
-
-      if (['concatedName'].find((d) => d === o?.fieldData?.fieldName)) {
-        columns = [
-          ...columns,
-          {
-            disabled: true,
-            field: 'concatedName',
-            headerName: 'Lead Name',
-            pivotIndex: 0,
-            show: true,
-            cellRenderer: 'nameRenderer',
-            primaryField: true
-          }
-        ];
-      } else if (currentColumn !== null) {
+      let currentColumn = getColumnData(leadResource, o?.fieldData, routes.leadDetail.path);
+      if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
           rendererNames.push(currentColumn?.rendererName);
@@ -187,14 +173,6 @@ const Leads = () => {
     ];
     setColumns([...columns]);
   };
-
-  const NameRenderer = (params) => (
-    <span className="d-flex gap-2 align-items-center">
-      <Link className="text-truncate link" title={params.value} to={`${routes.leadDetail.path}/${params.data._id}`}>
-        {params.value}
-      </Link>
-    </span>
-  );
 
   const RelatedOpportunityRenderer = (params) => (
     <>

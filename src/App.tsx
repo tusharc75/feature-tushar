@@ -670,7 +670,7 @@ function App() {
             <PrivateRoute exact path={routes.budget.path}>
               <Budget />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.budget.path}/detail/:id`}>
+            <PrivateRoute exact path={`${routes.budgetDetail.path}/:id`}>
               <BudgetDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.pricingCondition.path}>
