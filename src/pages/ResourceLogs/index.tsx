@@ -1,17 +1,15 @@
 import { Grid, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import { capitalize } from "lodash";
 import { Fragment, useEffect, useReducer, useState } from "react";
-import { isMobile, isTablet } from "react-device-detect";
 import axiosInstance from "src/axios/axiosInstance";
 import CustomAgGrid, { reducer, intialState } from "src/components/AgGridComponents/CustomAgGrid";
 import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
 import CustomContainer from "src/components/CustomContainer";
-import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
 import routes from "src/components/Helpers/Routes";
 import { gridLoadingTimeout, prepareDataForGrid } from "src/constants/helpers";
 import { useData } from "src/StateProvider/Provider";
 import { DateTimeRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { Link } from 'react-router-dom';
 
 const ResourceLogs = () => {
 
@@ -37,13 +35,10 @@ const ResourceLogs = () => {
     const getQueryString = () => {
         let query = null;
         const resource = 'Serialized Asset';
-
         query = `resource=${resource}`
-
         if (selectedSerializedAsset) {
             query = `${query}&referenceId=${selectedSerializedAsset.optionValue}`
         }
-
         return query
     }
 
@@ -57,12 +52,20 @@ const ResourceLogs = () => {
         const response = await axiosInstance().get(`/log?${queryString}`);
         data = response?.data?.data?.data;
         let rows = data.map((u) => {
-            let finalObject: any = prepareDataForGrid(u, user);
-            finalObject.type = capitalize(u.type);
-            finalObject.serialNumber = u?.serialNumber?.map((e) => e.serialNumber)?.toString();
-            return finalObject;
+            var changes = [];
+            u?.changes?.forEach((e) => {
+                if (e?.fieldLabel) {
+                    if (e?.oldValue && e?.newValue) {
+                        changes.push(`${e.fieldLabel} changed from ${e?.oldValue} to ${e?.newValue}`)
+                    }
+                    else {
+                        changes.push(`${e.fieldLabel} changed to ${e?.newValue}`)
+                    }
+                }
+            })
+            u.changes = changes?.toString();
+            return u;
         });
-
         dispatch({ type: 'initialize', data: rows, count: response?.data?.data?.count });
         setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
@@ -73,18 +76,63 @@ const ResourceLogs = () => {
         fetchRecords()
     }, [selectedSerializedAsset])
 
+
+    const AssetNumberRenderer = (params) => (
+        <Fragment>
+            <Link className="link text-truncate"
+                title={params?.value?.optionLabel} to={`${routes.serializedAssetDetail.path}/${params?.value?.optionValue}`}>
+                {params?.value?.optionLabel}
+            </Link>
+        </Fragment>
+    );
+
+    const UpdatedByRenderer = (params) => (
+        <Fragment>
+            <Link className="link text-truncate"
+                title={params?.value?.optionLabel} to={`${routes.userDetail.path}/${params?.value?.optionValue}`}>
+                {params?.value?.optionLabel}
+            </Link>
+        </Fragment>
+    );
+
     const columns = [
         {
+            field: 'resource',
+            headerName: 'Asset Number',
+            show: true,
+            cellRenderer: 'assetNumberRenderer',
+            filter: false,
+            sortable: false,
+        },
+        {
+            field: 'updatedBy',
+            headerName: 'Updated By',
+            show: true,
+            cellRenderer: 'updatedByRenderer',
+            filter: false,
+            sortable: false,
+        },
+        {
             field: 'date',
-            headerName: 'Date',
+            headerName: 'Updated Date Time',
             show: true,
             cellRenderer: 'dateTimeRenderer',
+            filter: false,
+            sortable: false,
+        },
+        {
+            field: 'changes',
+            headerName: 'Changes',
+            show: true,
+            cellRenderer: 'commonRenderer',
             filter: false,
             sortable: false
         },
     ];
 
     const frameworkComponents = {
+        assetNumberRenderer: AssetNumberRenderer,
+        updatedByRenderer: UpdatedByRenderer,
         dateTimeRenderer: DateTimeRenderer
     };
 
@@ -95,26 +143,8 @@ const ResourceLogs = () => {
                     <CustomBreadCrumbs routes={[routes.resourceLogs]} />
                 </Grid>
                 <Grid item md={8} sm={1} xs={2}>
-                    {/* <ImportExportLinks
-                        permissions={leadsPermissions}
-                        module="lead(s)"
-                        api={leadApi}
-                        afterImportCompleted={() => {
-                            fetchLeads();
-                        }}
-                        isExportAllOrSomeFeature={true}
-                        total={rowCount}
-                        recordsToExport={selectedRecords.length}
-                        ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-                        onExportToExcelSuccess={() => {
-                            if (gridApi) gridApi.deselectAll();
-                            else fetchLeads();
-                        }}
-                        additionalParams={getQueryString(true)}
-                    /> */}
                 </Grid>
             </Grid>
-
             <CustomContainer>
                 <div className="header-panel">
                     <Grid container>
@@ -122,8 +152,6 @@ const ResourceLogs = () => {
                             <Autocomplete
                                 options={serializedAsset}
                                 fullWidth
-                                // multiple
-                                // disableCloseOnSelect
                                 getOptionLabel={(option: any) => option.optionLabel}
                                 getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                                 value={selectedSerializedAsset}
@@ -131,12 +159,15 @@ const ResourceLogs = () => {
                                     setSelectedSerializedAsset(newValue);
                                 }}
                                 size="small"
-                                renderInput={(params) => <TextField {...params} label={`Select Asset`} variant="outlined" />}
+                                renderInput={(params) => <TextField
+                                    {...params}
+                                    label={`Select ${routes.serializedAsset.title}`}
+                                    variant="outlined"
+                                />}
                             />
                         </Grid>
                     </Grid>
                 </div>
-
                 <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}
@@ -153,7 +184,6 @@ const ResourceLogs = () => {
                     renderedFrom={'resourceLogs'}
                     refreshGrid={fetchRecords}
                 />
-
             </CustomContainer>
         </Fragment>
     )
