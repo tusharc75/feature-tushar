@@ -225,7 +225,8 @@ export const sidebarResource = {
   planningCalendar: 'Planning Calendar',
   fieldTicket: 'Field Ticket',
   fieldServiceTechnician: `Field Service Technician`,
-  rentalPlanningCalendar: `Rental Planning Calendar`
+  rentalPlanningCalendar: `Rental Planning Calendar`,
+  resourceLogs: `Resource Logs`
 };
 
 export const primaryFields = {
