@@ -44,9 +44,9 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
-  const [assignedAssets, setAssignedAssets] = useState([])
 
   useEffect(() => {
     fetchFields();
@@ -79,7 +79,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${startCase(row.original?.type)} `}</p>
+            <p>{`${row.original?.type === "serializedAsset" ? "Asset" : startCase(row.original?.type)} `}</p>
           </div>
         )
       },
@@ -91,7 +91,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {allowedToEdit  && row.original.type !== 'serializedAsset' ?
+            {allowedToEdit && row.original.type !== 'serializedAsset' ?
               <p
                 onClick={() => {
                   setMaterialEdit({
@@ -132,9 +132,9 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === 'product') {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  }else if (row.original.type === 'serializedAsset') {
+                  } else if (row.original.type === 'serializedAsset') {
                     window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                  }  
+                  }
                   else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   }
@@ -200,17 +200,16 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       parent.detail = parent.type === 'product' ? parent.productDetail?.productName :
         parent.type === 'package' ? parent.packageDetail?.packageName : parent.serviceDetail?.serviceName;
       parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription :
-        parent.type === 'package' ? parent?.packageDetail?.packageDescription : 
-        parent?.serviceDetail?.serviceDescription
+        parent.type === 'package' ? parent?.packageDetail?.packageDescription :
+          parent?.serviceDetail?.serviceDescription
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.assetQty = assignedAssets.filter((i) => i.parentId === parent._id).length;
       parent.subRows = generateNestedData(data.material, parent);
-      
+
     });
     setRowsData(rows);
     setSelectedRecords([]);
-    setAssignedAssets(assignedAssets)
   };
 
   const generateNestedData = (material, parent) => {
@@ -219,12 +218,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName :
         _subRow.type === 'package' ? _subRow.packageDetail?.packageName :
-        _subRow.type === 'serializedAsset' ?  _subRow.assetDetail.assetNumber :
-        _subRow.serviceDetail?.serviceName;
+          _subRow.type === 'serializedAsset' ? _subRow.assetDetail.assetNumber :
+            _subRow.serviceDetail?.serviceName;
       _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription :
         _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription :
-        _subRow.type === 'serializedAsset' ?  _subRow.assetDetail.assetNumber :
-        _subRow?.serviceDetail?.serviceDescription
+          _subRow.type === 'serializedAsset' ? parent.description :
+            _subRow?.serviceDetail?.serviceDescription
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -233,23 +232,13 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
   };
 
   const handleAdd = async (rows) => {
+    setIsAdding(true)
     const material: any = [];
-    if(assetAssignedProduct?.length > 0) {
-      assetAssignedProduct.map((i)=>{
-        rows.forEach((d) => {
-          if(d.productId === i.materialId){
-            const element: any = {};
-            element.materialId = d._id;
-            element.type = addDialog.type;
-            element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
-            element.qty = d.qty ? parseFloat(d.qty) : 1;
-            element.parentId = i._id;
-            material.push(element);
-          }         
-        });
+    if (addDialog.type === "serializedAsset") {
+      rows?.forEach((e) => {
+        material.push(e)
       })
-      setAssetAssignedProduct([])
-    }else{
+    } else {
       rows.forEach((d) => {
         const element: any = {};
         element.materialId = d._id;
@@ -270,9 +259,11 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           message: data.message
         });
         fetchData();
+        setIsAdding(false)
       })
       .catch((error) => {
         setAddDialog({ open: false, type: '', parentId: null });
+        setIsAdding(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -363,9 +354,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
 
   const disableAssignSerializedAssets = () => {
     if (selectedRecords.length === 0) return true;
-    const flatArray = selectedRecords.filter(
-      (f) => f.type === 'product' && f.productDetail.serializedProduct && f.qty > f.assetQty
-    );
+    const flatArray = selectedRecords.filter((f) => f.type === 'product' && f.productDetail.serializedProduct && f.qty > f.assetQty);
     return flatArray.length === 0;
   };
 
@@ -445,17 +434,17 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
               open={Boolean(anchorEl)}
               onClose={closeActions}
             >
-             {planningData.type === 'Rental Job' && <MenuItem
-              disabled={
-                disableAssignSerializedAssets()
-              }
-              onClick={() => {
-                 closeActions();
-                 setAssetAssignedProduct( selectedRecords.filter((i) => i.type === 'product' && i.productDetail.serializedProduct))
-                 setAddDialog({ open:true, type:'serializedAsset', parentId:null  })
-              }}
+              {planningData.type === 'Rental Job' && <MenuItem
+                disabled={
+                  disableAssignSerializedAssets()
+                }
+                onClick={() => {
+                  closeActions();
+                  setAssetAssignedProduct(selectedRecords.filter((i) => i.type === 'product' && i.productDetail.serializedProduct))
+                  setAddDialog({ open: true, type: 'serializedAsset', parentId: null })
+                }}
               >
-              Assign Serialized Asset
+                Assign Serialized Asset
               </MenuItem>}
               <MenuItem
                 onClick={() => {
@@ -565,17 +554,18 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         />
       )}
       {addDialog.open && addDialog.type === 'serializedAsset' && (
-        <AssignSerializedAssetDialog 
-        reference={'schedue'}
-        handleClose={() => {
-          setAddDialog({ open: false, type: '', parentId: null })
-          setAssetAssignedProduct([])
-        }}
-        ids={[]}
-        handleSucess={(rows) => {
-          handleAdd(rows)
-        }}
-        selectedProducts={assetAssignedProduct?.map((i) => { return {...i, qty:i.qty - i.assetQty}})}
+        <AssignSerializedAssetDialog
+          reference={'planning'}
+          handleClose={() => {
+            setAddDialog({ open: false, type: '', parentId: null })
+            setAssetAssignedProduct([])
+          }}
+          ids={flattenArray(rowsData)?.filter((e) => e.type === 'serializedAsset')?.map((e) => e.materialId)}
+          handleSucess={(rows) => {
+            handleAdd(rows?.map((e) => { return { materialId: e.asset, type: 'serializedAsset', parentId: e._id } }))
+          }}
+          isAssigning={isAdding}
+          selectedProducts={assetAssignedProduct?.map((i) => { return { _id: i._id, product: i.materialId, productName: i.detail, qty: i.qty - i.assetQty } })}
         />
       )}
     </Fragment>

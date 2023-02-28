@@ -563,13 +563,13 @@ const Productpackage = ({
       {addExistingProductDialog.open && addExistingProductDialog.existing && addExistingProductDialog.type === 'serializedAsset' && (
         <AssignSerializedAssetDialog
           reference="repairOrder"
-          referenceId={repairOrderData?._id}
           handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false })}
           ids={[...rowsData?.filter((e) => e.type === 'serializedAsset')?.map((e: any) => e?.serializedAssetDetail?._id)]}
           referenceData={{
             customerAccount: repairOrderData?.customerAccount?.optionValue,
             warehouse: repairOrderData?.warehouse?.optionValue
           }}
+          isAssigning={false}
           handleSucess={handleAdd}
         />
       )}
