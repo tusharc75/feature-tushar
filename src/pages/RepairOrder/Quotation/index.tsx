@@ -28,7 +28,7 @@ import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { genrateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import SendEmail from 'src/pages/RentalManagement/Quotation/SendEmail';
+import SendEmail from 'src/pages/Quotation/SendEmail';
 
 const Quotation = ({
   repairOrderData,

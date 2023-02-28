@@ -539,6 +539,7 @@ const QuotationDetails = () => {
                   version={currentVersion}
                   currentStep={currentStep}
                   versionData={quotationData?.versions[currentVersion]}
+                  allowedToEdit={allowedToEdit}
                 />
               )}
               {currentStep === 3 && quotationData && (
@@ -552,6 +553,8 @@ const QuotationDetails = () => {
                   version={currentVersion}
                   currentStep={currentStep}
                   versionData={quotationData?.versions[currentVersion]}
+                  allowedToEdit={allowedToEdit}
+
                 />
               )}
               {currentStep === 4 && quotationData && (
@@ -564,6 +567,8 @@ const QuotationDetails = () => {
                   version={currentVersion}
                   currentStep={currentStep}
                   versionData={quotationData?.versions[currentVersion]}
+                  allowedToEdit={allowedToEdit}
+
                 />
               )}
             </ContentFullScreen>
