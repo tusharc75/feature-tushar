@@ -1,6 +1,5 @@
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
 import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -19,6 +18,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { Link } from 'react-router-dom';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { flattenArray } from 'src/constants/columns';
 
 const ProductsTable = ({ packageId, packageData }) => {
 
@@ -34,8 +34,9 @@ const ProductsTable = ({ packageId, packageData }) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [rowsData, setRowsData] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
-  const [assignAssetDialog, setAssignAssetDialog] = useState(false);
-  const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
+
+  const [assignAssetDialog, setAssignAssetDialog] = useState({ open: false, products: [] });
+  const [isAssetAdding, setIsAssetAdding] = useState(false);
 
 
   useEffect(() => {
@@ -60,7 +61,7 @@ const ProductsTable = ({ packageId, packageData }) => {
           parent.productCategory = parent.productCategory?.optionLabel;
           parent.parentId = null;
           parent.qty = parent.qty;
-          parent.assetQty = assets.filter((i) => i.product === parent._id).length
+          parent.assetQty = assets?.filter((i) => i.product === parent._id)?.length
           parent.subRows = generateNestedData(assets, parent);
         });
         setRowsData(rows);
@@ -244,27 +245,23 @@ const ProductsTable = ({ packageId, packageData }) => {
     }
   };
 
-  const assignAssets = (data) => {
-    let products = []
-    products = selectedRecords?.filter((d, i) => d.type === 'product' && d.serializedProduct ).map((d) => d._id)
-    axiosInstance().post(`${packages.api}/${packageId}/products/assign-assets`, { packageId, products, data })
+  const handleAssignAssets = (data) => {
+    setIsAssetAdding(true)
+    axiosInstance().post(`${packages.api}/${packageId}/products/assign-assets`, { packageId, assets: data?.map((e) => { return { product: e.product, asset: e.asset } }) })
       .then(() => {
-        setAssignAssetDialog(false);
+        setAssignAssetDialog({ open: false, products: [] });
+        setIsAssetAdding(false)
         fetchData();
       })
       .catch((err) => {
-        setRemovingProducts(false);
-        setShowProductConfirmBox(false);
+        setIsAssetAdding(false)
         setToastConfig(err);
       });
-      setAssetAssignedProduct([])
   };
 
   const disableAssignSerializedAssets = () => {
     if (selectedRecords.length === 0) return true;
-    const flatArray = selectedRecords.filter(
-      (f) => f.type === 'product' && f.serializedProduct && f.qty > f.assetQty
-    );
+    const flatArray = selectedRecords.filter((f) => f.type === 'product' && f.serializedProduct && f.qty > f.assetQty);
     return flatArray.length === 0;
   };
 
@@ -328,12 +325,17 @@ const ProductsTable = ({ packageId, packageData }) => {
               <MenuItem
                 disabled={disableAssignSerializedAssets()}
                 onClick={() => {
-                  setAssignAssetDialog(true);
-                 setAssetAssignedProduct( selectedRecords.filter((i) => i.type === 'product' && i.serializedProduct).map((i) => {return {...i, materialId:i._id, productDetail:{productName: i.productName}}}))
+                  const products = [];
+                  selectedRecords.filter((i) => i.type === 'product' && i.serializedProduct)?.forEach((e) => {
+                    if (e?.qty - e?.assetQty > 0) {
+                      products.push({ _id: e._id, product: e._id, qty: e?.qty - e?.assetQty, productName: e?.detail })
+                    }
+                  })
+                  setAssignAssetDialog({ open: true, products: products });
                   handleClose();
                 }}
               >
-                Assign Serialized Assets
+                {`Assign ${routes.serializedAsset.title}`}
               </MenuItem>
               <MenuItem
                 disabled={permissions?.packages?.isUpdate && (selectedRecords.length === 0 || isRemovingProducts)}
@@ -393,15 +395,14 @@ const ProductsTable = ({ packageId, packageData }) => {
           onOk={removeProducts}
         />
       )}
-      {assignAssetDialog && (
+      {assignAssetDialog.open && (
         <AssignSerializedAssetDialog
           reference={'package'}
-          referenceData={packageData}
-          referenceId={packageId}
-          ids={[]}
-          handleClose={() => setAssignAssetDialog(false)}
-          handleSucess={assignAssets}
-          selectedProducts={assetAssignedProduct.map((i) => { return {...i, qty:i.qty - i.assetQty}})}
+          ids={flattenArray(rowsData)?.filter((e) => e.type === 'asset')?.map((e) => e._id)}
+          handleClose={() => setAssignAssetDialog({ open: false, products: [] })}
+          handleSucess={handleAssignAssets}
+          isAssigning={isAssetAdding}
+          selectedProducts={assignAssetDialog.products}
         />
       )}
     </Box>
