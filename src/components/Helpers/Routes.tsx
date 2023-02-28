@@ -64,6 +64,11 @@ const routes = {
     path: '/lead',
     data: {}
   },
+  resourceLogs: {
+    title: storedRoutes && storedRoutes.resourceLogs && storedRoutes.resourceLogs.title ? storedRoutes.resourceLogs?.title : RESOURCE_LABEL.resourceLogs,
+    path: '/resource-logs',
+    data: {}
+  },
   leadDetail: {
     title: storedRoutes && storedRoutes.lead && storedRoutes.lead.title ? storedRoutes.lead?.title : RESOURCE_LABEL.lead,
     path: '/lead/detail',
@@ -283,6 +288,10 @@ const routes = {
     title: storedRoutes && storedRoutes.budget && storedRoutes.budget ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: '/budget'
   },
+  budgetDetail: {
+    title: storedRoutes && storedRoutes.budget && storedRoutes.budget ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
+    path: '/budget/detail'
+  },
   pricingCondition: {
     title:
       storedRoutes && storedRoutes.pricingCondition && storedRoutes.pricingCondition
@@ -301,6 +310,11 @@ const routes = {
     title:
       storedRoutes && storedRoutes.marketSegment && storedRoutes.marketSegment ? storedRoutes.marketSegment?.title : RESOURCE_LABEL.marketSegment,
     path: '/market-segment'
+  },
+  marketSegmentDetail: {
+    title:
+      storedRoutes && storedRoutes.marketSegment && storedRoutes.marketSegment ? storedRoutes.marketSegment?.title : RESOURCE_LABEL.marketSegment,
+    path: '/market-segment/detail'
   },
   quotePdfTemplate: {
     title:
