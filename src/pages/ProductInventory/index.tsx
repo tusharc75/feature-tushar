@@ -392,6 +392,24 @@ const InventoryProduct = () => {
     });
   }
 
+  const handleRemap = () => {
+    const products = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((e) => e._id);
+    if (products?.length) {
+      axiosInstance().put(`${productInventory.api}/ledger-remap`, { products, warehouse: plantId })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchProductInventory()
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -525,6 +543,16 @@ const InventoryProduct = () => {
                       }}
                     >
                       Remove
+                    </MenuItem>
+                    <MenuItem
+                      disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
+                      style={{ display: 'none' }}
+                      onClick={() => {
+                        closeActions();
+                        handleRemap()
+                      }}
+                    >
+                      Remap
                     </MenuItem>
                   </Menu>
                 </Box>
