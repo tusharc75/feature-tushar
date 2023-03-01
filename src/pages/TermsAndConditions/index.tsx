@@ -407,13 +407,14 @@ export default function TermsAndCondition(props) {
             loading={loading}
             refreshGrid={fetchTermsAndConditions}
             renderedFrom={routes.termsAndConditions.title}
+            isClientSideGrid={true}
           />
         )}
 
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete the selected TermsAndCondition  ${deleteRec?._id ? deleteRec?.TACName : ''}?`}
+            message={`Are you sure you want to delete the selected Terms & Conditions ?`}
             onClose={() => setShowDeleteConfirmBox(false)}
             onOk={handleDeleteTermsAndConditions}
           />
