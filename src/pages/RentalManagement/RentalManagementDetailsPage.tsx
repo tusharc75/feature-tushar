@@ -237,7 +237,10 @@ const RentalManagementDetailsPage = () => {
       setCurrentStep(rentalSteps.indexOf(data?.processStatus) !== -1 ? rentalSteps.indexOf(data?.processStatus) : 0);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true
+      }
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data.owner.optionValue === user?.user?._id);
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);

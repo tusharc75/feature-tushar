@@ -18,6 +18,8 @@ import { useData } from '../../StateProvider/Provider';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
+import DateRangeIcon from '@material-ui/icons/DateRange';
+import { useHistory } from 'react-router-dom';
 
 function RentalManagementHeader({
   selectedRecords,
@@ -42,10 +44,11 @@ function RentalManagementHeader({
 }) {
 
   const {
-    state: { selectedEntity }
+    state: { permissions }
   }: any = useData();
   const [anchorEl, setAnchorEl] = useState(null);
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
 
 
   const openActions = (event) => {
@@ -210,6 +213,16 @@ function RentalManagementHeader({
                   })}
                 </ToggleButtonGroup>
               )}
+              {permissions?.rentalPlanningCalendar?.isRead &&
+                <ToggleButtonGroup size="small" className="ml-2">
+                  <ToggleButton onClick={() => {
+                    history.push(`${routes.rentalPlanningCalendar.path}`)
+                  }}>
+                    <DateRangeIcon fontSize="small" />
+                    <span className='pl-2'> {`Calander`}</span>
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              }
             </div>
           </HideWhenOffline>}
         {children}
