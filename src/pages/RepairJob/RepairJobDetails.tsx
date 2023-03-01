@@ -136,7 +136,10 @@ const RepairJobDetails = () => {
         setRepairJobData({ ...data });
         setCurrentStep(repairJobProcessSteps.indexOf(data?.processStatus) !== -1 ? repairJobProcessSteps.indexOf(data?.processStatus) : 0);
 
-        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        if (user?.role?.selectedEntity?.superAdminAccess) {
+          isAllowedToEdit = true
+        }
         setAllowedToEdit(isAllowedToEdit);
 
         if (permissions?.repairJob?.isUpdate && openEdit === 'true') {
