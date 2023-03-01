@@ -44,7 +44,6 @@ import { RiNurseFill } from 'react-icons/ri';
 import PolicyResources from './PolicyResources';
 import DashboardResources from './DashboardResources';
 import DefaultResources from './DefaultResources';
-import SuperAdminAccess from './SuperAdminAccess';
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -569,7 +568,21 @@ const RoleDetailsPage = () => {
                       <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} />
                     )}
                     <DefaultResources resourceList={resourceOption} resourceName={defaultResourceName} setResourceName={setDefaultResourceName} />
-                    <SuperAdminAccess superAdminAccess={superAdminAccess} setSuperAdminAccess={setSuperAdminAccess} />
+                    <Box p={1} pb={2}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="superAdminAccess"
+                            checked={superAdminAccess}
+                            onChange={(e) => {
+                              setSuperAdminAccess(e.target.checked)
+                            }}
+                            color="primary"
+                          />
+                        }
+                        label="Super Admin Access"
+                      />
+                    </Box>
                   </>
                 )
               )}
