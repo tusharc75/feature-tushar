@@ -1,4 +1,4 @@
-import { Grid, TextField } from "@material-ui/core";
+import { Grid, IconButton, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { Fragment, useEffect, useReducer, useState } from "react";
 import axiosInstance from "src/axios/axiosInstance";
@@ -10,6 +10,9 @@ import { gridLoadingTimeout, prepareDataForGrid } from "src/constants/helpers";
 import { useData } from "src/StateProvider/Provider";
 import { DateTimeRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import HtmlTooltip from "src/components/CustomTooltipTitle";
+import ChangesDialog from "./ChangesDialog";
 
 const ResourceLogs = () => {
 
@@ -19,7 +22,7 @@ const ResourceLogs = () => {
         state: { user }
     }: any = useData();
     const [gridApi, setGridApi] = useState(null);
-
+    const [openDialog, setOpenDialog] = useState({open:false, changes:null})
     const [serializedAsset, setSerializedAsset] = useState(null);
     const [selectedSerializedAsset, setSelectedSerializedAsset] = useState(null);
 
@@ -128,12 +131,31 @@ const ResourceLogs = () => {
             filter: false,
             sortable: false
         },
+        {
+            field: 'action',
+            headerName: 'Action',
+            width: 170,
+            cellRenderer: 'actionRenderer'
+          }
     ];
+
+    const ActionRenderer = (params) => {
+        return <>
+        <HtmlTooltip title="View Changes">
+          <IconButton 
+          onClick={()=>setOpenDialog({open: true, changes:params?.data?.changes})}
+          >
+          <VisibilityIcon color="primary" fontSize='small' />
+          </IconButton>
+        </HtmlTooltip>
+      </>
+    }
 
     const frameworkComponents = {
         assetNumberRenderer: AssetNumberRenderer,
         updatedByRenderer: UpdatedByRenderer,
-        dateTimeRenderer: DateTimeRenderer
+        dateTimeRenderer: DateTimeRenderer,
+        actionRenderer: ActionRenderer
     };
 
     return (
@@ -185,6 +207,13 @@ const ResourceLogs = () => {
                     refreshGrid={fetchRecords}
                 />
             </CustomContainer>
+            {openDialog?.open && (
+        <ChangesDialog  
+        open={openDialog?.open}
+        onClose={()=>setOpenDialog({open:false, changes:null})}
+        changes={openDialog?.changes}
+        />
+      )}
         </Fragment>
     )
 }
