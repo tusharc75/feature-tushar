@@ -43,9 +43,10 @@ function GridFilter({
   const [isSaveFilter, setIsSaveFilter] = useState({ open: false, data: null });
   const [isFilterDeleteConfirm, setIsFilterDeleteConfirm] = useState({ open: false, ids: null });
 
-  const [statusTimeFrame, setStatusTimeFrame] = useState<any>('custom');
+  const [statusTimeFrame, setStatusTimeFrame] = useState<any>({});
   const [betweenDate, setBetweenDate] = useState(null);
 
+  // const statusTimeFrame = {};
   useEffect(() => {
     fetchColumns();
     fetchUserFilters();
@@ -93,39 +94,54 @@ function GridFilter({
   const handleDuration = (timeFrameTemp, field) => {
     switch (timeFrameTemp) {
       case '1-month':
-        setStatusTimeFrame('1-month');
-        setBetweenDate((prevState) => ({
-          ...prevState,
-          [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
-          [`to_${field.fieldName}`]: new Date()
-        }));
+        setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: '1-month' });
+        formValues[`from_${field.fieldName}`] = new Date(moment().subtract('1', 'month').calendar());
+        formValues[`to_${field.fieldName}`] = new Date();
+        // setBetweenDate((prevState) => ({
+        //   ...prevState,
+        //   [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
+        //   [`to_${field.fieldName}`]: new Date()
+        // }));
         break;
       case '3-months':
-        setStatusTimeFrame('3-months');
-        setBetweenDate((prevState) => ({
-          ...prevState,
-          [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
-          [`to_${field.fieldName}`]: new Date()
-        }));
+        setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: '3-months' });
+        formValues[`from_${field.fieldName}`] = new Date(moment().subtract('3', 'months').calendar());
+        formValues[`to_${field.fieldName}`] = new Date();
+        // setBetweenDate((prevState) => ({
+        //   ...prevState,
+        //   [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
+        //   [`to_${field.fieldName}`]: new Date()
+        // }));
         break;
       case '6-months':
-        setStatusTimeFrame('6-months');
-        setBetweenDate((prevState) => ({
-          ...prevState,
-          [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
-          [`to_${field.fieldName}`]: new Date()
-        }));
+        setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: '6-months' });
+        formValues[`from_${field.fieldName}`] = new Date(moment().subtract('6', 'months').calendar());
+        formValues[`to_${field.fieldName}`] = new Date();
+        // setBetweenDate((prevState) => ({
+        //   ...prevState,
+        //   [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
+        //   [`to_${field.fieldName}`]: new Date()
+        // }));
         break;
       case '1-year':
-        setStatusTimeFrame('1-year');
-        setBetweenDate((prevState) => ({
-          ...prevState,
-          [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
-          [`to_${field.fieldName}`]: new Date()
-        }));
+        setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: '1-year' });
+        formValues[`from_${field.fieldName}`] = new Date(moment().subtract('1', 'year').calendar());
+        formValues[`to_${field.fieldName}`] = new Date();
+        // setBetweenDate((prevState) => ({
+        //   ...prevState,
+        //   [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
+        //   [`to_${field.fieldName}`]: new Date()
+        // }));
         break;
       default:
-        setStatusTimeFrame('custom');
+        setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: 'custom' });
+        formValues[`from_${field.fieldName}`] = null;
+        formValues[`to_${field.fieldName}`] = null;
+        // setBetweenDate((prevState) => ({
+        //   ...prevState,
+        //   [`from_${field.fieldName}`]: null,
+        //   [`to_${field.fieldName}`]: null
+        // }));
         break;
     }
   };
@@ -153,12 +169,13 @@ function GridFilter({
     const colNames = Object.keys(formValues);
 
     for (let i = 0; i < coloums.length; i++) {
+      console.log(coloums[i], coloums[i].fieldName);
       const col = coloums[i];
       const key = col?.fieldName;
 
       const fieldLabel = col.fieldLabel;
       // IF THIS COLUMN DOSEN'T EXIST ON FORMVALUES SKIP TO NEXT ITERATION
-      if (!colNames.includes(key)) {
+      if (!colNames.includes(key) && col.type !== 'dateTime') {
         continue;
       }
 
@@ -177,6 +194,36 @@ function GridFilter({
           type: 'contains',
           filter: getDataFromFormValue(formValues[key], key)?.optionLabel || null
         };
+      }
+      if (col.type === 'dateTime') {
+        const from = `from_${col.fieldName}`;
+        const to = `to_${col.fieldName}`;
+        const fromDate = formValues[from] ? formValues[from] : null;
+        const toDate = formValues[to] ? formValues[to] : null;
+
+        if (fromDate || toDate) {
+          chipData.push({
+            title: col.fieldLabel,
+            value:
+              fromDate && toDate
+                ? `${fromDate ? moment(fromDate).format('DD/MM/YYYY') : null} - ${toDate ? moment(toDate).format('DD/MM/YYYY') : null}`
+                : fromDate || toDate
+                ? `${fromDate ? `${moment(fromDate).format('DD/MM/YYYY')} (From Date)` : ''} ${
+                    toDate ? `${moment(toDate).format('DD/MM/YYYY')} (To Date)` : ''
+                  }`
+                : null,
+            name: col.fieldName
+          });
+
+          filterModel[col.fieldName] = {
+            filterType: 'text',
+            type: 'contains',
+            filter: {
+              from: fromDate ? new Date(fromDate) : null,
+              to: toDate ? new Date(toDate) : null
+            }
+          };
+        }
       }
 
       if (col.type === 'multiSelect' && formValues[key]) {
@@ -218,46 +265,49 @@ function GridFilter({
         };
       }
     }
-    if (betweenDate) {
-      for (const i in betweenDate) {
-        const data = moment(betweenDate[i]).format();
-        const [fromTo, key] = i.split('_');
-        const getCondition = (fromTo) => {
-          if (fromTo == 'from') {
-            return {
-              condition1: {
-                dateFrom: data,
-                dateTo: null,
-                filterType: 'date',
-                type: 'greaterThan'
-              }
-            };
-          } else {
-            return {
-              condition2: {
-                dateFrom: data,
-                dateTo: null,
-                filterType: 'date',
-                type: 'lessThan'
-              }
-            };
-          }
-        };
-        filterModel[key] = {
-          ...filterModel[key],
-          filterType: 'date',
-          operator: 'AND',
-          ...getCondition(fromTo)
-        };
-      }
-    }
+    // if (betweenDate) {
+    //   for (const i in betweenDate) {
+    //     const data = moment(betweenDate[i]).format();
+    //     const [fromTo, key] = i.split('_');
+    //     const getCondition = (fromTo) => {
+    //       if (fromTo == 'from') {
+    //         return {
+    //           condition1: {
+    //             dateFrom: data,
+    //             dateTo: null,
+    //             filterType: 'date',
+    //             type: 'greaterThan'
+    //           }
+    //         };
+    //       } else {
+    //         return {
+    //           condition2: {
+    //             dateFrom: data,
+    //             dateTo: null,
+    //             filterType: 'date',
+    //             type: 'lessThan'
+    //           }
+    //         };
+    //       }
+    //     };
+    //     filterModel[key] = {
+    //       ...filterModel[key],
+    //       filterType: 'date',
+    //       operator: 'AND',
+    //       ...getCondition(fromTo)
+    //     };
+    //   }
+    // }
+
     setChipData(chipData);
+    // console.log(filterModel, chipData);
     return filterModel;
   };
 
   const handleApplyFilter = () => {
     setCurrentFomValue(formValues || {});
     currentGridApi.setFilterModel(createFilterModel());
+    // console.log(setSelectedFilter, createFilterModel());
     setSelectedFilter(selectedUserFilter || null);
     handleClose();
   };
@@ -333,6 +383,14 @@ function GridFilter({
             <Grid container spacing={2}>
               {coloums ? (
                 coloums?.map((field) => {
+                  if (
+                    !statusTimeFrame[field.fieldName] &&
+                    (field.type === 'date' || field.type === 'dateTime') &&
+                    !formValues[`from_${field.fieldName}`] &&
+                    formValues[`to_${field.fieldName}`]
+                  ) {
+                    handleDuration('custom', field);
+                  }
                   return (
                     <Fragment key={field._id}>
                       {field.type === 'date' || field.type === 'dateTime' ? (
@@ -343,7 +401,8 @@ function GridFilter({
                               <Select
                                 labelId={field.fieldName}
                                 id={`time-${field.fieldName}`}
-                                value={statusTimeFrame}
+                                defaultValue={'custom'}
+                                value={statusTimeFrame[field.fieldName] ?? 'custom'}
                                 onChange={(e) => {
                                   handleDuration(e.target.value, field);
                                 }}
@@ -359,16 +418,18 @@ function GridFilter({
                           <Grid item xs={12} sm={6}>
                             <KeyboardDatePicker
                               autoOk
-                              disabled={statusTimeFrame !== 'custom'}
+                              disabled={!(statusTimeFrame[field.fieldName] === 'custom' || !(field.fieldName in statusTimeFrame))}
                               fullWidth
                               size="small"
                               variant="inline"
                               inputVariant="outlined"
                               name={`from_${field.fieldName}`}
                               label={`From ${field.fieldLabel}`}
-                              value={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : null}
+                              value={formValues[`from_${field.fieldName}`] ? formValues[`from_${field.fieldName}`] : null}
+                              maxDate={new Date()}
                               onChange={(date: any) => {
                                 setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
+                                handleSelectFilter(`from_${field.fieldName}`, date);
                               }}
                               format={dateFormat}
                               InputLabelProps={{
@@ -380,15 +441,17 @@ function GridFilter({
                             <KeyboardDatePicker
                               autoOk
                               fullWidth
-                              disabled={statusTimeFrame !== 'custom'}
+                              disabled={!(statusTimeFrame[field.fieldName] === 'custom' || !(field.fieldName in statusTimeFrame))}
                               size="small"
                               variant="inline"
                               inputVariant="outlined"
                               name={`to_${field.fieldName}`}
                               label={`To ${field.fieldLabel}`}
-                              value={betweenDate && betweenDate[`to_${field.fieldName}`] ? betweenDate[`to_${field.fieldName}`] : null}
+                              value={formValues[`to_${field.fieldName}`] ? formValues[`to_${field.fieldName}`] : null}
+                              maxDate={new Date()}
                               onChange={(date: any) => {
                                 setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
+                                handleSelectFilter(`to_${field.fieldName}`, date);
                               }}
                               format={dateFormat}
                               InputLabelProps={{
