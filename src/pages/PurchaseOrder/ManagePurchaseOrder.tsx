@@ -24,9 +24,8 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../Account/ManageAccount";
 import ManageContactDialog from "../Contact/ManageContact";
 
-const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, productId = null, productCategory = null,
-    productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null, warehouseId = null, disableEdit = false
-    , isFromSerializedAssetStepFromSalesOrder = false, refrenceData = null }) => {
+const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, products = [], 
+    currency = null, rentalManagementId = null, warehouseId = null, disableEdit = false, refrenceData = null }) => {
 
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
@@ -96,12 +95,6 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
             }
             else {
                 let createValues: any = getObjKeys("", fieldsDataForCreate)
-                if (productId && createValues) {
-                    createValues["product"] = productId
-                }
-                if (productCategory && createValues) {
-                    createValues["productCategory"] = productCategory
-                }
                 if (rentalManagementId) {
                     createValues["rentalJob"] = rentalManagementId
                 }
@@ -186,23 +179,21 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
             });
         }
         else {
-            if (isFromSerializedAssetStepFromRental || isFromSerializedAssetStepFromSalesOrder) {
-                axiosInstance().post(`${purchaseOrder.api}/create-po-with-asset`, { purchaseOrder: values, products: productsToSave }).then(({ data: { data } }) => {
-                    onSuccess();
-                    setLoading(false);
-                }).catch((error) => {
-                    setLoading(false);
-                    toastConfig.setToastConfig(error);
-                });
-            } else {
-                axiosInstance().post(`${purchaseOrder.api}`, values).then(({ data: { data } }) => {
-                    setLoading(false);
-                    history.push(`${purchaseOrder.api}/detail/${data._id}`);
-                }).catch((error) => {
-                    setLoading(false);
-                    toastConfig.setToastConfig(error);
-                });
+            if (products?.length) {
+                values.products = products;
             }
+            axiosInstance().post(`${purchaseOrder.api}`, values).then(({ data: { data } }) => {
+                setLoading(false);
+                if (products?.length) {
+                    onSuccess()
+                }
+                else {
+                    history.push(`${purchaseOrder.api}/detail/${data._id}`);
+                }
+            }).catch((error) => {
+                setLoading(false);
+                toastConfig.setToastConfig(error);
+            });
         }
     };
 
