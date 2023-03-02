@@ -91,7 +91,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       case 'Service Management':
         icon = <FaRegUser size={20} className={styles.sidebarIcon} />;
         break;
-      case 'Setups':
+      case 'Setups & Administration':
         icon = <BiCog size={20} className={styles.sidebarIcon} />;
         break;
       case 'Activities':

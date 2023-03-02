@@ -35,7 +35,7 @@ export const IconConst = {
   HERO_TEXT_ICON: 'HeroTextIcon',
   SIDEBAR_COG_ICON: 'SidebarCog',
   COLABORATION_TOOL: 'Collaboration Tools',
-  SETUPS_ICON: 'Setups',
+  SETUPS_ICON: 'Setups & Administration',
   SALES_MANAGEMENT: 'Sales Management',
   RENTAL_MANAGEMENT: 'Rental Management',
   ECOMMERCE: 'eCommerce',
