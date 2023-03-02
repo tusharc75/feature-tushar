@@ -1,9 +1,8 @@
 import React, { useEffect, useCallback, useMemo, useState, useContext } from 'react'
 import { useHistory } from 'react-router-dom';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar'
-import 'react-big-calendar/lib/sass/styles.scss'
+import './calendarView.scss'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
-import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import moment from 'moment';
 import { Grid, makeStyles, Checkbox, TextField, ButtonGroup, Button, Popper, Paper, ClickAwayListener, MenuList, MenuItem, Grow } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -18,11 +17,6 @@ const localizer = momentLocalizer(moment);
 const formats = {
     weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
-
-const minTime = new Date();
-minTime.setHours(0, 0, 0);
-const maxTime = new Date();
-maxTime.setHours(0, 0, 0);
 
 const useStyles = makeStyles((theme) => ({
     topbar: {
@@ -421,23 +415,21 @@ export default function CalendarView() {
                     style: newStyles
                 };
             }}
-            min={minTime}
-            max={maxTime}
-            slotGroupPropGetter={() => {
-                const newStyles = {
-                    display: 'none',
-                };
-
-                return {
-                    // style: newStyles,
-                    // className: classes['abc']
-                };
-            }}
             onNavigate={(date) => {
                 if (view === 'month') {
                     setDateRange({
                         estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
                         estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
+                    });
+                } else if (view === 'week') {
+                    setDateRange({
+                        estimateStartDate: moment(date).startOf('week').format('MM/DD/YYYY'),
+                        estimateEndDate: moment(date).endOf('week').format('MM/DD/YYYY')
+                    });
+                } else if (view === 'day') {
+                    setDateRange({
+                        estimateStartDate: moment(date).format('MM/DD/YYYY'),
+                        estimateEndDate: moment(date).format('MM/DD/YYYY')
                     });
                 }
             }}
