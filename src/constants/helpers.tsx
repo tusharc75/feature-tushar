@@ -1869,6 +1869,10 @@ export const ACTIVITY_RESOURCE = {
   fieldTicket: 'fieldTicket',
 };
 
+export const LOG_RESOURCE = {
+  serializedAsset: sidebarResource.serializedAsset,
+};
+
 export const REPORT_LIST = [
   {
     title: sidebarResource.rentalManagement,

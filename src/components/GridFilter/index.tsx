@@ -169,7 +169,6 @@ function GridFilter({
     const colNames = Object.keys(formValues);
 
     for (let i = 0; i < coloums.length; i++) {
-      console.log(coloums[i], coloums[i].fieldName);
       const col = coloums[i];
       const key = col?.fieldName;
 
@@ -208,10 +207,9 @@ function GridFilter({
               fromDate && toDate
                 ? `${fromDate ? moment(fromDate).format('DD/MM/YYYY') : null} - ${toDate ? moment(toDate).format('DD/MM/YYYY') : null}`
                 : fromDate || toDate
-                ? `${fromDate ? `${moment(fromDate).format('DD/MM/YYYY')} (From Date)` : ''} ${
-                    toDate ? `${moment(toDate).format('DD/MM/YYYY')} (To Date)` : ''
+                  ? `${fromDate ? `${moment(fromDate).format('DD/MM/YYYY')} (From Date)` : ''} ${toDate ? `${moment(toDate).format('DD/MM/YYYY')} (To Date)` : ''
                   }`
-                : null,
+                  : null,
             name: col.fieldName
           });
 
@@ -300,14 +298,12 @@ function GridFilter({
     // }
 
     setChipData(chipData);
-    // console.log(filterModel, chipData);
     return filterModel;
   };
 
   const handleApplyFilter = () => {
     setCurrentFomValue(formValues || {});
     currentGridApi.setFilterModel(createFilterModel());
-    // console.log(setSelectedFilter, createFilterModel());
     setSelectedFilter(selectedUserFilter || null);
     handleClose();
   };
