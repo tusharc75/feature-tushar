@@ -338,7 +338,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
   useEffect(() => {
     if (objBySectionName) {
       if (mode === 'Collaboration Tools') setColabData(objBySectionName['Collaboration Tools'] || objBySectionName['Activities'] || null);
-      else setColabData(objBySectionName['Setups & Administration'] || objBySectionName['Product Setup'] || null);
+      else setColabData(objBySectionName['Setups & Administration'] || objBySectionName['Setups'] || objBySectionName['Product Setup'] || null);
     }
   }, [objBySectionName]);
 
