@@ -393,6 +393,11 @@ const InventoryProduct = () => {
   }
 
   const handleRemap = () => {
+    // axiosInstance().get(`${productInventory.api}/automation`).then(({ data }) => {
+    // })
+    //   .catch((error) => {
+    //     toastConfig.setToastConfig(error);
+    //   });
     const products = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((e) => e._id);
     if (products?.length) {
       axiosInstance().put(`${productInventory.api}/ledger-remap`, { products, warehouse: plantId })

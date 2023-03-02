@@ -473,8 +473,7 @@ const SerializedAsset = ({ salesOrderData, setNextStep, currencySymbol, rendered
             message: `${sidebarResource.purchaseOrder} has been created successfully`,
           });
         }}
-        productsToSave={[...showManagePurchaseOrderDialog.products]}
-        isFromSerializedAssetStepFromSalesOrder={true}
+        products={[...showManagePurchaseOrderDialog.products]}
         currency={salesOrderData.currencyCode}
         warehouseId={salesOrderData?.warehouse?.optionValue}
       />
