@@ -568,7 +568,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       handleUpdateCost(rows);
     }
   };
-
+  
   return (
     <Fragment>
       {allowedToEdit && (
@@ -626,7 +626,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 color="default"
                 size="small"
                 onClick={openActions}
-                disabled={selectedProducts.length ? false : true}
+                disabled={selectedProducts?.filter((e) => !e.hideSelection)?.length ? false : true}
                 aria-controls="action-menu"
               >
                 {'Actions'}
@@ -646,11 +646,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               onClose={closeActions}
             >
               <MenuItem
-                disabled={selectedProducts.length > 0 && uniq(map(selectedProducts, 'type'))?.length === 1 ? false : true}
+                disabled={selectedProducts?.filter((e) => !e.hideSelection).length > 0
+                  && uniq(map(selectedProducts?.filter((e) => !e.hideSelection), 'type'))?.length === 1 ? false : true}
                 onClick={() => {
                   closeActions();
                   setIsBulkEdit(true);
-                  const typeUniq: any = uniq(map(selectedProducts, 'type'));
+                  const typeUniq: any = uniq(map(selectedProducts?.filter((e) => !e.hideSelection), 'type'));
                   if (typeUniq[0] === "Product") {
                     setShowProductDialog({ open: true, data: null, showSaveAndNext: false });
                   }
@@ -669,7 +670,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   onClick={() => {
                     closeActions();
                     setShowDeleteConfirmBox(true);
-                    setDeletePurchaseOrderItem(selectedProducts)
+                    setDeletePurchaseOrderItem(selectedProducts?.filter((e) => !e.hideSelection))
                   }}
                 >
                   Delete
@@ -722,7 +723,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             setIsBulkEdit(false);
           }}
           onSubmit={handleUpdateQty}
-          productData={!isBulkEdit ? showProductDialog.data : selectedProducts}
+          productData={!isBulkEdit ? showProductDialog.data : selectedProducts?.filter((e) => !e.hideSelection)}
           bulkEdit={isBulkEdit}
           purchaseOrderData={purchaseOrderData}
           showSaveAndNext={showProductDialog.showSaveAndNext}
@@ -737,7 +738,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           }}
           handleUpdateService={handleUpdateService}
           purchaseOrderData={purchaseOrderData}
-          serviceData={!isBulkEdit ? showServiceDialog.data : selectedProducts}
+          serviceData={!isBulkEdit ? showServiceDialog.data : selectedProducts?.filter((e) => !e.hideSelection)}
           bulkEdit={isBulkEdit}
           showSaveAndNext={showServiceDialog.showSaveAndNext}
           loadingEdit={loadingEdit}
@@ -752,7 +753,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           handleAddCost={handleAddCost}
           handleUpdateCost={handleUpdateCost}
           purchaseOrderData={purchaseOrderData}
-          costData={!isBulkEdit ? showCostDialog.data : selectedProducts}
+          costData={!isBulkEdit ? showCostDialog.data : selectedProducts?.filter((e) => !e.hideSelection)}
           bulkEdit={isBulkEdit}
           showSaveAndNext={showCostDialog.showSaveAndNext}
           loadingEdit={loadingEdit}
