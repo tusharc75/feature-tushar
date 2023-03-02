@@ -90,7 +90,7 @@ function Dashboard() {
             <Chart />
           </div>
           <div className={styles.rightContainer}>
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups" />
+            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" />
           </div>
           {/* <div className={styles.hero_container}>
@@ -248,7 +248,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
     <div className={styles.cardSection}>
       <div className={styles.cardContainer}>
         {sections.map((section) => {
-          if (section.head === 'Collaboration Tools' || section.head === 'Setups' || section.head === 'Activities') return <></>;
+          if (section.head === 'Collaboration Tools' || section.head === 'Setups' || section.head === 'Setups & Administration' || section.head === 'Activities') return <></>;
           const style = { '--bg_color': section.color, textAlign: 'left' } as React.CSSProperties;
           return (
             <button
@@ -322,7 +322,7 @@ const RenderDialog = ({ modalContent, handleClose, handleRoutes }) => {
 interface sidecardInterface {
   objBySectionName: any;
   handleRoutes: any;
-  mode: 'Collaboration Tools' | 'Setups';
+  mode: 'Collaboration Tools' | 'Setups & Administration';
 }
 
 const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration Tools' }: sidecardInterface) => {
@@ -331,14 +331,14 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
   const style = { '--sideCardBg': mode === 'Collaboration Tools' ? '#fffaee' : '#FDFFF4', width: '100%' } as React.CSSProperties;
   const description =
     (mode === 'Collaboration Tools' && `By using Collaboration tools, collaborate with or within team members easily`) ||
-    (mode === 'Setups' && `List of all product and category setups`);
+    (mode === 'Setups & Administration' && `List of all product and category setups`);
 
-  const checkLinkAvailability = ['Product Master', 'Pricing Setup', 'Lead Time Master'];
+  const checkLinkAvailability = ['Product Master', 'Pricing Setup', 'Product Categories'];
 
   useEffect(() => {
     if (objBySectionName) {
       if (mode === 'Collaboration Tools') setColabData(objBySectionName['Collaboration Tools'] || objBySectionName['Activities'] || null);
-      else setColabData(objBySectionName['Setups'] || objBySectionName['Product Setup'] || null);
+      else setColabData(objBySectionName['Setups & Administration'] || objBySectionName['Product Setup'] || null);
     }
   }, [objBySectionName]);
 
@@ -350,13 +350,13 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
       {colabData ? (
         <button
           style={style}
-          className={`${styles.rightInner} ${mode === 'Setups' && styles.setHeight}`}
+          className={`${styles.rightInner} ${mode === 'Setups & Administration' && styles.setHeight}`}
           onClick={() => setModalContent({ items: colabData, title: mode })}
         >
           <img src={SVGImages(mode)} alt={`${mode} Logo`} className={styles.colabLogo} />
           <Typography component={'h2'}>{mode}</Typography>
           <Typography component={'p'}>{description}</Typography>
-          {mode === 'Setups' && (
+          {mode === 'Setups & Administration' && (
             <>
               <ul className={styles.linkList}>
                 {colabData
