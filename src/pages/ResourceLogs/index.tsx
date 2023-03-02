@@ -7,40 +7,61 @@ import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
 import CustomContainer from "src/components/CustomContainer";
 import routes from "src/components/Helpers/Routes";
 import { gridLoadingTimeout, prepareDataForGrid } from "src/constants/helpers";
-import { useData } from "src/StateProvider/Provider";
 import { DateTimeRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import HtmlTooltip from "src/components/CustomTooltipTitle";
 import ChangesDialog from "./ChangesDialog";
+import { isMobile, isTablet } from "react-device-detect";
+import { get_activity_resource } from "src/components/Activity/Helpers/utils";
+import { useData } from "../../StateProvider/Provider";
+import { isEmpty } from "lodash";
 
 const ResourceLogs = () => {
 
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
     const {
-        state: { user }
+        state: { user, permissions },
     }: any = useData();
     const [gridApi, setGridApi] = useState(null);
-    const [openDialog, setOpenDialog] = useState({open:false, changes:null})
-    const [serializedAsset, setSerializedAsset] = useState(null);
-    const [selectedSerializedAsset, setSelectedSerializedAsset] = useState(null);
+    const [openDialog, setOpenDialog] = useState({ open: false, changes: null })
+    const [option, setOption] = useState([]);
+    const [selectedOption, setSelectedOption] = useState(null);
+
+    const [resource, setResource] = useState(null);
+    const [resourceOptions, setResourceOptions] = useState([]);
 
     useEffect(() => {
-        axiosInstance()
-            .get('/sa-formbuilder/lookup?lookupResource=Serialized Asset')
-            .then(({ data: { data } }) => {
-                setSerializedAsset(data['Serialized Asset'])
-            })
-            .catch((err) => { });
-    }, [])
+        setResourceOptions(get_activity_resource(permissions));
+    }, []);
+
+    useEffect(() => {
+        if (resource) {
+            axiosInstance()
+                .get(`/sa-formbuilder/lookup?lookupResource=${resource?.optionLabel === 'Asset Master' ? 'Serialized Asset' : resource?.optionLabel}`)
+                .then(({ data: { data } }) => {
+                    if (isEmpty(data)) {
+                        setOption([])
+                    } else {
+                        if (resource?.optionLabel === 'Asset Master') {
+                            setOption(data['Serialized Asset'])
+                        } else {
+                            setOption(data[resource?.optionLabel])
+                        }
+                    }
+
+                })
+                .catch((err) => { });
+        }
+    }, [resource])
 
     const getQueryString = () => {
         let query = null;
-        const resource = 'Serialized Asset';
-        query = `resource=${resource}`
-        if (selectedSerializedAsset) {
-            query = `${query}&referenceId=${selectedSerializedAsset.optionValue}`
+        const setectedresource = resource?.optionLabel === 'Asset Master' ? 'Serialized Asset' : resource?.optionLabel;
+        query = `resource=${setectedresource}`
+        if (selectedOption) {
+            query = `${query}&referenceId=${selectedOption.optionValue}`
         }
         return query
     }
@@ -52,7 +73,10 @@ const ResourceLogs = () => {
         }
         let data;
         const queryString = getQueryString()
-        const response = await axiosInstance().get(`/log?${queryString}`);
+        let response
+        if (resource) {
+            response = await axiosInstance().get(`/log?${queryString}`);
+        }
         data = response?.data?.data?.data;
         let rows = data.map((u) => {
             var changes = [];
@@ -77,7 +101,7 @@ const ResourceLogs = () => {
 
     useEffect(() => {
         fetchRecords()
-    }, [selectedSerializedAsset])
+    }, [selectedOption, resource])
 
 
     const AssetNumberRenderer = (params) => (
@@ -136,19 +160,19 @@ const ResourceLogs = () => {
             headerName: 'Action',
             width: 170,
             cellRenderer: 'actionRenderer'
-          }
+        }
     ];
 
     const ActionRenderer = (params) => {
         return <>
-        <HtmlTooltip title="View Changes">
-          <IconButton 
-          onClick={()=>setOpenDialog({open: true, changes:params?.data?.changes})}
-          >
-          <VisibilityIcon color="primary" fontSize='small' />
-          </IconButton>
-        </HtmlTooltip>
-      </>
+            <HtmlTooltip title="View Changes">
+                <IconButton
+                    onClick={() => setOpenDialog({ open: true, changes: params?.data?.changes })}
+                >
+                    <VisibilityIcon color="primary" fontSize='small' />
+                </IconButton>
+            </HtmlTooltip>
+        </>
     }
 
     const frameworkComponents = {
@@ -169,25 +193,42 @@ const ResourceLogs = () => {
             </Grid>
             <CustomContainer>
                 <div className="header-panel">
-                    <Grid container>
-                        <Grid item xs={12} sm={6} md={4} lg={4}>
+                    <Grid container spacing={2} alignItems="center">
+                        <Grid xs={12} sm={6} md={4} lg={4}>
                             <Autocomplete
-                                options={serializedAsset}
                                 fullWidth
-                                getOptionLabel={(option: any) => option.optionLabel}
-                                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                                value={selectedSerializedAsset}
+                                options={resourceOptions}
+                                getOptionLabel={(option) => option.optionLabel}
+                                value={resource}
                                 onChange={(event, newValue) => {
-                                    setSelectedSerializedAsset(newValue);
+                                    setResource(newValue);
                                 }}
                                 size="small"
-                                renderInput={(params) => <TextField
-                                    {...params}
-                                    label={`Select ${routes.serializedAsset.title}`}
-                                    variant="outlined"
-                                />}
+                                renderInput={(params) =>
+                                    <TextField {...params} label="Select Resource" variant="outlined" />
+                                }
                             />
                         </Grid>
+                        {resource &&
+                            <Grid item xs={12} sm={6} md={4} lg={4}>
+                                <Autocomplete
+                                    options={option}
+                                    fullWidth
+                                    getOptionLabel={(option: any) => option.optionLabel}
+                                    getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                                    value={selectedOption}
+                                    onChange={(event, newValue) => {
+                                        setSelectedOption(newValue);
+                                    }}
+                                    size="small"
+                                    renderInput={(params) => <TextField
+                                        {...params}
+                                        label={`Select ${resource?.optionLabel}`}
+                                        variant="outlined"
+                                    />}
+                                />
+                            </Grid>
+                        }
                     </Grid>
                 </div>
                 <CustomAgGrid
@@ -208,12 +249,12 @@ const ResourceLogs = () => {
                 />
             </CustomContainer>
             {openDialog?.open && (
-        <ChangesDialog  
-        open={openDialog?.open}
-        onClose={()=>setOpenDialog({open:false, changes:null})}
-        changes={openDialog?.changes}
-        />
-      )}
+                <ChangesDialog
+                    open={openDialog?.open}
+                    onClose={() => setOpenDialog({ open: false, changes: null })}
+                    changes={openDialog?.changes}
+                />
+            )}
         </Fragment>
     )
 }
