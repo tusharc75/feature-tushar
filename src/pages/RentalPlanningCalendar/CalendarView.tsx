@@ -378,7 +378,6 @@ function CalendarView() {
             onView={onView}
             view={view}
             eventPropGetter={(obj: any) => {
-                console.log(obj)
                 const newStyles = {
                     backgroundColor: obj.type === 'rental' ? 'rgba(255, 232, 204, 1)' : 'rgba(234, 239, 254, 1)',
                     color: obj?.type === 'rental' ? 'rgba(236, 85, 0, 1)' : 'rgba(4, 50, 161, 1)',
