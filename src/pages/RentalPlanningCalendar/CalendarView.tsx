@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback, useMemo, useState, useContext } from 'react'
 import { useHistory } from 'react-router-dom';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar'
+import 'react-big-calendar/lib/sass/styles.scss'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import moment from 'moment';
@@ -17,6 +18,11 @@ const localizer = momentLocalizer(moment);
 const formats = {
     weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
+
+const minTime = new Date();
+minTime.setHours(0, 0, 0);
+const maxTime = new Date();
+maxTime.setHours(0, 0, 0);
 
 const useStyles = makeStyles((theme) => ({
     topbar: {
@@ -121,9 +127,9 @@ export default function CalendarView() {
 
     const createDataForCalendar = (data: [], type: string) => {
         const createdData = data?.map((d: any) => {
-            const title = type === 'rental' ? d.rentalJobName : type === 'planning' ? d.planningNumber : '- - -'
-            const start = type === 'rental' ? new Date(d.estimateStartDate) : type === 'planning' ? new Date(d.startDate) : '- - -'
-            const end = type === 'rental' ? new Date(d.estimateEndDate) : type === 'planning' ? new Date(d.endDate) : '- - -'
+            const title = type === 'rental' ? d.rentalJobName : type === 'schedule' ? d.scheduleNumber : '- - -'
+            const start = type === 'rental' ? new Date(d.estimateStartDate) : type === 'schedule' ? new Date(d.startDate) : '- - -'
+            const end = type === 'rental' ? new Date(d.estimateEndDate) : type === 'schedule' ? new Date(d.endDate) : '- - -'
             return (
                 {
                     id: d._id,
@@ -144,10 +150,10 @@ export default function CalendarView() {
             .get(queryString)
             .then(({ data: { data } }) => {
                 const rentalData = createDataForCalendar(data.rental, 'rental')
-                const planningData = createDataForCalendar(data.planning, 'planning')
-                setTotalEvents([...rentalData, ...planningData])
-                setStaticEvents([...rentalData, ...planningData])
-                setEvents([...rentalData, ...planningData]);
+                const scheduleData = createDataForCalendar(data.schedule, 'schedule')
+                setTotalEvents([...rentalData, ...scheduleData])
+                setStaticEvents([...rentalData, ...scheduleData])
+                setEvents([...rentalData, ...scheduleData]);
                 setUpdateCount(updateCount + 1)
             })
             .catch((err) => { });
@@ -157,7 +163,7 @@ export default function CalendarView() {
         let route = ''
         if (event.type === 'rental') {
             route = 'change-rental-date'
-        } else if (event.type === 'planning') {
+        } else if (event.type === 'schedule') {
             route = 'change-planning-date'
         }
         axiosInstance()
@@ -231,7 +237,7 @@ export default function CalendarView() {
     };
 
     const filterEvent = () => {
-        const option = selectedOption === options[1] ? 'rental' : selectedOption === options[2] ? 'planning' : null
+        const option = selectedOption === options[1] ? 'rental' : selectedOption === options[2] ? 'schedule' : null
         if (option) {
             const filteredEvents = totalEvents.filter((item) => item.type === option)
             setEvents(filteredEvents)
@@ -389,6 +395,7 @@ export default function CalendarView() {
             </Grid>
         </Grid>
         <DragAndDropCalendar
+            style={{ height: "calc(100vh - 100px)" }}
             defaultDate={defaultDate}
             defaultView={'day'}
             events={events}
@@ -414,6 +421,18 @@ export default function CalendarView() {
                     style: newStyles
                 };
             }}
+            min={minTime}
+            max={maxTime}
+            slotGroupPropGetter={() => {
+                const newStyles = {
+                    display: 'none',
+                };
+
+                return {
+                    // style: newStyles,
+                    // className: classes['abc']
+                };
+            }}
             onNavigate={(date) => {
                 if (view === 'month') {
                     setDateRange({
@@ -425,12 +444,12 @@ export default function CalendarView() {
             onSelectEvent={(event: any) => {
                 if (event.type === 'rental') {
                     history.push(`${routes.rentalManagementDetail.path}/${event.id}`);
-                } else if (event.type === 'planning') {
+                } else if (event.type === 'schedule') {
                     history.push(`${routes.planningDetail.path}/${event.id}`);
                 }
             }}
         />
-    </div>
+    </div >
 
     )
 }

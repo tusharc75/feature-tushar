@@ -326,10 +326,10 @@ const SerializedAsset = ({
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
         parent.detail = `${parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === 'product'
-              ? parent?.productDetail?.productName
-              : parent?.packageDetail?.packageName
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent?.packageDetail?.packageName
           }`;
         parent.description =
           parent.type === 'service'
@@ -638,17 +638,18 @@ const SerializedAsset = ({
     newFlatArray = uniqBy(newFlatArray, '_id');
 
     flatArray = uniqBy(flatArray, '_id');
+
+
     const products = newFlatArray.map((m) => {
       return {
         _id: m.materialId,
         unit: m.unit,
         serialized: m.serializedProduct,
-        assetsCount: m.serializedProduct ? m.realAssetQty - m.realAssetAssignedQty : 0
+        assetsCount: m.serializedProduct ? m.realAssetQty - m.realAssetAssignedQty : m.assetQty
       };
     });
 
     const uniqProduct = [];
-
     products.forEach((element: any) => {
       const foundProduct = uniqProduct.filter((e) => e._id === element._id);
       if (foundProduct.length) {
@@ -663,6 +664,8 @@ const SerializedAsset = ({
         products: uniqProduct
       };
     });
+
+    
     const assetProduct = [];
     flatArray.forEach((element) => {
       if (element.type === 'product' && element.realAssetQty > element.realAssetAssignedQty) {
@@ -765,7 +768,7 @@ const SerializedAsset = ({
               >
                 {permissions?.bulkAssetCreation?.isCreate && (
                   <MenuItem
-                    disabled={showOrderDialog.products.length === 0}
+                    disabled={showOrderDialog?.products?.filter((e) => e.serialized === true)?.length === 0}
                     onClick={() => {
                       setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'bulkAssetCreation' }));
                       closeActions();
@@ -776,7 +779,7 @@ const SerializedAsset = ({
                 )}
                 {permissions?.purchaseOrder?.isCreate && (
                   <MenuItem
-                    disabled={showOrderDialog.products.length === 0}
+                    disabled={showOrderDialog?.products?.filter((e) => e.serialized === false)?.length === 0}
                     onClick={() => {
                       setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'purchaseOrder' }));
                       closeActions();
@@ -787,7 +790,7 @@ const SerializedAsset = ({
                 )}
                 {permissions?.sublease?.isCreate && (
                   <MenuItem
-                    disabled={showOrderDialog.products.length === 0}
+                    disabled={showOrderDialog?.products?.filter((e) => e.serialized === true)?.length === 0}
                     onClick={() => {
                       setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'sublease' }));
                       closeActions();
@@ -982,7 +985,7 @@ const SerializedAsset = ({
             });
           }}
           refrenceData={{
-            products: [...showOrderDialog.products],
+            products: [...showOrderDialog?.products?.filter((e) => e.serialized === true)],
             wellName: rentalManagementData?.wellName?.optionValue,
             afeNumber: rentalManagementData?.afeNumber,
             warehouse: rentalManagementData?.warehouse?.optionValue
@@ -1005,8 +1008,7 @@ const SerializedAsset = ({
               message: `${sidebarResource.purchaseOrder} has been created successfully`
             });
           }}
-          productsToSave={[...showOrderDialog.products]}
-          isFromSerializedAssetStepFromRental={true}
+          products={showOrderDialog?.products?.filter((e) => e.serialized === false)?.map((e) => { return { product: e._id, unit: e.unit, qty: e.assetsCount } })}
           currency={rentalManagementData.currency}
           refrenceData={{ wellName: rentalManagementData?.wellName?.optionValue, afeNumber: rentalManagementData?.afeNumber }}
           rentalManagementId={rentalManagementData._id}
@@ -1030,7 +1032,7 @@ const SerializedAsset = ({
           }}
           refrenceType="rentalJob"
           refrenceId={rentalManagementData._id}
-          refrenceData={{ ...rentalManagementData, material: [...showOrderDialog.products] }}
+          refrenceData={{ ...rentalManagementData, material: [...showOrderDialog?.products?.filter((e) => e.serialized === true)] }}
         />
       )}
     </Fragment>
