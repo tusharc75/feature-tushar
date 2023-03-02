@@ -156,7 +156,7 @@ const ResourceLogs = () => {
         }
     ];
 
-    const ActionRenderer = (params) => {
+    const ActionsRenderer = (params) => {
         return <>
             <HtmlTooltip title="View Changes">
                 <IconButton
@@ -172,7 +172,7 @@ const ResourceLogs = () => {
         assetNumberRenderer: AssetNumberRenderer,
         updatedByRenderer: UpdatedByRenderer,
         dateTimeRenderer: DateTimeRenderer,
-        actionRenderer: ActionRenderer
+        actionsRenderer: ActionsRenderer
     };
 
     return (
