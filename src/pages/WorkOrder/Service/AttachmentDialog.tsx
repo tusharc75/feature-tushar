@@ -4,7 +4,6 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
 import { object, string } from 'yup';
-import PropTypes from 'prop-types';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../../components/Helpers/CustomButton';
@@ -16,7 +15,6 @@ import { csvIcon, docIcon, excelSheetIcon, pdfFileIcon, pptIcon, textFileIcon, i
 import emailStyles from '../../../pages/Activity/Email/email.module.scss';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useData } from '../../../StateProvider/Provider';
-import { Skeleton } from '@material-ui/lab';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import PreviewIcon from '@material-ui/icons/Visibility';
 import _ from 'lodash';
@@ -65,7 +63,8 @@ const fileIcons = [
   }
 ];
 
-export default function ManageStepAttachment({ relatedTo, handleClose, handleSuccess, data }) {
+export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId, serviceName, stepName, handleClose, handleSuccess }) {
+
   const [initialValues, setInitialValues] = useState(null);
   const [loading, setLoading] = useState(false);
   const [, setDownloadProgress] = useState(0);
@@ -79,7 +78,6 @@ export default function ManageStepAttachment({ relatedTo, handleClose, handleSuc
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [attachmentToDelete, setAttachemnetToDelete] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formValues, setFormValues] = useState({});
   const [isFetching, setIsFetching] = useState(false);
   const [fullScreen, setFullScreen] = useState(false);
 
@@ -88,7 +86,6 @@ export default function ManageStepAttachment({ relatedTo, handleClose, handleSuc
   }: any = useData();
 
   useEffect(() => {
-    // setInitialValues({ name: '', fileUrl: '' });
     fetchAttachmentDetail();
   }, []);
 
@@ -101,10 +98,10 @@ export default function ManageStepAttachment({ relatedTo, handleClose, handleSuc
   const fetchAttachmentDetail = async () => {
     setIsFetching(true);
     axiosInstance()
-      .get(`${workOrder.api}/${data.serviceId}/${data.stepId}/attachment?relatedTo=${JSON.stringify(relatedTo)}`)
+      .get(`${workOrder.api}/step/attachment?workOrderId=${workOrderId}&uniqueServiceId=${uniqueServiceId}&stepId=${stepId}`)
       .then(({ data: { data } }) => {
         if (!data) {
-          setInitialValues({ name: '', fileUrl: '' });
+          setInitialValues({ name: stepName, fileUrl: '' });
           setIsFetching(false);
         } else {
           setCanEdit(data?.canEdit);
@@ -121,7 +118,6 @@ export default function ManageStepAttachment({ relatedTo, handleClose, handleSuc
             });
             setOtherAttachments([...nonImageAttachments, ...imageAttachments]);
           }
-          setFormValues(data);
           setIsFetching(false);
           setInitialValues({ ...data, fileUrl: data.file && data.file.length && data.file ? data.file[0]?.url : '' });
         }
@@ -131,53 +127,26 @@ export default function ManageStepAttachment({ relatedTo, handleClose, handleSuc
         setIsFetching(false);
         toastConfig.setToastConfig(error);
       });
-    // if (attachmentId && type === 'file') {
-
-    // } else if (attachmentId && type === 'folder') {
-    //   axiosInstance()
-    //     .get(`/attachment/folder/${attachmentId}`)
-    //     .then(({ data: { data } }) => {
-    //       setCanEdit(data?.canEdit);
-    //       setInitialValues(data);
-    //       setFormValues(data);
-    //       //   parentFolder = data?.parentFolder;
-    //       setIsFetching(false);
-    //     })
-    //     .catch((error) => {
-    //       setIsFetching(false);
-    //       toastConfig.setToastConfig(error);
-    //     });
-    // } else {
-    //   if (type === 'file') {
-    //     setInitialValues({ name: '', fileUrl: '' });
-    //     setFormValues({ name: '', fileUrl: '' });
-    //   } else {
-    //     setInitialValues({ name: '' });
-    //     setFormValues({ name: '' });
-    //   }
-    //   setIsFetching(false);
-    // }
-  };
-
-  const showSuccessMessage = (message) => {
-    toastConfig.setToastConfig({
-      open: true,
-      type: 'success',
-      message: message
-    });
   };
 
   const handleSave = (values) => {
-    let request = {
+    let data = {
       name: values.name,
       file: otherAttachments,
-      relatedTo: relatedTo
+      serviceName: serviceName,
+      workOrderId: workOrderId,
+      uniqueServiceId: uniqueServiceId,
+      stepId: stepId
     };
     setLoading(true);
     axiosInstance()
-      .post(`${workOrder.api}/${data.serviceId}/${data.stepId}/attachment?relatedTo=${JSON.stringify(relatedTo)}`, request)
+      .post(`${workOrder.api}/step/attachment`, data)
       .then(({ data }) => {
-        showSuccessMessage(data.message);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         setLoading(false);
         handleClose();
       })
@@ -380,17 +349,6 @@ export default function ManageStepAttachment({ relatedTo, handleClose, handleSuc
     </Grid>
   );
 
-  const isFieldNotTouched = (initialValues, values) => {
-    return Object.values(initialValues).toString() === Object.values(values).toString();
-  };
-
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
-
   return (
     <Dialog
       open
@@ -413,11 +371,9 @@ export default function ManageStepAttachment({ relatedTo, handleClose, handleSuc
               <>
                 <CustomDialogHeader
                   onClose={() => {
-                    if (isFieldNotTouched(initialValues, formValues)) handleClose();
-                    else setShowConfirmDialog(true);
+                    handleClose()
                   }}
-                  //   title={`${attachmentId ? 'Edit' : 'New'} Attachment`}
-                  title="New Attachment"
+                  title={`${serviceName} - ${stepName} - Attachment`}
                   isMinimized={!fullScreen}
                   onMinimizeMaximize={() => {
                     setFullScreen((prevState) => !prevState);
@@ -443,11 +399,9 @@ export default function ManageStepAttachment({ relatedTo, handleClose, handleSuc
                             helperText={touched['name'] && errors['name']}
                             onChange={(e) => {
                               setFieldValue('name', e.target.value.trimStart());
-                              handleValuesChange({ name: e.target.value.trimStart() });
                             }}
                           />
                         </Grid>
-
                         <Grid container item xs={12}>
                           <Grid item xs={10} sm={11} md={11}>
                             <FormTypes
@@ -462,7 +416,6 @@ export default function ManageStepAttachment({ relatedTo, handleClose, handleSuc
                               size="small"
                               setFieldValue={(fname, file) => {
                                 setFieldValue('fileUrl', file);
-                                handleValuesChange({ fileUrl: file });
                                 onUploadFile(file);
                               }}
                               doNotShowUploadedFile={true}
@@ -482,8 +435,7 @@ export default function ManageStepAttachment({ relatedTo, handleClose, handleSuc
                     color="primary"
                     size="small"
                     onClick={() => {
-                      if (isFieldNotTouched(initialValues, values)) handleClose();
-                      else setShowConfirmDialog(true);
+                      handleClose()
                     }}
                   >
                     Cancel
@@ -552,8 +504,3 @@ export default function ManageStepAttachment({ relatedTo, handleClose, handleSuc
   );
 }
 
-// ManageAttachment.propTypes = {
-//   relatedTo: PropTypes.any,
-//   attachmentId: PropTypes.any,
-//   handleClose: PropTypes.any
-// };

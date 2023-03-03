@@ -97,6 +97,7 @@ const SendEmail = ({ purchaseOrderData }) => {
     handleAttachments();
   };
 
+
   const handleViewPdf = (download, pdfType: string = 'ordered') => {
     if (download) {
       setLoading('download');
@@ -298,3 +299,6 @@ const SendEmail = ({ purchaseOrderData }) => {
 };
 
 export default SendEmail;
+
+
+
