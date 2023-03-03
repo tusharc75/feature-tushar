@@ -392,15 +392,43 @@ const InventoryProduct = () => {
     });
   }
 
+
+  const checkReport = () => {
+    const products = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((e) => e._id);
+    let api = `${productInventory.api}/automation`
+    if (products?.length) {
+      api = api + `?products=${products?.toString()}`
+    }
+    axiosInstance().get(api).then(({ data }) => {
+      console.log(data)
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   const handleRemap = () => {
-    // axiosInstance().get(`${productInventory.api}/automation`).then(({ data }) => {
-    // })
-    //   .catch((error) => {
-    //     toastConfig.setToastConfig(error);
-    //   });
     const products = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((e) => e._id);
     if (products?.length) {
-      axiosInstance().put(`${productInventory.api}/ledger-remap`, { products, warehouse: plantId })
+      axiosInstance().put(`${productInventory.api}/re-map/ledger-remap`, { products, warehouse: plantId })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchProductInventory()
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
+  const handleRemapPurchaseOrder = () => {
+    const products = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((e) => e._id);
+    if (products?.length) {
+      axiosInstance().put(`${productInventory.api}/re-map/purchase-order-remap`, { products, warehouse: plantId })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -554,10 +582,30 @@ const InventoryProduct = () => {
                       style={{ display: 'none' }}
                       onClick={() => {
                         closeActions();
+                        checkReport()
+                      }}
+                    >
+                      Check Report
+                    </MenuItem>
+                    <MenuItem
+                      disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
+                      style={{ display: 'none' }}
+                      onClick={() => {
+                        closeActions();
                         handleRemap()
                       }}
                     >
                       Remap
+                    </MenuItem>
+                    <MenuItem
+                      disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
+                      style={{ display: 'none' }}
+                      onClick={() => {
+                        closeActions();
+                        handleRemapPurchaseOrder()
+                      }}
+                    >
+                      Remap Purchase Order
                     </MenuItem>
                   </Menu>
                 </Box>
