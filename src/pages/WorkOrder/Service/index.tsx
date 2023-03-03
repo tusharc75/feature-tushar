@@ -902,7 +902,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                     <Steps
                       workOrderId={workOrderId}
                       selectedService={selectedService}
-                      serviceSteps={serviceSteps}
                       allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                       setDisableCompleteFail={setDisableCompleteFail}
                       fetchService={fetchRepairOrderData}

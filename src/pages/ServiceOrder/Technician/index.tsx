@@ -10,7 +10,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { dateTimeFormat, formatAmountWithCurrency, serviceOrder } from '../../../constants/helpers';
+import { serviceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
@@ -18,9 +18,9 @@ import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
-import moment from 'moment';
 import SendEmail from '../SendEmail';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const Technician = ({
     serviceOrderData,
@@ -38,7 +38,7 @@ const Technician = ({
     const [deleteData, setDeleteData] = useState(null);
     const [isDeleting, setDeleting] = useState(false);
 
-    const [addEmployeeMasterDialog, setAddEmployeeMasterDialog] = useState({ open: false });
+    const [addEmployeeMasterDialog, setAddEmployeeMasterDialog] = useState({ open: false, data: null });
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
 
@@ -51,21 +51,25 @@ const Technician = ({
     }, [columns]);
 
     const fetchFields = async () => {
-        var { fields: data, allFields } = await fetch_service_order_detail_fields(serviceOrderData?.currency);
-        const column: any = [
+        var data = await fetch_service_order_detail_fields(serviceOrderData?.currency);
+        data?.forEach((e) => {
+            e.isColumnEditable = false;
+        });
+        var newColumns = genrateCustomTableColumns(data, serviceOrderData?.currency, renderedFrom);
+        var column: any = [
             {
-                accessor: 'srno',
+                accessor: 'index',
                 Header: 'Index',
-                width: 70,
+                width: 50,
                 sticky: isMobile ? 'none' : 'left',
-                Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+                Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
             },
             {
                 accessor: 'type',
                 Header: 'Type',
                 disableFilters: true,
                 sticky: isMobile ? 'none' : 'left',
-                width: 200,
+                width: 100,
                 Cell: ({ row }) =>
                     row.original['type'] ? (
                         <p>
@@ -78,8 +82,7 @@ const Technician = ({
             {
                 accessor: 'detail',
                 Header: ' Details',
-                minWidth: 300,
-                width: 300,
+                width: 250,
                 sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row }) => (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -99,55 +102,21 @@ const Technician = ({
                         </IconButton>
                     </div>
                 )
-            }, {
+            },
+            {
                 accessor: 'status',
                 Header: 'Status',
                 width: 200,
-                Cell: ({ row }) =>
-                    row.original['status'] ? (
-                        <p>
-                            {row.original?.status}
-                        </p>
-                    ) : (
-                        <NoDataCell />
-                    )
+                Cell: ({ row }) => row.original['status'] ? (<p>{row.original?.status}</p>) : <NoDataCell />
+            },
+            {
+                accessor: 'competency',
+                Header: 'Competency',
+                width: 250,
+                Cell: ({ row }) => row.original['competency'] ? (<p>{row.original?.competency}</p>) : <NoDataCell />
             },
         ];
-        allFields?.forEach((element) => {
-            if (element.type === 'dateTime') {
-                column.push({
-                    accessor: element.fieldName,
-                    Header: element.fieldLabel,
-                    disableFilters: true,
-                    width: 250,
-                    Cell: ({ row }) =>
-                        row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName]).format(dateTimeFormat)}</p> : <NoDataCell />
-                });
-            }
-            else if (element.type === 'currencyAmount') {
-                element.displayCurrency.forEach((_currency) => {
-                    let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-                    let fieldLabel = element.fieldLabel + ' ' + _currency;
-                    column.push({
-                        accessor: fieldName,
-                        Header: fieldLabel,
-                        Cell: ({ row }) =>
-                            row.original[fieldName] ? (
-                                <p>{formatAmountWithCurrency(serviceOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                            ) : (
-                                <NoDataCell />
-                            )
-                    });
-                });
-            }
-            else {
-                column.push({
-                    accessor: element.fieldName,
-                    Header: element.fieldLabel,
-                    Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-                });
-            }
-        })
+        column = [...column, ...newColumns]
         column.push({
             accessor: 'action',
             Header: '',
@@ -186,22 +155,25 @@ const Technician = ({
         const responseTechnician = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/technician`);
         const technician = responseTechnician?.data?.data;
 
-        data = response?.data?.data;
-        let rows = data.material.filter((e) => e.parentId === null);
-        rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
-
+        data = response?.data?.data?.material?.filter((e) => e.type !== "product");
+        let rows = data.filter((e) => e.parentId === null);
         rows.forEach((parent, i) => {
-            parent.srno = i + 1;
+            parent.index = i + 1;
             parent.detail =
                 parent.type === 'product'
                     ? parent?.productDetail?.productName
                     : parent.type === 'service'
                         ? parent?.serviceDetail?.serviceName
                         : parent?.packageDetail?.packageName;
-            parent.subRows = generateNestedData(data.material, technician, parent);
+            parent.competency = parent.type === 'service' ? parent?.serviceDetail?.competency?.map((e) => e?.optionLabel)?.toString() : null
+            parent.serviceCompetency = parent.type === 'service' ? parent?.serviceDetail?.competency || [] : []
+            parent.subRows = generateNestedData(data, technician, parent);
         });
 
-        setNextStep(true)
+        if (technician?.length) {
+            setNextStep(true)
+        }
+
         setRowsData(rows);
         setSelectedProducts([]);
     };
@@ -212,7 +184,7 @@ const Technician = ({
         technician.filter((e) => e._id === parent._id)?.forEach((element, i) => {
             const obj: any = {};
             obj._id = parent._id;
-            obj.srno = parent.srno + '.' + (i + 1);
+            obj.index = parent.index + '.' + (i + 1);
             obj.detail = `${element?.technician?.firstName} ${element?.technician?.lastName} - (${element?.technician?.firstName})`
             obj.technician = element?.technician?._id
             obj.type = "technician"
@@ -226,12 +198,9 @@ const Technician = ({
         const subRows: any = material.filter((e) => e.parentId === parent._id);
         subRows.forEach((_subRow, j) => {
             _subRow.srno = parent.srno + '.' + (j + 1);
-            _subRow.detail =
-                _subRow.type === 'product'
-                    ? _subRow?.productDetail?.productName
-                    : _subRow.type === 'service'
-                        ? _subRow?.serviceDetail?.serviceName
-                        : _subRow?.packageDetail?.packageName;
+            _subRow.detail = _subRow.type === 'product' ? _subRow?.productDetail?.productName : _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName : _subRow?.packageDetail?.packageName;
+            _subRow.competency = _subRow.type === 'service' ? _subRow?.serviceDetail?.competency?.map((e) => e.optionLabel)?.toString() : null
+            _subRow.serviceCompetency = _subRow.type === 'service' ? _subRow?.serviceDetail?.competency || [] : []
             _subRow.subRows = generateNestedData(material, technician, _subRow);
         });
 
@@ -251,7 +220,7 @@ const Technician = ({
         })
         axiosInstance().post(`${serviceOrder.api}/${serviceOrderData._id}/technician`, sendData)
             .then(() => {
-                setAddEmployeeMasterDialog({ open: false });
+                setAddEmployeeMasterDialog({ open: false, data: null });
                 fetchData()
             })
             .catch((error) => {
@@ -317,7 +286,7 @@ const Technician = ({
                                     size="small"
                                     disabled={selectedProducts?.length === 1 ? false : true}
                                     onClick={() => {
-                                        setAddEmployeeMasterDialog({ open: true });
+                                        setAddEmployeeMasterDialog({ open: true, data: selectedProducts[0] });
                                     }}
                                 >
                                     {`Assign Technician`}
@@ -398,8 +367,9 @@ const Technician = ({
                         handleAssignTechnician(data);
                     }}
                     handleClose={() => {
-                        setAddEmployeeMasterDialog({ open: false });
+                        setAddEmployeeMasterDialog({ open: false, data: null });
                     }}
+                    defaultCompetency={addEmployeeMasterDialog?.data?.serviceCompetency}
                     ids={[]}
                 />
             )}

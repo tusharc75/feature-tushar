@@ -86,6 +86,7 @@ const LookupResource = [
   { name: 'Service Order', value: 'Service Order' },
   { name: 'Employee Master', value: 'Employee Master' },
   { name: 'Competency Master', value: 'Competency Master' },
+  { name: 'Competency Type', value: 'Competency Type' },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField }) => {
@@ -159,6 +160,14 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         (fieldData.type === 'multiLine' || fieldData.type === 'singleLine' || fieldData.type === 'mobileNumber' || fieldData.type === 'number')
       ) {
         values.primaryField = false;
+      }
+      if (values.type === 'lookUpDisplay') {
+        if (!values.lookUpField) {
+          values.lookUpField = '';
+        }
+        if (!values.lookUpFieldDisplay) {
+          values.lookUpFieldDisplay = '';
+        }
       }
       if (values.type === 'process') {
         if (!values.showAdditionalInfoPopup) {
@@ -353,6 +362,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               }
             }
 
+            if (fieldData.type === 'lookUpDisplay') {
+              ele.lookUpField = values.lookUpField;
+              ele.lookUpFieldDisplay = values.lookUpFieldDisplay;
+            }
+
             if (module === "form-builder-master") {
               ele.editAble = values.editAble || false;
               ele.deletAble = values.deletAble || false;
@@ -435,6 +449,15 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       }
       if (values?.minValue > values?.maxValue) {
         errors["minValue"] = "Please enter valid min value";
+      }
+    }
+
+    if (values.type === 'lookUpDisplay') {
+      if (!values.lookUpField) {
+        errors['lookUpField'] = 'Please enter look up field';
+      }
+      if (!values.lookUpFieldDisplay) {
+        errors['lookUpFieldDisplay'] = 'Please enter look up field display';
       }
     }
 
@@ -892,6 +915,46 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       fields={fields}
                       _id={fieldData._id}
                     />
+                  )}
+                  {fieldData.type === "lookUpDisplay" && (
+                    <Box pt={1} pb={1}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={6} sm={6} md={6}>
+                          <TextField
+                            variant="outlined"
+                            type="text"
+                            label="Look Up Field"
+                            required={true}
+                            name="lookUpField"
+                            fullWidth
+                            margin="dense"
+                            value={values['lookUpField']}
+                            error={touched['lookUpField'] && Boolean(errors['lookUpField'])}
+                            helperText={touched['lookUpField'] && errors['lookUpField']}
+                            onChange={(e) => {
+                              setFieldValue('lookUpField', e.target.value.trimStart());
+                            }}
+                          />
+                        </Grid>
+                        <Grid item xs={6} sm={6} md={6}>
+                          <TextField
+                            variant="outlined"
+                            type="text"
+                            label="Look Up Field Display"
+                            required={true}
+                            name="lookUpFieldDisplay"
+                            fullWidth
+                            margin="dense"
+                            value={values['lookUpFieldDisplay']}
+                            error={touched['lookUpFieldDisplay'] && Boolean(errors['lookUpFieldDisplay'])}
+                            helperText={touched['lookUpFieldDisplay'] && errors['lookUpFieldDisplay']}
+                            onChange={(e) => {
+                              setFieldValue('lookUpFieldDisplay', e.target.value.trimStart());
+                            }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
                   )}
                   <Box pt={1} pb={1}>
                     <FormControlLabel

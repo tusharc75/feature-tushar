@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, IconButton, Tooltip, Button, Menu, MenuItem, Chip } from "@material-ui/core";
+import { Grid, IconButton, Tooltip, Button, Menu, MenuItem, Chip } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,7 +11,7 @@ import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { isObjectEmpty, gridLoadingTimeout, productInventory, getLocalStorageArrayData, removeLocalStorage } from 'src/constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, productInventory, getLocalStorageArrayData, removeLocalStorage, TOOLTIP_MESSAGE } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -24,8 +24,8 @@ import HistoryDialog from './History/historyDialog';
 import SerialNumberDialog from './SerialNumber/SerialNumberDialog';
 import { camelCase } from 'lodash';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
-import HtmlTooltip from "../../components/CustomTooltipTitle";
-import NoDataCell from "../../components/Helpers/NoDataCell";
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+import NoDataCell from '../../components/Helpers/NoDataCell';
 import HistoryIcon from '@material-ui/icons/History';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
@@ -34,11 +34,12 @@ import { ExpandMore } from '@material-ui/icons';
 import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
 import { useHistory } from 'react-router-dom';
 import { NumberRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import SettingsIcon from '@material-ui/icons/Settings';
+import SettingsDialog from './SettingsDialog';
 
 let searchTimeout;
 
 const InventoryProduct = () => {
-
   const renderedFrom = camelCase(routes?.productInventory.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -52,18 +53,22 @@ const InventoryProduct = () => {
   const [columns, setColumns] = useState(null);
 
   const [softHold, setSoftHold] = useState({ open: false, data: {} });
-  const [showHistory, setShowHistory] = useState({ open: false, product: "", productName: "" });
-  const [showSerialNumber, setShowSerialNumber] = useState({ open: false, product: "", productName: "" });
+  const [showHistory, setShowHistory] = useState({ open: false, product: '', productName: '' });
+  const [showSerialNumber, setShowSerialNumber] = useState({ open: false, product: '', productName: '' });
 
-  const [inventory, setInventory] = useState({ open: false, product: [], type: "" });
+  const [inventory, setInventory] = useState({ open: false, product: [], type: '' });
 
-  const { state: { user, permissions, selectedEntity } }: any = useData();
+  const [settingDialogOpen, setSettingDialogOpen] = useState(false);
+
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
 
   const history = useHistory();
 
   const [fromProductMaster, setFromProductMaster] = useState({
     product: history.location?.state?.product,
-    productName: history.location?.state?.productName,
+    productName: history.location?.state?.productName
   });
 
   const { getColumnData } = useColumns();
@@ -100,37 +105,37 @@ const InventoryProduct = () => {
     axiosInstance()
       .get(`/warehouse`)
       .then(({ data: { data } }) => {
-        setPlantOptions([{ "warehouseName": "All", "_id": "All" }, ...data]);
+        setPlantOptions([{ warehouseName: 'All', _id: 'All' }, ...data]);
         if (plantId === null && data?.length) {
-          setPlantId("All");
+          setPlantId('All');
         }
       });
   };
 
   const fetchGridColumns = async () => {
-    setColumns(null)
+    setColumns(null);
 
-    const productFields = await axiosInstance().get("/field?resource=Product&view=true");
-    const productInventoryFields = await axiosInstance().get("/field?resource=Product Inventory&view=true");
+    const productFields = await axiosInstance().get('/field?resource=Product&view=true');
+    const productInventoryFields = await axiosInstance().get('/field?resource=Product Inventory&view=true');
 
-    let columns = []
-    let rendererNames = []
+    let columns = [];
+    let rendererNames = [];
 
-    productFields?.data?.data?.forEach(o => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
+    productFields?.data?.data?.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
       if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData]
+        columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName)
+          rendererNames.push(currentColumn?.rendererName);
         }
       }
-    })
+    });
 
     columns?.forEach((e) => {
-      if (!["productName", "serializedProduct"].includes(e.field)) {
-        e.show = false
+      if (!['productName', 'serializedProduct'].includes(e.field)) {
+        e.show = false;
       }
-    })
+    });
 
     productInventoryFields?.data?.data?.forEach((o) => {
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
@@ -142,25 +147,28 @@ const InventoryProduct = () => {
               cellEditor: 'numericCellEditor',
               cellRenderer: 'numberRenderer',
               filter: false,
-              editable: plantId === "All" ? false : permissions?.productInventory?.isUpdate
+              editable: plantId === 'All' ? false : permissions?.productInventory?.isUpdate
             });
-          }
-          else if (['inventory'].includes(currentColumn?.columnData.field)) {
+          } else if (['inventory'].includes(currentColumn?.columnData.field)) {
             columns.push({
               ...currentColumn?.columnData,
               cellRenderer: 'numberRenderer',
-              filter: false,
+              filter: false
             });
-          }
-          else {
+          } else {
             columns.push(currentColumn?.columnData);
           }
         }
       }
     });
 
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-    setFrameworkComponents({ ...tempFrameworkComponent, softHoldRenderer: SoftHoldRenderer, numberRenderer: NumberRenderer, actionsRenderer: ActionsRenderer })
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+    setFrameworkComponents({
+      ...tempFrameworkComponent,
+      softHoldRenderer: SoftHoldRenderer,
+      numberRenderer: NumberRenderer,
+      actionsRenderer: ActionsRenderer
+    });
 
     const defaultColumns = [
       { field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },
@@ -168,8 +176,8 @@ const InventoryProduct = () => {
       { field: 'purchaseOrderQty', headerName: 'On PO', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }
     ];
 
-    setColumns([...columns, ...defaultColumns])
-  }
+    setColumns([...columns, ...defaultColumns]);
+  };
 
   const fetchProductInventory = () => {
     dispatch({ type: 'loading', loading: true });
@@ -207,15 +215,20 @@ const InventoryProduct = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let tempPlantId = plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId
+    let tempPlantId =
+      plantId === 'All'
+        ? plantOptions
+          .filter((d) => d._id !== 'All')
+          .map((d) => d._id)
+          .toString()
+        : plantId;
 
-    let deepFilter = "";
+    let deepFilter = '';
     if (!isExport) {
-      deepFilter = `?wareHouse=${tempPlantId}`
+      deepFilter = `?wareHouse=${tempPlantId}`;
       deepFilter = deepFilter + `&page=${page}&limit=${limit}`;
-    }
-    else {
-      deepFilter = `&wareHouse=${tempPlantId}`
+    } else {
+      deepFilter = `&wareHouse=${tempPlantId}`;
     }
 
     let filterById = [];
@@ -228,7 +241,7 @@ const InventoryProduct = () => {
 
     const updatedFilters = [];
     if (!user?.user?.brandPolicy?.showSerializedProduct) {
-      updatedFilters.push({ field: "serializedProduct", term: "No" })
+      updatedFilters.push({ field: 'serializedProduct', term: 'No' });
     }
 
     if (!isObjectEmpty(filters)) {
@@ -271,81 +284,88 @@ const InventoryProduct = () => {
   };
 
   const SoftHoldRenderer = (params) => (
-    <> {params.value ? (
-      <Fragment>
-        {params.value}
-        <HtmlTooltip title={`Soft Hold History`}>
-          <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(params)} />
-        </HtmlTooltip>
-      </Fragment>
-    ) : 0}
+    <>
+      {' '}
+      {params.value ? (
+        <Fragment>
+          {params.value}
+          <HtmlTooltip title={`Soft Hold History`}>
+            <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(params)} />
+          </HtmlTooltip>
+        </Fragment>
+      ) : (
+        0
+      )}
     </>
   );
 
   const ActionsRenderer = (params) => (
-    <>
-      {(params?.data?.plantId !== "All") &&
-        <Fragment>
-          {permissions?.productInventory?.isCreate ?
-            <Box>
-              <Tooltip title="Add">
-                <IconButton
-                  size="small"
-                  aria-label="Clone"
-                  onClick={() => {
-                    setInventory({ open: true, product: [params?.data], type: 'add' })
-                  }}
-                >
-                  <AddCircleOutlineIcon fontSize="small" color="secondary" />
-                </IconButton>
-              </Tooltip>
-            </Box> : null}
-          {permissions?.productInventory?.isUpdate ?
-            <Box pl={1}>
-              <Tooltip title="Remove">
-                <IconButton
-                  size="small"
-                  aria-label="Clone"
-                  disabled={params?.data?.availableInventory ? false : true}
-                  onClick={() => {
-                    setInventory({ open: true, product: [params?.data], type: 'remove' })
-                  }}
-                >
-                  <RemoveCircleOutlineIcon fontSize="small" color={params?.data?.availableInventory ? "error" : "disabled"} />
-                </IconButton>
-              </Tooltip>
-            </Box> : null}
-        </Fragment>
-      }
+    <Fragment>
+      <HtmlTooltip title={!permissions?.productInventory?.isCreate ? TOOLTIP_MESSAGE.add :
+        params?.data?.plantId === "All" ? "Select Plant" : "Add"}>
+        <span>
+          <IconButton
+            size="small"
+            aria-label="Add"
+            disabled={permissions?.productInventory?.isCreate && params?.data?.plantId !== "All" ? false : true}
+            onClick={() => {
+              setInventory({ open: true, product: [params?.data], type: 'add' })
+            }}
+          >
+            <AddCircleOutlineIcon
+              fontSize="small"
+              color={permissions?.productInventory?.isCreate && params?.data?.plantId !== "All" ? "secondary" : "disabled"} />
+          </IconButton>
+        </span>
+      </HtmlTooltip>
       <Box pl={1}>
-        <Tooltip title="History">
+        <HtmlTooltip title={!permissions?.productInventory?.isUpdate ? TOOLTIP_MESSAGE.remove :
+          params?.data?.plantId === "All" ? "Select Plant" : !params?.data?.availableInventory ? "Inventory not available" : "Remove"}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={permissions?.productInventory?.isUpdate && params?.data?.availableInventory && params?.data?.plantId !== "All" ? false : true}
+              onClick={() => {
+                setInventory({ open: true, product: [params?.data], type: 'remove' })
+              }}
+            >
+              <RemoveCircleOutlineIcon
+                fontSize="small"
+                color={permissions?.productInventory?.isUpdate && params?.data?.availableInventory && params?.data?.plantId !== "All" ? "error" : "disabled"} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </Box>
+      <Box pl={1}>
+        <HtmlTooltip title="History">
           <IconButton
             size="small"
             aria-label="Clone"
             onClick={() => {
-              setShowHistory({ open: true, product: params?.data?.productId, productName: params?.data?.productName })
+              setShowHistory({ open: true, product: params?.data?.productId, productName: params?.data?.productName });
             }}
           >
             <HistoryIcon fontSize="small" color="primary" />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       </Box>
-      {params?.data?.serializedProduct &&
+      {params?.data?.serializedProduct && (
         <Box pl={1}>
-          <Tooltip title="View Serial Number">
+          <HtmlTooltip title="View Serial Number">
             <IconButton
               size="small"
               aria-label="Clone"
               onClick={() => {
-                setShowSerialNumber({ open: true, product: params?.data?.productId, productName: params?.data?.productName })
+                setShowSerialNumber({ open: true, product: params?.data?.productId, productName: params?.data?.productName });
               }}
             >
               <VisibilityOutlinedIcon fontSize="small" color="primary" />
             </IconButton>
-          </Tooltip>
+          </HtmlTooltip>
         </Box>
-      }
-    </>
+      )}
+    </Fragment>
   );
 
   const replaceFieldName = (field) => {
@@ -372,6 +392,57 @@ const InventoryProduct = () => {
     });
   }
 
+
+  const checkReport = () => {
+    const products = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((e) => e._id);
+    let api = `${productInventory.api}/automation`
+    if (products?.length) {
+      api = api + `?products=${products?.toString()}`
+    }
+    axiosInstance().get(api).then(({ data }) => {
+      console.log(data)
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+  const handleRemap = () => {
+    const products = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((e) => e._id);
+    if (products?.length) {
+      axiosInstance().put(`${productInventory.api}/re-map/ledger-remap`, { products, warehouse: plantId })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchProductInventory()
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
+  const handleRemapPurchaseOrder = () => {
+    const products = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((e) => e._id);
+    if (products?.length) {
+      axiosInstance().put(`${productInventory.api}/re-map/purchase-order-remap`, { products, warehouse: plantId })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchProductInventory()
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -381,7 +452,7 @@ const InventoryProduct = () => {
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
             additionalParams={getQueryString(true)}
-            permissions={{ isCreate: permissions?.productInventory?.isCreate && plantId !== "All" }}
+            permissions={{ isCreate: permissions?.productInventory?.isCreate && plantId !== 'All' }}
             module="product inventory"
             api={productInventory.api}
             afterImportCompleted={() => {
@@ -391,7 +462,11 @@ const InventoryProduct = () => {
             isExportAllOrSomeFeature={true}
             total={rowCount}
             recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id) : []}
+            ids={
+              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                : []
+            }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchProductInventory();
@@ -459,13 +534,13 @@ const InventoryProduct = () => {
                   />
                 </Grid>
               </Box>
-              {permissions?.productInventory?.isUpdate ?
+              {permissions?.productInventory?.isUpdate ? (
                 <Box ml={1}>
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="default"
                     size="small"
-                    disabled={(getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length && plantId !== "All") ? false : true}
+                    disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length && plantId !== 'All' ? false : true}
                     className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                     onClick={openActions}
                     aria-controls="action-menu"
@@ -487,8 +562,8 @@ const InventoryProduct = () => {
                     <MenuItem
                       disabled={permissions?.productInventory?.isCreate ? false : true}
                       onClick={() => {
-                        closeActions()
-                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: "add" })
+                        closeActions();
+                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: 'add' });
                       }}
                     >
                       Add
@@ -496,15 +571,62 @@ const InventoryProduct = () => {
                     <MenuItem
                       disabled={permissions?.productInventory?.isUpdate ? false : true}
                       onClick={() => {
-                        closeActions()
-                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: "remove" })
+                        closeActions();
+                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: 'remove' });
                       }}
                     >
                       Remove
                     </MenuItem>
+                    <MenuItem
+                      disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
+                      style={{ display: 'none' }}
+                      onClick={() => {
+                        closeActions();
+                        checkReport()
+                      }}
+                    >
+                      Check Report
+                    </MenuItem>
+                    <MenuItem
+                      disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
+                      style={{ display: 'none' }}
+                      onClick={() => {
+                        closeActions();
+                        handleRemap()
+                      }}
+                    >
+                      Remap
+                    </MenuItem>
+                    <MenuItem
+                      disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
+                      style={{ display: 'none' }}
+                      onClick={() => {
+                        closeActions();
+                        handleRemapPurchaseOrder()
+                      }}
+                    >
+                      Remap Purchase Order
+                    </MenuItem>
                   </Menu>
                 </Box>
-                : null}
+              ) : null}
+              {user?.role?.selectedEntity?.policy?.isProductInventorySettings && (
+                <Box ml={1}>
+                  <HtmlTooltip title={plantId === 'All' ? "Select Plant" : "Setting"}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        disabled={plantId !== 'All' ? false : true}
+                        onClick={() => {
+                          setSettingDialogOpen(true);
+                        }}
+                      >
+                        <SettingsIcon color={plantId === 'All' ? 'disabled' : 'primary'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                </Box>
+              )}
             </Grid>
           </Grid>
         </div>
@@ -535,41 +657,69 @@ const InventoryProduct = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {softHold.open &&
+        {softHold.open && (
           <SoftHoldDialog
             close={() => setSoftHold({ open: false, data: {} })}
             data={softHold.data}
-            warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
-          />}
+            warehouse={
+              plantId === 'All'
+                ? plantOptions
+                  .filter((d) => d._id !== 'All')
+                  .map((d) => d._id)
+                  .toString()
+                : plantId
+            }
+          />
+        )}
 
-        {showHistory.open &&
+        {showHistory.open && (
           <HistoryDialog
-            close={() => setShowHistory({ open: false, product: "", productName: "" })}
+            close={() => setShowHistory({ open: false, product: '', productName: '' })}
             product={showHistory.product}
-            warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
+            warehouse={
+              plantId === 'All'
+                ? plantOptions
+                  .filter((d) => d._id !== 'All')
+                  .map((d) => d._id)
+                  .toString()
+                : plantId
+            }
             productName={showHistory.productName}
-          />}
+          />
+        )}
 
-        {showSerialNumber.open &&
+        {showSerialNumber.open && (
           <SerialNumberDialog
-            close={() => setShowSerialNumber({ open: false, product: "", productName: "" })}
+            close={() => setShowSerialNumber({ open: false, product: '', productName: '' })}
             product={showSerialNumber.product}
             productName={showSerialNumber.productName}
-            warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
-          />}
-        {inventory.open &&
-          <AddRemoveDialog
-            handleClose={() =>
-              setInventory({ open: false, product: [], type: "" })
+            warehouse={
+              plantId === 'All'
+                ? plantOptions
+                  .filter((d) => d._id !== 'All')
+                  .map((d) => d._id)
+                  .toString()
+                : plantId
             }
+          />
+        )}
+        {inventory.open && (
+          <AddRemoveDialog
+            handleClose={() => setInventory({ open: false, product: [], type: '' })}
             handleSuccess={() => {
-              removeLocalStorage(localStorageSelectedRecords)
-              fetchProductInventory()
-              setInventory({ open: false, product: [], type: "" })
+              removeLocalStorage(localStorageSelectedRecords);
+              fetchProductInventory();
+              setInventory({ open: false, product: [], type: '' });
             }}
             product={inventory.product}
             type={inventory.type}
             warehouse={plantId}
+          />
+        )}
+        {settingDialogOpen &&
+          <SettingsDialog
+            warehouse={plantId}
+            onClose={() => setSettingDialogOpen(false)}
           />}
       </div>
     </Fragment>

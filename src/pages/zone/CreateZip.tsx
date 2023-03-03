@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -7,21 +7,31 @@ import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
-import { TextField } from "@material-ui/core";
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../constants/helpers';
+import { TextField as TextFieldFormik } from 'formik-material-ui';
+import { Field, Form, Formik } from 'formik';
+import { object, string } from 'yup';
 
 const CreateZip = (props) => {
-  const { setToastConfig } = useContext(CustomToastContext)
+  const { setToastConfig } = useContext(CustomToastContext);
   const { zoneId, onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [saveClick, setSaveClick] = useState(false);
-  const [value, setValue] = useState('')
+  const [initialValues, setInitialValues] = useState(null);
 
-  const handleSubmit = () => {
-    let newValues = { zoneZips: [value] };
+  const zipCodeSchema = object().shape({
+    zipCode: string().required('Please enter zip code')
+  });
+
+  useEffect(() => {
+    setInitialValues({ zipCode: '' });
+  }, [zoneId]);
+
+  const handleSubmit = (values) => {
+    let newValues = { zoneZips: [values.zipCode] };
     setSaveClick(true);
     axiosInstance()
       .post(`/zone/${zoneId}/zip`, newValues)
@@ -41,6 +51,10 @@ const CreateZip = (props) => {
       });
   };
 
+  function validate(values) {
+    const errors = {};
+    return errors;
+  }
 
   return (
     <Dialog
@@ -57,9 +71,7 @@ const CreateZip = (props) => {
       fullWidth
     >
       <CustomDialogHeader
-        title={
-          `Create Zip Code`
-        }
+        title={`Create Zip Code`}
         onClose={() => {
           onClose();
         }}
@@ -69,38 +81,47 @@ const CreateZip = (props) => {
         }}
         showManimizeMaximize={true}
       ></CustomDialogHeader>
-      <CustomDialogContent>
-        <TextField
-          variant='outlined'
-          type="text"
-          required={true}
-          margin="dense"
-          label='Zip Code'
-          name='Zip Code'
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value)
-
-          }}
-        />
-      </CustomDialogContent>
-      <CustomDialogFooter>
-        <Button
-          size="small"
-          color="primary"
-          onClick={() => {
-            onClose();
-          }}
-        >
-          {isUpdateDisabled ? 'Close' : 'Cancel'}
-        </Button>
-        {!isUpdateDisabled && (
-          <CustomButton loading={loading} variant="contained" color="primary" type="submit" disabled={saveClick} onClick={handleSubmit}>
-            {' '}
-            Save
-          </CustomButton>
-        )}
-      </CustomDialogFooter>
+      {initialValues ? (
+        <Formik initialValues={initialValues} validationSchema={zipCodeSchema} onSubmit={handleSubmit} validate={validate}>
+          {({ submitForm, touched, errors, setFieldValue, values }) => (
+            <>
+              <CustomDialogContent>
+                <Form autoComplete="off" autoCorrect="off" noValidate>
+                  <Field
+                    component={TextFieldFormik}
+                    margin="dense"
+                    type="text"
+                    size="small"
+                    label="Zip Code"
+                    name="zipCode"
+                    variant="outlined"
+                    onChange={(e) => {
+                      setFieldValue('zipCode', e.target.value);
+                    }}
+                  />
+                </Form>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <Button
+                  size="small"
+                  color="primary"
+                  onClick={() => {
+                    onClose();
+                  }}
+                >
+                  {isUpdateDisabled ? 'Close' : 'Cancel'}
+                </Button>
+                {!isUpdateDisabled && (
+                  <CustomButton loading={loading} variant="contained" color="primary" type="submit" disabled={saveClick} onClick={submitForm}>
+                    {' '}
+                    Save
+                  </CustomButton>
+                )}
+              </CustomDialogFooter>
+            </>
+          )}
+        </Formik>
+      ) : null}
     </Dialog>
   );
 };

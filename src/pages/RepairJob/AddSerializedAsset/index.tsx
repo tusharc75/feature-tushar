@@ -69,30 +69,53 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
     setAnchorElAction(null);
   };
 
-  const commonColumns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "assetNumberRenderer", width: 300, required: false },
-    { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer", required: false },
-    { field: "product", headerName: "Product Type", show: true, cellRenderer: "commonRenderer", required: false },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer", required: false },
-  ];
+  const fetchFields = async () => {
+    var columns = [];
+    const { data: { data } } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+          fieldNames: ['productName', 'productDescription', 'productCategory']
+        },
+        {
+          resource: 'Serialized Asset',
+          fieldNames: ['assetNumber', 'serialNumber']
+        }
+      ]
+    });
+    const assetField = data?.find((e) => e.resource === 'Serialized Asset')?.fieldNames || []
+    const productField = data?.find((e) => e.resource === 'Product')?.fieldNames || []
 
-  const fetchFields = () => {
-    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`).then(({ data: { data } }) => {
-      const columns = [...commonColumns];
-      let rendererNames = [];
-      genrateColoum(data, columns, rendererNames, false, renderedFrom);
-      setRepairJobAssetFields(data)
-      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-      tempFrameworkComponent = {
-        assetNumberRenderer: AssetNumberRenderer,
-        commonRenderer: CommonRenderer,
-        actionsRenderer: ActionsRenderer,
-        ...tempFrameworkComponent,
+    assetField?.forEach((ele) => {
+      if (ele?.fieldName === "assetNumber") {
+        columns.push({ field: "assetNumber", headerName: ele?.fieldLabel, show: true, disabled: true, cellRenderer: "assetNumberRenderer" })
       }
-      setFrameWorkComponent({ ...tempFrameworkComponent })
-      setColumns([...columns])
-      fetchRecords()
+      if (ele?.fieldName === "serialNumber") {
+        columns.push({ field: "serialNumber", headerName: ele?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+      }
     })
+    productField?.forEach((ele) => {
+      columns.push({ field: ele?.fieldName, headerName: ele?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+    })
+
+    columns.push({ field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer", required: false })
+
+    const fieldResponce = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`);
+
+    let rendererNames = [];
+    genrateColoum(fieldResponce?.data?.data, columns, rendererNames, false, renderedFrom);
+    setRepairJobAssetFields(fieldResponce?.data?.data)
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      assetNumberRenderer: AssetNumberRenderer,
+      commonRenderer: CommonRenderer,
+      actionsRenderer: ActionsRenderer,
+      ...tempFrameworkComponent,
+    }
+    setFrameWorkComponent({ ...tempFrameworkComponent })
+    setColumns([...columns])
+    fetchRecords()
+
   }
 
   const fetchRecords = () => {
@@ -106,6 +129,9 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
           let finalObject = prepareDataForGrid(u, user);
           finalObject["allowedToEdit"] = allowedToEdit && permissions?.repairJob?.isUpdate;
           finalObject["canDelete"] = u?.status === INVENTORY_STATUS.reserved;
+          finalObject["isChecked"] = false;
+          finalObject["productName"] = u?.product?.optionLabel;
+          finalObject["productDescription"] = u?.productDetail?.productDescription;
           finalObject["isChecked"] = false;
           return finalObject;
         });

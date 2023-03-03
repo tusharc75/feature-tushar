@@ -31,6 +31,8 @@ import { get_activity_resource } from '../../../components/Activity/Helpers/util
 import CustomReactTable from 'src/components/CustomReactTableNew/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import PreviewIcon from '@material-ui/icons/Visibility';
+import _ from 'lodash';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -153,7 +155,7 @@ export default function Attachment() {
   const column: any = [
     {
       accessor: 'type',
-      id: "type",
+      id: 'type',
       Header: 'Type',
       width: 70,
       canDrag: false,
@@ -238,17 +240,30 @@ export default function Attachment() {
       accessor: 'action',
       Header: '',
       minWidth: 50,
-      width: 50,
+      width: 80,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }) => {
+        const allPdf = _.every(row.original?.file, (d) => _.endsWith(d?.url, '.pdf'));
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original.type !== "folder" && (
+            {row.original.type !== 'folder' && (
               <Tooltip title="Download">
                 <IconButton size="small" aria-label="Delete" onClick={() => downloadFile(row.original)}>
                   <GetAppIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Tooltip>
+            )}
+            {allPdf && row.original.type === 'file' && (
+              <Tooltip
+                title="Preview"
+                onClick={(e) => {
+                  viewPdf(e, row.original);
+                }}
+              >
+                <IconButton size="small">
+                  <PreviewIcon fontSize="small" color="primary" />
                 </IconButton>
               </Tooltip>
             )}
@@ -372,6 +387,73 @@ export default function Attachment() {
     }
   };
 
+  const viewPdf = (event, data) => {
+    if (event) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'info',
+        message: `File is Loading, Please wait...`
+      });
+    }
+    const file = data?.file;
+    setIsDownloading(true);
+    if (file?.length === 1) {
+      axiosInstance()
+        .get(`user/download?fileName=${file[0].url}`, {
+          responseType: 'blob',
+          onDownloadProgress: (progressEvent) => {
+            let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+
+            if (percentCompleted === 100) {
+              toastConfig.setToastConfig({
+                message: 'File Downloaded Successfully',
+                open: true,
+                type: 'success'
+              });
+              setTimeout(() => {
+                setIsDownloading(false);
+              }, 2000);
+            }
+          }
+        })
+        .then(({ data }) => {
+          const file = new Blob([data], { type: 'application/pdf' });
+          const fileURL = URL.createObjectURL(file);
+          const pdfWindow = window.open();
+          pdfWindow.location.href = fileURL;
+          // toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+          setIsDownloading(false);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+          setIsDownloading(false);
+        });
+    } else {
+      const fileUrl = file?.map((f) => f.url);
+      axiosInstance()
+        .put(
+          `user/download`,
+          {
+            files: fileUrl
+          },
+          {
+            responseType: 'blob'
+          }
+        )
+        .then(({ data }) => {
+          const file = new Blob([data], { type: 'application/pdf' });
+          const fileURL = URL.createObjectURL(file);
+          const pdfWindow = window.open();
+          pdfWindow.location.href = fileURL;
+          setTimeout(() => setIsDownloading(false), 2000);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+          setIsDownloading(false);
+        });
+    }
+  };
+
   const getQueryString = () => {
     let deepFilter = `&page=${page}&limit=${limit}`;
 
@@ -404,42 +486,54 @@ export default function Attachment() {
       gridApi.setRowData([]);
     }
     let api = `/attachment?relatedTo=${JSON.stringify(filter)}${queryString}`;
-    axiosInstance().get(api).then(({ data: { data: { data, count } } }) => {
-      let rows = data?.filter((e) => !e?.parentFolder);
-      const parentRows = rows.map((parent, idx) => {
-        parent.subRows = generateNestedData(data, parent);
-        return {
-          ...parent,
-          id: parent._id,
-          fileUrl: parent.fileUrl,
-          canEdit: parent.type === 'folder' ? true : parent?.canEdit,
-          createdBy: displayDate(parent.createdBy?.date),
-          updatedBy: displayDate(parent.updatedBy?.date),
-          isChecked: false
-        };
+    axiosInstance()
+      .get(api)
+      .then(
+        ({
+          data: {
+            data: { data, count }
+          }
+        }) => {
+          let rows = data?.filter((e) => !e?.parentFolder);
+          const parentRows = rows.map((parent, idx) => {
+            parent.subRows = generateNestedData(data, parent);
+            return {
+              ...parent,
+              id: parent._id,
+              fileUrl: parent.fileUrl,
+              canEdit: parent.type === 'folder' ? true : parent?.canEdit,
+              createdBy: displayDate(parent.createdBy?.date),
+              updatedBy: displayDate(parent.updatedBy?.date),
+              isChecked: false
+            };
+          });
+          dispatch({ type: 'initialize', data: parentRows, count: count });
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
+        }
+      )
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        dispatch({ type: 'loading', loading: false });
       });
-      dispatch({ type: 'initialize', data: parentRows, count: count });
-      setTimeout(() => { dispatch({ type: 'loading', loading: false }) }, gridLoadingTimeout);
-    }
-    ).catch((error) => {
-      toastConfig.setToastConfig(error);
-      dispatch({ type: 'loading', loading: false });
-    });
   };
 
   const generateNestedData = (data, parent) => {
-    const childRow = data?.filter((e) => e?.parentFolder === parent?._id)?.map((u) => {
-      u.subRows = generateNestedData(data, u);
-      return {
-        ...u,
-        id: u._id,
-        fileUrl: u.fileUrl,
-        canEdit: u.type === 'folder' ? true : u?.canEdit,
-        createdBy: displayDate(u.createdBy?.date),
-        updatedBy: displayDate(u.updatedBy?.date),
-        isChecked: false
-      };
-    });
+    const childRow = data
+      ?.filter((e) => e?.parentFolder === parent?._id)
+      ?.map((u) => {
+        u.subRows = generateNestedData(data, u);
+        return {
+          ...u,
+          id: u._id,
+          fileUrl: u.fileUrl,
+          canEdit: u.type === 'folder' ? true : u?.canEdit,
+          createdBy: displayDate(u.createdBy?.date),
+          updatedBy: displayDate(u.updatedBy?.date),
+          isChecked: false
+        };
+      });
     return childRow;
   };
 
@@ -616,13 +710,13 @@ export default function Attachment() {
               data={dataRows}
               currentPage={page}
               onSelect={(newSelectedRecords) => {
-                dispatch({ type: "selection", selectedRecords: newSelectedRecords })
+                dispatch({ type: 'selection', selectedRecords: newSelectedRecords });
               }}
               dispatch={dispatch}
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => { }}
+              setWholeRowsCellColor={() => {}}
               renderedFrom={'attachment_render_form'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -662,7 +756,7 @@ export default function Attachment() {
                     parentResource = {
                       referenceId: addchildDialog.data?.relatedTo[0]?.referenceId,
                       type: addchildDialog.data?.relatedTo[0]?.type
-                    }
+                    };
                   }
                   setOpen({ open: true, type: 'folder', parentFolder: addchildDialog.data._id, parentResource: parentResource });
                   setAddchildDialog({ open: false, data: null, top: null, bottom: null });
@@ -677,7 +771,7 @@ export default function Attachment() {
                     parentResource = {
                       referenceId: addchildDialog.data?.relatedTo[0]?.referenceId,
                       type: addchildDialog.data?.relatedTo[0]?.type
-                    }
+                    };
                   }
                   setOpen({ open: true, type: 'file', parentFolder: addchildDialog.data._id, parentResource: parentResource });
                   setAddchildDialog({ open: false, data: null, top: null, bottom: null });
@@ -708,7 +802,11 @@ export default function Attachment() {
               relatedTo={[
                 {
                   type: open.parentResource ? open.parentResource?.type : resource && selectedResourceData ? resource.optionValue : 'user',
-                  referenceId: open.parentResource ? open.parentResource?.referenceId : resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
+                  referenceId: open.parentResource
+                    ? open.parentResource?.referenceId
+                    : resource && selectedResourceData
+                    ? selectedResourceData.id
+                    : user?.user?._id,
                   access: true
                 }
               ]}

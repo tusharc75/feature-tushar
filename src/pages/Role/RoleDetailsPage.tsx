@@ -82,7 +82,8 @@ const RoleDetailsPage = () => {
     rentalManagement: false,
     sublease: false,
     purchaseOrder: false,
-    quoteBuilder: false
+    quoteBuilder: false,
+    productInventory: false
   });
 
   const [policyFieldCheckBox, SetPolicyFieldCheckBox] = useState({
@@ -92,20 +93,23 @@ const RoleDetailsPage = () => {
     isPricingPurchaseOrder: false,
     isQuoteAskSupplierPrice: false,
     isQuotationRentalManagement: false,
-    isProgressiveBillingRentalManagement: false
+    isProgressiveBillingRentalManagement: false,
+    isProductInventorySettings: false
   });
 
   const [resourceCheckbox, setResourceCheckBox] = useState({
     rentalManagement: false,
     sublease: false,
     purchaseOrder: false,
-    quoteBuilder: false
+    quoteBuilder: false,
+    productInventory: false
   });
 
   const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false);
   const [dashBoardOption, setDashBoardOption] = useState([]);
   const [dashboardName, setDashboardName] = useState([]);
   const [defaultResourceName, setDefaultResourceName] = useState([]);
+  const [superAdminAccess, setSuperAdminAccess] = useState(false)
 
   const policyResources = [
     {
@@ -142,6 +146,11 @@ const RoleDetailsPage = () => {
       resource: 'Quote Builder',
       fieldLabel: 'Ask Supplier Quote',
       fieldName: 'isQuoteAskSupplierPrice'
+    },
+    {
+      resource: 'Product Inventory',
+      fieldLabel: 'Product Inventory Settings',
+      fieldName: 'isProductInventorySettings'
     }
   ];
 
@@ -205,7 +214,8 @@ const RoleDetailsPage = () => {
         rentalManagement: e.target.checked,
         purchaseOrder: e.target.checked,
         sublease: e.target.checked,
-        quoteBuilder: e.target.checked
+        quoteBuilder: e.target.checked,
+        productInventory: e.target.checked
       });
 
       SetPolicyFieldCheckBox({
@@ -215,7 +225,8 @@ const RoleDetailsPage = () => {
         isRentalReopen: e.target.checked,
         isQuoteAskSupplierPrice: e.target.checked,
         isQuotationRentalManagement: e.target.checked,
-        isProgressiveBillingRentalManagement: e.target.checked
+        isProgressiveBillingRentalManagement: e.target.checked,
+        isProductInventorySettings: e.target.checked
       });
     }
     if (checkBoxType === 'Policy-CheckBox') {
@@ -284,6 +295,7 @@ const RoleDetailsPage = () => {
         }) || [];
       setResourceOption([...copyOfDashBoardOption]);
       setDefaultResourceName(data?.defaultResource || '');
+      setSuperAdminAccess(data?.superAdminAccess || false);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -344,7 +356,8 @@ const RoleDetailsPage = () => {
         type: roleData.type,
         policy: policyFieldCheckBox,
         dashBoards: dashBoardIds,
-        defaultResource: defaultResourceName
+        defaultResource: defaultResourceName,
+        superAdminAccess: superAdminAccess
       })
       .then(({ data }) => {
         fetchRoleData();
@@ -475,12 +488,7 @@ const RoleDetailsPage = () => {
             {roleData ? (
               <>
                 {permissions.role.isUpdate && (
-                  <Button
-                    disabled={isUpdating || checkError()}
-                    variant="contained"
-                    color="primary"
-                    size="medium"
-                    onClick={handleUpdateRole}>
+                  <Button disabled={isUpdating || checkError()} variant="contained" color="primary" size="medium" onClick={handleUpdateRole}>
                     {isUpdating ? <CircularProgress size={22} /> : 'Update'}
                   </Button>
                 )}
@@ -501,7 +509,7 @@ const RoleDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Grid container spacing={1} >
+        <Grid container spacing={1}>
           <Grid item xs={12} sm={12} md={8} lg={8}>
             <Box display="flex" marginTop={2} marginBottom={2} gridGap={10} px={1}>
               <TextField
@@ -560,6 +568,21 @@ const RoleDetailsPage = () => {
                       <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} />
                     )}
                     <DefaultResources resourceList={resourceOption} resourceName={defaultResourceName} setResourceName={setDefaultResourceName} />
+                    <Box p={1} pb={2}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="superAdminAccess"
+                            checked={superAdminAccess}
+                            onChange={(e) => {
+                              setSuperAdminAccess(e.target.checked)
+                            }}
+                            color="primary"
+                          />
+                        }
+                        label="Super Admin Access"
+                      />
+                    </Box>
                   </>
                 )
               )}

@@ -66,7 +66,7 @@ export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
 export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Loading Ticket', 'Invoice'];
 export const demandOrderSteps = ['Add Products'];
 export const purchaseRequisitionSteps = ['Add Products'];
-export const scheduleSteps = ['Add Products'];
+export const serviceOrderSteps = ['Add Services', 'Add Products', 'Assign Technician', 'Technician Dispatch', 'Invoice'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -221,8 +221,12 @@ export const sidebarResource = {
   technicianScheduler: 'Technician Scheduler',
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
-  schedule: 'Schedule'
-
+  planning: 'Planning',
+  planningCalendar: 'Planning Calendar',
+  fieldTicket: 'Field Ticket',
+  fieldServiceTechnician: `Field Service Technician`,
+  rentalPlanningCalendar: `Rental Planning Calendar`,
+  resourceLogs: `Resource Logs`
 };
 
 export const primaryFields = {
@@ -296,6 +300,7 @@ export const RESOURCE_LABEL = {
   report: 'Report',
   scheduleReport: 'Schedule Report',
   resourceCalendar: 'Resource Calendar',
+  scheduleCalendar: 'Schedule Calendar',
   cageManagement: 'Cage Management',
   productAuction: 'Product Auction',
   inventoryToAsset: 'Inventory to Asset',
@@ -324,7 +329,10 @@ export const RESOURCE_LABEL = {
   technicianScheduler: 'Technician Scheduler',
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
-  schedule: 'Schedule'
+  planning: 'Planning',
+  fieldTicket: 'Field Ticket',
+  fieldServiceTechnician: `Field Service Technician`,
+  resourceLogs: `Resource Logs`
 };
 
 export const CHILD_RESOURCE = {
@@ -344,7 +352,10 @@ export const CHILD_RESOURCE = {
   quotationService: 'Quotation Service',
   repairOrderProduct: 'Repair Order Product',
   serviceOrderDetails: 'Service Order Detail',
-  scheduleMaterial: 'Schedule Material'
+  planningMaterial: 'Planning Material',
+  purchaseRequisition: 'Purchase Requisition Detail',
+  serviceOrderAddon: 'Service Order Addon',
+  fieldTicketCost: 'Field Ticket Cost',
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -731,6 +742,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
         });
     } else if (key.type === 'decimal') {
       obj[key.fieldName] = value && value !== '' ? parseFloat(value) : value;
+    } else if (key.type === 'lookUpDisplay') {
     } else {
       obj[key.fieldName] = value;
     }
@@ -798,6 +810,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
       }
     } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : defaultValue || 0;
+    } else if (key.type === 'lookUpDisplay') {
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue || '';
     }
@@ -1852,7 +1865,12 @@ export const ACTIVITY_RESOURCE = {
   productionOrder: 'productionOrder',
   serviceOrder: 'serviceOrder',
   workOrder: 'workOrder',
-  demandOrder: 'demandOrder'
+  demandOrder: 'demandOrder',
+  fieldTicket: 'fieldTicket',
+};
+
+export const LOG_RESOURCE = {
+  serializedAsset: sidebarResource.serializedAsset,
 };
 
 export const REPORT_LIST = [
@@ -1976,7 +1994,8 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.invoice, value: sidebarResource.invoice, key: 'invoice' },
   { title: sidebarResource.demandOrder, value: sidebarResource.demandOrder, key: 'demandOrder' },
   { title: sidebarResource.productionOrder, value: sidebarResource.productionOrder, key: 'productionOrder' },
-  { title: sidebarResource.serviceOrder, value: sidebarResource.serviceOrder, key: 'serviceOrder' }
+  { title: sidebarResource.serviceOrder, value: sidebarResource.serviceOrder, key: 'serviceOrder' },
+  { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' }
 ];
 
 export const getApi = (resource: string) => {
@@ -2115,6 +2134,11 @@ export const getData = (resource: string, data: any) => {
     case 'work-order':
       return {
         name: `${data?.workOrderNumber}`,
+        id: data._id
+      };
+    case 'field-ticket':
+      return {
+        name: `${data?.fieldTicketNumber}`,
         id: data._id
       };
     default:
@@ -2346,3 +2370,12 @@ export const ECOM_SECTIONS = [
     label: 'Product List'
   }
 ];
+
+export const TOOLTIP_MESSAGE = {
+  add: "You don't have permissions to add",
+  edit: "You don't have permissions to edit",
+  remove: "You don't have permissions to remove",
+}
+
+
+

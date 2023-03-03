@@ -52,6 +52,7 @@ import ProgressiveBilling from './ProgressiveBilling';
 import Services from './Services';
 import Consumables from './Consumables';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { IoMdDownload } from 'react-icons/io';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -103,6 +104,7 @@ const RentalManagementDetailsPage = () => {
 
   const [versionNotClonned, setVersionNotClonned] = useState(false);
   const [reOpening, setReOpening] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -235,7 +237,10 @@ const RentalManagementDetailsPage = () => {
       setCurrentStep(rentalSteps.indexOf(data?.processStatus) !== -1 ? rentalSteps.indexOf(data?.processStatus) : 0);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true
+      }
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data.owner.optionValue === user?.user?._id);
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
@@ -384,6 +389,27 @@ const RentalManagementDetailsPage = () => {
       });
   };
 
+
+  const handleDownload = () => {
+    setIsDownloading(true)
+    axiosInstance().get(`/download-attachment?referenceType=rentalManagement&referenceId=${rentalManagementData?._id}`,
+      {
+        responseType: 'blob'
+      })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', rentalManagementData?.rentalJobName + '.zip');
+        document.body.appendChild(link);
+        link.click();
+        setIsDownloading(false)
+      }).catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsDownloading(false)
+      })
+  }
+
   return (
     <>
       <Box className="main-container-v1">
@@ -395,6 +421,19 @@ const RentalManagementDetailsPage = () => {
             <Box className="control-buttons-v1">
               <>
                 <Fragment>
+                  <Button
+                    variant={'outlined'}
+                    className="btn-outline-v1"
+                    type="button"
+                    size="small"
+                    disabled={isDownloading ? true : false}
+                    startIcon={isMobile ? '' : <IoMdDownload />}
+                    onClick={(e) => {
+                      handleDownload()
+                    }}
+                  >
+                    {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
+                  </Button>
                   {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]) && versionNotClonned && (
                     <Button
                       disabled={!versionNotClonned}

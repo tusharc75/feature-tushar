@@ -30,19 +30,13 @@ const Blog = () => {
     state: { permissions, selectedEntity }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
-  const [blogPermission, setBlogPermission] = useState({
-    isCreate: permissions.blog?.isCreate,
-    isUpdate: permissions.blog?.isUpdate,
-    isRead: permissions.blog?.isRead,
-    isDelete: permissions.blog?.isDelete
-  });
+
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const { getColumnData } = useColumns();
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -50,8 +44,7 @@ const Blog = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [open, setOpen] = useState({ open: false, isClone: false });
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
+
   const [blogId, setBlogId] = useState(null);
 
   const openActions = (event) => {
@@ -69,41 +62,17 @@ const Blog = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (['title'].find((d) => d === o?.fieldData?.fieldName)) {
-            columns = [
-              ...columns,
-              {
-                disabled: false,
-                field: 'title',
-                headerName: 'Title',
-                pivotIndex: 0,
-                show: true,
-                cellRenderer: 'nameRenderer',
-                primaryField: true
-              }
-            ];
-          } else {
-            if (o?.fieldData?.primaryField === true) {
-              columns = [
-                ...columns,
-                { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
-              ];
-            } else {
-              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.blog.path);
-
-              if (currentColumn !== null) {
-                columns = [...columns, currentColumn?.columnData];
-                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                  rendererNames.push(currentColumn?.rendererName);
-                }
-              }
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.blogDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -126,16 +95,14 @@ const Blog = () => {
         let count = data?.count;
         let rows = data?.data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = blogPermission.isDelete;
+          finalObject['canDelete'] = permissions?.blog?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = blogPermission.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.blog?.isUpdate;
 
           return {
             ...finalObject
           };
         });
-        setIsAllChecked(false);
-        setClonedData(data);
         if (appendRows) {
           dispatch({
             type: 'initialize',
@@ -174,16 +141,6 @@ const Blog = () => {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const NameRenderer = (params) => {
-    return (
-      <span className=" d-flex gap-2 align-items-center">
-        <Link className="link" to={`${routes.blogDetail.path}/${params.data._id}`}>
-          {params.value}
-        </Link>
-      </span>
-    );
   };
 
   const ActionsRenderer = (params) => (
@@ -291,11 +248,6 @@ const Blog = () => {
     fetchBlogData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-  useEffect(() => {
-    if (permissions && permissions.blog) {
-      setBlogPermission(permissions.blog);
-    }
-  }, [permissions]);
 
   return (
     <Fragment>
@@ -382,7 +334,7 @@ const Blog = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={!blogPermission?.isDelete}
+                      disabled={!permissions?.blog?.isDelete}
                       onClick={() => {
                         closeActions();
                         // eslint-disable-next-line no-lone-blocks

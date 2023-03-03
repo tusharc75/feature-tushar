@@ -7,7 +7,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { camelCase } from 'lodash';
-import { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
@@ -22,26 +22,27 @@ import {
   removeLocalStorage,
   sidebarResource
 } from 'src/constants/helpers';
-import { getColumnData } from 'src/constants/columns';
 import { Link } from 'react-router-dom';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ManageSchedule from './ManageSchedule';
 import styles from '../Leads/Header.module.scss';
+import ManageFieldTicket from './ManageFieldTicket';
 
 
-const Schedule = () => {
-  const renderedFrom = camelCase(routes?.schedule.title);
+const FieldTicket = () => {
+
+  const renderedFrom = camelCase(routes?.fieldTicket.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [scheduleId, setScheduleId] = useState(null);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const [fieldTicketId, setFieldTicketId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -49,43 +50,28 @@ const Schedule = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const { getColumnData } = useColumns();
+
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.schedule}`)
+      .get(`/field?resource=${sidebarResource?.fieldTicket}`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.fieldData?.primaryField === true) {
-            columns = [
-              ...columns,
-              {
-                field: o?.fieldData?.fieldName,
-                headerName: o?.fieldData?.fieldLabel,
-                show: true,
-                disabled: true,
-                cellRenderer: 'nameRenderer',
-                primaryField: true
-              }
-            ];
-          } else {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.schedule.path);
-
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName);
-              }
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicketDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
-          actionsRenderer: ActionsRenderer
+          actionsRenderer: ActionsRenderer,
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
@@ -93,23 +79,20 @@ const Schedule = () => {
       });
   };
 
-  const fetchScheduleData = () => {
+  const fetchFieldTicketData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes?.schedule.path}${queryString}`)
-      .then(({ data: { data } }) => {
-        let count = data?.count;
-        let rows = data?.data?.map((u: any) => {
+      .get(`${routes?.fieldTicket.path}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.schedule?.isDelete && finalObject?.ownerId === user?.user?._id;
+          finalObject['canDelete'] = permissions?.fieldTicket?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.schedule?.isUpdate;
-
+          finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
           return {
             ...finalObject
           };
@@ -129,20 +112,6 @@ const Schedule = () => {
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
-        }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -154,10 +123,8 @@ const Schedule = () => {
     switch (field) {
       case 'createdBy':
         return 'createdBy.user.concatedName';
-
       case 'updatedBy':
         return 'updatedBy.user.concatedName';
-
       default:
         return field;
     }
@@ -207,25 +174,15 @@ const Schedule = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const NameRenderer = (params) => {
-    return (
-      <span className=" d-flex gap-2 align-items-center">
-        <Link className="link" to={`${routes.schedule.path}/detail/${params.data._id}`}>
-          {params.value}
-        </Link>
-      </span>
-    );
-  };
-
   const ActionsRenderer = (params) => (
     <Fragment>
-      {permissions?.schedule?.isCreate ? (
+      {permissions?.fieldTicket?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
             aria-label="Clone"
             onClick={() => {
-             setScheduleId(params.data.id);
+              setFieldTicketId(params.data.id);
               setOpen({ open: true, isClone: true });
             }}
           >
@@ -270,10 +227,10 @@ const Schedule = () => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`${routes?.schedule?.path}/remove`, { ids: ids })
+      .put(`${routes?.fieldTicket?.path}/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
-        fetchScheduleData();
+        fetchFieldTicketData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
@@ -292,22 +249,22 @@ const Schedule = () => {
   }, []);
 
   useEffect(() => {
-    fetchScheduleData();
+    fetchFieldTicketData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   return (
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.schedule.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.fieldTicket.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.schedule}
-            module="schedule"
-            api={'schedule'}
+            permissions={permissions.fieldTicket}
+            module="fieldTicket"
+            api={'field-ticket'}
             afterImportCompleted={() => {
-              fetchScheduleData();
+              fetchFieldTicketData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
@@ -319,9 +276,10 @@ const Schedule = () => {
             }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
-              else fetchScheduleData();
+              else fetchFieldTicketData();
             }}
             additionalParams={getQueryString(true)}
+            onlyExport={true}
           />
         </Grid>
       </Grid>
@@ -342,11 +300,11 @@ const Schedule = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.schedule.isCreate && (
+                  {permissions.fieldTicket.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
-                        setScheduleId(null);
+                        setFieldTicketId(null);
                         setOpen({ open: true, isClone: false });
                       }}
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -357,7 +315,7 @@ const Schedule = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions?.schedule?.isDelete && (
+                  {permissions?.fieldTicket?.isDelete && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -413,17 +371,17 @@ const Schedule = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.schedule}
+              permissions={permissions.fieldTicket}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
-                setScheduleId(data.id);
+                setFieldTicketId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                setScheduleId(data.id);
+                setFieldTicketId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               extraParamsToCheckDelete={true}
@@ -439,7 +397,7 @@ const Schedule = () => {
               onCreate={false}
               showClone={true}
               onClone={(data) => {
-                setScheduleId(data.id);
+                setFieldTicketId(data.id);
                 setOpen({ open: true, isClone: true });
               }}
               chips={[]}
@@ -459,7 +417,7 @@ const Schedule = () => {
               allowAction={true}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={fetchScheduleData}
+              refreshGrid={fetchFieldTicketData}
               showOnlyShowFilteredRecordSwitch={true}
             />
           )
@@ -467,7 +425,7 @@ const Schedule = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete Schedule  ${deleteRecord?.scheduleNumber || ''} ?`}
+            message={`Are you sure you want to delete Field Ticket  ${deleteRecord?.fieldTicketNumber || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -476,13 +434,13 @@ const Schedule = () => {
           />
         )}
         {open?.open && (
-          <ManageSchedule
-            id={scheduleId}
+          <ManageFieldTicket
+            id={fieldTicketId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
-              fetchScheduleData();
+              fetchFieldTicketData();
             }}
           />
         )}
@@ -491,4 +449,4 @@ const Schedule = () => {
   );
 };
 
-export default Schedule;
+export default FieldTicket;

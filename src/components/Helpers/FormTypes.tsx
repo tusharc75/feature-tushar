@@ -769,6 +769,7 @@ const FormTypes = (props) => {
         required={required}
         name={name}
         value={values[name]}
+        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         InputProps={{
@@ -1404,6 +1405,7 @@ const FormTypes = (props) => {
         {...rest}
         variant="outlined"
         type="number"
+        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
         label={label}
         required={required}
         name={name}
@@ -2073,7 +2075,7 @@ const FormTypes = (props) => {
           onChange={(date) => setFieldValue(name, date)}
           onError={console.error}
           disablePast
-          format="yyyy/MM/dd HH:mm"
+          format={dateFormatForInputControl + " HH:mm"}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
           InputLabelProps={{

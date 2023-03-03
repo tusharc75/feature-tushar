@@ -1,39 +1,19 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import {
-  Grid,
   Box,
   Button,
-  Paper,
-  Typography,
   IconButton,
-  CircularProgress,
-  Tab,
-  Tabs,
-  ButtonGroup,
-  Container,
-  InputAdornment,
-  useMediaQuery,
-  Menu,
-  MenuItem,
-  Tooltip,
-  Chip,
-  capitalize
 } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import { ExpandMore } from '@material-ui/icons';
-import { isMobile, isTablet } from 'react-device-detect';
-import { FiDownloadCloud } from 'react-icons/fi';
-import { AiFillEdit, AiOutlineEye, AiOutlineFileExcel, AiOutlineFilePdf } from 'react-icons/ai';
-import { GiVintageRobot } from 'react-icons/gi';
-import { utils } from 'xlsx';
-import { fetch_quotation_product_fields, handleViewPdf } from 'src/components/Quotation/helper';
+import { isMobile } from 'react-device-detect';
+import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { dateFormat, formatAmountWithCurrency, prepareDataForGrid, quotation, QUOTATION_STATUS } from 'src/constants/helpers';
+import { dateFormat, formatAmountWithCurrency, prepareDataForGrid, quotation } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import SendEmail from '../SendEmail';
@@ -50,7 +30,8 @@ const QuoteBuilder = ({
   fetchQuotationData,
   version,
   currentStep,
-  versionData
+  versionData,
+  allowedToEdit
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -60,6 +41,8 @@ const QuoteBuilder = ({
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
+  const [allColumn, setAllColumn] = useState([]);
+
 
   useEffect(() => {
     fetchFields();
@@ -95,9 +78,8 @@ const QuoteBuilder = ({
       {
         accessor: 'type',
         Header: 'Type',
-        disableFilters: true,
         sticky: isMobile ? 'none' : 'left',
-        width: 200,
+        width: 100,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -114,34 +96,33 @@ const QuoteBuilder = ({
         width: 300,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {
-              <p className="text-truncate" title={row.original?.detail}>
-                {row.original?.detail}
-              </p>
-            }
-            {row.original?.parentId === null && row.original?.type !== 'Service' && (
-              <Box ml={1} className="d-flex align-items-center">
+            <p className="text-truncate" title={row.original?.detail}>
+              {row.original?.detail}
+            </p>
+            {row.original?.subRows?.length ? (
+              <Box ml={1} >
                 <span>({row.original?.subRows?.length})</span>
               </Box>
-            )}
-            <IconButton
-              size="small"
-              onClick={() => {
-                window.open(
-                  `${
-                    row.original.type === 'serializedAsset'
+            ) : null}
+            <Box ml={1} >
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(
+                    `${row.original.type === 'serializedAsset'
                       ? routes.serializedAssetDetail.path
                       : row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'package'
-                      ? routes.packagesDetail.path
-                      : routes.serviceMasterDetail.path
-                  }/${row.original.materialId}`
-                );
-              }}
-            >
-             <OpenInNewIcon fontSize="small" color="primary" /> 
-            </IconButton>
+                        ? routes.productDetail.path
+                        : row.original.type === 'package'
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
+                    }/${row.original.materialId}`
+                  );
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
           </div>
         )
       },
@@ -259,6 +240,7 @@ const QuoteBuilder = ({
       }
     });
     setColumns(coloum);
+    setAllColumn(coloum.map((d) => d.Header));
   };
 
   const fetchProductInventory = async () => {
@@ -273,15 +255,14 @@ const QuoteBuilder = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -320,16 +301,16 @@ const QuoteBuilder = ({
 
   const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
-    subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+    subRows.forEach((_subRow, index) => {
+      _subRow.srno = parent.srno + '.' + `${index + 1}`;
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -352,19 +333,30 @@ const QuoteBuilder = ({
     <Fragment>
       <Box pb={2} display="flex" justifyContent="space-between">
         <Box display="flex">
-          <SendEmail versionData={versionData} quotationData={quotationData} />
+          <SendEmail
+            versionData={versionData}
+            quotationData={quotationData}
+            columns={columns}
+            versionId={versionData._id}
+            allColumn={allColumn}
+            isSendEmail={true}
+            allowedToEdit={allowedToEdit}
+            currentVersion={version}
+            hideSummary={true}
+            hideVersions={true}
+          />
         </Box>
         <Box display="flex">
           {versionData?.processStatus === 'Send To Customer' && (
             <HtmlTooltip title={'Send to customer'}>
               <Button
                 variant="contained"
-                className="btn-outline-v1"
                 size="small"
+                color="primary"
                 disabled={sentToCustomer}
                 onClick={() => {
                   axiosInstance()
-                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${versionData._id}`)
+                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${versionData._id}?sendMail=true`)
                     .then(() => {
                       fetchQuotationData(version, false);
                       toastConfig.setToastConfig({
@@ -393,7 +385,7 @@ const QuoteBuilder = ({
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-              onSelect={() => {}}
+              onSelect={() => { }}
               hideSelection={true}
               hideAction={true}
               childrenProperty="subRows"

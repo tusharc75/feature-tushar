@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, MenuList, ListItemIcon, ListItemText } from '@material-ui/core';
+import { Grid, Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -10,17 +10,15 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AddExistingProductInventory from './AddExistingProductInventory';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import moment from 'moment';
-import { repairOrder, dateFormat } from '../../../constants/helpers';
+import { repairOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { ExpandMore } from '@material-ui/icons';
-import { sortBy } from 'lodash';
+import { capitalize, sortBy } from 'lodash';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
@@ -71,59 +69,43 @@ const Productpackage = ({
     setColumns(null);
     const coloum: any = [
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
       },
-
+      {
+        accessor: 'type',
+        Header: 'Type',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>,
+      },
       {
         accessor: 'detail',
-        Header: 'Asset Details',
-        minWidth: 300,
-        width: 300,
+        Header: 'Details',
+        width: 250,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {!allowedToEdit ? <p>{row.original.detail}</p> : <p title={row.original.detail}>{row.original.detail}</p>}
-            {
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-                </span>
-              </Box>
-            }
-            <Chip
-              className="ml-1"
-              label={`${
-                row.original.type === 'service'
-                  ? 'Service'
-                  : row.original.type === 'product'
-                  ? 'Product'
-                  : row.original.type === 'serializedAsset'
-                  ? 'Asset'
-                  : 'Package'
-              }`}
-              size="small"
-              color="primary"
-              onClick={() => {
-                window.open(
-                  `${
-                    row.original.type === 'service'
-                      ? routes.serviceMasterDetail.path
-                      : row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : routes.packagesDetail.path
-                  }/${row.original.materialId}`
-                );
-              }}
-            />
+
+            <a className="link text-truncate" target='_blank' href={`${row.original.type === 'service'
+              ? routes.serviceMasterDetail.path
+              : row.original.type === 'product'
+                ? routes.productDetail.path
+                : row.original.type === 'serializedAsset'
+                  ? routes.serializedAssetDetail.path
+                  : routes.packagesDetail.path
+              }/${row.original.materialId}`}>{row.original.detail}</a>
+            <Box ml={1} className="d-flex align-items-center">
+              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+              </span>
+            </Box>
           </div>
         )
       },
@@ -215,41 +197,39 @@ const Productpackage = ({
     const rows = data.material.filter((e) => e.parentId === null);
 
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.type === 'product'
+      parent.index = i + 1;
+      parent.detail = `${parent.type === 'service'
+        ? parent.serviceDetail?.serviceName
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.assetNumber
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serializedAssetDetail.assetNumber
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent?.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.status = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
+      parent.status = `${parent.type === 'service'
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
           ? parent?.productDetail?.status
           : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent?.serializedAssetDetail?.status
+            : parent.packageDetail?.status
+        }`;
     });
 
     if (rows.length !== 0) {
@@ -272,24 +252,23 @@ const Productpackage = ({
     let productIndex = 0;
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'product'
+      _subRow.index = parent.index + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
+      _subRow.detail = `${_subRow.type === 'service'
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.assetNumber
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serializedAssetDetail.assetNumber
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -297,15 +276,14 @@ const Productpackage = ({
       _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
-      parent.status = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
+      parent.status = `${parent.type === 'service'
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
+        }`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -345,7 +323,7 @@ const Productpackage = ({
 
   const handleSaveData = async (rows: any) => {
     rows.forEach((element) => {
-      delete element.srno;
+      delete element.index;
       delete element.detail;
       delete element.serializedProduct;
       delete element.qtyDisplay;
@@ -413,7 +391,7 @@ const Productpackage = ({
       <Grid container spacing={2}>
         {allowedToEdit && (
           <Grid item xs={12} md={12} sm={12}>
-            <Box display="flex" justifyContent="space-between" m={1} mb={0}>
+            <Box display="flex" justifyContent="space-between" mt={1} mb={1}>
               <Box display="flex">
                 {/* {permissions?.product?.isRead &&
                   <Button
@@ -445,10 +423,9 @@ const Productpackage = ({
                 {permissions?.serializedAsset?.isRead && allowedToEdit && (
                   <>
                     <Button
-                      className="btn-outline-v1 light"
                       size="small"
-                      variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                      style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                      variant="contained"
+                      color="primary"
                       onClick={() => {
                         setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null, existing: false });
                       }}
@@ -457,10 +434,9 @@ const Productpackage = ({
                     </Button>
                     <Box ml={1} />
                     <Button
-                      className="btn-outline-v1 light"
                       size="small"
-                      variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                      style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                      variant="contained"
+                      color="primary"
                       onClick={() => {
                         setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null, existing: true });
                       }}
@@ -524,6 +500,7 @@ const Productpackage = ({
                 hideAction={!allowedToEdit}
                 renderedFrom="repair_order_product_package"
                 isClientSideGrid={true}
+                hideExpander={true}
               />
             </Box>
           ) : (
@@ -586,13 +563,13 @@ const Productpackage = ({
       {addExistingProductDialog.open && addExistingProductDialog.existing && addExistingProductDialog.type === 'serializedAsset' && (
         <AssignSerializedAssetDialog
           reference="repairOrder"
-          referenceId={repairOrderData?._id}
           handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false })}
           ids={[...rowsData?.filter((e) => e.type === 'serializedAsset')?.map((e: any) => e?.serializedAssetDetail?._id)]}
           referenceData={{
             customerAccount: repairOrderData?.customerAccount?.optionValue,
             warehouse: repairOrderData?.warehouse?.optionValue
           }}
+          isAssigning={false}
           handleSucess={handleAdd}
         />
       )}

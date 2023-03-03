@@ -1,0 +1,20 @@
+.rbc-time-content,
+.rbc-time-header-gutter {
+    display: none !important;
+}
+
+.rbc-time-header {
+    height: calc(100vh - 150px);
+
+    .rbc-time-header-content {
+        border-left: none;
+    }
+}
+
+// .rbc-allday-cell {
+//     min-height: calc(100vh - 200px);
+// }
+
+// .rbc-time-header-cell {
+//     height: 300px;
+// }
