@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback, useMemo, useState, useContext } from 'react'
 import { useHistory } from 'react-router-dom';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar'
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import './calendarView.scss'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import moment from 'moment';
