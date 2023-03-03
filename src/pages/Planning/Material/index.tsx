@@ -262,7 +262,6 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         setIsAdding(false)
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
         setIsAdding(false)
         toastConfig.setToastConfig(error);
       });

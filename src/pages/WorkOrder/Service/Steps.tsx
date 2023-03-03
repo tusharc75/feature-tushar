@@ -23,8 +23,9 @@ import CompleteDialog from './CompleteDialog';
 import { useData } from 'src/StateProvider/Provider';
 import SettingsIcon from '@material-ui/icons/Settings';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
-import UploadFileIcon from '@material-ui/icons/CloudUpload';
-import ManageStepAttachment from './ManageStepAttachmentDialog';
+import AttachFileIcon from '@material-ui/icons/AttachFile';
+import AttachmentDialog from './AttachmentDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const TimerComponent = ({ stepData, updateTime = true }) => {
   const [time, setTime] = useState(null);
@@ -172,7 +173,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
   } = useData();
   const [viewStep, setViewStep] = React.useState({ open: false, step: null });
   const [isAllStepDone, setIsAllStepDone] = React.useState(false);
-  const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, data: null });
+  const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
 
   useEffect(() => {
     fetchServiceData();
@@ -541,15 +542,13 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   transition: 'background .5s ease',
                   backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                 }}
-                className={`${classes.accordionHeading}  ${
-                  Boolean(stepData?.passFailStatus)
-                    ? `${
-                        Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                          ? classes.green
-                          : ''
-                      } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
-                    : classes.white
-                }`}
+                className={`${classes.accordionHeading}  ${Boolean(stepData?.passFailStatus)
+                  ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                    ? classes.green
+                    : ''
+                  } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+                  : classes.white
+                  }`}
               >
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
                   <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px' }}>
@@ -593,8 +592,8 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                               {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
                                 ? 'Resume'
                                 : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-                                ? 'Pause'
-                                : 'Restart'}
+                                  ? 'Pause'
+                                  : 'Restart'}
                             </Button>
                           </Box>
                         )}
@@ -668,9 +667,9 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                         )
                       ) : null}
                       {stepData?.status &&
-                      ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                      ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                      (isMeTechnician || !isAnyTechnician) ? (
+                        ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                        ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                        (isMeTechnician || !isAnyTechnician) ? (
                         [
                           WORKORDER_SERVICE_STEP_STATUS.passed,
                           WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -724,6 +723,26 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                       paddingTop: '10px'
                     }}
                   >
+                    <Box ml={1}>
+                      <HtmlTooltip title="Upload Document">
+                        <IconButton
+                          aria-label="close"
+                          onClick={() => {
+                            setAttchmentsDialog({
+                              open: true,
+                              uniqueServiceId: selectedService.uniqueId,
+                              stepId: step?._id,
+                              serviceName: selectedService.serviceName,
+                              stepName: step.stepName
+                            });
+                          }}
+                          size="small"
+                          color="inherit"
+                        >
+                          <AttachFileIcon color="primary" fontSize="small" />
+                        </IconButton>
+                      </HtmlTooltip>
+                    </Box>
                     {referencType !== 'workOrderTechnician' && (
                       <Box ml={1}>
                         <IconButton
@@ -738,24 +757,6 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                         </IconButton>
                       </Box>
                     )}
-                    <Box ml={1}>
-                      <IconButton
-                        aria-label="close"
-                        onClick={() => {
-                          setAttchmentsDialog({
-                            open: true,
-                            data: {
-                              serviceId: selectedService?.materialId,
-                              stepId: step?._id
-                            }
-                          });
-                        }}
-                        size="small"
-                        color="inherit"
-                      >
-                        <UploadFileIcon color="inherit" fontSize="small" />
-                      </IconButton>
-                    </Box>
                   </Box>
                 </Box>
               </Box>
@@ -817,15 +818,15 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             message={
               addServiceConfirmation.type === 'returnToStepOnFail'
                 ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services
-                    ?.map((e) => e.serviceName)
-                    ?.toString()}. Do you want to continue ?`
+                  ?.map((e) => e.serviceName)
+                  ?.toString()}. Do you want to continue ?`
                 : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                ? ` Step fail requires Quote Revision. Do you confirm on this?`
-                : addServiceConfirmation.type === 'jumpStep'
-                ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                    ?.map((e) => e.serviceName)
-                    ?.toString()} has been added. Do you want to Add ? `
+                  ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                  : addServiceConfirmation.type === 'jumpStep'
+                    ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                      ?.map((e) => e.serviceName)
+                      ?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
@@ -860,22 +861,16 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
           />
         )}
         {attchmentsDialog.open && (
-          <ManageStepAttachment
-            relatedTo={[
-              {
-                type: 'workOrder',
-                referenceId: workOrderId,
-                access: true
-              }
-            ]}
-            data={attchmentsDialog.data}
+          <AttachmentDialog
+            workOrderId={workOrderId}
+            uniqueServiceId={attchmentsDialog.uniqueServiceId}
+            stepId={attchmentsDialog.stepId}
+            serviceName={attchmentsDialog.serviceName}
+            stepName={attchmentsDialog.stepName}
             handleClose={() => {
-              setAttchmentsDialog({
-                open: false,
-                data: null
-              });
+              setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
             }}
-            handleSuccess={() => {}}
+            handleSuccess={() => { }}
           />
         )}
       </Box>
