@@ -2,6 +2,7 @@ import React, { useEffect, useCallback, useMemo, useState, useContext } from 're
 import { useHistory } from 'react-router-dom';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar'
 import './calendarView.scss'
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import moment from 'moment';
 import { Grid, makeStyles, Checkbox, TextField, ButtonGroup, Button, Popper, Paper, ClickAwayListener, MenuList, MenuItem, Grow, Box } from '@material-ui/core';
@@ -188,6 +189,9 @@ function CalendarView() {
         updateData(event, start, end)
     }
 
+    const handleDragStart = (event) => {
+    }
+
     const resizeEvent = ({ event, start, end }) => {
         const filterEvents = staticEvents.filter(ev => ev.id !== event.id)
         const existing = staticEvents.find((ev) => ev.id === event.id) ?? {}
@@ -364,13 +368,14 @@ function CalendarView() {
             }
         </Box>
         <DragAndDropCalendar
-            style={{ height: "calc(100vh - 260px)" }}
+            style={{ height: "calc(100vh - 50px)" }}
             defaultDate={defaultDate}
             defaultView={'day'}
             events={events}
             formats={formats}
             localizer={localizer}
             onEventDrop={moveEvent}
+            handleDragStart={handleDragStart}
             onEventResize={resizeEvent}
             popup={true}
             resizable
@@ -378,7 +383,6 @@ function CalendarView() {
             onView={onView}
             view={view}
             eventPropGetter={(obj: any) => {
-                console.log(obj)
                 const newStyles = {
                     backgroundColor: obj.type === 'rental' ? 'rgba(255, 232, 204, 1)' : 'rgba(234, 239, 254, 1)',
                     color: obj?.type === 'rental' ? 'rgba(236, 85, 0, 1)' : 'rgba(4, 50, 161, 1)',
