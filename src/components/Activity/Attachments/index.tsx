@@ -27,7 +27,6 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
-  
   const [open, setOpen] = useState({ open: false, type: 'file', parentFolder: null, purpose: 'add' });
   const [loading, setLoading] = useState(false);
   const [attachments, setAttachments] = useState(null);
@@ -58,7 +57,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           setLoading(false);
           onSetCount('Attachment', count);
           const rows = data
-            ?.filter((item) => item.parentFolder === null)
+            ?.filter((item) => !item.parentFolder)
             .map((_attachment, idx) => {
               if (_attachment?.type === 'folder') {
                 const childTree = nestedSubTrees(data, _attachment._id);
