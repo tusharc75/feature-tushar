@@ -26,6 +26,9 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { useHistory } from 'react-router-dom';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import AttachmentIcon from '@material-ui/icons/Attachment';
+import ReceiptIcon from '@material-ui/icons/Receipt';
+import RepeatIcon from '@material-ui/icons/Repeat';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
@@ -178,7 +181,7 @@ const SerializedAsset = ({
                     });
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color={'primary'} />
+                  <AttachmentIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -192,7 +195,7 @@ const SerializedAsset = ({
                     });
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color={'primary'} />
+                  <ReceiptIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -236,7 +239,7 @@ const SerializedAsset = ({
                         });
                       }}
                     >
-                      <OpenInNewIcon fontSize="small" color={'primary'} />
+                      <RepeatIcon fontSize="small" color={'primary'} />
                     </IconButton>
                   </HtmlTooltip>
                 )}
@@ -665,7 +668,7 @@ const SerializedAsset = ({
       };
     });
 
-    
+
     const assetProduct = [];
     flatArray.forEach((element) => {
       if (element.type === 'product' && element.realAssetQty > element.realAssetAssignedQty) {

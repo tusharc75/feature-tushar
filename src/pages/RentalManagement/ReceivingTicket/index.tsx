@@ -129,6 +129,7 @@ const ReceivingTicket = ({
 
   const [invoiceData, setInvoiceData] = useState(null);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, data: null, loading: false })
+  const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -148,6 +149,15 @@ const ReceivingTicket = ({
 
   const closeActions = () => {
     setAnchorActionEl(null);
+  };
+
+
+  const openLinkActions = (event) => {
+    setAnchorLinkActionEl(event.currentTarget);
+  };
+
+  const closeLinkActions = () => {
+    setAnchorLinkActionEl(null);
   };
 
   useEffect(() => {
@@ -1439,6 +1449,33 @@ const ReceivingTicket = ({
               )}
           </Menu>
           <Box mx={1} />
+          {(
+            <IconButton onClick={openLinkActions} size="small" color="primary">
+              <ExpandMore fontSize="inherit" />
+            </IconButton>
+          )}
+          <Menu
+            anchorEl={anchorLinkActionEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="action-menu"
+            open={Boolean(anchorLinkActionEl)}
+            onClose={closeLinkActions}
+          >
+            <MenuItem
+              onClick={() => {
+                history.push(routes.deliveryTicket.path, {
+                  rental: rentalManagementData
+                });
+              }}
+            >
+              {`Created ${routes.deliveryTicket.title}`}
+            </MenuItem>
+          </Menu>
           {showProcessDeliveryTicket && !isOffline && (
             <Fragment>
               <Tooltip title="Process Multiple Receiving/Return Ticket(s)">
