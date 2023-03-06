@@ -8,7 +8,7 @@ import Button from "@material-ui/core/Button";
 import { AiFillFilePdf } from 'react-icons/ai';
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { gridLoadingTimeout, deliveryTicket, serializedAsset, DELIVERY_TICKET_REFRENCE_TYPE } from '../../constants/helpers';
+import { gridLoadingTimeout, deliveryTicket, serializedAsset } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../SwipableListComponents/CustomSwipableList';
@@ -18,7 +18,7 @@ import { useData } from "../../StateProvider/Provider";
 import { PickupFromRenderer, DeliveryToRenderer } from './helper';
 
 
-const TypewiseTickets = ({ refrenceType, refrenceId, renderedFrom }) => {
+const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
@@ -80,7 +80,7 @@ const TypewiseTickets = ({ refrenceType, refrenceId, renderedFrom }) => {
             gridApi.setRowData([]);
         }
         let data;
-        const response = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${refrenceType}&refrenceId=${refrenceId}`)
+        const response = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${referenceType}&referenceId=${referenceId}`)
         data = response?.data?.data
         let rows = data.map((u) => {
             let finalObject = prepareDataForGrid(u, user);

@@ -44,8 +44,8 @@ const ManageRepairOrder = ({
   repairOrderId = null,
   onClose,
   onSuccess,
-  refrenceType = null,
-  refrenceData = null,
+  referenceType = null,
+  referenceData = null,
   isEditable = true,
   isAnyMaterial = false
 }) => {
@@ -203,18 +203,18 @@ const ManageRepairOrder = ({
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
         initialData['repairOrderNumber'] = `RO_${generateUniqueIdOnly()}`;
-        if (refrenceType === "rentalJob") {
+        if (referenceType === "rentalJob") {
           if (fieldsDataForCreate?.some((e) => e?.fieldName === "warehouse")) {
-            initialData['warehouse'] = refrenceData?.warehouse;
+            initialData['warehouse'] = referenceData?.warehouse;
           }
           if (fieldsDataForCreate?.some((e) => e?.fieldName === "rentalJob")) {
-            initialData["rentalJob"] = refrenceData?._id;
+            initialData["rentalJob"] = referenceData?._id;
           }
           if (fieldsDataForCreate?.some((e) => e?.fieldName === "customerAccount")) {
-            initialData['customerAccount'] = refrenceData?.customerAccount;
+            initialData['customerAccount'] = referenceData?.customerAccount;
           }
           if (fieldsDataForCreate?.some((e) => e?.fieldName === "customerContact")) {
-            initialData['customerContact'] = refrenceData?.customerContact;
+            initialData['customerContact'] = referenceData?.customerContact;
           }
           if (fieldsDataForCreate?.some((e) => e?.fieldName === "type")) {
             initialData['type'] = REPAIR_ORDER_TYPE.external;
@@ -270,7 +270,7 @@ const ManageRepairOrder = ({
       axiosInstance()
         .post(`${repairOrder.api}`, rest)
         .then(({ data: { data, message } }) => {
-          if (!refrenceType) {
+          if (!referenceType) {
             history.push(`${routes.repairOrderDetail.path}/${data._id}`);
           }
           setLoading(false);

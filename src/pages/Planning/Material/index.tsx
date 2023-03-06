@@ -555,6 +555,10 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       {addDialog.open && addDialog.type === 'serializedAsset' && (
         <AssignSerializedAssetDialog
           reference={'planning'}
+          referenceData={{
+            fromDate: planningData?.startDate,
+            toDate: planningData?.endDate
+          }}
           handleClose={() => {
             setAddDialog({ open: false, type: '', parentId: null })
             setAssetAssignedProduct([])

@@ -624,7 +624,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           type={addExistingProductDialog.type}
-          refrenceType={'Quotation'}
+          referenceType={'Quotation'}
           ignoreIds={rowsData?.map((e) => e?.materialId)}
         />
       )}

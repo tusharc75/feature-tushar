@@ -33,7 +33,7 @@ const AddExistingProductInventory = ({
   type,
   isAddingProducts,
   renderedFrom,
-  refrenceType,
+  referenceType,
   ignoreIds
 }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -125,7 +125,7 @@ const AddExistingProductInventory = ({
     //     updatedFilters.push({ field: 'packageType', term: 'product' })
     // }
     // if (type === "product") {
-    //     if (refrenceType !== "purchaseOrder") {
+    //     if (referenceType !== "purchaseOrder") {
     //         updatedFilters.push({ field: 'serializedProduct', term: 'yes' })
     //     }
     // }

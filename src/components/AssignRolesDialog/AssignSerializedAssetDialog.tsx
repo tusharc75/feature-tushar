@@ -147,6 +147,11 @@ const AssignSerializedAssetDialog = ({
         deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
       }
     }
+    if (reference === 'planning') {
+      deepFilter = `${deepFilter}&planning=true`;
+      const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate }
+      deepFilter = `${deepFilter}&date=${JSON.stringify(dateFilter)}`;
+    }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
