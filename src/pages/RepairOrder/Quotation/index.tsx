@@ -556,7 +556,7 @@ const Quotation = ({
                   className="mx-1"
                   color="primary"
                 >
-                 Process Quote
+                  Process Quote
                 </Button>
               ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
                 <Button
@@ -722,7 +722,7 @@ const Quotation = ({
           onClose={() => setShowAllVersionStatus(false)}
           quotationId={quotationData?._id}
           handleChangeVersion={handleChangeVersion}
-          refrenceType="repairOrder"
+          referenceType="repairOrder"
         />
       )}
       {customerAcceptable && (

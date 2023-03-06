@@ -14,7 +14,7 @@ import {
 } from "./../../constants/helpers";
 import {
     getObjKeysWithValues, getObjKeys, yupSchema, deliveryTicket, sidebarResource, DELIVERY_TICKET_TYPE,
-    DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_FROM_TO_TYPE
+    DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_FROM_TO_TYPE
 } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import FormTypes from "../../components/Helpers/FormTypes";
@@ -29,10 +29,8 @@ import { createDeliveryTicketOffline } from './deliveryTicketOfflineHelper';
 import CustomButton from '../../components/Helpers/CustomButton'
 import AddIcon from "@material-ui/icons/AddCircle";
 import ManageAddressDialog from "../../components/Address/ManageAddressDialog";
-import { isArray } from "lodash";
-import routes from './../../components/Helpers/Routes';
 
-const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, ticketType = null, refrenceType = null, refrenceData = null,
+const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, ticketType = null, referenceType = null, referenceData = null,
     productInventory = null, products = null, serialNumber = null }) => {
 
     const { state: { user } }: any = useData();
@@ -99,7 +97,7 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
             })
             setFormsData(newFilteredData);
         }
-    }, [initialData.fields, refrenceData]);
+    }, [initialData.fields, referenceData]);
 
     const updateFieldProperty = (fields, pickupFromType, deliveryToType, ticketType, pickupFrom, deliveryTo, isPickupFromDisable, isDeliveryToDisable) => {
         var warehouse = [];
@@ -166,7 +164,7 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
 
     useEffect(() => {
         fetchFields()
-    }, [deliveryTicketId, refrenceData]);
+    }, [deliveryTicketId, referenceData]);
 
     const fetchFields = async () => {
         try {
@@ -202,10 +200,10 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                 const tempInitialData = getObjKeys("", fieldsDataForCreate)
                 var isPickupFromDisable = false;
                 var isDeliveryToDisable = false;
-                if ((productInventory || products) && refrenceType && refrenceData) {
+                if ((productInventory || products) && referenceType && referenceData) {
 
-                    tempInitialData["ticketName"] = `${refrenceData?.ticketName}_${generateUniqueIdOnly()}`
-                    tempInitialData["type"] = refrenceType;
+                    tempInitialData["ticketName"] = `${referenceData?.ticketName}_${generateUniqueIdOnly()}`
+                    tempInitialData["type"] = referenceType;
                     tempInitialData["ticketType"] = ticketType;
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
                     tempInitialData["products"] = []
@@ -216,45 +214,45 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                     if (serialNumber) {
                         tempInitialData["serialNumber"] = serialNumber
                     }
-                    tempInitialData["wellName"] = refrenceData?.wellName;
-                    tempInitialData["afeNumber"] = refrenceData?.afeNumber;
-                    if (refrenceData?.processor) {
-                        tempInitialData["deliveryPerson"] = refrenceData?.processor;
+                    tempInitialData["wellName"] = referenceData?.wellName;
+                    tempInitialData["afeNumber"] = referenceData?.afeNumber;
+                    if (referenceData?.processor) {
+                        tempInitialData["deliveryPerson"] = referenceData?.processor;
                     }
-                    if (refrenceData.status) {
-                        tempInitialData["status"] = refrenceData.status;
+                    if (referenceData.status) {
+                        tempInitialData["status"] = referenceData.status;
                     }
-                    isPickupFromDisable = refrenceData?.isPickupFromDisable ? true : false;
-                    isDeliveryToDisable = refrenceData?.isDeliveryToDisable ? true : false;
+                    isPickupFromDisable = referenceData?.isPickupFromDisable ? true : false;
+                    isDeliveryToDisable = referenceData?.isDeliveryToDisable ? true : false;
 
-                    if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob) {
-                        tempInitialData["rentalJob"] = refrenceData?.refrenceId
+                    if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob) {
+                        tempInitialData["rentalJob"] = referenceData?.referenceId
                     }
-                    else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
-                        tempInitialData["salesOrder"] = refrenceData?._id
+                    else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.salesOrder) {
+                        tempInitialData["salesOrder"] = referenceData?._id
                     }
-                    else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
-                        tempInitialData["repairJob"] = refrenceData?.refrenceId
+                    else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.repairJob) {
+                        tempInitialData["repairJob"] = referenceData?.referenceId
                     }
-                    else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-                        tempInitialData["transferAsset"] = refrenceData?.refrenceId;
+                    else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset) {
+                        tempInitialData["transferAsset"] = referenceData?.referenceId;
                     }
-                    else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.sublease) {
-                        tempInitialData["sublease"] = refrenceData?.refrenceId;
+                    else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.sublease) {
+                        tempInitialData["sublease"] = referenceData?.referenceId;
                     }
-                    else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.transferInventory) {
-                        tempInitialData["transferInventory"] = refrenceData?.refrenceId;
+                    else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
+                        tempInitialData["transferInventory"] = referenceData?.referenceId;
                     }
-                    else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.repairOrder) {
-                        tempInitialData["repairOrder"] = refrenceData?.refrenceId;
+                    else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.repairOrder) {
+                        tempInitialData["repairOrder"] = referenceData?.referenceId;
                     }
 
-                    tempInitialData["pickupFromType"] = refrenceData?.pickupFromType;
-                    tempInitialData["pickupFrom"] = refrenceData?.pickupFrom;
-                    tempInitialData["pickupFromAddress"] = refrenceData?.pickupFromAddress;
-                    tempInitialData["deliveryToType"] = refrenceData?.deliveryToType;
-                    tempInitialData["deliveryTo"] = refrenceData?.deliveryTo;
-                    tempInitialData["deliveryToAddress"] = refrenceData?.deliveryToAddress;
+                    tempInitialData["pickupFromType"] = referenceData?.pickupFromType;
+                    tempInitialData["pickupFrom"] = referenceData?.pickupFrom;
+                    tempInitialData["pickupFromAddress"] = referenceData?.pickupFromAddress;
+                    tempInitialData["deliveryToType"] = referenceData?.deliveryToType;
+                    tempInitialData["deliveryTo"] = referenceData?.deliveryTo;
+                    tempInitialData["deliveryToAddress"] = referenceData?.deliveryToAddress;
 
                     const warehouse = fieldsDataForUpdate.find((d) => d.fieldName === "warehouse");
                     if (warehouse && warehouse?.option?.length) {
@@ -273,16 +271,16 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                     }
 
                     if (!tempInitialData["deliveryToAddress"]) {
-                        if (refrenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
+                        if (referenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
                             const customerAccountData = fieldsDataForCreate?.find((d) => d?.fieldName === "customerAccount")?.option || [];
-                            const customerShippingAddress = customerAccountData?.find((d) => d?.optionValue === refrenceData?.deliveryTo)?.shippingAddress || [];
+                            const customerShippingAddress = customerAccountData?.find((d) => d?.optionValue === referenceData?.deliveryTo)?.shippingAddress || [];
                             if (customerShippingAddress?.length === 1) {
                                 tempInitialData["deliveryToAddress"] = customerShippingAddress[0];
                             }
                         }
-                        else if (refrenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
+                        else if (referenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
                             const supplierAccountData = fieldsDataForCreate?.find((d) => d?.fieldName === "supplierAccount")?.option || [];
-                            const supplierShippingAddress = supplierAccountData?.find((d) => d?.optionValue === refrenceData?.deliveryTo)?.shippingAddress || [];
+                            const supplierShippingAddress = supplierAccountData?.find((d) => d?.optionValue === referenceData?.deliveryTo)?.shippingAddress || [];
                             if (supplierShippingAddress?.length === 1) {
                                 tempInitialData["deliveryToAddress"] = supplierShippingAddress[0];
                             }
@@ -551,8 +549,8 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                                                                             //minDate={new Date()}
                                                                             //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
                                                                             // maxDate={
-                                                                            //     refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob ? refrenceData.estimateStartDate ? moment(refrenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
-                                                                            //         : refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
+                                                                            //     referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob ? referenceData.estimateStartDate ? moment(referenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
+                                                                            //         : referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
                                                                             />
                                                                         ) : field.fieldName === "deliveryDate" ? (
                                                                             <FormTypes

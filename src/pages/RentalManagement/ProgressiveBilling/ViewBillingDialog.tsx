@@ -103,22 +103,24 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                 {row.original?.detail}
               </p>
               {row.original['type'] !== 'additionalCost' && (
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === 'service') {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'product') {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'asset') {
-                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                    } else {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
+                <Box ml={1}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      if (row.original.type === 'service') {
+                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                      } else if (row.original.type === 'product') {
+                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                      } else if (row.original.type === 'asset') {
+                        window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                      } else {
+                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                      }
+                    }}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </Box>
               )}
             </div>
           )
@@ -290,7 +292,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
 
   const fetchProductInventory = async () => {
     var data: any = [];
-    const response = await axiosInstance().get(`${invoice.api}/productpackage/${invoiceData._id}`);
+    const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
     data = response?.data?.data;
 
     const responseAdditionalCostData = await axiosInstance().get(`${invoice.api}/${invoiceData._id}/additional-cost`);
@@ -304,7 +306,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         : parent.type === 'package'
           ? parent.packageDetail?.packageName
           : parent.type === 'asset'
-            ? parent.inventoryDetail?.assetNumber
+            ? parent.serializedAssetDetail?.assetNumber
             : parent.serviceDetail?.serviceName
         }`;
       parent.description =
@@ -314,7 +316,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             ? parent?.productDetail?.productDescription || ''
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
-              : '';
+              : parent.type === 'asset'
+                ? parent.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
@@ -343,7 +347,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
           : _subRow?.type === 'asset'
-            ? _subRow?.inventoryDetail?.assetNumber
+            ? _subRow?.serializedAssetDetail?.assetNumber
             : _subRow?.serviceDetail?.serviceName
         }`;
       _subRow.description =
@@ -353,7 +357,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             ? _subRow?.productDetail?.productDescription || ''
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+              : _subRow.type === 'asset'
+                ? _subRow.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       _subRow.isEditable = false;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);

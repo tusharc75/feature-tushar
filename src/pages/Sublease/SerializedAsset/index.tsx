@@ -14,7 +14,7 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import {
   prepareDataForGrid,
-  DELIVERY_TICKET_REFRENCE_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   DELIVERY_FROM_TO_TYPE,
   sublease,
@@ -242,7 +242,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                     onClick={() => {
                       const data = {};
                       data['ticketName'] = subleaseData.subleaseName;
-                      data['refrenceId'] = subleaseData._id;
+                      data['referenceId'] = subleaseData._id;
                       data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.supplier;
                       data['pickupFrom'] = subleaseData?.supplierAccount?.optionValue;
                       data['pickupFromAddress'] = subleaseData?.shippingAddress?.optionValue;
@@ -279,7 +279,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                     onClick={() => {
                       const data = {};
                       data['ticketName'] = subleaseData.subleaseName;
-                      data['refrenceId'] = subleaseData._id;
+                      data['referenceId'] = subleaseData._id;
                       data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
                       data['pickupFrom'] = selectedRecords[0]?.warehouseId;
                       data['pickupFromAddress'] = selectedRecords[0]?.currentLocationId;
@@ -387,8 +387,8 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
       {showTicketDialog.open && (
         <ManageDeliveryTicket
           ticketType={DELIVERY_TICKET_TYPE.delivery}
-          refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.sublease}
-          refrenceData={showTicketDialog.data}
+          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.sublease}
+          referenceData={showTicketDialog.data}
           productInventory={selectedRecords}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           onSuccess={() => {

@@ -311,7 +311,7 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
             setFullScreen((prevState) => !prevState);
           }}
           showManimizeMaximize={true}
-          refrenceType="salesOrder"
+          referenceType="salesOrder"
         />
       </Dialog>
     )}

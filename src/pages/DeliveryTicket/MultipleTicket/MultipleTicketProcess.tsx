@@ -18,7 +18,7 @@ import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { camelCase } from 'lodash';
 
 
-const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
+const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => {
     const renderedFrom = `${camelCase(routes?.deliveryTicket.title)}_grid-2`
     const { state: { user, selectedEntity, permissions } }: any = useData();
     const { getColumnData } = useColumns();
@@ -84,7 +84,7 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
                 }
                 let data: any = [], count;
                 if (!isOffline) {
-                    const response = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${refrenceType}&refrenceId=${refrenceData._id}&ticketType=${ticketType?.toString()}`)
+                    const response = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${referenceType}&referenceId=${referenceData._id}&ticketType=${ticketType?.toString()}`)
                     data = response?.data?.data;
                     count = data?.length;
                 }

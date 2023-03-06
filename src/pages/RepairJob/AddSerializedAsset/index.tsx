@@ -361,7 +361,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
     </Grid>
     {addSerializedAssetDialog &&
       <AddSerializedAsset
-        refrenceType="Repair Job"
+        referenceType="Repair Job"
         addSerializedAsset={(newRecordsToAdd) => {
           setIsAdding(true);
           axiosInstance().post(`${repairJob.api}/${repairJobData._id}/assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })

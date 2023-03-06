@@ -627,9 +627,9 @@ const SerializedAssetDetailsPage = () => {
       )}
       {showRepairJobDialog && (
         <ManageRepairJob
-          refrenceType="Product Inventory"
+          referenceType="Product Inventory"
           onClose={() => setShowRepairJobDialog(false)}
-          refrenceData={{ warehouse: productInventoryData?.warehouse?.optionValue }}
+          referenceData={{ warehouse: productInventoryData?.warehouse?.optionValue }}
           onSuccess={(obj) => {
             setShowRepairJobDialog(false);
             handleAddAssetToRepairJob(obj?._id);

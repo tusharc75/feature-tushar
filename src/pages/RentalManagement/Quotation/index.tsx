@@ -783,7 +783,7 @@ const Quotation = ({
           onClose={() => setShowAllVersionStatus(false)}
           quotationId={quotationData?._id}
           handleChangeVersion={handleChangeVersion}
-          refrenceType="rentalJob"
+          referenceType="rentalJob"
         />
       )}
       {customerAcceptable && (

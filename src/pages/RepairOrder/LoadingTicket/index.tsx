@@ -15,7 +15,7 @@ import {
     gridLoadingTimeout,
     DELIVERY_TICKET_STATUS,
     DELIVERY_TICKET_TYPE,
-    DELIVERY_TICKET_REFRENCE_TYPE,
+    DELIVERY_TICKET_REFERENCE_TYPE,
     DELIVERY_FROM_TO_TYPE,
     repairOrder,
     INVENTORY_STATUS,
@@ -58,7 +58,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
             const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/product-package`);
 
             const { data: { data: deliveryTicketList } } = await axiosInstance().get(
-                `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.repairOrder}&refrenceId=${repairOrderData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+                `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.repairOrder}&referenceId=${repairOrderData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
             );
 
             response?.data?.data?.material?.forEach((e: any) => {
@@ -202,7 +202,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
         if (selectedRecords.length) {
             const data = {};
             data['ticketName'] = repairOrderData.repairOrderNumber;
-            data['refrenceId'] = repairOrderData._id;
+            data['referenceId'] = repairOrderData._id;
             data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
             data['pickupFrom'] = repairOrderData?.warehouse?.optionValue;
             data['pickupFromAddress'] = repairOrderData?.warehouse?.optionValue;
@@ -367,8 +367,8 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
         {showTicketDialog.open && (
             <ManageDeliveryTicket
                 ticketType={DELIVERY_TICKET_TYPE.loading}
-                refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.repairOrder}
-                refrenceData={showTicketDialog.data}
+                referenceType={DELIVERY_TICKET_REFERENCE_TYPE.repairOrder}
+                referenceData={showTicketDialog.data}
                 onClose={() => setShowTicketDialog({ open: false, data: {} })}
                 productInventory={selectedRecords}
                 products={[]}

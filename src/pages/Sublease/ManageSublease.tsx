@@ -30,8 +30,7 @@ import { isEqual } from 'lodash';
 import moment from "moment";
 import ManageAddressDialog from "src/components/Address/ManageAddressDialog";
 
-const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess,
-    refrenceType = null, refrenceId = null, refrenceData = null }) => {
+const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess, referenceType = null, referenceId = null, referenceData = null }) => {
 
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
@@ -114,21 +113,21 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                 if (fieldsDataForCreate?.some((e) => e.fieldName === "currency")) {
                     createValues["currency"] = user.user?.brandCurrency;
                 }
-                if (refrenceType === "rentalJob") {
-                    createValues["rentalJob"] = refrenceId
-                    createValues["estimateStartDate"] = refrenceData.estimateStartDate
-                    createValues["estimateEndDate"] = refrenceData.estimateEndDate
+                if (referenceType === "rentalJob") {
+                    createValues["rentalJob"] = referenceId
+                    createValues["estimateStartDate"] = referenceData.estimateStartDate
+                    createValues["estimateEndDate"] = referenceData.estimateEndDate
                     if (fieldsDataForCreate?.some((e) => e.fieldName === "warehouse")) {
-                        createValues["warehouse"] = refrenceData?.warehouse?.optionValue
+                        createValues["warehouse"] = referenceData?.warehouse?.optionValue
                     }
                     if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
-                        createValues["wellName"] = refrenceData?.wellName?.optionValue
+                        createValues["wellName"] = referenceData?.wellName?.optionValue
                     }
                     if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
-                        createValues["afeNumber"] = refrenceData?.afeNumber
+                        createValues["afeNumber"] = referenceData?.afeNumber
                     }
                     if (fieldsDataForCreate.some((e) => e.fieldName === "processor")) {
-                        createValues["processor"] = refrenceData?.processor?.optionValue
+                        createValues["processor"] = referenceData?.processor?.optionValue
                     }
                 }
                 createValues["actualStartDate"] = ""
@@ -193,17 +192,17 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
         else {
             axiosInstance().post(`${sublease.api}`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                if (refrenceType) {
+                if (referenceType) {
                     const material: any = []
-                    refrenceData.material.forEach(d => {
+                    referenceData.material.forEach(d => {
                         const element: any = {};
                         element.materialId = d._id;
                         element.type = "product";
                         element.unit = d.unit;
                         element.qty = d.assetsCount;
                         element.parentId = null;
-                        element.estimateStartDate = refrenceData?.estimateStartDate;
-                        element.estimateEndDate = refrenceData?.estimateEndDate;
+                        element.estimateStartDate = referenceData?.estimateStartDate;
+                        element.estimateEndDate = referenceData?.estimateEndDate;
                         element.actualStartDate = "";
                         element.actualEndDate = "";
                         element.assetQty = 0;

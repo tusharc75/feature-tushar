@@ -11,7 +11,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import {
     gridLoadingTimeout, repairJob, REPAIR_JOB_STATUS, deliveryTicket, INVENTORY_STATUS, serializedAsset,
-    DELIVERY_TICKET_TYPE, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFRENCE_TYPE, prepareDataForGrid, INVENTORY_OWNER_TYPE
+    DELIVERY_TICKET_TYPE, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, prepareDataForGrid, INVENTORY_OWNER_TYPE
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
@@ -172,7 +172,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     const handleTicketDialog = (ticketType, pickupFromType, deliveryToType) => {
         const data = {}
         data["ticketName"] = repairJobData.repairJobName;
-        data["refrenceId"] = repairJobData._id;
+        data["referenceId"] = repairJobData._id;
         data["pickupFromType"] = pickupFromType;
 
         var pickupFrom = "";
@@ -485,8 +485,8 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         {showTicketDialog.open &&
             <ManageDeliveryTicket
                 ticketType={showTicketDialog.ticketType}
-                refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.repairJob}
-                refrenceData={showTicketDialog.data}
+                referenceType={DELIVERY_TICKET_REFERENCE_TYPE.repairJob}
+                referenceData={showTicketDialog.data}
                 productInventory={selectedRecords}
                 onClose={() => setShowTicketDialog({ open: false, ticketType: "", data: {} })}
                 onSuccess={() => {

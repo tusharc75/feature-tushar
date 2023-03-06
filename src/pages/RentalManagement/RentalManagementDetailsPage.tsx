@@ -20,7 +20,7 @@ import {
   ACTIVITY_RESOURCE,
   QUOTATION_STATUS,
   deliveryTicket,
-  DELIVERY_TICKET_REFRENCE_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE
 } from '../../constants/helpers';
 import Steps from './Steps';
@@ -155,7 +155,7 @@ const RentalManagementDetailsPage = () => {
     if (user?.role?.selectedEntity?.policy?.isProgressiveBillingRentalManagement) {
       axiosInstance()
         .get(
-          `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+          `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
         )
         .then(({ data: { data } }) => {
           if (data.length > 0) {

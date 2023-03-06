@@ -711,7 +711,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             setAddProductDialog(false);
           }}
           type={'product'}
-          refrenceType="purchaseOrder"
+          referenceType="purchaseOrder"
           renderedFrom={renderedFrom}
           ignoreIds={[]}
         />
