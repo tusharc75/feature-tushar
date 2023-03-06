@@ -217,7 +217,10 @@ function RentalManagementHeader({
                 <Box ml={1}>
                   <ToggleButtonGroup size="small" >
                     <ToggleButton onClick={() => {
-                      history.push(`${routes.planning.path}`)
+                      history.push({
+                        pathname: routes.planning.path,
+                        state: 'Rental Job'
+                      })
                     }}>
                       <span>{`Planned Rental`}</span>
                     </ToggleButton>
