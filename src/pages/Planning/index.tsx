@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Box, Button, Chip, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -34,8 +34,20 @@ import AutorenewIcon from '@material-ui/icons/Autorenew';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { useHistory } from 'react-router-dom';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import queryString from 'query-string';
 
 const Planning = () => {
+
+  const PlanningType = [
+    {
+      key: `All ${routes?.planning.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes?.planning.title}`,
+      value: 2
+    }
+  ];
 
   const renderedFrom = camelCase(routes?.planning.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -48,7 +60,9 @@ const Planning = () => {
   }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { type }: any = queryString.parse(history.location.search);
 
+  const [selectedPlanningType, setSelectedPlanningType] = useState(history.location.state)
   const [planningId, setPlanningId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -58,6 +72,7 @@ const Planning = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const { getColumnData } = useColumns();
 
   const fetchGridColumns = () => {
@@ -142,20 +157,30 @@ const Planning = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}&filterPlanning=${selectedType}` : `?filterPlanning=${selectedType}`;
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
+    const updatedFilters = [];
 
+    if (selectedPlanningType) {
+      updatedFilters.push({
+        field: replaceFieldName('type'),
+        term: selectedPlanningType
+      });
+    }
+
+    if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
         });
       });
+    }
+
+    if (updatedFilters.length > 0) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
@@ -299,9 +324,15 @@ const Planning = () => {
     fetchGridColumns();
   }, []);
 
+  const onTypeChange = (event, type) => {
+    const value = PlanningType.find((d) => d.key === type).value;
+    setSelectedType(value)
+    history.push(`?type=${value}`);
+  }
+
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType, selectedPlanningType]);
 
   return (
     <Fragment>
@@ -337,16 +368,39 @@ const Planning = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              {permissions?.rentalPlanningCalendar?.isRead &&
-                <Box ml={1}>
-                  <ToggleButtonGroup size="small" >
-                    <ToggleButton onClick={() => {
-                      history.push(`${routes.rentalPlanningCalendar.path}`)
-                    }}>
-                      <span>{`Calander`}</span>
+              <ToggleButtonGroup
+                size="small"
+                className="align-items-center gap-1 layout-for-mobile "
+                value={PlanningType[selectedType - 1].key}
+                exclusive
+                onChange={onTypeChange}
+              >
+                {PlanningType.map((k, index) => {
+                  return (
+                    <ToggleButton value={k.key} key={index}>
+                      {k.key}
                     </ToggleButton>
-                  </ToggleButtonGroup>
-                </Box>
+                  );
+                })}
+              </ToggleButtonGroup>
+              <Box ml={1}>
+                <ToggleButtonGroup size="small" >
+                  <ToggleButton onClick={() => {
+                    history.push(`${routes.rentalPlanningCalendar.path}`)
+                  }}>
+                    <span>{`Calander`}</span>
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+              {selectedPlanningType &&
+                <Chip
+                  className="ml-3"
+                  color="primary"
+                  label={'Type: Rental Job'}
+                  onDelete={() => {
+                    setSelectedPlanningType(null)
+                  }}
+                />
               }
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
