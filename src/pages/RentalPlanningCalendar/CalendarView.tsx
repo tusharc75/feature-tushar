@@ -3,7 +3,6 @@ import { useHistory } from 'react-router-dom';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar'
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import './calendarView.scss'
-import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import moment from 'moment';
 import { Grid, makeStyles, Checkbox, TextField, ButtonGroup, Button, Popper, Paper, ClickAwayListener, MenuList, MenuItem, Grow, Box } from '@material-ui/core';
@@ -190,9 +189,6 @@ function CalendarView() {
         updateData(event, start, end)
     }
 
-    const handleDragStart = (event) => {
-    }
-
     const resizeEvent = ({ event, start, end }) => {
         const filterEvents = staticEvents.filter(ev => ev.id !== event.id)
         const existing = staticEvents.find((ev) => ev.id === event.id) ?? {}
@@ -369,14 +365,13 @@ function CalendarView() {
             }
         </Box>
         <DragAndDropCalendar
-            style={{ height: "calc(100vh - 50px)" }}
+            style={{ height: "calc(100vh - 260px)" }}
             defaultDate={defaultDate}
             defaultView={'day'}
             events={events}
             formats={formats}
             localizer={localizer}
             onEventDrop={moveEvent}
-            handleDragStart={handleDragStart}
             onEventResize={resizeEvent}
             popup={true}
             resizable
