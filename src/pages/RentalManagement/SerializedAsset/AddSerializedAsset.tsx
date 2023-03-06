@@ -17,8 +17,6 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import { prepareDataForGrid } from "../../../constants/helpers"
 import { isMobile, isTablet } from "react-device-detect";
-import { MdAdd } from "react-icons/md";
-import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import { groupBy, orderBy, sortBy, uniq, map } from "lodash";
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
 import { Autocomplete } from "@material-ui/lab";
@@ -201,7 +199,9 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                     deepFilter = `${deepFilter}&repairable=true`;
                 }
                 else {
-                    deepFilter = `${deepFilter}&availableAssets=true`;
+                    deepFilter = `${deepFilter}&rentalJob=true`;
+                    const dateFilter = { from: refrenceData?.fromDate, to: refrenceData?.toDate }
+                    deepFilter = `${deepFilter}&date=${JSON.stringify(dateFilter)}`;
                 }
             }
         }
