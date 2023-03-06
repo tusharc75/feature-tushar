@@ -1,12 +1,11 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tabs, Tab, useMediaQuery, Menu, MenuItem } from '@material-ui/core';
+import { useState, useEffect, useContext } from 'react';
+import { Grid, Box, Button, Tabs, Tab, Menu, MenuItem } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -19,7 +18,7 @@ import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import Steps from '../RentalManagement/Steps';
-import Productpackage from './Productpackage';
+import Material from './Material';
 import Invoice from './Invoice';
 import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
@@ -314,14 +313,13 @@ const InvoiceDetails = () => {
           />
           <ContentFullScreen title={invoiceProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && invoiceData && (
-              <Productpackage
+              <Material
                 invoiceData={invoiceData}
                 setNextStep={setNextStep}
-                currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
                 updateJobStatus={updateJobStatus}
-                currentStep={currentStep}
+                allowedToEdit={allowedToEdit && permissions?.invoice?.isUpdate ? true : false}
               />
             )}
 

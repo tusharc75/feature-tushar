@@ -147,6 +147,11 @@ const AssignSerializedAssetDialog = ({
         deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
       }
     }
+    if (reference === 'planning') {
+      deepFilter = `${deepFilter}&planning=true`;
+      const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate }
+      deepFilter = `${deepFilter}&date=${JSON.stringify(dateFilter)}`;
+    }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
@@ -182,26 +187,18 @@ const AssignSerializedAssetDialog = ({
   };
 
   useEffect(() => {
-    let tempProducts = products;
-    const alreadyStoredSelectedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
-    if (tempProducts.length === 0) {
-      selectedProducts?.map((d) => {
-        if (tempProducts.find((obj) => obj.id === d.product)) {
-          tempProducts.find((obj) => obj.id === d.id).qty = d?.qty + tempProducts.find((obj) => obj.id === d.product).qty;
-        } else {
-          tempProducts.push({ id: d.product, name: d.productName, qty: d?.qty });
-        }
-      });
-    } else {
-      tempProducts = [];
-      selectedProducts.map((d) => {
-        tempProducts.push({
-          id: d.product,
-          name: d.productName,
-          qty: d?.qty - alreadyStoredSelectedRecords?.filter((obj) => obj.productId === d.product).length
-        });
-      });
-    }
+    let tempProducts = [];
+    selectedProducts?.map((d) => {
+      const alreadyAdded = tempProducts.find((obj) => obj.id === d.product);
+      if (alreadyAdded) {
+        alreadyAdded.qty = d?.qty + alreadyAdded.qty;
+      } else {
+        tempProducts.push({ id: d.product, name: d.productName, qty: d?.qty });
+      }
+    });
+    tempProducts?.forEach((e) => {
+      e.qty = e?.qty - [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((obj) => obj.productId === e.id).length;
+    })
     setProducts(tempProducts);
   }, [selectedRecords]);
 
@@ -254,11 +251,17 @@ const AssignSerializedAssetDialog = ({
                   onClick={() => {
                     if (selectedProducts?.length) {
                       const data = [];
+                      const selectedAssets = [...getLocalStorageArrayData(localStorageSelectedRecords)];
                       selectedProducts?.forEach((ele) => {
-                        const assets = ([...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.productId === ele.product))?.map((e) => e._id)
-                        assets?.forEach((asset) => {
-                          data.push({ ...ele, asset: asset })
-                        })
+                        let qty = ele.qty;
+                        while (qty) {
+                          const result = selectedAssets.filter((f) => f.productId === ele.product && !f.isCounted);
+                          if (result.length) {
+                            data.push({ ...ele, asset: result[0]._id })
+                            result[0].isCounted = true;
+                          }
+                          qty--;
+                        }
                       })
                       handleSucess(data);
                     }

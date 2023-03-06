@@ -29,6 +29,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Chip } from '@material-ui/core';
 
 let deliveryTicketTimeout;
 
@@ -47,6 +48,7 @@ const DeliveryTicket = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
+  const [fromRental, setFromRental] = useState(history?.location?.state?.rental)
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.deliveryTicket.title}`);
   const { state: { user, selectedEntity, permissions } }: any = useData();
@@ -183,7 +185,7 @@ const DeliveryTicket = () => {
     if (renderCount > 0) {
       fetchDeliveryTicket();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, selectedEntity, isOffline, selectedType, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, selectedEntity, isOffline, selectedType, showFilteredRecordsOnly, fromRental]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -223,12 +225,19 @@ const DeliveryTicket = () => {
   };
 
   const getQueryString = (isExport = false) => {
+    let filterById = [];
     let deepFilter = `?page=${page}&limit=${limit}&filterDeliveryTickets=${selectedType}`;
     if (isExport) {
       deepFilter = `filterDeliveryTickets=${selectedType}`;
     }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+    if (fromRental) {
+      filterById.push({ field: 'rentalJob', term: fromRental?._id });
+    }
+    if (filterById.length > 0) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
     }
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
@@ -238,7 +247,7 @@ const DeliveryTicket = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and&filterByIdType=and`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
@@ -365,6 +374,16 @@ const DeliveryTicket = () => {
                 <Grid>
                   <GiAbstract055 className="headerLogo" />
                   <span className="listingHeader">{routes.deliveryTicket.title} </span>
+                  {fromRental && (
+                    <Chip
+                      className="ml-3"
+                      color="primary"
+                      label={`Rental : ${fromRental.rentalJobName}`}
+                      onDelete={() => {
+                        setFromRental(null);
+                      }}
+                    />
+                  )}
                 </Grid>
                 <HideWhenOffline>
                   <div className={`align-items-center gap-1 layout-for-mobile `}>

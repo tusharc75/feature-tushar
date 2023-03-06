@@ -25,7 +25,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../Account/ManageAccount";
 import ManageContactDialog from "../Contact/ManageContact";
 
-const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, onClose, onSuccess, refrenceId = null, refrenceData = null }) => {
+const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, onClose, onSuccess, referenceId = null, refrenceData = null }) => {
 
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
@@ -84,7 +84,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                     createValues["currency"] = user.user?.brandCurrency;
                 }
                 if (refrenceData) {
-                    createValues["rentalJob"] = refrenceId
+                    createValues["rentalJob"] = referenceId
                     createValues["warehouse"] = refrenceData?.warehouse
                     if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
                         createValues["wellName"] = refrenceData?.wellName

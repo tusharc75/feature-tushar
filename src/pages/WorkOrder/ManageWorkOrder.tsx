@@ -28,7 +28,7 @@ import { useHistory } from 'react-router-dom';
 
 const disabledFieldArray = ['workOrderNumber', "type", "product", "repairOrder", "status"]
 
-const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = null, refrenceType = null, refrenceData = null }) => {
+const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = null, referenceType = null, referenceData = null }) => {
 
     const { state: { user } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
@@ -71,11 +71,11 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
             })
             setFormsData(newFilteredData);
         }
-    }, [initialData.fields, refrenceData]);
+    }, [initialData.fields, referenceData]);
 
     useEffect(() => {
         fetchFields()
-    }, [workOrderId, refrenceData]);
+    }, [workOrderId, referenceData]);
 
 
     const fetchFields = async () => {
@@ -132,15 +132,15 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
             }
             else {
                 const tempInitialData = getObjKeys("", fieldsDataForCreate)
-                if (refrenceType && refrenceData) {
+                if (referenceType && referenceData) {
                     tempInitialData["workOrderNumber"] = `WO_${generateUniqueIdOnly()}`
-                    tempInitialData["type"] = refrenceType;
-                    tempInitialData["product"] = refrenceData?.product
-                    if (refrenceType === "Repair Order") {
-                        tempInitialData["repairOrder"] = refrenceData?._id;
+                    tempInitialData["type"] = referenceType;
+                    tempInitialData["product"] = referenceData?.product
+                    if (referenceType === "Repair Order") {
+                        tempInitialData["repairOrder"] = referenceData?._id;
                     }
-                    if (serializedAssetFieldIndex > -1 && refrenceData.serializedAsset) {
-                        tempInitialData["serializedAsset"] = refrenceData.serializedAsset
+                    if (serializedAssetFieldIndex > -1 && referenceData.serializedAsset) {
+                        tempInitialData["serializedAsset"] = referenceData.serializedAsset
                     }
                 }
                 else {
@@ -194,7 +194,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
             let updatedValues = { ...values }
             axiosInstance().post(`${workOrder.api}`, updatedValues).then(({ data }) => {
                 setLoading(false);
-                if (refrenceType && refrenceData) {
+                if (referenceType && referenceData) {
                     onSuccess(data?.data)
                 }
                 else {
@@ -379,7 +379,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                                                         {...field}
                                                                         fieldData={field}
                                                                         isNew={!Boolean(workOrderId)}
-                                                                        disabled={(refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)) || (refrenceData?.warehouse && field.fieldName === 'warehouse') || Boolean(workOrderId) && field.disableOnEdit}
+                                                                        disabled={(referenceType && referenceData && disabledFieldArray.includes(field.fieldName)) || (referenceData?.warehouse && field.fieldName === 'warehouse') || Boolean(workOrderId) && field.disableOnEdit}
                                                                         values={values}
                                                                         errors={errors}
                                                                         touched={touched}
@@ -404,7 +404,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                                                            {...field}
                                                                            fieldData={field}
                                                                            isNew={!Boolean(workOrderId)}
-                                                                           disabled={(refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)) || (refrenceData?.product && field.fieldName === 'product') || Boolean(workOrderId) && field.disableOnEdit}
+                                                                           disabled={(referenceType && referenceData && disabledFieldArray.includes(field.fieldName)) || (referenceData?.product && field.fieldName === 'product') || Boolean(workOrderId) && field.disableOnEdit}
                                                                            values={values}
                                                                            errors={errors}
                                                                            touched={touched}
@@ -427,7 +427,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                                                            {...field}
                                                                            fieldData={field}
                                                                            isNew={!Boolean(workOrderId)}
-                                                                           disabled={(refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)) || (refrenceData?.serializedAsset && field.fieldName === 'serializedAsset') || Boolean(workOrderId) && field.disableOnEdit}
+                                                                           disabled={(referenceType && referenceData && disabledFieldArray.includes(field.fieldName)) || (referenceData?.serializedAsset && field.fieldName === 'serializedAsset') || Boolean(workOrderId) && field.disableOnEdit}
                                                                            values={values}
                                                                            errors={errors}
                                                                            touched={touched}
@@ -450,7 +450,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                                                         {...field}
                                                                         fieldData={field}
                                                                         isNew={!Boolean(workOrderId)}
-                                                                        disabled={(refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)) || (refrenceData?.serializedAsset && field.fieldName === 'serializedAsset') || Boolean(workOrderId) && field.disableOnEdit}
+                                                                        disabled={(referenceType && referenceData && disabledFieldArray.includes(field.fieldName)) || (referenceData?.serializedAsset && field.fieldName === 'serializedAsset') || Boolean(workOrderId) && field.disableOnEdit}
                                                                         values={values}
                                                                         errors={errors}
                                                                         touched={touched}

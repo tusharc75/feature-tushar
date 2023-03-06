@@ -1779,7 +1779,7 @@ export const DELIVERY_TICKET_TYPE = {
   delivery: 'Delivery'
 };
 
-export const DELIVERY_TICKET_REFRENCE_TYPE = {
+export const DELIVERY_TICKET_REFERENCE_TYPE = {
   rentalJob: 'Rental Job',
   transferAsset: 'Transfer Asset',
   repairJob: 'Repair Job',

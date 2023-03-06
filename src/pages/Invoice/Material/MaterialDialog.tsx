@@ -27,12 +27,14 @@ interface EditDialogProps {
   calculatePrice?: VoidFunction | any;
   material: any[]
   selectedProducts: any[]
-  isBulkedit: any
+  isBulkedit: any;
+  showSaveAndNext: any
+  loadingEdit: any
 }
 
 const rateChangeFields = ["unit", "pricingMethod"]
 
-const InvoiceQtyDialog: FC<EditDialogProps> = (
+const MaterialDialog: FC<EditDialogProps> = (
   {
     calculatePrice,
     onClose,
@@ -41,7 +43,9 @@ const InvoiceQtyDialog: FC<EditDialogProps> = (
     rowData,
     material,
     selectedProducts,
-    isBulkedit
+    isBulkedit,
+    showSaveAndNext,
+    loadingEdit
   }) => {
 
 
@@ -52,6 +56,7 @@ const InvoiceQtyDialog: FC<EditDialogProps> = (
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [saveAndNext, setSaveAndNext] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -62,61 +67,12 @@ const InvoiceQtyDialog: FC<EditDialogProps> = (
     var data = await fetch_invoice_product_fields(invoiceData?.currency)
     setAllFields(JSON.parse(JSON.stringify(data)))
     if (isBulkedit) {
-      let unitArray: any = []
-      let pricingMethodArray: any = []
-      selectedProducts?.forEach(element => {
-        if (element?.[`${element.type}Detail`]?.unit) {
-          unitArray.push([...element?.[`${element.type}Detail`]?.unit])
-        }
-        if (element?.[`${element.type}Detail`]?.pricingMethod) {
-          pricingMethodArray.push([...element?.[`${element.type}Detail`]?.pricingMethod])
-        }
-      });
-      let unit: any = unitArray?.shift().filter(function (v) {
-        return unitArray?.every(function (a) {
-          return a.indexOf(v) !== -1;
-        });
-      });
-      let pricingMethod: any = pricingMethodArray?.shift()?.filter(function (v) {
-        return pricingMethodArray?.every(function (a) {
-          return a.indexOf(v) !== -1;
-        });
-      });
-      const unitOptions: any = arrayToDropwdownOption(unit)
-      const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
-      data.forEach((element) => {
-        if (element.fieldName === "unit") {
-          element.option = unitOptions;
-        }
-        if (element.fieldName === "pricingMethod") {
-          element.option = pricingMethodOptions;
-        }
-        element.required = false;
-        element.isFormula = false;
-        element.isMulitFormula = false;
-      })
       setInitialData({
         fields: data,
         values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", tenure: "" },
       });
     }
     else {
-      let unitOptions: any = []
-      let pricingMethodOptions: any = []
-      if (rowData?.[`${rowData.type}Detail`]?.unit) {
-        unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.unit);
-      }
-      if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
-        pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
-      }
-      data.forEach(element => {
-        if (element.fieldName === "unit") {
-          element.option = unitOptions;
-        }
-        if (element.fieldName === "pricingMethod") {
-          element.option = pricingMethodOptions;
-        }
-      });
       setInitialData({
         fields: data,
         values: getObjKeysWithValues(rowData, data),
@@ -253,7 +209,7 @@ const InvoiceQtyDialog: FC<EditDialogProps> = (
           rows = [...rows, ...parent]
         }
       });
-      handleSaveData(rows)
+      handleSaveData(rows, saveAndNext)
     }
     else {
       if (rowData.parentId !== null && !showConfirmationDialog) {
@@ -277,7 +233,7 @@ const InvoiceQtyDialog: FC<EditDialogProps> = (
         }
         const child = material.filter((e) => e.parentId === rowData._id)
         resetValueZero(child)
-        handleSaveData([...rows, ...child])
+        handleSaveData([...rows, ...child], saveAndNext)
         setShowConfirmationDialog(false);
       }
     }
@@ -304,7 +260,6 @@ const InvoiceQtyDialog: FC<EditDialogProps> = (
       }
     }
   };
-
 
   function validate(values) {
     const errors = {};
@@ -538,4 +493,4 @@ const InvoiceQtyDialog: FC<EditDialogProps> = (
   </Dialog>);
 };
 
-export default InvoiceQtyDialog;
+export default MaterialDialog;

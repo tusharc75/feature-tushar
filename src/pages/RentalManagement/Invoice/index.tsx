@@ -649,7 +649,7 @@ const Invoice = ({
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            refrenceType="rentalJob"
+            referenceType="rentalJob"
           />
         </Dialog>
       )}

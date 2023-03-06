@@ -5,10 +5,11 @@ import {
   convertMsToTime,
   getObjKeys,
   getObjKeysWithValues,
+  RESOURCE_LABEL,
   setFieldsInAscendingOrder,
   workOrder,
   WORKORDER_SERVICE_STATUS,
-  WORKORDER_SERVICE_STEP_STATUS,
+  WORKORDER_SERVICE_STEP_STATUS
 } from 'src/constants/helpers';
 import { Box, IconButton, Grid, Typography, Chip } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -22,19 +23,21 @@ import CompleteDialog from './CompleteDialog';
 import { useData } from 'src/StateProvider/Provider';
 import SettingsIcon from '@material-ui/icons/Settings';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
+import AttachFileIcon from '@material-ui/icons/AttachFile';
+import AttachmentDialog from './AttachmentDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const TimerComponent = ({ stepData, updateTime = true }) => {
-
   const [time, setTime] = useState(null);
   useEffect(() => {
     if (!updateTime) {
       setTime(convertMsToTime(stepData?.duration || 0));
-    }
-    else {
+    } else {
       setTime(convertMsToTime(stepData?.duration || 0));
     }
     const interval = setInterval(() => {
-      if (updateTime) setTime(convertMsToTime((stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())));
+      if (updateTime)
+        setTime(convertMsToTime((stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())));
     }, 1000);
     return () => {
       clearInterval(interval);
@@ -152,7 +155,6 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '', handelClose = null }) => {
-
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -164,16 +166,20 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
-  const { state: { user: { user } } } = useData();
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
   const [viewStep, setViewStep] = React.useState({ open: false, step: null });
   const [isAllStepDone, setIsAllStepDone] = React.useState(false);
+  const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
 
   useEffect(() => {
     fetchServiceData();
   }, [selectedService]);
 
   const fetchServiceData = async () => {
-
     const stepDataResponse = await axiosInstance().get(`${workOrder.api}/${workOrderId}/steps-data`);
     const stepsData = stepDataResponse?.data?.data || [];
     setServiceData(stepsData);
@@ -185,11 +191,14 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
       ele.isAllowToPerform = false;
       if (index === 0) {
         ele.isAllowToPerform = true;
-      }
-      else if (index > 0) {
+      } else if (index > 0) {
         const prevStep = serviceDetail?.steps[index - 1];
-        const prevStepData = stepsData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === prevStep?._id);;
-        const currStepData = stepsData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === ele?._id);
+        const prevStepData = stepsData?.find(
+          (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === prevStep?._id
+        );
+        const currStepData = stepsData?.find(
+          (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === ele?._id
+        );
         if (prevStepData?.passFailStatus || currStepData?.passFailStatus) {
           ele.isAllowToPerform = true;
         }
@@ -200,7 +209,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
           }
         }
       }
-    })
+    });
 
     setServiceDetails(serviceDetail);
 
@@ -227,7 +236,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
         setOpenCompleteDialog(true);
       }
     }
-  }
+  };
 
   const updateServiceStatus = (uniqueId, status) => {
     axiosInstance()
@@ -405,38 +414,49 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
       .then(({ data }) => {
         const result = data?.data;
         if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isPassAddon && result?.passAddon?.length) {
-          if (referencType === "workOrderTechnician") {
-            handleAddService(result?.passAddon?.map((e) => e._id), step);
+          if (referencType === 'workOrderTechnician') {
+            handleAddService(
+              result?.passAddon?.map((e) => e._id),
+              step
+            );
+          } else {
+            setAddServiceConfirmation({
+              open: true,
+              status: WORKORDER_SERVICE_STEP_STATUS.passed,
+              services: result?.passAddon,
+              step: step,
+              type: ''
+            });
           }
-          else {
-            setAddServiceConfirmation({ open: true, status: WORKORDER_SERVICE_STEP_STATUS.passed, services: result?.passAddon, step: step, type: '' });
+        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isFailAddon && result?.failAddon?.length) {
+          if (referencType === 'workOrderTechnician') {
+            handleAddService(
+              result?.failAddon?.map((e) => e._id),
+              step
+            );
+          } else {
+            setAddServiceConfirmation({
+              open: true,
+              status: WORKORDER_SERVICE_STEP_STATUS.failed,
+              services: result?.failAddon,
+              step: step,
+              type: ''
+            });
           }
-        }
-        else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isFailAddon && result?.failAddon?.length) {
-          if (referencType === "workOrderTechnician") {
-            handleAddService(result?.failAddon?.map((e) => e._id), step);
-          }
-          else {
-            setAddServiceConfirmation({ open: true, status: WORKORDER_SERVICE_STEP_STATUS.failed, services: result?.failAddon, step: step, type: '' });
-          }
-        }
-        else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isJumpStepPass && result?.jumpStepsPass?.length) {
-          if (referencType !== "workOrderTechnician") {
+        } else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isJumpStepPass && result?.jumpStepsPass?.length) {
+          if (referencType !== 'workOrderTechnician') {
             setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.passed, open: true, type: 'jumpStep' }));
           }
-        }
-        else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isJumpStepFail && result?.jumpStepsFail?.length) {
-          if (referencType !== "workOrderTechnician") {
+        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isJumpStepFail && result?.jumpStepsFail?.length) {
+          if (referencType !== 'workOrderTechnician') {
             setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'jumpStep' }));
           }
-        }
-        else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isQuoteRevisionOnFail) {
-          if (referencType !== "workOrderTechnician") {
+        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isQuoteRevisionOnFail) {
+          if (referencType !== 'workOrderTechnician') {
             setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'isQuoteRevisionOnFail' }));
           }
-        }
-        else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isReturnToStepOnFail && result?.returnToStepOnFail) {
-          if (referencType !== "workOrderTechnician") {
+        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isReturnToStepOnFail && result?.returnToStepOnFail) {
+          if (referencType !== 'workOrderTechnician') {
             setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'returnToStepOnFail' }));
           }
         }
@@ -477,8 +497,9 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
   };
 
   const handleUpdateStep = (values: any) => {
-    values.order = viewStep?.step?.order
-    axiosInstance().put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/update-step`, values)
+    values.order = viewStep?.step?.order;
+    axiosInstance()
+      .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/update-step`, values)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -486,7 +507,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
           message: data.message
         });
         setViewStep({ open: false, step: null });
-        fetchService()
+        fetchService();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -495,12 +516,16 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
 
   return serviceDetails ? (
     serviceDetails?.steps?.length ? (
-      <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }} style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }} >
+      <Box
+        className={classes.mainContainer}
+        sx={{ position: 'relative', overflow: 'hidden' }}
+        style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }}
+      >
         <div className={classes.root}>
           {serviceDetails?.steps?.map((step, index) => {
             const { stepData, isStepValid } = getFields(step);
             if (referencType === 'workOrderTechnician' && stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) {
-              return ''
+              return '';
             }
             let isAnyTechnician = selectedService?.assignedUsers?.length ? true : false;
             let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) || false;
@@ -530,7 +555,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                     <Box>
                       <Chip
                         color="primary"
-                        label={referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order}`}
+                        label={referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
                       />
                     </Box>
                     <Box ml={1}>
@@ -541,28 +566,37 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   </Box>
                   {step?.isAllowToPerform && (
                     <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto', display: 'flex' }}>
-                      {stepData?.startDate &&
-                        <TimerComponent stepData={stepData} updateTime={stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? true : false} />}
-                      {([WORKORDER_SERVICE_STEP_STATUS.start, WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) && (isMeTechnician || !isAnyTechnician) && (
-                        <Box mr={1}>
-                          <Button
-                            variant="outlined"
-                            color="secondary"
-                            size="small"
-                            disabled={!allowedToEdit}
-                            onClick={(e) => {
-                              if ([WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) {
-                                handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
-                              } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
-                                handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.pause, stepData);
-                              }
-                            }}
-                          >
-                            {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause ? 'Resume' :
-                              stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? 'Pause' : 'Restart'}
-                          </Button>
-                        </Box>
+                      {stepData?.startDate && (
+                        <TimerComponent stepData={stepData} updateTime={stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? true : false} />
                       )}
+                      {[
+                        WORKORDER_SERVICE_STEP_STATUS.start,
+                        WORKORDER_SERVICE_STEP_STATUS.pause,
+                        WORKORDER_SERVICE_STEP_STATUS.needReperform
+                      ].includes(stepData?.status) &&
+                        (isMeTechnician || !isAnyTechnician) && (
+                          <Box mr={1}>
+                            <Button
+                              variant="outlined"
+                              color="secondary"
+                              size="small"
+                              disabled={!allowedToEdit}
+                              onClick={(e) => {
+                                if ([WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) {
+                                  handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
+                                } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+                                  handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.pause, stepData);
+                                }
+                              }}
+                            >
+                              {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
+                                ? 'Resume'
+                                : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+                                  ? 'Pause'
+                                  : 'Restart'}
+                            </Button>
+                          </Box>
+                        )}
                       {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
                         <Box ml={1}>
                           <Button
@@ -632,11 +666,15 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                           </Box>
                         )
                       ) : null}
-                      {stepData?.status
-                        && ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)
-                        && ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus)
-                        && (isMeTechnician || !isAnyTechnician) ? (
-                        [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.failed, WORKORDER_SERVICE_STEP_STATUS.completed]?.includes(stepData?.passFailStatus) ?
+                      {stepData?.status &&
+                        ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                        ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                        (isMeTechnician || !isAnyTechnician) ? (
+                        [
+                          WORKORDER_SERVICE_STEP_STATUS.passed,
+                          WORKORDER_SERVICE_STEP_STATUS.failed,
+                          WORKORDER_SERVICE_STEP_STATUS.completed
+                        ]?.includes(stepData?.passFailStatus) ? (
                           <>
                             <Box marginX={1} />
                             <Box>
@@ -647,52 +685,84 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                                 disabled={!allowedToEdit}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleStartEnd("reopen", step._id);
+                                  handleStartEnd('reopen', step._id);
                                 }}
                               >
                                 Re-open
                               </Button>
                             </Box>
-                          </> :
-                          step?.fields?.length ?
-                            <>
-                              <Box marginX={1} />
-                              <Box>
-                                <Button
-                                  variant="outlined"
-                                  color="inherit"
-                                  size="small"
-                                  disabled={!allowedToEdit}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedStep(step);
-                                    setStepState(stepData);
-                                  }}
-                                >
-                                  Enter Value
-                                </Button>
-                              </Box>
-                            </> : null
+                          </>
+                        ) : step?.fields?.length ? (
+                          <>
+                            <Box marginX={1} />
+                            <Box>
+                              <Button
+                                variant="outlined"
+                                color="inherit"
+                                size="small"
+                                disabled={!allowedToEdit}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedStep(step);
+                                  setStepState(stepData);
+                                }}
+                              >
+                                Enter Value
+                              </Button>
+                            </Box>
+                          </>
+                        ) : null
                       ) : null}
                     </Box>
                   )}
-                  {referencType !== 'workOrderTechnician' &&
+                  <Box
+                    sx={{
+                      justifyContent: 'flex-end',
+                      display: 'flex',
+                      alignItems: 'center',
+                      paddingTop: '10px'
+                    }}
+                  >
                     <Box ml={1}>
-                      <IconButton
-                        aria-label="close"
-                        onClick={() => {
-                          setViewStep({ open: true, step: step });
-                        }}
-                        size="small"
-                        color="inherit"
-                      >
-                        <SettingsIcon color="inherit" fontSize='small' />
-                      </IconButton></Box>}
+                      <HtmlTooltip title="Upload Document">
+                        <IconButton
+                          aria-label="close"
+                          onClick={() => {
+                            setAttchmentsDialog({
+                              open: true,
+                              uniqueServiceId: selectedService.uniqueId,
+                              stepId: step?._id,
+                              serviceName: selectedService.serviceName,
+                              stepName: step.stepName
+                            });
+                          }}
+                          size="small"
+                          color="inherit"
+                        >
+                          <AttachFileIcon color="primary" fontSize="small" />
+                        </IconButton>
+                      </HtmlTooltip>
+                    </Box>
+                    {referencType !== 'workOrderTechnician' && (
+                      <Box ml={1}>
+                        <IconButton
+                          aria-label="close"
+                          onClick={() => {
+                            setViewStep({ open: true, step: step });
+                          }}
+                          size="small"
+                          color="inherit"
+                        >
+                          <SettingsIcon color="inherit" fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    )}
+                  </Box>
                 </Box>
               </Box>
             );
           })}
-          {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) &&
+          {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) && (
             <Box pt={2}>
               <Grid container justify="flex-end">
                 <Button
@@ -706,9 +776,10 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   Complete
                 </Button>
               </Grid>
-            </Box>}
+            </Box>
+          )}
         </div>
-        {Boolean(selectedStep) ?
+        {Boolean(selectedStep) ? (
           <StepFieldsDialog
             workOrderId={workOrderId}
             fieldData={getFields(selectedStep)?.fieldData}
@@ -722,16 +793,17 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             allowedToEdit={allowedToEdit}
             step={selectedStep}
             stepData={stepState}
-          /> : null}
+          />
+        ) : null}
         {openCompleteDialog && (
           <CompleteDialog
             serviceName={selectedService?.serviceName}
             comment={comment}
             setComment={setComment}
             updateStatus={() => {
-              updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed)
+              updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
               if (handelClose) {
-                handelClose()
+                handelClose();
               }
             }}
             handleClose={() => {
@@ -745,19 +817,26 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             open={true}
             message={
               addServiceConfirmation.type === 'returnToStepOnFail'
-                ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()}. Do you want to continue ?`
+                ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services
+                  ?.map((e) => e.serviceName)
+                  ?.toString()}. Do you want to continue ?`
                 : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
                   ? ` Step fail requires Quote Revision. Do you confirm on this?`
                   : addServiceConfirmation.type === 'jumpStep'
                     ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()} has been added. Do you want to Add ? `
+                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                      ?.map((e) => e.serviceName)
+                      ?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
             }}
             onOk={() => {
               if (addServiceConfirmation.type === '') {
-                handleAddService(addServiceConfirmation.services?.map((e) => e._id), addServiceConfirmation.step);
+                handleAddService(
+                  addServiceConfirmation.services?.map((e) => e._id),
+                  addServiceConfirmation.step
+                );
               }
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
             }}
@@ -769,7 +848,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
               setViewStep({ open: false, step: null });
             }}
             handleSucess={(data) => {
-              handleUpdateStep(data)
+              handleUpdateStep(data);
             }}
             stepId={viewStep.step?._id}
             stepData={viewStep.step}
@@ -781,15 +860,28 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             uniqueId={selectedService?.uniqueId}
           />
         )}
+        {attchmentsDialog.open && (
+          <AttachmentDialog
+            workOrderId={workOrderId}
+            uniqueServiceId={attchmentsDialog.uniqueServiceId}
+            stepId={attchmentsDialog.stepId}
+            serviceName={attchmentsDialog.serviceName}
+            stepName={attchmentsDialog.stepName}
+            handleClose={() => {
+              setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
+            }}
+            handleSuccess={() => { }}
+          />
+        )}
       </Box>
     ) : (
       <>
         <Box p={2} height={500} bgcolor="rgba(242, 243, 247, 0.6)" textAlign="center">
-          {referencType !== 'workOrderTechnician' &&
+          {referencType !== 'workOrderTechnician' && (
             <Button variant="contained" color="primary" onClick={() => setAssignSteps(true)}>
               Add Step
             </Button>
-          }
+          )}
         </Box>
         {assignSteps && (
           <StepDialog
