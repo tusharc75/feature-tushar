@@ -235,12 +235,12 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
     const getRowStyleScheduled = (params) => {
         if ([INVENTORY_STATUS.available, INVENTORY_STATUS.new]?.includes(params?.data?.status)) {
             return {
-                'background-color': "#90EE90",
+                'background-color': "#DBF8DB",
             }
         }
         if (params?.data?.reserved) {
             return {
-                'background-color': "#FFCCCB",
+                'background-color': "#FAEAE9",
             }
         }
         if ([INVENTORY_STATUS.inUse]?.includes(params?.data?.status)) {
