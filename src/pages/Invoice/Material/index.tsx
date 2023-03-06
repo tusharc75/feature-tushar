@@ -32,30 +32,28 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import MaterialDialog from './MaterialDialog';
-
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 
 const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, updateJobStatus, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
-
   const [isUpdating, setUpdating] = useState(false);
-
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [material, setMaterial] = useState([]);
-  const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
+  const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct:false });
   const [columns, setColumns] = useState(null);
   const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
-
+  const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -115,15 +113,24 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
             {row?.original?.type !== 'service' && row.original.type !== 'serializedAsset' && 
              <>
              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
-                <HtmlTooltip title="Add ">
+                {row.original?.subRows?.length > 0 && <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span> }
+               <Box pl={1}>
+               <HtmlTooltip title="Add ">
                   <IconButton
-                    onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
+                    onClick={(event) => {
+                      if(row.original.type === 'product' && row.original.productDetail.serializedProduct){
+                        setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX, isSerializedProduct:true })
+                        setAssetAssignedProduct([row.original])
+                      }else{
+                        setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX, isSerializedProduct:false })
+                      }
+                    }}
                     size="small"
                   >
                     <Add color="disabled" fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
+               </Box>
               </Box>
               </>
             }
@@ -185,7 +192,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
     data = response?.data?.data;
     let rows = data.material.filter((e) => e.parentId === null)
-    assignedAssets = data.material.filter((e) => e.type === 'serializedAsset')
+    assignedAssets = data.material.filter((e) => e.type === 'serializedAsset' && e.parentId)
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -249,6 +256,11 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
   const handleAdd = async (rows) => {
     setIsAdding(true)
     const material: any = [];
+    if (addDialog.type === "serializedAsset" && addDialog.parentId) {
+      rows?.forEach((e) => {
+        material.push(e)
+      })
+    } else {
       rows.forEach((d) => {
         const element: any = {};
         element.materialId = d._id;
@@ -258,6 +270,8 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
         element.parentId = addDialog.parentId;
         material.push(element);
       });
+    }
+    setAssetAssignedProduct([])
     axiosInstance()
       .post(`${routes?.invoice?.path}/material/${invoiceData._id}`, { material })
       .then(({ data }) => {
@@ -355,6 +369,16 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
           });
       });
     }
+  };
+
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    if (inputField.hasOwnProperty('qtyDisplay')) {
+      inputField['qty'] = inputField['qtyDisplay'];
+    }
+    let rows: any = [{ ...rowData, ...updatedData }];
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    handleSaveData(rows);
   };
 
   return (
@@ -497,6 +521,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
               uniqueKey="_id"
               renderedFrom="invoice_product_package"
               isClientSideGrid={true}
+              onSaveEdit={onSaveInlineEdit}
             />
           </Box>
         </>
@@ -533,7 +558,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
       {addchildDialog.open && (
         <Popover
           anchorReference="anchorPosition"
-          anchorPosition={{ top: addchildDialog.top, left: addchildDialog.bottom }}
+         anchorPosition={{ top: addchildDialog.top, left: addchildDialog.bottom }}
           anchorOrigin={{
             vertical: 'center',
             horizontal: 'left'
@@ -544,14 +569,14 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
           }}
           open={addchildDialog.open}
           onClose={() => {
-            setAddDialog({ open: false, type:'', parentId: null });
+            setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct:false });
           }}
         >
           <MenuList>
             <MenuItem
               onClick={() => {
                 setAddDialog({ open: true, type: 'product', parentId: addchildDialog.parentId });
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct:false });
               }}
             >
               Product
@@ -559,7 +584,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
             <MenuItem
               onClick={() => {
                 setAddDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct:false });
               }}
             >
               Package
@@ -567,11 +592,21 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
             <MenuItem
               onClick={() => {
                 setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct:false });
               }}
             >
               Services
             </MenuItem>
+            {addchildDialog.isSerializedProduct && (
+               <MenuItem
+               onClick={() => {
+                 setAddDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId });
+                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct:false });
+               }}
+             >
+               Assets
+             </MenuItem>
+            )}
           </MenuList>
         </Popover>
       )}
@@ -616,12 +651,18 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
           reference={'invoice'}
           handleClose={() => {
             setAddDialog({ open: false, type: '', parentId: null })
+            setAssetAssignedProduct([])
           }}
           ids={flattenArray(rowsData)?.filter((e) => e.type === 'serializedAsset')?.map((e) => e.materialId)}
           handleSucess={(rows) => {
-            handleAdd(rows)
+            if(addDialog.parentId){
+              handleAdd(rows?.map((e) => { return { materialId: e.asset, type: 'serializedAsset', parentId: e._id } }))
+            }else{
+              handleAdd(rows);
+            }
           }}
           isAssigning={isAdding}
+          selectedProducts={assetAssignedProduct?.map((i) => { return { _id: i._id, product: i.materialId, productName: i.detail, qty: i.assetQty ? i.qty - i.assetQty : i.qty } })}
         />
       )}
     </Fragment>
