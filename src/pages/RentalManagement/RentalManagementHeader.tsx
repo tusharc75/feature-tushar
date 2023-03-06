@@ -213,15 +213,27 @@ function RentalManagementHeader({
                   })}
                 </ToggleButtonGroup>
               )}
+              {permissions?.planning?.isRead &&
+                <Box ml={1}>
+                  <ToggleButtonGroup size="small" >
+                    <ToggleButton onClick={() => {
+                      history.push(`${routes.planning.path}`)
+                    }}>
+                      <span>{`Planned Rental`}</span>
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
+              }
               {permissions?.rentalPlanningCalendar?.isRead &&
-                <ToggleButtonGroup size="small" className="ml-2">
-                  <ToggleButton onClick={() => {
-                    history.push(`${routes.rentalPlanningCalendar.path}`)
-                  }}>
-                    <DateRangeIcon fontSize="small" />
-                    <span className='pl-2'> {`Calander`}</span>
-                  </ToggleButton>
-                </ToggleButtonGroup>
+                <Box ml={1}>
+                  <ToggleButtonGroup size="small" >
+                    <ToggleButton onClick={() => {
+                      history.push(`${routes.rentalPlanningCalendar.path}`)
+                    }}>
+                      <span>{`Calander`}</span>
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
               }
             </div>
           </HideWhenOffline>}

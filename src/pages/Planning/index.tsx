@@ -33,6 +33,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { useHistory } from 'react-router-dom';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 
 const Planning = () => {
 
@@ -335,7 +336,19 @@ const Planning = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+              {permissions?.rentalPlanningCalendar?.isRead &&
+                <Box ml={1}>
+                  <ToggleButtonGroup size="small" >
+                    <ToggleButton onClick={() => {
+                      history.push(`${routes.rentalPlanningCalendar.path}`)
+                    }}>
+                      <span>{`Calander`}</span>
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
+              }
+            </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>
