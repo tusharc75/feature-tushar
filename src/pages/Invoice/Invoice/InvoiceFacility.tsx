@@ -1,38 +1,17 @@
 import Box from '@material-ui/core/Box/Box';
-import React, { useState, useEffect, useReducer, useContext } from 'react';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, DateRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
-import Grid from '@material-ui/core/Grid/Grid';
-import { Button, Dialog, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
+import { useState, useContext } from 'react';
+import { Button, Dialog, Menu, MenuItem } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import {
   CustomDialogTransition,
-  dateFormat,
-  formatAmountWithCurrency,
-  customerContact,
-  gridLoadingTimeout,
   invoice,
-  purchaseOrder,
-  sidebarResource
 } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillFilePdf } from 'react-icons/ai';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
-import routes from '../../../components/Helpers/Routes';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import moment from 'moment';
-import { BiPurchaseTagAlt, MdEmail } from 'react-icons/all';
-import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
-import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from '../../../constants/columns';
-import { prepareDataForGrid } from '../../../constants/helpers';
-import CustomAgGridEditable from '../../../components/AgGridComponents/CustomAgGridEditable';
-import { Link } from 'react-router-dom';
-import { startCase } from 'lodash';
-import { fetch_invoice_product_fields } from '../../../components/Invoice/helper';
+import { MdEmail } from 'react-icons/all';
 
 const InvoiceFacility = ({ invoiceData }) => {
   const toastConfig = useContext(CustomToastContext);
