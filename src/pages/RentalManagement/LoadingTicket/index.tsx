@@ -138,7 +138,8 @@ const LoadingTicket = ({
           warehouse: u?.warehouse?.optionLabel,
           warehouseId: u?.warehouse?.optionValue,
           currentOwner: u?.currentOwner,
-          currentLocation: u?.currentLocation?.optionValue
+          currentLocation: u?.currentLocation?.optionValue,
+          rentalAssetStatus: u?.status,
         }));
 
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id);
@@ -154,6 +155,7 @@ const LoadingTicket = ({
           replaceReason: d.replaceReason,
           replaceAsset: d?.replaceAsset ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset : "",
           description: d?.product?.productDescription,
+          rentalAssetStatus: d?.status,
         })).map((u) => ({
           ...u,
           type: 'Asset',
@@ -431,6 +433,7 @@ const LoadingTicket = ({
     },
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
+    { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
   ];
 
