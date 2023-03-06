@@ -3,7 +3,7 @@ import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flo
 import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, INVENTORY_STATUS, REPAIR_JOB_STATUS, COLOUR_MASTER } from 'src/constants/helpers';
+import { deliveryTicket, DELIVERY_TICKET_REFERENCE_TYPE, INVENTORY_STATUS, REPAIR_JOB_STATUS, COLOUR_MASTER } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -85,7 +85,7 @@ const RepairJobViews = (props) => {
 
       const assets = await axiosInstance().get(`repair-job/${repairId}/assets`);
       const tickets = await axiosInstance().get(
-        `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.repairJob}&refrenceId=${repairId}`
+        `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.repairJob}&referenceId=${repairId}`
       );
 
       if (assets?.data?.data?.length) xPosition += 300;

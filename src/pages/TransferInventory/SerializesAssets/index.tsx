@@ -281,8 +281,8 @@ const SerialzedAssets = ({
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog({ open: false, product: [] });
           }}
-          refrenceType={'Transfer Inventory'}
-          refrenceData={null}
+          referenceType={'Transfer Inventory'}
+          referenceData={null}
           isAdding={isAdding}
           selectedProducts={addSerializedAssetDialog.product}
           filterByPlant={transferInventoryData?.transferFromPlant?.optionValue}

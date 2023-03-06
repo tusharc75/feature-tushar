@@ -938,8 +938,8 @@ const SerializedAsset = ({
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog({ open: false });
           }}
-          refrenceType={'Rental Job'}
-          refrenceData={{
+          referenceType={'Rental Job'}
+          referenceData={{
             _id: rentalManagementData?._id,
             warehouse: rentalManagementData?.warehouse?.optionValue,
             wellName: rentalManagementData?.wellName?.optionValue,
@@ -997,7 +997,7 @@ const SerializedAsset = ({
             afeNumber: rentalManagementData?.afeNumber,
             warehouse: rentalManagementData?.warehouse?.optionValue
           }}
-          refrenceId={rentalManagementData._id}
+          referenceId={rentalManagementData._id}
         />
       )}
       {showOrderDialog.open && showOrderDialog.type === 'purchaseOrder' && (
@@ -1037,9 +1037,9 @@ const SerializedAsset = ({
               message: `${sidebarResource.sublease} has been created successfully`
             });
           }}
-          refrenceType="rentalJob"
-          refrenceId={rentalManagementData._id}
-          refrenceData={{ ...rentalManagementData, material: [...showOrderDialog?.products?.filter((e) => e.serialized === true)] }}
+          referenceType="rentalJob"
+          referenceId={rentalManagementData._id}
+          referenceData={{ ...rentalManagementData, material: [...showOrderDialog?.products?.filter((e) => e.serialized === true)] }}
         />
       )}
     </Fragment>

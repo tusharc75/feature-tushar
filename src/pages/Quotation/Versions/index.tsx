@@ -14,7 +14,7 @@ import { camelCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import { Link } from 'react-router-dom';
 
-export default function Version({ onClose, quotationId, handleChangeVersion, refrenceType = "" }) {
+export default function Version({ onClose, quotationId, handleChangeVersion, referenceType = "" }) {
 
   const renderedFrom = `${camelCase(routes?.quotation.title)}_versions`;
 
@@ -29,7 +29,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
   useEffect(() => {
     const column: any = [];
     column.push({ field: 'version', headerName: 'Version', show: true, width: 140, disabled: true, cellRenderer: 'nameRenderer' });
-    if (refrenceType === "rentalJob" || refrenceType === "repairOrder") {
+    if (referenceType === "rentalJob" || referenceType === "repairOrder") {
       column.push({ field: 'quotationNumber', headerName: 'Quotation Number', show: true, cellRenderer: 'quotationNumberRenderer' });
     }
     column.push({ field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' });
@@ -44,7 +44,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
   }, [quotationId]);
 
   const NameRenderer = (params) => (
-    refrenceType === "rentalJob" || refrenceType === "repairOrder" ?
+    referenceType === "rentalJob" || referenceType === "repairOrder" ?
       <span>{params.data.version}</span> :
       <span
         className="link"

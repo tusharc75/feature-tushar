@@ -13,7 +13,7 @@ import {
   CustomDialogTransition,
   dateFormat,
   deliveryTicket,
-  DELIVERY_TICKET_REFRENCE_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   formatAmountWithCurrency,
   invoice,
@@ -301,7 +301,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       additionalCostData = additionalCostData.filter((d) => !additionalCost?.some((obj) => obj._id === d._id));
     }
     const result = await axiosInstance().get(
-      `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`
+      `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${rentalManagementData._id}`
     );
     const returnTicketProducts = {};
     result?.data?.data?.forEach((element) => {

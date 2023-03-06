@@ -12,7 +12,7 @@ import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwip
 import { useData } from 'src/StateProvider/Provider';
 import AddInventory from './AddInventory';
 import AssignSerialNumber from './AssignSerialNumber';
-import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS, deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS, deliveryTicket, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE } from 'src/constants/helpers';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -106,7 +106,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       gridApi.setRowData([]);
     }
 
-    const { data: { data: deliveryTicketList } } = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.transferInventory}&refrenceId=${transferInventoryData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`);
+    const { data: { data: deliveryTicketList } } = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.transferInventory}&referenceId=${transferInventoryData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`);
     var deliveryTicketProduct = []
     deliveryTicketList?.forEach((e) => {
       if (e?.products && e?.products?.length) {

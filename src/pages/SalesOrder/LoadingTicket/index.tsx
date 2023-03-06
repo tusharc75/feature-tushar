@@ -17,7 +17,7 @@ import {
   salesOrder,
   sidebarResource,
   DELIVERY_TICKET_TYPE,
-  DELIVERY_TICKET_REFRENCE_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_FROM_TO_TYPE
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -66,7 +66,7 @@ const LoadingTicket = ({ renderedFrom, currentStep, salesOrderData, fetchSalesOr
       productAssets = response?.data?.data
       productAssets = productAssets.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
 
-      const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=Sales Order&refrenceId=${salesOrderData._id}`)
+      const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=Sales Order&referenceId=${salesOrderData._id}`)
       deliveryTicketList = result?.data?.data
 
       deliveryTicketList.map(obj => {
@@ -149,7 +149,7 @@ const LoadingTicket = ({ renderedFrom, currentStep, salesOrderData, fetchSalesOr
   const handleDeliveryTicketDialog = () => {
     const data = {}
     data["ticketName"] = salesOrderData.salesOrderNo;
-    data["refrenceId"] = salesOrderData._id;
+    data["referenceId"] = salesOrderData._id;
     data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
     data["pickupFrom"] = salesOrderData?.plant?.optionValue;
     data["pickupFromAddress"] = salesOrderData?.plant?.address;
@@ -284,8 +284,8 @@ const LoadingTicket = ({ renderedFrom, currentStep, salesOrderData, fetchSalesOr
     {showTicketDialog.open && (
       <ManageDeliveryTicket
         ticketType={DELIVERY_TICKET_TYPE.loading}
-        refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.salesOrder}
-        refrenceData={showTicketDialog.data}
+        referenceType={DELIVERY_TICKET_REFERENCE_TYPE.salesOrder}
+        referenceData={showTicketDialog.data}
         productInventory={selectedRecords}
         onClose={() => setShowTicketDialog({ open: false, data: {} })}
         onSuccess={() => {

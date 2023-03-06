@@ -12,7 +12,7 @@ import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHea
 import MultipleTicketProcess from "./MultipleTicketProcess";
 
 
-const MultipleTicket = ({ refrenceData, ticketType, refrenceType, handleClose }) => {
+const MultipleTicket = ({ referenceData, ticketType, referenceType, handleClose }) => {
 
     return (<Dialog
         fullScreen={true}
@@ -23,9 +23,9 @@ const MultipleTicket = ({ refrenceData, ticketType, refrenceType, handleClose })
         <CustomDialogHeader title={`Process ${ticketType} Ticket`} onClose={handleClose} ></CustomDialogHeader>
         <div className="listing-grid p-3">
             <MultipleTicketProcess
-                refrenceData={refrenceData}
+                referenceData={referenceData}
                 ticketType={ticketType}
-                refrenceType={refrenceType}
+                referenceType={referenceType}
             />
         </div>
     </Dialog>

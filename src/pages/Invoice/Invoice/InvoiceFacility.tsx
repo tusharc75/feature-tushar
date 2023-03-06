@@ -266,7 +266,7 @@ const InvoiceFacility = ({ invoiceData }) => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            refrenceType="invoice"
+            referenceType="invoice"
           />
         </Dialog>
       )}

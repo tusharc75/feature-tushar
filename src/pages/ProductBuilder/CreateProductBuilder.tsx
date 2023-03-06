@@ -86,15 +86,6 @@ const CreateProductBuilder = () => {
           />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
-          {/* <ImportExportLinks
-                    module="builderheader"
-                    api={"productbuilder"}
-                    refrenceId={id}
-                    afterImportCompleted={() => {
-                        setIsUpdating(true)
-                        setIsUpdating(false)
-                    }}
-                /> */}
         </Grid>
       </Grid>
       <CustomContainer>
