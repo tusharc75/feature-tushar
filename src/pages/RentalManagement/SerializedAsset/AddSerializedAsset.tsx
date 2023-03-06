@@ -199,7 +199,7 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                     deepFilter = `${deepFilter}&repairable=true`;
                 }
                 else {
-                    deepFilter = `${deepFilter}&rentalJob=true`;
+                    deepFilter = `${deepFilter}&rental=true`;
                     const dateFilter = { from: refrenceData?.fromDate, to: refrenceData?.toDate }
                     deepFilter = `${deepFilter}&date=${JSON.stringify(dateFilter)}`;
                 }
