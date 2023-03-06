@@ -369,6 +369,7 @@ function CalendarView() {
             }
         </Box>
         <DragAndDropCalendar
+            style={{ height: "calc(100vh - 50px)" }}
             defaultDate={defaultDate}
             defaultView={'day'}
             events={events}
