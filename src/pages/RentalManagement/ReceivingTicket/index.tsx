@@ -700,7 +700,7 @@ const ReceivingTicket = ({
     { field: 'manualEndDate', headerName: 'End Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'startDate', headerName: 'System Start Date', show: false, cellRenderer: 'dateRenderer' },
     { field: 'endDate', headerName: 'System End Date', show: false, cellRenderer: 'dateRenderer' },
-    { field: 'rentalAssetStatus', headerName: 'Rental Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' },
   ];
 

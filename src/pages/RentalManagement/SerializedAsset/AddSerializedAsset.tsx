@@ -233,9 +233,19 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
     };
 
     const getRowStyleScheduled = (params) => {
-        if ([INVENTORY_STATUS.available, INVENTORY_STATUS.new].indexOf(params?.data?.status) >= 0) {
+        if ([INVENTORY_STATUS.available, INVENTORY_STATUS.new]?.includes(params?.data?.status)) {
             return {
-                'background-color': "#d3ffe0",
+                'background-color': "#90EE90",
+            }
+        }
+        if (params?.data?.reserved) {
+            return {
+                'background-color': "#FFCCCB",
+            }
+        }
+        if ([INVENTORY_STATUS.inUse]?.includes(params?.data?.status)) {
+            return {
+                'background-color': "#FFD580",
             }
         }
         return null;
