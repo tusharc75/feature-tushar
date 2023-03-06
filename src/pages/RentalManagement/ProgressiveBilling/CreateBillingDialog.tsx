@@ -35,7 +35,7 @@ import { startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
-import { CheckBox } from '@material-ui/icons';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -141,11 +141,18 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                   }
                 }}
               >
-                <InfoIcon fontSize="small" color="primary" />
+                <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
             )}
           </div>
         )
+      }, {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
       }
     ];
     data
@@ -243,33 +250,27 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           });
         }
       });
-    {
-      isMobile ? (
-        <Box display={'none'} />
-      ) : (
-        coloum.push({
-          accessor: 'action',
-          Header: '',
-          minWidth: 50,
-          width: 50,
-          sticky: 'right',
-          disableFilters: true,
-          canDrag: false,
-          Cell: ({ row }) =>
-            row.original.isEditable && (
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  setIsProductEdit({ open: true, rowData: row.original });
-                }}
-              >
-                <EditIcon color="primary" />
-              </IconButton>
-            )
-        })
-      );
-    }
+    coloum.push({
+      accessor: 'action',
+      Header: '',
+      minWidth: 50,
+      width: 50,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) =>
+        row.original.isEditable && (
+          <IconButton
+            size="small"
+            aria-label="Details"
+            onClick={() => {
+              setIsProductEdit({ open: true, rowData: row.original });
+            }}
+          >
+            <EditIcon color="primary" />
+          </IconButton>
+        )
+    })
     coloum.forEach((element) => {
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
@@ -337,6 +338,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             ele.qty = 1;
             ele._id = ele?.inventoryDetail?._id;
             ele.materialId = ele?.inventoryDetail?._id;
+            ele.description = element?.productDetail?.productDescription || '';
             let values = { qty: 1 };
             values['actualStartDate'] = ele?.manualStartDate;
             values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
@@ -447,6 +449,16 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
               : parent.type === 'additionalCost'
                 ? parent?.costType
                 : parent.packageDetail?.packageName;
+      parent.description =
+        parent.type === 'product'
+          ? parent?.productDetail?.productDescription || '' :
+          parent.type === 'service'
+            ? parent?.serviceDetail?.serviceDescription || '' :
+            parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || '' :
+              parent.type === 'asset'
+                ? parent?.description || ''
+                : '';
       parent.qtyDisplay = parent.qty;
       parent.isEditable =
         ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'asset' || parent.type === 'additionalCost'
@@ -470,6 +482,16 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             : _subRow.type === 'asset'
               ? _subRow?.inventoryDetail?.assetNumber
               : _subRow?.packageDetail?.packageName;
+      _subRow.description =
+        _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDescription || '' :
+          _subRow.type === 'service'
+            ? _subRow?.serviceDetail?.serviceDescription || '' :
+            _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || '' :
+              _subRow.type === 'asset'
+                ? _subRow?.description || ''
+                : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(_subRow?.pricingMethod) ? false : true;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -582,7 +604,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       delete element?.productDetail;
       delete element?.packageDetail;
       delete element?.serviceDetail;
-      delete element?.serviceDetail;
+      delete element?.inventoryDetail;
+      delete element?.description;
       delete element?.subRows;
       delete element?.manualEndDate
     });

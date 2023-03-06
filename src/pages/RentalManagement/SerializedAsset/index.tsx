@@ -432,6 +432,7 @@ const SerializedAsset = ({
         ..._inventory,
         srno: `${parent.srno}.${k + 1}`,
         detail: _inventory?.assetNumber ? _inventory?.assetNumber : _inventory.inventoryDetail?.assetNumber,
+        description: parent?.description,
         type: 'asset',
         isNonSerializeAsset: false,
         status: _inventory?.status ? _inventory?.status : _inventory.inventoryDetail?.status,
@@ -453,6 +454,7 @@ const SerializedAsset = ({
         inventory: _inventory.id,
         srno: `${parent.srno}.${k + 1}`,
         detail: _inventory?.assetNumber,
+        description: parent?.description,
         type: 'asset',
         isNonSerializeAsset: true,
         status: _inventory?.status,
@@ -941,6 +943,8 @@ const SerializedAsset = ({
             _id: rentalManagementData?._id,
             warehouse: rentalManagementData?.warehouse?.optionValue,
             wellName: rentalManagementData?.wellName?.optionValue,
+            fromDate: rentalManagementData?.estimateStartDate,
+            toDate: rentalManagementData?.estimateEndDate,
             afeNumber: rentalManagementData?.afeNumber
           }}
           isAdding={isAdding}

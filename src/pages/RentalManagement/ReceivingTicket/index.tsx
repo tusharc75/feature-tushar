@@ -131,6 +131,9 @@ const ReceivingTicket = ({
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, data: null, loading: false })
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
 
+  const [repairJobCount, setRepairJobCount] = useState(0);
+  const [repairOrderCount, setRepairOrderCount] = useState(0);
+
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
@@ -259,6 +262,13 @@ const ReceivingTicket = ({
         invoiceData = invoiceResponse?.data?.data?.material || []
 
         setInvoiceData(invoiceData);
+      }
+
+      if (permissions?.repairJob?.isRead && transactionData?.repairJob?.length) {
+        setRepairJobCount(transactionData?.repairJob?.length);
+      }
+      if (permissions?.repairOrder?.isRead && transactionData?.repairOrder?.length) {
+        setRepairOrderCount(transactionData?.repairOrder?.length);
       }
 
       if (transactionData?.repairJob?.length || transactionData?.repairOrder?.length) {
@@ -1449,7 +1459,7 @@ const ReceivingTicket = ({
               )}
           </Menu>
           <Box mx={1} />
-          {(
+          {(repairJobCount > 0 || repairOrderCount > 0) && (
             <IconButton onClick={openLinkActions} size="small" color="primary">
               <ExpandMore fontSize="inherit" />
             </IconButton>
@@ -1466,15 +1476,28 @@ const ReceivingTicket = ({
             open={Boolean(anchorLinkActionEl)}
             onClose={closeLinkActions}
           >
-            <MenuItem
-              onClick={() => {
-                history.push(routes.deliveryTicket.path, {
-                  rental: rentalManagementData
-                });
-              }}
-            >
-              {`Created ${routes.deliveryTicket.title}`}
-            </MenuItem>
+            {repairJobCount > 0 && (
+              <MenuItem
+                onClick={() => {
+                  history.push(routes.repairJob.path, {
+                    rental: rentalManagementData
+                  });
+                }}
+              >
+                {`Created ${routes.repairJob.title}`}
+              </MenuItem>
+            )}
+            {repairOrderCount > 0 && (
+              <MenuItem
+                onClick={() => {
+                  history.push(routes.repairOrder.path, {
+                    rental: rentalManagementData
+                  });
+                }}
+              >
+                {`Created ${routes.repairOrder.title}`}
+              </MenuItem>
+            )}
           </Menu>
           {showProcessDeliveryTicket && !isOffline && (
             <Fragment>
@@ -1739,7 +1762,7 @@ const ReceivingTicket = ({
       )}
       {showRepairOrderDialog && (
         <ManageRepairOrder
-          refrenceType="Rental Job"
+          refrenceType="rentalJob"
           refrenceData={{
             _id: rentalManagementData._id,
             warehouse: selectedRecords[0].warehouseId,
