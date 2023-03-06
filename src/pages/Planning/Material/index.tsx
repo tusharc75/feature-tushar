@@ -79,7 +79,20 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${row.original?.type === "serializedAsset" ? "Asset" : startCase(row.original?.type)} `}</p>
+            <p>{`${row.original?.type === "serializedAsset" ? `Asset` : startCase(row.original?.type)}`}</p>
+            <Box pl={1}>
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
+                : row.original?.type === 'package'
+                  ? row.original?.packageDetail?.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
+            </Box>
           </div>
         )
       },
@@ -190,11 +203,9 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
 
   const fetchData = async () => {
     var data: any = [];
-    let assignedAssets = []
     const response = await axiosInstance().get(`${routes.planning.path}/material/${planningData._id}`);
     data = response?.data?.data;
     let rows = data.material.filter((e) => e.parentId === null)
-    assignedAssets = data.material.filter((e) => e.type === 'serializedAsset')
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === 'product' ? parent.productDetail?.productName :
@@ -204,9 +215,9 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           parent?.serviceDetail?.serviceDescription
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
-      parent.assetQty = assignedAssets.filter((i) => i.parentId === parent._id).length;
+      parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === 'serializedAsset')?.length;
+      parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, parent);
-
     });
     setRowsData(rows);
     setSelectedRecords([]);
@@ -225,7 +236,9 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           _subRow.type === 'serializedAsset' ? parent.description :
             _subRow?.serviceDetail?.serviceDescription
       _subRow.qty = _subRow.qty;
+      _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === 'serializedAsset')?.length;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
+      _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -353,9 +366,10 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
 
   const disableAssignSerializedAssets = () => {
     if (selectedRecords.length === 0) return true;
-    const flatArray = selectedRecords.filter((f) => f.type === 'product' && f.productDetail.serializedProduct && f.qty > f.assetQty);
+    const flatArray = selectedRecords.filter((f) => f?.type === 'product' && f?.productDetail?.serializedProduct && f?.qty > f?.assetQty);
     return flatArray.length === 0;
   };
+
 
   return (
     <Fragment>
@@ -439,7 +453,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
                 }
                 onClick={() => {
                   closeActions();
-                  setAssetAssignedProduct(selectedRecords.filter((i) => i.type === 'product' && i.productDetail.serializedProduct))
+                  setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === 'product' && i?.productDetail?.serializedProduct))
                   setAddDialog({ open: true, type: 'serializedAsset', parentId: null })
                 }}
               >
