@@ -36,18 +36,18 @@ import { useHistory } from 'react-router-dom';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import queryString from 'query-string';
 
-const PlanningType = [
-  {
-    key: 'All Planning',
-    value: 1
-  },
-  {
-    key: 'My Planning',
-    value: 2
-  }
-];
-
 const Planning = () => {
+
+  const PlanningType = [
+    {
+      key: `All ${routes?.planning.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes?.planning.title}`,
+      value: 2
+    }
+  ];
 
   const renderedFrom = camelCase(routes?.planning.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -392,12 +392,11 @@ const Planning = () => {
                   </ToggleButton>
                 </ToggleButtonGroup>
               </Box>
-              {
-                selectedPlanningType &&
+              {selectedPlanningType &&
                 <Chip
                   className="ml-3"
                   color="primary"
-                  label={'Rental Job'}
+                  label={'Type: Rental Job'}
                   onDelete={() => {
                     setSelectedPlanningType(null)
                   }}
