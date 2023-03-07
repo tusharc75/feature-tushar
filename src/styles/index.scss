@@ -985,8 +985,12 @@ body::-webkit-scrollbar-thumb {
       color: #7b898e;
     }
   }
+
   .MuiTreeItem-root .activity {
     padding: 6px 0px 6px 10px;
+  }
+  .attachment-files.MuiTreeItem-root .activity {
+    padding: 6px 10px;
   }
 }
 

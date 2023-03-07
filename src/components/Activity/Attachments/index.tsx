@@ -29,8 +29,6 @@ import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 import { AiOutlineFileAdd, AiOutlineFolderAdd, AiOutlineDelete, AiOutlineFile } from 'react-icons/ai';
 import { FiEdit2 } from 'react-icons/fi';
 
-const structureOrder = ['folder', 'file'];
-
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState({ open: false, type: 'file', parentFolder: null, purpose: 'add' });
   const [loading, setLoading] = useState(false);
@@ -244,9 +242,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   const nestedSubTrees = (data, parentId) => {
     return data
       ?.filter((item) => `${item.parentFolder}` === `${parentId}`)
-      ?.sort((a, b) => {
-        return structureOrder.indexOf(a?.type) > structureOrder.indexOf(b?.type);
-      })
       ?.map((_attachment, idx) => {
         if (_attachment?.type === 'folder') {
           const childTree = nestedSubTrees(data, _attachment._id);
