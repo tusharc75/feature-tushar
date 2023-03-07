@@ -24,7 +24,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../Account/ManageAccount";
 import ManageContactDialog from "../Contact/ManageContact";
 
-const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, products = [], 
+const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, products = [],
     currency = null, rentalManagementId = null, warehouseId = null, disableEdit = false, refrenceData = null }) => {
 
     const history = useHistory();
@@ -79,7 +79,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     } else {
                         if (disableEdit) {
                             fieldsDataForUpdate?.forEach((e) => {
-                                if (['supplierAccount', 'warehouse', 'currency']?.includes(e?.fieldName)) {
+                                if (['warehouse', 'currency']?.includes(e?.fieldName)) {
                                     e.disableOnEdit = true
                                 }
                             })
