@@ -1869,7 +1869,6 @@ export const ACTIVITY_RESOURCE = {
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
   fieldTicket: 'fieldTicket',
-  fleetMaster:`Fleet Master`
 };
 
 export const LOG_RESOURCE = {
