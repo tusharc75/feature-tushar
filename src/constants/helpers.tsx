@@ -226,7 +226,8 @@ export const sidebarResource = {
   fieldTicket: 'Field Ticket',
   fieldServiceTechnician: `Field Service Technician`,
   rentalPlanningCalendar: `Rental Planning Calendar`,
-  resourceLogs: `Resource Logs`
+  resourceLogs: `Resource Logs`,
+  fleetMaster:`Fleet Master`
 };
 
 export const primaryFields = {
@@ -332,7 +333,8 @@ export const RESOURCE_LABEL = {
   planning: 'Planning',
   fieldTicket: 'Field Ticket',
   fieldServiceTechnician: `Field Service Technician`,
-  resourceLogs: `Resource Logs`
+  resourceLogs: `Resource Logs`,
+  fleetMaster:`Fleet Master`
 };
 
 export const CHILD_RESOURCE = {
@@ -1867,6 +1869,7 @@ export const ACTIVITY_RESOURCE = {
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
   fieldTicket: 'fieldTicket',
+  fleetMaster:`Fleet Master`
 };
 
 export const LOG_RESOURCE = {
