@@ -9,7 +9,7 @@ import { CustomDialogTransition, gridLoadingTimeout, deliveryTicket, rentalManag
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from "../../../components/Helpers/Routes";
-import { prepareDataForGrid, DELIVERY_TICKET_REFRENCE_TYPE, getObjKeys, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_TYPE, sidebarResource, generateUniqueIdOnly } from "../../../constants/helpers";
+import { prepareDataForGrid, DELIVERY_TICKET_REFERENCE_TYPE, getObjKeys, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_TYPE, sidebarResource, generateUniqueIdOnly } from "../../../constants/helpers";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../../constants/useColumns"
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
@@ -157,7 +157,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
       const tempInitialData = getObjKeys("", fieldsDataForCreate)
       tempInitialData["ticketName"] = `${referenceData?.rentalJobName}_${generateUniqueIdOnly()}`;
       tempInitialData["ticketType"] = DELIVERY_TICKET_TYPE.receiving;
-      tempInitialData["type"] = DELIVERY_TICKET_REFRENCE_TYPE.rentalJob;
+      tempInitialData["type"] = DELIVERY_TICKET_REFERENCE_TYPE.rentalJob;
       tempInitialData["rentalJob"] = referenceData._id;
       tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
       tempInitialData["pickupFrom"] = referenceData?.customerAccount?.optionValue;
@@ -183,7 +183,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
 
       // const data = {}
       // data["ticketName"] = referenceData.rentalJobName;
-      // data["refrenceId"] = referenceData._id;
+      // data["referenceId"] = referenceData._id;
       // data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
       // data["pickupFrom"] = referenceData?.customerAccount?.optionValue;
       // data["pickupFromAddress"] = referenceData.shippingAddress?.optionValue;
@@ -305,8 +305,8 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
     {showTicketDialog.open && (
       <ManageDeliveryTicket
         ticketType={showTicketDialog.ticketType}
-        refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
-        refrenceData={showTicketDialog.data}
+        referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
+        referenceData={showTicketDialog.data}
         productInventory={productInventory?.filter((e) => e.type === "Asset")}
         products={productInventory?.filter((e) => e.type === "Product")}
         onClose={() => setShowTicketDialog({ open: false, ticketType: "", data: {}, rentalJob: null })}

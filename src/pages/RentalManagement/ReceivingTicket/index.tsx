@@ -20,7 +20,7 @@ import {
   DELIVERY_TICKET_STATUS,
   RENTAL_INTERNAL_ASSET_STATUS,
   DELIVERY_TICKET_TYPE,
-  DELIVERY_TICKET_REFRENCE_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
   repairJob,
   DELIVERY_FROM_TO_TYPE,
   COLOUR_MASTER,
@@ -130,6 +130,9 @@ const ReceivingTicket = ({
   const [invoiceData, setInvoiceData] = useState(null);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, data: null, loading: false })
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
+
+  const [repairJobCount, setRepairJobCount] = useState(0);
+  const [repairOrderCount, setRepairOrderCount] = useState(0);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -246,7 +249,7 @@ const ReceivingTicket = ({
         transactionData = transactionResult?.data?.data;
 
         const result = await axiosInstance().get(
-          `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`
+          `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${rentalManagementData._id}`
         );
         deliveryTicketList = result?.data?.data;
 
@@ -259,6 +262,13 @@ const ReceivingTicket = ({
         invoiceData = invoiceResponse?.data?.data?.material || []
 
         setInvoiceData(invoiceData);
+      }
+
+      if (permissions?.repairJob?.isRead && transactionData?.repairJob?.length) {
+        setRepairJobCount(transactionData?.repairJob?.length);
+      }
+      if (permissions?.repairOrder?.isRead && transactionData?.repairOrder?.length) {
+        setRepairOrderCount(transactionData?.repairOrder?.length);
       }
 
       if (transactionData?.repairJob?.length || transactionData?.repairOrder?.length) {
@@ -690,7 +700,7 @@ const ReceivingTicket = ({
     { field: 'manualEndDate', headerName: 'End Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'startDate', headerName: 'System Start Date', show: false, cellRenderer: 'dateRenderer' },
     { field: 'endDate', headerName: 'System End Date', show: false, cellRenderer: 'dateRenderer' },
-    { field: 'rentalAssetStatus', headerName: 'Rental Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' },
   ];
 
@@ -708,7 +718,7 @@ const ReceivingTicket = ({
   const handleTicketDialog = (ticketType, deliveryToType) => {
     const data = {};
     data['ticketName'] = rentalManagementData.rentalJobName;
-    data['refrenceId'] = rentalManagementData._id;
+    data['referenceId'] = rentalManagementData._id;
     data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
     data['pickupFrom'] = rentalManagementData?.customerAccount?.optionValue;
     data['pickupFromAddress'] = selectedRecords[0]?.currentLocation;
@@ -785,7 +795,7 @@ const ReceivingTicket = ({
 
   const handleOpenReplaceAssetReason = (rows) => {
     const data: any = {};
-    data.refrenceType = 'rentalJob';
+    data.referenceType = 'rentalJob';
     data.referenceId = rentalManagementData._id;
     const assets: any = [];
     selectedRecords?.forEach((element: any) => {
@@ -1449,7 +1459,7 @@ const ReceivingTicket = ({
               )}
           </Menu>
           <Box mx={1} />
-          {(
+          {(repairJobCount > 0 || repairOrderCount > 0) && (
             <IconButton onClick={openLinkActions} size="small" color="primary">
               <ExpandMore fontSize="inherit" />
             </IconButton>
@@ -1466,15 +1476,28 @@ const ReceivingTicket = ({
             open={Boolean(anchorLinkActionEl)}
             onClose={closeLinkActions}
           >
-            <MenuItem
-              onClick={() => {
-                history.push(routes.deliveryTicket.path, {
-                  rental: rentalManagementData
-                });
-              }}
-            >
-              {`Created ${routes.deliveryTicket.title}`}
-            </MenuItem>
+            {repairJobCount > 0 && (
+              <MenuItem
+                onClick={() => {
+                  history.push(routes.repairJob.path, {
+                    rental: rentalManagementData
+                  });
+                }}
+              >
+                {`Created ${routes.repairJob.title}`}
+              </MenuItem>
+            )}
+            {repairOrderCount > 0 && (
+              <MenuItem
+                onClick={() => {
+                  history.push(routes.repairOrder.path, {
+                    rental: rentalManagementData
+                  });
+                }}
+              >
+                {`Created ${routes.repairOrder.title}`}
+              </MenuItem>
+            )}
           </Menu>
           {showProcessDeliveryTicket && !isOffline && (
             <Fragment>
@@ -1578,8 +1601,8 @@ const ReceivingTicket = ({
       {showTicketDialog.open && (
         <ManageDeliveryTicket
           ticketType={showTicketDialog.ticketType}
-          refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
-          refrenceData={showTicketDialog.data}
+          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
+          referenceData={showTicketDialog.data}
           productInventory={selectedRecords?.filter((e) => e.type === 'Asset')}
           products={
             showQtyDialog?.data && showQtyDialog?.data?.length > 0
@@ -1621,7 +1644,7 @@ const ReceivingTicket = ({
       )}
       {isExistingRentalJob && (
         <ExistingRentalJob
-          referenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
+          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
           referenceData={rentalManagementData}
           productInventory={selectedRecords?.filter((e) => e.type === 'Asset')}
           onClose={() => setIsExistingRentalJob(false)}
@@ -1711,9 +1734,9 @@ const ReceivingTicket = ({
       )}
       {openDeliveryTicketDialog && (
         <MultipleTicket
-          refrenceData={rentalManagementData}
+          referenceData={rentalManagementData}
           ticketType={[DELIVERY_TICKET_TYPE.receiving, DELIVERY_TICKET_TYPE.return]}
-          refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
+          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
           handleClose={() => {
             setOpenDeliveryTicketDialog(false);
             fetchRecords();
@@ -1722,8 +1745,8 @@ const ReceivingTicket = ({
       )}
       {showRepairJobDialog && (
         <ManageRepairJob
-          refrenceType="Rental Job"
-          refrenceData={{
+          referenceType="Rental Job"
+          referenceData={{
             _id: rentalManagementData._id,
             warehouse: selectedRecords[0].warehouseId,
             wellName: rentalManagementData?.wellName?.optionValue,
@@ -1739,8 +1762,8 @@ const ReceivingTicket = ({
       )}
       {showRepairOrderDialog && (
         <ManageRepairOrder
-          refrenceType="Rental Job"
-          refrenceData={{
+          referenceType="rentalJob"
+          referenceData={{
             _id: rentalManagementData._id,
             warehouse: selectedRecords[0].warehouseId,
             customerAccount: rentalManagementData.customerAccount?.optionValue,
@@ -1759,8 +1782,8 @@ const ReceivingTicket = ({
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog({ open: false, products: [] });
           }}
-          refrenceType={'ReplaceAsset'}
-          refrenceData={{
+          referenceType={'ReplaceAsset'}
+          referenceData={{
             _id: rentalManagementData?._id,
             warehouse: rentalManagementData?.warehouse?.optionValue
           }}

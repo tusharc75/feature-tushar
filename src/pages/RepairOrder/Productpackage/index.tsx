@@ -437,6 +437,7 @@ const Productpackage = ({
                       size="small"
                       variant="contained"
                       color="primary"
+                      disabled={rowsData ? false : true}
                       onClick={() => {
                         setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null, existing: true });
                       }}

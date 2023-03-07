@@ -14,7 +14,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import {
   DELIVERY_FROM_TO_TYPE,
-  DELIVERY_TICKET_REFRENCE_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   gridLoadingTimeout,
@@ -129,7 +129,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
       const {
         data: { data: deliveryTicketList }
       } = await axiosInstance().get(
-        `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.transferInventory}&refrenceId=${transferInventoryData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+        `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.transferInventory}&referenceId=${transferInventoryData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
       );
 
       const { assets, products, serialNumber } = productsData;
@@ -217,7 +217,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   const handleLoadingTicketDialog = () => {
     const data = {};
     data['ticketName'] = transferInventoryData?.transferNumber;
-    data['refrenceId'] = transferInventoryData?._id;
+    data['referenceId'] = transferInventoryData?._id;
 
     data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
     data['pickupFrom'] = transferInventoryData?.transferFromPlant.optionValue;
@@ -418,8 +418,8 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
       {showTicketDialog.open && (
         <ManageDeliveryTicket
           ticketType={DELIVERY_TICKET_TYPE.loading}
-          refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.transferInventory}
-          refrenceData={showTicketDialog.data}
+          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.transferInventory}
+          referenceData={showTicketDialog.data}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           productInventory={selectedRecords?.filter((e) => e.type === 'Asset')}
           products={selectedRecords?.filter((e) => e.type === 'Product')}

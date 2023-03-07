@@ -5,7 +5,7 @@ import { Link, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { deliveryTicket, sidebarResource, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_FROM_TO_TYPE } from 'src/constants/helpers';
+import { deliveryTicket, sidebarResource, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_FROM_TO_TYPE } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
@@ -171,7 +171,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const fetchLoadingTickets = () =>
     new Promise((resolve, reject) => {
       axiosInstance()
-        .get(`${routes.deliveryTicket.path}/typewise?refrenceType=Transfer Asset&refrenceId=${transferAssetId}`)
+        .get(`${routes.deliveryTicket.path}/typewise?referenceType=Transfer Asset&referenceId=${transferAssetId}`)
         .then(({ data: { data } }) => {
           resolve(data);
         })
@@ -289,7 +289,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               }
               onClick={() => {
                 const data: any = {}
-                data["refrenceId"] = transferAssetData._id
+                data["referenceId"] = transferAssetData._id
                 data["ticketName"] = transferAssetData.transferAssetNumber
 
                 if (transferAssetData?.transferType === "Internal") {
@@ -407,8 +407,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       {showTicketDialog.open && (
         <ManageDeliveryTicket
           ticketType={DELIVERY_TICKET_TYPE.receiving}
-          refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.transferAsset}
-          refrenceData={showTicketDialog.data}
+          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.transferAsset}
+          referenceData={showTicketDialog.data}
           productInventory={assetWithNoTicket}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           onSuccess={() => {

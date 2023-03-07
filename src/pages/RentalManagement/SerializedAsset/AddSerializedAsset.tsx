@@ -17,8 +17,6 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import { prepareDataForGrid } from "../../../constants/helpers"
 import { isMobile, isTablet } from "react-device-detect";
-import { MdAdd } from "react-icons/md";
-import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import { groupBy, orderBy, sortBy, uniq, map } from "lodash";
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
 import { Autocomplete } from "@material-ui/lab";
@@ -29,9 +27,9 @@ import HtmlTooltip from "../../../components/CustomTooltipTitle";
 
 let searchTimeout;
 
-const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, refrenceType = null,
-    refrenceData = null,
-    rentalId = null, repairJobId = null, transferAssetId = null, salesOrderId = null, notIn = null, queryString = null, filterByPlant = null }) => {
+const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, referenceType = null,
+    referenceData = null,
+    rentalId = null, repairJobId = null, transferAssetId = null, salesOrderId = null, notIn = null, filterByPlant = null }) => {
 
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -181,7 +179,7 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
         }
         //  To fetch the remaining unassigned assets of that rental management
         if (rentalId) {
-            deepFilter = `${deepFilter}&rental=${rentalId}&notIn=${notIn}`;
+            deepFilter = `${deepFilter}&rentalJobId=${rentalId}&notIn=${notIn}`;
         } else if (repairJobId) {
             deepFilter = `${deepFilter}&repairJobId=${repairJobId}&notIn=${notIn}`;
         } else if (transferAssetId) {
@@ -194,15 +192,15 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
             } else {
                 deepFilter = `${deepFilter}&entityWise=0&plant=${selectedPlant}`;
             }
-            if (queryString) {
-                deepFilter = `${deepFilter}&${queryString}`;
-            } else {
-                if (refrenceType === "Repair Job") {
-                    deepFilter = `${deepFilter}&repairable=true`;
-                }
-                else {
-                    deepFilter = `${deepFilter}&availableAssets=true`;
-                }
+            if (referenceType === "Repair Job") {
+                deepFilter = `${deepFilter}&repairable=true`;
+            }
+            else if (referenceType === "Rental Job") {
+                const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate }
+                deepFilter = `${deepFilter}&rental=true&date=${JSON.stringify(dateFilter)}`;
+            }
+            else {
+                deepFilter = `${deepFilter}&availableAsset=true`;
             }
         }
         if (subleaseAsset) {
@@ -235,9 +233,19 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
     };
 
     const getRowStyleScheduled = (params) => {
-        if ([INVENTORY_STATUS.available, INVENTORY_STATUS.new].indexOf(params?.data?.status) >= 0) {
+        if ([INVENTORY_STATUS.available, INVENTORY_STATUS.new]?.includes(params?.data?.status)) {
             return {
-                'background-color': "#d3ffe0",
+                'background-color': "#DBF8DB",
+            }
+        }
+        if (params?.data?.reserved) {
+            return {
+                'background-color': "#FAEAE9",
+            }
+        }
+        if ([INVENTORY_STATUS.inUse]?.includes(params?.data?.status)) {
+            return {
+                'background-color': "#FFD580",
             }
         }
         return null;
@@ -282,7 +290,7 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
             aria-labelledby="customized-dialog-title"
             open={true}
         >
-            <CustomDialogHeader title={`${refrenceType === "ReplaceAsset" ? "Replace" : "Add"} ${routes.serializedAsset.title}`} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
+            <CustomDialogHeader title={`${referenceType === "ReplaceAsset" ? "Replace" : "Add"} ${routes.serializedAsset.title}`} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
             <CustomDialogContent>
                 <Box pt={1} pb={1}>
                     <Grid container spacing={2}>
@@ -320,7 +328,7 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                             }
                         </Grid>
                         <Grid item xs={12} md={3}>
-                            {refrenceType === "Rental Job" &&
+                            {referenceType === "Rental Job" &&
                                 <Grid container >
                                     <Grid item xs={6} justifyContent={"flex-end"}>
                                         {permissions?.sublease &&
@@ -419,7 +427,7 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                 }
                                 <Box pl={1}>
                                     <HtmlTooltip title={(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) ? "Direct transfer to customer location" :
-                                        refrenceType === "Rental Job" ? "Add to Job" : refrenceType === "ReplaceAsset" ? "Replace" : 'Add'}>
+                                        referenceType === "Rental Job" ? "Add to Job" : referenceType === "ReplaceAsset" ? "Replace" : 'Add'}>
                                         <Button
                                             color="primary"
                                             size="small"
@@ -431,8 +439,8 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                             endIcon={isAdding && <CircularProgress size={20} />}
                                         >
                                             {
-                                                refrenceType === "Rental Job" ? 'Add to Job' :
-                                                    refrenceType === "ReplaceAsset" ? "Replace" : 'Add'
+                                                referenceType === "Rental Job" ? 'Add to Job' :
+                                                    referenceType === "ReplaceAsset" ? "Replace" : 'Add'
                                             }
                                             {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
                                         </Button>
@@ -514,13 +522,13 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                 onSuccess={(data) => {
                     handleAddAssetToTransferAsset(data?._id);
                 }}
-                refrenceId={refrenceData._id}
-                refrenceType={refrenceType}
-                refrenceData={{
+                referenceId={referenceData._id}
+                referenceType={referenceType}
+                referenceData={{
                     transferFromPlant: getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0]?.warehouseId,
-                    transferToPlant: refrenceData?.warehouse,
-                    wellName: refrenceData?.wellName,
-                    afeNumber: refrenceData?.afeNumber
+                    transferToPlant: referenceData?.warehouse,
+                    wellName: referenceData?.wellName,
+                    afeNumber: referenceData?.afeNumber
                 }}
             />
         )}

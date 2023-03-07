@@ -41,9 +41,9 @@ interface Props {
   onClose?: any;
   onSuccess?: any;
   number?: string;
-  refrenceType?: string;
-  refrenceId?: string;
-  refrenceData?: any;
+  referenceType?: string;
+  referenceId?: string;
+  referenceData?: any;
   transferFromDisable?: boolean;
   transferToDisable?: boolean;
 }
