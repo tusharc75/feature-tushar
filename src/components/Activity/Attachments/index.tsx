@@ -92,7 +92,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                         borderLeft: '4px solid #298B88',
                         boxShadow: '0px 4px 40px rgba(0, 0, 0, 0.08)',
                         borderRadius: '4px',
-                        // marginBottom: '10px',
+                        marginBottom: '10px',
                         padding: '14px 0 14px 9px'
                       }}
                       label={
@@ -560,7 +560,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               <ListItemIcon style={{ minWidth: '30px' }}>
                 <AiOutlineFileAdd />
               </ListItemIcon>
-              <ListItemText>New File...</ListItemText>
+              <ListItemText>New File</ListItemText>
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -571,7 +571,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               <ListItemIcon style={{ minWidth: '30px' }}>
                 <AiOutlineFolderAdd />
               </ListItemIcon>
-              <ListItemText>New Folder...</ListItemText>
+              <ListItemText>New Folder</ListItemText>
             </MenuItem>
           </>
         ) : null}
