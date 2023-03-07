@@ -195,6 +195,8 @@ import FieldTicketDetail from './pages/FieldTicket/FieldTicketDetail';
 import FieldServiceTechnician from './pages/FieldServiceTechnician';
 import FleetMaster from './pages/FleetMaster';
 import FleetMasterDetail from './pages/FleetMaster/FleetMasterDetail';
+import Job from './pages/Job';
+import JobDetail from './pages/Job/JobDetail';
 
 var notificationInterval: any = null;
 
@@ -968,6 +970,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fleetMasterDetail.path}/:id`}>
               <FleetMasterDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.job.path}`}>
+              <Job />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.jobDetail.path}/:id`}>
+              <JobDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
