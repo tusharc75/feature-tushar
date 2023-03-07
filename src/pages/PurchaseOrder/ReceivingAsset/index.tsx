@@ -84,11 +84,11 @@ const ReceivingAsset = ({
       Cell: ({ row }) => (
         <p className="text-truncate">
           {row.original.type === 'Product' ? (
-            <Link className="link" title={row.original.productId} to={`${routes.productDetail.path}/${row.original.productId}`}>
+            <Link className="link" title={row.original.detail} to={`${routes.productDetail.path}/${row.original.productId}`}>
               {row.original.detail}
             </Link>
           ) : row.original.type === 'Asset' ? (
-            <Link className="link" title={row.original.productId} to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}>
+            <Link className="link" title={row.original.detail} to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}>
               {row.original.detail}
             </Link>
           ) : (

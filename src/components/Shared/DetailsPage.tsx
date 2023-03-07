@@ -109,6 +109,11 @@ const Details = (props: DetailProps) => {
     sortArray();
     const fieldData = fields.map((f) => f.fieldData);
     const vals = getObjKeysWithValues(data, fieldData);
+    fieldData?.forEach((e) => {
+      if (e.type === 'lookUpDisplay') {
+        vals[e.fieldName] = data[e.fieldName];
+      }
+    });
     setValues(vals);
 
     return () => {
@@ -201,6 +206,8 @@ const Details = (props: DetailProps) => {
       text = values[input.fieldName] ? displayDate(values[input.fieldName]) : '-';
     } else if (input.type === 'dateTime') {
       text = values[input.fieldName] ? displayDateTime(values[input.fieldName]) : '-';
+    } else if (input.type === 'lookUpDisplay') {
+      text = values[input.fieldName] ? values[input.fieldName]?.optionLabel : '-';
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : '-';
     }
@@ -370,7 +377,7 @@ const Details = (props: DetailProps) => {
                       item
                       xs={12}
                       sm={gridSize ?? dynamicSize(6, field.fieldData.type)}
-                      md={gridSize ?? dynamicSize(4, field.fieldData.type)}
+                      xl={gridSize ?? dynamicSize(4, field.fieldData.type)}
                     >
                       <Grid container alignItems="center" style={{ border: field.fieldData.type === 'imageUpload' ? 0 : '1px solid #EDEDED' }}>
                         <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(5, field.fieldData.type)}>

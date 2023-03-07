@@ -8,15 +8,13 @@ export const fetch_service_order_detail_fields = async (currency) => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.serviceOrderDetails}`);
     data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, currency ? currency : "USD");
-    const allFields = [...data];
-    var isRateRequired = false
-    data.forEach(element => {
-        if (element.fieldName === "price" && element.required) {
-            isRateRequired = true;
-        }
-    });
-    if (!isRateRequired) {
-        data = data.filter((e) => e.sectionName !== "Pricing Information")
-    }
-    return { fields: data, allFields: allFields };
+    return data;
+}
+
+export const fetch_service_order_addOn_fields = async (currency) => {
+    var data;
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.serviceOrderAddon}`);
+    data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, currency ? currency : "USD");
+    return data;
 }

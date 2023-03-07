@@ -64,6 +64,11 @@ const routes = {
     path: '/lead',
     data: {}
   },
+  resourceLogs: {
+    title: storedRoutes && storedRoutes.resourceLogs && storedRoutes.resourceLogs.title ? storedRoutes.resourceLogs?.title : RESOURCE_LABEL.resourceLogs,
+    path: '/resource-logs',
+    data: {}
+  },
   leadDetail: {
     title: storedRoutes && storedRoutes.lead && storedRoutes.lead.title ? storedRoutes.lead?.title : RESOURCE_LABEL.lead,
     path: '/lead/detail',
@@ -283,6 +288,10 @@ const routes = {
     title: storedRoutes && storedRoutes.budget && storedRoutes.budget ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: '/budget'
   },
+  budgetDetail: {
+    title: storedRoutes && storedRoutes.budget && storedRoutes.budget ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
+    path: '/budget/detail'
+  },
   pricingCondition: {
     title:
       storedRoutes && storedRoutes.pricingCondition && storedRoutes.pricingCondition
@@ -301,6 +310,11 @@ const routes = {
     title:
       storedRoutes && storedRoutes.marketSegment && storedRoutes.marketSegment ? storedRoutes.marketSegment?.title : RESOURCE_LABEL.marketSegment,
     path: '/market-segment'
+  },
+  marketSegmentDetail: {
+    title:
+      storedRoutes && storedRoutes.marketSegment && storedRoutes.marketSegment ? storedRoutes.marketSegment?.title : RESOURCE_LABEL.marketSegment,
+    path: '/market-segment/detail'
   },
   quotePdfTemplate: {
     title:
@@ -465,6 +479,20 @@ const routes = {
         ? storedRoutes.resourceCalendar?.title
         : 'Resource Calendar',
     path: '/resource-calendar'
+  },
+  planningCalendar: {
+    title:
+      storedRoutes && storedRoutes.planningCalendar && storedRoutes.planningCalendar.title
+        ? storedRoutes.planningCalendar?.title
+        : 'Planning Calendar',
+    path: '/planning-calendar'
+  },
+  rentalPlanningCalendar: {
+    title:
+      storedRoutes && storedRoutes.rentalPlanningCalendar && storedRoutes.rentalPlanningCalendar.title
+        ? storedRoutes.rentalPlanningCalendar?.title
+        : 'Rental Planning Calendar',
+    path: '/rental-planning-calendar'
   },
   eCommercePolicy: {
     title:
@@ -808,19 +836,40 @@ const routes = {
         : RESOURCE_LABEL.purchaseRequisition,
     path: '/purchase-requisition/detail'
   },
-  schedule: {
+  planning: {
     title:
-      storedRoutes && storedRoutes.schedule && storedRoutes.schedule.title
-        ? storedRoutes.schedule?.title
-        : RESOURCE_LABEL.schedule,
-    path: '/schedule'
+      storedRoutes && storedRoutes.planning && storedRoutes.planning.title
+        ? storedRoutes.planning?.title
+        : RESOURCE_LABEL.planning,
+    path: '/planning'
   },
-  scheduleDetail: {
+  planningDetail: {
     title:
-      storedRoutes && storedRoutes.schedule && storedRoutes.schedule.title
-        ? storedRoutes.schedule?.title
-        : RESOURCE_LABEL.schedule,
-    path: '/schedule/detail'
+      storedRoutes && storedRoutes.planning && storedRoutes.planning.title
+        ? storedRoutes.planning?.title
+        : RESOURCE_LABEL.planning,
+    path: '/planning/detail'
+  },
+  fieldTicket: {
+    title:
+      storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title
+        ? storedRoutes.fieldTicket?.title
+        : RESOURCE_LABEL.fieldTicket,
+    path: '/field-ticket'
+  },
+  fieldTicketDetail: {
+    title:
+      storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title
+        ? storedRoutes.fieldTicket?.title
+        : RESOURCE_LABEL.fieldTicket,
+    path: '/field-ticket/detail'
+  },
+  fieldServiceTechnician: {
+    title:
+      storedRoutes && storedRoutes.fieldServiceTechnician && storedRoutes.fieldServiceTechnician.title
+        ? storedRoutes.fieldServiceTechnician?.title
+        : RESOURCE_LABEL.fieldServiceTechnician,
+    path: '/field-service-technician'
   },
 };
 

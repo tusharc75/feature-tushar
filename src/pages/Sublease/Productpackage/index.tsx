@@ -26,6 +26,7 @@ import { fetch_sublease_product_fields } from '../../../components/Sublease/help
 import { ExpandMore } from '@material-ui/icons';
 import styles from '../../Leads/Header.module.scss';
 import { genrateCustomTableColumns } from 'src/constants/columns';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const Productpackage = ({
   subleaseData,
@@ -120,30 +121,39 @@ const Productpackage = ({
                 </HtmlTooltip>
               </Box>
             )}
-            <HtmlTooltip title="Details">
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
-                  );
-                }}
-              >
-                <InfoIcon fontSize="small" />
-              </IconButton>
-            </HtmlTooltip>
+            <Box ml={1}>
+              <HtmlTooltip title="Details">
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    window.open(
+                      `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                    );
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            </Box>
           </div>
         ),
         Footer: () => {
           return <>Total</>;
+        }
+      },
+      {
+        accessor: 'description',
+        Header: "Description",
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       }
     ];
     const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
     coloum = [...coloum, ...newColumns];
-
     coloum.push({
       accessor: 'action',
       Header: '',
@@ -195,7 +205,8 @@ const Productpackage = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
+      parent.description = parent.type === 'product' ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.hideSelection = parent.assetQty > 0 ? true : false;
@@ -206,6 +217,7 @@ const Productpackage = ({
         subRows.forEach((_subRow, j) => {
           _subRow.srno = i + 1 + '.' + (j + 1);
           _subRow.detail = _subRow.productDetail?.productName;
+          _subRow.description = _subRow.productDetail?.productDescription;
           _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
           _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;

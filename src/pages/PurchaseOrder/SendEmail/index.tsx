@@ -97,18 +97,15 @@ const SendEmail = ({ purchaseOrderData }) => {
     handleAttachments();
   };
 
-  const handleViewPdf = (download, PDFType: string = 'ordered') => {
+
+  const handleViewPdf = (download, pdfType: string = 'ordered') => {
     if (download) {
       setLoading('download');
     } else {
       setLoading('view');
     }
     axiosInstance()
-      .get(
-        PDFType === 'ordered'
-          ? `${purchaseOrder.api}/${purchaseOrderData?._id}/pdf?type=ordered`
-          : `${purchaseOrder.api}/${purchaseOrderData?._id}/pdf?type=received`
-      )
+      .get(`${purchaseOrder.api}/${purchaseOrderData?._id}/pdf?type=${pdfType}`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -120,7 +117,7 @@ const SendEmail = ({ purchaseOrderData }) => {
               const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', `PurchaseOrder-${purchaseOrderData.purchaseOrderNumber}.pdf`);
+              link.setAttribute('download', `Purchase Order - ${purchaseOrderData.purchaseOrderNumber}.pdf`);
               document.body.appendChild(link);
               link.click();
             } else {
@@ -177,7 +174,7 @@ const SendEmail = ({ purchaseOrderData }) => {
       <Box display="flex" justifyContent="space-between">
         <Box display="flex" alignItems="center">
           <Box display="flex">
-            {permissions?.purchaseOrder?.isRead && !isMobile && (
+            {!isMobile && (
               <Button
                 variant="outlined"
                 color="primary"
@@ -186,12 +183,29 @@ const SendEmail = ({ purchaseOrderData }) => {
                 startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                 disabled={loading === 'view'}
                 onClick={(e) => {
+                  setDownlodingFile(false)
                   handleClick(e);
                 }}
               >
                 {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : loading === 'view' ? 'Please wait...' : 'Preview'}
               </Button>
             )}
+            <Box mx={1} />
+            <Button
+              variant="outlined"
+              color="primary"
+              type="button"
+              size="small"
+              startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
+              disabled={loading === 'download'}
+              onClick={(e) => {
+                setDownlodingFile(true)
+                handleClick(e);
+              }}
+            >
+              {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === 'download' ? 'Please wait...' : 'Download'}
+            </Button>
+            <Box mx={1} />
             <Menu
               id="simple-menu"
               anchorEl={anchorEl}
@@ -225,57 +239,7 @@ const SendEmail = ({ purchaseOrderData }) => {
                 Received
               </MenuItem>
             </Menu>
-            <Box mx={1} />
-            {permissions?.purchaseOrder?.isRead && (
-              <Button
-                variant="outlined"
-                color="primary"
-                type="button"
-                size="small"
-                startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
-                disabled={loading === 'download'}
-                onClick={(e) => {
-                  handleClick(e);
-                }}
-              >
-                {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === 'download' ? 'Please wait...' : 'Download'}
-              </Button>
-            )}
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
-              }}
-            >
-              <MenuItem
-                onClick={() => {
-                  setAnchorEl(null);
-                  handleViewPdf(downlodingFile, 'ordered');
-                }}
-              >
-                Ordered
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setAnchorEl(null);
-                  handleViewPdf(downlodingFile, 'received');
-                }}
-              >
-                Received
-              </MenuItem>
-            </Menu>
-            <Box mx={1} />
-            {permissions?.purchaseOrder?.isRead && (
+            {permissions?.purchaseOrder?.isUpdate && (
               <Button
                 variant="outlined"
                 color="primary"
@@ -335,4 +299,6 @@ const SendEmail = ({ purchaseOrderData }) => {
 };
 
 export default SendEmail;
+
+
 

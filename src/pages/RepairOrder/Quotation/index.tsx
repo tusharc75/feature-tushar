@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from 'react';
-import { Box, Button, Typography, Chip, useMediaQuery, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, Typography, Chip, useMediaQuery, Menu, MenuItem, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -7,7 +7,6 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import moment from 'moment';
 import {
   quotation,
   pricingCondition,
@@ -23,12 +22,13 @@ import { capitalize, orderBy } from 'lodash';
 import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyDialog';
 import LeadTimeDialog from 'src/pages/Quotation/Productpackage/LeadTimeDialog';
 import Versions from 'src/pages/Quotation/Versions';
-import { FcCancel, FcClock, FcOk, GiReceiveMoney, VscVersions } from 'react-icons/all';
+import { FcCancel, FcClock, FcOk } from 'react-icons/all';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
-import SendEmail from 'src/pages/RentalManagement/Quotation/SendEmail';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { genrateCustomTableColumns } from 'src/constants/columns';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import SendEmail from 'src/pages/Quotation/SendEmail';
 
 const Quotation = ({
   repairOrderData,
@@ -127,11 +127,17 @@ const Quotation = ({
         }
       },
       {
+        accessor: 'type',
+        Header: 'Type',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.type === "serializedAsset" ? "Asset" : capitalize(row.original.type)}</p>
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
-        minWidth: 300,
-        width: 300,
-        primaryField: true,
+        width: 250,
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
@@ -149,25 +155,24 @@ const Quotation = ({
                 {row.original?.detail}
               </p>
             )}
-
-            <Chip
-              className="ml-1"
-              label={`${row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}`}
-              size="small"
-              color="primary"
-              onClick={() => {
-                window.open(
-                  `${row.original.type === 'serializedAsset'
-                    ? routes.serializedAssetDetail.path
-                    : row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'package'
-                        ? routes.packagesDetail.path
-                        : routes.serviceMasterDetail.path
-                  }/${row.original.materialId}`
-                );
-              }}
-            />
+            <Box pl={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'serializedAsset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
           </div>
         )
       },
@@ -490,7 +495,8 @@ const Quotation = ({
       <Box
         display="flex"
         justifyContent="space-between"
-        m={1}
+        mt={1}
+        mb={2}
         className={`flex-wrap`}
         style={{ gap: isMobileScreen ? '5px' : 0, justifyContent: isMobileScreen ? 'center' : 'space-between' }}
       >
@@ -498,7 +504,6 @@ const Quotation = ({
           <SendEmail
             versionData={quotationData?.versions[currentVersion]}
             quotationData={quotationData}
-            previewOnly={true}
             allowedToEdit={invoiceStep ? !allowedToEdit : allowedToEdit}
             versionId={quotationData?.versions[currentVersion]?._id}
             columns={columns}
@@ -546,19 +551,19 @@ const Quotation = ({
                         d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
                     )}
                   onClick={handleSendToCustomer}
-                  variant="outlined"
+                  variant="contained"
                   size="small"
                   className="mx-1"
                   color="primary"
                 >
-                  Send to customer
+                 Process Quote
                 </Button>
               ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
                 <Button
                   onClick={() => {
                     setCustomerAcceptable(true);
                   }}
-                  variant="outlined"
+                  variant="contained"
                   size="small"
                   className="mx-1"
                   color="primary"
@@ -570,7 +575,7 @@ const Quotation = ({
                   onClick={() => {
                     cloneVersion();
                   }}
-                  variant="outlined"
+                  variant="contained"
                   size="small"
                   className="mx-1"
                   color="primary"
@@ -639,34 +644,32 @@ const Quotation = ({
         )}
       </Box>
       {columns && rowsData ? (
-        <>
-          <Box p="6px" zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-              columns={columns}
-              data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={setSelectedProducts}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              hideSelection={
-                !allowedToEdit ||
-                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                  quotationData?.versions[currentVersion]?.status
-                )
-              }
-              hideAction={
-                !allowedToEdit ||
-                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                  quotationData?.versions[currentVersion]?.status
-                )
-              }
-              onSaveEdit={onSaveInlineEdit}
-              renderedFrom={renderedFrom}
-              isClientSideGrid={true}
-            />
-          </Box>
-        </>
+        <Box zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+            columns={columns}
+            data={rowsData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+            onSelect={setSelectedProducts}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            hideSelection={
+              !allowedToEdit ||
+              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationData?.versions[currentVersion]?.status
+              )
+            }
+            hideAction={
+              !allowedToEdit ||
+              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationData?.versions[currentVersion]?.status
+              )
+            }
+            onSaveEdit={onSaveInlineEdit}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+          />
+        </Box>
       ) : (
         <Box p={2} height={500} bgcolor="white">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

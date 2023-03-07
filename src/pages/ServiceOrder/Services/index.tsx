@@ -11,10 +11,8 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { dateTimeFormat, formatAmountWithCurrency, serviceOrder, sidebarResource } from '../../../constants/helpers';
+import { serviceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -22,15 +20,18 @@ import { startCase } from 'lodash';
 import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ServiceOrderQty from './ServiceOrderQty';
-import moment from 'moment';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 import { genrateCustomTableColumns } from 'src/constants/columns';
 import CustomEditableGrid from 'src/components/CustomEditableGrid';
+import { flattenArray } from 'src/constants/columns';
+import AddIcon from '@material-ui/icons/Add'
+import { ExpandMore } from '@material-ui/icons';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+
 
 const Services = ({
   serviceOrderData,
   setNextStep,
-  currencySymbol,
   renderedFrom,
   stepFullScreen,
   allowedToEdit
@@ -50,10 +51,10 @@ const Services = ({
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
 
-  const [material, setMaterial] = useState([]);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
+  const [addAnchorEl, setAddAnchorEl] = useState(null)
   const [allFields, setAllFields] = useState([]);
   const [openBulkEdit, setOpenBulkEdit] = useState({ open: false, data: null });
 
@@ -66,7 +67,7 @@ const Services = ({
   }, [columns]);
 
   const fetchFields = async () => {
-    var { fields: data, allFields } = await fetch_service_order_detail_fields(serviceOrderData?.currency);
+    var allFields = await fetch_service_order_detail_fields(serviceOrderData?.currency);
     setAllFields(allFields)
     const newColumns = genrateCustomTableColumns(allFields, serviceOrderData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
@@ -89,7 +90,7 @@ const Services = ({
         Header: 'Type',
         disableFilters: true,
         sticky: isMobile ? 'none' : 'left',
-        width: 200,
+        width: 70,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -116,12 +117,31 @@ const Services = ({
             >
               {row.original.detail}
             </p>
-            <IconButton
+           {row.original.type === 'package' && (
+            <>
+             <Box ml={1}>
+            <HtmlTooltip title="Add Product">
+                    <IconButton
+                      onClick={() => {
+                        setAddExistingProductDialog({ open: true, type: "product", parentId: row.original?._id });
+                      }}
+                      size="small"
+                    >
+                      <AddIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </HtmlTooltip>
+            </Box>
+            </>
+           )}
+          <Box ml={1}>
+          <IconButton
               size="small"
               style={{ marginLeft: "10px" }}
               onClick={() => {
                 if (row.original.type === 'service') {
                   window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'product') {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                 } else {
                   window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                 }
@@ -129,6 +149,7 @@ const Services = ({
             >
               <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
+          </Box>
           </div>
         )
       }
@@ -185,12 +206,11 @@ const Services = ({
 
     const response = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
     data = response?.data?.data;
-    setMaterial(JSON.parse(JSON.stringify(data.material)));
-    let rows = data.material.filter((e) => e.parentId === null);
+
     const responseTechnician = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/technician`);
     const technician = responseTechnician?.data?.data;
 
-    rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
+    let rows = data.material.filter((e) => e.parentId === null);
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
@@ -271,7 +291,7 @@ const Services = ({
         setUpdating(false);
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         setOpenBulkEdit({
-          open: true, data: data.data.material.map(d => {
+          open: true, data: data.data.map(d => {
             return {
               ...d, detail:
                 d.type === 'product'
@@ -300,6 +320,7 @@ const Services = ({
       delete element.productDetail;
       delete element.packageDetail;
       delete element.serviceDetail;
+      delete element.serializedAssetDetail;
       delete element.parentName;
       delete element.subRows;
     });
@@ -357,13 +378,21 @@ const Services = ({
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = material.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qtyDisplay')) {
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(material, inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
+  };
+
+  const openAddActions = (event) =>{
+    setAddAnchorEl(event.currentTarget)
+  }
+
+  const closeAddActions = () => {
+    setAddAnchorEl(null);
   };
 
   return (
@@ -373,28 +402,46 @@ const Services = ({
           <Grid item xs={12} md={12} sm={12}>
             <Box display="flex" justifyContent="space-between" m={1} mb={0}>
               <Box display="flex">
-                {permissions?.serviceMaster?.isRead && (
-                  <Button
-                    className={'btn-outline-v1'} variant="contained" size="small"
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
-                    }}
-                  >
-                    {isMobile && !isTablet ? 'Service' : `Add Services`}
-                  </Button>
-                )}
-                <Box mx={isMobile ? 0.5 : 1} />
-                {permissions?.packages?.isRead && (
-                  <Button
-                    className={'btn-outline-v1'} variant="contained" size="small"
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                    }}
-                  >
-                    {isMobile && !isTablet ? 'Package' : `Add Service ${routes.packages.title}`}
-                  </Button>
-                )}
-              </Box>
+              <Button
+              variant={'outlined'}
+              color="primary"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={openAddActions}
+              aria-controls="add-menu">
+              {'Add'}
+              <ExpandMore fontSize="small" />
+            </Button>
+            <Menu
+              anchorEl={addAnchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="add-menu"
+              open={Boolean(addAnchorEl)}
+              onClose={closeAddActions}
+            >
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
+                }}
+              >
+                Add Services
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+                }}
+              >
+               Add Service Packages
+              </MenuItem>
+            </Menu>
+            </Box>
               <Box display="flex">
                 <Button
                   variant={'outlined'}
@@ -510,11 +557,26 @@ const Services = ({
           ids={[]}
         />
       )}
+        {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
+        <AssignProductDialog
+          reference={'serviceOrder'}
+          serialized={null}
+          productsDialogOpen={addExistingProductDialog.open}
+          productId={null}
+          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+          assignedProducts={[]}
+          renderedFrom={renderedFrom}
+          onSuccess={(product) => {
+            handleAdd(product);
+          }}
+        />
+      )}
       {openBulkEdit.open &&
         <CustomEditableGrid
           onClose={() => setOpenBulkEdit({ open: false, data: null })}
           data={openBulkEdit.data}
           fields={allFields}
+          columns={columns}
           currency={serviceOrderData?.currency}
           handleSave={(rows) => {
             handleSaveData(rows)

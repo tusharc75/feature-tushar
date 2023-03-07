@@ -18,6 +18,7 @@ import ErrorBoundaryComponent from './ErrorBoundary';
 import Login from './pages/Auth/Login';
 import AzureLogin from './pages/Auth/AzureLogin';
 import Leads from './pages/Leads';
+import ResourceLogs from './pages/ResourceLogs';
 import LeadDetailsPage from './pages/Leads/LeadDetailsPage';
 import NewLead from './pages/Leads/NewLead';
 import Opportunities from './pages/Opportunities';
@@ -185,8 +186,13 @@ import IrtTicket from './pages/IrtTicket';
 import IrtTicketDetail from './pages/IrtTicket/IrtTicketDetail';
 import PurchaseRequisition from './pages/PurchaseRequisition';
 import PurchaseRequisitionDetail from './pages/PurchaseRequisition/PurchaseRequisitionDetail';
-import ScheduleDetail from './pages/Schedule/ScheduleDetail';
-import Schedule from './pages/Schedule';
+import Planning from './pages/Planning';
+import PlanningDetail from './pages/Planning/PlanningDetail';
+import PlanningCalendar from './pages/PlanningCalendar';
+import RentalPlanningCalendar from './pages/RentalPlanningCalendar';
+import FieldTicket from './pages/FieldTicket';
+import FieldTicketDetail from './pages/FieldTicket/FieldTicketDetail';
+import FieldServiceTechnician from './pages/FieldServiceTechnician';
 
 var notificationInterval: any = null;
 
@@ -292,7 +298,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -428,6 +434,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.lead.path}>
               <Leads />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.resourceLogs.path}>
+              <ResourceLogs />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.leadDetail.path}/:id`}>
               <LeadDetailsPage />
@@ -661,7 +670,7 @@ function App() {
             <PrivateRoute exact path={routes.budget.path}>
               <Budget />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.budget.path}/detail/:id`}>
+            <PrivateRoute exact path={`${routes.budgetDetail.path}/:id`}>
               <BudgetDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.pricingCondition.path}>
@@ -747,6 +756,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}/custom-report/:id`}>
               <CustomReports />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.rentalPlanningCalendar.path}`}>
+              <RentalPlanningCalendar />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
               <ResourceCalendar />
@@ -931,11 +943,23 @@ function App() {
             <PrivateRoute exact path={`${routes.purchaseRequisitionDetail.path}/:id`}>
               <PurchaseRequisitionDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.schedule.path}`}>
-              <Schedule />
+            <PrivateRoute exact path={`${routes.planning.path}`}>
+              <Planning />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.scheduleDetail.path}/:id`}>
-              <ScheduleDetail />
+            <PrivateRoute exact path={`${routes.planningDetail.path}/:id`}>
+              <PlanningDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.planningCalendar.path}`}>
+              <PlanningCalendar />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldTicket.path}`}>
+              <FieldTicket />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldTicketDetail.path}/:id`}>
+              <FieldTicketDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldServiceTechnician.path}`}>
+              <FieldServiceTechnician />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

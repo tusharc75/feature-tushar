@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
@@ -16,66 +16,37 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import axiosInstance from 'src/axios/axiosInstance';
-import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { uniq, map, orderBy } from 'lodash';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const MaterialDialog = ({ onClose, materialData, scheduleData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
 
+const MaterialDialog = ({onClose, materialData, purchaseRequisitionData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext  }) => {
+  
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [allFields, setAllFields] = useState([]);
-
   useEffect(() => {
     fetchFields();
   }, [materialData]);
 
+
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.scheduleMaterial}`);
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseRequisition}`);
     var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, scheduleData?.currency);
     if (bulkEdit) {
-      let unitArray: any = []
-      materialData?.forEach(element => {
-        if (element?.[`${element.type}Detail`]?.unit) {
-          unitArray.push([...element?.[`${element.type}Detail`]?.unit])
-        }
-      });
-      let unit: any = unitArray?.shift()?.filter(function (v) {
-        return unitArray.every(function (a) {
-          return a.indexOf(v) !== -1;
-        });
-      });
-      const unitOptions: any = arrayToDropwdownOption(unit)
-      data.forEach((element) => {
-        if (element.fieldName === "unit") {
-          element.option = unitOptions;
-        }
-        element.required = false;
-        element.isFormula = false;
-        element.isMulitFormula = false;
-      })
       data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
+
       setInitialData({
         fields: data,
         values: getObjKeys("", data),
       });
     }
     else {
-      let unitOptions: any = []
-      if (materialData?.[`${materialData.type}Detail`]?.unit) {
-        unitOptions = arrayToDropwdownOption(materialData?.[`${materialData.type}Detail`]?.unit);
-      }
-      data.forEach(element => {
-        if (element.fieldName === "unit") {
-          element.option = unitOptions;
-        }
-      });
       setAllFields(JSON.parse(JSON.stringify(data)))
       setInitialData({
         fields: data,
@@ -116,15 +87,16 @@ const MaterialDialog = ({ onClose, materialData, scheduleData, handleUpdate, loa
   };
 
   return (
-    <Dialog
-      maxWidth="md"
-      fullScreen={fullScreen || isMobile || isTablet}
-      TransitionComponent={CustomDialogTransition}
-      aria-labelledby="customized-dialog-title"
-      open={true}
-      fullWidth
-    >
-      {initialData && initialData.fields.length ? (
+    <>
+      <Dialog
+        maxWidth="md"
+        fullScreen={fullScreen || isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
+        aria-labelledby="customized-dialog-title"
+        open={true}
+        fullWidth
+      >
+       {initialData && initialData.fields.length ? (
         <Formik
           enableReinitialize={true}
           initialValues={initialData.values}
@@ -186,7 +158,6 @@ const MaterialDialog = ({ onClose, materialData, scheduleData, handleUpdate, loa
                                       <Box flexGrow={1}>
                                         <FormTypes
                                           {...field}
-                                          fields={initialData.fields}
                                           fieldData={field}
                                           values={values}
                                           errors={errors}
@@ -260,7 +231,8 @@ const MaterialDialog = ({ onClose, materialData, scheduleData, handleUpdate, loa
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-    </Dialog>
+      </Dialog>
+    </>
   );
 };
 

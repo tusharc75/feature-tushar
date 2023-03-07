@@ -3,8 +3,6 @@ import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import axiosInstance from "../../../axios/axiosInstance";
-import { groupBy, unionBy, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
@@ -15,11 +13,8 @@ import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
-import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
-import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
+import { uniq, map, orderBy, isEqual } from 'lodash';
 import moment from "moment";
-import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
-import { object, number } from 'yup';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 
 interface EditDialogProps {
@@ -40,19 +35,17 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = (
 
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
-  const [priceMethodList, setPriceMethodList] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const ref = useRef(null);
+
   useEffect(() => {
     fetchData()
   }, []);
 
   const fetchData = async () => {
-    var { fields: data } = await fetch_service_order_detail_fields(serviceOrderData?.currency);
-    setAllFields(JSON.parse(JSON.stringify(data)))
+    var data = await fetch_service_order_detail_fields(serviceOrderData?.currency);
     let unitOptions: any = []
     let pricingMethodOptions: any = []
     if (rowData?.[`${rowData.type}Detail`]?.unit) {
@@ -61,7 +54,6 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = (
     if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
       pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
     }
-    setPriceMethodList(pricingMethodOptions)
     data.forEach(element => {
       if (element.fieldName === "unit") {
         element.option = unitOptions;
@@ -155,7 +147,6 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = (
               showManimizeMaximize={true}
             ></CustomDialogHeader>
             <CustomDialogContent>
-              {/* {isBulkedit && <h6 className="form-label-style mb-2" >* Please enter value you want to bulk update.</h6>} */}
               <Form autoComplete="off" autoCorrect="off" noValidate >
                 {fields && fields.map((section, i) => (
                   <div key={i}>

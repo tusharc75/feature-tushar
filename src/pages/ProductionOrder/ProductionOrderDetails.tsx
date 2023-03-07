@@ -1,19 +1,16 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Menu, MenuItem } from '@material-ui/core';
+import { Grid, Box, Button, Tab, Tabs, Menu, MenuItem } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { productionOrder, sidebarResource, ACTIVITY_RESOURCE, PRODUCTION_ORDER_STATUS } from 'src/constants/helpers';
-import Activity from 'src/components/Activity';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
@@ -27,7 +24,7 @@ import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
 import ManageProductionOrder from './ManageProductionOrder';
-import Productpackage from './Productpackage';
+import Material from './Material';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 
 function a11yProps(index: any) {
@@ -326,13 +323,12 @@ const ProductionOrderDetails = () => {
           />
           <ContentFullScreen title={productionOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {productionOrderProcessSteps[currentStep] === 'Add' && productionOrderData && (
-              <Productpackage
-                fetchProductionOrderData={fetchProductionOrderData}
+              <Material
                 productionOrderData={productionOrderData}
                 setNextStep={setNextStep}
                 renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
-                allowedToEdit={true}
+                allowedToEdit={allowedToEdit && permissions?.productionOrder?.isUpdate ? true : false}
                 allowedToDelete={allowedToDelete}
               />
             )}

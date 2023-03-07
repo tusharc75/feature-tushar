@@ -402,16 +402,14 @@ const ProductDetailsPage = () => {
                           <Typography className="table-head-v1">{routes.warehouse.title}</Typography>
                           <Typography className="table-head-v1">Qty</Typography>
                         </Box>
-                        <Box display="flex" justifyContent="space-between">
-                          {productInventoryData
-                            ?.filter((d) => d.inventory)
-                            .map(({ inventory, warehouse }) => (
-                              <>
-                                <Typography className="table-data-v1  bt-0 br-0">{warehouse?.name} </Typography>
-                                <Typography className="table-data-v1  bt-0">{inventory}</Typography>
-                              </>
-                            ))}
-                        </Box>
+                        {productInventoryData
+                          ?.filter((d) => d.inventory)
+                          .map(({ inventory, warehouse }) => (
+                            <Box display="flex" justifyContent="space-between">
+                              <Typography className="table-data-v1 bt-0 br-0">{warehouse?.name} </Typography>
+                              <Typography className="table-data-v1 bt-0">{inventory}</Typography>
+                            </Box>
+                          ))}
                       </>
                     ) : (
                       <Box textAlign="center" padding={2} minHeight={100}>

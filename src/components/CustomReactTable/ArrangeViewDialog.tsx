@@ -26,6 +26,7 @@ import update from 'immutability-helper';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+import { isEqual } from 'lodash';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -91,7 +92,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const [sortedColumns, setSortedColumns] = React.useState([]);
   const [searchedColumns, setSearchedColumns] = React.useState([]);
   const [searchVal, setSearchVal] = React.useState('');
-  const [oldData, setOldData] = React.useState('');
+  const [oldData, setOldData] = React.useState([]);
   const [newData, setNewData] = React.useState('');
   const [allChecked, setAllChecked] = React.useState(true);
   const [hasChanged, setHasChanged] = React.useState(false);
@@ -145,7 +146,9 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
 
 
     // setColumns([...columns]);
-    // setOldData(JSON.stringify([...columns]));
+    setOldData([...columns].map(d => {
+      return { [d.id]: d.isVisible }
+    }));
     // setNewData(JSON.stringify([...columns]));
   }, []);
 
@@ -372,7 +375,11 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         <Button variant="outlined" color="primary" onClick={onClose}>
           Close
         </Button>
-        <Button variant="contained" color="primary" disableElevation onClick={handleSaveChange}>
+        <Button variant="contained" color="primary" disableElevation
+          disabled={isEqual(oldData, sortedColumns.map(d => {
+            return { [d.id]: d.isVisible }
+          }))}
+          onClick={handleSaveChange}>
           Save changes
         </Button>
       </CustomDialogFooter>

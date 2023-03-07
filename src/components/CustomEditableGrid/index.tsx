@@ -1,5 +1,5 @@
-import { Box, Button, Dialog, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from '@material-ui/core';
-import { useEffect, useRef, useState } from 'react';
+import { Box, Button, Dialog, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Tooltip } from '@material-ui/core';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -12,28 +12,40 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { FieldArray, Form, Formik, FormikProps } from 'formik';
 import { yupSchemaForBulkEdit } from './helper';
+import MaUTable from '@material-ui/core/Table';
+import {
+    useTable,
+    useExpanded,
+    useRowSelect,
+    useFlexLayout,
+    useSortBy,
+    useResizeColumns,
+    useFilters,
+    useColumnOrder,
+    usePagination,
+    useRowState
+} from 'react-table';
+import { useSticky } from 'react-table-sticky';
+import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
+import { isEmpty } from 'lodash';
 
-const cellWidth = 250;
-
-const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => {
+const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSave }) => {
 
     const [fullScreen, setFullScreen] = useState(true);
-    const [rows, setRows] = useState([]);
-    const [columns, setColummns] = useState([]);
-    const formikRef = useRef<FormikProps<{ rows: any[] }>>();
+    const [displayRows, setDisplayRows] = useState([]);
+    const [constColummns, setConstColummns] = useState([]);
+    const [flatRows, setFlatRows] = useState(data);
+    const [touched, setTouched] = useState<any>({});
+    const [error, setError] = useState<any>({});
 
     useEffect(() => {
-        generateRows()
         generateColumnField()
     }, []);
 
-    const generateRows = () => {
-        const tempRows = data.map(d => {
-            let tempFieldData = getObjKeysWithValues(d, fields)
-            return { ...d, ...tempFieldData }
-        })
-        setRows(tempRows)
-    };
+    useEffect(() => {
+        generateRows()
+        setError(yupSchemaForBulkEdit(fields, flatRows))
+    }, [flatRows]);
 
     const generateColumnField = () => {
         let column = [];
@@ -48,13 +60,115 @@ const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => 
                 column.push(ele)
             }
         });
-        setColummns(column)
+        setConstColummns(column)
     };
 
+    const newColumns = useMemo(
+        () => [
+            {
+                id: 'expander',
+                fieldName: 'expander',
+                Header: ({ isAllRowsExpanded }) => (
+                    <span
+                        style={{
+                            paddingLeft: '0.3rem',
+                            color: 'black'
+                        }}
+                    >
+                        {isAllRowsExpanded ? (
+                            <FaAngleDown
+                                className="cursor-pointer"
+                                onClick={() => {
+                                    toggleAllRowsExpanded(false);
+                                }}
+                            />
+                        ) : (
+                            <FaAngleRight
+                                className="cursor-pointer"
+                                onClick={() => {
+                                    toggleAllRowsExpanded(true);
+                                }}
+                            />
+                        )}
+                    </span>
+                ),
+                sticky: 'left',
+                width: isMobile && !isTablet ? 40 : 70,
+                minWidth: isMobile && !isTablet ? 40 : 70,
+                canDrag: false,
+                Cell: ({ row }) =>
+                    row.canExpand ? (
+                        <span
+                            {...row.getToggleRowExpandedProps({
+                                style: {
+                                    paddingLeft: `${row.depth * 2}rem`
+                                }
+                            })}
+                        >
+                            {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
+                        </span>
+                    ) : null
+            },
+            ...columns.map((m) => {
+                return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+            })
+        ],
+        []
+    );
 
+    const {
+        getTableProps,
+        rows,
+        headerGroups,
+        footerGroups,
+        prepareRow,
+        toggleRowExpanded,
+        toggleAllRowsExpanded,
+    } = useTable(
+        {
+            columns: newColumns,
+            data: displayRows,
+            initialState: {
+                // autoResetExpanded: false,
+                // expanded: true
+            },
+            getSubRows: (row: any) => row.subRows,
+        },
+        useFlexLayout,
+        useColumnOrder,
+        useResizeColumns,
+        useFilters,
+        useSortBy,
+        useExpanded, // Use the useExpanded plugin hook
+        // usePagination,
+        useRowSelect,
+        useSticky,
+        useRowState
+    );
+
+    const generateRows = () => {
+        const tempRows = flatRows.map(d => {
+            let tempFieldData = getObjKeysWithValues(d, fields)
+            return { ...d, ...tempFieldData }
+        })
+        let rows = tempRows.filter((e) => e.parentId === null);
+
+        rows.forEach((parent, i) => {
+            parent.subRows = generateNestedData(tempRows, parent);
+        });
+        setDisplayRows(rows)
+    };
+
+    const generateNestedData = (material, parent) => {
+        const subRows: any = material.filter((e) => e.parentId === parent._id);
+        subRows.forEach((_subRow, j) => {
+            _subRow.subRows = generateNestedData(material, _subRow);
+        });
+        return subRows;
+    };
 
     const updateData = (row, inputField, value) => {
-        setRows((prevState) => {
+        setFlatRows((prevState) => {
             let tempIndex = prevState.findIndex((obj => obj._id === row._id));
             // prevState[tempIndex][inputField] = value
             const values = { [inputField]: value }
@@ -86,118 +200,116 @@ const CustomEditableGrid = ({ onClose, data, fields, currency, handleSave }) => 
                 onClose={onClose}
             />
             {rows && rows.length ?
-                <Formik
-                    initialValues={{ rows: rows }}
-                    enableReinitialize={true}
-                    innerRef={formikRef}
-                    validationSchema={yupSchemaForBulkEdit(fields, rows)}
-                    validateOnMount
-                    onSubmit={() => { }}>
-                    {({ values,
-                        errors,
-                        touched,
-                        setFieldTouched,
-                        setErrors,
-                    }) => (
-                        <>
-                            <CustomDialogContent>
-                                <TableContainer component={Paper}>
-                                    <Form>
-                                        <Table aria-label="customized table">
-                                            <FieldArray
-                                                name="bulk_edit_element"
-                                                render={(arrayHelpers) => (
-                                                    <div>
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell width={cellWidth}>Details</TableCell>
-                                                                {columns &&
-                                                                    columns?.map((field: any, index: any) => (
-                                                                        <TableCell width={cellWidth} >{`${field?.fieldLabel} ${field?.required ? '*' : ''}`}</TableCell>
-                                                                    ))}
-                                                                <TableCell>Action</TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableBody>
-                                                            {values.rows?.map((row: any, rowIndex: any) => (
-                                                                <TableRow key={rowIndex}>
-                                                                    <TableCell width={cellWidth}>{row?.detail}</TableCell>
-                                                                    {columns &&
-                                                                        columns?.map((field: any, colIndex: any) => (
-                                                                            <TableCell width={cellWidth}>
-                                                                                <FormTypes
-                                                                                    fieldData={field}
-                                                                                    values={row}
-                                                                                    currency={currency}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    onChange={(inputField, val) => {
-                                                                                        let tempValue = {
-                                                                                            ...values.rows[rowIndex],
-                                                                                            [inputField]: val
-                                                                                        }
-                                                                                        arrayHelpers.replace(rowIndex, tempValue);
-                                                                                        updateData(row, inputField, val)
-                                                                                    }}
-                                                                                    size="small"
-                                                                                />
-                                                                            </TableCell>
-                                                                        ))}
-                                                                    <TableCell>
-                                                                        <Tooltip title="Delete">
-                                                                            <IconButton
-                                                                                size="small"
-                                                                                aria-label="Delete"
-                                                                                onClick={() => {
-                                                                                }}
-                                                                            >
-                                                                                <DeleteIcon color="error" />
-                                                                            </IconButton>
-                                                                        </Tooltip>
-
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            ))}
-                                                        </TableBody>
-                                                    </div>
-                                                )}
-                                            />
-                                        </Table>
-                                    </Form>
-
-                                </TableContainer>
-                            </CustomDialogContent>
-                            <CustomDialogFooter>
-                                <Button
-                                    size="small"
-                                    color="primary"
-                                    onClick={onClose}
-                                >{"Close"}</Button>
-                                <CustomButton
-                                    loading={false}
-                                    variant="contained"
-                                    color="primary"
-                                    type="submit"
-                                    onClick={() => {
-                                        let error = false
-                                        rows.forEach((element) => {
-                                            columns.forEach((input) => {
-                                                if (input.required && !Boolean(element[input.fieldName])) {
-                                                    setFieldTouched(`${element._id}_${input.fieldName}`, true);
-                                                    error = true
-                                                }
-                                            });
-                                        });
-                                        if (!error) handleSave(rows);
+                <>
+                    <CustomDialogContent>
+                        <div
+                            style={{
+                                display: 'block',
+                                overflow: 'auto',
+                                height: '100%'
+                            }}
+                            className="border custom-react-table "
+                        >
+                            <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
+                                <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
+                                    {headerGroups.map((headerGroup, index) => (
+                                        <>
+                                            <TableRow {...headerGroup.getHeaderGroupProps()} key={index} className="tr">
+                                                {headerGroup.headers.map((column, index) => (
+                                                    <TableCell
+                                                        key={`${index}-${column?.Header}`}
+                                                        {...column.getHeaderProps()}
+                                                        className="th text-truncate table-header overflow-initial"
+                                                    >
+                                                        <div className="d-flex align-items-center justify-content-space-between pos-rel">
+                                                            <div className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
+                                                                <span>{column.render('Header')}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div {...column.getResizerProps()} className="resizer" />
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        </>
+                                    ))}
+                                </TableHead>
+                                <TableBody
+                                    style={{
+                                        overflowY: 'scroll',
+                                        overflowX: 'hidden'
                                     }}
-                                > Save
-                                </CustomButton>
-                            </CustomDialogFooter>
-                        </>
-                    )}
-                </Formik>
+                                    className="body"
+                                >
+                                    {rows.map((row, index) => {
+                                        prepareRow(row);
+                                        return (
+                                            <TableRow {...row.getRowProps()} className="tr">
+                                                {row.cells.map((cell) => {
+                                                    return (
+                                                        <TableCell
+                                                            {...cell.getCellProps()}
+                                                            className={`td ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}`}
+                                                        >
+                                                            {cell.column.id === 'expander' || cell.column.id === 'detail' || cell.column.id === 'type' || cell.column.id === 'srno' ? cell.render('Cell')
+                                                                : <FormTypes
+                                                                    fieldData={constColummns.find(d => d.fieldName === cell.column.id || cell.column.id.includes(d.fieldName))}
+                                                                    values={row.original}
+                                                                    currency={currency}
+                                                                    errors={error}
+                                                                    touched={touched}
+                                                                    onChange={(inputField, val) => {
+                                                                        updateData(row.original, inputField, val)
+                                                                        setTouched((prevState) => {
+                                                                            prevState[`${row.original._id}_${inputField}`] = true
+                                                                            return prevState
+                                                                        })
+                                                                    }}
+                                                                    size="small"
+                                                                />}
+                                                        </TableCell>
+                                                    );
+                                                })}
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
+                                {rows?.length > 0 && (
+                                    <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer ">
+                                        {footerGroups.map((group) => (
+                                            <TableRow {...group.getFooterGroupProps()} className="tr">
+                                                {group.headers.map((column) => (
+                                                    <TableCell {...column.getHeaderProps()} className="th text-truncate font-weight-bold text-black">
+                                                        {column.render('Footer')}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        ))}
+                                    </TableFooter>
+                                )}
+                            </MaUTable>
+                        </div>
+                    </CustomDialogContent>
 
-
+                    <CustomDialogFooter>
+                        <Button
+                            size="small"
+                            color="primary"
+                            onClick={onClose}
+                        >{"Close"}</Button>
+                        <CustomButton
+                            loading={false}
+                            variant="contained"
+                            color="primary"
+                            type="submit"
+                            onClick={() => {
+                                if (isEmpty(error)) {
+                                    handleSave(flatRows);
+                                }
+                            }}
+                        > Save
+                        </CustomButton>
+                    </CustomDialogFooter>
+                </>
                 : <Box
                     p={2}
                     height={500}

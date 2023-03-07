@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useReducer } from 'react';
-import { Box, Button, ButtonGroup, CircularProgress, Dialog, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, ButtonGroup, CircularProgress, Dialog, Grid, IconButton, TextField } from '@material-ui/core';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -21,10 +21,12 @@ import styles from 'src/pages/Leads/Header.module.scss';
 import CustomAgGridEditable, { reducer, intialState } from '../AgGridComponents/CustomAgGridEditable';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
+import { Autocomplete } from '@material-ui/lab';
 
 let searchTimeout;
 
-const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, extraStaticFilter = [] }) => {
+const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, defaultCompetency = [], extraStaticFilter = [] }) => {
+
   const renderedFrom = `${routes.employeeMaster.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -42,10 +44,13 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [columns, setColumns] = useState([]);
   const { getColumnData } = useColumns();
+  const [competencyOptions, setCompetencyOptions] = useState(null);
+  const [selectedCompetency, setSelectedCompetency] = useState(defaultCompetency)
 
   useEffect(() => {
     localStorage.removeItem(localStorageSelectedRecords);
     fetchGridColumns();
+    fetchCompetencyMaster();
   }, []);
 
   useEffect(() => {
@@ -60,7 +65,16 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
     searchTimeout = setTimeout(() => {
       fetchData();
     }, millisec);
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetency]);
+
+  const fetchCompetencyMaster = () => {
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Competency Master`).then(({ data: { data } }) => {
+      setCompetencyOptions(data["Competency Master"] || []);
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -129,7 +143,11 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
+
     const updatedFilters = [];
+    if (selectedCompetency?.length > 0) {
+      updatedFilters.push(...selectedCompetency.map((i) => ({ field: 'competency', term: i.optionLabel })));
+    }
     if (extraStaticFilter?.length) {
       extraStaticFilter?.forEach((e) => {
         updatedFilters.push(e);
@@ -142,9 +160,9 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=or`;
     } else {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=or`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
@@ -187,48 +205,63 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
         onClose={handleClose}
       />
       <CustomDialogContent>
-        <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={6} className="d-flex align-items-center gap-1"></Grid>
-            <Grid item xs={6} className={styles.filter_side}>
-              <Box className={styles.filter_side_header} component="div">
-                <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
-                <Button
-                  disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
-                  onClick={handleSubmit}
-                  color="primary"
-                  size="small"
-                  variant="contained"
-                  endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
-                >
-                  Add{' '}
-                  {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
-                    ? '(' + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ')'
-                    : ''}
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </div>
-        {frameWorkComponent && Object.keys(frameWorkComponent).length > 0 ? (
-          <CustomAgGridEditable
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={false}
-            loading={loading}
-            allowSelection={true}
-            onCellValueChanged={onCellValueChanged}
-            showOnlyShowFilteredRecordSwitch={true}
-            refreshGrid={fetchData}
-            renderedFrom={renderedFrom}
-          />
+        {competencyOptions && frameWorkComponent && Object.keys(frameWorkComponent).length > 0 ? (
+          <>
+            <div className="header-panel">
+              <Grid container className={styles.filter_side_container}>
+                <Grid item xs={6} className="d-flex align-items-center gap-1">
+                  <Autocomplete
+                    fullWidth
+                    options={competencyOptions}
+                    getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                    onChange={(e, val) => {
+                      setSelectedCompetency(val)
+                    }}
+                    multiple
+                    value={selectedCompetency}
+                    filterSelectedOptions={true}
+                    renderInput={(params) => <TextField {...params} margin="dense" name="competency" label="Competency" variant="outlined" fullWidth />}
+                  />
+                </Grid>
+                <Grid item xs={6} className={styles.filter_side}>
+                  <Box className={styles.filter_side_header} component="div">
+                    <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
+                    <Button
+                      disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
+                      onClick={handleSubmit}
+                      color="primary"
+                      size="small"
+                      variant="contained"
+                      endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
+                    >
+                      Add{' '}
+                      {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
+                        ? '(' + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ')'
+                        : ''}
+                    </Button>
+                  </Box>
+                </Grid>
+              </Grid>
+            </div>
+            <CustomAgGridEditable
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              allowAction={false}
+              loading={loading}
+              allowSelection={true}
+              onCellValueChanged={onCellValueChanged}
+              showOnlyShowFilteredRecordSwitch={true}
+              refreshGrid={fetchData}
+              renderedFrom={renderedFrom}
+            />
+          </>
         ) : (
           <Box p={2} height={500} bgcolor="white">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />

@@ -215,7 +215,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, ver
         <Box display="flex">
           <Button
             variant="contained"
-            className="btn-outline-v1"
+            color="primary"
             size="small"
             onClick={() => {
               setShowServiceDialog(true);

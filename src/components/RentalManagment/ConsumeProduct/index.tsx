@@ -54,6 +54,7 @@ const ConsumeProduct = ({ handleClose, type, loading, handleSucess, products }) 
               <TextField
                 variant="outlined"
                 type="number"
+                onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                 label={"Qty"}
                 required={true}
                 name="qty"

@@ -3136,11 +3136,11 @@ body {
     }
   }
   .chip-container {
-    padding-bottom: 15px;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
+    position: relative;
   }
 }
 

@@ -1,5 +1,5 @@
 import { Box, Button, IconButton, makeStyles, Grid, Menu, MenuItem } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Add, ExpandMore } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -7,194 +7,247 @@ import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import routes from 'src/components/Helpers/Routes';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { genrateCustomTableColumns, flattenArray } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import PurchaseRequisitionDetailDialog from './PurchaseRequisitionDetailDialog';
 import AddIcon from '@material-ui/icons/Add';
+import MaterialDialog from './materialDialog';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { CHILD_RESOURCE } from 'src/constants/helpers';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
-const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitionData, stepFullScreen }) => {
-  const {
-    state: { user, permissions }
-  }: any = useData();
+const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
+
+  const { state: { user, permissions } }: any = useData();
+
   const toastConfig = useContext(CustomToastContext);
-  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '' });
+  const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
+
   const [rowsData, setRowsData] = useState(null);
-  const [allFields, setAllFields] = useState([]);
   const [columns, setColumns] = useState(null);
-  const [material, setMaterial] = useState([]);
+
+  const [allFields, setAllFields] = useState([]);
+  const [selectedRecords, setSelectedRecords] = useState([]);
+
+  const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
+
   const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
-  const [recordToUpdate, setRecordToUpdate] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
-
 
   useEffect(() => {
     fetchFields();
   }, []);
 
   const fetchFields = async () => {
-    try {
-      let fields = await axiosInstance().get('/field?resource=Purchase Requisition Detail');
-      let data = fields?.data?.data.map((i: any) => {
-        return i?.fieldData
-      })
-      setAllFields(data);
-      const newColumns = genrateCustomTableColumns(data, '', '');
-      let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-      if (qtyIndex > -1) {
-        newColumns[qtyIndex].accessor = 'qtyDisplay';
-      }
-      newColumns.forEach((element) => {
-        if (element.accessor === 'qtyDisplay') {
-          element['Footer'] = (info) => {
-            const qtyTotal = info.rows
-              .filter((f) => f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-              .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-            return <>{qtyTotal}</>;
-          };
-        }
-      })
-      let coloum: any = [
-        {
-          accessor: 'srno',
-          Header: 'Index',
-          width: 70,
-          sticky: isMobile ? 'none' : 'left',
-          Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
-          Footer: () => {
-            return <>Total</>;
-          }
-        },
-        {
-          accessor: 'type',
-          Header: 'Type',
-          sticky: isMobile ? 'none' : 'left',
-          Cell: ({ row }) => (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <p>{`${startCase(row.original?.type)} `}</p>
-            </div>
-          )
-        },
-        {
-          accessor: 'detail',
-          Header: 'Detail',
-          minWidth: 300,
-          width: 300,
-          sticky: isMobile ? 'none' : 'left',
-          Cell: ({ row }) => (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              {
-                <p
-                  onClick={() => {
-                    handleOpen(row.original);
-                  }}
-                  className="link text-truncate"
-                  title={row.original?.detail}
-                >
-                  {row.original?.detail}
-                </p>
-              }
-            </div>
-          )
-        }
-      ];
-      coloum = [...coloum, ...newColumns];
-      {
-        isMobile ? (
-          <Box display={'none'} />
-        ) : (
-          coloum.push({
-            accessor: 'action',
-            Header: 'Action',
-            minWidth: 100,
-            width: 100,
-            sticky: 'right',
-            disableFilters: true,
-            canDrag: false,
-            Cell: ({ row }) =>
-              !row.original.hideSelection && (
-                <Grid container spacing={1}>
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                      setDeleteData(obj);
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" color="error" />
-                  </IconButton>
-                </Grid>
-              )
-          })
-        );
-      }
-      setColumns(coloum);
-      fetchData();
-    } catch (err) {
-      toastConfig.setToastConfig(err);
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseRequisition}`);
+    var data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, purchaseRequisitionData?.currency);
+    setAllFields(data);
+    const newColumns = genrateCustomTableColumns(data, purchaseRequisitionData?.currency, renderedFrom);
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
+    newColumns.forEach((element) => {
+      if (element.accessor === 'qtyDisplay') {
+        element['Footer'] = (info) => {
+          const qtyTotal = info.rows
+            .filter((f) => f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+          return <>{qtyTotal}</>;
+        };
+      }
+    })
+    let coloum: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p>{`${startCase(row.original?.type)} `}</p>
+          </div>
+        )
+      },
+      {
+        accessor: 'detail',
+        Header: 'Detail',
+        minWidth: 300,
+        width: 300,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row, rows }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {allowedToEdit ?
+              <p
+                onClick={() => {
+                  setMaterialEdit({
+                    open: true, data: row.original, bulkedit: false,
+                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                  });
+                }}
+                className="link text-truncate"
+                title={row.original?.detail}
+              >
+                {row.original?.detail}
+              </p>
+              : <p className="text-truncate">{row.original?.detail}</p>}
+            <Box ml={1} >
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        )
+      },
+      {
+        accessor: 'description',
+        Header: "Description",
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
+      }
+    ];
+    coloum = [...coloum, ...newColumns];
+    coloum.push({
+      accessor: 'action',
+      Header: 'Action',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => allowedToEdit && (
+        <Grid container spacing={1}>
+          <IconButton
+            size="small"
+            aria-label="Details"
+            onClick={() => {
+              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+              setDeleteData(obj);
+            }}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </Grid>
+      )
+    })
+    if (!allowedToEdit) {
+      coloum?.forEach((e: any) => {
+        e.editable = false;
+      })
+    }
+    setColumns(coloum);
+    fetchData();
   };
 
   const fetchData = async () => {
-    setNextStep(false);
     var data: any = [];
     const response = await axiosInstance().get(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`);
     data = response?.data?.data;
-    setMaterial(JSON.parse(JSON.stringify(data.material)));
-    const rows = data.material
+    let rows = data.material.filter((e) => e.parentId === null)
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.serviceDetail?.serviceName}`;
+      parent.index = i + 1;
+      parent.detail = parent.type === 'product' ? parent.productDetail?.productName :
+       parent.serviceDetail?.serviceName;
+      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription :
+       parent?.serviceDetail?.serviceDescription
+      parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
     });
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(true);
-    } else {
-      setNextStep(true);
-    }
     setRowsData(rows);
-    setSelectedProducts([]);
+    setSelectedRecords([]);
   };
 
-  const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false });
-    setRecordToUpdate(rowData);
-  };
-
-  const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = material.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
-    let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(material, inputField, allFields, updatedData);
-    handleSaveData(rows);
-  };
-
-  const handleSaveData = async (rows: any) => {
-    setUpdating(true);
+  const handleAdd = async (rows) => {
+    const material: any = [];
+    rows.forEach((d) => {
+      const element: any = {};
+      element.materialId = d._id;
+      element.type = addDialog.type;
+      element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
+      element.qty = d.qty ? parseFloat(d.qty) : 1;
+      element.parentId = addDialog.parentId;
+      material.push(element);
+    });
     axiosInstance()
-      .put(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`, { material: rows })
-      .then(() => {
-        setUpdating(false);
-        setIsProductEdit({ open: false, isBulkedit: false });
+      .post(`${routes?.purchaseRequisition?.path}/material/${purchaseRequisitionData._id}`, { material })
+      .then(({ data }) => {
+        setAddDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Record updated successfully`
+          message: data.message
         });
         fetchData();
+      })
+      .catch((error) => {
+        setAddDialog({ open: false, type: '', parentId: null });
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
+    setUpdating(true);
+    rows.forEach((element) => {
+      delete element.index;
+      delete element.detail;
+      delete element.qtyDisplay;
+      delete element.isValid;
+      delete element.hideSelection;
+      delete element.productDetail;
+      delete element.packageDetail;
+      delete element.serviceDetail;
+      delete element.subRows;
+    });
+    axiosInstance()
+      .put(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`, { material: rows })
+      .then(({ data }) => {
+        setUpdating(false);
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        if (saveAndNext) {
+          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          setMaterialEdit({ open: true, data: rowsData[rowIndex + 1], bulkedit: false, showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+        }
+        else {
+          setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
+        }
       })
       .catch((error) => {
         setUpdating(false);
@@ -206,12 +259,12 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitio
     setDeleting(true);
     axiosInstance()
       .put(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData?._id}/delete`, { ids: rows })
-      .then(() => {
+      .then(({ data }) => {
         setDeleting(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Record deleted successfully`
+          message: data.message
         });
         fetchData();
         setDeleteData(null);
@@ -220,34 +273,6 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitio
         setDeleting(false);
         toastConfig.setToastConfig(error);
         setDeleteData(null);
-      });
-  };
-
-
-  const handleAdd = async (rows) => {
-    const material: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.materialId = d._id;
-      element.type = addExistingProductDialog.type;
-      element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
-      element.qty = d.qty ? parseFloat(d.qty) : 1;
-      material.push(element);
-    });
-    axiosInstance()
-      .post(`${routes?.purchaseRequisition?.path}/material/${purchaseRequisitionData._id}`, { material })
-      .then(() => {
-        setAddExistingProductDialog({ open: false, type: '' });
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Record added successfully`
-        });
-        fetchData();
-      })
-      .catch((error) => {
-        setAddExistingProductDialog({ open: false, type: '' });
-        toastConfig.setToastConfig(error);
       });
   };
 
@@ -267,111 +292,128 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitio
     setAddAnchorEl(null);
   };
 
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    if (inputField.hasOwnProperty('qtyDisplay')) {
+      inputField['qty'] = inputField['qtyDisplay'];
+    }
+    let rows: any = [{ ...rowData, ...updatedData }];
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    handleSaveData(rows);
+  };
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center">
-          <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
-            {'Add'}
-            <ExpandMore fontSize="small" />
-          </Button>
-          <Menu
-            anchorEl={addAnchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="add-menu"
-            open={Boolean(addAnchorEl)}
-            onClose={closeAddActions}
-          >
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddExistingProductDialog({ open: true, type: 'product' });
+      {allowedToEdit &&
+        <Box display="flex" justifyContent="space-between" m={1}>
+          <Box display="flex" alignItems="center">
+            <Button
+              variant={'outlined'}
+              color="primary"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={openAddActions}
+              aria-controls="add-menu">
+              {'Add'}
+              <ExpandMore fontSize="small" />
+            </Button>
+            <Menu
+              anchorEl={addAnchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
               }}
+              id="add-menu"
+              open={Boolean(addAnchorEl)}
+              onClose={closeAddActions}
             >
-              Add Products
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddExistingProductDialog({ open: true, type: 'service' });
-              }}
-            >
-              Add Services
-            </MenuItem>
-          </Menu>
-        </Box>
-        <Box display="flex">
-          <Button
-            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-            variant={isMobile ? 'text' : 'outlined'}
-            color="default"
-            size="small"
-            onClick={openActions}
-            aria-controls="action-menu"
-          >
-            {isMobile ? '' : 'Actions'} <ExpandMore />
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorEl)}
-            onClose={closeActions}
-          >
-            <MenuItem
-              onClick={() => {
-                const dataToDelete =
-                  selectedProducts &&
-                  selectedProducts
-                    .filter((e) => !e.hideSelection)
-                    .map((rec: any) => {
-                      const obj: any = {};
-                      obj.id = rec._id;
-                      obj.type = rec?.type;
-                      obj.materialId = rec?.materialId;
-                      return obj;
-                    });
-                setDeleteData(dataToDelete);
-                closeActions();
-              }}
-              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-            >
-              Delete
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Box>
-      {columns && rowsData ? (
-        <>
-          <Box p="6px" zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-              columns={columns}
-              data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={setSelectedProducts}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              renderedFrom={renderedFrom}
-              isClientSideGrid={true}
-              onSaveEdit={onSaveInlineEdit}
-              hideSelection={!allowedToEdit}
-              hideAction={!allowedToEdit}
-              hideExpander={true}
-            />
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddDialog({ open: true, type: 'product', parentId: null });
+                }}
+              >
+                Add Products
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddDialog({ open: true, type: 'service', parentId: null });
+                }}
+              >
+                Add Services
+              </MenuItem>
+            </Menu>
           </Box>
-        </>
+          <Box display="flex">
+            <Button
+              disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
+              variant={isMobile ? 'text' : 'outlined'}
+              color="default"
+              size="small"
+              onClick={openActions}
+              aria-controls="action-menu"
+            >
+              {isMobile ? '' : 'Actions'} <ExpandMore />
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+                }}
+              >
+                Bulk Edit
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection).map((rec: any) => {
+                    const obj: any = {};
+                    obj.id = rec._id;
+                    obj.type = rec?.type;
+                    obj.materialId = rec?.materialId;
+                    return obj;
+                  });
+                  setDeleteData(dataToDelete);
+                  closeActions();
+                }}
+              >
+                Delete
+              </MenuItem>
+            </Menu>
+          </Box>
+        </Box>
+      }
+      {columns && rowsData ? (
+        <Box p="6px" zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={'calc(100vh - 345px)'}
+            columns={columns}
+            data={rowsData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+            onSelect={setSelectedRecords}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            onSaveEdit={onSaveInlineEdit}
+            hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
+          />
+        </Box>
       ) : (
         <Box p={2} height={500} bgcolor="white">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -386,36 +428,39 @@ const Material = ({ renderedFrom, allowedToEdit, setNextStep, purchaseRequisitio
           okBtnLoading={isDeleting}
         />
       )}
-      {isProductEdit.open && (
-        <PurchaseRequisitionDetailDialog
+      {materialEdit.open && (
+        <MaterialDialog
           onClose={() => {
-            setIsProductEdit({ open: false, isBulkedit: false });
+            setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
           }}
-          productionOrderData={recordToUpdate}
-          handleSave={handleSaveData}
-          loading={isUpdating}
+          materialData={materialEdit.data}
+          purchaseRequisitionData={purchaseRequisitionData}
+          handleUpdate={handleSaveData}
+          loadingEdit={isUpdating}
+          bulkEdit={materialEdit.bulkedit}
+          showSaveAndNext={materialEdit.showSaveAndNext}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
+      {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
           reference="purchaseRequisition"
           serialized={null}
-          productsDialogOpen={addExistingProductDialog.open}
+          productsDialogOpen={addDialog.open}
           productId={null}
-          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '' })}
-          assignedProducts={rowsData?.map((e) => e?.materialId)}
+          handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
+          assignedProducts={[]}
           renderedFrom={renderedFrom}
           onSuccess={(d) => {
             handleAdd(d);
           }}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
+      {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
           reference={"purchaseRequisition"}
           referenceId={purchaseRequisitionData?._id}
-          handleClose={() => setAddExistingProductDialog({ open: false, type: '' })}
-          ids={rowsData?.map((e) => e?.materialId)}
+          handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
+          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
