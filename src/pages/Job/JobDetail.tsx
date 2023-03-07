@@ -12,11 +12,13 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageJob from './ManageJobDialog';
 import TabPanel from '../../components/TabPanel';
 import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
 import ManageJobDialog from './ManageJobDialog';
+import Material from './Material';
+import Steps from '../RentalManagement/Steps';
+import ContentFullScreen from 'src/components/ContentFullScreen';
 
 const JobDetail = () => {
   const renderedFrom = camelCase(routes?.job.title);
@@ -32,6 +34,11 @@ const JobDetail = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [currentStep, setCurrentStep] = useState(null);
+  const [nextStep, setNextStep] = useState(true);
+  const [jobProcessSteps, setJobProcessSteps] = useState(['Add']);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
+
 
   const {
     state: { permissions, user }
@@ -62,6 +69,9 @@ const JobDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.job.path}/${id}`);
+      setCurrentStep(
+        jobProcessSteps.indexOf(data?.processStatus) !== -1 ? jobProcessSteps.indexOf(data?.processStatus) : 0
+      );
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
@@ -105,6 +115,19 @@ const JobDetail = () => {
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
+
+  const updateProcessStatus = (processStatus) => {
+    axiosInstance()
+      .put(`${routes.job.path}/${id}/process-status`, { processStatus: processStatus })
+      .then(({ data }) => {})
+      .catch((error) => {});
+  };
+
+  useEffect(() => {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= jobProcessSteps.length) {
+      updateProcessStatus(jobProcessSteps[currentStep]);
+    }
+  }, [currentStep]);
 
   return (
     <Box className="main-container-v1">
@@ -179,6 +202,25 @@ const JobDetail = () => {
           </Box>
           </TabPanel>
           <TabPanel value={tabValue} index={1}>  
+          <Steps
+            isNextStep={false}
+            nextStep={nextStep}
+            steps={jobProcessSteps}
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
+            isStepEnded={false}
+            setStepFullScreen={() => setStepFullScreen(true)}
+          />
+           <ContentFullScreen title={jobProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          {jobData && (
+            <Material
+              renderedFrom={`${renderedFrom}_grid-1`}
+              allowedToEdit={allowedToEdit && permissions?.job?.isUpdate ? true : false}
+              jobData={jobData}
+              setNextStep={setNextStep}
+            />
+          )}
+          </ContentFullScreen>
         </TabPanel>
       </Box>
       {showConfirmBox && (
