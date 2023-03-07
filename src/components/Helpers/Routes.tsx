@@ -878,6 +878,34 @@ const routes = {
         : RESOURCE_LABEL.fleetDispatch,
     path: '/fleet-dispatch'
   },
+  fleetMaster: {
+    title:
+      storedRoutes && storedRoutes.fleetMaster && storedRoutes.fleetMaster.title
+        ? storedRoutes.fleetMaster?.title
+        : RESOURCE_LABEL.fleetMaster,
+    path: '/fleet-master'
+  },
+  fleetMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.fleetMaster && storedRoutes.fleetMaster.title
+        ? storedRoutes.fleetMaster?.title
+        : RESOURCE_LABEL.fleetMaster,
+    path: '/fleet-master/detail'
+  },
+  job: {
+    title:
+      storedRoutes && storedRoutes.job && storedRoutes.job.title
+        ? storedRoutes.job?.title
+        : RESOURCE_LABEL.job,
+    path: '/job'
+  },
+  jobDetail: {
+    title:
+      storedRoutes && storedRoutes.job && storedRoutes.job.title
+        ? storedRoutes.job?.title
+        : RESOURCE_LABEL.job,
+    path: '/job/detail'
+  },
 };
 
 export default routes;
