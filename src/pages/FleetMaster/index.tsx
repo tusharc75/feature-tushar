@@ -279,7 +279,6 @@ const FleetMaster = () => {
                             else fetchFleetMasterData();
                         }}
                         additionalParams={getQueryString(true)}
-                        onlyExport={true}
                     />
                 </Grid>
             </Grid>
