@@ -36,7 +36,7 @@ import { ExpandMore } from '@material-ui/icons';
 import AddNonSerializeAssets from './AddNonSerializeAssets';
 import { removeAssetsInRental } from '../rentalOfflineHelper';
 import WarningIcon from '@material-ui/icons/Warning';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
 
 const SerializedAsset = ({
   rentalManagementData,
@@ -210,23 +210,21 @@ const SerializedAsset = ({
             )}
             {row.original?.type === 'asset' && (
               <span className="d-flex align-items-center gap-2">
-                {[INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.reserved].includes(row.original.status) &&
-                  !row?.original?.rentalAssetStatus &&
-                  allowedToEdit && (
-                    <HtmlTooltip title={`Remove`}>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setShowConfirmBox(true);
-                          setDeleteData([
-                            { _id: row.original.inventory, assetNumber: row.original.detail, isNonSerializeAsset: row.original.isNonSerializeAsset }
-                          ]);
-                        }}
-                      >
-                        <Delete fontSize="small" color={'error'} />
-                      </IconButton>
-                    </HtmlTooltip>
-                  )}
+                {(allowedToEdit && row?.original?.canRemove) && (
+                  <HtmlTooltip title={`Remove`}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setShowConfirmBox(true);
+                        setDeleteData([
+                          { _id: row.original.inventory, assetNumber: row.original.detail, isNonSerializeAsset: row.original.isNonSerializeAsset }
+                        ]);
+                      }}
+                    >
+                      <Delete fontSize="small" color={'error'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
                 {row.original.isTransferAsset && (
                   <HtmlTooltip
                     title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}
@@ -428,6 +426,18 @@ const SerializedAsset = ({
         isTransferAsset = true;
         transferData = transferFilter[0];
       }
+      var canRemove = false;
+      if (user?.user?.brandPolicy?.rentalPlanning) {
+        if (_inventory?.status === INVENTORY_STATUS.reserved) {
+          canRemove = true;
+        }
+      }
+      else {
+        if ([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.reserved].includes(_inventory?.inventoryDetail?.status) &&
+          (!_inventory?.status || _inventory?.status === INVENTORY_STATUS.reserved)) {
+          canRemove = true;
+        }
+      }
       subRows.push({
         ..._inventory,
         srno: `${parent.srno}.${k + 1}`,
@@ -435,7 +445,7 @@ const SerializedAsset = ({
         description: parent?.description,
         type: 'asset',
         isNonSerializeAsset: false,
-        status: _inventory?.status ? _inventory?.status : _inventory.inventoryDetail?.status,
+        status: _inventory.inventoryDetail?.status,
         rentalAssetStatus: _inventory?.status,
         manualStatus: _inventory.inventoryDetail?.manualStatus,
         warehouse: _inventory.inventoryDetail?.warehouse,
@@ -443,7 +453,8 @@ const SerializedAsset = ({
         isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
         isTransferAsset: isTransferAsset,
         transferData: transferData,
-        isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset
+        isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset,
+        canRemove: canRemove
       });
     });
 
@@ -459,7 +470,8 @@ const SerializedAsset = ({
         isNonSerializeAsset: true,
         status: _inventory?.status,
         warehouse: rentalManagementData?.warehouse?.optionValue,
-        isValid: true
+        isValid: true,
+        canRemove: true,
       });
     });
 
@@ -814,12 +826,9 @@ const SerializedAsset = ({
                   {`Assign Serial Number`}
                 </MenuItem>
                 <MenuItem
-                  disabled={
-                    treeToFlatArray(selectedRecords, 'subRows')?.filter((d) => d.type === 'asset' && d.status === INVENTORY_STATUS.reserved)
-                      .length === 0
-                  }
+                  disabled={flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove)?.length === 0}
                   onClick={() => {
-                    const assets = treeToFlatArray(selectedRecords, 'subRows')?.filter((d) => d.type === 'asset');
+                    const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);
                     const dataTodelete = [];
                     assets?.forEach((element) => {
                       dataTodelete.push({ _id: element?.inventory, assetNumber: element?.detail, isNonSerializeAsset: element?.isNonSerializeAsset });
