@@ -885,6 +885,20 @@ const routes = {
         : RESOURCE_LABEL.fleetMaster,
     path: '/fleet-master/detail'
   },
+  job: {
+    title:
+      storedRoutes && storedRoutes.job && storedRoutes.job.title
+        ? storedRoutes.job?.title
+        : RESOURCE_LABEL.job,
+    path: '/job'
+  },
+  jobDetail: {
+    title:
+      storedRoutes && storedRoutes.job && storedRoutes.job.title
+        ? storedRoutes.job?.title
+        : RESOURCE_LABEL.job,
+    path: '/job/detail'
+  },
 };
 
 export default routes;
