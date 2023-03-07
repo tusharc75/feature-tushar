@@ -977,13 +977,16 @@ body::-webkit-scrollbar-thumb {
     border-left: 4px solid #298b88;
     box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.08);
     border-radius: 4px;
-    margin-top: 8px;
+    margin-block: 8px;
     .activity-date {
       font-size: 0.8rem;
       padding-top: 2px;
       padding-left: 6px;
       color: #7b898e;
     }
+  }
+  .MuiTreeItem-root .activity {
+    padding: 6px 0px 6px 10px;
   }
 }
 
@@ -3306,5 +3309,17 @@ body {
     // border-top: 0;
     box-shadow: 0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03);
     border-radius: 0px 0px 4.04585px 4.04585px;
+  }
+}
+.activityDetailBox.attachment {
+  .attachment-files {
+    .MuiTreeItem-content {
+      .MuiTreeItem-iconContainer {
+        display: none;
+        & + div {
+          padding-left: 0;
+        }
+      }
+    }
   }
 }
