@@ -560,7 +560,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               <ListItemIcon style={{ minWidth: '30px' }}>
                 <AiOutlineFileAdd />
               </ListItemIcon>
-              <ListItemText>New File...</ListItemText>
+              <ListItemText>New File</ListItemText>
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -571,7 +571,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               <ListItemIcon style={{ minWidth: '30px' }}>
                 <AiOutlineFolderAdd />
               </ListItemIcon>
-              <ListItemText>New Folder...</ListItemText>
+              <ListItemText>New Folder</ListItemText>
             </MenuItem>
           </>
         ) : null}
