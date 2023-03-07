@@ -871,6 +871,13 @@ const routes = {
         : RESOURCE_LABEL.fieldServiceTechnician,
     path: '/field-service-technician'
   },
+  fleetDispatch: {
+    title:
+      storedRoutes && storedRoutes.fleetDispatch && storedRoutes.fleetDispatch.title
+        ? storedRoutes.fleetDispatch?.title
+        : RESOURCE_LABEL.fleetDispatch,
+    path: '/fleet-dispatch'
+  },
 };
 
 export default routes;

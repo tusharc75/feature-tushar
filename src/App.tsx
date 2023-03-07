@@ -193,6 +193,7 @@ import RentalPlanningCalendar from './pages/RentalPlanningCalendar';
 import FieldTicket from './pages/FieldTicket';
 import FieldTicketDetail from './pages/FieldTicket/FieldTicketDetail';
 import FieldServiceTechnician from './pages/FieldServiceTechnician';
+import FleetDispatch from './pages/FleetDispatch';
 
 var notificationInterval: any = null;
 
@@ -960,6 +961,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldServiceTechnician.path}`}>
               <FieldServiceTechnician />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fleetDispatch.path}`}>
+              <FleetDispatch />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

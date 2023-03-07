@@ -332,6 +332,7 @@ export const RESOURCE_LABEL = {
   planning: 'Planning',
   fieldTicket: 'Field Ticket',
   fieldServiceTechnician: `Field Service Technician`,
+  fleetDispatch: `Fleet Dispatch`,
   resourceLogs: `Resource Logs`
 };
 
