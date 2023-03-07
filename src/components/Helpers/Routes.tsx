@@ -871,6 +871,20 @@ const routes = {
         : RESOURCE_LABEL.fieldServiceTechnician,
     path: '/field-service-technician'
   },
+  fleetMaster: {
+    title:
+      storedRoutes && storedRoutes.fleetMaster && storedRoutes.fleetMaster.title
+        ? storedRoutes.fleetMaster?.title
+        : RESOURCE_LABEL.fleetMaster,
+    path: '/fleet-master'
+  },
+  fleetMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.fleetMaster && storedRoutes.fleetMaster.title
+        ? storedRoutes.fleetMaster?.title
+        : RESOURCE_LABEL.fleetMaster,
+    path: '/fleet-master/detail'
+  },
 };
 
 export default routes;
