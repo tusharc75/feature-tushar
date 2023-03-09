@@ -17,8 +17,9 @@ const useStyles = makeStyles((theme) => ({
     padding: '15px',
     transition: 'transform .2s, background .3s',
     flexWrap: 'wrap',
+    backgroundColor: "#F8FFFC",
     '&:hover': {
-      transform: 'scale(1.02)',
+      transform: 'scale(1.01)',
       zIndex: '1'
     }
   },
@@ -33,8 +34,9 @@ const useStyles = makeStyles((theme) => ({
     border: '1px solid #ebebeb',
     padding: '15px',
     transition: 'transform .2s, background .3s',
+    backgroundColor: "#FFFAEF",
     '&:hover': {
-      transform: 'scale(1.02)',
+      transform: 'scale(1.01)',
       zIndex: '1'
     }
   },
@@ -169,7 +171,7 @@ const FleetDispatchBox = ({ data, id, index, moveCard, cardType, handleDispatch 
                   <LocalShippingIcon className={`${classes.truckIcon} ${classes.icon}`} />
                 </Box>
                 <Box sx={{ flexBasis: 'calc(100% - 35px)' }}>
-                  <Typography className={classes.primaryText}>{data?.fleetNumber}</Typography>
+                  <Typography className={classes.primaryText}>Fleet : {data?.fleetNumber}</Typography>
                   <Typography className={classes.secondaryText}>
                     <strong>Location :</strong> {data?.currentLocation?.optionLabel}
                   </Typography>
