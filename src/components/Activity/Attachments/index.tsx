@@ -51,7 +51,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   const handleFolderOptionsClose = () => {
     setFolderAnchorEl(null);
   };
-  console.log(folderAnchorEl);
 
   const {
     state: { permissions }

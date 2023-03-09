@@ -73,14 +73,18 @@ const FleetDispatchBox = ({ data, id, index, moveCard, cardType, handleDispatch 
             item.index = hoverIndex;
         },
         drop: (item: any) => {
-            handleDispatch(item, data)
+            if (cardType === "fleet") {
+                handleDispatch(data, item?.data)
+            } else {
+                handleDispatch(item?.data, data)
+            }
         }
     });
 
     const [{ isDragging }, drag] = useDrag({
         type: 'move',
         item: () => {
-            return { id, index, cardType };
+            return { id, index, cardType, data };
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging()

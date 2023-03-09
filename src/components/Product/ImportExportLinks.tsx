@@ -147,7 +147,6 @@ export default function ImportExportLinks({
     }
   };
   const uploadExtraData = (event, apiUrl = null) => {
-    console.log(apiUrl);
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
         hideDuration: null,
@@ -310,7 +309,6 @@ export default function ImportExportLinks({
                         id={`importDataFromExcel-${idx}`}
                         name={`importDataFromExcel-${idx}`}
                         onChange={(e) => {
-                          console.log(d);
                           uploadExtraData(e, d.api);
                         }}
                         accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
