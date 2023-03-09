@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
   expandIcon: {
     position: 'absolute',
     right: '0',
-    color: 'white'
+    color: '#3e3e3e'
   },
   custom_expandIcon: {
     position: 'absolute',
