@@ -22,6 +22,7 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
+  
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -48,10 +49,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     data = CURReplaceByCurrencySingle(data, jobData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = genrateCustomTableColumns(data, jobData?.currency, renderedFrom);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
+
     let coloum: any = [
       {
         accessor: 'index',
@@ -62,16 +60,6 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
         Footer: () => {
           return <>Total</>;
         }
-      },
-      {
-        accessor: 'type',
-        Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${startCase(row.original?.type)} `}</p>
-          </div>
-        )
       },
       {
         accessor: 'detail',
@@ -140,17 +128,12 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     let rows = data?.material;
     rows?.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.serializedAssetDetail?.assetNumber;
+      parent.detail = parent?.serializedAssetDetail?.assetNumber;
       parent.description = parent?.description;
       parent.qty = parent.qty;
-      parent.qtyDisplay = parent.qty;
     });
-    if (rows.length !== 0) {
-      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
-        setNextStep(false);
-      } else {
-        setNextStep(true);
-      }
+    if (rows?.length) {
+      setNextStep(true);
     } else {
       setNextStep(false);
     }
@@ -172,7 +155,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
       const element: any = {};
       element.materialId = d._id;
       element.type = addDialog.type;
-      element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
+      element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : 'Unit';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       material.push(element);
     });
@@ -200,7 +183,6 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     rows.forEach((element) => {
       delete element.index;
       delete element.detail;
-      delete element.qtyDisplay;
       delete element.isValid;
       delete element.hideSelection;
     });
@@ -221,6 +203,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
         toastConfig.setToastConfig(error);
       });
   };
+
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
@@ -239,9 +222,6 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
@@ -251,7 +231,12 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center">
-          <Button variant="outlined" size="small" onClick={() => setAddDialog({ open: true, type: 'asset' })} startIcon={<AddIcon />} color="primary">
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => setAddDialog({ open: true, type: 'asset' })}
+            startIcon={<AddIcon />}
+            color="primary">
             Add
           </Button>
         </Box>
@@ -289,7 +274,6 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
             >
               Bulk Edit
             </MenuItem>
-
             <MenuItem
               onClick={() => {
                 const dataToDelete =
@@ -313,22 +297,21 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
         </Box>
       </Box>
       {columns && rowsData ? (
-        <>
-          <Box p="6px" zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={'calc(100vh - 395px)'}
-              columns={columns}
-              data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={setSelectedRecords}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              renderedFrom={renderedFrom}
-              isClientSideGrid={true}
-              onSaveEdit={onSaveInlineEdit}
-            />
-          </Box>
-        </>
+        <Box p="6px" zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={'calc(100vh - 395px)'}
+            columns={columns}
+            data={rowsData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+            onSelect={setSelectedRecords}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            hideExpander={true}
+            onSaveEdit={onSaveInlineEdit}
+          />
+        </Box>
       ) : (
         <Box p={2} height={500} bgcolor="white">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -361,9 +344,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
           handleClose={() => {
             setAddDialog({ open: false, type: '' });
           }}
-          ids={flattenArray(rowsData)
-            ?.filter((e) => e.type === 'asset')
-            ?.map((e) => e.materialId)}
+          ids={flattenArray(rowsData)?.filter((e) => e.type === 'asset')?.map((e) => e.materialId)}
           handleSucess={(rows) => {
             handleAdd(rows);
           }}
