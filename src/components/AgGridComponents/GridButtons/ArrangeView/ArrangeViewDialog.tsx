@@ -24,9 +24,9 @@ import { TouchBackend } from 'react-dnd-touch-backend';
 import update from 'immutability-helper';
 import { isMobile, isTablet } from 'react-device-detect';
 
-import CustomDialogContent from '../CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

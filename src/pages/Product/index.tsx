@@ -370,7 +370,7 @@ const Product = () => {
     axiosInstance()
       .put(`/product/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords)
+        removeLocalStorage(localStorageSelectedRecords);
         fetchProduct();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -500,7 +500,7 @@ const Product = () => {
         ids: selectedRecords.map((d: { _id: string }) => d._id)
       })
       .then(() => {
-        fetchProduct()
+        fetchProduct();
         setSubmitting(false);
         setOpenAddDialog(false);
       })
@@ -573,6 +573,38 @@ const Product = () => {
               else fetchProduct();
             }}
             additionalParams={getQueryString(true)}
+            extraImportExportLinks={[
+              {
+                title: 'Child Product Template',
+                api: `${product.api}/unknown/bom/template`,
+                type: 'export'
+              },
+              {
+                title: 'Child Product Import',
+                api: `${product.api}/unknown/bom/import`,
+                type: 'import'
+              },
+              {
+                title: 'Service Template',
+                api: `${product.api}/unknown/service-master/template`,
+                type: 'export'
+              },
+              {
+                title: 'Service Import',
+                api: `${product.api}/unknown/service-master/import`,
+                type: 'import'
+              },
+              {
+                title: 'Service Package Template',
+                api: `${product.api}/unknown/package/template`,
+                type: 'export'
+              },
+              {
+                title: 'Service Package Import',
+                api: `${product.api}/unknown/package/import`,
+                type: 'import'
+              }
+            ]}
           />
         </Grid>
       </Grid>
@@ -725,7 +757,8 @@ const Product = () => {
                       />
                     ) : (
                       <TextField {...params} margin="dense" name="productType" label="Product Type" variant="outlined" fullWidth />
-                    )}
+                    )
+                  }
                 />
               )}
             </Grid>
@@ -781,23 +814,26 @@ const Product = () => {
                       open={Boolean(anchorEl)}
                       onClose={closeActions}
                     >
-                      <MenuItem disabled={!productPermissions.isDelete} onClick={() => {
-                        setShowDeleteConfirmBox(true)
-                        closeActions()
-                      }}
+                      <MenuItem
+                        disabled={!productPermissions.isDelete}
+                        onClick={() => {
+                          setShowDeleteConfirmBox(true);
+                          closeActions();
+                        }}
                       >
                         Delete
                       </MenuItem>
-                      {permissions?.repairType?.isRead &&
+                      {permissions?.repairType?.isRead && (
                         <MenuItem
-                          disabled={!productPermissions.isUpdate && !permissions?.hasOwnProperty("repairType")}
+                          disabled={!productPermissions.isUpdate && !permissions?.hasOwnProperty('repairType')}
                           onClick={() => {
-                            setOpenAddDialog(true)
-                            closeActions()
+                            setOpenAddDialog(true);
+                            closeActions();
                           }}
                         >
                           {`Assign ${routes?.repairType?.title}`}
-                        </MenuItem>}
+                        </MenuItem>
+                      )}
                     </Menu>
                   </Grid>
                 </Box>
@@ -888,8 +924,8 @@ const Product = () => {
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete the product ${deleteRecord?._id ? deleteRecord?.productName : ''} ?`}
           onClose={() => {
-            setDeleteRecord(null)
-            setShowDeleteConfirmBox(false)
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

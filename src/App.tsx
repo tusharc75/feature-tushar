@@ -193,6 +193,7 @@ import RentalPlanningCalendar from './pages/RentalPlanningCalendar';
 import FieldTicket from './pages/FieldTicket';
 import FieldTicketDetail from './pages/FieldTicket/FieldTicketDetail';
 import FieldServiceTechnician from './pages/FieldServiceTechnician';
+import FleetDispatch from './pages/FleetDispatch';
 import FleetMaster from './pages/FleetMaster';
 import FleetMasterDetail from './pages/FleetMaster/FleetMasterDetail';
 import Job from './pages/Job';
@@ -964,6 +965,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldServiceTechnician.path}`}>
               <FieldServiceTechnician />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fleetDispatch.path}`}>
+              <FleetDispatch />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fleetMaster.path}`}>
               <FleetMaster />

@@ -10,7 +10,7 @@ import { orderBy, uniqBy } from 'lodash';
 import { checkStaticField, staticColumns } from '../../constants/columns';
 import NumericEditor from './NumericEditor';
 import DateEditor from './DateEditor';
-import ArrangeView from './ArrangeView';
+import ArrangeView from './GridButtons/ArrangeView/ArrangeView';
 
 export function reducer(state, action) {
   switch (action.type) {
