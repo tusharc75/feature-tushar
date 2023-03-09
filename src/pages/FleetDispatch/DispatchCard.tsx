@@ -1,7 +1,8 @@
 import React from 'react';
-import { makeStyles, IconButton, Typography, Box, Grid, Menu, MenuItem } from '@material-ui/core';
+import { makeStyles, Typography, Box, Grid } from '@material-ui/core';
 
 import { useDrag, useDrop } from 'react-dnd';
+import { AiFillPropertySafety } from 'react-icons/ai';
 
 const useStyles = makeStyles(() => ({
     activitybox: {
@@ -25,8 +26,8 @@ const useStyles = makeStyles(() => ({
     }
 }));
 
-export const FleetDispatchBox = (props) => {
-    const { data, id, index, moveCard } = props;
+const FleetDispatchBox = ({ data, id, index, moveCard, type, handleDispatch }) => {
+
     const classes = useStyles();
     const ref = React.useRef(null);
 
@@ -39,6 +40,9 @@ export const FleetDispatchBox = (props) => {
         },
         hover: (item: any, monitor) => {
             if (!ref.current) {
+                return;
+            }
+            if (item.type !== type) {
                 return;
             }
             const dragIndex = item.index;
@@ -58,13 +62,16 @@ export const FleetDispatchBox = (props) => {
             }
             moveCard(dragIndex, hoverIndex);
             item.index = hoverIndex;
+        },
+        drop: (item: any) => {
+            handleDispatch(item, data)
         }
     });
 
     const [{ isDragging }, drag] = useDrag({
         type: 'move',
         item: () => {
-            return { id, index };
+            return { id, index, type };
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging()
@@ -75,34 +82,28 @@ export const FleetDispatchBox = (props) => {
     drag(drop(ref));
 
     return (
-        <div
-            ref={ref}
-            data-handler-id={handlerId}
-        >
-            <Box
-                className={` ${classes.activitybox}`}
-                style={{ opacity }}
-            >
-                <Box>
-                    <Grid container>
-                        <Grid item xs={11}>
-                            <Box display="flex" mr="10px">
-                                <Typography
-                                    style={{
-                                        textOverflow: 'ellipsis',
-                                        overflow: 'hidden',
-                                        whiteSpace: 'nowrap',
-                                        marginRight: '5px'
-                                    }}
-                                    variant="subtitle2"
-                                >
-                                    {data?.name}
-                                </Typography>
-                            </Box>
-                        </Grid>
+        <div ref={ref} data-handler-id={handlerId}  >
+            <Box className={` ${classes.activitybox}`} style={{ opacity }}  >
+                <Grid container>
+                    <Grid item xs={11}>
+                        <Box display="flex" mr="10px">
+                            <Typography
+                                style={{
+                                    textOverflow: 'ellipsis',
+                                    overflow: 'hidden',
+                                    whiteSpace: 'nowrap',
+                                    marginRight: '5px'
+                                }}
+                                variant="subtitle2"
+                            >
+                                {data?.name} - {type}
+                            </Typography>
+                        </Box>
                     </Grid>
-                </Box>
+                </Grid>
             </Box>
         </div>
     );
 };
+
+export default FleetDispatchBox;
