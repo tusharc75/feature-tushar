@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Divider, IconButton, makeStyles, useMediaQuery, Menu, MenuItem } from '@material-ui/core';
+import { Divider, IconButton, makeStyles, useMediaQuery, Menu, MenuItem, Box } from '@material-ui/core';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
@@ -68,7 +68,8 @@ export default function ImportExportLinks({
   isExportAllOrSomeFeature = false,
   onExportToExcelSuccess = () => {},
   total = 0,
-  additionalParams = null
+  additionalParams = null,
+  extraImportExportLinks = []
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
@@ -76,8 +77,16 @@ export default function ImportExportLinks({
   const [anchorEl, setAnchorEl] = useState(null);
   const [isSelection, setIsSelection] = useState(false);
   const [isUpladDialog, setIsUploadDialog] = useState(false);
+  const [anchorExtraEl, setAnchorExtraEl] = useState(null);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
+  };
+
+  const handleExtraClick = (event) => {
+    setAnchorExtraEl(event.currentTarget);
+  };
+  const handleExtraClose = () => {
+    setAnchorExtraEl(null);
   };
 
   const handleClose = () => {
@@ -137,11 +146,59 @@ export default function ImportExportLinks({
         });
     }
   };
+  const uploadExtraData = (event, apiUrl = null) => {
+    console.log(apiUrl);
+    if (event.target.files && event.target.files.length) {
+      toastConfig.setToastConfig({
+        hideDuration: null,
+        open: true,
+        type: 'info',
+        message: `Uploading ${module}, Please wait...`
+      });
+      const file = event.target.files[0];
+
+      let formData = new FormData();
+      formData.append('file', file);
+
+      let importApi = `${api}/import`;
+
+      if (additionalParams) {
+        importApi = `${importApi}?${additionalParams}`;
+      }
+
+      axiosInstance()
+        .post(apiUrl ? apiUrl : importApi, formData, {
+          responseType: 'blob',
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        .then((response) => {
+          if (!response.headers['content-disposition']) {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: 'All Records Added Successfully'
+            });
+          } else {
+            const fileName = response.headers['content-disposition'].split('filename=')[1];
+            downloadExcel(response.data, fileName);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'error',
+              message: `Found some issue(s) while importing ${module}`
+            });
+          }
+          // handleExtraClose();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
 
   /**
    * EXPORT TABLES INTO EXCEL
    */
-  const exportToExcel = () => {
+  const exportToExcel = (apiUrl = null) => {
     toastConfig.setToastConfig({
       hideDuration: null,
       open: true,
@@ -162,7 +219,7 @@ export default function ImportExportLinks({
     }
 
     axiosInstance()
-      .get(exportApi, {
+      .get(apiUrl ? apiUrl : exportApi, {
         responseType: 'arraybuffer'
       })
       .then((response) => {
@@ -240,6 +297,53 @@ export default function ImportExportLinks({
         >
           Email a Link
         </label> */}
+
+        {extraImportExportLinks?.length > 0 && (
+          <>
+            <Menu id="import-export-extra-links" anchorEl={anchorExtraEl} keepMounted open={Boolean(anchorExtraEl)} onClose={handleExtraClose}>
+              {extraImportExportLinks?.map((d, idx) => {
+                if (d.type === 'import') {
+                  return (
+                    <MenuItem>
+                      <input
+                        onClick={(e: any) => (e.target.value = null)}
+                        id={`importDataFromExcel-${idx}`}
+                        name={`importDataFromExcel-${idx}`}
+                        onChange={(e) => {
+                          console.log(d);
+                          uploadExtraData(e, d.api);
+                        }}
+                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                        style={{
+                          opacity: '0',
+                          position: 'absolute',
+                          zIndex: -1
+                        }}
+                        type="file"
+                      />
+                      <label htmlFor={`importDataFromExcel-${idx}`}>{d.title}</label>
+                    </MenuItem>
+                  );
+                } else {
+                  return (
+                    <MenuItem
+                      onClick={() => {
+                        exportToExcel(d.api);
+                        handleExtraClose();
+                      }}
+                    >
+                      {d.title}
+                    </MenuItem>
+                  );
+                }
+              })}
+            </Menu>
+            <Box ml={1} />
+            <IconButton onClick={handleExtraClick}>
+              <IoIosArrowDropdown className={module !== 'builder' ? classes.expandIcon : classes.custom_expandIcon} />
+            </IconButton>
+          </>
+        )}
       </div>
       <Menu id="import-export-links" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
         {permissions?.isCreate && (
@@ -272,6 +376,42 @@ export default function ImportExportLinks({
         >
           Download Template
         </MenuItem>
+
+        {extraImportExportLinks?.map((d) => {
+          if (d.type === 'import') {
+            return (
+              <MenuItem>
+                <input
+                  onClick={(e: any) => (e.target.value = null)}
+                  id="importFromExcel"
+                  name="importFromExcel"
+                  onChange={(e) => {
+                    uploadExtraData(e, d.api);
+                  }}
+                  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                  style={{
+                    opacity: '0',
+                    position: 'absolute',
+                    zIndex: -1
+                  }}
+                  type="file"
+                />
+                <label htmlFor="importFromExcel">{d.title}</label>
+              </MenuItem>
+            );
+          } else {
+            return (
+              <MenuItem
+                onClick={() => {
+                  exportToExcel(d.api);
+                  handleExtraClose();
+                }}
+              >
+                {d.title}
+              </MenuItem>
+            );
+          }
+        })}
         {/* <MenuItem>Email a Link</MenuItem> */}
       </Menu>
       {isMobile && (
