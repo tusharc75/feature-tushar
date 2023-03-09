@@ -7,8 +7,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
 import { disabledColumns, getSortedColumns } from '../../constants/columns';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
-import ArrangeViewDialog from './ArrangeViewDialog';
-import ReportArrangeView from './ReportArrangeView';
 
 // import { BsArrowLeftRight } from 'react-icons/bs';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
@@ -207,9 +205,8 @@ export default function CustomGridHeaderOptions({
               </FormGroup>
             </FormControl>
           </Popover> */}
-          {showOnlyShowFilteredRecordSwitch && (
+          {/* {showOnlyShowFilteredRecordSwitch && (
             <>
-              {/* <Divider orientation="vertical" flexItem className="mr-2" /> */}
 
               <FormControlLabel
                 value={checked}
@@ -230,13 +227,13 @@ export default function CustomGridHeaderOptions({
                 labelPlacement="end"
               />
             </>
-          )}
+          )} */}
         </div>
 
         <div style={{ marginLeft: 'auto' }}>
-          {refreshGrid && (
+          {/* {refreshGrid && (
             <>
-              {/* <Divider orientation="vertical" flexItem /> */}
+            
 
               <Tooltip title="Refresh">
                 <IconButton
@@ -255,7 +252,7 @@ export default function CustomGridHeaderOptions({
                 </IconButton>
               </Tooltip>
             </>
-          )}
+          )} */}
         </div>
 
         {/* <Button aria-describedby="columnSelection"

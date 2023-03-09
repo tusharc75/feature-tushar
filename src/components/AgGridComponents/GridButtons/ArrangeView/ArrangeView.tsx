@@ -2,13 +2,13 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Box, Button, Popover, FormControl, FormGroup, Divider, FormControlLabel, Tooltip, Switch, IconButton } from '@material-ui/core';
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import axiosInstance from '../../axios/axiosInstance';
-import { useData } from '../../StateProvider/Provider';
-import { disabledColumns, getSortedColumns } from '../../constants/columns';
-import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
+import { CustomOfflineContext } from '../../../../StateProvider/OfflineContext/OfflineContext';
+import axiosInstance from '../../../../axios/axiosInstance';
+import { useData } from '../../../../StateProvider/Provider';
+import { disabledColumns, getSortedColumns } from '../../../../constants/columns';
+import { SET_GRID_METADATA } from '../../../../StateProvider/actionTypes';
 import ArrangeViewDialog from './ArrangeViewDialog';
-import ReportArrangeView from './ReportArrangeView';
+import ReportArrangeView from '../../ReportArrangeView';
 import { BiFilterAlt } from 'react-icons/bi';
 // import { BsArrowLeftRight } from 'react-icons/bs';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
@@ -25,10 +25,11 @@ const ArrangeView = ({
   saveColumnOptions = false,
   selectedReportView = null,
   setSelectedReportView = null,
-  reportSave = false
+  reportSave = false,
+  style = {},
+  ...otherProps
 }) => {
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
-  const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const {
     state: { user }
@@ -78,30 +79,27 @@ const ArrangeView = ({
   };
 
   return (
-    <div>
+    <>
       <Tooltip title="Arrange View" placement="top">
         <IconButton
+          {...otherProps}
           style={{
-            zIndex: '2',
             width: '46px',
-            height: '40px',
-            position: 'absolute',
+            height: '32px',
             background: 'white',
-            right: '1px',
-            top: '1px',
             padding: '11px',
-            borderLeft: '1px solid #e5e5e5'
+            border: '1px solid #e5e5e5',
+            color: '#737373',
+            ...style
           }}
           aria-describedby="columnSelection"
           size="small"
-          className="px-2  arrange-view-v2"
           color="primary"
           onClick={(event) => {
             setOpenColumnSelection(true);
-            setOpenColumnSelectionAnchorEl(event.currentTarget);
           }}
         >
-          <SwapHorizIcon style={{ color: '#1d1d1d' }} />
+          <SwapHorizIcon />
         </IconButton>
       </Tooltip>
       {openColumnSelection && (
@@ -133,7 +131,7 @@ const ArrangeView = ({
           )}
         </>
       )}
-    </div>
+    </>
   );
 };
 
