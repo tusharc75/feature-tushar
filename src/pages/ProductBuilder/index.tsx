@@ -246,7 +246,7 @@ const ProductBuilder = () => {
                 <Button
                   className={isMobile ? "mobile_button ml-2" : `${styles.action_submit_btn} ${"ml-2"}`}
                   // className={styles.action_submit_btn}
-                  variant={isMobile ? "text" : "contained"}
+                  variant={isMobile ? "text" : "outlined"}
                   color="default"
                   size="small"
                   onClick={openActions}
