@@ -65,7 +65,8 @@ const routes = {
     data: {}
   },
   resourceLogs: {
-    title: storedRoutes && storedRoutes.resourceLogs && storedRoutes.resourceLogs.title ? storedRoutes.resourceLogs?.title : RESOURCE_LABEL.resourceLogs,
+    title:
+      storedRoutes && storedRoutes.resourceLogs && storedRoutes.resourceLogs.title ? storedRoutes.resourceLogs?.title : RESOURCE_LABEL.resourceLogs,
     path: '/resource-logs',
     data: {}
   },
@@ -809,17 +810,11 @@ const routes = {
     path: '/technician-scheduler'
   },
   irtTicket: {
-    title:
-      storedRoutes && storedRoutes.irtTicket && storedRoutes.irtTicket.title
-        ? storedRoutes.irtTicket?.title
-        : RESOURCE_LABEL.irtTicket,
+    title: storedRoutes && storedRoutes.irtTicket && storedRoutes.irtTicket.title ? storedRoutes.irtTicket?.title : RESOURCE_LABEL.irtTicket,
     path: '/irt-ticket'
   },
   irtTicketDetail: {
-    title:
-      storedRoutes && storedRoutes.irtTicket && storedRoutes.irtTicket.title
-        ? storedRoutes.irtTicket?.title
-        : RESOURCE_LABEL.irtTicket,
+    title: storedRoutes && storedRoutes.irtTicket && storedRoutes.irtTicket.title ? storedRoutes.irtTicket?.title : RESOURCE_LABEL.irtTicket,
     path: '/irt-ticket/detail'
   },
   purchaseRequisition: {
@@ -837,31 +832,19 @@ const routes = {
     path: '/purchase-requisition/detail'
   },
   planning: {
-    title:
-      storedRoutes && storedRoutes.planning && storedRoutes.planning.title
-        ? storedRoutes.planning?.title
-        : RESOURCE_LABEL.planning,
+    title: storedRoutes && storedRoutes.planning && storedRoutes.planning.title ? storedRoutes.planning?.title : RESOURCE_LABEL.planning,
     path: '/planning'
   },
   planningDetail: {
-    title:
-      storedRoutes && storedRoutes.planning && storedRoutes.planning.title
-        ? storedRoutes.planning?.title
-        : RESOURCE_LABEL.planning,
+    title: storedRoutes && storedRoutes.planning && storedRoutes.planning.title ? storedRoutes.planning?.title : RESOURCE_LABEL.planning,
     path: '/planning/detail'
   },
   fieldTicket: {
-    title:
-      storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title
-        ? storedRoutes.fieldTicket?.title
-        : RESOURCE_LABEL.fieldTicket,
+    title: storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title ? storedRoutes.fieldTicket?.title : RESOURCE_LABEL.fieldTicket,
     path: '/field-ticket'
   },
   fieldTicketDetail: {
-    title:
-      storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title
-        ? storedRoutes.fieldTicket?.title
-        : RESOURCE_LABEL.fieldTicket,
+    title: storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title ? storedRoutes.fieldTicket?.title : RESOURCE_LABEL.fieldTicket,
     path: '/field-ticket/detail'
   },
   fieldServiceTechnician: {
@@ -879,33 +862,28 @@ const routes = {
     path: '/fleet-dispatch'
   },
   fleetMaster: {
-    title:
-      storedRoutes && storedRoutes.fleetMaster && storedRoutes.fleetMaster.title
-        ? storedRoutes.fleetMaster?.title
-        : RESOURCE_LABEL.fleetMaster,
+    title: storedRoutes && storedRoutes.fleetMaster && storedRoutes.fleetMaster.title ? storedRoutes.fleetMaster?.title : RESOURCE_LABEL.fleetMaster,
     path: '/fleet-master'
   },
   fleetMasterDetail: {
-    title:
-      storedRoutes && storedRoutes.fleetMaster && storedRoutes.fleetMaster.title
-        ? storedRoutes.fleetMaster?.title
-        : RESOURCE_LABEL.fleetMaster,
+    title: storedRoutes && storedRoutes.fleetMaster && storedRoutes.fleetMaster.title ? storedRoutes.fleetMaster?.title : RESOURCE_LABEL.fleetMaster,
     path: '/fleet-master/detail'
   },
   job: {
-    title:
-      storedRoutes && storedRoutes.job && storedRoutes.job.title
-        ? storedRoutes.job?.title
-        : RESOURCE_LABEL.job,
+    title: storedRoutes && storedRoutes.job && storedRoutes.job.title ? storedRoutes.job?.title : RESOURCE_LABEL.job,
     path: '/job'
   },
   jobDetail: {
-    title:
-      storedRoutes && storedRoutes.job && storedRoutes.job.title
-        ? storedRoutes.job?.title
-        : RESOURCE_LABEL.job,
+    title: storedRoutes && storedRoutes.job && storedRoutes.job.title ? storedRoutes.job?.title : RESOURCE_LABEL.job,
     path: '/job/detail'
   },
+  fleetReceiver: {
+    title:
+      storedRoutes && storedRoutes.fleetReceiver && storedRoutes.fleetReceiver.title
+        ? storedRoutes.fleetReceiver?.title
+        : RESOURCE_LABEL.fleetReceiver,
+    path: '/fleet-receiver'
+  }
 };
 
 export default routes;
