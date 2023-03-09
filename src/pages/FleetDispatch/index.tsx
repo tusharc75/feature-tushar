@@ -35,16 +35,7 @@ const FleetDispatch = () => {
       });
   };
 
-  const handleDispatch = (card1, card2) => {
-    var fleet = {};
-    var job = {};
-    if (card1?.cardType === 'fleet') {
-      fleet = card1;
-      job = card2;
-    } else {
-      fleet = card2;
-      job = card1;
-    }
+  const handleDispatch = (fleet, job) => {
     setDispatchDialogOpen({ open: true, fleet: fleet, job: job });
   };
 

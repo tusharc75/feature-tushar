@@ -80,16 +80,14 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     flexWrap: 'wrap',
-    margin: '-10px -10px 0 0'
+    margin: '-10px -10px 0 0',
+    justifyContent: 'center'
   },
   singleGauge: {
     maxWidth: '150px',
     flexBasis: '150px',
     padding: '10px 10px 0 0',
-    [theme.breakpoints.up('sm')]: {
-      flexBasis: '33.33333%',
-      maxWidth: '33.33333%'
-    },
+
     [theme.breakpoints.up('md')]: {
       flexBasis: '50%',
       maxWidth: '50%'
@@ -138,14 +136,18 @@ const FleetDispatchBox = ({ data, id, index, moveCard, cardType, handleDispatch 
       item.index = hoverIndex;
     },
     drop: (item: any) => {
-      handleDispatch(item, data);
+      if (cardType === 'fleet') {
+        handleDispatch(data, item?.data);
+      } else {
+        handleDispatch(item?.data, data);
+      }
     }
   });
 
   const [{ isDragging }, drag] = useDrag({
     type: 'move',
     item: () => {
-      return { id, index, cardType };
+      return { id, index, cardType, data };
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging()
