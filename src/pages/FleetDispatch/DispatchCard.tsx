@@ -1,11 +1,9 @@
 import React from 'react';
-import { makeStyles, Typography, Box, Grid } from '@material-ui/core';
-
+import { makeStyles, Typography, Box } from '@material-ui/core';
 import { useDrag, useDrop } from 'react-dnd';
-import { AiFillPropertySafety } from 'react-icons/ai';
 
 const useStyles = makeStyles(() => ({
-    activitybox: {
+    fleetBox: {
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
@@ -13,20 +11,31 @@ const useStyles = makeStyles(() => ({
         margin: '0px 6px 14px',
         borderRadius: '4px',
         border: '1px solid #ebebeb',
-        // boxShadow: 'rgb(23 43 77 / 20%) 0px 1px 1px, rgb(23 43 77 / 20%) 0px 0px 1px',
-        backgroundColor: 'rgb(255, 255, 255)',
-        color: 'rgb(23, 43, 77)',
-        padding: '14px 15px',
+        padding: '15px',
         transition: 'transform .2s, background .3s',
         '&:hover': {
             transform: 'scale(1.02)',
             zIndex: '1'
-            // backgroundColor: 'var(--hover_bg)'
+        }
+    },
+    jobBox: {
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        margin: '0px 6px 14px',
+        borderRadius: '4px',
+        border: '1px solid #ebebeb',
+        padding: '15px',
+        transition: 'transform .2s, background .3s',
+        '&:hover': {
+            transform: 'scale(1.02)',
+            zIndex: '1'
         }
     }
 }));
 
-const FleetDispatchBox = ({ data, id, index, moveCard, type, handleDispatch }) => {
+const FleetDispatchBox = ({ data, id, index, moveCard, cardType, handleDispatch }) => {
 
     const classes = useStyles();
     const ref = React.useRef(null);
@@ -42,7 +51,7 @@ const FleetDispatchBox = ({ data, id, index, moveCard, type, handleDispatch }) =
             if (!ref.current) {
                 return;
             }
-            if (item.type !== type) {
+            if (item.type !== cardType) {
                 return;
             }
             const dragIndex = item.index;
@@ -71,7 +80,7 @@ const FleetDispatchBox = ({ data, id, index, moveCard, type, handleDispatch }) =
     const [{ isDragging }, drag] = useDrag({
         type: 'move',
         item: () => {
-            return { id, index, type };
+            return { id, index, cardType };
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging()
@@ -82,27 +91,26 @@ const FleetDispatchBox = ({ data, id, index, moveCard, type, handleDispatch }) =
     drag(drop(ref));
 
     return (
-        <div ref={ref} data-handler-id={handlerId}  >
-            <Box className={` ${classes.activitybox}`} style={{ opacity }}  >
-                <Grid container>
-                    <Grid item xs={11}>
-                        <Box display="flex" mr="10px">
-                            <Typography
-                                style={{
-                                    textOverflow: 'ellipsis',
-                                    overflow: 'hidden',
-                                    whiteSpace: 'nowrap',
-                                    marginRight: '5px'
-                                }}
-                                variant="subtitle2"
-                            >
-                                {data?.name} - {type}
-                            </Typography>
-                        </Box>
-                    </Grid>
-                </Grid>
-            </Box>
-        </div>
+        <div ref={ref} key={index} >
+            {cardType === "fleet" ?
+                <Box className={classes.fleetBox} style={{ opacity }}  >
+                    <Box mr="10px">
+                        <Typography variant="subtitle2"  >
+                            Fleet Number : {data?.fleetNumber}
+                        </Typography>
+                    </Box>
+                </Box> :
+                <Box className={classes.jobBox} style={{ opacity }}  >
+                    <Box mr="10px">
+                        <Typography variant="subtitle2"  >
+                            Job Number : {data?.jobNumber}
+                        </Typography>
+                        <Typography variant="subtitle2"  >
+                            Asset : {data?.asset?.assetNumber}
+                        </Typography>
+                    </Box>
+                </Box>}
+        </div >
     );
 };
 

@@ -4,14 +4,14 @@ import { useDrop } from 'react-dnd';
 import update from 'immutability-helper';
 import DispatchCard from './DispatchCard';
 
-const DispatchList = ({ activity, type, handleDispatch }) => {
+const DispatchList = ({ activity, cardType, handleDispatch }) => {
 
     const ref = useRef(null);
     const [list, setList] = useState([]);
 
     useEffect(() => {
         setList(activity);
-    }, [activity, type]);
+    }, [activity, cardType]);
 
     const moveCard = useCallback(
         (dragIndex, hoverIndex) => {
@@ -37,19 +37,17 @@ const DispatchList = ({ activity, type, handleDispatch }) => {
 
     return (
         <div ref={ref}>
-            <Box>
-                {list?.map((element, index) => (
-                    <DispatchCard
-                        data={element}
-                        key={element?.id}
-                        id={element?.id}
-                        index={index}
-                        moveCard={moveCard}
-                        type={type}
-                        handleDispatch={handleDispatch}
-                    />
-                ))}
-            </Box>
+            {list?.map((element, index) => (
+                <DispatchCard
+                    data={element}
+                    key={element?.id}
+                    id={element?.id}
+                    index={index}
+                    moveCard={moveCard}
+                    cardType={cardType}
+                    handleDispatch={handleDispatch}
+                />
+            ))}
         </div>
     );
 };
