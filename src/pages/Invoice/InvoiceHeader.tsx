@@ -200,7 +200,7 @@ function InvoiceHeader(props) {
               <>
                 <Button
                   disabled={canDelete}
-                  variant={isMobile ? "text" : "contained"}
+                  variant={isMobile ? "text" : "outlined"}
                   color="default"
                   size="small"
                   onClick={openActions}
