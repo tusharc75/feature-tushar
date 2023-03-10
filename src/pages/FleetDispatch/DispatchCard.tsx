@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
   },
   secondaryText: {
     fontWeight: 400,
-    fontSize: '12px',
+    fontSize: '13px',
     lineHeight: 1.5,
     color: '#5B5B5B',
 
@@ -138,6 +138,9 @@ const FleetDispatchBox = ({ data, id, index, moveCard, cardType, handleDispatch 
       item.index = hoverIndex;
     },
     drop: (item: any) => {
+      if (item?.cardType === cardType) {
+        return;
+      }
       if (cardType === 'fleet') {
         handleDispatch(data, item?.data);
       } else {
@@ -205,14 +208,14 @@ const FleetDispatchBox = ({ data, id, index, moveCard, cardType, handleDispatch 
             </Box>
             <Box>
               <Typography className={classes.primaryText}>{data?.jobNumber}</Typography>
-              <Typography className={classes.secondaryText}>
-                <strong>Asset :</strong> {data?.asset?.assetNumber}
+              <Typography className={classes.primaryText}>
+                <strong>PRS :</strong> {data?.asset?.assetNumber}
               </Typography>
               <Typography className={classes.secondaryText}>
                 <strong>Customer :</strong> {data?.customerContact?.optionLabel}
               </Typography>
               <Typography className={classes.secondaryText}>
-                <strong>Address :</strong> {data?.shippingAddress?.optionLabel}
+                <strong>Location :</strong> {data?.shippingAddress?.optionLabel}
               </Typography>
             </Box>
           </Box>
