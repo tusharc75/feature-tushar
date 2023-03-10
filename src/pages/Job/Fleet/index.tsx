@@ -10,7 +10,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 
-const Material = ({ jobData, renderedFrom, setNextStep }) => {
+const Fleet = ({ jobData, renderedFrom, setNextStep }) => {
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
 
@@ -32,6 +32,7 @@ const Material = ({ jobData, renderedFrom, setNextStep }) => {
         Header: 'Detail',
         minWidth: 300,
         width: 300,
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{row.original?.detail}</p>
@@ -87,10 +88,10 @@ const Material = ({ jobData, renderedFrom, setNextStep }) => {
         Cell: ({ row }) => (row.original.receivedDate ? <p>{moment(row.original.receivedDate).format(dateTimeFormat)}</p> : <NoDataCell />)
       },
       {
-        accessor: 'receivedComment',
+        accessor: 'receiverComment',
         Header: 'Received Comment',
         width: 200,
-        Cell: ({ row }) => (row.original.receivedComment ? <p>{row.original.receivedComment}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row.original.receiverComment ? <p>{row.original.receiverComment}</p> : <NoDataCell />)
       }
     ];
     setColumns(coloum);
@@ -162,4 +163,4 @@ const Material = ({ jobData, renderedFrom, setNextStep }) => {
   );
 };
 
-export default Material;
+export default Fleet;
