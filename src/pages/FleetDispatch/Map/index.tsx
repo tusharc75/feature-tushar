@@ -24,7 +24,6 @@ const MapView = ({ handleClose }) => {
 
     const fetchData = () => {
         axiosInstance().get(`${routes?.fleetMaster.path}`).then(({ data: { data } }) => {
-            console.log(data)
             setFleets(data?.data);
         })
             .catch((error) => {

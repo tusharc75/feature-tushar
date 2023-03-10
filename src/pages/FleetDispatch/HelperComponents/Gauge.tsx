@@ -43,7 +43,6 @@ const getSegmentWidth = (segmentCount) => {
 
 const getPercentage = ({ input, min, max }: { input: number; min: number; max: number }) => {
   const result = (input - min) / (max - min);
-  console.log(result);
   return result;
 };
 
