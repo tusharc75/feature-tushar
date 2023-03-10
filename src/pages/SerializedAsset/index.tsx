@@ -681,7 +681,7 @@ const SerializedAsset = () => {
                     >
                       Delete
                     </MenuItem>
-                    {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && [INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].map((status) => (
+                    {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && [INVENTORY_STATUS.available].map((status) => (
                       <MenuItem
                         onClick={() => {
                           closeActions();
@@ -694,6 +694,24 @@ const SerializedAsset = () => {
                     ))}
                     {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && [...getLocalStorageArrayData(localStorageSelectedRecords)]?.length &&
                       <>
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            handleStatusUpdate(INVENTORY_STATUS.needRepair);
+                          }}
+                          disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![INVENTORY_STATUS.needRepair].includes(o.status)).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
+                        >
+                          {`Status Change - ${INVENTORY_STATUS.needRepair}`}
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            handleStatusUpdate(INVENTORY_STATUS.needRecert);
+                          }}
+                          disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![INVENTORY_STATUS.needRecert].includes(o.status)).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
+                        >
+                          {`Status Change - ${INVENTORY_STATUS.needRecert}`}
+                        </MenuItem>
                         <MenuItem
                           onClick={() => {
                             closeActions();
