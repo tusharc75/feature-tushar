@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Divider, Grid, TextField } from '@material-ui/core';
 import React, { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
@@ -79,19 +79,7 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
                 <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{'Dispatch Fleet Details'}</h2>
             </div>
             <Box marginY={2}>
-                <Grid spacing={3} container>
-                    <Grid item xs={12} sm={6} md={6}>
-                        <TextField
-                            variant="outlined"
-                            type="text"
-                            label="Fleet Number"
-                            fullWidth
-                            margin="dense"
-                            disabled
-                            value={fleet?.fleetNumber}
-                            onChange={(e: any) => { }}
-                        />
-                    </Grid>
+                <Grid spacing={2} container>
                     <Grid item xs={12} sm={6} md={6}>
                         <TextField
                             variant="outlined"
@@ -99,23 +87,47 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
                             label="Job Number"
                             fullWidth
                             margin="dense"
-                            disabled
                             value={job?.jobNumber}
-                            onChange={(e: any) => { }}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
                         <TextField
                             variant="outlined"
                             type="text"
-                            label="Asset"
+                            label="PRS"
                             fullWidth
                             margin="dense"
-                            disabled
                             value={job?.asset?.assetNumber}
-                            onChange={(e: any) => { }}
                         />
                     </Grid>
+                    <Grid item xs={12} sm={6} md={6}>
+                        <TextField
+                            variant="outlined"
+                            type="text"
+                            label="Fleet Number"
+                            fullWidth
+                            margin="dense"
+                            value={fleet?.fleetNumber}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={6}>
+                        <TextField
+                            variant="outlined"
+                            type="text"
+                            label="Location"
+                            fullWidth
+                            margin="dense"
+                            value={job?.shippingAddress?.optionLabel}
+                        />
+                    </Grid>
+                </Grid>
+            </Box>
+            <div className={"detail-box-content"}>
+                <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{'Dispatch Information'}</h2>
+            </div>
+            <Box marginY={2}>
+                <Grid spacing={2} container>
                     <Grid item xs={12} sm={6} md={6}>
                         <FormTypes
                             fieldData={null}
