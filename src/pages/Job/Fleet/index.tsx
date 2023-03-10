@@ -123,10 +123,10 @@ const Material = ({ jobData, renderedFrom, setNextStep }) => {
     const subRows: any = material.filter((e) => e.asset.optionValue === parent.materialId);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.fleet.optionLabel;
-      _subRow.materialId = _subRow.fleet.optionValue;
-      _subRow.dispatchBy = _subRow.dispatchBy.optionLabel;
-      _subRow.receivedBy = _subRow.receivedBy.optionLabel;
+      _subRow.detail = _subRow?.fleet?.optionLabel;
+      _subRow.materialId = _subRow?.fleet?.optionValue;
+      _subRow.dispatchBy = _subRow?.dispatchBy?.optionLabel;
+      _subRow.receivedBy = _subRow?.receivedBy?.optionLabel;
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
