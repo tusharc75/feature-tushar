@@ -11,16 +11,14 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const ManageFleetReceiverDialog = ({ handleClose, handleSucess, data }) => {
+const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
   const [comment, setComment] = useState('');
-  const [dispatchData, setDispatchData] = useState({
-    documents: [],
-    signature: ''
-  });
+  const [dispatchData, setDispatchData] = useState({ documents: [], signature: '' });
 
   const handleReceive = () => {
     setSubmitting(true);
@@ -77,19 +75,7 @@ const ManageFleetReceiverDialog = ({ handleClose, handleSucess, data }) => {
           <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{'Receive Fleet Details'}</h2>
         </div>
         <Box marginY={2}>
-          <Grid spacing={3} container>
-            <Grid item xs={12} sm={6} md={6}>
-              <TextField
-                variant="outlined"
-                type="text"
-                label="Fleet Number"
-                fullWidth
-                margin="dense"
-                disabled
-                value={data.fleet?.optionLabel ?? ''}
-                onChange={(e: any) => {}}
-              />
-            </Grid>
+          <Grid spacing={2} container>
             <Grid item xs={12} sm={6} md={6}>
               <TextField
                 variant="outlined"
@@ -97,23 +83,47 @@ const ManageFleetReceiverDialog = ({ handleClose, handleSucess, data }) => {
                 label="Job Number"
                 fullWidth
                 margin="dense"
-                disabled
-                value={data.job?.optionLabel ?? ''}
-                onChange={(e: any) => {}}
+                value={data?.job?.jobNumber}
               />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
               <TextField
                 variant="outlined"
                 type="text"
-                label="Asset"
+                label="PRS"
                 fullWidth
                 margin="dense"
-                disabled
-                value={data?.asset?.optionLabel ?? ''}
-                onChange={(e: any) => {}}
+                value={data?.asset?.assetNumber}
               />
             </Grid>
+            <Grid item xs={12} sm={6} md={6}>
+              <TextField
+                variant="outlined"
+                type="text"
+                label="Fleet Number"
+                fullWidth
+                margin="dense"
+                value={data?.fleet?.fleetNumber}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={6}>
+              <TextField
+                variant="outlined"
+                type="text"
+                label="Location"
+                fullWidth
+                margin="dense"
+                value={data?.job?.shippingAddress?.optionLabel}
+              />
+            </Grid>
+          </Grid>
+        </Box>
+        <div className={"detail-box-content"}>
+          <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+          <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{'Receiver Information'}</h2>
+        </div>
+        <Box marginY={2}>
+          <Grid spacing={2} container>
             <Grid item xs={12} sm={6} md={6}>
               <FormTypes
                 fieldData={null}
@@ -207,4 +217,4 @@ const ManageFleetReceiverDialog = ({ handleClose, handleSucess, data }) => {
   );
 };
 
-export default ManageFleetReceiverDialog;
+export default ReceiverDialog;

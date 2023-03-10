@@ -62,6 +62,7 @@ const FleetDispatch = () => {
               <Map fontSize="small" color="primary" />
             </IconButton>
             <IconButton
+              className='ml-2'
               size="small"
               onClick={fetchData}
             >
