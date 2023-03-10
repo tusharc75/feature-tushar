@@ -251,15 +251,15 @@ const Quotation = ({
 
     rows?.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
+      parent.detail = parent.type === 'serializedAsset'
         ? parent.serializedAssetDetail?.assetNumber
         : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
             ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
-      parent.description =
+            : parent.packageDetail?.packageName;
+      parent.description = parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.product?.productDescription :
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'

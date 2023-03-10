@@ -2,18 +2,15 @@ import { Box, Grid, makeStyles, Typography } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
-import { DndProvider } from 'react-dnd';
-import { isMobile, isTablet } from 'react-device-detect';
-import { TouchBackend } from 'react-dnd-touch-backend';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ManageFleetReceiverDialog from './ReceiverDialog';
 import moment from 'moment';
 import { dateFormat } from 'src/constants/helpers';
+import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   fleetBox: {
     cursor: 'pointer',
     display: 'flex',
@@ -23,14 +20,56 @@ const useStyles = makeStyles(() => ({
     borderRadius: '4px',
     border: '1px solid #ebebeb',
     padding: '15px',
+    backgroundColor: "#F8FFFC",
     transition: 'transform .2s, background .3s',
     '&:hover': {
       transform: 'scale(1.02)',
       zIndex: '1'
     }
-  }
+  },
+  contentContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    [theme.breakpoints.down('md')]: {
+      marginBottom: '20px'
+    }
+  },
+  truckIcon: {
+    transform: 'rotateY(180deg)'
+  },
+  primaryText: {
+    fontWeight: 700,
+    fontSize: '14px',
+    lineHeight: '1.28',
+    color: '#2A3042',
+    marginBottom: '14px'
+  },
+  secondaryText: {
+    fontWeight: 400,
+    fontSize: '13px',
+    lineHeight: 1.5,
+    color: '#5B5B5B',
+
+    '& strong': {
+      fontWeight: 600,
+      color: '#2A3042'
+    },
+    marginBottom: '4px',
+    '&:last-of-type': {
+      marginBottom: 0
+    }
+  },
+  icon: {
+    fontSize: '20px',
+    display: 'inline-block !important',
+    verticalAlign: 'bottom',
+    marginRight: '10px'
+  },
 }));
+
+
 const FleetReceiver = () => {
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -67,23 +106,32 @@ const FleetReceiver = () => {
         {!loading ? (
           fleets?.length > 0 ? (
             <Grid container spacing={2}>
-              <Grid item md={6} xs={12} sm={4} style={{ paddingTop: '0px' }}>
-                {fleets?.map((data, index) => (
-                  <Box
-                    className={classes.fleetBox}
-                    onClick={() => {
-                      setReceiverDialogOpen({ open: true, fleet: data });
-                    }}
-                  >
-                    <Box mr="10px">
-                      <Typography variant="subtitle2">Fleet Number : {data?.fleet?.optionLabel ?? ''}</Typography>
-                      <Typography variant="subtitle2">Asset : {data?.asset?.optionLabel ?? ''}</Typography>
-                      <Typography variant="subtitle2">Dispatch Date : {moment(data?.dispatchDate).format(dateFormat)}</Typography>
-                      <Typography variant="subtitle2">Status : {data?.status ?? ''}</Typography>
+              {fleets?.map((data, index) => (
+                <Grid item md={6} xs={12} sm={4}>
+                  <Box key={index} className={classes.fleetBox} onClick={() => { setReceiverDialogOpen({ open: true, fleet: data }) }}  >
+                    <Box className={classes.contentContainer}>
+                      <Box sx={{ flexBasis: '20px' }}>
+                        <LocalShippingIcon className={`${classes.truckIcon} ${classes.icon}`} />
+                      </Box>
+                      <Box sx={{ flexBasis: 'calc(100% - 35px)' }}>
+                        <Typography className={classes.primaryText}>Fleet : {data?.fleet?.fleetNumber}</Typography>
+                        <Typography className={classes.primaryText}>
+                          <strong>PRS :</strong> {data?.asset?.assetNumber}
+                        </Typography>
+                        <Typography className={classes.primaryText}>
+                          <strong>Job :</strong> {data?.job?.jobNumber}
+                        </Typography>
+                        <Typography className={classes.secondaryText}>
+                          <strong>Customer :</strong> {data?.job?.customerAccount?.optionLabel}
+                        </Typography>
+                        <Typography className={classes.secondaryText}>
+                          <strong>Location :</strong> {data?.job?.billingAddress?.optionLabel}
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
-                ))}
-              </Grid>
+                </Grid>
+              ))}
             </Grid>
           ) : (
             <Box p={2} height={500} bgcolor="white">
@@ -108,7 +156,7 @@ const FleetReceiver = () => {
           data={receiverDialogOpen?.fleet}
         />
       )}
-    </Box>
+    </Box >
   );
 };
 
