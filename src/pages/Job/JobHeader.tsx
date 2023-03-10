@@ -11,6 +11,7 @@ import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { MdAdd, MdSort, MdFilterList } from 'react-icons/md';
 import routes from 'src/components/Helpers/Routes';
+import { useHistory } from 'react-router-dom';
 
 function JobHeader(props) {
   const {
@@ -32,6 +33,7 @@ function JobHeader(props) {
   const [filter, setFilter] = useState(options[0].key);
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const [open, setOpen] = useState(false);
+  const history = useHistory();
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -115,7 +117,7 @@ function JobHeader(props) {
               />
 
               <Button
-               onClick={handleOpen}
+                onClick={handleOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
@@ -157,6 +159,28 @@ function JobHeader(props) {
             })}
           </ToggleButtonGroup>
         )}
+        {permissions?.fleetDispatch?.isRead &&
+          <Box ml={1}>
+            <ToggleButtonGroup size="small" >
+              <ToggleButton onClick={() => {
+                history.push(`${routes.fleetDispatch.path}`)
+              }}>
+                <span>{routes.fleetDispatch.title}</span>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+        }
+        {permissions?.fleetReceiver?.isRead &&
+          <Box ml={1}>
+            <ToggleButtonGroup size="small" >
+              <ToggleButton onClick={() => {
+                history.push(`${routes.fleetReceiver.path}`)
+              }}>
+                <span>{routes.fleetReceiver.title}</span>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+        }
         {children}
       </Grid>
       <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
@@ -173,7 +197,7 @@ function JobHeader(props) {
           </Grid>
 
           <Grid style={{ display: 'flex', gap: '5px' }}>
-            {permissions?.isCreate && permissions?.isUpdate && (
+            {permissions?.job?.isCreate && permissions?.job?.isUpdate && (
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
                 color="primary"
@@ -185,42 +209,42 @@ function JobHeader(props) {
                 {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
               </Button>
             )}
-            {permissions?.isDelete && (
-                <>
-                  <Button
-                    disabled={canDelete}
-                    variant={isMobile ? "text" : "outlined"}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    className={isMobile ? "mobile_button" : styles.action_submit_btn}
-                  >
-                    {isMobile ? "" :  "Actions" } <ExpandMore/>
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+            {permissions?.job?.isDelete && (
+              <>
+                <Button
+                  disabled={canDelete}
+                  variant={isMobile ? "text" : "outlined"}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                >
+                  {isMobile ? "" : "Actions"} <ExpandMore />
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      showConfirmBox(null);
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
                   >
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        showConfirmBox(null);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </Menu>
-                </>
-              )}
+                    Delete
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
           </Grid>
         </Box>
       </Grid>
