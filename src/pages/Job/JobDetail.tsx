@@ -19,6 +19,8 @@ import ManageJobDialog from './ManageJobDialog';
 import Material from './Material';
 import Steps from '../RentalManagement/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import { jobProcessSteps } from 'src/constants/helpers';
+import Fleet from "./Fleet"
 
 const JobDetail = () => {
   const renderedFrom = camelCase(routes?.job.title);
@@ -36,7 +38,6 @@ const JobDetail = () => {
   const [tabValue, setTabValue] = useState(0);
   const [currentStep, setCurrentStep] = useState(null);
   const [nextStep, setNextStep] = useState(true);
-  const [jobProcessSteps, setJobProcessSteps] = useState(['Add']);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
 
@@ -212,10 +213,18 @@ const JobDetail = () => {
             setStepFullScreen={() => setStepFullScreen(true)}
           />
            <ContentFullScreen title={jobProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-          {jobData && (
+          { currentStep === 0 && jobData && (
             <Material
               renderedFrom={`${renderedFrom}_grid-1`}
               allowedToEdit={allowedToEdit && permissions?.job?.isUpdate ? true : false}
+              jobData={jobData}
+              setNextStep={setNextStep}
+            />
+          )}
+
+          {currentStep === 1 && jobData && (
+              <Fleet
+              renderedFrom={`${renderedFrom}_grid-1`}
               jobData={jobData}
               setNextStep={setNextStep}
             />

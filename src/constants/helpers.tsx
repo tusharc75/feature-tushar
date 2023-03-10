@@ -47,6 +47,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Invoice'];
 export const invoiceProcessSteps = ['Add Products', 'Ready To Invoice'];
+export const jobProcessSteps = ['Add', 'Fleet'];
 export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Send To Customer', 'End'];
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
