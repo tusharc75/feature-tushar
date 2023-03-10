@@ -35,18 +35,21 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import ManageJobDialog from './ManageJobDialog';
 
 let jobTimeout;
-const JobType = [
-  {
-    key: 'All Job',
-    value: 1
-  },
-  {
-    key: 'My Job',
-    value: 2
-  }
-];
+
 
 const Job = () => {
+
+  const JobType = [
+    {
+      key: `All ${routes?.job.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes?.job.title}`,
+      value: 2
+    }
+  ];
+
   const renderedFrom = camelCase(routes?.job.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -421,7 +424,7 @@ const Job = () => {
             columns={columns}
             dispatch={dispatch}
             searchVal={search}
-            permissions={permissions?.job}
+            permissions={permissions}
             onCreate={clickCreateNew}
             showConfirmBox={showConfirmBox}
             canDelete={getLocalStorageArrayData(localStorageSelectedRecords)?.length === 0}

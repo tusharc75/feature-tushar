@@ -120,7 +120,6 @@ function QuoteHeader(props) {
             id="demo-customized-button"
             aria-controls="demo-customized-menu"
             aria-haspopup="true"
-            // aria-expanded={open ? 'true' : undefined}
             color="secondary"
             variant="text"
             disableElevation
@@ -140,7 +139,6 @@ function QuoteHeader(props) {
             id="demo-customized-button"
             aria-controls="demo-customized-menu"
             aria-haspopup="true"
-            // aria-expanded={open ? 'true' : undefined}
             variant="text"
             color="secondary"
             disableElevation
@@ -192,8 +190,6 @@ function QuoteHeader(props) {
             />
           </Grid>
 
-
-
           <Grid style={{ display: "flex", gap: "5px" }}>
             {QuotePermissions.isCreate && (
               <Button
@@ -211,7 +207,7 @@ function QuoteHeader(props) {
               <>
                 <Button
                   disabled={canDelete}
-                  variant={isMobile && !isTablet ? "text" : "contained"}
+                  variant={isMobile && !isTablet ? "text" : "outlined"}
                   color="default"
                   size="small"
                   onClick={openActions}
