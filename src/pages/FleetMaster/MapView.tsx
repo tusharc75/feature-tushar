@@ -88,6 +88,7 @@ const MapView = ({ handleClose, lat, lng }) => {
                         <MarkerClusterer>
                             {(clusterer) => (
                                 <>
+                                
                                     {data?.map((data: any, index) => (
                                         <Marker
                                             key={Math.random()}
