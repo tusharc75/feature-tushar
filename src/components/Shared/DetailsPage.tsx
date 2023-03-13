@@ -90,7 +90,8 @@ const unlinkFields = [
   sidebarResource.budget,
   sidebarResource.productCategory,
   sidebarResource.productTemplate,
-  sidebarResource.priceTemplate
+  sidebarResource.priceTemplate,
+  sidebarResource.termsAndConditions
 ];
 const Details = (props: DetailProps) => {
   const { setToastConfig } = useContext(CustomToastContext);
@@ -179,16 +180,16 @@ const Details = (props: DetailProps) => {
         typeof values[input.fieldName] === 'string'
           ? values[input.fieldName]
           : filterOptions.length
-          ? filterOptions.map((d) => d.optionLabel).join(', ')
-          : '';
+            ? filterOptions.map((d) => d.optionLabel).join(', ')
+            : '';
       text = value ? value : '-';
     } else if (input.type === 'freeStyleMultiSelect') {
       const value =
         values[input.fieldName].length && Array.isArray(values[input.fieldName])
           ? values[input.fieldName].map((d) => d).join(', ')
           : typeof values[input.fieldName] === 'string'
-          ? values[input.fieldName]
-          : '';
+            ? values[input.fieldName]
+            : '';
 
       text = value ? value : '-';
     } else if (input.type === 'dropDown') {
@@ -251,8 +252,8 @@ const Details = (props: DetailProps) => {
       fieldData?.hasOwnProperty('lookup') &&
       fieldData?.lookup &&
       permissions &&
-      permissions[camelCase(fieldData?.lookupResource)]?.isRead &&
-      !unlinkFields.includes(fieldData?.lookupResource)
+      (fieldData?.fieldName === "termsConditions" ? permissions["termsAndConditions"]?.isRead : permissions[camelCase(fieldData?.lookupResource)]?.isRead)
+      // && !unlinkFields.includes(fieldData?.lookupResource)
     ) {
       if (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') {
         return (
@@ -263,13 +264,13 @@ const Details = (props: DetailProps) => {
                   <React.Fragment key={_val.optionValue}>
                     <Link
                       to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`}
-                      // onMouseEnter={(e) =>
-                      //   getPopoverData(
-                      //     e,
-                      //     fieldData.lookupResource,
-                      //     _val.optionValue
-                      //   )
-                      // }
+                    // onMouseEnter={(e) =>
+                    //   getPopoverData(
+                    //     e,
+                    //     fieldData.lookupResource,
+                    //     _val.optionValue
+                    //   )
+                    // }
                     >
                       <span className={`text-truncate link`}>
                         {_val.optionLabel}
@@ -285,17 +286,17 @@ const Details = (props: DetailProps) => {
               )
             ) : data[fieldData.fieldName] ? (
               <Link
-                to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]}`}
-                // onMouseEnter={(e) =>
-                //   getPopoverData(
-                //     e,
-                //     fieldData.lookupResource,
-                //     val[fieldData.fieldName]
-                //   )
-                // }
+                to={unlinkFields.includes(fieldData?.lookupResource) ? `/${kebabCase(fieldData.lookupResource)}?id=${val[fieldData.fieldName]}` : `/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]}`}
+              // onMouseEnter={(e) =>
+              //   getPopoverData(
+              //     e,
+              //     fieldData.lookupResource,
+              //     val[fieldData.fieldName]
+              //   )
+              // }
               >
                 <span className={`text-truncate link`}>
-                  {data[fieldData.fieldName].optionLabel}
+                  {data[fieldData.fieldName].optionLabel || value}
                   {data[fieldData.fieldName]?.staticData?.approved && data[fieldData.fieldName]?.staticData?.approved === true ? (
                     <FcApproval className={classes.approvalIcon} title="Approved" size={20} />
                   ) : null}
@@ -346,7 +347,7 @@ const Details = (props: DetailProps) => {
               {fieldData.type === 'email' && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
             </>
           ) : (
-            <span className={`text-truncate `}> {value} </span>
+            <span className={`text-truncate `}> {value} 21</span>
           )}
           {fieldData.type === 'mobileNumber' && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
         </Typography>
@@ -411,36 +412,36 @@ const Details = (props: DetailProps) => {
                               {renderData(initialVals, field.fieldData)}
                               {field.fieldData.type === 'fileUpload'
                                 ? initialVals[field.fieldData.fieldName] &&
-                                  (isDownloading ? (
-                                    <Box display="flex" alignItems="center">
-                                      {downloadProgress === 100 ? 'Downloaded' : 'Downloading'}
+                                (isDownloading ? (
+                                  <Box display="flex" alignItems="center">
+                                    {downloadProgress === 100 ? 'Downloaded' : 'Downloading'}
 
-                                      <Box marginLeft={1} position="relative" display="inline-flex">
-                                        <CircularProgress size={30} variant="determinate" value={downloadProgress} />
-                                        <Box
-                                          top={0}
-                                          left={0}
-                                          bottom={0}
-                                          right={0}
-                                          position="absolute"
-                                          display="flex"
-                                          alignItems="center"
-                                          justifyContent="center"
-                                        >
-                                          <Typography variant="caption" component="div" color="textSecondary">{`${downloadProgress}%`}</Typography>
-                                        </Box>
+                                    <Box marginLeft={1} position="relative" display="inline-flex">
+                                      <CircularProgress size={30} variant="determinate" value={downloadProgress} />
+                                      <Box
+                                        top={0}
+                                        left={0}
+                                        bottom={0}
+                                        right={0}
+                                        position="absolute"
+                                        display="flex"
+                                        alignItems="center"
+                                        justifyContent="center"
+                                      >
+                                        <Typography variant="caption" component="div" color="textSecondary">{`${downloadProgress}%`}</Typography>
                                       </Box>
                                     </Box>
-                                  ) : (
-                                    <IconButton
-                                      title={`Download ${initialVals[field.fieldData.fieldName]}`}
-                                      disabled={isDownloading}
-                                      size="small"
-                                      onClick={() => downloadFile(normalizeValues(initialVals, field.fieldData))}
-                                    >
-                                      <GetApp />
-                                    </IconButton>
-                                  ))
+                                  </Box>
+                                ) : (
+                                  <IconButton
+                                    title={`Download ${initialVals[field.fieldData.fieldName]}`}
+                                    disabled={isDownloading}
+                                    size="small"
+                                    onClick={() => downloadFile(normalizeValues(initialVals, field.fieldData))}
+                                  >
+                                    <GetApp />
+                                  </IconButton>
+                                ))
                                 : null}{' '}
                             </Box>
                           )}
