@@ -79,7 +79,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     } else {
                         if (disableEdit) {
                             fieldsDataForUpdate?.forEach((e) => {
-                                if (['supplierAccount', 'warehouse', 'currency']?.includes(e?.fieldName)) {
+                                if (['warehouse', 'currency']?.includes(e?.fieldName)) {
                                     e.disableOnEdit = true
                                 }
                             })

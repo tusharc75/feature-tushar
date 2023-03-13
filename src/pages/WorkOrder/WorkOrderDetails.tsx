@@ -106,7 +106,10 @@ const WorkOrderDetails = () => {
     axiosInstance()
       .get(`${routes.workOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        if (user?.role?.selectedEntity?.superAdminAccess) {
+          isAllowedToEdit = true
+        }
         setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
         setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false);
         if (permissions?.workOrder?.isUpdate && openEdit === 'true') {
