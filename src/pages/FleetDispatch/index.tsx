@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -11,6 +11,9 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import DispatchDialog from './DispatchDialog';
+import { Map } from '@material-ui/icons';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import MapView from './Map';
 
 const FleetDispatch = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -18,6 +21,7 @@ const FleetDispatch = () => {
   const [fleets, setFleets] = useState(null);
   const [jobs, setJobs] = useState(null);
   const [dispatchDialogOpen, setDispatchDialogOpen] = useState({ open: false, fleet: null, job: null });
+  const [showMapView, setShowMapView] = useState(false)
 
   useEffect(() => {
     fetchData();
@@ -47,6 +51,25 @@ const FleetDispatch = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
+        <Box className='d-flex justify-content-end align-items-center mb-4'>
+          <Box className="d-flex align-items-center">
+            <IconButton
+              size="small"
+              onClick={() => {
+                setShowMapView(true)
+              }}
+            >
+              <Map fontSize="small" color="primary" />
+            </IconButton>
+            <IconButton
+              className='ml-2'
+              size="small"
+              onClick={fetchData}
+            >
+              <RefreshIcon fontSize="small" color="primary" />
+            </IconButton>
+          </Box>
+        </Box>
         {fleets && jobs ? (
           <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
             <Grid container spacing={2}>
@@ -76,6 +99,25 @@ const FleetDispatch = () => {
             job={dispatchDialogOpen.job}
           />
         )}
+        {dispatchDialogOpen.open && (
+          <DispatchDialog
+            handleSucess={() => {
+              setDispatchDialogOpen({ open: false, fleet: null, job: null });
+              fetchData();
+            }}
+            handleClose={() => {
+              setDispatchDialogOpen({ open: false, fleet: null, job: null });
+            }}
+            fleet={dispatchDialogOpen.fleet}
+            job={dispatchDialogOpen.job}
+          />
+        )}
+        {showMapView &&
+          <MapView
+            handleClose={() => {
+              setShowMapView(false)
+            }}
+          />}
       </Box>
     </Box>
   );

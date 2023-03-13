@@ -38,7 +38,7 @@ const ReceivingAsset = ({
   const [receiveDialog, setReceiveDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectProductDialog, setRejectProductDialog] = useState(null);
-  const [historyDialog, setHistoryDialog] = useState({ open: false, product: '', productName: '' });
+  const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
   const [inventoryHistory, setInventoryHistory] = useState([]);
 
   const [rowsData, setRowsData] = useState(null);
@@ -282,7 +282,7 @@ const ReceivingAsset = ({
                       size="small"
                       aria-label="History"
                       onClick={() => {
-                        setHistoryDialog({ open: true, product: row?.original?.productId, productName: row?.original?.detail });
+                        setHistoryDialog({ open: true, _id: row?.original?._id, product: row?.original?.productId, productName: row?.original?.detail });
                       }}
                     >
                       <HistoryIcon fontSize="small" color={'primary'} />
@@ -467,9 +467,9 @@ const ReceivingAsset = ({
       )}
       {historyDialog.open && (
         <History
-          handleClose={() => setHistoryDialog({ open: false, product: '', productName: '' })}
+          handleClose={() => setHistoryDialog({ open: false, _id: '', product: '', productName: '' })}
           productName={historyDialog.productName}
-          inventoryHistory={inventoryHistory?.filter((e) => e.product === historyDialog.product)}
+          inventoryHistory={inventoryHistory?.filter((e) => e._id === historyDialog._id && e.product === historyDialog.product)}
         />
       )}
     </>

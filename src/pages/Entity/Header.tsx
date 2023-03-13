@@ -150,7 +150,7 @@ const EntityHeader = (props) => {
               <>
                 <Button
                   className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
-                  variant={isMobile && !isTablet ? "text" : "contained"}
+                  variant={isMobile && !isTablet ? "text" : "outlined"}
                   color="default"
                   size="small"
                   onClick={openActions}

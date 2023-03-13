@@ -47,6 +47,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Invoice'];
 export const invoiceProcessSteps = ['Add Products', 'Ready To Invoice'];
+export const jobProcessSteps = ['Add', 'Fleet'];
 export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Send To Customer', 'End'];
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
@@ -340,6 +341,7 @@ export const RESOURCE_LABEL = {
   resourceLogs: `Resource Logs`,
   fleetMaster: `Fleet Master`,
   job: 'Job',
+  fleetReceiver: 'Fleet Receiver'
 };
 
 export const CHILD_RESOURCE = {
@@ -841,21 +843,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1874,11 +1876,11 @@ export const ACTIVITY_RESOURCE = {
   serviceOrder: 'serviceOrder',
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
-  fieldTicket: 'fieldTicket',
+  fieldTicket: 'fieldTicket'
 };
 
 export const LOG_RESOURCE = {
-  serializedAsset: sidebarResource.serializedAsset,
+  serializedAsset: sidebarResource.serializedAsset
 };
 
 export const REPORT_LIST = [
@@ -2024,8 +2026,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'customer-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'supplier-account':
@@ -2035,8 +2038,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'supplier-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'lead':
@@ -2321,10 +2325,10 @@ export const WORK_ORDER_STATUS = {
 };
 
 export const IRT_APPROVER_STATUS = {
-  send: "Email Sent",
-  approved: "Approved",
-  declined: "Declined"
-}
+  send: 'Email Sent',
+  approved: 'Approved',
+  declined: 'Declined'
+};
 
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
@@ -2382,8 +2386,5 @@ export const ECOM_SECTIONS = [
 export const TOOLTIP_MESSAGE = {
   add: "You don't have permissions to add",
   edit: "You don't have permissions to edit",
-  remove: "You don't have permissions to remove",
-}
-
-
-
+  remove: "You don't have permissions to remove"
+};

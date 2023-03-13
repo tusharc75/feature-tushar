@@ -232,7 +232,7 @@ function PackageHeader(props) {
                             <>
                                 <Button
                                     disabled={canDelete}
-                                    variant={isMobile && !isTablet ? "text" : "contained"}
+                                    variant={isMobile && !isTablet ? "text" : "outlined"}
                                     color="default"
                                     size="small"
                                     onClick={openActions}

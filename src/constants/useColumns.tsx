@@ -47,9 +47,10 @@ export const detailPagePath = {
 export const hasDetailPageAsPopup = {
     subMarketSegment: routes?.marketSegment?.path,
     marketSegment: routes?.marketSegment?.path,
-    productCategory: routes?.productCategory?.path
+    productCategory: routes?.productCategory?.path,
+    termsConditions: routes?.termsAndConditions?.path
 }
-export const popupResources = ["Product Category", "Market Segment", "Warehouse"]
+export const popupResources = ["Product Category", "Market Segment", "Warehouse","Terms & Conditions"]
 
 export const disabledColumns = {
     [routes.rentalManagementDetail.title]: [],
