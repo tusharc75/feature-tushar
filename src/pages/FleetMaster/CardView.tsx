@@ -1,10 +1,12 @@
 import { Box, Grid, IconButton, makeStyles, Tooltip, Typography } from '@material-ui/core';
 import { Fragment, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useData } from 'src/StateProvider/Provider';
 import { Map } from '@material-ui/icons';
 import MapView from './MapView';
+import routes from 'src/components/Helpers/Routes';
 
 const useStyles = makeStyles((theme) => ({
     cardBox: {
@@ -14,7 +16,8 @@ const useStyles = makeStyles((theme) => ({
         position: 'relative',
         padding: '15px',
         paddingBottom: '35px',
-        height: '100%'
+        height: '100%',
+        cursor: 'pointer'
     },
     text: {
         fontSize: '14px',
@@ -31,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
 
 const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, setShowDeleteConfirmBox }) => {
     const classes = useStyles();
+    const history = useHistory();
 
     const {
         state: { permissions }
@@ -49,7 +53,9 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                     data.map((fleetMaster, index) => {
                         return (
                             <Grid item lg={4} md={4} sm={6} xs={12} key={index}>
-                                <Box className={`${classes.cardBox}`}>
+                                <Box className={`${classes.cardBox}`} onClick={(e) => {
+                                    history.push(`${routes.fleetMasterDetail.path}/${fleetMaster?._id}`);
+                                }}>
                                     <Typography className={classes.text}><strong>Fleet Number :</strong> {fleetMaster?.fleetNumber}</Typography>
                                     <Typography className={classes.text}><strong>Current Location :</strong> {fleetMaster?.currentLocation?.optionLabel}</Typography>
                                     <Box className={classes.icons}>
@@ -58,7 +64,8 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                                                 size="small"
                                                 aria-label="Map"
                                                 style={{ marginRight: '8px' }}
-                                                onClick={() => {
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
                                                     setMapView({
                                                         open: true,
                                                         lat: fleetMaster?.currentLocation?.latitude,
@@ -74,7 +81,8 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                                                 <IconButton
                                                     size="small"
                                                     aria-label="Clone"
-                                                    onClick={() => {
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
                                                         setFleetMasterId(fleetMaster?._id);
                                                         setOpen({ open: true, isClone: true });
                                                     }}
@@ -94,7 +102,8 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                                             <Tooltip title="Delete">
                                                 <IconButton
                                                     aria-label="Delete"
-                                                    onClick={() => {
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
                                                         setDeleteRecord(fleetMaster);
                                                         setShowDeleteConfirmBox(true);
                                                     }}

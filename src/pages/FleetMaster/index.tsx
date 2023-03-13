@@ -299,7 +299,7 @@ const FleetMaster = () => {
                                     setViewType(1)
                                 }}
                             >
-                                <ViewListIcon color={viewType === 1 ? 'primary' : 'disabled'} />
+                                <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
                             </IconButton>
                             <IconButton
                                 size="small"
@@ -308,7 +308,7 @@ const FleetMaster = () => {
                                     setViewType(2)
                                 }}
                             >
-                                <AppsIcon color={viewType === 2 ? 'primary' : 'disabled'} />
+                                <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
                             </IconButton>
                         </Grid>
                         <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
@@ -391,7 +391,18 @@ const FleetMaster = () => {
                     </Grid>
                 </div>
                 {
-                    viewType === 1 && <>
+                    viewType === 1 &&
+                    <CardView
+                        data={cardViewData}
+                        fields={columns}
+                        setFleetMasterId={setFleetMasterId}
+                        setOpen={setOpen}
+                        setDeleteRecord={setDeleteRecord}
+                        setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+                    />
+                }
+                {
+                    viewType === 2 && <>
                         {
                             Object.keys(frameWorkComponent).length > 0 ? (
                                 isMobile && !isTablet ? (
@@ -451,17 +462,6 @@ const FleetMaster = () => {
                             ) : null
                         }
                     </>
-                }
-                {
-                    viewType === 2 &&
-                    <CardView
-                        data={cardViewData}
-                        fields={columns}
-                        setFleetMasterId={setFleetMasterId}
-                        setOpen={setOpen}
-                        setDeleteRecord={setDeleteRecord}
-                        setShowDeleteConfirmBox={setShowDeleteConfirmBox}
-                    />
                 }
 
                 {showDeleteConfirmBox && (
