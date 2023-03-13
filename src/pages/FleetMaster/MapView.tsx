@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, CircularProgress, Dialog } from '@material-ui/core';
-import { GoogleMap, Marker } from '@react-google-maps/api';
-import routes from 'src/components/Helpers/Routes';
+import { DirectionsRenderer, GoogleMap, Marker, LoadScript } from '@react-google-maps/api';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
