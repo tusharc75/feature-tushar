@@ -47,6 +47,21 @@ function CalendarView() {
         estimateEndDate: moment().endOf('month').format('MM/DD/YYYY')
     })
 
+    const [month, setMonth] = useState({
+        startDate: moment().startOf('month').format('MM/DD/YYYY'),
+        endDate: moment().endOf('month').format('MM/DD/YYYY')
+    })
+    const [week, setWeek] = useState({
+        startDate: moment().startOf('month').format('MM/DD/YYYY'),
+        endDate: moment().endOf('month').format('MM/DD/YYYY')
+    })
+    const [day, setDay] = useState({
+        startDate: moment().startOf('month').format('MM/DD/YYYY'),
+        endDate: moment().endOf('month').format('MM/DD/YYYY')
+    })
+
+    const [renderCount, setRenderCount] = useState(0)
+
     const [updateCount, setUpdateCount] = useState(0)
 
     const anchorRef = React.useRef<HTMLDivElement>(null);
@@ -58,6 +73,25 @@ function CalendarView() {
         product: 'Product',
         asset: 'Asset'
     }
+
+    useEffect(() => {
+        if (view === 'month') {
+            setMonth({
+                startDate: dateRange.estimateStartDate,
+                endDate: dateRange.estimateEndDate,
+            })
+        } else if (view === 'week') {
+            setWeek({
+                startDate: dateRange.estimateStartDate,
+                endDate: dateRange.estimateEndDate,
+            })
+        } else if (view === 'day') {
+            setDay({
+                startDate: dateRange.estimateStartDate,
+                endDate: dateRange.estimateEndDate,
+            })
+        }
+    }, [dateRange])
 
     useEffect(() => {
         axiosInstance()
@@ -202,6 +236,29 @@ function CalendarView() {
         },
         [setView]
     );
+
+    useEffect(() => {
+        if (renderCount !== 0) {
+            if (view === 'month') {
+                setDateRange({
+                    estimateStartDate: month.startDate,
+                    estimateEndDate: month.endDate
+                })
+            } else if (view === 'week') {
+                setDateRange({
+                    estimateStartDate: week.startDate,
+                    estimateEndDate: week.endDate
+                })
+            } else if (view === 'day') {
+                setDateRange({
+                    estimateStartDate: day.startDate,
+                    estimateEndDate: day.endDate
+                })
+            }
+        } else {
+            setRenderCount(renderCount + 1)
+        }
+    }, [view])
 
     const handleClose = (event: React.MouseEvent<Document, MouseEvent>) => {
         if (anchorRef.current && anchorRef.current.contains(event.target as HTMLElement)) {
