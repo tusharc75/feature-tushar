@@ -6,7 +6,7 @@ import CustomAgGrid, { reducer, intialState } from "src/components/AgGridCompone
 import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
 import CustomContainer from "src/components/CustomContainer";
 import routes from "src/components/Helpers/Routes";
-import { gridLoadingTimeout, LOG_RESOURCE } from "src/constants/helpers";
+import { dateFormat, gridLoadingTimeout, LOG_RESOURCE } from "src/constants/helpers";
 import { DateTimeRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom';
 import VisibilityIcon from '@material-ui/icons/Visibility';
@@ -14,6 +14,7 @@ import HtmlTooltip from "src/components/CustomTooltipTitle";
 import ChangesDialog from "./ChangesDialog";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
+import moment from "moment";
 
 const ResourceLogs = () => {
 
@@ -84,14 +85,31 @@ const ResourceLogs = () => {
                 var changes = [];
                 u?.changes?.forEach((e) => {
                     if (e?.fieldLabel) {
-                        if (e?.oldValue && e?.newValue) {
-                            changes.push(`${e.fieldLabel} changed from ${e?.oldValue} to ${e?.newValue}`)
+                        var oldValue = e?.oldValue;
+                        var newValue = e?.newValue;
+
+                        if (e?.type === "date") {
+                            if (oldValue && moment(oldValue)?.isValid) {
+                                oldValue = moment(oldValue).format(dateFormat)
+                            }
+                            if (newValue && moment(newValue)?.isValid) {
+                                newValue = moment(newValue).format(dateFormat)
+                            }
+                        }
+                        else if (e?.type === "dropDown" && e?.lookup) {
+                            oldValue = oldValue?.label;
+                            newValue = newValue?.label;
+                        }
+
+                        if (oldValue && newValue) {
+                            changes.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`)
                         }
                         else {
-                            changes.push(`${e.fieldLabel} changed to ${e?.newValue}`)
+                            changes.push(`${e.fieldLabel} changed to ${newValue}`)
                         }
                     }
                 })
+                u.changeLogs = changes;
                 u.changes = changes?.toString();
                 return u;
             });
@@ -160,7 +178,7 @@ const ResourceLogs = () => {
         return <>
             <HtmlTooltip title="View Changes">
                 <IconButton
-                    onClick={() => setOpenDialog({ open: true, changes: params?.data?.changes })}
+                    onClick={() => setOpenDialog({ open: true, changes: params?.data?.changeLogs })}
                 >
                     <VisibilityIcon color="primary" fontSize='small' />
                 </IconButton>
