@@ -6,6 +6,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
 const ChangesDialog = ({ open, onClose, changes }) => {
+  
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   return (
@@ -37,12 +38,11 @@ const ChangesDialog = ({ open, onClose, changes }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {changes &&
-                  changes.split(',')?.map((item: any, index: any) => (
-                    <TableRow key={index}>
-                      <TableCell>{item}</TableCell>
-                    </TableRow>
-                  ))}
+                {changes && changes?.map((item: any, index: any) => (
+                  <TableRow key={index}>
+                    <TableCell>{item}</TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>

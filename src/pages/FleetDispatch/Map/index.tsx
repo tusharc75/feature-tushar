@@ -16,8 +16,7 @@ const containerStyle = {
 };
 
 const MapView = ({ handleClose }) => {
-  const customIcon = <LocalShippingIcon style={{ color: 'red', fontSize: 30 }} />;
-  console.log(customIcon);
+  
   const [fleets, setFleets] = useState(null);
   const [map, setMap] = useState(null);
   const [activeMarker, setActiveMarker] = useState(null);
