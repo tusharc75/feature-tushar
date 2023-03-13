@@ -347,7 +347,7 @@ const Details = (props: DetailProps) => {
               {fieldData.type === 'email' && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
             </>
           ) : (
-            <span className={`text-truncate `}> {value} 21</span>
+            <span className={`text-truncate `}> {value}</span>
           )}
           {fieldData.type === 'mobileNumber' && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
         </Typography>
