@@ -29,7 +29,9 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import styles from '../Leads/Header.module.scss';
 import ManageFleetMaster from './ManageFleetMaster';
-
+import CardView from './CardView';
+import AppsIcon from '@material-ui/icons/Apps';
+import ViewListIcon from '@material-ui/icons/ViewList';
 
 const FleetMaster = () => {
 
@@ -51,6 +53,9 @@ const FleetMaster = () => {
     const [columns, setColumns] = useState([]);
     const [gridApi, setGridApi] = useState(null);
     const { getColumnData } = useColumns();
+
+    const [viewType, setViewType] = useState(1);
+    const [cardViewData, setCardViewData] = useState([])
 
 
     const fetchGridColumns = () => {
@@ -88,6 +93,7 @@ const FleetMaster = () => {
         axiosInstance()
             .get(`${routes?.fleetMaster.path}${queryString}`)
             .then(({ data: { data } }) => {
+                setCardViewData(data?.data)
                 let rows = data?.data?.map((u: any) => {
                     let finalObject: any = prepareDataForGrid(u);
                     finalObject['canDelete'] = permissions?.fleetMaster?.isDelete;
@@ -285,7 +291,26 @@ const FleetMaster = () => {
             <CustomContainer>
                 <div className="header-panel">
                     <Grid container className={styles.filter_side_container}>
-                        <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
+                        <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+                            <IconButton
+                                size="small"
+                                aria-label="Clone"
+                                onClick={() => {
+                                    setViewType(1)
+                                }}
+                            >
+                                <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
+                            </IconButton>
+                            <IconButton
+                                size="small"
+                                aria-label="Clone"
+                                onClick={() => {
+                                    setViewType(2)
+                                }}
+                            >
+                                <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
+                            </IconButton>
+                        </Grid>
                         <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
                             <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                                 <Grid>
@@ -365,62 +390,80 @@ const FleetMaster = () => {
                         </Grid>
                     </Grid>
                 </div>
-                {Object.keys(frameWorkComponent).length > 0 ? (
-                    isMobile && !isTablet ? (
-                        <CustomSwipableList
-                            allowSelection={true}
-                            allowSwipe={true}
-                            permissions={permissions.fleetMaster}
-                            primaryField={columns?.find((d) => d.primaryField)}
-                            onClick={(data) => {
-                                setFleetMasterId(data.id);
-                                setOpen({ open: true, isClone: false });
-                            }}
-                            dataRows={dataRows}
-                            selectedRecords={selectedRecords}
-                            dispatch={dispatch}
-                            onEdit={(data) => {
-                                setFleetMasterId(data.id);
-                                setOpen({ open: true, isClone: false });
-                            }}
-                            extraParamsToCheckDelete={true}
-                            onDelete={(data) => {
-                                setDeleteRecord(data);
-                                setShowDeleteConfirmBox(true);
-                            }}
-                            rowCount={rowCount}
-                            page={page}
-                            loading={loading}
-                            additionalDetails={[]}
-                            owerCollaboratorInitialsOrImages=""
-                            onCreate={false}
-                            showClone={true}
-                            onClone={(data) => {
-                                setFleetMasterId(data.id);
-                                setOpen({ open: true, isClone: true });
-                            }}
-                            chips={[]}
-                            renderedFrom={renderedFrom}
-                        />
-                    ) : (
-                        <CustomAgGrid
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameWorkComponent}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            allowAction={true}
-                            loading={loading}
-                            renderedFrom={renderedFrom}
-                            refreshGrid={fetchFleetMasterData}
-                            showOnlyShowFilteredRecordSwitch={true}
-                        />
-                    )
-                ) : null}
+                {
+                    viewType === 1 &&
+                    <CardView
+                        data={cardViewData}
+                        fields={columns}
+                        setFleetMasterId={setFleetMasterId}
+                        setOpen={setOpen}
+                        setDeleteRecord={setDeleteRecord}
+                        setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+                    />
+                }
+                {
+                    viewType === 2 && <>
+                        {
+                            Object.keys(frameWorkComponent).length > 0 ? (
+                                isMobile && !isTablet ? (
+                                    <CustomSwipableList
+                                        allowSelection={true}
+                                        allowSwipe={true}
+                                        permissions={permissions.fleetMaster}
+                                        primaryField={columns?.find((d) => d.primaryField)}
+                                        onClick={(data) => {
+                                            setFleetMasterId(data.id);
+                                            setOpen({ open: true, isClone: false });
+                                        }}
+                                        dataRows={dataRows}
+                                        selectedRecords={selectedRecords}
+                                        dispatch={dispatch}
+                                        onEdit={(data) => {
+                                            setFleetMasterId(data.id);
+                                            setOpen({ open: true, isClone: false });
+                                        }}
+                                        extraParamsToCheckDelete={true}
+                                        onDelete={(data) => {
+                                            setDeleteRecord(data);
+                                            setShowDeleteConfirmBox(true);
+                                        }}
+                                        rowCount={rowCount}
+                                        page={page}
+                                        loading={loading}
+                                        additionalDetails={[]}
+                                        owerCollaboratorInitialsOrImages=""
+                                        onCreate={false}
+                                        showClone={true}
+                                        onClone={(data) => {
+                                            setFleetMasterId(data.id);
+                                            setOpen({ open: true, isClone: true });
+                                        }}
+                                        chips={[]}
+                                        renderedFrom={renderedFrom}
+                                    />
+                                ) : (
+                                    <CustomAgGrid
+                                        columns={columns}
+                                        dataRows={dataRows}
+                                        frameworkComponents={frameWorkComponent}
+                                        setGridApi={setGridApi}
+                                        dispatch={dispatch}
+                                        rowCount={rowCount}
+                                        limit={limit}
+                                        pageSizes={pageSizes}
+                                        page={page}
+                                        allowAction={true}
+                                        loading={loading}
+                                        renderedFrom={renderedFrom}
+                                        refreshGrid={fetchFleetMasterData}
+                                        showOnlyShowFilteredRecordSwitch={true}
+                                    />
+                                )
+                            ) : null
+                        }
+                    </>
+                }
+
                 {showDeleteConfirmBox && (
                     <ConfirmationDialog
                         open={showDeleteConfirmBox}
