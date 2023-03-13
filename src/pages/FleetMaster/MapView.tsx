@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, CircularProgress, Dialog } from '@material-ui/core';
-import { DirectionsRenderer, GoogleMap, Marker, LoadScript } from '@react-google-maps/api';
+import { DirectionsRenderer, GoogleMap, Marker, LoadScript, MarkerClusterer, Polyline, InfoWindow } from '@react-google-maps/api';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -13,6 +13,25 @@ const containerStyle = {
 };
 
 const MapView = ({ handleClose, lat, lng }) => {
+
+    const data = [
+        {
+            lat: 34.847115,
+            lng: -106.186151
+        },
+        {
+            lat: 41.958956,
+            lng: -87.235257
+        },
+        {
+            lat: 46.514608,
+            lng: -110.527067
+        },
+        {
+            lat: 36.681231,
+            lng: -118.795964
+        },
+    ]
 
     if (!window.google || typeof window.google !== 'object') return <div>Loading...</div>;
 
@@ -66,6 +85,37 @@ const MapView = ({ handleClose, lat, lng }) => {
                         zoom={4}
                     >
                         <Marker position={new google.maps.LatLng(lat, lng)} />
+                        <MarkerClusterer>
+                            {(clusterer) => (
+                                <>
+                                    {data?.map((data: any, index) => (
+                                        <Marker
+                                            key={Math.random()}
+                                            label={{
+                                                text: (index + 1)?.toString(),
+                                                fontWeight: 'bold',
+                                                color: 'white',
+                                                fontSize: '14px'
+                                            }}
+                                            // onClick={() => {
+                                            //     setSelectedService(data);
+                                            // }}
+                                            position={new google.maps.LatLng(data?.lat, data?.lng)}
+                                            clusterer={clusterer}
+                                        />
+                                    ))}
+                                    <Polyline
+                                        path={data?.map((data: any) => new google.maps.LatLng(data?.lat, data?.lng))}
+                                        options={{
+                                            strokeColor: '#0000FF',
+                                            strokeOpacity: 1,
+                                            strokeWeight: 2,
+                                            icons: [{ icon: { path: 'M -2,-2 2,0 M 2,-2 -2,0', strokeOpacity: 1, scale: 1 } }]
+                                        }}
+                                    />
+                                </>
+                            )}
+                        </MarkerClusterer>
                     </GoogleMap>
                 </Box>
             ) : (
