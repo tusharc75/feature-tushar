@@ -15,12 +15,14 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import TabPanel from '../../components/TabPanel';
 import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
+import {TbFileInvoice} from 'react-icons/tb'
 import ManageJobDialog from './ManageJobDialog';
 import Material from './Material';
 import Steps from '../RentalManagement/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { jobProcessSteps } from 'src/constants/helpers';
 import Fleet from "./Fleet"
+import Invoice from "./Invoice"
 
 const JobDetail = () => {
   const renderedFrom = camelCase(routes?.job.title);
@@ -39,7 +41,6 @@ const JobDetail = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [nextStep, setNextStep] = useState(true);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-
 
   const {
     state: { permissions, user }
@@ -190,6 +191,17 @@ const JobDetail = () => {
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
           />
+           <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+              <TbFileInvoice className="mr-1" fontSize="inherit" /> Invoice
+            </div>
+            }
+            value={2}
+            aria-controls="a11y-tabpanel-1"
+            id="a11y-tab-1"
+          />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -230,6 +242,11 @@ const JobDetail = () => {
             />
           )}
           </ContentFullScreen>
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+            <Invoice 
+            renderedFrom={`${renderedFrom}_grid-1`}
+            />
         </TabPanel>
       </Box>
       {showConfirmBox && (
