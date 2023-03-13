@@ -455,6 +455,7 @@ export default function CustomAgGrid({
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
             selectedRecords={selectedRecords}
           /> */}
+          {/* SHOW ONLY SELECTED BUTTON */}
 
           <CustomGridFilterHeader
             showFilters={showFilters}
@@ -471,6 +472,9 @@ export default function CustomAgGrid({
             isClientSideGrid={isClientSideGrid}
             dispatch={dispatch}
           />
+          {showOnlyShowFilteredRecordSwitch && (
+            <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '0 0 10px' }} />
+          )}
 
           <div className="table-container-v1">
             <div id="grid-listing" className="ag-theme-material ag-grid-listing-grid">
@@ -634,46 +638,31 @@ export default function CustomAgGrid({
             </div>
           </div>
 
-          <div
-            className="tableFooter"
-            style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between', gap: '15px' }}
-          >
-            {/* SHOW ONLY SELECTED BUTTON */}
-            {showOnlyShowFilteredRecordSwitch && (
-              <ShowOnlySelected
-                dispatch={dispatch}
-                renderedFrom={renderedFrom}
-                selectedRecords={selectedRecords}
-                style={{ padding: '30px 0 14px' }}
-              />
-            )}
+          {allowPagination && (
+            <TablePagination
+              component="div"
+              count={rowCount}
+              page={page}
+              className="agPagination pagination-v1"
+              onPageChange={(event, newPage) => {
+                dispatch({ type: 'pageChange', page: newPage });
 
-            {allowPagination && (
-              <TablePagination
-                component="div"
-                count={rowCount}
-                page={page}
-                className="agPagination pagination-v1"
-                onPageChange={(event, newPage) => {
-                  dispatch({ type: 'pageChange', page: newPage });
+                if (currentGridApi) {
+                  currentGridApi.paginationGoToPage(newPage);
+                }
+              }}
+              rowsPerPage={limit}
+              onRowsPerPageChange={(event) => {
+                dispatch({ type: 'pageSizeChange', limit: event.target.value });
 
-                  if (currentGridApi) {
-                    currentGridApi.paginationGoToPage(newPage);
-                  }
-                }}
-                rowsPerPage={limit}
-                onRowsPerPageChange={(event) => {
-                  dispatch({ type: 'pageSizeChange', limit: event.target.value });
-
-                  if (currentGridApi) {
-                    currentGridApi.paginationGoToPage(0);
-                    currentGridApi.paginationSetPageSize(event.target.value);
-                  }
-                }}
-                rowsPerPageOptions={pageSizes}
-              />
-            )}
-          </div>
+                if (currentGridApi) {
+                  currentGridApi.paginationGoToPage(0);
+                  currentGridApi.paginationSetPageSize(event.target.value);
+                }
+              }}
+              rowsPerPageOptions={pageSizes}
+            />
+          )}
         </div>
       </div>
     </>
