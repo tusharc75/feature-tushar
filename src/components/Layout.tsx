@@ -91,7 +91,7 @@ const Layout = ({ children, width }) => {
     });
   };
 
-  const getHelpers = (helpers: StoreHelpers) => {};
+  const getHelpers = (helpers: StoreHelpers) => { };
 
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status, type, index, action, lifecycle, step } = data;
@@ -196,26 +196,24 @@ const Layout = ({ children, width }) => {
 
   return (
     <div ref={contentRef}>
-      {['local', 'development'].includes(process.env.REACT_APP_ENV) && (
-        <Joyride
-          continuous
-          callback={handleJoyrideCallback}
-          getHelpers={getHelpers}
-          run={tour.start}
-          disableScrollParentFix={true}
-          scrollOffset={0}
-          stepIndex={tour.stepIndex}
-          scrollToFirstStep={true}
-          showProgress={true}
-          showSkipButton={false}
-          steps={grapSteps()}
-          styles={{
-            options: {
-              zIndex: 10000
-            }
-          }}
-        />
-      )}
+      <Joyride
+        continuous
+        callback={handleJoyrideCallback}
+        getHelpers={getHelpers}
+        run={tour.start}
+        disableScrollParentFix={true}
+        scrollOffset={0}
+        stepIndex={tour.stepIndex}
+        scrollToFirstStep={true}
+        showProgress={true}
+        showSkipButton={false}
+        steps={grapSteps()}
+        styles={{
+          options: {
+            zIndex: 10000
+          }
+        }}
+      />
       <Sidebar toggleDrawer={toggleDrawer} setToggleDrawer={setToggleDrawer} />
       <Toolbar />
       <Box display="flex">
