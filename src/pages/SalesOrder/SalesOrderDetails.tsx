@@ -19,7 +19,7 @@ import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import Steps from '../RentalManagement/Steps';
-import Productpackage from './Productpackage';
+import Material from './Material';
 import AdditionalCost from './AdditionalCost';
 import SerializedAsset from './SerializedAsset';
 import LoadingTicket from './LoadingTicket';
@@ -319,10 +319,9 @@ const SalesOrderDetails = () => {
           />
           <ContentFullScreen title={salesOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && salesOrderData && (
-              <Productpackage
+              <Material
                 salesOrderData={salesOrderData}
                 setNextStep={setNextStep}
-                currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
               />
@@ -330,31 +329,14 @@ const SalesOrderDetails = () => {
             {currentStep === 1 && salesOrderData && (
               <AdditionalCost salesOrderData={salesOrderData} setNextStep={setNextStep} renderedFrom={`${renderedFrom}_grid-2`} />
             )}
-            {/* {currentStep === 2 && salesOrderData && (
-                      <SerializedAsset
-                        salesOrderData={salesOrderData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        renderedFrom={`${renderedFrom}_grid-3`}  
-                      />
-                    )}
-                    {currentStep === 3 && salesOrderData && (
-                      <LoadingTicket
-                        fetchSalesOrderData={fetchSalesOrderData}
-                        salesOrderData={salesOrderData}
-                        currentStep={currentStep}
-                        setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-4`}  
-                      />
-                    )} */}
             {currentStep === 2 && salesOrderData && (
               <Invoice
                 salesOrderData={salesOrderData}
                 setNextStep={setNextStep}
-                fetchSalesOrderData={fetchSalesOrderData}
                 updateJobStatus={updateJobStatus}
                 statusOptions={statusOptions}
                 renderedFrom={`${renderedFrom}_grid-5`}
+                stepFullScreen={stepFullScreen}
               />
             )}
           </ContentFullScreen>
