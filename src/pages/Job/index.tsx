@@ -33,6 +33,7 @@ import JobHeader from './JobHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ManageJobDialog from './ManageJobDialog';
+import CardView from './CardView';
 
 let jobTimeout;
 
@@ -79,6 +80,7 @@ const Job = () => {
   const { isOffline } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState([]);
   const [locationKeys, setLocationKeys] = useState([]);
+  const [viewType, setViewType] = useState(1)
 
   const { getColumnData } = useColumns();
 
@@ -153,7 +155,7 @@ const Job = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-        fetchJob();
+      fetchJob();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
@@ -300,7 +302,7 @@ const Job = () => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
         finalObject['allowedToEdit'] = permissions?.job?.isUpdate;
-        finalObject['canDelete'] = permissions?.job?.isDelete && finalObject?.ownerId === user?.user?._id ;
+        finalObject['canDelete'] = permissions?.job?.isDelete && finalObject?.ownerId === user?.user?._id;
         return finalObject;
       });
       if (appendRows) {
@@ -429,68 +431,85 @@ const Job = () => {
             showConfirmBox={showConfirmBox}
             canDelete={getLocalStorageArrayData(localStorageSelectedRecords)?.length === 0}
             filters={filters}
-           />
+            viewType={viewType}
+            setViewType={setViewType}
+          />
         </div>
-        {Object.keys(frameworkComponents).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions?.job}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                history.push(`${routes.jobDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                history.push(`${routes.jobDetail.path}/${data._id}?openEdit=true`);
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setDeleteRecord(data._id);
-                setIsConformDialogVisible(true);
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              chips={[
-                {
-                  icon: <SiStatuspage />,
-                  label: 'Status: ',
-                  field: 'status'
-                }
-              ]}
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setShowManageJobDialog({ open: true, isClone: true, idToClone: data._id });
-              }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={100}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchJob}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={RESOURCE_LABEL.job}
-            />
-          )
-        ) : null}
 
+        {
+          viewType === 1 &&
+          <CardView
+            jobs={dataRows}
+            setShowManageJobDialog={setShowManageJobDialog}
+            setSingleJobDelete={setSingleJobDelete}
+            dispatch={dispatch}
+            loading={loading}
+          />
+        }
+        {
+          viewType === 2 &&
+          <>
+            {Object.keys(frameworkComponents).length > 0 ? (
+              isMobile && !isTablet ? (
+                <CustomSwipableList
+                  allowSelection={true}
+                  allowSwipe={true}
+                  permissions={permissions?.job}
+                  primaryField={columns?.find((d) => d.primaryField)}
+                  onClick={(data) => {
+                    history.push(`${routes.jobDetail.path}/${data._id}`);
+                  }}
+                  dataRows={dataRows}
+                  selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
+                  dispatch={dispatch}
+                  onEdit={(data) => {
+                    history.push(`${routes.jobDetail.path}/${data._id}?openEdit=true`);
+                  }}
+                  extraParamsToCheckDelete={true}
+                  onDelete={(data) => {
+                    setDeleteRecord(data._id);
+                    setIsConformDialogVisible(true);
+                  }}
+                  rowCount={rowCount}
+                  page={page}
+                  loading={loading}
+                  chips={[
+                    {
+                      icon: <SiStatuspage />,
+                      label: 'Status: ',
+                      field: 'status'
+                    }
+                  ]}
+                  onCreate={false}
+                  showClone={true}
+                  onClone={(data) => {
+                    setShowManageJobDialog({ open: true, isClone: true, idToClone: data._id });
+                  }}
+                  renderedFrom={renderedFrom}
+                />
+              ) : (
+                <CustomAgGrid
+                  columns={columns}
+                  dataRows={dataRows}
+                  frameworkComponents={frameworkComponents}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={rowCount}
+                  limit={limit}
+                  pageSizes={pageSizes}
+                  page={page}
+                  actionWidth={100}
+                  loading={loading}
+                  renderedFrom={renderedFrom}
+                  refreshGrid={fetchJob}
+                  showOnlyShowFilteredRecordSwitch={true}
+                  showFilters={true}
+                  resource={RESOURCE_LABEL.job}
+                />
+              )
+            ) : null}
+          </>
+        }
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -501,9 +520,8 @@ const Job = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.jobNumber ? 'Job' : 'Jobs'}   ${
-              deleteRecord.jobNumber || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.jobNumber ? 'Job' : 'Jobs'}   ${deleteRecord.jobNumber || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

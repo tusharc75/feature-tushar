@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
+import { Box, Grid, MenuItem, Button, Menu, IconButton } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
@@ -12,6 +12,8 @@ import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { MdAdd, MdSort, MdFilterList } from 'react-icons/md';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
+import AppsIcon from '@material-ui/icons/Apps';
+import ViewListIcon from '@material-ui/icons/ViewList';
 
 function JobHeader(props) {
   const {
@@ -27,7 +29,9 @@ function JobHeader(props) {
     selectedType,
     columns,
     dispatch,
-    filters
+    filters,
+    viewType,
+    setViewType
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(options[0].key);
@@ -181,6 +185,26 @@ function JobHeader(props) {
             </ToggleButtonGroup>
           </Box>
         }
+        <Box ml={1}>
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setViewType(1)
+            }}
+          >
+            <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
+          </IconButton>
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setViewType(2)
+            }}
+          >
+            <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
+          </IconButton>
+        </Box>
         {children}
       </Grid>
       <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>

@@ -1,18 +1,24 @@
-import { useState, useEffect, Fragment } from 'react';
-import { Box, IconButton } from '@material-ui/core';
+import { useState, useEffect, Fragment, useContext } from 'react';
+import { Box, Button, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import { dateTimeFormat } from '../../../constants/helpers';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
+import { AiFillFilePdf } from 'react-icons/ai';
+import { IoMdDownload } from 'react-icons/io';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const Fleet = ({ jobData, renderedFrom, setNextStep }) => {
+  const toastConfig = useContext(CustomToastContext);
+
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
+  const [pdfLoading, setPdfLoading] = useState(null);
 
   useEffect(() => {
     fetchFields();
@@ -134,8 +140,84 @@ const Fleet = ({ jobData, renderedFrom, setNextStep }) => {
     return subRows;
   };
 
+  const handleViewPdf = (type, PDFType) => {
+    setPdfLoading(type);
+    axiosInstance()
+      .get(`/pdf/${jobData._id}?resource=Job`)
+      .then(({ data }) => {
+        axiosInstance()
+          .get(`user/download?fileName=${data.data.fileName}`, {
+            responseType: 'blob'
+          })
+          .then(({ data }) => {
+            setPdfLoading(null);
+            if (type === 'Download') {
+              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', `Quotation-${jobData.name}.pdf`);
+              document.body.appendChild(link);
+              link.click();
+            } else {
+              const file = new Blob([data], { type: 'application/pdf' });
+              const fileURL = URL.createObjectURL(file);
+              const pdfWindow = window.open();
+              pdfWindow.location.href = fileURL;
+              toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+            }
+          })
+          .catch((err) => {
+            setPdfLoading(null);
+            toastConfig.setToastConfig(err);
+          });
+      })
+      .catch((err) => {
+        setPdfLoading(null);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
   return (
     <Fragment>
+      <Box
+        display="flex"
+        mt={1}
+        mb={2}
+        sx={{ flexWrap: isMobile ? 'wrap' : 'no-wrap', justifyContent: 'flex-end' }}
+        style={{ gap: isMobile ? '8px' : '0px' }}
+      >
+        <Button
+          variant="outlined"
+          className="btn-outline-v1"
+          color="primary"
+          type="button"
+          size="small"
+          startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
+          disabled={pdfLoading}
+          onClick={(e) => {
+            handleViewPdf('view', 'PDF');
+          }}
+        >
+          {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : pdfLoading === 'view' ? 'Please wait...' : 'Preview'}
+        </Button>
+        <>
+          <Box mx={0.5} />
+          <Button
+            className="btn-outline-v1"
+            variant="outlined"
+            color="primary"
+            type="button"
+            size="small"
+            startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
+            disabled={pdfLoading}
+            onClick={(e) => {
+              handleViewPdf('download', 'PDF');
+            }}
+          >
+            {isMobile && !isTablet ? <IoMdDownload size={20} /> : pdfLoading === 'download' ? 'Please wait...' : 'Download'}
+          </Button>
+        </>
+      </Box>
       <Box mt={1}>
         {columns && rowsData ? (
           <Box p="6px" zIndex={5} width={'100%'}>
