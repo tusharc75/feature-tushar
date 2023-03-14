@@ -710,7 +710,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           renderedFrom={`${renderedFrom}_grid-sub-1`}
           reference="purchaseOrder"
           onSuccess={handleAddProduct}
-          serialized={!user?.user?.brandPolicy?.showSerializedProduct}
           productId={null}
           assignedProducts={[]}
         />

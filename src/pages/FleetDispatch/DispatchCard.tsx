@@ -183,9 +183,9 @@ const FleetDispatchBox = ({ data, id, index, moveCard, cardType, handleDispatch 
             </Grid>
             <Grid item xs={12} md={6} lg={5}>
               <Box className={classes.gaugeContainer}>
-                <Gauges className={classes.singleGauge} max={200} value={data?.temperature} lebel="TEMP" suffix={<>°F</>} />
-                <Gauges className={classes.singleGauge} max={1000} value={data?.pressure} lebel="PRESSURE" suffix={<>PSI</>} />
-                <Gauges className={classes.singleGauge} max={1000} value={data?.volume} lebel="VOLUME" suffix={<>MMcf</>} />
+                <Gauges className={classes.singleGauge} max={200} value={data?.temperature} lebel="TEMP" suffix={<> °F</>} />
+                <Gauges className={classes.singleGauge} max={1000} value={data?.pressure} lebel="PRESSURE" suffix={<> PSI</>} />
+                <Gauges className={classes.singleGauge} max={1000} value={data?.volume} lebel="VOLUME" suffix={<> MMcf</>} />
               </Box>
             </Grid>
           </Grid>
