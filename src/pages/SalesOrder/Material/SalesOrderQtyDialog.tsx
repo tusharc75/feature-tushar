@@ -72,7 +72,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
           pricingMethodArray.push([...element?.[`${element.type}Detail`]?.pricingMethod])
         }
       });
-      let unit: any = unitArray?.shift().filter(function (v) {
+      let unit: any = unitArray?.shift()?.filter(function (v) {
         return unitArray?.every(function (a) {
           return a.indexOf(v) !== -1;
         });
