@@ -123,6 +123,7 @@ const FleetMasterDetail = () => {
                         {permissions?.fleetMaster?.isDelete && (
                             <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                         )}
+                        <ActivityButton referenceId={fleetMasterData?._id} resource={ACTIVITY_RESOURCE.fleetMaster}/>
                     </Box>
                 </Box>
             </Box>

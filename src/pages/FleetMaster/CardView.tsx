@@ -7,6 +7,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { Map } from '@material-ui/icons';
 import MapView from './MapView';
 import routes from 'src/components/Helpers/Routes';
+import Gauges from 'src/components/Gauges';
 
 const useStyles = makeStyles((theme) => ({
     cardBox: {
@@ -29,6 +30,29 @@ const useStyles = makeStyles((theme) => ({
         position: 'absolute',
         right: 0,
         bottom: 0,
+    },
+    gaugeContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        maxWidth: '300px',
+        paddingTop: '15px',
+        paddingBottom: '10px',
+    },
+    singleGauge: {
+        maxWidth: '150px',
+        flexBasis: '150px',
+        padding: '10px 10px 0 0',
+
+        [theme.breakpoints.up('md')]: {
+            flexBasis: '50%',
+            maxWidth: '50%'
+        },
+        [theme.breakpoints.up('lg')]: {
+            flexBasis: '33.333%',
+            maxWidth: '33.333%'
+        }
     }
 }));
 
@@ -53,11 +77,17 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                     data.map((fleetMaster, index) => {
                         return (
                             <Grid item lg={4} md={4} sm={6} xs={12} key={index}>
-                                <Box className={`${classes.cardBox}`} onClick={(e) => {
-                                    history.push(`${routes.fleetMasterDetail.path}/${fleetMaster?._id}`);
-                                }}>
+                                <Box className={`${classes.cardBox}`}
+                                    onClick={(e) => {
+                                        history.push(`${routes.fleetMasterDetail.path}/${fleetMaster?._id}`);
+                                    }}>
                                     <Typography className={classes.text}><strong>Fleet Number :</strong> {fleetMaster?.fleetNumber}</Typography>
                                     <Typography className={classes.text}><strong>Current Location :</strong> {fleetMaster?.currentLocation?.optionLabel}</Typography>
+                                    <Box className={classes.gaugeContainer}>
+                                        <Gauges className={classes.singleGauge} max={200} value={fleetMaster?.temperature} lebel="TEMP" suffix={<>°F</>} />
+                                        <Gauges className={classes.singleGauge} max={1000} value={fleetMaster?.pressure} lebel="PRESSURE" suffix={<>PSI</>} />
+                                        <Gauges className={classes.singleGauge} max={1000} value={fleetMaster?.volume} lebel="VOLUME" suffix={<>MMcf</>} />
+                                    </Box>
                                     <Box className={classes.icons}>
                                         <Tooltip title="Map">
                                             <IconButton
