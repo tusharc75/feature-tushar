@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, makeStyles, Tooltip, Typography } from '@material-ui/core';
+import { Box, Chip, Grid, IconButton, makeStyles, Tooltip, Typography } from '@material-ui/core';
 import { Fragment, useEffect, useState, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -6,6 +6,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import Gauges from 'src/components/Gauges';
 
 const useStyles = makeStyles((theme) => ({
     cardBox: {
@@ -28,10 +29,34 @@ const useStyles = makeStyles((theme) => ({
         position: 'absolute',
         right: 0,
         bottom: 0,
+    },
+    gaugeContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        maxWidth: '400px',
+        paddingTop: '15px',
+        paddingBottom: '10px'
+    },
+    singleGauge: {
+        maxWidth: '150px',
+        flexBasis: '150px',
+        padding: '10px 10px 0 0',
+
+        [theme.breakpoints.up('md')]: {
+            flexBasis: '50%',
+            maxWidth: '50%'
+        },
+        [theme.breakpoints.up('lg')]: {
+            flexBasis: '33.33%',
+            maxWidth: '33.33%'
+        }
     }
 }));
 
 const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, loading }) => {
+
     const classes = useStyles();
     const history = useHistory();
 
@@ -64,7 +89,7 @@ const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, 
                     <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
             ) :
-                <Box pt={3} >
+                <Box mt={3} >
                     {jobs?.length > 0 ?
                         <Grid container spacing={2}>
                             {jobs.map((job, index) => {
@@ -75,6 +100,21 @@ const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, 
                                         }}>
                                             <Typography className={classes.text}><strong>Job Number :</strong> {job?.jobNumber}</Typography>
                                             <Typography className={classes.text}><strong>Customer Account :</strong> {job?.customerAccount}</Typography>
+                                            <Box className={classes.gaugeContainer}>
+                                                <Gauges
+                                                    className={classes.singleGauge}
+                                                    max={1000}
+                                                    colors={["#39EA75"]}
+                                                    value={parseInt((Math.random() * 1000)?.toFixed(0))}
+                                                    lebel="JOB TOTAL" suffix={<> MMcf</>} />
+                                                <Gauges
+                                                    className={classes.singleGauge}
+                                                    max={100}
+                                                    colors={["#2AC656"]}
+                                                    value={parseInt((Math.random() * 10)?.toFixed(0))}
+                                                    lebel="TOTAL FLEET" suffix={<></>} />
+                                            </Box>
+                                            {parseInt((Math.random() * 10)?.toFixed(0)) % 2 === 0 ? <Chip color="primary" label="Fleet Required" /> : null}
                                             <Box className={classes.icons}>
                                                 {permissions?.job?.isCreate ? (
                                                     <Tooltip title="Clone">
@@ -96,7 +136,6 @@ const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, 
                                                         </IconButton>
                                                     </Tooltip>
                                                 )}
-
                                                 {job?.canDelete ? (
                                                     <Tooltip title="Delete">
                                                         <IconButton
@@ -132,6 +171,8 @@ const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, 
                         </Box>
                     }
                 </Box>}
+
+
         </div>
     );
 };
