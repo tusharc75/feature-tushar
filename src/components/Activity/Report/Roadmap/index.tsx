@@ -6,9 +6,9 @@ import moment from 'moment';
 
 import { GetRoadmap } from '../../../../axios/activity';
 
-import Calander from './Calander';
+import Calendar from './Calendar';
 import ActivityList from './ActivityList';
-import CalanderList from './CalanderList';
+import CalendarList from './CalendarList';
 import Loader from '../../../../components/Loader';
 import { isMobile, isTablet } from 'react-device-detect';
 
@@ -119,11 +119,10 @@ function Roadmap({ type, filter }) {
             </div>
           </Box>
           <Box id="scrollDayLiner" onScroll={onscroll} border={1} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
-            <Calander calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
-
+            <Calendar calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
             <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
               <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
-                <CalanderList
+                <CalendarList
                   fetchRoadmap={fetchRoadmap}
                   type={type}
                   activity={activity}
