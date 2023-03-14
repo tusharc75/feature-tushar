@@ -244,9 +244,7 @@ const JobDetail = () => {
           </ContentFullScreen>
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
-          <Invoice
-            renderedFrom={`${renderedFrom}_grid-1`}
-          />
+          <Invoice />
         </TabPanel>
       </Box>
       {showConfirmBox && (
