@@ -15,14 +15,15 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import TabPanel from '../../components/TabPanel';
 import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
-import {TbFileInvoice} from 'react-icons/tb'
+import { TbFileInvoice } from 'react-icons/tb'
 import ManageJobDialog from './ManageJobDialog';
 import Material from './Material';
 import Steps from '../RentalManagement/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { jobProcessSteps } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, jobProcessSteps } from 'src/constants/helpers';
 import Fleet from "./Fleet"
 import Invoice from "./Invoice"
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const JobDetail = () => {
   const renderedFrom = camelCase(routes?.job.title);
@@ -121,8 +122,8 @@ const JobDetail = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${routes.job.path}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   useEffect(() => {
@@ -139,21 +140,20 @@ const JobDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.job?.isUpdate && allowedToEdit && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className="btn-outline-v1"
-                    onClick={handleOpenUpdateDialog}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.job?.isDelete && allowedToDelete && (
-                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                )}
-              </>
+            {permissions?.job?.isUpdate && allowedToEdit && (
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                className="btn-outline-v1"
+                onClick={handleOpenUpdateDialog}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+              >
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              </Button>
+            )}
+            {permissions?.job?.isDelete && allowedToDelete && (
+              <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+            )}
+            <ActivityButton referenceId={jobData?._id} resource={ACTIVITY_RESOURCE.job} />
           </Box>
         </Box>
       </Box>
@@ -173,8 +173,8 @@ const JobDetail = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-              <FaWpforms className="mr-1" fontSize="inherit" /> Header
-            </div>
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
             }
             value={0}
             aria-controls="a11y-tabpanel-0"
@@ -184,19 +184,19 @@ const JobDetail = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-            </div>
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
             }
             value={1}
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
           />
-           <Tab
+          <Tab
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-              <TbFileInvoice className="mr-1" fontSize="inherit" /> Invoice
-            </div>
+                <TbFileInvoice className="mr-1" fontSize="inherit" /> Invoice
+              </div>
             }
             value={2}
             aria-controls="a11y-tabpanel-1"
@@ -213,8 +213,8 @@ const JobDetail = () => {
               <DetailsPage data={jobData} fields={fields} />
             )}
           </Box>
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>  
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
           <Steps
             isNextStep={false}
             nextStep={nextStep}
@@ -224,29 +224,29 @@ const JobDetail = () => {
             isStepEnded={false}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
-           <ContentFullScreen title={jobProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-          { currentStep === 0 && jobData && (
-            <Material
-              renderedFrom={`${renderedFrom}_grid-1`}
-              allowedToEdit={allowedToEdit && permissions?.job?.isUpdate ? true : false}
-              jobData={jobData}
-              setNextStep={setNextStep}
-            />
-          )}
+          <ContentFullScreen title={jobProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            {currentStep === 0 && jobData && (
+              <Material
+                renderedFrom={`${renderedFrom}_grid-1`}
+                allowedToEdit={allowedToEdit && permissions?.job?.isUpdate ? true : false}
+                jobData={jobData}
+                setNextStep={setNextStep}
+              />
+            )}
 
-          {currentStep === 1 && jobData && (
+            {currentStep === 1 && jobData && (
               <Fleet
-              renderedFrom={`${renderedFrom}_grid-1`}
-              jobData={jobData}
-              setNextStep={setNextStep}
-            />
-          )}
+                renderedFrom={`${renderedFrom}_grid-1`}
+                jobData={jobData}
+                setNextStep={setNextStep}
+              />
+            )}
           </ContentFullScreen>
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
-            <Invoice 
+          <Invoice
             renderedFrom={`${renderedFrom}_grid-1`}
-            />
+          />
         </TabPanel>
       </Box>
       {showConfirmBox && (

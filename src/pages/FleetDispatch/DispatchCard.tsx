@@ -3,7 +3,7 @@ import { makeStyles, Typography, Box, Grid } from '@material-ui/core';
 import { useDrag, useDrop } from 'react-dnd';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import WorkIcon from '@material-ui/icons/Work';
-import { Gauge } from './HelperComponents';
+import Gauges from '../../components/Gauges';
 
 const useStyles = makeStyles((theme) => ({
   fleetBox: {
@@ -183,19 +183,9 @@ const FleetDispatchBox = ({ data, id, index, moveCard, cardType, handleDispatch 
             </Grid>
             <Grid item xs={12} md={6} lg={5}>
               <Box className={classes.gaugeContainer}>
-                <Gauge className={classes.singleGauge} max={100} value={data?.temperature} lebel="TEMP" suffix={<>°</>} />
-                <Gauge className={classes.singleGauge} max={100} value={data?.pressure} lebel="PRESSURE" suffix={<>Psi</>} />
-                <Gauge
-                  className={classes.singleGauge}
-                  max={100}
-                  value={data?.volume}
-                  lebel="VOLUME"
-                  suffix={
-                    <span>
-                      m<sup>3</sup>
-                    </span>
-                  }
-                />
+                <Gauges className={classes.singleGauge} max={200} value={data?.temperature} lebel="TEMP" suffix={<>°F</>} />
+                <Gauges className={classes.singleGauge} max={1000} value={data?.pressure} lebel="PRESSURE" suffix={<>PSI</>} />
+                <Gauges className={classes.singleGauge} max={1000} value={data?.volume} lebel="VOLUME" suffix={<>MMcf</>} />
               </Box>
             </Grid>
           </Grid>

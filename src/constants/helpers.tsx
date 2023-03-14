@@ -1876,7 +1876,9 @@ export const ACTIVITY_RESOURCE = {
   serviceOrder: 'serviceOrder',
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
-  fieldTicket: 'fieldTicket'
+  fieldTicket: 'fieldTicket',
+  fleetMaster: 'fleetMaster',
+  job: 'Job',
 };
 
 export const LOG_RESOURCE = {
@@ -2150,6 +2152,16 @@ export const getData = (resource: string, data: any) => {
     case 'field-ticket':
       return {
         name: `${data?.fieldTicketNumber}`,
+        id: data._id
+      };
+    case 'fleet-master':
+      return {
+        name: `${data?.fleetNumber}`,
+        id: data._id
+      };
+    case 'job':
+      return {
+        name: `${data?.jobNumber}`,
         id: data._id
       };
     default:
