@@ -233,7 +233,7 @@ function RentalManagementHeader({
                     <ToggleButton onClick={() => {
                       history.push(`${routes.rentalPlanningCalendar.path}`)
                     }}>
-                      <span>{`Calander`}</span>
+                      <span>{`Calendar`}</span>
                     </ToggleButton>
                   </ToggleButtonGroup>
                 </Box>

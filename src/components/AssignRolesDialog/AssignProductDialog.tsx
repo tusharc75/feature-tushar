@@ -47,7 +47,7 @@ const AssignProductDialog = ({
 }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const {
-    state: { permissions, selectedEntity }
+    state: { user, permissions, selectedEntity }
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
@@ -176,11 +176,18 @@ const AssignProductDialog = ({
         term: 'Part'
       });
     }
-    if (serialized != null) {
-      updatedFilters.push({
-        field: 'serializedProduct',
-        term: `${serialized === 'true' ? 'Yes' : 'No'}`
-      });
+    if (reference === "purchaseOrder") {
+      if (!user?.user?.brandPolicy?.showSerializedProduct) {
+        updatedFilters.push({ field: 'serializedProduct', term: 'No' });
+      }
+    }
+    else {
+      if (serialized != null) {
+        updatedFilters.push({
+          field: 'serializedProduct',
+          term: `${serialized === 'true' ? 'Yes' : 'No'}`
+        });
+      }
     }
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {

@@ -17,7 +17,7 @@ import Chip from '@material-ui/core/Chip';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import Loader from "../../../../components/Loader";
-import BigCalander from "./BigCalander";
+import BigCalendar from "./BigCalendar";
 import { GetBoard } from "../../../../axios/activity";
 
 
@@ -50,7 +50,7 @@ export default function Calender({ type, filter, activityId }) {
 
     const classes = useStyles();
     return (activity ? <Box bgcolor="white">
-        <BigCalander
+        <BigCalendar
             activity={activity}
             type={type}
         />
