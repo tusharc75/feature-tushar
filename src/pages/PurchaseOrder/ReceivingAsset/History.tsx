@@ -18,7 +18,8 @@ const History = ({ handleClose, productName, inventoryHistory }) => {
 
     useEffect(() => {
         const data = JSON.parse(JSON.stringify(inventoryHistory));
-        let rows = data?.map((u: any) => {
+        let rows = data?.map((u: any, index) => {
+            u._id = index;
             u.type = capitalize(u?.type);
             return u;
         });
