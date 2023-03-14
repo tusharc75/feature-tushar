@@ -5,8 +5,8 @@ import moment from 'moment';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import ActivityList from './ActivityList';
-import Calander from './Calander';
-import CalanderList from './CalanderList';
+import Calendar from './Calendar';
+import CalendarList from './CalendarList';
 import MapView from '../Map';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
@@ -141,10 +141,10 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
           </Box>
           {!selected ? (
             <Box id="scrollDayLiner" onScroll={onscroll} border={1} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
-              <Calander calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
+              <Calendar calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
               <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
                 <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
-                  <CalanderList
+                  <CalendarList
                     fetchRoadmap={fetchRoadmap}
                     activity={activity}
                     expanded={expanded}
