@@ -6,7 +6,6 @@ import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { purchaseOrder } from 'src/constants/helpers';
-import AddExistingProductInventory from '../../Sublease/Productpackage/AddExistingProductInventory';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -28,6 +27,7 @@ import AddIcon from '@material-ui/icons/Add';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { map, uniq } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -568,7 +568,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       handleUpdateCost(rows);
     }
   };
-  
+
   return (
     <Fragment>
       {allowedToEdit && (
@@ -704,16 +704,15 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         </Box>
       )}
       {addProductDialog && (
-        <AddExistingProductInventory
-          isAddingProducts={isAddingProducts}
-          addProductInventory={handleAddProduct}
-          handleProductInventoryClose={() => {
-            setAddProductDialog(false);
-          }}
-          type={'product'}
-          referenceType="purchaseOrder"
-          renderedFrom={renderedFrom}
-          ignoreIds={[]}
+        <AssignProductDialog
+          productsDialogOpen={addProductDialog}
+          handleCloseDialog={() => setAddProductDialog(false)}
+          renderedFrom={`${renderedFrom}_grid-sub-1`}
+          reference="purchaseOrder"
+          onSuccess={handleAddProduct}
+          serialized={!user?.user?.brandPolicy?.showSerializedProduct}
+          productId={null}
+          assignedProducts={[]}
         />
       )}
       {showProductDialog.open && (
