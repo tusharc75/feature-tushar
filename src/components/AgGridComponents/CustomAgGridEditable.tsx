@@ -13,6 +13,7 @@ import DateEditor from './DateEditor';
 // import ArrangeView from './GridButtons/ArrangeView/ArrangeView';
 
 import CustomGridFilterHeader from './CustomGridFilterHeader';
+import { ShowOnlySelected } from './GridButtons';
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -415,6 +416,9 @@ export default function CustomAgGridEditable({
             isClientSideGrid={isClientSideGrid}
             dispatch={dispatch}
           />
+          {showOnlyShowFilteredRecordSwitch && (
+            <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '0 0 10px' }} />
+          )}
           <div className="table-container-v1" style={{ position: 'relative' }}>
             {/* <ArrangeView
               columns={columns}
