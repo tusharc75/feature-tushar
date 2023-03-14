@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function CalanderList(props) {
+export default function CalendarList(props) {
   const {
     activity,
     expanded,

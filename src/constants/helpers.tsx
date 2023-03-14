@@ -843,21 +843,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1876,7 +1876,9 @@ export const ACTIVITY_RESOURCE = {
   serviceOrder: 'serviceOrder',
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
-  fieldTicket: 'fieldTicket'
+  fieldTicket: 'fieldTicket',
+  fleetMaster: 'fleetMaster',
+  job: 'Job',
 };
 
 export const LOG_RESOURCE = {
@@ -2005,7 +2007,8 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.demandOrder, value: sidebarResource.demandOrder, key: 'demandOrder' },
   { title: sidebarResource.productionOrder, value: sidebarResource.productionOrder, key: 'productionOrder' },
   { title: sidebarResource.serviceOrder, value: sidebarResource.serviceOrder, key: 'serviceOrder' },
-  { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' }
+  { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' },
+  { title: sidebarResource.job, value: sidebarResource.job, key: 'job' }
 ];
 
 export const getApi = (resource: string) => {
@@ -2026,9 +2029,8 @@ export const getData = (resource: string, data: any) => {
       };
     case 'customer-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
-          data?.lastName ? data?.lastName : ''
-        }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
+          }`,
         id: data._id
       };
     case 'supplier-account':
@@ -2038,9 +2040,8 @@ export const getData = (resource: string, data: any) => {
       };
     case 'supplier-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
-          data?.lastName ? data?.lastName : ''
-        }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
+          }`,
         id: data._id
       };
     case 'lead':
@@ -2151,6 +2152,16 @@ export const getData = (resource: string, data: any) => {
     case 'field-ticket':
       return {
         name: `${data?.fieldTicketNumber}`,
+        id: data._id
+      };
+    case 'fleet-master':
+      return {
+        name: `${data?.fleetNumber}`,
+        id: data._id
+      };
+    case 'job':
+      return {
+        name: `${data?.jobNumber}`,
         id: data._id
       };
     default:

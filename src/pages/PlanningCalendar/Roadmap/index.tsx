@@ -5,9 +5,9 @@ import React, { useContext, useEffect, useState } from "react";
 import axiosInstance from "src/axios/axiosInstance";
 import { dateFormat, downloadExcel } from 'src/constants/helpers';
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import Calander from '../../TechnicianScheduler/Roadmap/Calander';
+import Calendar from '../../TechnicianScheduler/Roadmap/Calendar';
 import ActivityList from './ActivityList';
-import CalanderList from './CalanderList';
+import CalendarList from './CalendarList';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 
@@ -270,7 +270,7 @@ const RoadMap = () => {
             </div>
           </Box>
           <Box id="scrollDayLiner" onScroll={onscroll} border={1} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
-            <Calander
+            <Calendar
               calendarType={calendarType}
               dayPixel={dayPixel}
               startDate={moment(startDate)}
@@ -278,7 +278,7 @@ const RoadMap = () => {
             />
             <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
               <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
-                <CalanderList
+                <CalendarList
                   fetchRoadmap={fetchRoadmap}
                   activity={activity}
                   expanded={expanded}
