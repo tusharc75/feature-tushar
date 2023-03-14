@@ -17,8 +17,8 @@ const History = ({ handleClose, productName, inventoryHistory }) => {
     const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
     useEffect(() => {
-        let rows = inventoryHistory?.map((u: any, index) => {
-            u._id = index;
+        const data = JSON.parse(JSON.stringify(inventoryHistory));
+        let rows = data?.map((u: any) => {
             u.type = capitalize(u?.type);
             return u;
         });
