@@ -5,6 +5,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const useStyles = makeStyles((theme) => ({
     cardBox: {
@@ -59,83 +60,78 @@ const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, 
     return (
         <div className='card-view'>
             {loading ? (
-                <div className="card-view-loader">
-                    <span>Loading</span>
-                </div>
-            ) : (
-                ''
-            )}
-            <div style={{ opacity: loading ? 0.5 : 1 }}>
-                {
-                    jobs?.length > 0 ?
+                <Box p={2} height={500} bgcolor="white">
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
+            ) :
+                <Box pt={3} >
+                    {jobs?.length > 0 ?
                         <Grid container spacing={2}>
-                            {
-                                jobs.map((job, index) => {
-                                    return (
-                                        <Grid item lg={4} md={4} sm={6} xs={12} key={index}>
-                                            <Box className={`${classes.cardBox}`} onClick={(e) => {
-                                                history.push(`${routes.jobDetail.path}/${job?._id}`);
-                                            }}>
-                                                <Typography className={classes.text}><strong>Job Number :</strong> {job?.jobNumber}</Typography>
-                                                <Typography className={classes.text}><strong>Customer Account :</strong> {job?.customerAccount}</Typography>
-                                                <Box className={classes.icons}>
-                                                    {permissions?.job?.isCreate ? (
-                                                        <Tooltip title="Clone">
-                                                            <IconButton
-                                                                size="small"
-                                                                aria-label="Clone"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    setShowManageJobDialog({ open: true, isClone: true, idToClone: job._id });
-                                                                }}
-                                                            >
-                                                                <FileCopyIcon fontSize="small" color="primary" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    ) : (
-                                                        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-                                                            <IconButton aria-label="Clone" size="small">
-                                                                <FileCopyIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    )}
+                            {jobs.map((job, index) => {
+                                return (
+                                    <Grid item lg={4} md={4} sm={6} xs={12} key={index}>
+                                        <Box className={`${classes.cardBox}`} onClick={(e) => {
+                                            history.push(`${routes.jobDetail.path}/${job?._id}`);
+                                        }}>
+                                            <Typography className={classes.text}><strong>Job Number :</strong> {job?.jobNumber}</Typography>
+                                            <Typography className={classes.text}><strong>Customer Account :</strong> {job?.customerAccount}</Typography>
+                                            <Box className={classes.icons}>
+                                                {permissions?.job?.isCreate ? (
+                                                    <Tooltip title="Clone">
+                                                        <IconButton
+                                                            size="small"
+                                                            aria-label="Clone"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                setShowManageJobDialog({ open: true, isClone: true, idToClone: job._id });
+                                                            }}
+                                                        >
+                                                            <FileCopyIcon fontSize="small" color="primary" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                ) : (
+                                                    <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+                                                        <IconButton aria-label="Clone" size="small">
+                                                            <FileCopyIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                )}
 
-                                                    {job?.canDelete ? (
-                                                        <Tooltip title="Delete">
-                                                            <IconButton
-                                                                aria-label="Delete"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    setSingleJobDelete({
-                                                                        show: true,
-                                                                        id: job._id,
-                                                                        jobNumber: `${job.jobNumber}`
-                                                                    });
-                                                                }}
-                                                            >
-                                                                <DeleteIcon fontSize="small" color="error" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    ) : (
-                                                        <Tooltip className="cursor-stop" title="You do not have permission to delete">
-                                                            <IconButton aria-label="Delete" size="small">
-                                                                <DeleteIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    )}
-                                                </Box>
+                                                {job?.canDelete ? (
+                                                    <Tooltip title="Delete">
+                                                        <IconButton
+                                                            aria-label="Delete"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                setSingleJobDelete({
+                                                                    show: true,
+                                                                    id: job._id,
+                                                                    jobNumber: `${job.jobNumber}`
+                                                                });
+                                                            }}
+                                                        >
+                                                            <DeleteIcon fontSize="small" color="error" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                ) : (
+                                                    <Tooltip className="cursor-stop" title="You do not have permission to delete">
+                                                        <IconButton aria-label="Delete" size="small">
+                                                            <DeleteIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                )}
                                             </Box>
-                                        </Grid>
-                                    )
-                                })
+                                        </Box>
+                                    </Grid>
+                                )
+                            })
                             }
                         </Grid>
-                        :
-                        <Box my={5}>
-                            <Typography align="center">No results found!</Typography>
+                        : <Box my={5}>
+                            <Typography align="center">No Data To Show</Typography>
                         </Box>
-                }
-            </div>
+                    }
+                </Box>}
         </div>
     );
 };

@@ -510,7 +510,6 @@ const Job = () => {
             ) : null}
           </>
         }
-
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
