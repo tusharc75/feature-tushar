@@ -30,7 +30,7 @@ const types = [
   { _id: "3", name: "Available", type: "available", color: "#EFF8FF" }
 ];
 
-export default function CalanderList(props) {
+export default function CalendarList(props) {
   const { activity, expanded, selected, handleSelect, startDate, endDate, totalDay, calendarType } = props;
   const classes = useStyles();
 

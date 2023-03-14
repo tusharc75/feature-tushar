@@ -99,7 +99,7 @@ const GetDays = function (month, year) {
 
 
 
-export default function BigCalander({ type, activity }) {
+export default function BigCalendar({ type, activity }) {
 
     const history = useHistory();
     const [month, setMonth] = useState(moment().month() + 1);
