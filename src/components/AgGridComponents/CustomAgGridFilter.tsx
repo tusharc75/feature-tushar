@@ -24,6 +24,7 @@ export default forwardRef((props: any, ref) => {
 
   let timeout;
   const onInputBoxChanged = (input) => {
+    setCurrentValue(input.target.value);
     let millisec = Object.keys(input.target.value).length > 0 ? 600 : 5;
 
     if (timeout) {
@@ -39,7 +40,6 @@ export default forwardRef((props: any, ref) => {
         return;
       }
 
-      setCurrentValue(input.target.value);
       props.parentFilterInstance((instance) => {
         instance.onFloatingFilterChanged('contains', input.target.value);
 
@@ -67,6 +67,7 @@ export default forwardRef((props: any, ref) => {
         style={{ padding: 0 }}
         type="search"
         ref={inputRef}
+        value={currentValue}
         onChange={onInputBoxChanged}
         size="small"
         fullWidth
