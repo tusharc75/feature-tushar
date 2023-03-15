@@ -1,4 +1,4 @@
-import React, { forwardRef, Fragment, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, Fragment, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { TextField } from '@material-ui/core';
 import FilterListIcon from '@material-ui/icons/FilterList';
 
@@ -26,6 +26,7 @@ export default forwardRef((props: any, ref) => {
   const onInputBoxChanged = (input) => {
     setCurrentValue(input.target.value);
     let millisec = Object.keys(input.target.value).length > 0 ? 600 : 5;
+    setCurrentValue(input.target.value);
 
     if (timeout) {
       clearTimeout(timeout);
