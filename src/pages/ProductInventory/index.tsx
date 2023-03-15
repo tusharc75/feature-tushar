@@ -674,7 +674,10 @@ const InventoryProduct = () => {
 
         {showHistory.open && (
           <HistoryDialog
-            close={() => setShowHistory({ open: false, product: '', productName: '' })}
+            close={() => {
+              setShowHistory({ open: false, product: '', productName: '' })
+              fetchProductInventory()
+            }}
             product={showHistory.product}
             warehouse={
               plantId === 'All'
