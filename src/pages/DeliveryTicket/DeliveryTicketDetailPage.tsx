@@ -25,7 +25,7 @@ import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import { FaFileSignature, FaMailchimp, FaSignature, FaWpforms } from "react-icons/fa";
 import { BiEdit, BiFoodMenu } from "react-icons/bi";
-import { prepareDataForGrid, DELIVERY_TICKET_MAPPED_STATUS, sidebarResource, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_FROM_TO_TYPE } from "../../constants/helpers"
+import { prepareDataForGrid, DELIVERY_TICKET_MAPPED_STATUS, sidebarResource, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_FROM_TO_TYPE } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -143,37 +143,37 @@ export default function DeliveryTicketDetail(props) {
         data = response?.data?.data
       }
       data = data.filter((fields: any) => {
-        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
+        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.repairJob) {
           if (["transferAsset", "rentalJob", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "transferInventory", "repairOrder"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
-        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
+        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset) {
           if (["rentalJob", "repairJob", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "transferInventory", "repairOrder"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
-        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob) {
+        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob) {
           if (["repairJob", "transferAsset", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "transferInventory", "repairOrder"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
-        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
+        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.salesOrder) {
           if (["repairJob", "transferAsset", "sublease", "productInventory", "pickupFromType", "deliveryToType", "transferInventory", "repairOrder"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
-        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.sublease) {
+        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.sublease) {
           if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "transferInventory", "repairOrder"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
-        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferInventory) {
+        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
           if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "sublease", "repairOrder"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
-        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.repairOrder) {
+        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.repairOrder) {
           if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "sublease", "transferInventory"].includes(fields.fieldData.fieldName)) {
             return false
           }
@@ -837,10 +837,10 @@ export default function DeliveryTicketDetail(props) {
             }}
             isAdding={isAdding}
             selectedProducts={[]}
-            rentalId={deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob ? deliveryTicketData?.rentalJob?.optionValue : ""}
-            repairJobId={deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob ? deliveryTicketData?.repairJob?.optionValue : ""}
-            transferAssetId={deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset ? deliveryTicketData?.transferAsset?.optionValue : ""}
-            salesOrderId={deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder ? deliveryTicketData?.salesOrder?.optionValue : ""}
+            rentalId={deliveryTicketData?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob ? deliveryTicketData?.rentalJob?.optionValue : ""}
+            repairJobId={deliveryTicketData?.type === DELIVERY_TICKET_REFERENCE_TYPE.repairJob ? deliveryTicketData?.repairJob?.optionValue : ""}
+            transferAssetId={deliveryTicketData?.type === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset ? deliveryTicketData?.transferAsset?.optionValue : ""}
+            salesOrderId={deliveryTicketData?.type === DELIVERY_TICKET_REFERENCE_TYPE.salesOrder ? deliveryTicketData?.salesOrder?.optionValue : ""}
             notIn={deliveryTicketData.ticketType}
           />
         }

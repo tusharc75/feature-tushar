@@ -1,60 +1,24 @@
 
 import Box from "@material-ui/core/Box/Box";
-import React, { useState, useEffect, useReducer, useContext } from "react";
+import { useState, useEffect, Fragment } from "react";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Dialog, IconButton } from "@material-ui/core";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, salesOrder, sidebarResource } from "../../../constants/helpers";
-import { useData } from "../../../StateProvider/Provider";
+import { IconButton } from "@material-ui/core";
+import { salesOrder } from "../../../constants/helpers";
 import axiosInstance from "../../../axios/axiosInstance";
-import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
-import { isMobile, isTablet } from "react-device-detect";
-import { AiFillFilePdf } from "react-icons/ai";
+import { isMobile } from "react-device-detect";
 import routes from "../../../components/Helpers/Routes";
-import { BiPurchaseTagAlt, MdEmail } from "react-icons/all";
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
-import { prepareDataForGrid } from "../../../constants/helpers";
-import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
-import { Link } from "react-router-dom";
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { startCase } from "lodash";
-import { fetch_salesOrder_product_fields, fetch_salesOrder_cost_fields } from '../../../components/SalesOrder/helper';
+import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
+import { genrateCustomTableColumns } from "src/constants/columns";
+import InvoiceFacility from "./InvoiceFacility";
 
-
-const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobStatus, statusOptions, renderedFrom }) => {
-
-  const toastConfig = useContext(CustomToastContext);
-  const { state: { user, permissions } }: any = useData();
-
-  const [sendEmail, setSendEmail] = useState(false);
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
-  const [generatingPdfFile, setGeneratingFile] = useState(false);
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
-  const [columns, setColumns] = useState([
-    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" }
-  ])
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null)
-
-  const [downlodingFile, setDownlodingFile] = useState(null)
-  const [emailAttachments, setEmailAttachments] = useState([]);
-
-  const NameRenderer = (params) => (
-    <Link
-      className="link"
-      title={params.value}
-      to={`${routes.productDetail.path}/${params.data.productId}`}
-    >
-      {params.value}
-    </Link>
-  );
+const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, renderedFrom,stepFullScreen}) => {
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [rowsData, setRowsData] = useState(null);
+  const [columns, setColumns] = useState(null)
 
   useEffect(() => {
     if (statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") > statusOptions.findIndex(d => d.optionLabel === salesOrderData?.status)) {
@@ -67,255 +31,173 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
   }, []);
 
   const fetchFields = async () => {
-    try {
-      let fields = await fetch_salesOrder_product_fields(salesOrderData?.currency)
-      const resultCost = await fetch_salesOrder_cost_fields(salesOrderData?.currency)
-      fields = [...fields, ...resultCost]
-      let rendererNames = [];
-      genrateColoum(fields, columns, rendererNames, false, renderedFrom);
-      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-      tempFrameworkComponent = {
-        commonRenderer: CommonRenderer,
-        nameRenderer: NameRenderer,
-        ...tempFrameworkComponent,
-      }
-      setFrameWorkComponent({ ...tempFrameworkComponent })
-      setColumns([...columns])
-      fetchData()
-    }
-    catch (error) {
-      toastConfig.setToastConfig(error)
-    }
-  }
-
-  const fetchData = async () => {
-    let combinedData: any = []
-    let material: any = []
-    let additionalcost: any = []
-    try {
-      const resultMaterial = await axiosInstance().get(`${salesOrder.api}/productpackage/${salesOrderData._id}`)
-      material = resultMaterial?.data?.data?.material;
-      const resultCost = await axiosInstance().get(`${salesOrder.api}/additionalcost/${salesOrderData._id}`)
-      additionalcost = resultCost?.data?.data;
-      material?.forEach((item) => {
-        if (!item.parentId) {
-          item.description = `${item.type === "product" ? item.productDetail?.productName : item.packageDetail?.packageName}`
-          item.type = startCase(item.type);
-          combinedData.push(item);
+    var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
+    const newColumns = genrateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+    let coloum: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Footer: () => {
+          return <>Total</>;
         }
-      });
-      additionalcost?.forEach((e) => {
-        e.type = "Service";
-      })
-      combinedData = [...combinedData, ...additionalcost];
-      let rows = combinedData?.map((item) => {
-        let res: any = {
-          ...prepareDataForGrid(item),
-        };
-        return res;
-      });
-      dispatch({ type: "initialize", data: rows, count: rows.length });
-      dispatch({ type: "loading", loading: false });
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p>{`${startCase(row.original?.type)} `}</p>
+          </div>
+        )
+      },
+      {
+        accessor: 'detail',
+        Header: 'Detail',
+        minWidth: 300,
+        width: 300,
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {
+              <p
+                title={row.original?.detail}
+              >
+                {row.original?.detail}
+              </p>
+            }
+
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        )
+      },
+      {
+        accessor: 'leadTime',
+        Header: 'Lead Time (Days)',
+        Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+        Footer: (info) => {
+          const total = info.rows
+            .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
+            .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
+          return <>{total}</>;
+        }
+      }
+    ];
+    coloum = [...coloum, ...newColumns];
+    setColumns(coloum);
+    fetchMaterialData();
+  }
+  const fetchMaterialData = async () => {
+    setNextStep(false);
+    var data: any = [];
+    const response = await axiosInstance().get(`${salesOrder.api}/material/${salesOrderData._id}`);
+    data = response?.data?.data;
+    const rows = data.material.filter((e) => e.parentId === null);
+    rows.forEach((parent, i) => {
+      parent.index = i + 1;
+      parent.detail = `${
+          parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
+      parent.description =
+        parent.type === 'product'
+          ? parent?.productDetail?.productDescription
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription
+          : parent?.serviceDetail?.serviceDescription;
+      parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
+      parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      parent.qty = parent.qty;
+      parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
+      parent.subRows = generateNestedData(data.material, parent);
+    });
+    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+      setNextStep(true);
+    } else {
+      setNextStep(true);
     }
-    catch (error) {
-      dispatch({ type: "loading", loading: false });
-      toastConfig.setToastConfig(error)
-    }
+    setRowsData(rows);
   };
 
-  const handlePDF = (type) => {
-    setDownlodingFile(type);
-    axiosInstance().get(`${salesOrder.api}/${salesOrderData._id}/pdf`).then(({ data }) => {
-      axiosInstance().get(`user/download?fileName=${data.data.fileName}`, {
-        responseType: "blob",
-      })
-        .then(({ data }) => {
-          if (type === "Download") {
-            const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `Sales-Order-${salesOrderData.salesOrderNo}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            setDownlodingFile(null);
-          }
-          else if (type === "Preview") {
-            const file = new Blob([data], { type: "application/pdf" });
-            const fileURL = URL.createObjectURL(file);
-            const pdfWindow = window.open();
-            pdfWindow.location.href = fileURL;
-            setDownlodingFile(null);
-          }
-          else {
-            const file = new Blob([data], { type: 'application/pdf' });
-            generateBase64forFile(file, 'pdf');
-          }
-        })
-        .catch((err) => {
-          if (type === "Email") {
-            setSendEmail(true)
-          }
-          toastConfig.setToastConfig(err);
-          setDownlodingFile(null);
-        });
-    }).catch((err) => {
-      if (type === "Email") {
-        setSendEmail(true)
-      }
-      toastConfig.setToastConfig(err);
-      setDownlodingFile(null);
-    })
-  }
-
-  const generateBase64forFile = (blobData, type) => {
-    let reader = new FileReader();
-    reader.readAsDataURL(blobData);
-    reader.onloadend = function () {
-      let base64data: any = reader.result;
-      if (type === 'pdf') {
-        const attachments = [{
-          base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-          contentType: base64data.split(';')[0].split(':')[1],
-          name: `Sales-Order-${salesOrderData.salesOrderNo}`
-        }];
-        setEmailAttachments(attachments)
-        setSendEmail(true)
-      }
-    };
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.detail = `${
+       _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
+      _subRow.description =
+        _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDescription
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow?.serviceDetail?.serviceDescription;
+      _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
+      _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      _subRow.qty = `${parent.qty * _subRow.qty} `;
+      _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+    if (subRows.length === 0 && parent.type === 'package') {
+      parent.isValid = false;
+    }
+    if (parent.type === 'package') {
+      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
+    }
+    return subRows;
   };
 
-  const fetchEmailsData = () => {
-    let ownerCollaboratorEmails = [];
-    if (salesOrderData?.collaborator && salesOrderData.collaborator.length) {
-      ownerCollaboratorEmails = salesOrderData.collaborator.filter((o) => o?.email).map((o) => o?.email);
-    }
-    if (salesOrderData?.owner?.email) {
-      ownerCollaboratorEmails.push(salesOrderData.owner.email);
-    }
-    let toEmails = [];
-    if (salesOrderData?.customerAccount?.email) {
-      toEmails.push(salesOrderData.customerAccount.email);
-    }
-    setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
-  }
 
-  return (<>
-    <Box display="flex" justifyContent="space-between" m={1}>
-      <Box display="flex" alignItems="center">
-        {permissions?.salesOrder?.isRead && (
-          <Button
-            variant="outlined"
-            color="primary"
-            type="button"
-            size="small"
-            disabled={downlodingFile === "Preview" ? true : false}
-            startIcon={isMobile ? '' : <AiFillFilePdf />}
-            onClick={() => handlePDF("Preview")}
-          >
-            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === "Preview" ? "Please wait..." : "Preview"}
-          </Button>
-        )}
-        <Box mx={1} />
-        {permissions?.salesOrder?.isRead && (
-          <Button
-            variant="outlined"
-            color="primary"
-            type="button"
-            size="small"
-            disabled={downlodingFile === "Download" ? true : false}
-            startIcon={isMobile ? '' : <AiFillFilePdf />}
-            onClick={() => handlePDF("Download")}
-          >
-            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === "Download" ? "Please wait..." : "Download"}
-          </Button>
-        )}
-        <Box mx={1} />
-        {permissions?.salesOrder?.isRead && <Button
-          variant="outlined"
-          color="primary"
-          size="small"
-          disabled={downlodingFile === "Email" ? true : false}
-          startIcon={isMobile ? '' : <MdEmail />}
-          onClick={() => {
-            fetchEmailsData()
-            handlePDF("Email")
-          }}
-        >
-          {isMobile ? <MdEmail size={22} /> : downlodingFile === "Email" ? "Please wait..." : `Send Email`}
-        </Button>}
-      </Box>
-    </Box>
+  return (
+  <Fragment>
+    <InvoiceFacility salesOrderData={salesOrderData} />
     <Grid item xs={12} md={12} sm={12} className="mt-3">
-      {columns && frameWorkComponent ?
-        <CustomAgGridEditable
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={false}
-          loading={loading}
-          allowSelection={false}
-          isClientSideGrid={true}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchData}
-          fromPurchaseOrderGrid={true}
-          onCellValueChanged={(row) => {
-          }}
-          currency={salesOrderData?.currency?.toLowerCase()}
-        />
-        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-      }
+    {columns && rowsData ? (
+        <>
+          <Box p="6px" zIndex={5} width={'100%'}>
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+              columns={columns}
+              data={rowsData}
+              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+              onSelect={setSelectedProducts}
+              childrenProperty="subRows"
+              uniqueKey="_id"
+              renderedFrom="sales_order_product_package"
+              isClientSideGrid={true}
+            />
+          </Box>
+        </>
+      ) : (
+        <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
     </Grid>
-    {sendEmail && (
-      <Dialog
-        open={sendEmail}
-        fullScreen={fullScreen || isMobile || isTablet}
-        TransitionComponent={CustomDialogTransition}
-        aria-labelledby="customized-dialog-title"
-        maxWidth="md"
-        onClose={() => {
-          setSendEmail(false);
-          setDownlodingFile(null);
-          setFullScreen(false);
-        }}
-        fullWidth
-      >
-        <CreateEmail
-          generatingFile={generatingPdfFile}
-          handleClose={() => {
-            setSendEmail(false);
-            setDownlodingFile(null);
-            setFullScreen(false);
-          }}
-          fetchData={() => {
-            setSendEmail(false);
-            setDownlodingFile(null);
-            setFullScreen(false);
-          }}
-          id={salesOrderData._id}
-          showESign={true}
-          isQuoteBuilder={true}
-          options={userEmails?.to}
-          cc={userEmails?.cc ?? []}
-          emailId={null}
-          qouteBuilderAttachments={emailAttachments}
-          subject={`${user?.user?.brandName ?? 'Brand'} Invoice - ${salesOrderData?.salesOrderNo ?? ''}`}
-          fromQuote={true}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen((prevState) => !prevState);
-          }}
-          showManimizeMaximize={true}
-          refrenceType="salesOrder"
-        />
-      </Dialog>
-    )}
-  </>
+  </Fragment>
   );
 }
 

@@ -4,7 +4,7 @@ import { Link, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { deliveryTicket, sidebarResource, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_FROM_TO_TYPE, INVENTORY_STATUS, COLOUR_MASTER } from 'src/constants/helpers';
+import { deliveryTicket, sidebarResource, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_FROM_TO_TYPE, INVENTORY_STATUS, COLOUR_MASTER } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
@@ -183,7 +183,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const fetchLoadingTickets = () =>
     new Promise((resolve, reject) => {
       axiosInstance()
-        .get(`${routes.deliveryTicket.path}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.transferAsset}&refrenceId=${transferAssetId}`)
+        .get(`${routes.deliveryTicket.path}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.transferAsset}&referenceId=${transferAssetId}`)
         .then(({ data: { data } }) => {
           resolve(data);
           setTickets(data);
@@ -296,7 +296,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   const handleOpenReplaceAssetReason = (rows) => {
     const data: any = {}
-    data.refrenceType = "transferAsset";
+    data.referenceType = "transferAsset";
     data.referenceId = transferAssetId;
     const assets: any = []
     selectedRecords?.forEach((element: any) => {
@@ -400,7 +400,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   }
                   onClick={() => {
                     const data: any = {}
-                    data["refrenceId"] = transferAssetData._id
+                    data["referenceId"] = transferAssetData._id
                     data["ticketName"] = transferAssetData.transferAssetNumber
                     data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
                     data["pickupFrom"] = transferAssetData?.transferFromPlant?.optionValue;
@@ -550,8 +550,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         showTicketDialog.open && (
           <ManageDeliveryTicket
             ticketType={DELIVERY_TICKET_TYPE.loading}
-            refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.transferAsset}
-            refrenceData={showTicketDialog.data}
+            referenceType={DELIVERY_TICKET_REFERENCE_TYPE.transferAsset}
+            referenceData={showTicketDialog.data}
             productInventory={assetWithNoTicket}
             onClose={() => setShowTicketDialog({ open: false, data: {} })}
             onSuccess={() => {
@@ -593,8 +593,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog({ open: false, products: [] });
           }}
-          refrenceType={"ReplaceAsset"}
-          refrenceData={{
+          referenceType={"ReplaceAsset"}
+          referenceData={{
             _id: transferAssetData?._id, warehouse: transferAssetData?.transferFromPlant.optionValue
           }}
           isAdding={replaceLoading}

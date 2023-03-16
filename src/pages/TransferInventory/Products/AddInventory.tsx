@@ -36,6 +36,8 @@ const AddInventory = ({ plantId, close, isAdding, submit, renderedFrom, ignoreId
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null)
 
+  const { state: { user } }: any = useData();
+
   useEffect(() => {
     removeLocalStorage(localStorageSelectedRecords)
     fetchFields();
@@ -130,14 +132,21 @@ const AddInventory = ({ plantId, close, isAdding, submit, renderedFrom, ignoreId
       deepFilter = deepFilter + `&ignoreIds=${JSON.stringify(ignoreIds)}`
     }
 
+    const updatedFilters = [];
+    if (!user?.user?.brandPolicy?.showSerializedProduct) {
+      updatedFilters.push({ field: 'serializedProduct', term: 'No' });
+    }
+    
     if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
         });
       });
+    }
+
+    if (updatedFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
     }
 
@@ -148,7 +157,7 @@ const AddInventory = ({ plantId, close, isAdding, submit, renderedFrom, ignoreId
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-    
+
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }

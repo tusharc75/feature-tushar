@@ -10,7 +10,10 @@ import { orderBy, uniqBy } from 'lodash';
 import { checkStaticField, staticColumns } from '../../constants/columns';
 import NumericEditor from './NumericEditor';
 import DateEditor from './DateEditor';
-import ArrangeView from './ArrangeView';
+// import ArrangeView from './GridButtons/ArrangeView/ArrangeView';
+
+import CustomGridFilterHeader from './CustomGridFilterHeader';
+import { ShowOnlySelected } from './GridButtons';
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -159,7 +162,12 @@ export default function CustomAgGridEditable({
   idProperty = '_id',
   rowClassRules = null,
   actionLabel = null,
-  actionEditable = false
+  actionEditable = false,
+  showFilters = false,
+  resource = null,
+  selectedReportView = null,
+  setSelectedReportView = null,
+  reportSave = false
 }) {
   const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
@@ -386,21 +394,42 @@ export default function CustomAgGridEditable({
         )}
 
         <div style={{ opacity: loading ? 0.5 : 1 }}>
-          <CustomGridHeaderOptions
+          {/* <CustomGridHeaderOptions
             refreshGrid={refreshGrid}
             renderedFrom={renderedFrom}
             dispatch={dispatch}
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
+          /> */}
+
+          <CustomGridFilterHeader
+            showFilters={showFilters}
+            resource={resource}
+            currentGridApi={currentGridApi}
+            refreshGrid={refreshGrid}
+            setSelectedReportView={setSelectedReportView}
+            selectedReportView={selectedReportView}
+            reportSave={reportSave}
+            columns={columns}
+            setColumns={setColumns}
+            columnApi={columnApi}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={isClientSideGrid}
+            dispatch={dispatch}
+            selectedRecords={selectedRecords}
+            showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
           />
+          {/* {showOnlyShowFilteredRecordSwitch && (
+            <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '0 0 10px' }} />
+          )} */}
           <div className="table-container-v1" style={{ position: 'relative' }}>
-            <ArrangeView
+            {/* <ArrangeView
               columns={columns}
               setColumns={setColumns}
               columnApi={columnApi}
               renderedFrom={renderedFrom}
               isClientSideGrid={isClientSideGrid}
               dispatch={dispatch}
-            />
+            /> */}
 
             <div className={`ag-theme-material ${className}`}>
               <AgGridReact

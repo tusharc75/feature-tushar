@@ -171,9 +171,10 @@ const ProjectStrategyHeader = (props) => {
             {(permissions?.isDelete || permissions?.isUpdate) && (
               <>
                 <Button
-                  variant={isMobile ? 'text' : 'contained'}
+                  variant={isMobile ? 'text' : 'outlined'}
                   color="default"
                   size="small"
+                  disabled={canDelete}
                   onClick={openActions}
                   aria-controls="action-menu"
                   className={isMobile ? 'mobile_button' : styles.action_submit_btn}

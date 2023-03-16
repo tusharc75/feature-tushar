@@ -53,7 +53,7 @@ const TransferAssetViews = (props) => {
       // const viewsData = await axiosInstance().get(`${rentalManagement.api}/views/${rentalId}`);
       const assets = await axiosInstance().get(`${transferAsset.api}/get-asset/${tAId}`);
       const loadingTicket = await axiosInstance().get(
-        `${deliveryTicket.api}/typewise?refrenceType=${sidebarResource.transferAsset}&refrenceId=${tAId}`
+        `${deliveryTicket.api}/typewise?referenceType=${sidebarResource.transferAsset}&referenceId=${tAId}`
       );
       const allAssets = assets?.data?.data?.assets || [];
       const allLoadingTicket = loadingTicket?.data?.data || [];

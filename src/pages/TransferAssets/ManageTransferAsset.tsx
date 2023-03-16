@@ -33,9 +33,9 @@ interface Props {
   number?: string;
   isEditable?: boolean;
   isMainInfoEditable?: boolean;
-  refrenceType?: string;
-  refrenceId?: string;
-  refrenceData?: any;
+  referenceType?: string;
+  referenceId?: string;
+  referenceData?: any;
 }
 
 const ManageTransferAsset: FC<Props> = (props) => {
@@ -43,7 +43,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
     state: { selectedEntity, permissions }
   }: any = useData();
   const { isClone = false, transferAssetId = null, onClose, onSuccess, number = '', isEditable = false, isMainInfoEditable = false,
-    refrenceType = null, refrenceId = null, refrenceData = null } = props;
+    referenceType = null, referenceId = null, referenceData = null } = props;
 
   const toastConfig = useContext(CustomToastContext);
   const initialRender = useRef(true);
@@ -122,26 +122,26 @@ const ManageTransferAsset: FC<Props> = (props) => {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
           setAllFields(fieldsDataForCreate);
           createValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`;
-          if (refrenceType === "Rental Job") {
-            createValues["transferFromPlant"] = refrenceData?.transferFromPlant;
-            createValues["transfertoPlant"] = refrenceData?.transferToPlant;
+          if (referenceType === "Rental Job") {
+            createValues["transferFromPlant"] = referenceData?.transferFromPlant;
+            createValues["transfertoPlant"] = referenceData?.transferToPlant;
             fieldsDataForCreate?.forEach((e) => {
               if (e.fieldName === "transfertoPlant") {
-                const plantAddress = e?.option?.filter((e) => e.optionValue === refrenceData?.transferToPlant)
+                const plantAddress = e?.option?.filter((e) => e.optionValue === referenceData?.transferToPlant)
                 if (plantAddress.length) {
                   createValues["plantShipTo"] = plantAddress[0].address
                 }
               }
             })
-            createValues["rentalJob"] = refrenceId;
+            createValues["rentalJob"] = referenceId;
             if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
-              createValues["wellName"] = refrenceData?.wellName
+              createValues["wellName"] = referenceData?.wellName
             }
             if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
-              createValues["afeNumber"] = refrenceData?.afeNumber
+              createValues["afeNumber"] = referenceData?.afeNumber
             }
             if (fieldsDataForCreate.some((e) => e.fieldName === "processor")) {
-              createValues["processor"] = refrenceData?.processor
+              createValues["processor"] = referenceData?.processor
             }
           }
           setInitialData({

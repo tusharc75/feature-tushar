@@ -505,6 +505,35 @@ body::-webkit-scrollbar-thumb {
   animation: dot-animation 2s infinite;
 }
 
+.card-view {
+  position: relative;
+  min-height: calc(100vh - 200px);
+}
+
+.card-view-loader {
+  position : absolute;
+  z-index  : 2;
+  left     : 50%;
+  top      : 50%;
+  transform: translate(-50%, -50%);
+}
+
+.card-view-loader span {
+  padding        : 15px 25px;
+  border         : 1px solid lightgray;
+  background     : white;
+  font-size      : 1rem;
+  letter-spacing : 1px;
+  width          : 150px;
+  display        : flex;
+  justify-content: center;
+}
+
+.card-view-loader span:after {
+  content  : '';
+  animation: dot-animation 2s infinite;
+}
+
 .loading-dots:after {
   content: '';
   animation: dot-animation 2s infinite;
@@ -977,13 +1006,20 @@ body::-webkit-scrollbar-thumb {
     border-left: 4px solid #298b88;
     box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.08);
     border-radius: 4px;
-    margin-top: 8px;
+    margin-block: 8px;
     .activity-date {
       font-size: 0.8rem;
       padding-top: 2px;
       padding-left: 6px;
       color: #7b898e;
     }
+  }
+
+  .MuiTreeItem-root .activity {
+    padding: 6px 0px 6px 10px;
+  }
+  .attachment-files.MuiTreeItem-root .activity {
+    padding: 6px 10px;
   }
 }
 
@@ -3306,5 +3342,17 @@ body {
     // border-top: 0;
     box-shadow: 0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03);
     border-radius: 0px 0px 4.04585px 4.04585px;
+  }
+}
+.activityDetailBox.attachment {
+  .attachment-files {
+    .MuiTreeItem-content {
+      .MuiTreeItem-iconContainer {
+        display: none;
+        & + div {
+          padding-left: 0;
+        }
+      }
+    }
   }
 }

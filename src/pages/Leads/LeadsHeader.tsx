@@ -7,7 +7,7 @@ import styles from './Header.module.scss';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { processFieldName } from '../../constants/helpers';
+import { getLocalStorageArrayData, processFieldName } from '../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
@@ -193,6 +193,7 @@ function LeadsHeader(props) {
                   onClick={openActions}
                   aria-controls="action-menu"
                   className={isMobile && !isTablet ? 'mobile_button' : ''}
+                  disabled={selectedLeads.length === 0}
                 >
                   {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
                 </Button>

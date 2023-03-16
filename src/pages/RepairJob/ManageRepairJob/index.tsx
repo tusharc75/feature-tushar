@@ -33,7 +33,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageWarehouse from '../../Warehouse/ManageWarehouse';
 import { isEqual } from 'lodash';
 
-const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSuccess, refrenceType = null, refrenceData = null }) => {
+const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSuccess, referenceType = null, referenceData = null }) => {
 
   const initialRender = useRef(true)
 
@@ -114,18 +114,18 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
           initialData["expectedCompletionDate"] = null;
         }
         
-        if (refrenceType === "Rental Job") {
-          initialData["warehouse"] = refrenceData?.warehouse
-          initialData["rentalJob"] = refrenceData?._id
+        if (referenceType === "Rental Job") {
+          initialData["warehouse"] = referenceData?.warehouse
+          initialData["rentalJob"] = referenceData?._id
           if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
-            initialData["wellName"] = refrenceData?.wellName
+            initialData["wellName"] = referenceData?.wellName
           }
           if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
-            initialData["afeNumber"] = refrenceData?.afeNumber
+            initialData["afeNumber"] = referenceData?.afeNumber
           }
         }
-        if (refrenceType === "Product Inventory") {
-          initialData["warehouse"] = refrenceData?.warehouse
+        if (referenceType === "Product Inventory") {
+          initialData["warehouse"] = referenceData?.warehouse
         }
 
         setAllFields(fieldsDataForCreate);
@@ -171,7 +171,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
           "processStatus": repairJobProcessSteps[0]
         })
           .then(() => {
-            if (!refrenceType) {
+            if (!referenceType) {
               history.push(`${routes.repairJobDetail.path}/${data._id}`);
             }
             setSubmitting(false);

@@ -606,6 +606,7 @@ const WorkOrder = ({
                   setSelectedAssets(data?.filter((d) => d.type === 'serializedAsset' && !d.hideSelection) || []);
                   setSelectedProducts(data?.filter((d) => !d.hideSelection) || []);
                 }}
+                setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={allowedToEdit ? false : isPostWorkService ? false : true}

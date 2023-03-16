@@ -759,7 +759,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
             setAddDialog({ open: false, type: '', parentId: null });
           }}
           type={addDialog.type}
-          refrenceType={'Quotation'}
+          referenceType={'Quotation'}
           ignoreIds={rowsData?.map((e) => e?.materialId)}
         />
       )}

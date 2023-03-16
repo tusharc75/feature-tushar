@@ -47,6 +47,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Invoice'];
 export const invoiceProcessSteps = ['Add Products', 'Ready To Invoice'];
+export const jobProcessSteps = ['Add', 'Fleet'];
 export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Send To Customer', 'End'];
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
@@ -226,7 +227,11 @@ export const sidebarResource = {
   fieldTicket: 'Field Ticket',
   fieldServiceTechnician: `Field Service Technician`,
   rentalPlanningCalendar: `Rental Planning Calendar`,
-  resourceLogs: `Resource Logs`
+  resourceLogs: `Resource Logs`,
+  fleetMaster: `Fleet Master`,
+  job: 'Job',
+  fleetDispatch: 'Fleet Dispatch',
+  fleetReceiver: 'Fleet Receiver'
 };
 
 export const primaryFields = {
@@ -332,7 +337,11 @@ export const RESOURCE_LABEL = {
   planning: 'Planning',
   fieldTicket: 'Field Ticket',
   fieldServiceTechnician: `Field Service Technician`,
-  resourceLogs: `Resource Logs`
+  fleetDispatch: `Fleet Dispatch`,
+  resourceLogs: `Resource Logs`,
+  fleetMaster: `Fleet Master`,
+  job: 'Job',
+  fleetReceiver: 'Fleet Receiver'
 };
 
 export const CHILD_RESOURCE = {
@@ -356,6 +365,7 @@ export const CHILD_RESOURCE = {
   purchaseRequisition: 'Purchase Requisition Detail',
   serviceOrderAddon: 'Service Order Addon',
   fieldTicketCost: 'Field Ticket Cost',
+  jobDetail: 'Job Detail'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -1779,7 +1789,7 @@ export const DELIVERY_TICKET_TYPE = {
   delivery: 'Delivery'
 };
 
-export const DELIVERY_TICKET_REFRENCE_TYPE = {
+export const DELIVERY_TICKET_REFERENCE_TYPE = {
   rentalJob: 'Rental Job',
   transferAsset: 'Transfer Asset',
   repairJob: 'Repair Job',
@@ -1867,10 +1877,12 @@ export const ACTIVITY_RESOURCE = {
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
   fieldTicket: 'fieldTicket',
+  fleetMaster: 'fleetMaster',
+  job: 'Job',
 };
 
 export const LOG_RESOURCE = {
-  serializedAsset: sidebarResource.serializedAsset,
+  serializedAsset: sidebarResource.serializedAsset
 };
 
 export const REPORT_LIST = [
@@ -1995,7 +2007,8 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.demandOrder, value: sidebarResource.demandOrder, key: 'demandOrder' },
   { title: sidebarResource.productionOrder, value: sidebarResource.productionOrder, key: 'productionOrder' },
   { title: sidebarResource.serviceOrder, value: sidebarResource.serviceOrder, key: 'serviceOrder' },
-  { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' }
+  { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' },
+  { title: sidebarResource.job, value: sidebarResource.job, key: 'job' }
 ];
 
 export const getApi = (resource: string) => {
@@ -2139,6 +2152,16 @@ export const getData = (resource: string, data: any) => {
     case 'field-ticket':
       return {
         name: `${data?.fieldTicketNumber}`,
+        id: data._id
+      };
+    case 'fleet-master':
+      return {
+        name: `${data?.fleetNumber}`,
+        id: data._id
+      };
+    case 'job':
+      return {
+        name: `${data?.jobNumber}`,
         id: data._id
       };
     default:
@@ -2313,10 +2336,10 @@ export const WORK_ORDER_STATUS = {
 };
 
 export const IRT_APPROVER_STATUS = {
-  send: "Email Sent",
-  approved: "Approved",
-  declined: "Declined"
-}
+  send: 'Email Sent',
+  approved: 'Approved',
+  declined: 'Declined'
+};
 
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
@@ -2374,8 +2397,5 @@ export const ECOM_SECTIONS = [
 export const TOOLTIP_MESSAGE = {
   add: "You don't have permissions to add",
   edit: "You don't have permissions to edit",
-  remove: "You don't have permissions to remove",
-}
-
-
-
+  remove: "You don't have permissions to remove"
+};

@@ -96,7 +96,7 @@ export const CreateEmail = ({
   isMinimized,
   onMinimizeMaximize,
   showManimizeMaximize,
-  refrenceType = ''
+  referenceType = ''
 }) => {
   const {
     state: { user }
@@ -249,7 +249,7 @@ export const CreateEmail = ({
       body['graphToken'] = await getAzureAcessToken(instance);
       body['mailbox'] = azureAccount.username;
     }
-    const api = refrenceType === 'quote' ? `/quote-builder/sendQuoteEmail` : '/send-email';
+    const api = referenceType === 'quote' ? `/quote-builder/sendQuoteEmail` : '/send-email';
     axiosInstance()
       .post(api, body)
       .then(() => {

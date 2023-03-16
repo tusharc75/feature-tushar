@@ -15,8 +15,10 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { IconButton, Tooltip } from '@material-ui/core';
 import { Autorenew } from '@material-ui/icons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
 const History = ({ product, warehouse }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -24,6 +26,10 @@ const History = ({ product, warehouse }) => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
+
+  const [isRevertConfirmation, setIsRevertConfirmation] = useState({ open: false, _id: "", product: "" });
+  const [revertLoading, setRevertLoading] = useState(false);
+
 
   useEffect(() => {
     fetchRecords();
@@ -90,7 +96,8 @@ const History = ({ product, warehouse }) => {
     { field: 'warehouse', headerName: 'Plant', show: true, cellRenderer: 'commonRenderer' },
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
   ];
 
   const CreditDebitRenderer = (params: any) => (
@@ -136,27 +143,32 @@ const History = ({ product, warehouse }) => {
       <NoDataCell />
     );
 
+  const handleRevert = () => {
+    setRevertLoading(true)
+    let data = { comment: 'Reverted' };
+    axiosInstance().put(`${productInventory.api}/${isRevertConfirmation.product}/ledger-revert/${isRevertConfirmation._id}`, data)
+      .then(({ data: { data } }) => {
+        setRevertLoading(false)
+        setIsRevertConfirmation({ open: false, _id: "", product: "" })
+        dispatch({ type: 'initialize', data: [], count: 0 });
+        fetchRecords();
+      })
+      .catch((error) => {
+        setRevertLoading(false)
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   const ActionsRenderer = (params) => (
     <>
-      {['Product Inventory','Reverted'].includes(params.data.referenceType) && !params?.data?.reverted  ? (
+      {['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted ? (
         <Box pl={1}>
           <Tooltip title="Revert">
             <IconButton
               size="small"
               aria-label="revert"
               onClick={() => {
-                let data = {
-                  comment: 'Reverted'
-                };
-                axiosInstance()
-                  .put(`${productInventory.api}/${params?.data?.product}/ledger-revert/${params?.data?._id}`, data)
-                  .then(({ data: { data } }) => {
-                    dispatch({ type: 'initialize', data: [], count: 0 });
-                    fetchRecords();
-                  })
-                  .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                  });
+                setIsRevertConfirmation({ open: true, _id: params?.data?._id, product: params?.data?.product })
               }}
             >
               <Autorenew fontSize="small" color="primary" />
@@ -202,6 +214,17 @@ const History = ({ product, warehouse }) => {
           </Box>
         )}
       </Grid>
+      {isRevertConfirmation.open &&
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to revert ?`}
+          onClose={() => {
+            setIsRevertConfirmation({ open: false, _id: "", product: "" })
+          }}
+          okBtnLoading={revertLoading}
+          onOk={handleRevert}
+        />
+      }
     </>
   );
 };

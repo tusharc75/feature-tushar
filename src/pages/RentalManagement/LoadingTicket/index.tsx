@@ -19,7 +19,7 @@ import {
   INVENTORY_STATUS,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
-  DELIVERY_TICKET_REFRENCE_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
   serializedAsset,
   DELIVERY_FROM_TO_TYPE,
   COLOUR_MASTER,
@@ -138,7 +138,8 @@ const LoadingTicket = ({
           warehouse: u?.warehouse?.optionLabel,
           warehouseId: u?.warehouse?.optionValue,
           currentOwner: u?.currentOwner,
-          currentLocation: u?.currentLocation?.optionValue
+          currentLocation: u?.currentLocation?.optionValue,
+          rentalAssetStatus: u?.status,
         }));
 
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id);
@@ -154,6 +155,7 @@ const LoadingTicket = ({
           replaceReason: d.replaceReason,
           replaceAsset: d?.replaceAsset ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset : "",
           description: d?.product?.productDescription,
+          rentalAssetStatus: d?.status,
         })).map((u) => ({
           ...u,
           type: 'Asset',
@@ -167,7 +169,7 @@ const LoadingTicket = ({
           currentLocation: u?.currentLocation?.optionValue,
         }));
 
-        const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`);
+        const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`);
         deliveryTicketList = result?.data?.data;
 
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
@@ -431,6 +433,7 @@ const LoadingTicket = ({
     },
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
+    { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
   ];
 
@@ -449,7 +452,7 @@ const LoadingTicket = ({
     if (selectedRecords.length) {
       const data = {};
       data['ticketName'] = rentalManagementData.rentalJobName;
-      data['refrenceId'] = rentalManagementData._id;
+      data['referenceId'] = rentalManagementData._id;
 
       if (selectedRecords[0].warehouse) {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
@@ -508,7 +511,7 @@ const LoadingTicket = ({
 
   const handleOpenReplaceAssetReason = (rows) => {
     const data: any = {};
-    data.refrenceType = 'rentalJob';
+    data.referenceType = 'rentalJob';
     data.referenceId = rentalManagementData._id;
     const assets: any = [];
     selectedRecords?.forEach((element: any) => {
@@ -918,8 +921,8 @@ const LoadingTicket = ({
       {showTicketDialog.open && (
         <ManageDeliveryTicket
           ticketType={DELIVERY_TICKET_TYPE.loading}
-          refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
-          refrenceData={showTicketDialog.data}
+          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
+          referenceData={showTicketDialog.data}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           productInventory={selectedRecords?.filter((e) => e.type === 'Asset')}
           products={selectedRecords?.filter((e) => e.type === 'Product')}
@@ -1041,9 +1044,9 @@ const LoadingTicket = ({
       )}
       {openDeliveryTicketDialog && (
         <MultipleTicket
-          refrenceData={rentalManagementData}
+          referenceData={rentalManagementData}
           ticketType={[DELIVERY_TICKET_TYPE.loading]}
-          refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
+          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
           handleClose={() => {
             setOpenDeliveryTicketDialog(false);
             fetchRecords();
@@ -1059,8 +1062,8 @@ const LoadingTicket = ({
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog({ open: false, products: [] });
           }}
-          refrenceType={'ReplaceAsset'}
-          refrenceData={{
+          referenceType={'ReplaceAsset'}
+          referenceData={{
             _id: rentalManagementData?._id,
             warehouse: rentalManagementData?.warehouse?.optionValue
           }}

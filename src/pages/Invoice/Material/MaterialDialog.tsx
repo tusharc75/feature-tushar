@@ -16,32 +16,36 @@ import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
-import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
+import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
-  salesOrderData: any;
+  invoiceData: any;
   rowData?: object | any;
   calculatePrice?: VoidFunction | any;
   material: any[]
   selectedProducts: any[]
-  isBulkedit: any
+  isBulkedit: any;
+  showSaveAndNext: any
+  loadingEdit: any
 }
 
 const rateChangeFields = ["unit", "pricingMethod"]
 
-const SalesOrderQtyDialog: FC<EditDialogProps> = (
+const MaterialDialog: FC<EditDialogProps> = (
   {
     calculatePrice,
     onClose,
     handleSaveData,
-    salesOrderData,
+    invoiceData,
     rowData,
     material,
     selectedProducts,
-    isBulkedit
+    isBulkedit,
+    showSaveAndNext,
+    loadingEdit
   }) => {
 
 
@@ -52,6 +56,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [saveAndNext, setSaveAndNext] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -59,64 +64,15 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_salesOrder_product_fields(salesOrderData?.currency)
+    var data = await fetch_invoice_product_fields(invoiceData?.currency)
     setAllFields(JSON.parse(JSON.stringify(data)))
     if (isBulkedit) {
-      let unitArray: any = []
-      let pricingMethodArray: any = []
-      selectedProducts?.forEach(element => {
-        if (element?.[`${element.type}Detail`]?.unit) {
-          unitArray.push([...element?.[`${element.type}Detail`]?.unit])
-        }
-        if (element?.[`${element.type}Detail`]?.pricingMethod) {
-          pricingMethodArray.push([...element?.[`${element.type}Detail`]?.pricingMethod])
-        }
-      });
-      let unit: any = unitArray?.shift().filter(function (v) {
-        return unitArray?.every(function (a) {
-          return a.indexOf(v) !== -1;
-        });
-      });
-      let pricingMethod: any = pricingMethodArray?.shift()?.filter(function (v) {
-        return pricingMethodArray?.every(function (a) {
-          return a.indexOf(v) !== -1;
-        });
-      });
-      const unitOptions: any = arrayToDropwdownOption(unit)
-      const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
-      data.forEach((element) => {
-        if (element.fieldName === "unit") {
-          element.option = unitOptions;
-        }
-        if (element.fieldName === "pricingMethod") {
-          element.option = pricingMethodOptions;
-        }
-        element.required = false;
-        element.isFormula = false;
-        element.isMulitFormula = false;
-      })
       setInitialData({
         fields: data,
         values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", tenure: "" },
       });
     }
     else {
-      let unitOptions: any = []
-      let pricingMethodOptions: any = []
-      if (rowData?.[`${rowData.type}Detail`]?.unit) {
-        unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.unit);
-      }
-      if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
-        pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
-      }
-      data.forEach(element => {
-        if (element.fieldName === "unit") {
-          element.option = unitOptions;
-        }
-        if (element.fieldName === "pricingMethod") {
-          element.option = pricingMethodOptions;
-        }
-      });
       setInitialData({
         fields: data,
         values: getObjKeysWithValues(rowData, data),
@@ -253,7 +209,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
           rows = [...rows, ...parent]
         }
       });
-      handleSaveData(rows)
+      handleSaveData(rows, saveAndNext)
     }
     else {
       if (rowData.parentId !== null && !showConfirmationDialog) {
@@ -277,7 +233,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
         }
         const child = material.filter((e) => e.parentId === rowData._id)
         resetValueZero(child)
-        handleSaveData([...rows, ...child])
+        handleSaveData([...rows, ...child], saveAndNext)
         setShowConfirmationDialog(false);
       }
     }
@@ -304,7 +260,6 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
       }
     }
   };
-
 
   function validate(values) {
     const errors = {};
@@ -419,7 +374,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
                                         const value = val && val.optionValue ? val.optionValue : '';
                                         getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
                                           if (price) {
-                                            let priceFieldName = "price_" + salesOrderData?.currency?.toLowerCase()
+                                            let priceFieldName = "price_" + invoiceData?.currency?.toLowerCase()
                                             const result = autoCalculateSpecificFields({ [priceFieldName]: price, [field.fieldName]: value }, values, initialData.fields)
                                             if (Object.keys(result).length >= 1) {
                                               for (var x in result) {
@@ -538,4 +493,4 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
   </Dialog>);
 };
 
-export default SalesOrderQtyDialog;
+export default MaterialDialog;
