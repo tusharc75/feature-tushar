@@ -18,7 +18,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
 const History = ({ product, warehouse }) => {
-  
+
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -96,7 +96,8 @@ const History = ({ product, warehouse }) => {
     { field: 'warehouse', headerName: 'Plant', show: true, cellRenderer: 'commonRenderer' },
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
   ];
 
   const CreditDebitRenderer = (params: any) => (
