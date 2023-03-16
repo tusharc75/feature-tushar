@@ -7,7 +7,7 @@ import { CustomOfflineContext } from '../../StateProvider/OfflineContext/Offline
 import GridFilter from '../GridFilter';
 
 // OTHER COMPONENTS
-import { RefreshButton, ArrangeView } from './GridButtons';
+import { RefreshButton, ArrangeView, ShowOnlySelected } from './GridButtons';
 
 const CustomGridFilterHeader = (props) => {
   const {
@@ -24,7 +24,9 @@ const CustomGridFilterHeader = (props) => {
     renderedFrom,
     isClientSideGrid,
     buttonGap = '10px',
-    dispatch
+    dispatch,
+    showOnlyShowFilteredRecordSwitch = false,
+    selectedRecords = null
   } = props;
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
@@ -58,6 +60,9 @@ const CustomGridFilterHeader = (props) => {
   return (
     <>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', marginBottom: '15px', justifyContent: 'space-between' }}>
+        {showOnlyShowFilteredRecordSwitch && (
+          <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '10px 0 0px' }} />
+        )}
         {showFilters && (
           <div className="table-filter-v1" style={{ flexBasis: '766px', maxWidth: '766px' }}>
             <DisplyaFilters
@@ -69,7 +74,6 @@ const CustomGridFilterHeader = (props) => {
             />
           </div>
         )}
-
         <div style={{ marginInlineStart: 'auto' }}>
           {showFilters && (
             <Tooltip title="Apply filter" placement="top">

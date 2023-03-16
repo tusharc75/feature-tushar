@@ -471,10 +471,9 @@ export default function CustomAgGrid({
             renderedFrom={renderedFrom}
             isClientSideGrid={isClientSideGrid}
             dispatch={dispatch}
+            selectedRecords={selectedRecords}
+            showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
           />
-          {showOnlyShowFilteredRecordSwitch && (
-            <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '0 0 10px' }} />
-          )}
 
           <div className="table-container-v1">
             <div id="grid-listing" className="ag-theme-material ag-grid-listing-grid">
