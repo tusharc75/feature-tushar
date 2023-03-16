@@ -368,7 +368,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   const calculatePrice = (arr: any[]) => {
     if (salesOrderData) {
       const data: any = {};
-      data.conditionType = ['Rent'];
+      data.conditionType = ['Price'];
       data.material = arr.map((ele) => ({
         materialId: ele?.materialId,
         materialType: ele?.type,
