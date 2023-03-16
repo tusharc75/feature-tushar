@@ -7,7 +7,7 @@ import { CustomOfflineContext } from '../../StateProvider/OfflineContext/Offline
 import GridFilter from '../GridFilter';
 
 // OTHER COMPONENTS
-import { RefreshButton, ArrangeView } from './GridButtons';
+import { RefreshButton, ArrangeView, ShowOnlySelected } from './GridButtons';
 
 const CustomGridFilterHeader = (props) => {
   const {
@@ -24,7 +24,9 @@ const CustomGridFilterHeader = (props) => {
     renderedFrom,
     isClientSideGrid,
     buttonGap = '10px',
-    dispatch
+    dispatch,
+    showOnlyShowFilteredRecordSwitch = false,
+    selectedRecords = null
   } = props;
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
@@ -67,6 +69,9 @@ const CustomGridFilterHeader = (props) => {
               clearSingleFilter={clearSingleFilter}
               clearFilterAll={clearFilterAll}
             />
+            {showOnlyShowFilteredRecordSwitch && (
+              <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '10px 0 0px' }} />
+            )}
           </div>
         )}
 
