@@ -580,6 +580,15 @@ const Product = () => {
                 type: 'export'
               },
               {
+                title: 'Child Product Export',
+                api: `${product.api}/unknown/bom/template?export=true${
+                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                    : ''
+                }`,
+                type: 'export'
+              },
+              {
                 title: 'Child Product Import',
                 api: `${product.api}/unknown/bom/import`,
                 type: 'import'
@@ -590,6 +599,15 @@ const Product = () => {
                 type: 'export'
               },
               {
+                title: 'Service Template Export',
+                api: `${product.api}/unknown/service-master/template?export=true${
+                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                    : ''
+                }`,
+                type: 'export'
+              },
+              {
                 title: 'Service Import',
                 api: `${product.api}/unknown/service-master/import`,
                 type: 'import'
@@ -597,6 +615,15 @@ const Product = () => {
               {
                 title: 'Service Package Template',
                 api: `${product.api}/unknown/package/template`,
+                type: 'export'
+              },
+              {
+                title: 'Service Package Export',
+                api: `${product.api}/unknown/package/template?export=true${
+                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                    : ''
+                }`,
                 type: 'export'
               },
               {
