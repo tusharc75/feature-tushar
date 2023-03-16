@@ -24,8 +24,8 @@ export default forwardRef((props: any, ref) => {
 
   let timeout;
   const onInputBoxChanged = (input) => {
-    let millisec = Object.keys(input.target.value).length > 0 ? 600 : 5;
     setCurrentValue(input.target.value);
+    let millisec = Object.keys(input.target.value).length > 0 ? 600 : 5;
 
     if (timeout) {
       clearTimeout(timeout);
