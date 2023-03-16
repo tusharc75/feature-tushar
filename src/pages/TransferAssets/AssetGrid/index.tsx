@@ -9,7 +9,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { prepareDataForGrid, deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, transferAsset, serializedAsset } from "src/constants/helpers"
+import { prepareDataForGrid, deliveryTicket, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE, transferAsset, serializedAsset } from "src/constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "src/constants/useColumns"
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { FaSuitcase } from "react-icons/fa";
@@ -110,7 +110,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
   const fetchLoadingTickets = () =>
     new Promise((resolve, reject) => {
-      axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${transferAssetData?._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
+      axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${transferAssetData?._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
         .then(({ data: { data } }) => {
           resolve(data);
         })
@@ -305,7 +305,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog(false);
           }}
-          refrenceType="Transfer Asset"
+          referenceType="Transfer Asset"
           isAdding={isAdding}
           selectedProducts={[]}
           filterByPlant={transferAssetData?.transferFromPlant.optionValue}

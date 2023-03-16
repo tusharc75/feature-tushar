@@ -149,7 +149,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   const saveEntity = () => {
     axiosInstance()
       .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -417,8 +417,8 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
     id === selectedEntity
       ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
       : hasAccessToEntity(id)
-      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-      : '';
+        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+        : '';
 
   function handleListKeyDown(event) {
     if (event.key === 'Tab') {
@@ -541,7 +541,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => {})
+                      .then(() => { })
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -661,7 +661,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => {})
+                      .then(() => { })
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -723,20 +723,20 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-            <MenuItem
-              title={curEntity.entityName}
-              key={curEntity._id}
-              selected={selectedEntity === curEntity._id}
-              onClick={() => {
-                handleSelectedEnity(curEntity._id);
-                closeEntitiesMenu();
-              }}
-            >
-              <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
-              <Box component="span" marginX={1} />
-              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-            </MenuItem>
-          ))
+          <MenuItem
+            title={curEntity.entityName}
+            key={curEntity._id}
+            selected={selectedEntity === curEntity._id}
+            onClick={() => {
+              handleSelectedEnity(curEntity._id);
+              closeEntitiesMenu();
+            }}
+          >
+            <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
+            <Box component="span" marginX={1} />
+            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+          </MenuItem>
+        ))
         : null}
     </Menu>
   );
@@ -767,7 +767,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
 
       {/* Remove below false to show chat notification icon */}
 
-      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => {}}>
+      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => { }}>
         <Badge
           variant="dot"
           overlap="circular"
@@ -804,7 +804,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
         </Popover>
       </MenuItem>
 
-      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => {}}>
+      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => { }}>
         <Badge
           variant="dot"
           overlap="circular"
@@ -914,24 +914,20 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   }
 
   const startTour = () => {
-    if (['local', 'development'].includes(process.env.REACT_APP_ENV)) {
-      const paths = pathname.split('/').filter((x: string) => x);
-      let path: string;
-
-      if (paths.includes('detail')) {
-        paths.splice(paths.length - 1, 1);
-        path = paths.join('/');
-      }
-
-      dispatch({
-        type: SET_START_TOUR,
-        payload: {
-          path: paths.includes('detail') ? `/${path}` : pathname,
-          start: true,
-          stepIndex: 0
-        }
-      });
+    const paths = pathname.split('/').filter((x: string) => x);
+    let path: string;
+    if (paths.includes('detail')) {
+      paths.splice(paths.length - 1, 1);
+      path = paths.join('/');
     }
+    dispatch({
+      type: SET_START_TOUR,
+      payload: {
+        path: paths.includes('detail') ? `/${path}` : pathname,
+        start: true,
+        stepIndex: 0
+      }
+    });
   };
 
   return (

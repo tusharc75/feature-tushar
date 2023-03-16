@@ -9,122 +9,43 @@ import {
   MenuItem,
   Button,
   Menu,
-  MenuProps,
-  styled,
-  alpha,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Slide,
-  Divider,
-  Radio,
-  RadioGroup,
-  FormControl,
-  FormControlLabel,
-  List,
-  ListItemIcon,
-  ListItemText,
-  withStyles,
-  makeStyles
 } from '@material-ui/core';
-import MuiListItem from '@material-ui/core/ListItem';
-import { TransitionProps } from '@material-ui/core/transitions';
 import { ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
-  FaUserTie,
-  IoFilterCircle,
-  MdAccountBalanceWallet,
   MdAdd,
   MdFilterList,
   MdSort,
-  FaCalendarDay,
-  RiTicketFill,
-  RiArrowUpDownFill,
-  RiArrowUpDownLine,
-  BsArrowUpShort,
-  BsArrowUp,
-  BsArrowDown
 } from 'react-icons/all';
 import routes from 'src/components/Helpers/Routes';
-import { useData } from '../../StateProvider/Provider';
 
-const StyledMenu = styled((props: MenuProps) => (
-  <Menu
-    elevation={0}
-    anchorOrigin={{
-      vertical: 'bottom',
-      horizontal: 'right'
-    }}
-    transformOrigin={{
-      vertical: 'top',
-      horizontal: 'right'
-    }}
-    {...props}
-  />
-));
-
-const ListItem = withStyles({
-  root: {
-    borderLeft: '3px solid white',
-    '& .MuiListItemIcon-root': {
-      minWidth: '36px !important',
-      fontSize: '16px'
-    },
-    '&$selected': {
-      borderLeft: '3px solid #43AEAA',
-      color: '#43AEAA !important',
-      backgroundColor: 'white !important',
-      '& .MuiListItemIcon-root': {
-        color: '#43AEAA'
-      },
-      '& .MuiListItemText-primary': {
-        fontWeight: 600
-      }
-    }
-    // "&$selected:hover": {
-    //   backgroundColor: "purple",
-    //   color: "white",
-    //   "& .MuiListItemIcon-root": {
-    //     color: "white"
-    //   }
-    // },
-    // "&:hover": {
-    //   backgroundColor: "blue",
-    //   color: "white",
-    //   "& .MuiListItemIcon-root": {
-    //     color: "white"
-    //   }
-    // }
-  },
-  selected: {}
-})(MuiListItem);
-
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 function OpportunitiesHeader(props) {
   const ref = useRef(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const [clicked, setClicked] = useState(false);
-
-  const handleListIconClick = (id) => {
-    setClicked(true);
-  };
-
   const [isOpenDialog, setisOpenDialog] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const {
+    selectedRecords,
+    onTypeChange,
+    options,
+    onSearch,
+    searchVal,
+    onCreate,
+    opportunityPermissions,
+    showConfirmBox,
+    canDelete,
+    icon,
+    heading,
+    children,
+    showTransferEntityDialog,
+    columns,
+    dispatch,
+    filters
+  } = props;
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -150,16 +71,6 @@ function OpportunitiesHeader(props) {
 
   const closeActions = () => {
     setAnchorEl(null);
-  };
-  const [show, setShow] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  // Sort
-
-  const [selectedIndex, setSelectedIndex] = React.useState(1);
-
-  const handleListItemClick = (event, index) => {
-    setSelectedIndex(index);
   };
 
   useEffect(() => {
@@ -189,24 +100,6 @@ function OpportunitiesHeader(props) {
     }
   };
 
-  const {
-    selectedRecords,
-    onTypeChange,
-    options,
-    onSearch,
-    searchVal,
-    onCreate,
-    opportunityPermissions,
-    showConfirmBox,
-    canDelete,
-    icon,
-    heading,
-    children,
-    showTransferEntityDialog,
-    columns,
-    dispatch,
-    filters
-  } = props;
 
   let toggleInner = options && (
     <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
@@ -229,7 +122,6 @@ function OpportunitiesHeader(props) {
               id="demo-customized-button"
               aria-controls="demo-customized-menu"
               aria-haspopup="true"
-              // aria-expanded={open ? 'true' : undefined}
               color="secondary"
               variant="text"
               disableElevation
@@ -251,7 +143,6 @@ function OpportunitiesHeader(props) {
               id="demo-customized-button"
               aria-controls="demo-customized-menu"
               aria-haspopup="true"
-              // aria-expanded={open ? 'true' : undefined}
               variant="text"
               color="secondary"
               disableElevation
@@ -316,7 +207,7 @@ function OpportunitiesHeader(props) {
               <>
                 <Button
                   disabled={canDelete}
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
                   color="default"
                   size="small"
                   onClick={openActions}

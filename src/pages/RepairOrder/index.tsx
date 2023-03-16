@@ -30,17 +30,7 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import {
-  FaSuitcase,
-  SiStatuspage,
-  FaWarehouse,
-  GiAutoRepair,
-  GrStatusInfo,
-  BsFillPersonFill,
-  GiCargoShip,
-  FaShippingFast,
-  RiSpaceShipFill
-} from 'react-icons/all';
+import { SiStatuspage } from 'react-icons/all';
 import ManageRepairOrder from './ManageRepairOrder';
 import RepairOrderHeader from './RepairOrderHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -91,6 +81,7 @@ const RepairOrder = () => {
   const [columns, setColumns] = useState([]);
 
   const { getColumnData } = useColumns();
+  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
 
   useEffect(() => {
     fetchGridColumns();
@@ -165,7 +156,7 @@ const RepairOrder = () => {
     if (renderCount > 0) {
       fetchRepairOrders();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, fromRental, showFilteredRecordsOnly]);
 
   const handleSingleDeleteRepairOrder = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -270,6 +261,9 @@ const RepairOrder = () => {
       deepFilter = `filterRepairOrders=${selectedType}`;
     }
     let filterById = [];
+    if (fromRental) {
+      filterById.push({ field: "rentalJob", term: fromRental?._id });
+    }
     if (filterById.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
     }
@@ -448,11 +442,18 @@ const RepairOrder = () => {
             heading={routes.repairOrder.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             filters={filters}
-
-            // showCloneRepairOrderDialog={() => {
-            //   handleShowCloneRepairOrderDialog()
-            // }}
-          ></RepairOrderHeader>
+          >
+            {fromRental && (
+              <Chip
+                className="ml-3"
+                color="primary"
+                label={`Rental Job : ${fromRental?.rentalJobName}`}
+                onDelete={() => {
+                  setFromRental(null);
+                }}
+              />
+            )}
+          </RepairOrderHeader>
         </div>
         {Object.keys(frameworkComponents).length > 0 ? (
           isMobile && !isTablet ? (
@@ -522,9 +523,8 @@ const RepairOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${
-              deleteRecord.repairOrderNumber || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${deleteRecord.repairOrderNumber || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

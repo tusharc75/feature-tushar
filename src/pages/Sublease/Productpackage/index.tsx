@@ -567,7 +567,7 @@ const Productpackage = ({
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           type={addExistingProductDialog.type}
-          refrenceType="sublease"
+          referenceType="sublease"
           renderedFrom={addExistingProductDialog.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
           ignoreIds={[]}
         />

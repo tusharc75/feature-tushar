@@ -24,11 +24,14 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import { MdAdd, MdSort, MdFilterList } from 'react-icons/md';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
+import { useLocation } from 'react-router-dom';
+import queryString from 'query-string';
 
 let termsTimeout;
 export default function TermsAndCondition(props) {
   const history = useHistory();
   const { termsAndConditionBreadcrumb } = props;
+  const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, user, selectedEntity }
@@ -44,6 +47,7 @@ export default function TermsAndCondition(props) {
     approveAccount: false
   });
   const [deleteRec, setDeleteRec] = useState<any>({});
+  const [termsAndConditionsData, setTermsAndConditionsData] = useState([]);
   const [editRecord, setEditRecord] = useState<any>({});
   const [sortOpen, setSortOpen] = useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
@@ -56,6 +60,16 @@ export default function TermsAndCondition(props) {
       setActionsPermissions(permissions?.[termsAndCondition.permission]);
     }
   }, [permissions]);
+
+  useEffect(() => {
+    const parsedParams = queryString.parse(location?.search);
+    const tempData = termsAndConditionsData.find(d => d.id === parsedParams?.id)
+    if (parsedParams?.id && tempData) {
+      setShowCreateDialog({ open: true, isClone: false });
+
+      setEditRecord({ ...tempData });
+    }
+  }, [location, termsAndConditionsData]);
 
   useEffect(() => {
     fetchTermsAndConditions();
@@ -136,6 +150,7 @@ export default function TermsAndCondition(props) {
             ...u,
             id: u._id
           }));
+          setTermsAndConditionsData(rows)
           dispatch({ type: 'initialize', data: rows, count: data.count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });

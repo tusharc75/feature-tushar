@@ -30,7 +30,6 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { FaDiceOne } from 'react-icons/fa';
 import moment from 'moment';
 import AddIcon from '@material-ui/icons/AddCircle';
@@ -44,8 +43,8 @@ const ManageRepairOrder = ({
   repairOrderId = null,
   onClose,
   onSuccess,
-  refrenceType = null,
-  refrenceData = null,
+  referenceType = null,
+  referenceData = null,
   isEditable = true,
   isAnyMaterial = false
 }) => {
@@ -203,16 +202,26 @@ const ManageRepairOrder = ({
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
         initialData['repairOrderNumber'] = `RO_${generateUniqueIdOnly()}`;
-        if ('Rental Job') {
-          initialData['warehouse'] = refrenceData?.warehouse;
-          // initialData["rentalJob"] = refrenceData?._id;
-          initialData['customerAccount'] = refrenceData?.customerAccount;
-          initialData['customerContact'] = refrenceData?.customerContact;
-          initialData['type'] = REPAIR_ORDER_TYPE.external;
+        if (referenceType === "rentalJob") {
+          if (fieldsDataForCreate?.some((e) => e?.fieldName === "warehouse")) {
+            initialData['warehouse'] = referenceData?.warehouse;
+          }
+          if (fieldsDataForCreate?.some((e) => e?.fieldName === "rentalJob")) {
+            initialData["rentalJob"] = referenceData?._id;
+          }
+          if (fieldsDataForCreate?.some((e) => e?.fieldName === "customerAccount")) {
+            initialData['customerAccount'] = referenceData?.customerAccount;
+          }
+          if (fieldsDataForCreate?.some((e) => e?.fieldName === "customerContact")) {
+            initialData['customerContact'] = referenceData?.customerContact;
+          }
+          if (fieldsDataForCreate?.some((e) => e?.fieldName === "type")) {
+            initialData['type'] = REPAIR_ORDER_TYPE.external;
+          }
         }
         setDisablePlantIfAssetAdded(false);
         setRepairOrderInitialData({
-          fields: fieldsDataForCreate,
+          fields: fieldsDataForCreate?.filter((e) => !["rentalJob"]?.includes(e.fieldName)),
           initialValues: initialData
         });
         setFormValues(initialData);
@@ -260,7 +269,7 @@ const ManageRepairOrder = ({
       axiosInstance()
         .post(`${repairOrder.api}`, rest)
         .then(({ data: { data, message } }) => {
-          if (!refrenceType) {
+          if (!referenceType) {
             history.push(`${routes.repairOrderDetail.path}/${data._id}`);
           }
           setLoading(false);
@@ -297,7 +306,7 @@ const ManageRepairOrder = ({
     }));
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => { }, []);
   return (
     <Dialog
       maxWidth="md"
@@ -354,7 +363,7 @@ const ManageRepairOrder = ({
           initialValues={repairOrderInitialData.initialValues}
           validationSchema={yupSchema(repairOrderInitialData.fields)}
           validateOnMount
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
             <>
@@ -395,8 +404,8 @@ const ManageRepairOrder = ({
                                               isAnyMaterial || ![REPAIR_ORDER_TYPE.external].includes(values['type'])
                                                 ? true
                                                 : !isClone
-                                                ? repairOrderId && field.disableOnEdit
-                                                : false || !isEditable
+                                                  ? repairOrderId && field.disableOnEdit
+                                                  : false || !isEditable
                                             }
                                             required={field.required}
                                             fullWidth
@@ -427,8 +436,8 @@ const ManageRepairOrder = ({
                                                   isAnyMaterial || ![REPAIR_ORDER_TYPE.external].includes(values['type'])
                                                     ? true
                                                     : !isClone
-                                                    ? repairOrderId && field.disableOnEdit
-                                                    : false
+                                                      ? repairOrderId && field.disableOnEdit
+                                                      : false
                                                 }
                                                 size="small"
                                               >
@@ -437,10 +446,10 @@ const ManageRepairOrder = ({
                                                     isAnyMaterial || ![REPAIR_ORDER_TYPE.external].includes(values['type'])
                                                       ? 'disabled'
                                                       : isClone
-                                                      ? 'primary'
-                                                      : repairOrderId && field.disableOnEdit
-                                                      ? 'disabled'
-                                                      : 'primary'
+                                                        ? 'primary'
+                                                        : repairOrderId && field.disableOnEdit
+                                                          ? 'disabled'
+                                                          : 'primary'
                                                   }
                                                 />
                                               </IconButton>
@@ -482,18 +491,18 @@ const ManageRepairOrder = ({
                                               ![REPAIR_ORDER_TYPE.external].includes(values['type'])
                                                 ? true
                                                 : !isClone
-                                                ? repairOrderId && field.disableOnEdit
-                                                : false || !isEditable
+                                                  ? repairOrderId && field.disableOnEdit
+                                                  : false || !isEditable
                                             }
                                             required={field.required}
                                             fullWidth
                                             isTooltip={false}
                                             size="small"
                                             onOpen={() => onCustomerContactDropdownOpen(values['customerAccount'])}
-                                            // onChange={(e, value) => {
-                                            //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                          // onChange={(e, value) => {
+                                          //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
 
-                                            // }}
+                                          // }}
                                           />
                                         </Grid>
                                         {permissions.customerContact?.isCreate && (
@@ -507,8 +516,8 @@ const ManageRepairOrder = ({
                                                   ![REPAIR_ORDER_TYPE.external].includes(values['type'])
                                                     ? true
                                                     : !isClone
-                                                    ? repairOrderId && field.disableOnEdit
-                                                    : false
+                                                      ? repairOrderId && field.disableOnEdit
+                                                      : false
                                                 }
                                                 size="small"
                                               >
@@ -517,10 +526,10 @@ const ManageRepairOrder = ({
                                                     ![REPAIR_ORDER_TYPE.external].includes(values['type'])
                                                       ? 'disabled'
                                                       : isClone
-                                                      ? 'primary'
-                                                      : repairOrderId && field.disableOnEdit
-                                                      ? 'disabled'
-                                                      : 'primary'
+                                                        ? 'primary'
+                                                        : repairOrderId && field.disableOnEdit
+                                                          ? 'disabled'
+                                                          : 'primary'
                                                   }
                                                 />
                                               </IconButton>
@@ -803,8 +812,8 @@ const ManageRepairOrder = ({
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                             : null
                                         }
                                       />

@@ -290,7 +290,7 @@ const SendEmail = ({ purchaseOrderData }) => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            refrenceType="purchaseOrder"
+            referenceType="purchaseOrder"
           />
         </Dialog>
       )}

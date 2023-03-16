@@ -26,6 +26,9 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { useHistory } from 'react-router-dom';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import AttachmentIcon from '@material-ui/icons/Attachment';
+import ReceiptIcon from '@material-ui/icons/Receipt';
+import RepeatIcon from '@material-ui/icons/Repeat';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
@@ -33,7 +36,7 @@ import { ExpandMore } from '@material-ui/icons';
 import AddNonSerializeAssets from './AddNonSerializeAssets';
 import { removeAssetsInRental } from '../rentalOfflineHelper';
 import WarningIcon from '@material-ui/icons/Warning';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
 
 const SerializedAsset = ({
   rentalManagementData,
@@ -178,7 +181,7 @@ const SerializedAsset = ({
                     });
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color={'primary'} />
+                  <AttachmentIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -192,7 +195,7 @@ const SerializedAsset = ({
                     });
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color={'primary'} />
+                  <ReceiptIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -207,23 +210,21 @@ const SerializedAsset = ({
             )}
             {row.original?.type === 'asset' && (
               <span className="d-flex align-items-center gap-2">
-                {[INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.reserved].includes(row.original.status) &&
-                  !row?.original?.rentalAssetStatus &&
-                  allowedToEdit && (
-                    <HtmlTooltip title={`Remove`}>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setShowConfirmBox(true);
-                          setDeleteData([
-                            { _id: row.original.inventory, assetNumber: row.original.detail, isNonSerializeAsset: row.original.isNonSerializeAsset }
-                          ]);
-                        }}
-                      >
-                        <Delete fontSize="small" color={'error'} />
-                      </IconButton>
-                    </HtmlTooltip>
-                  )}
+                {(allowedToEdit && row?.original?.canRemove) && (
+                  <HtmlTooltip title={`Remove`}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setShowConfirmBox(true);
+                        setDeleteData([
+                          { _id: row.original.inventory, assetNumber: row.original.detail, isNonSerializeAsset: row.original.isNonSerializeAsset }
+                        ]);
+                      }}
+                    >
+                      <Delete fontSize="small" color={'error'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
                 {row.original.isTransferAsset && (
                   <HtmlTooltip
                     title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}
@@ -236,7 +237,7 @@ const SerializedAsset = ({
                         });
                       }}
                     >
-                      <OpenInNewIcon fontSize="small" color={'primary'} />
+                      <RepeatIcon fontSize="small" color={'primary'} />
                     </IconButton>
                   </HtmlTooltip>
                 )}
@@ -425,13 +426,26 @@ const SerializedAsset = ({
         isTransferAsset = true;
         transferData = transferFilter[0];
       }
+      var canRemove = false;
+      if (user?.user?.brandPolicy?.rentalPlanning) {
+        if (_inventory?.status === INVENTORY_STATUS.reserved) {
+          canRemove = true;
+        }
+      }
+      else {
+        if ([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.reserved].includes(_inventory?.inventoryDetail?.status) &&
+          (!_inventory?.status || _inventory?.status === INVENTORY_STATUS.reserved)) {
+          canRemove = true;
+        }
+      }
       subRows.push({
         ..._inventory,
         srno: `${parent.srno}.${k + 1}`,
         detail: _inventory?.assetNumber ? _inventory?.assetNumber : _inventory.inventoryDetail?.assetNumber,
+        description: parent?.description,
         type: 'asset',
         isNonSerializeAsset: false,
-        status: _inventory?.status ? _inventory?.status : _inventory.inventoryDetail?.status,
+        status: _inventory.inventoryDetail?.status,
         rentalAssetStatus: _inventory?.status,
         manualStatus: _inventory.inventoryDetail?.manualStatus,
         warehouse: _inventory.inventoryDetail?.warehouse,
@@ -439,7 +453,8 @@ const SerializedAsset = ({
         isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
         isTransferAsset: isTransferAsset,
         transferData: transferData,
-        isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset
+        isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset,
+        canRemove: canRemove
       });
     });
 
@@ -450,11 +465,13 @@ const SerializedAsset = ({
         inventory: _inventory.id,
         srno: `${parent.srno}.${k + 1}`,
         detail: _inventory?.assetNumber,
+        description: parent?.description,
         type: 'asset',
         isNonSerializeAsset: true,
         status: _inventory?.status,
         warehouse: rentalManagementData?.warehouse?.optionValue,
-        isValid: true
+        isValid: true,
+        canRemove: true,
       });
     });
 
@@ -665,7 +682,7 @@ const SerializedAsset = ({
       };
     });
 
-    
+
     const assetProduct = [];
     flatArray.forEach((element) => {
       if (element.type === 'product' && element.realAssetQty > element.realAssetAssignedQty) {
@@ -809,12 +826,9 @@ const SerializedAsset = ({
                   {`Assign Serial Number`}
                 </MenuItem>
                 <MenuItem
-                  disabled={
-                    treeToFlatArray(selectedRecords, 'subRows')?.filter((d) => d.type === 'asset' && d.status === INVENTORY_STATUS.reserved)
-                      .length === 0
-                  }
+                  disabled={flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove)?.length === 0}
                   onClick={() => {
-                    const assets = treeToFlatArray(selectedRecords, 'subRows')?.filter((d) => d.type === 'asset');
+                    const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);
                     const dataTodelete = [];
                     assets?.forEach((element) => {
                       dataTodelete.push({ _id: element?.inventory, assetNumber: element?.detail, isNonSerializeAsset: element?.isNonSerializeAsset });
@@ -933,11 +947,13 @@ const SerializedAsset = ({
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog({ open: false });
           }}
-          refrenceType={'Rental Job'}
-          refrenceData={{
+          referenceType={'Rental Job'}
+          referenceData={{
             _id: rentalManagementData?._id,
             warehouse: rentalManagementData?.warehouse?.optionValue,
             wellName: rentalManagementData?.wellName?.optionValue,
+            fromDate: rentalManagementData?.estimateStartDate,
+            toDate: rentalManagementData?.estimateEndDate,
             afeNumber: rentalManagementData?.afeNumber
           }}
           isAdding={isAdding}
@@ -990,7 +1006,7 @@ const SerializedAsset = ({
             afeNumber: rentalManagementData?.afeNumber,
             warehouse: rentalManagementData?.warehouse?.optionValue
           }}
-          refrenceId={rentalManagementData._id}
+          referenceId={rentalManagementData._id}
         />
       )}
       {showOrderDialog.open && showOrderDialog.type === 'purchaseOrder' && (
@@ -1030,9 +1046,9 @@ const SerializedAsset = ({
               message: `${sidebarResource.sublease} has been created successfully`
             });
           }}
-          refrenceType="rentalJob"
-          refrenceId={rentalManagementData._id}
-          refrenceData={{ ...rentalManagementData, material: [...showOrderDialog?.products?.filter((e) => e.serialized === true)] }}
+          referenceType="rentalJob"
+          referenceId={rentalManagementData._id}
+          referenceData={{ ...rentalManagementData, material: [...showOrderDialog?.products?.filter((e) => e.serialized === true)] }}
         />
       )}
     </Fragment>

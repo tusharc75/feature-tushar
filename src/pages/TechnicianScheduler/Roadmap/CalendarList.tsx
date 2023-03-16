@@ -26,7 +26,7 @@ import styles from './roadmap.module.scss';
 //   }
 // }));
 
-export default function CalanderList(props) {
+export default function CalendarList(props) {
   const { activity, expanded, selected, handleSelect, startDate, endDate, totalDay, calendarType } = props;
   // const classes = useStyles();
 

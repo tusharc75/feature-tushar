@@ -13,9 +13,12 @@ import { GridApi } from 'ag-grid-community';
 import { uniqBy } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 
-import ArrangeView from './ArrangeView';
+import ArrangeView from './GridButtons/ArrangeView/ArrangeView';
 
 import CustomGridFilterHeader from './CustomGridFilterHeader';
+
+// OTHER COMPONENTS
+import { ShowOnlySelected } from './GridButtons';
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -163,7 +166,7 @@ export default function CustomAgGrid({
   customGridOptions = null,
   actionLabel = null,
   actionEditable = false,
-  onCellValueChanged = () => { },
+  onCellValueChanged = () => {},
   showOnlyShowFilteredRecordSwitch = false,
   idProperty = '_id',
   allowHeaderSelection = true,
@@ -192,8 +195,7 @@ export default function CustomAgGrid({
           dispatch({ type: 'search', search: query });
         }
       }, 300);
-    }
-    else {
+    } else {
       timer = setTimeout(() => {
         dispatch({ type: 'search', search: '' });
         dispatch({ type: 'loading', loading: false });
@@ -384,15 +386,15 @@ export default function CustomAgGrid({
                 ? true
                 : checkStaticField(renderedFrom, column.field)
               : column.hasOwnProperty('show') && !column?.show
-                ? true
-                : false
+              ? true
+              : false
           }
           floatingFilterComponent="customFloatingFilter"
           valueGetter={column.valueGetter ?? null}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+          // floatingFilterComponent={column.floatingFilterComponent ?? null}
+          // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+          //   suppressFilterButton: true,
+          // }}
         ></AgGridColumn>
       )
     ) : column.isAction ? (
@@ -418,25 +420,25 @@ export default function CustomAgGrid({
               ? true
               : checkStaticField(renderedFrom, column.field)
             : column.hasOwnProperty('show') && !column?.show
-              ? true
-              : false
+            ? true
+            : false
         }
         comparator={() => {
           return 0;
         }}
         floatingFilterComponent="customFloatingFilter"
         valueGetter={column.valueGetter ?? null}
-      // floatingFilterComponent={column.floatingFilterComponent ?? null}
-      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-      //   suppressFilterButton: true,
-      // }}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
       ></AgGridColumn>
     );
   });
 
   return (
     <>
-      <div className="ag-grid-main custom-react-table-v1">
+      <div className="ag-grid-main custom-react-table-v1 ">
         {loading ? (
           <div className="loader">
             <span>Loading</span>
@@ -446,30 +448,35 @@ export default function CustomAgGrid({
         )}
 
         <div style={{ opacity: loading ? 0.5 : 1 }}>
-          <CustomGridHeaderOptions
+          {/* <CustomGridHeaderOptions
             refreshGrid={refreshGrid}
             renderedFrom={renderedFrom}
             dispatch={dispatch}
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
             selectedRecords={selectedRecords}
+          /> */}
+          {/* SHOW ONLY SELECTED BUTTON */}
+
+          <CustomGridFilterHeader
+            showFilters={showFilters}
+            resource={resource}
+            currentGridApi={currentGridApi}
+            refreshGrid={refreshGrid}
+            setSelectedReportView={setSelectedReportView}
+            selectedReportView={selectedReportView}
+            reportSave={reportSave}
+            columns={columns}
+            setColumns={setColumns}
+            columnApi={columnApi}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={isClientSideGrid}
+            dispatch={dispatch}
           />
-          {showFilters && (
-            <>
-              <CustomGridFilterHeader resource={resource} currentGridApi={currentGridApi} />
-            </>
+          {showOnlyShowFilteredRecordSwitch && (
+            <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '0 0 10px' }} />
           )}
-          <div className="table-container-v1" style={{ position: 'relative' }}>
-            <ArrangeView
-              setSelectedReportView={setSelectedReportView}
-              selectedReportView={selectedReportView}
-              reportSave={reportSave}
-              columns={columns}
-              setColumns={setColumns}
-              columnApi={columnApi}
-              renderedFrom={renderedFrom}
-              isClientSideGrid={isClientSideGrid}
-              dispatch={dispatch}
-            />
+
+          <div className="table-container-v1">
             <div id="grid-listing" className="ag-theme-material ag-grid-listing-grid">
               <AgGridReact
                 onFirstDataRendered={onFirstDataRendered}
@@ -630,6 +637,7 @@ export default function CustomAgGrid({
               </AgGridReact>
             </div>
           </div>
+
           {allowPagination && (
             <TablePagination
               component="div"

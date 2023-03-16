@@ -356,7 +356,7 @@ const PricingConditions = () => {
                     {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                   </Button>
                   <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="default"
                     size="small"
                     className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}

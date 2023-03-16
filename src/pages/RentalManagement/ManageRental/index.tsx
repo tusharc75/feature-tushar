@@ -231,7 +231,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         setCloneHeading(rentalJobName);
                         setRentalData({
                             fields: fieldsDataForCreate,
-                            initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
+                            initialValues: { ...getObjKeysWithValues(rest, fieldsDataForCreate), estimateEndDate: null },
                         });
                         setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate))
                         setLoading(false)

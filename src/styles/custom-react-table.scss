@@ -117,6 +117,11 @@ $isAppliedBill: #a8ec9c;
         //border-right: 1px solid $isTransferAsset;
       }
 
+      .isService {
+        background: #FFFAEF;
+        border-bottom: 1px solid #FFFAEF;
+      }
+
       // background-color: #fff;
       overflow: hidden;
 
@@ -185,6 +190,15 @@ $isAppliedBill: #a8ec9c;
         td.isTransferAsset {
           background: $isTransferAsset;
         }
+
+        td.isTransferAsset {
+          background: $isTransferAsset;
+        }
+
+        td.isService {
+          background: #FFFAEF;
+        }
+        
 
         td.error {
           background: #efcccc;

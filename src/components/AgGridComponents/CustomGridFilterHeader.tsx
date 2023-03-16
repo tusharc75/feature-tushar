@@ -1,16 +1,36 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
-import { Box, Chip, Button, Popover, FormControl, FormGroup, Divider, FormControlLabel, Tooltip, Switch, IconButton } from '@material-ui/core';
+import { Chip, Button, Tooltip } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 
 import GridFilter from '../GridFilter';
 
+// OTHER COMPONENTS
+import { RefreshButton, ArrangeView } from './GridButtons';
+
 const CustomGridFilterHeader = (props) => {
-  const { resource, currentGridApi } = props;
+  const {
+    showFilters,
+    resource,
+    currentGridApi,
+    refreshGrid,
+    setSelectedReportView,
+    selectedReportView,
+    reportSave,
+    columns,
+    setColumns,
+    columnApi,
+    renderedFrom,
+    isClientSideGrid,
+    buttonGap = '10px',
+    dispatch
+  } = props;
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [chipData, setChipData] = useState([]);
   const [currentFomValue, setCurrentFomValue] = useState({});
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
@@ -36,21 +56,51 @@ const CustomGridFilterHeader = (props) => {
   };
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
-      <div className="table-filter-v1" style={{ flexBasis: 'calc(100% - 110px)' }}>
-        <DisplyaFilters
-          selectedFilter={selectedFilter}
-          chipData={chipData}
-          handleFilterOpen={handleFilterOpen}
-          clearSingleFilter={clearSingleFilter}
-          clearFilterAll={clearFilterAll}
-        />
+    <>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', marginBottom: '15px', justifyContent: 'space-between' }}>
+        {showFilters && (
+          <div className="table-filter-v1" style={{ flexBasis: '766px', maxWidth: '766px' }}>
+            <DisplyaFilters
+              selectedFilter={selectedFilter}
+              chipData={chipData}
+              handleFilterOpen={handleFilterOpen}
+              clearSingleFilter={clearSingleFilter}
+              clearFilterAll={clearFilterAll}
+            />
+          </div>
+        )}
+
+        <div style={{ marginInlineStart: 'auto' }}>
+          {showFilters && (
+            <Tooltip title="Apply filter" placement="top">
+              <Button
+                style={{ marginRight: buttonGap }}
+                startIcon={<BiFilterAlt />}
+                size={'small'}
+                className="btn-outline-v1 light "
+                onClick={handleFilterOpen}
+              >
+                Filter
+              </Button>
+            </Tooltip>
+          )}
+          <ArrangeView
+            setSelectedReportView={setSelectedReportView}
+            selectedReportView={selectedReportView}
+            reportSave={reportSave}
+            columns={columns}
+            setColumns={setColumns}
+            columnApi={columnApi}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={isClientSideGrid}
+            dispatch={dispatch}
+            style={{ marginRight: buttonGap }}
+          />
+          <RefreshButton isOffline={isOffline} refreshGrid={refreshGrid} />
+        </div>
       </div>
-      <div style={{ flexBasis: '91px', marginLeft: 'auto' }}>
-        <Button startIcon={<BiFilterAlt />} size={'small'} className="btn-outline-v1 light " onClick={handleFilterOpen}>
-          Filter
-        </Button>
-      </div>
+
+      {/* ALL MODALS */}
       {isFilterOpen && (
         <GridFilter
           resource={resource}
@@ -63,7 +113,7 @@ const CustomGridFilterHeader = (props) => {
           setCurrentFomValue={setCurrentFomValue}
         />
       )}
-    </div>
+    </>
   );
 };
 
@@ -86,7 +136,7 @@ const DisplyaFilters = (props) => {
   }, [chipData]);
 
   const hideElementAndShowNumber = (container) => {
-    const containerWidth = container?.clientWidth - 103;
+    const containerWidth = container?.clientWidth - 52;
     const childItems = [...container?.children];
 
     let lastVisibleItem = null;
@@ -127,6 +177,7 @@ const DisplyaFilters = (props) => {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
+      cursor: pointer;
       `;
     }
   };

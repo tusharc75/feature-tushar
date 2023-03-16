@@ -193,6 +193,12 @@ import RentalPlanningCalendar from './pages/RentalPlanningCalendar';
 import FieldTicket from './pages/FieldTicket';
 import FieldTicketDetail from './pages/FieldTicket/FieldTicketDetail';
 import FieldServiceTechnician from './pages/FieldServiceTechnician';
+import FleetDispatch from './pages/FleetDispatch';
+import FleetMaster from './pages/FleetMaster';
+import FleetMasterDetail from './pages/FleetMaster/FleetMasterDetail';
+import Job from './pages/Job';
+import JobDetail from './pages/Job/JobDetail';
+import FleetReceiver from './pages/FleetReceiver';
 
 var notificationInterval: any = null;
 
@@ -298,7 +304,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -960,6 +966,24 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldServiceTechnician.path}`}>
               <FieldServiceTechnician />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fleetDispatch.path}`}>
+              <FleetDispatch />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fleetMaster.path}`}>
+              <FleetMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fleetMasterDetail.path}/:id`}>
+              <FleetMasterDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.job.path}`}>
+              <Job />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.jobDetail.path}/:id`}>
+              <JobDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fleetReceiver.path}`}>
+              <FleetReceiver />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

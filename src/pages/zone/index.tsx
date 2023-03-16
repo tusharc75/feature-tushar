@@ -392,7 +392,7 @@ const Zone = () => {
                   )}
                   {permissions?.zone?.isDelete && (
                     <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
                       color="default"
                       size="small"
                       onClick={openActions}

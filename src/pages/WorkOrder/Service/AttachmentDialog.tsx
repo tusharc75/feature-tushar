@@ -1,0 +1,506 @@
+import React, { useState, useEffect, useContext } from 'react';
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import { Formik, Form } from 'formik';
+import { object, string } from 'yup';
+import axiosInstance from '../../../axios/axiosInstance';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import CustomButton from '../../../components/Helpers/CustomButton';
+import TextField from '@material-ui/core/TextField';
+import { IconButton, Typography, Paper, Tooltip, Dialog } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import GetAppIcon from '@material-ui/icons/GetApp';
+import { csvIcon, docIcon, excelSheetIcon, pdfFileIcon, pptIcon, textFileIcon, imageIcon } from '../../../assets/file_icons';
+import emailStyles from '../../../pages/Activity/Email/email.module.scss';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
+import { useData } from '../../../StateProvider/Provider';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import PreviewIcon from '@material-ui/icons/Visibility';
+import _ from 'lodash';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import FormTypes from 'src/components/Helpers/FormTypes';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import ImagePreview from 'src/components/Activity/Email/ImagePreview';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomDialogTransition, workOrder } from 'src/constants/helpers';
+
+const AttachmentSchema = object().shape({
+  name: string().required('please add attachment name'),
+  fileUrl: string().required('please upload attachment')
+});
+
+const fileIcons = [
+  {
+    extensions: ['.txt', '.rtf'],
+    source: textFileIcon
+  },
+  {
+    extensions: ['.doc', '.docx', '.docs'],
+    source: docIcon
+  },
+  {
+    extensions: ['.pdf'],
+    source: pdfFileIcon
+  },
+  {
+    extensions: ['.xlsx', '.xml', '.xls', '.xlsm', '.xlt', '.xltm', '.xltx', '.xlw'],
+    source: excelSheetIcon
+  },
+  {
+    extensions: ['.csv'],
+    source: csvIcon
+  },
+  {
+    extensions: ['.pot', '.potm', '.potx', '.ppa', '.ppam', '.pptx', '.pptm', '.ppt', '.ppsx'],
+    source: pptIcon
+  },
+  {
+    extensions: ['.tif', 'tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'],
+    source: imageIcon
+  }
+];
+
+export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId, serviceName, stepName, handleClose, handleSuccess }) {
+
+  const [initialValues, setInitialValues] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [, setDownloadProgress] = useState(0);
+  const [, setIsDownloading] = useState(false);
+  const toastConfig = useContext(CustomToastContext);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
+  const [imageSource, setImageSource] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [otherAttachments, setOtherAttachments] = useState([]);
+  const [canEdit, setCanEdit] = useState(true);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [attachmentToDelete, setAttachemnetToDelete] = useState('');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const [fullScreen, setFullScreen] = useState(false);
+
+  const {
+    state: { permissions }
+  }: any = useData();
+
+  useEffect(() => {
+    fetchAttachmentDetail();
+  }, []);
+
+  const checkImageUrl = (url) => {
+    let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
+    let imageExtensions = ['.tif', 'tiff', '.bmp', '.jpg', 'jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
+    return imageExtensions.indexOf(extension) >= 0;
+  };
+
+  const fetchAttachmentDetail = async () => {
+    setIsFetching(true);
+    axiosInstance()
+      .get(`${workOrder.api}/step/attachment?workOrderId=${workOrderId}&uniqueServiceId=${uniqueServiceId}&stepId=${stepId}`)
+      .then(({ data: { data } }) => {
+        if (!data) {
+          setInitialValues({ name: stepName, fileUrl: '' });
+          setIsFetching(false);
+        } else {
+          setCanEdit(data?.canEdit);
+          if (data.file && data.file.length) {
+            let imageAttachments = [];
+            let nonImageAttachments = [];
+            data.file.map((file) => {
+              let isImageUrl = checkImageUrl(file.url);
+              if (!isImageUrl) {
+                nonImageAttachments.push({ name: file.name, url: file.url });
+              } else {
+                imageAttachments.push({ name: file.name, url: file.url });
+              }
+            });
+            setOtherAttachments([...nonImageAttachments, ...imageAttachments]);
+          }
+          setIsFetching(false);
+          setInitialValues({ ...data, fileUrl: data.file && data.file.length && data.file ? data.file[0]?.url : '' });
+        }
+      })
+      .catch((error) => {
+        setInitialValues({ name: '', fileUrl: '' });
+        setIsFetching(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleSave = (values) => {
+    let data = {
+      name: values.name,
+      file: otherAttachments,
+      serviceName: serviceName,
+      workOrderId: workOrderId,
+      uniqueServiceId: uniqueServiceId,
+      stepId: stepId
+    };
+    setLoading(true);
+    axiosInstance()
+      .post(`${workOrder.api}/step/attachment`, data)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setLoading(false);
+        handleClose();
+      })
+      .catch((error) => {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const viewPdf = (event, file) => {
+    if (event) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'info',
+        message: `File is Loading, Please wait...`
+      });
+    }
+    setDownloadProgress(0);
+    setIsDownloading(true);
+    axiosInstance()
+      .get(`user/download?fileName=${file}`, {
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          setDownloadProgress(percentCompleted);
+
+          if (percentCompleted === 100) {
+            toastConfig.setToastConfig({
+              message: 'File Downloaded Successfully',
+              open: true,
+              type: 'success'
+            });
+            setTimeout(() => {
+              setDownloadProgress(0);
+              setIsDownloading(false);
+            }, 2000);
+          }
+        }
+      })
+      .then(({ data }) => {
+        const file = new Blob([data], { type: 'application/pdf' });
+        const fileURL = URL.createObjectURL(file);
+        const pdfWindow = window.open();
+        pdfWindow.location.href = fileURL;
+        // toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+        setIsDownloading(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsDownloading(false);
+      });
+  };
+
+  const downloadFile = (event, file) => {
+    if (event) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'info',
+        message: `Downloading, Please wait...`
+      });
+    }
+    setDownloadProgress(0);
+    setIsDownloading(true);
+    axiosInstance()
+      .get(`user/download?fileName=${file.url}`, {
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          setDownloadProgress(percentCompleted);
+
+          if (percentCompleted === 100) {
+            toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
+            setTimeout(() => {
+              setDownloadProgress(0);
+              setIsDownloading(false);
+            }, 2000);
+          }
+        }
+      })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', file.url);
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => setIsDownloading(false), 2000);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsDownloading(false);
+      });
+  };
+
+  const onUploadFile = (file) => {
+    setOtherAttachments((prevState) => [...prevState, { name: file.split('_')[3] || file, url: file }]);
+  };
+
+  const handleDeleteAttachment = (file) => {
+    setOtherAttachments(otherAttachments.filter((current) => current?.url !== file.url));
+    setAttachemnetToDelete('');
+    setShowConfirmationDialog(false);
+  };
+
+  const getFileIconSrc = (file) => {
+    if (file) {
+      let extension = file.substring(file.lastIndexOf('.')).toLowerCase();
+      let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+      if (data && data?.source) return data.source;
+    }
+  };
+
+  const renderFileThumbnails = (
+    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
+      {otherAttachments && otherAttachments.length > 0 ? (
+        <>
+          {otherAttachments.map((attachment, i) => {
+            return (
+              <>
+                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
+                  <Paper className={emailStyles.fileContainer}>
+                    <img src={getFileIconSrc(attachment.url)} className={emailStyles.file} alt="attchment" />
+                    <Typography noWrap variant="body2">
+                      {attachment
+                        ? attachment?.name
+                          ? attachment?.name
+                          : attachment.url.substring(attachment.url.lastIndexOf('/') + 1)
+                        : 'attachment'}
+                    </Typography>
+                    <div className={emailStyles.fileOverlay}>
+                      <Typography variant="subtitle2">
+                        {attachment
+                          ? attachment?.name
+                            ? attachment?.name
+                            : attachment.url.substring(attachment.url.lastIndexOf('/') + 1)
+                          : 'attachment'}
+                      </Typography>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', width: '50%', float: 'right', bottom: '0' }}>
+                        <Tooltip title="Download">
+                          <IconButton onClick={(event) => downloadFile(event, attachment)} style={{ paddingBottom: '1px' }}>
+                            {
+                              // <a href={`${attachment}`}
+                              //     download={true}>
+                              //     <GetAppIcon />
+                              // </a>
+                              <GetAppIcon />
+                            }
+                          </IconButton>
+                        </Tooltip>
+                        {_.endsWith(attachment?.url, '.pdf') && (
+                          <Tooltip title="Preview">
+                            <IconButton>
+                              <PreviewIcon
+                                color="primary"
+                                onClick={(e) => {
+                                  viewPdf(e, attachment.url);
+                                }}
+                              />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {canEdit && permissions.attachment.isDelete ? (
+                          <Tooltip title="Delete">
+                            <IconButton>
+                              {
+                                <DeleteIcon
+                                  color="error"
+                                  onClick={() => {
+                                    setShowConfirmationDialog(true);
+                                    // handleDeleteAttachment(attachment)
+                                    setAttachemnetToDelete(attachment);
+                                  }}
+                                />
+                              }
+                            </IconButton>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip
+                            className="cursor-stop"
+                            title={
+                              permissions.quoteBuilder.isDelete
+                                ? 'Signed quote attachments can not be deleted'
+                                : "You don't have permissions to delete attachment"
+                            }
+                          >
+                            <IconButton>
+                              <DeleteIcon color="disabled" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </div>
+                  </Paper>
+                </Grid>
+              </>
+            );
+          })}
+        </>
+      ) : null}
+    </Grid>
+  );
+
+  return (
+    <Dialog
+      open
+      aria-labelledby="customized-dialog-title"
+      maxWidth="md"
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          handleClose();
+          setFullScreen(false);
+        }
+      }}
+      fullWidth
+      fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+    >
+      {!isFetching ? (
+        initialValues ? (
+          <Formik initialValues={initialValues} validationSchema={AttachmentSchema} onSubmit={handleSave}>
+            {({ submitForm, touched, errors, setFieldValue, values }) => (
+              <>
+                <CustomDialogHeader
+                  onClose={() => {
+                    handleClose()
+                  }}
+                  title={`${serviceName} - ${stepName} - Attachment`}
+                  isMinimized={!fullScreen}
+                  onMinimizeMaximize={() => {
+                    setFullScreen((prevState) => !prevState);
+                  }}
+                  showManimizeMaximize={true}
+                ></CustomDialogHeader>
+                <CustomDialogContent>
+                  <Form autoComplete="off" autoCorrect="off" noValidate>
+                    <Box padding={1}>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12}>
+                          <TextField
+                            variant="outlined"
+                            type="text"
+                            label={'Name'}
+                            required={true}
+                            disabled={!canEdit}
+                            name="name"
+                            fullWidth
+                            margin="dense"
+                            value={values['name']}
+                            error={touched['name'] && Boolean(errors['name'])}
+                            helperText={touched['name'] && errors['name']}
+                            onChange={(e) => {
+                              setFieldValue('name', e.target.value.trimStart());
+                            }}
+                          />
+                        </Grid>
+                        <Grid container item xs={12}>
+                          <Grid item xs={10} sm={11} md={11}>
+                            <FormTypes
+                              label="File"
+                              name="fileUrl"
+                              required={true}
+                              type="fileUpload"
+                              values={values}
+                              canEdit={canEdit}
+                              errors={errors}
+                              touched={touched}
+                              size="small"
+                              setFieldValue={(fname, file) => {
+                                setFieldValue('fileUrl', file);
+                                onUploadFile(file);
+                              }}
+                              doNotShowUploadedFile={true}
+                              imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                setUploadingImageOrFileProgress(completePercentage);
+                              }}
+                            />
+                          </Grid>
+                          {renderFileThumbnails}
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  </Form>
+                </CustomDialogContent>
+                <CustomDialogFooter>
+                  <Button
+                    color="primary"
+                    size="small"
+                    onClick={() => {
+                      handleClose()
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  {canEdit && (
+                    <CustomButton
+                      type="button"
+                      color="primary"
+                      disabled={loading || uploadingImageOrFileProgress > 0 || otherAttachments.length === 0}
+                      loading={loading}
+                      variant="contained"
+                      onClick={submitForm}
+                    >
+                      Save
+                    </CustomButton>
+                  )}
+                </CustomDialogFooter>
+                {showConfirmDialog ? (
+                  <ConfirmCancelDialog
+                    close={() => setShowConfirmDialog(false)}
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false);
+                      submitForm();
+                    }}
+                    onClose={() => {
+                      setShowConfirmDialog(false);
+                      handleClose();
+                    }}
+                  />
+                ) : null}
+                {open ? (
+                  <ImagePreview
+                    open={open}
+                    aria-labelledby="customized-dialog-title"
+                    heading={imageSource ? imageSource.substring(imageSource.lastIndexOf('/') + 1) : 'image preview'}
+                    close={() => {
+                      setImageSource(null);
+                      setOpen(false);
+                    }}
+                    image={imageSource}
+                  />
+                ) : null}
+                {showConfirmationDialog && (
+                  <ConfirmationDialog
+                    open={showConfirmationDialog}
+                    message="Are you sure you want to delete this attachment?"
+                    onClose={() => {
+                      setShowConfirmationDialog(false);
+                    }}
+                    onOk={() => handleDeleteAttachment(attachmentToDelete)}
+                  />
+                )}
+              </>
+            )}
+          </Formik>
+        ) : null
+      ) : (
+        <div>
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        </div>
+      )}
+    </Dialog>
+  );
+}
+

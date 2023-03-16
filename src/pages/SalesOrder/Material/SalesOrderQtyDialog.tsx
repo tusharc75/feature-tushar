@@ -16,13 +16,13 @@ import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
-import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
+import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
 
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
-  invoiceData: any;
+  salesOrderData: any;
   rowData?: object | any;
   calculatePrice?: VoidFunction | any;
   material: any[]
@@ -32,12 +32,12 @@ interface EditDialogProps {
 
 const rateChangeFields = ["unit", "pricingMethod"]
 
-const InvoiceQtyDialog: FC<EditDialogProps> = (
+const SalesOrderQtyDialog: FC<EditDialogProps> = (
   {
     calculatePrice,
     onClose,
     handleSaveData,
-    invoiceData,
+    salesOrderData,
     rowData,
     material,
     selectedProducts,
@@ -59,7 +59,7 @@ const InvoiceQtyDialog: FC<EditDialogProps> = (
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_invoice_product_fields(invoiceData?.currency)
+    var data = await fetch_salesOrder_product_fields(salesOrderData?.currency)
     setAllFields(JSON.parse(JSON.stringify(data)))
     if (isBulkedit) {
       let unitArray: any = []
@@ -72,7 +72,7 @@ const InvoiceQtyDialog: FC<EditDialogProps> = (
           pricingMethodArray.push([...element?.[`${element.type}Detail`]?.pricingMethod])
         }
       });
-      let unit: any = unitArray?.shift().filter(function (v) {
+      let unit: any = unitArray?.shift()?.filter(function (v) {
         return unitArray?.every(function (a) {
           return a.indexOf(v) !== -1;
         });
@@ -419,7 +419,7 @@ const InvoiceQtyDialog: FC<EditDialogProps> = (
                                         const value = val && val.optionValue ? val.optionValue : '';
                                         getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
                                           if (price) {
-                                            let priceFieldName = "price_" + invoiceData?.currency?.toLowerCase()
+                                            let priceFieldName = "price_" + salesOrderData?.currency?.toLowerCase()
                                             const result = autoCalculateSpecificFields({ [priceFieldName]: price, [field.fieldName]: value }, values, initialData.fields)
                                             if (Object.keys(result).length >= 1) {
                                               for (var x in result) {
@@ -538,4 +538,4 @@ const InvoiceQtyDialog: FC<EditDialogProps> = (
   </Dialog>);
 };
 
-export default InvoiceQtyDialog;
+export default SalesOrderQtyDialog;

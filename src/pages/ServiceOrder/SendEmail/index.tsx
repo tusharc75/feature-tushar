@@ -240,7 +240,7 @@ const SendEmail = ({ serviceOrderData }) => {
                         setFullScreen((prevState) => !prevState);
                     }}
                     showManimizeMaximize={true}
-                    refrenceType="serviceOrder"
+                    referenceType="serviceOrder"
                 />
             </Dialog>
         )}
