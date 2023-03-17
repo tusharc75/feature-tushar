@@ -283,7 +283,7 @@ const RepairOrderDetails = () => {
               <>
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
-                  [REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced].includes(repairOrderData?.status) && (
+                  (enableStatusChange || [REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced].includes(repairOrderData?.status)) && (
                     <Fragment>
                       <Button
                         variant="outlined"
@@ -310,7 +310,8 @@ const RepairOrderDetails = () => {
                         {statusOptions?.map((o, index) => {
                           return (
                             <MenuItem
-                              disabled={index <= statusOptions.findIndex((d) => d.optionLabel === repairOrderData?.status)}
+                              disabled={[REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.completed]?.includes(o?.optionLabel)
+                                ? index <= statusOptions.findIndex((d) => d.optionLabel === repairOrderData?.status) : true}
                               onClick={() => {
                                 closeActions();
                                 handleStatusChange(o);
