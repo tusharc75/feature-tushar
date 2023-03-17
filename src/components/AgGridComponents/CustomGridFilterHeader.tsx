@@ -60,11 +60,11 @@ const CustomGridFilterHeader = (props) => {
   return (
     <>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', marginBottom: '15px', justifyContent: 'space-between' }}>
-        {showOnlyShowFilteredRecordSwitch && (
-          <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '10px 0 0px' }} />
-        )}
-        {showFilters && (
-          <div className="table-filter-v1" style={{ flexBasis: '766px', maxWidth: '766px' }}>
+        <div className="table-filter-v1" style={{ flexBasis: '766px', maxWidth: '766px', paddingRight: '52px' }}>
+          {showOnlyShowFilteredRecordSwitch && (
+            <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '0px 0 10px' }} />
+          )}
+          {showFilters && (
             <DisplyaFilters
               selectedFilter={selectedFilter}
               chipData={chipData}
@@ -72,8 +72,8 @@ const CustomGridFilterHeader = (props) => {
               clearSingleFilter={clearSingleFilter}
               clearFilterAll={clearFilterAll}
             />
-          </div>
-        )}
+          )}
+        </div>
         <div style={{ marginInlineStart: 'auto' }}>
           {showFilters && (
             <Tooltip title="Apply filter" placement="top">
