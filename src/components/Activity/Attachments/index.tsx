@@ -14,7 +14,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import ActivityLoader from '../../Helpers/ActivityLoader';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from '../../../constants/helpers';
+import { CustomDialogTransition, dateFormat } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
@@ -28,6 +28,7 @@ import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 
 import { AiOutlineFileAdd, AiOutlineFolderAdd, AiOutlineDelete, AiOutlineFile } from 'react-icons/ai';
 import { FiEdit2 } from 'react-icons/fi';
+import moment from 'moment';
 
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState({ open: false, type: 'file', parentFolder: null, purpose: 'add' });
@@ -118,6 +119,13 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                             <FolderOpenIcon className="mr-2" style={{ maxWidth: '18px', color: '#5B5B5B' }} />
                             <Typography style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: '#5B5B5B' }}>
                               {` ${_attachment?.name} ${childTree?.length ? `(${childTree?.length})` : ''}`}
+                              <Typography
+                                variant="body2"
+                                component={'span'}
+                                style={{ fontSize: '0.8rem', paddingTop: '2px', paddingLeft: '6px', color: '#7b898e' }}
+                              >
+                                Created: {moment(_attachment?.createdBy?.date).format(dateFormat)}
+                              </Typography>
                             </Typography>
                           </div>
 
@@ -166,6 +174,13 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                               >
                                 <AiOutlineFile style={{ marginRight: '8px' }} />
                                 {_attachment?.name ?? ''}
+                                <Typography
+                                  variant="body2"
+                                  component={'span'}
+                                  style={{ fontSize: '0.8rem', paddingTop: '2px', paddingLeft: '6px', color: '#7b898e' }}
+                                >
+                                  Created: {moment(_attachment?.createdBy?.date).format(dateFormat)}
+                                </Typography>
                               </Typography>
                             </Grid>
                             {permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
@@ -273,6 +288,13 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                     <FolderOpenIcon className="mr-2" style={{ maxWidth: '18px', color: '#5B5B5B' }} />
                     <Typography style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: '#5B5B5B' }}>
                       {` ${_attachment?.name} ${childTree?.length ? `(${childTree?.length})` : ''}`}
+                      <Typography
+                        variant="body2"
+                        component={'span'}
+                        style={{ fontSize: '0.8rem', paddingTop: '2px', paddingLeft: '6px', color: '#7b898e' }}
+                      >
+                        Created: {moment(_attachment?.createdBy?.date).format(dateFormat)}
+                      </Typography>
                     </Typography>
                   </div>
 
@@ -343,6 +365,13 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                       >
                         <AiOutlineFile style={{ marginRight: '8px' }} />
                         {_attachment?.name ?? ''}
+                        <Typography
+                          variant="body2"
+                          component={'span'}
+                          style={{ fontSize: '0.8rem', paddingTop: '2px', paddingLeft: '6px', color: '#7b898e' }}
+                        >
+                          Created: {moment(_attachment?.createdBy?.date).format(dateFormat)}
+                        </Typography>
                       </Typography>
                     </Grid>
                     {permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
@@ -636,6 +665,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               <ManageAttachment
                 attachmentId={open.purpose === 'add' ? null : attachmentId}
                 handleClose={() => {
+                  console.log('hello');
                   handleClose();
                   setFullScreen(false);
                 }}

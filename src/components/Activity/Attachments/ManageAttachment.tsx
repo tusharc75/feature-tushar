@@ -126,6 +126,7 @@ export default function ManageAttachment({
       type: 'success',
       message: message
     });
+    handleClose();
   };
 
   const handleSave = (values) => {
@@ -154,6 +155,7 @@ export default function ManageAttachment({
             showSuccessMessage(data.message);
             setLoading(false);
             // setInitialValues(null)
+
             handleClose();
             if (fetchData) fetchData();
           })
@@ -167,6 +169,7 @@ export default function ManageAttachment({
           .then(({ data }) => {
             showSuccessMessage(data.message);
             setLoading(false);
+
             handleClose();
             if (fetchData) fetchData();
           })
@@ -183,6 +186,7 @@ export default function ManageAttachment({
             showSuccessMessage(data.message);
             setLoading(false);
             // setInitialValues(null)
+
             handleClose();
             if (fetchData) fetchData();
           })
@@ -196,6 +200,7 @@ export default function ManageAttachment({
           .then(({ data }) => {
             showSuccessMessage(data.message);
             setLoading(false);
+
             handleClose();
             if (fetchData) fetchData();
           })
