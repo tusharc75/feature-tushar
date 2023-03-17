@@ -19,7 +19,7 @@ import reactHtmlparser, { convertNodeToElement } from 'react-html-parser';
 import { HiOutlineMail } from 'react-icons/hi';
 import Dialog from '@material-ui/core/Dialog';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
-import { getApi, getData, isObjectEmpty } from '../../../constants/helpers';
+import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
 import styles from '../../Leads/Header.module.scss';
 import emailStyles from './email.module.scss';
 import './email.scss';
@@ -138,13 +138,11 @@ const Email = () => {
   useEffect(() => {
     if (resource && resource?.optionValue) {
       setLoadingResources(true);
+      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue]
       axiosInstance()
-        .get(`${getApi(resource?.optionValue)}?limit=100`)
+        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
         .then(({ data: { data } }) => {
-          if (data.length) {
-            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
-            setResourceData(mappedData || []);
-          }
+          setResourceData(data[lookupResource] || []);
           setLoadingResources(false);
         })
         .catch((error) => {
@@ -442,14 +440,14 @@ const Email = () => {
                   <Autocomplete
                     disabled={loadingResources}
                     options={resourceData}
-                    getOptionLabel={(option: any) => option.name}
-                    getOptionSelected={(option: any, value: any) => option.name === value.name}
+                    getOptionLabel={(option: any) => option.optionLabel}
+                    getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
                     style={{ width: '250px' }}
                     value={selectedResourceData}
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
-                      if (newValue?.id) {
-                        setFilter((prevState) => [...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]);
+                      if (newValue?.optionValue) {
+                        setFilter((prevState) => [...prevState, { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
                       } else {
                         setFilter([]);
                       }
@@ -609,7 +607,7 @@ const Email = () => {
               relatedTo={[
                 {
                   type: resource && selectedResourceData ? resource.optionValue : 'user',
-                  referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
+                  referenceId: resource && selectedResourceData ? selectedResourceData.optionValue : user?.user?._id,
                   access: true
                 }
               ]}
