@@ -44,7 +44,6 @@ const fileIcons = [
 ];
 
 const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) => {
-  console.log(attachments);
   const {
     state: { permissions }
   }: any = useData();
