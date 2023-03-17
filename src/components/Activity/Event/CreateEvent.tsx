@@ -21,7 +21,7 @@ import {
 import MomentUtils from "@date-io/moment";
 import { object, string } from "yup";
 import moment from "moment";
-import { camelCase, isEmpty, kebabCase } from "lodash";
+import { isEmpty } from "lodash";
 import {
   GetEventDetail,
   CreateNewEvent,
@@ -39,7 +39,7 @@ import { useAccount, useMsal } from "@azure/msal-react";
 import axiosInstance from "../../../axios/axiosInstance";
 import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
-import { dateFormat, getData } from "../../../constants/helpers";
+import { dateFormat, sidebarResource } from "../../../constants/helpers";
 import { get_activity_resource } from '../Helpers/utils';
 
 const EventSchema = object().shape({
@@ -111,13 +111,11 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
   useEffect(() => {
     if (resource && resource?.optionValue) {
       setLoadingResources(true);
+      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue]
       axiosInstance()
-        .get(`${kebabCase(resource?.optionValue)}?limit=100`)
+        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
         .then(({ data: { data } }) => {
-          if (data.length) {
-            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
-            setResourceData(mappedData);
-          }
+          setResourceData(data[lookupResource] || []);
           setLoadingResources(false);
         })
         .catch((error) => {
@@ -164,7 +162,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
           values.relatedTo = [
             {
               type: resource?.optionValue,
-              referenceId: selectedResourceData.id,
+              referenceId: selectedResourceData.optionValue,
               access: true,
             },
           ];
@@ -294,9 +292,9 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                             <Autocomplete
                               disabled={loadingResources}
                               options={resourceData}
-                              getOptionLabel={(option: any) => option.name}
+                              getOptionLabel={(option: any) => option.optionLabel}
                               getOptionSelected={(option: any, value: any) =>
-                                option.name === value.name
+                                option.optionLabel === value.optionLabel
                               }
                               fullWidth
                               value={selectedResourceData}

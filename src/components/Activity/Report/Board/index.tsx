@@ -17,7 +17,6 @@ import { CustomDialogTransition } from '../../../../constants/helpers';
 import axiosInstance from '../../../../axios/axiosInstance';
 import { CreateTask } from '../../Task/CreateTask';
 import { CreateCase } from '../../Case/CreateCase';
-import { getApi, getData } from '../../../../constants/helpers';
 import { get_activity_resource } from '../../../Activity/Helpers/utils';
 import { sidebarResource } from '../../../../constants/helpers';
 
@@ -258,7 +257,7 @@ const Board = ({ type, filter }) => {
                 relatedTo={[
                   {
                     type: resource?.optionValue && selectedResourceData ? camelCase(resource?.optionValue) : 'user',
-                    referenceId: resource?.optionValue && selectedResourceData ? selectedResourceData.id : user._id,
+                    referenceId: resource?.optionValue && selectedResourceData ? selectedResourceData.optionValue : user._id,
                     access: true
                   }
                 ]}
@@ -279,7 +278,7 @@ const Board = ({ type, filter }) => {
                 relatedTo={[
                   {
                     type: resource?.optionValue && selectedResourceData ? camelCase(resource?.optionValue) : 'user',
-                    referenceId: resource?.optionValue && selectedResourceData ? selectedResourceData.id : user._id,
+                    referenceId: resource?.optionValue && selectedResourceData ? selectedResourceData.optionValue : user._id,
                     access: true
                   }
                 ]}
