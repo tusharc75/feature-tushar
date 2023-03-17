@@ -43,23 +43,25 @@ const ActivityButton = ({ referenceId, resource }) => {
         <Grid container>
           <Grid item xs={12}>
             <div>
-              <Activity
-                resourceId={referenceId}
-                resource={resource}
-                restrictedAddActivities={
-                  permissions && permissions[`${resource}`] && permissions[`${resource}`].isUpdate ? [] : ['Attachment', 'Case']
-                }
-                relatedTo={[
-                  {
-                    type: resource,
-                    referenceId: referenceId,
-                    access: true
+              {showActivity && (
+                <Activity
+                  resourceId={referenceId}
+                  resource={resource}
+                  restrictedAddActivities={
+                    permissions && permissions[`${resource}`] && permissions[`${resource}`].isUpdate ? [] : ['Attachment', 'Case']
                   }
-                ]}
-                close={() => setActivityShow(false)}
-                handleActivityRefresh={() => {}}
-                emails={[]}
-              />
+                  relatedTo={[
+                    {
+                      type: resource,
+                      referenceId: referenceId,
+                      access: true
+                    }
+                  ]}
+                  close={() => setActivityShow(false)}
+                  handleActivityRefresh={() => {}}
+                  emails={[]}
+                />
+              )}
             </div>
           </Grid>
         </Grid>

@@ -183,25 +183,27 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
           <Grid container>
             <Grid item xs={12}>
               <div>
-                <Activity
-                  resourceId={showActivity.referenceId}
-                  resource={ACTIVITY_RESOURCE.fleetMaster}
-                  restrictedAddActivities={
-                    permissions && permissions[`${ACTIVITY_RESOURCE.fleetMaster}`] && permissions[`${ACTIVITY_RESOURCE.fleetMaster}`].isUpdate
-                      ? []
-                      : ['Attachment', 'Case']
-                  }
-                  relatedTo={[
-                    {
-                      type: ACTIVITY_RESOURCE.fleetMaster,
-                      referenceId: showActivity.referenceId,
-                      access: true
+                {showActivity.open && (
+                  <Activity
+                    resourceId={showActivity.referenceId}
+                    resource={ACTIVITY_RESOURCE.fleetMaster}
+                    restrictedAddActivities={
+                      permissions && permissions[`${ACTIVITY_RESOURCE.fleetMaster}`] && permissions[`${ACTIVITY_RESOURCE.fleetMaster}`].isUpdate
+                        ? []
+                        : ['Attachment', 'Case']
                     }
-                  ]}
-                  close={() => setActivityShow({ open: false, referenceId: '' })}
-                  handleActivityRefresh={() => {}}
-                  emails={[]}
-                />
+                    relatedTo={[
+                      {
+                        type: ACTIVITY_RESOURCE.fleetMaster,
+                        referenceId: showActivity.referenceId,
+                        access: true
+                      }
+                    ]}
+                    close={() => setActivityShow({ open: false, referenceId: '' })}
+                    handleActivityRefresh={() => {}}
+                    emails={[]}
+                  />
+                )}
               </div>
             </Grid>
           </Grid>
