@@ -19,6 +19,7 @@ import { CreateTask } from '../../Task/CreateTask';
 import { CreateCase } from '../../Case/CreateCase';
 import { getApi, getData } from '../../../../constants/helpers';
 import { get_activity_resource } from '../../../Activity/Helpers/utils';
+import { sidebarResource } from '../../../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   block: {
@@ -97,16 +98,15 @@ const Board = ({ type, filter }) => {
   };
 
   // Data for Autocomplete
+
   useEffect(() => {
     if (resource && resource?.optionValue) {
       setLoadingResources(true);
+      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue]
       axiosInstance()
-        .get(`${getApi(resource?.optionValue)}?limit=100`)
+        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
         .then(({ data: { data } }) => {
-          if (data.length) {
-            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
-            setResourceData(mappedData || []);
-          }
+          setResourceData(data[lookupResource] || []);
           setLoadingResources(false);
         })
         .catch((error) => {
@@ -146,7 +146,7 @@ const Board = ({ type, filter }) => {
   const updateStatus = (id: string, updatedData: any) => {
     axiosInstance()
       .put(`${type}/${id}`, { status: updatedData.status })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         fetchBoard();
       });
@@ -177,8 +177,8 @@ const Board = ({ type, filter }) => {
           <Autocomplete
             disabled={loadingResources}
             options={resourceData}
-            getOptionLabel={(option: any) => option.name}
-            getOptionSelected={(option: any, value: any) => option.name === value.name}
+            getOptionLabel={(option: any) => option.optionLabel}
+            getOptionSelected={(option: any, value: any) => option?.optionLabel === value?.optionLabel}
             style={{ width: '50%' }}
             value={selectedResourceData}
             onChange={(event, newValue) => {
