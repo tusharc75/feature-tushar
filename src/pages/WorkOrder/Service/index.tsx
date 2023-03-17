@@ -40,7 +40,6 @@ import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import { reverse } from 'lodash';
-import AttachFileIcon from '@material-ui/icons/AttachFile';
 import AttachmentDialog from './AttachmentDialog';
 
 const getTotalTime = (stepTimes: any) => {
@@ -52,7 +51,7 @@ const getTotalTime = (stepTimes: any) => {
       totalTimes += new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime();
     }
   });
-  stepTimes.forEach((item) => {});
+  stepTimes.forEach((item) => { });
   return { shouldTimerRun, totalTimes };
 };
 
@@ -220,7 +219,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       setServiceSteps(services);
       if (
         services.filter((e) => e.type === 'service' && e.status === WORKORDER_SERVICE_STATUS.completed)?.length ===
-          services.filter((e) => e.type === 'service')?.length &&
+        services.filter((e) => e.type === 'service')?.length &&
         workOrderData?.status !== WORK_ORDER_STATUS.completed
       ) {
         fetchWorkOrderData();
@@ -355,8 +354,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           quotationData?.status === QUOTATION_STATUS.acceptByCustomer
             ? '#E9FFE8'
             : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-            ? '#FFE9EA'
-            : 'white',
+              ? '#FFE9EA'
+              : 'white',
         cursor: 'pointer',
         borderRadius: '3px'
       };
@@ -369,8 +368,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           quotationData?.status === QUOTATION_STATUS.acceptByCustomer
             ? '#E9FFE8'
             : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-            ? '#FFE9EA'
-            : 'white',
+              ? '#FFE9EA'
+              : 'white',
         cursor: 'pointer',
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
@@ -384,8 +383,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
             ? '#E9FFE8'
             : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
-            ? '#FFE9EA'
-            : 'white',
+              ? '#FFE9EA'
+              : 'white',
         cursor: allowedToEdit ? 'pointer' : 'not-allowed',
         PointerEvent: 'none',
         opacity: '.5'
@@ -400,8 +399,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
             ? '#E9FFE8'
             : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
-            ? '#FFE9EA'
-            : 'white',
+              ? '#FFE9EA'
+              : 'white',
         cursor: 'pointer',
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
@@ -414,8 +413,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
             ? '#E9FFE8'
             : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
-            ? '#FFE9EA'
-            : 'white',
+              ? '#FFE9EA'
+              : 'white',
         borderColor: 'rgb(224, 224, 224)',
         cursor: 'pointer'
       };
@@ -644,24 +643,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                 {data?.type === 'service' && (
                                   <Grid item xs={2} container justify="flex-end">
                                     <div style={{ display: 'flex' }}>
-                                      <HtmlTooltip title="Upload Document">
-                                        <IconButton
-                                          aria-label="close"
-                                          onClick={() => {
-                                            setAttchmentsDialog({
-                                              open: true,
-                                              uniqueServiceId: selectedService.uniqueId,
-                                              stepId: null,
-                                              serviceName: selectedService.serviceName,
-                                              stepName: data?.serviceName || ''
-                                            });
-                                          }}
-                                          size="small"
-                                          color="inherit"
-                                        >
-                                          <AttachFileIcon color="primary" fontSize="small" />
-                                        </IconButton>
-                                      </HtmlTooltip>
                                       <IconButton
                                         size="small"
                                         color="primary"
@@ -861,6 +842,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               </MenuItem>
               <MenuItem
                 onClick={() => {
+                  setAttchmentsDialog({
+                    open: true,
+                    uniqueServiceId: selectedService.uniqueId,
+                    stepId: null,
+                    serviceName: selectedService.serviceName,
+                    stepName: selectedService?.serviceName || ''
+                  });
+                  setAnchorEl(null);
+                }}
+              >
+                Upload Document
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
                   setConsumablesDialog(true);
                   setAnchorEl(null);
                 }}
@@ -924,7 +919,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               <Box>
                 {selectedService?.type === 'service' ? (
                   allowedToEdit ||
-                  (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
+                    (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
                     <Steps
                       workOrderId={workOrderId}
                       selectedService={selectedService}
@@ -1060,7 +1055,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           handleClose={() => {
             setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
           }}
-          handleSuccess={() => {}}
+          handleSuccess={() => { }}
         />
       )}
     </Box>
