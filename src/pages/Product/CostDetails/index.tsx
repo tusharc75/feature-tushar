@@ -5,71 +5,108 @@ import BoxWithBorder from '../../../components/BoxWithBorder';
 import { Skeleton } from '@material-ui/lab';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import routes from 'src/components/Helpers/Routes';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const CostDetails = ({ product, productData, className = '' }) => {
-  const [averageCost, setAverageCost] = useState(null);
+const CostDetails = ({ product, productData }) => {
+
+  const toastConfig = useContext(CustomToastContext);
+
   const [loading, setLoading] = useState(false)
+  const [listPrice, setListPrice] = useState(0)
+  const [costList, setCostList] = useState(null);
 
   useEffect(() => {
-    fetchCostDetails()
+    if (productData?.listPrice) {
+      setListPrice(productData?.listPrice)
+    }
   }, [product, productData]);
 
-  const fetchCostDetails = () => {
+  useEffect(() => {
+    fetchData()
+  }, [product, productData]);
+
+  const fetchData = () => {
     setLoading(true)
     axiosInstance()
       .get(`product/${product}/cost`)
       .then(async ({ data: { data } }) => {
-        setAverageCost(data?.averagePrice || 0);
+        setCostList(data);
         setLoading(false)
       })
-      .catch((err) => { });
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setLoading(false)
+      });
   }
 
   return (
-    <Box className={`single-form-v1 ${className}`}>
+    <Box className={`single-form-v1`}>
       <Box className={'form-head-v1'} justifyContent="space-between" alignItems="center">
         <Typography variant="subtitle2">Cost Details</Typography>
         <HtmlTooltip title="Refresh Cost Details">
-          <IconButton size="small" onClick={fetchCostDetails}>
+          <IconButton size="small" onClick={fetchData}>
             <RefreshIcon fontSize="small" />
           </IconButton>
         </HtmlTooltip>
       </Box>
-      {averageCost !== null && !loading ? (
-        <Box className="formdata-v1">
-          <Box display="flex" justifyContent="space-between">
-            <Typography className="table-head-v1">List Price</Typography>
-            <Typography className="table-data-v1" style={{ borderTopWidth: '1px' }}>
-              {productData?.listPrice ? productData?.listPrice : 0}
-            </Typography>
+      <Box className="formdata-v1">
+        {!loading ?
+          <Box>
+            {costList?.map((data) => (
+              (data?.warehouse === 'All' || data?.totalQty) ?
+                <Accordion defaultExpanded={data?.warehouse === 'All' ? true : false}  >
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel1a-content"
+                    id="panel1a-header"
+                  >
+                    <Typography variant='subtitle2'>{data?.warehouse === 'All' ? `${data?.warehouse} ${routes.warehouse.title}` : data?.warehouse}</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Box style={{ width: "100%" }}>
+                      <Box display="flex" justifyContent="space-between">
+                        <Typography className="table-head-v1">List Price</Typography>
+                        <Typography className="table-data-v1" style={{ borderTopWidth: '1px' }}>
+                          {listPrice}
+                        </Typography>
+                      </Box>
+                      <Box display="flex" justifyContent="space-between">
+                        <Typography className="table-head-v1 bt-0 br-0">Average Cost</Typography>
+                        <Typography className="table-data-v1  bt-0">{data?.price}</Typography>
+                      </Box>
+                      <Box mb={1} display="flex" justifyContent="space-between">
+                        <Typography className="table-head-v1 bt-0 br-0">Margin</Typography>
+                        <Typography className="table-data-v1  bt-0">
+                          {listPrice === 0 ? 0 : ((listPrice + data?.price) / listPrice).toFixed(2)}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </AccordionDetails>
+                </Accordion> : null
+            ))}
           </Box>
-          <Box display="flex" justifyContent="space-between">
-            <Typography className="table-head-v1 bt-0 br-0">Average Cost</Typography>
-            <Typography className="table-data-v1  bt-0">{averageCost}</Typography>
-          </Box>
-          <Box mb={1} display="flex" justifyContent="space-between">
-            <Typography className="table-head-v1 bt-0 br-0">Margin</Typography>
-            <Typography className="table-data-v1  bt-0">
-              {(productData?.listPrice || 0) === 0 ? 0 : (((productData?.listPrice || 0) + averageCost) / (productData?.listPrice || 0)).toFixed(2)}
-            </Typography>
-          </Box>
-        </Box>
-      ) : (
-        [1, 2].map((i) => (
-          <BoxWithBorder
-            key={i}
-            style={{
-              margin: '8px'
-            }}
-          >
-            <Box padding={1}>
-              <Skeleton variant="text" width="100px" height="20px" />
-              <Box marginTop={1} />
-              <Skeleton variant="text" width="100%" height="15px" />
-            </Box>
-          </BoxWithBorder>
-        ))
-      )}
+          :
+          ([1, 2].map((i) => (
+            <BoxWithBorder
+              key={i}
+              style={{
+                margin: '8px'
+              }}
+            >
+              <Box padding={1}>
+                <Skeleton variant="text" width="100px" height="20px" />
+                <Box marginTop={1} />
+                <Skeleton variant="text" width="100%" height="15px" />
+              </Box>
+            </BoxWithBorder>
+          ))
+          )}
+      </Box>
     </Box>
   );
 };

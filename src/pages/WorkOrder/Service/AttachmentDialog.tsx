@@ -54,7 +54,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
   const fetchAttachmentDetail = async () => {
     setIsFetching(true);
     axiosInstance()
-      .get(`${workOrder.api}/step/attachment?workOrderId=${workOrderId}&uniqueServiceId=${uniqueServiceId}&stepId=${stepId}`)
+      .get(`${workOrder.api}/step/attachment?workOrderId=${workOrderId}&uniqueServiceId=${uniqueServiceId}${stepId ? `&stepId=${stepId}` : ''}`)
       .then(({ data: { data } }) => {
         if (!data) {
           setInitialValues({ name: stepName, fileUrl: '' });
@@ -92,7 +92,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
       serviceName: serviceName,
       workOrderId: workOrderId,
       uniqueServiceId: uniqueServiceId,
-      stepId: stepId
+      ...(stepId && { stepId: stepId })
     };
     setLoading(true);
     axiosInstance()
@@ -146,7 +146,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                   onClose={() => {
                     handleClose();
                   }}
-                  title={`${serviceName} - ${stepName} - Attachment`}
+                  title={`${serviceName} ${stepId ? `- ${stepName}` : ''} - Attachment`}
                   isMinimized={!fullScreen}
                   onMinimizeMaximize={() => {
                     setFullScreen((prevState) => !prevState);
