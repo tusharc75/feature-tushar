@@ -179,6 +179,11 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
         errors['customDate'] = `Please selecte valid date`;
       }
     }
+
+    if (moment(values["customDate"]).isAfter(moment())) {
+      errors['customDate'] = `Please selecte valid date`;
+    }
+
     return errors;
   }
 
