@@ -46,6 +46,7 @@ const History = ({ handleClose, productName, inventoryHistory }) => {
             }
         },
         { field: "comment", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
+        { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
     ];
 
     const CreditDebitRenderer = (params: any) => (

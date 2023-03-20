@@ -18,7 +18,7 @@ import { AddOutlined } from '@material-ui/icons';
 import { Button, Tooltip, IconButton, MenuItem, Menu, TextField, Chip, Link, Popover, MenuList } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, getApi, getData, gridLoadingTimeout } from '../../../constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
 import { Delete as DeleteIcon } from '@material-ui/icons';
 import { gridPageSizes, isObjectEmpty, displayDate } from '../../../constants/helpers';
 import { ExpandMore } from '@material-ui/icons';
@@ -313,13 +313,11 @@ export default function Attachment() {
   useEffect(() => {
     if (resource && resource?.optionValue) {
       setLoadingResources(true);
+      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue]
       axiosInstance()
-        .get(`${getApi(resource?.optionValue)}?limit=100`)
+        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
         .then(({ data: { data } }) => {
-          if (data.length) {
-            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
-            setResourceData(mappedData || []);
-          }
+          setResourceData(data[lookupResource] || []);
           setLoadingResources(false);
         })
         .catch((error) => {
@@ -628,14 +626,14 @@ export default function Attachment() {
                   <Autocomplete
                     disabled={loadingResources}
                     options={resourceData}
-                    getOptionLabel={(option: any) => option.name}
-                    getOptionSelected={(option: any, value: any) => option.name === value.name}
+                    getOptionLabel={(option: any) => option.optionLabel}
+                    getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
                     style={{ width: '250px' }}
                     value={selectedResourceData}
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
-                      if (newValue?.id) {
-                        setFilter((prevState) => [...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]);
+                      if (newValue?.optionValue) {
+                        setFilter((prevState) => [...prevState, { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
                       } else {
                         setFilter([]);
                       }
@@ -716,7 +714,7 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => {}}
+              setWholeRowsCellColor={() => { }}
               renderedFrom={'attachment_render_form'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -805,8 +803,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                    ? selectedResourceData.id
-                    : user?.user?._id,
+                      ? selectedResourceData.optionValue
+                      : user?.user?._id,
                   access: true
                 }
               ]}
