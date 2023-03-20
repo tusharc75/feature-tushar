@@ -577,7 +577,7 @@ const Product = () => {
               {
                 title: 'Child Product Template',
                 api: `${product.api}/unknown/bom/template`,
-                type: 'export'
+                type: 'download'
               },
               {
                 title: 'Child Product Export',
@@ -596,7 +596,7 @@ const Product = () => {
               {
                 title: 'Service Template',
                 api: `${product.api}/unknown/service-master/template`,
-                type: 'export'
+                type: 'download'
               },
               {
                 title: 'Service Template Export',
@@ -615,7 +615,7 @@ const Product = () => {
               {
                 title: 'Service Package Template',
                 api: `${product.api}/unknown/package/template`,
-                type: 'export'
+                type: 'download'
               },
               {
                 title: 'Service Package Export',

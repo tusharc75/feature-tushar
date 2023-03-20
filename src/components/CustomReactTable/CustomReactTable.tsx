@@ -477,7 +477,7 @@ export default function CustomReactTable({
                       <TableCell
                         onDoubleClick={() => {
                           if (!cell?.column?.editable) return;
-                          setCellValue(cell?.value || '');
+                          setCellValue(parseFloat(cell?.value) || null);
                           setIsCellEditing(true);
                           setCurrentRowEditing(row);
                           setCellState(row.id, cell.column.id, { isEditing: true });
@@ -485,7 +485,7 @@ export default function CustomReactTable({
                             Object.keys(rowState[rowId].cellState).forEach((colId) => {
                               if (rowState[rowId]?.cellState[colId] !== cell.column?.id && rowState[rowId]?.cellState[colId]?.isEditing) {
                                 setCellState(rowId, colId, { isEditing: false });
-                                setIsCellEditing(false);
+                                // setIsCellEditing(false);
                               }
                             });
                           });

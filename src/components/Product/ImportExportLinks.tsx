@@ -78,6 +78,16 @@ export default function ImportExportLinks({
   const [isSelection, setIsSelection] = useState(false);
   const [isUpladDialog, setIsUploadDialog] = useState(false);
   const [anchorExtraEl, setAnchorExtraEl] = useState(null);
+
+  const [imptExptDnldMenuDta, setImptExptDnldMenuDta] = useState({ anchorEl: null, action: null, open: false });
+
+  const handleOpenMenu = (e, action) => {
+    setImptExptDnldMenuDta({ action, anchorEl: e.currentTarget, open: true });
+  };
+  const handleCloseMenu = () => {
+    setImptExptDnldMenuDta({ anchorEl: null, action: null, open: false });
+  };
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -249,55 +259,147 @@ export default function ImportExportLinks({
       });
   };
 
+  const RenderButtonMenu = () => {
+    return (
+      <>
+        <Menu id="button-menu" anchorEl={imptExptDnldMenuDta.anchorEl} keepMounted open={true} onClose={handleCloseMenu}>
+          {permissions?.isCreate && imptExptDnldMenuDta.action === 'import' && (
+            <MenuItem
+              onClick={() => {
+                setIsSelection(true);
+                setIsUploadDialog(true);
+                handleCloseMenu();
+              }}
+            >
+              <label htmlFor="importFromExcel" className="cursor-pointer">
+                Import from Excel
+              </label>
+            </MenuItem>
+          )}
+          {imptExptDnldMenuDta.action === 'export' && (
+            <MenuItem
+              onClick={() => {
+                exportToExcel();
+                handleCloseMenu();
+              }}
+            >
+              Export to Excel
+            </MenuItem>
+          )}
+          {imptExptDnldMenuDta.action === 'download' && (
+            <MenuItem
+              onClick={() => {
+                setIsSelection(true);
+                handleCloseMenu();
+              }}
+            >
+              Download Template
+            </MenuItem>
+          )}
+
+          {extraImportExportLinks?.map((d) => {
+            if (d.type === 'import' && imptExptDnldMenuDta.action === 'import') {
+              return (
+                <MenuItem key={d.title}>
+                  <input
+                    onClick={(e: any) => (e.target.value = null)}
+                    id="importFromExcel"
+                    name="importFromExcel"
+                    onChange={(e) => {
+                      uploadExtraData(e, d.api);
+                    }}
+                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                    style={{
+                      opacity: '0',
+                      position: 'absolute',
+                      zIndex: -1
+                    }}
+                    type="file"
+                  />
+                  <label htmlFor="importFromExcel">{d.title}</label>
+                </MenuItem>
+              );
+            } else if (d.type === 'export' && imptExptDnldMenuDta.action === 'export') {
+              return (
+                <MenuItem
+                  key={d.title}
+                  onClick={() => {
+                    exportToExcel(d.api);
+                    handleCloseMenu();
+                  }}
+                >
+                  {d.title}
+                </MenuItem>
+              );
+            } else if (imptExptDnldMenuDta.action === 'download' && d.type === 'download') {
+              return (
+                <MenuItem
+                  key={d.title}
+                  onClick={() => {
+                    exportToExcel(d.api);
+                    handleCloseMenu();
+                  }}
+                >
+                  {d.title}
+                </MenuItem>
+              );
+            }
+          })}
+        </Menu>
+      </>
+    );
+  };
+
   return (
     <div className={module !== 'builder' ? classes.root : classes.custom_root}>
       <div className={classes.linksContainer}>
         {permissions?.isCreate && (
           <>
             <label
-              onClick={() => {
-                setIsSelection(true);
-                setIsUploadDialog(true);
-                handleClose();
+              onClick={(e) => {
+                if (api === 'product') {
+                  handleOpenMenu(e, 'import');
+                } else {
+                  setIsSelection(true);
+                  setIsUploadDialog(true);
+                  handleClose();
+                }
               }}
-              htmlFor="importFromExcel"
+              htmlFor={api === 'product' ? '' : 'importFromExcel'}
               className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}
             >
-              {/* {ImportInput} */}
               Import from Excel
             </label>
-            {/* <Divider orientation="vertical" flexItem className={classes.linkDivider} /> */}
-            {/* <Divider orientation="vertical" flexItem className={classes.linkDivider} /> */}
           </>
         )}
 
         <label
-          onClick={exportToExcel}
+          onClick={(e) => {
+            if (api === 'product') {
+              handleOpenMenu(e, 'export');
+            } else {
+              exportToExcel();
+            }
+          }}
           className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}
         >
           Export to Excel
           {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? ' (All)' : ` (${recordsToExport})`) : null}
         </label>
-        {/* <Divider orientation="vertical" flexItem className={classes.linkDivider} /> */}
         <label
-          onClick={() => setIsSelection(true)}
+          onClick={(e) => {
+            if (api === 'product') {
+              handleOpenMenu(e, 'download');
+            } else {
+              setIsSelection(true);
+            }
+          }}
           className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}
         >
           Download Template
         </label>
-        {/* <Divider
-          orientation="vertical"
-          flexItem
-          className={classes.linkDivider}
-        />
-        <label
-          onClick={(e) => e.preventDefault()}
-          className={`${classes.links} cursor-pointer`}
-        >
-          Email a Link
-        </label> */}
 
-        {extraImportExportLinks?.length > 0 && (
+        {extraImportExportLinks?.length > 0 && api !== 'product' && (
           <>
             <Menu id="import-export-extra-links" anchorEl={anchorExtraEl} keepMounted open={Boolean(anchorExtraEl)} onClose={handleExtraClose}>
               {extraImportExportLinks?.map((d, idx) => {
@@ -410,7 +512,6 @@ export default function ImportExportLinks({
             );
           }
         })}
-        {/* <MenuItem>Email a Link</MenuItem> */}
       </Menu>
       {isMobile && (
         <IconButton onClick={handleClick}>
@@ -429,6 +530,7 @@ export default function ImportExportLinks({
           api={api}
         />
       )}
+      {imptExptDnldMenuDta.open && <RenderButtonMenu />}
     </div>
   );
 }
