@@ -67,7 +67,15 @@ export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
 export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Loading Ticket', 'Invoice'];
 export const demandOrderSteps = ['Add Products'];
 export const purchaseRequisitionSteps = ['Add Products'];
-export const serviceOrderSteps = ['Add Services', 'Add Products', 'Assign Technician', 'Technician Dispatch', 'Invoice'];
+// export const serviceOrderSteps = ['Add Services', 'Add Products', 'Assign Technician', 'Technician Dispatch', 'Invoice'];
+
+export const serviceOrderSteps = [
+  { name: 'Add Services', title: 'Add', icon: 'add' },
+  { name: 'Add Products', title: 'Products', icon: 'add' },
+  { name: 'Assign Technician', title: 'Assign', icon: 'assign' },
+  { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
+  { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
+];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
