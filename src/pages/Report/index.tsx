@@ -316,12 +316,21 @@ const Report = () => {
 
         forDeepFilter.forEach((key) => {
           const options = selectedData[key].value;
-          options.forEach((o: any) => {
+          if (selectedData[key].type === "dropDown") {
             deepFilter.push({
               field: key,
-              term: o.optionValue
+              term: options.map((d: any) => d.optionValue)
             });
-          });
+
+          }
+          else {
+            options.forEach((o: any) => {
+              deepFilter.push({
+                field: key,
+                term: o.optionValue
+              });
+            });
+          }
         });
 
         if (filterById.length > 0) {
@@ -513,7 +522,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => {}}
+                      onEdit={() => { }}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -528,8 +537,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => {}}
-                      onClone={(data) => {}}
+                      onDelete={(data) => { }}
+                      onClone={(data) => { }}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (
