@@ -109,6 +109,10 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
       }
     }
 
+    if (moment(values["rejectDate"]).isAfter(moment())) {
+      errors['rejectDate'] = `Please selecte valid date`;
+    }
+
     return errors;
   }
 

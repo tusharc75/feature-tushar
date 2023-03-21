@@ -54,31 +54,41 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
 
   const handleCreateSerializedAsset = (values) => {
     setIsSubmitting(true);
-    let products = values?.seriaizedAsset?.map((u) => ({
-      _id: u._id,
-      product: u.productId,
-      serializedProduct: u.serializedProduct,
-      warehouse: u.warehouse?._id,
-      inventoryQuantity: parseInt(u?.inventoryQuantity),
-      assetQuantity: parseInt(u?.assetQuantity),
-      serialNumber: u?.serialNumber,
-      comment: u?.comment
-    }));
-    axiosInstance()
-      .post(`${purchaseOrder.api}/receive-inventory/${purchaseOrderID}`, { products: products, receiveDate: values?.receiveDate })
-      .then(({ data }) => {
-        setIsSubmitting(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+    const data: any = []
+    values?.seriaizedAsset?.forEach((element) => {
+      if (parseInt(element?.inventoryQuantity)) {
+        data.push({
+          _id: element._id,
+          product: element.productId,
+          serializedProduct: element.serializedProduct,
+          warehouse: element?.warehouse?._id,
+          inventoryQuantity: parseInt(element?.inventoryQuantity),
+          assetQuantity: parseInt(element?.assetQuantity),
+          serialNumber: element?.serialNumber,
+          comment: element?.comment
         });
-        onSuccess();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setIsSubmitting(false);
-      });
+      }
+    });
+    if (data?.length) {
+      axiosInstance().post(`${purchaseOrder.api}/receive-inventory/${purchaseOrderID}`, { products: data, receiveDate: values?.receiveDate })
+        .then(({ data }) => {
+          setIsSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          onSuccess();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setIsSubmitting(false);
+        });
+    }
+    else{
+      setIsSubmitting(false);
+      onSuccess();
+    }
   };
 
   const validate = (values) => {
