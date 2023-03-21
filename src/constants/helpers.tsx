@@ -727,6 +727,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       obj[key.fieldName] = value ? value : options;
     } else if (key.type === 'date') {
       obj[key.fieldName] = value ? value : new Date();
+    } else if (key.type === 'dateTime') {
+      obj[key.fieldName] = new Date();
     } else if (key.type === 'year') {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'colorPicker') {
@@ -896,6 +898,8 @@ export const yupSchema = (fields: any[], validEmail = true) => {
           }
         });
     } else if (input.type === 'date') {
+      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
+    } else if (input.type === 'dateTime') {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
     } else if (input.type === 'freeStyleMultiSelect') {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`) : array();
