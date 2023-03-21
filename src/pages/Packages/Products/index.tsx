@@ -5,7 +5,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { packages } from 'src/constants/helpers';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -21,11 +21,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { flattenArray } from 'src/constants/columns';
 
 const ProductsTable = ({ packageId, packageData }) => {
-
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
   const { setToastConfig } = useContext(CustomToastContext);
 
-  const { state: { permissions } }: any = useData();
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const [columns, setColumns] = useState([]);
   const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
@@ -38,14 +39,12 @@ const ProductsTable = ({ packageId, packageData }) => {
   const [assignAssetDialog, setAssignAssetDialog] = useState({ open: false, products: [] });
   const [isAssetAdding, setIsAssetAdding] = useState(false);
 
-
   useEffect(() => {
     fetchColumns();
     fetchData();
   }, []);
 
   const fetchData = async () => {
-
     const allAssetsResponce: any = await axiosInstance().get(`${packages.api}/${packageId}/products/assets`);
     const assets = allAssetsResponce?.data?.data || [];
 
@@ -61,7 +60,7 @@ const ProductsTable = ({ packageId, packageData }) => {
           parent.productCategory = parent.productCategory?.optionLabel;
           parent.parentId = null;
           parent.qty = parent.qty;
-          parent.assetQty = assets?.filter((i) => i.product === parent._id)?.length
+          parent.assetQty = assets?.filter((i) => i.product === parent._id)?.length;
           parent.subRows = generateNestedData(assets, parent);
         });
         setRowsData(rows);
@@ -111,14 +110,15 @@ const ProductsTable = ({ packageId, packageData }) => {
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div>
-            {row.original.type === 'product' ?
+            {row.original.type === 'product' ? (
               <Link className="link text-truncate" to={`${routes.productDetail.path}/${row.original._id}`}>
                 {row.original.detail}
               </Link>
-              :
+            ) : (
               <Link className="link text-truncate" to={`${routes.serializedAssetDetail.path}/${row.original._id}`}>
                 {row.original.detail}
-              </Link>}
+              </Link>
+            )}
           </div>
         )
       },
@@ -246,15 +246,21 @@ const ProductsTable = ({ packageId, packageData }) => {
   };
 
   const handleAssignAssets = (data) => {
-    setIsAssetAdding(true)
-    axiosInstance().post(`${packages.api}/${packageId}/products/assign-assets`, { packageId, assets: data?.map((e) => { return { product: e.product, asset: e.asset } }) })
+    setIsAssetAdding(true);
+    axiosInstance()
+      .post(`${packages.api}/${packageId}/products/assign-assets`, {
+        packageId,
+        assets: data?.map((e) => {
+          return { product: e.product, asset: e.asset };
+        })
+      })
       .then(() => {
         setAssignAssetDialog({ open: false, products: [] });
-        setIsAssetAdding(false)
+        setIsAssetAdding(false);
         fetchData();
       })
       .catch((err) => {
-        setIsAssetAdding(false)
+        setIsAssetAdding(false);
         setToastConfig(err);
       });
   };
@@ -270,17 +276,13 @@ const ProductsTable = ({ packageId, packageData }) => {
       <Box mb={2} mt={1} display="flex" justifyContent="space-between">
         <Box display="flex">
           {permissions?.packages?.isUpdate && (
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => setShowProductAssignDialog(true)}>
+            <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
               {`Add Products`}
             </Button>
           )}
         </Box>
         <Box display="flex">
-          <ImportExportLinks
+          <ImportExportMenu
             permissions={permissions?.packages}
             module="packages-products"
             api={`${packages.api}/${packageId}/products`}
@@ -292,8 +294,8 @@ const ProductsTable = ({ packageId, packageData }) => {
             recordsToExport={selectedRecords.length}
             ids={[]}
             additionalParams={`refrenceId=${packageId}`}
-            isBackgroundWhite={true}
           />
+
           <Box ml={1}>
             <Button
               variant={'outlined'}
@@ -326,11 +328,13 @@ const ProductsTable = ({ packageId, packageData }) => {
                 disabled={disableAssignSerializedAssets()}
                 onClick={() => {
                   const products = [];
-                  selectedRecords.filter((i) => i.type === 'product' && i.serializedProduct)?.forEach((e) => {
-                    if (e?.qty - e?.assetQty > 0) {
-                      products.push({ _id: e._id, product: e._id, qty: e?.qty - e?.assetQty, productName: e?.detail })
-                    }
-                  })
+                  selectedRecords
+                    .filter((i) => i.type === 'product' && i.serializedProduct)
+                    ?.forEach((e) => {
+                      if (e?.qty - e?.assetQty > 0) {
+                        products.push({ _id: e._id, product: e._id, qty: e?.qty - e?.assetQty, productName: e?.detail });
+                      }
+                    });
                   setAssignAssetDialog({ open: true, products: products });
                   handleClose();
                 }}
@@ -398,7 +402,9 @@ const ProductsTable = ({ packageId, packageData }) => {
       {assignAssetDialog.open && (
         <AssignSerializedAssetDialog
           reference={'package'}
-          ids={flattenArray(rowsData)?.filter((e) => e.type === 'asset')?.map((e) => e._id)}
+          ids={flattenArray(rowsData)
+            ?.filter((e) => e.type === 'asset')
+            ?.map((e) => e._id)}
           handleClose={() => setAssignAssetDialog({ open: false, products: [] })}
           handleSucess={handleAssignAssets}
           isAssigning={isAssetAdding}

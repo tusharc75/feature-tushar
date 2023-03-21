@@ -66,7 +66,7 @@ export default function ImportExportLinks({
   recordsToExport = 0,
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
-  onExportToExcelSuccess = () => { },
+  onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
   extraImportExportLinks = []
@@ -256,90 +256,105 @@ export default function ImportExportLinks({
   };
 
   const RenderButtonMenu = () => {
-    return (<Menu id="button-menu" anchorEl={imptExptDnldMenuDta.anchorEl} keepMounted open={true} onClose={handleCloseMenu}>
-      {permissions?.isCreate && imptExptDnldMenuDta.action === 'import' && (
-        <MenuItem
-          onClick={() => {
-            setIsSelection(true);
-            setIsUploadDialog(true);
-            handleCloseMenu();
-          }}
-        >
-          <label htmlFor="importFromExcel" className="cursor-pointer">
-            {api === 'product' ? `Product Import` : `Import from Excel`}
-          </label>
-        </MenuItem>
-      )}
-      {imptExptDnldMenuDta.action === 'export' && (
-        <MenuItem
-          onClick={() => {
-            exportToExcel();
-            handleCloseMenu();
-          }}
-        >
-          {api === 'product' ? `Product Export` : `Export to Excel`}
-        </MenuItem>
-      )}
-      {imptExptDnldMenuDta.action === 'download' && (
-        <MenuItem
-          onClick={() => {
-            setIsSelection(true);
-            handleCloseMenu();
-          }}
-        >
-          {api === 'product' ? `Product Template` : ` Download Template`}
-        </MenuItem>
-      )}
-      {extraImportExportLinks?.map((d) => {
-        if (d.type === 'import' && imptExptDnldMenuDta.action === 'import') {
-          return (
-            <MenuItem key={d.title}>
-              <input
-                onClick={(e: any) => (e.target.value = null)}
-                id="importFromExcel"
-                name="importFromExcel"
-                onChange={(e) => {
-                  uploadExtraData(e, d.api);
+    return (
+      <Menu
+        id="button-menu"
+        anchorEl={imptExptDnldMenuDta.anchorEl}
+        keepMounted
+        open={true}
+        onClose={handleCloseMenu}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+      >
+        {permissions?.isCreate && imptExptDnldMenuDta.action === 'import' && (
+          <MenuItem
+            onClick={() => {
+              setIsSelection(true);
+              setIsUploadDialog(true);
+              handleCloseMenu();
+            }}
+          >
+            <label htmlFor="importFromExcel" className="cursor-pointer">
+              {api === 'product' ? `Product Import` : `Import from Excel`}
+            </label>
+          </MenuItem>
+        )}
+        {imptExptDnldMenuDta.action === 'export' && (
+          <MenuItem
+            onClick={() => {
+              exportToExcel();
+              handleCloseMenu();
+            }}
+          >
+            {api === 'product' ? `Product Export` : `Export to Excel`}
+          </MenuItem>
+        )}
+        {imptExptDnldMenuDta.action === 'download' && (
+          <MenuItem
+            onClick={() => {
+              setIsSelection(true);
+              handleCloseMenu();
+            }}
+          >
+            {api === 'product' ? `Product Template` : ` Download Template`}
+          </MenuItem>
+        )}
+        {extraImportExportLinks?.map((d) => {
+          if (d.type === 'import' && imptExptDnldMenuDta.action === 'import') {
+            return (
+              <MenuItem key={d.title}>
+                <input
+                  onClick={(e: any) => (e.target.value = null)}
+                  id="importFromExcel"
+                  name="importFromExcel"
+                  onChange={(e) => {
+                    uploadExtraData(e, d.api);
+                  }}
+                  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                  style={{
+                    opacity: '0',
+                    position: 'absolute',
+                    zIndex: -1
+                  }}
+                  type="file"
+                />
+                <label htmlFor="importFromExcel">{d.title}</label>
+              </MenuItem>
+            );
+          } else if (d.type === 'export' && imptExptDnldMenuDta.action === 'export') {
+            return (
+              <MenuItem
+                key={d.title}
+                onClick={() => {
+                  exportToExcel(d.api);
+                  handleCloseMenu();
                 }}
-                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                style={{
-                  opacity: '0',
-                  position: 'absolute',
-                  zIndex: -1
+              >
+                {d.title}
+              </MenuItem>
+            );
+          } else if (imptExptDnldMenuDta.action === 'download' && d.type === 'download') {
+            return (
+              <MenuItem
+                key={d.title}
+                onClick={() => {
+                  exportToExcel(d.api);
+                  handleCloseMenu();
                 }}
-                type="file"
-              />
-              <label htmlFor="importFromExcel">{d.title}</label>
-            </MenuItem>
-          );
-        } else if (d.type === 'export' && imptExptDnldMenuDta.action === 'export') {
-          return (
-            <MenuItem
-              key={d.title}
-              onClick={() => {
-                exportToExcel(d.api);
-                handleCloseMenu();
-              }}
-            >
-              {d.title}
-            </MenuItem>
-          );
-        } else if (imptExptDnldMenuDta.action === 'download' && d.type === 'download') {
-          return (
-            <MenuItem
-              key={d.title}
-              onClick={() => {
-                exportToExcel(d.api);
-                handleCloseMenu();
-              }}
-            >
-              {d.title}
-            </MenuItem>
-          );
-        }
-      })}
-    </Menu>
-
+              >
+                {d.title}
+              </MenuItem>
+            );
+          }
+        })}
+      </Menu>
     );
   };
 

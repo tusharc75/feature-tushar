@@ -511,26 +511,26 @@ body::-webkit-scrollbar-thumb {
 }
 
 .card-view-loader {
-  position : absolute;
-  z-index  : 2;
-  left     : 50%;
-  top      : 50%;
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
   transform: translate(-50%, -50%);
 }
 
 .card-view-loader span {
-  padding        : 15px 25px;
-  border         : 1px solid lightgray;
-  background     : white;
-  font-size      : 1rem;
-  letter-spacing : 1px;
-  width          : 150px;
-  display        : flex;
+  padding: 15px 25px;
+  border: 1px solid lightgray;
+  background: white;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  width: 150px;
+  display: flex;
   justify-content: center;
 }
 
 .card-view-loader span:after {
-  content  : '';
+  content: '';
   animation: dot-animation 2s infinite;
 }
 
@@ -2675,7 +2675,7 @@ svg.MuiSvgIcon-root {
     --container-padding: 26px;
   }
   .MuiButton-outlinedPrimary {
-    color: #3e3e3e !important;
+    color: #737373 !important;
     border: 1px solid #e2e2e2 !important;
     font-weight: 400 !important;
   }
