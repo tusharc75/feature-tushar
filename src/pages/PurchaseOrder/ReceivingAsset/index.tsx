@@ -18,8 +18,10 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RejectProduct from './RejectProduct';
 import TransformIcon from '@material-ui/icons/Transform';
 import HistoryIcon from '@material-ui/icons/History';
+import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import Receive from './Receive';
 import Reject from './Reject';
+import Logs from './Logs';
 import History from './History';
 
 const ReceivingAsset = ({
@@ -38,7 +40,10 @@ const ReceivingAsset = ({
   const [receiveDialog, setReceiveDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectProductDialog, setRejectProductDialog] = useState(null);
+
+  const [logDialog, setLogDialog] = useState({ open: false, _id: '', product: '', productName: '' });
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
+
   const [inventoryHistory, setInventoryHistory] = useState([]);
 
   const [rowsData, setRowsData] = useState(null);
@@ -249,17 +254,15 @@ const ReceivingAsset = ({
         {
           accessor: 'action',
           Header: '',
-          minWidth: 80,
-          width: 80,
+          minWidth: 130,
+          width: 130,
           sticky: 'right',
           disableFilters: true,
           canDrag: false,
           Cell: ({ row }) =>
             row?.original?.type === 'Product' ? (
               <>
-                {permissions?.purchaseOrder?.isUpdate
-                  && allowedToEdit
-                  && row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0)
+                {permissions?.purchaseOrder?.isUpdate && allowedToEdit && row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0)
                   && ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status)
                   ? (
                     <HtmlTooltip title="Reject">
@@ -286,6 +289,19 @@ const ReceivingAsset = ({
                       }}
                     >
                       <HistoryIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
+                <HtmlTooltip title="Logs">
+                  <span>
+                    <IconButton
+                      size="small"
+                      aria-label="Log"
+                      onClick={() => {
+                        setLogDialog({ open: true, _id: row?.original?._id, product: row?.original?.productId, productName: row?.original?.detail });
+                      }}
+                    >
+                      <TrackChangesIcon fontSize="small" color={'primary'} />
                     </IconButton>
                   </span>
                 </HtmlTooltip>
@@ -465,11 +481,20 @@ const ReceivingAsset = ({
           warehouse={purchaseOrderData?.warehouse.optionValue}
         />
       )}
+      {logDialog.open && (
+        <Logs
+          handleClose={() => setLogDialog({ open: false, _id: '', product: '', productName: '' })}
+          productName={logDialog.productName}
+          inventoryHistory={inventoryHistory?.filter((e) => e._id === logDialog._id && e.product === logDialog.product)}
+        />
+      )}
       {historyDialog.open && (
         <History
           handleClose={() => setHistoryDialog({ open: false, _id: '', product: '', productName: '' })}
           productName={historyDialog.productName}
-          inventoryHistory={inventoryHistory?.filter((e) => e._id === historyDialog._id && e.product === historyDialog.product)}
+          poId={purchaseOrderData._id}
+          _id={historyDialog._id}
+          product={historyDialog.product}
         />
       )}
     </>
