@@ -257,7 +257,23 @@ export default function ImportExportLinks({
 
   const RenderButtonMenu = () => {
     return (
-      <Menu id="button-menu" anchorEl={imptExptDnldMenuDta.anchorEl} keepMounted open={true} onClose={handleCloseMenu}>
+
+      <Menu
+        id="button-menu"
+        anchorEl={imptExptDnldMenuDta.anchorEl}
+        keepMounted
+        open={true}
+        onClose={handleCloseMenu}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+      >
         {permissions?.isCreate && imptExptDnldMenuDta.action === 'import' && (
           <MenuItem
             onClick={() => {
@@ -292,6 +308,7 @@ export default function ImportExportLinks({
           </MenuItem>
         )}
         {extraImportExportLinks?.map((d, idx) => {
+
           if (d.type === 'import' && imptExptDnldMenuDta.action === 'import') {
             return (
               <MenuItem key={d.title}>
@@ -299,6 +316,7 @@ export default function ImportExportLinks({
                   onClick={(e: any) => (e.target.value = null)}
                   id={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}
                   name={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}
+
                   onChange={(e) => {
                     uploadExtraData(e, d.api);
                   }}
@@ -311,6 +329,7 @@ export default function ImportExportLinks({
                   type="file"
                 />
                 <label htmlFor={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}>{d.title}</label>
+
               </MenuItem>
             );
           } else if (d.type === 'export' && imptExptDnldMenuDta.action === 'export') {
