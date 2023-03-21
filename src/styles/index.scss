@@ -2737,6 +2737,7 @@ svg.MuiSvgIcon-root {
     box-shadow: 0px 3.90676px 39.0676px rgba(0, 0, 0, 0.08);
     border-radius: 10px;
     min-height: 700px;
+    isolation: isolate;
 
     // height: calc(100vh - 136px);
     @media all and (max-width: 768px) {

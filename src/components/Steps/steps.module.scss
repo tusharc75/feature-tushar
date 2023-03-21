@@ -10,6 +10,7 @@
     height: calc(100% + 90px);
     background: linear-gradient(180deg, #ffffff 0%, #e1f5f4 100%);
     pointer-events: none;
+    z-index: -1;
   }
 }
 .mainContainer {
