@@ -7,7 +7,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: '100%',
+    // width: '100%',
     flexGrow: 1,
     display: 'flex',
     justifyContent: 'flex-end'
