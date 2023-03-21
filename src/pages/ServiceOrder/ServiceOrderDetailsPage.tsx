@@ -19,6 +19,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { camelCase } from 'lodash';
 import ManageServiceOrderDialog from './ManageServiceOrder';
 import Steps from '../RentalManagement/Steps';
+import Steps2 from 'src/components/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Services from './Services';
 import Products from './Products';
@@ -29,7 +30,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ServiceOrderViews from './RoadMapViews';
 
 const ServiceOrderDetailsPage = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.serviceOrder.title);
 
@@ -133,7 +133,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const getServiceOrderFields = async () => {
@@ -240,7 +240,16 @@ const ServiceOrderDetailsPage = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps
+          {/* <Steps
+            isNextStep={false}
+            nextStep={nextStep}
+            steps={serviceOrderSteps}
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
+            isStepEnded={false}
+            setStepFullScreen={() => setStepFullScreen(true)}
+          /> */}
+          <Steps2
             isNextStep={false}
             nextStep={nextStep}
             steps={serviceOrderSteps}
