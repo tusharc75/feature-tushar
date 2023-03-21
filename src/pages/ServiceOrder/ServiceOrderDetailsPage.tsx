@@ -80,7 +80,7 @@ const ServiceOrderDetailsPage = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
-      updateProcessStatus(serviceOrderSteps[currentStep]);
+      updateProcessStatus(serviceOrderSteps[currentStep]?.name);
     }
   }, [currentStep]);
 
@@ -114,7 +114,11 @@ const ServiceOrderDetailsPage = () => {
       setAllowedToDelete(data.owner.optionValue === user?.user?._id);
       setServiceOrderData(data);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
-      setCurrentStep(serviceOrderSteps.indexOf(data?.processStatus) !== -1 ? serviceOrderSteps.indexOf(data?.processStatus) : 0);
+      setCurrentStep(
+        serviceOrderSteps.map((s) => s.name).indexOf(data?.processStatus) !== -1
+          ? serviceOrderSteps.map((s) => s.name).indexOf(data?.processStatus)
+          : 0
+      );
       if (isAllowedToEdit && openEdit === 'true') {
         setOpenUpdateDialog(true);
         const params = new URLSearchParams();
@@ -258,7 +262,7 @@ const ServiceOrderDetailsPage = () => {
             isStepEnded={false}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
-          <ContentFullScreen title={serviceOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <ContentFullScreen title={serviceOrderSteps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && serviceOrderData && (
               <Services
                 serviceOrderData={serviceOrderData}

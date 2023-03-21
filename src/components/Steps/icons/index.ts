@@ -4,6 +4,9 @@ import dispatch from './dispatch.svg';
 import invoice from './invoice.svg';
 import { LeftIcon } from './left';
 import { RightIcon } from './right';
+export interface stepIconInterface {
+  icon: 'add' | 'assign' | 'dispatch' | 'invoice' | 'dispatch';
+}
 
 export const getIcon = (name: string) => {
   name = name.toLowerCase();

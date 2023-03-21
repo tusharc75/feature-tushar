@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import styles from './steps.module.scss';
-import CustomMobileStepperOpportunities from '../CustomMobileStepperOpportunities';
+import MobileSteps from './MobileSteps';
 import { isMobile } from 'react-device-detect';
 import { Button, IconButton, Box, Typography } from '@material-ui/core';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
@@ -78,7 +78,7 @@ const Steps = ({
   return (
     <div>
       {isMobile ? (
-        <CustomMobileStepperOpportunities
+        <MobileSteps
           stepName={`${activeStep + 1}/${steps.length} ${steps[currentStep] ? steps[currentStep] : ''}`}
           nextButton={
             <Button
@@ -116,7 +116,7 @@ const Steps = ({
               </IconButton>
             </Box>
             <div className={styles.contentContainer} ref={containerRef}>
-              {steps.map((label, i) => (
+              {steps.map((step, i) => (
                 <Box
                   className={`
                     ${styles.singleStep} 
@@ -125,12 +125,12 @@ const Steps = ({
                     ${i > currentStep ? styles.inActiveStep : ''}
                     single-step-item
                 `}
-                  key={label}
+                  key={step}
                 >
                   <Box className={styles.stepIcon}>
-                    <img src={getIcon(label)} alt={`${label}-icon`} aria-hidden />
+                    <img src={getIcon(step.icon)} alt={`${step}-icon`} aria-hidden />
                   </Box>
-                  <Typography className={styles.label}>{label.split(' ')[1] ? label.split(' ')[1] : label.split(' ')[0]}</Typography>
+                  <Typography className={styles.label}>{step.title}</Typography>
                   {!isStepEnded && setStepFullScreen && currentStep === i && (
                     <HtmlTooltip title={`Full Screen`}>
                       <Box className={styles.fullScrceen}>
