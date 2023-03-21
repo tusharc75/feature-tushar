@@ -22,6 +22,12 @@ import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
 import { kebabCase, orderBy, uniqBy } from 'lodash';
+import { stepIconInterface } from 'src/components/Steps/icons';
+
+interface stepInterface extends stepIconInterface {
+  name: string;
+  title: string;
+}
 
 export const staticHiddenResource = ['Dashboard', 'Report'];
 
@@ -69,7 +75,7 @@ export const demandOrderSteps = ['Add Products'];
 export const purchaseRequisitionSteps = ['Add Products'];
 // export const serviceOrderSteps = ['Add Services', 'Add Products', 'Assign Technician', 'Technician Dispatch', 'Invoice'];
 
-export const serviceOrderSteps = [
+export const serviceOrderSteps: stepInterface[] = [
   { name: 'Add Services', title: 'Add', icon: 'add' },
   { name: 'Add Products', title: 'Products', icon: 'add' },
   { name: 'Assign Technician', title: 'Assign', icon: 'assign' },
