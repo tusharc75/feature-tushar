@@ -11,6 +11,8 @@ import { useData } from 'src/StateProvider/Provider';
 import PreviewIcon from '@material-ui/icons/Visibility';
 import _ from 'lodash';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import moment from 'moment';
+import { dateTimeFormat } from 'src/constants/helpers';
 
 const fileIcons = [
   {
@@ -166,6 +168,9 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             : attachment.url.substring(attachment.url.lastIndexOf('/') + 1)
                           : 'attachment'}
                       </Typography>
+                      {attachment?.date && <Typography variant="body2">
+                        {moment(attachment?.date)?.format(dateTimeFormat)}
+                      </Typography>}
                       <div className={emailStyles.fileOverlay}>
                         <Typography variant="subtitle2">
                           {attachment
