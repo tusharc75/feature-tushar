@@ -103,7 +103,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
   };
 
   const onUploadFile = (file) => {
-    setOtherAttachments((prevState) => [...prevState, { name: file.split('_')[3] || file, url: file, date: new Date() }]);
+    setOtherAttachments((prevState) => [{ name: file.split('_')[3] || file, url: file, date: new Date() }, ...prevState]);
   };
 
   const handleDeleteAttachment = (file) => {
