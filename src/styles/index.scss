@@ -923,7 +923,11 @@ body::-webkit-scrollbar-thumb {
 }
 
 .MobileStep-next-back-button {
-  color: var(--secondary) !important;
+  color: var(--primary-light) !important;
+  &:disabled {
+    opacity: 0.7;
+    pointer-events: none;
+  }
 }
 
 .one {
@@ -2678,6 +2682,7 @@ svg.MuiSvgIcon-root {
     color: #737373 !important;
     border: 1px solid #e2e2e2 !important;
     font-weight: 400 !important;
+    background-color: white;
   }
 
   margin-bottom: 20px;
