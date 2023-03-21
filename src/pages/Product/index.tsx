@@ -599,7 +599,7 @@ const Product = () => {
                 type: 'download'
               },
               {
-                title: 'Service Template Export',
+                title: 'Service Export',
                 api: `${product.api}/unknown/service-master/template?export=true${
                   getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                     ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`

@@ -60,11 +60,6 @@ export default function ManageAttachment({
     fetchAttachmentDetail();
   }, []);
 
-  const checkImageUrl = (url) => {
-    let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
-    let imageExtensions = ['.tif', 'tiff', '.bmp', '.jpg', 'jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
-    return imageExtensions.indexOf(extension) >= 0;
-  };
 
   const fetchAttachmentDetail = async () => {
     setIsFetching(true);
@@ -74,17 +69,10 @@ export default function ManageAttachment({
         .then(({ data: { data } }) => {
           setCanEdit(data?.canEdit);
           if (data.file && data.file.length) {
-            let imageAttachments = [];
-            let nonImageAttachments = [];
-            data.file.map((file) => {
-              let isImageUrl = checkImageUrl(file.url);
-              if (!isImageUrl) {
-                nonImageAttachments.push({ name: file.name, url: file.url });
-              } else {
-                imageAttachments.push({ name: file.name, url: file.url });
-              }
+            data?.file?.sort((a: any, b: any) => {
+              return (new Date(b?.date)).getTime() - (new Date(a?.date)).getTime();
             });
-            setOtherAttachments([...nonImageAttachments, ...imageAttachments]);
+            setOtherAttachments(data.file);
           }
           setFormValues(data);
           setIsFetching(false);
@@ -213,7 +201,7 @@ export default function ManageAttachment({
   };
 
   const onUploadFile = (file) => {
-    setOtherAttachments((prevState) => [...prevState, { name: file.split('_')[3] || file, url: file }]);
+    setOtherAttachments((prevState) => [...prevState, { name: file.split('_')[3] || file, url: file, date: new Date() }]);
   };
 
   const handleDeleteAttachment = (file) => {
