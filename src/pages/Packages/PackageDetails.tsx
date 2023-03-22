@@ -15,7 +15,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { packages } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, packages } from 'src/constants/helpers';
 import ManagePackageDialog from './ManagePackageDialog';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Products from './Products';
@@ -25,6 +25,7 @@ import LeadTimeMaster from '../../components/LeadTime';
 import { RiShoppingBag3Fill } from 'react-icons/ri';
 import { MdMiscellaneousServices } from 'react-icons/md';
 import { isMobile, isTablet } from 'react-device-detect';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -154,6 +155,7 @@ const PackageDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
+            <ActivityButton referenceId={packageData?._id} resource={ACTIVITY_RESOURCE.packages} />
           </Box>
         </Box>
       </Box>
