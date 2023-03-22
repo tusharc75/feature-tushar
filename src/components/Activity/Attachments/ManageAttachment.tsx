@@ -21,12 +21,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 
 const AttachmentSchema = object().shape({
-  name: string().required('please add attachment name'),
+  name: string().required('Attachment Name is required'),
   fileUrl: string().required('please upload attachment')
 });
 
 const FolderSchema = object().shape({
-  name: string().required('please add folder name')
+  name: string().required('Folder Name is required')
 });
 
 export default function ManageAttachment({
@@ -107,16 +107,7 @@ export default function ManageAttachment({
       setIsFetching(false);
     }
   };
-
-  const showSuccessMessage = (message) => {
-    toastConfig.setToastConfig({
-      open: true,
-      type: 'success',
-      message: message
-    });
-    handleClose();
-  };
-
+  
   const handleSave = (values) => {
     let request: any = {};
     if (type === 'file') {
@@ -140,10 +131,12 @@ export default function ManageAttachment({
         axiosInstance()
           .put(`/attachment/${attachmentId}`, request)
           .then(({ data }) => {
-            showSuccessMessage(data.message);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
             setLoading(false);
-            // setInitialValues(null)
-
             handleClose();
             if (fetchData) fetchData();
           })
@@ -155,9 +148,12 @@ export default function ManageAttachment({
         axiosInstance()
           .post(`/attachment`, request)
           .then(({ data }) => {
-            showSuccessMessage(data.message);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
             setLoading(false);
-
             handleClose();
             if (fetchData) fetchData();
           })
@@ -171,10 +167,12 @@ export default function ManageAttachment({
         axiosInstance()
           .put(`/attachment/folder/${attachmentId}`, request)
           .then(({ data }) => {
-            showSuccessMessage(data.message);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
             setLoading(false);
-            // setInitialValues(null)
-
             handleClose();
             if (fetchData) fetchData();
           })
@@ -186,9 +184,12 @@ export default function ManageAttachment({
         axiosInstance()
           .post(`/attachment/folder`, request)
           .then(({ data }) => {
-            showSuccessMessage(data.message);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
             setLoading(false);
-
             handleClose();
             if (fetchData) fetchData();
           })
