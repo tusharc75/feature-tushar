@@ -1,7 +1,7 @@
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, Menu, MenuItem } from '@material-ui/core';
 import CustomAgGrid from 'src/components/AgGridComponents/CustomAgGridEditable';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
@@ -20,6 +20,7 @@ import Loader from 'src/components/Loader';
 import { camelCase } from 'lodash';
 import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 
 const ServiceTable = ({ packageId, packageData }) => {
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
@@ -40,6 +41,7 @@ const ServiceTable = ({ packageId, packageData }) => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   let canServiceAdd = packageData?.packageType === 'Product' && !packageData?.products?.length ? false : true;
@@ -160,6 +162,14 @@ const ServiceTable = ({ packageId, packageData }) => {
       });
   };
 
+  const handleClick = (event) => {
+    setAnchorActionEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorActionEl(null);
+  };
+
   const ActionsRenderer = (params) => <span>{params?.data?.qty}</span>;
 
   return (
@@ -173,6 +183,53 @@ const ServiceTable = ({ packageId, packageData }) => {
           )}
         </Box>
         <Box display="flex" style={{ marginLeft: 'auto' }}>
+          {permissions?.packages?.isUpdate && (
+            <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button variant="outlined" color="primary" size="small" disabled={!canServiceAdd} onClick={() => setArrangeView(true)}>
+                <GrDrag fontSize="small" color="primary" className="mr-1" />
+                Arrange
+              </Button>
+              <Box ml={1} />
+              <Button
+                variant={'outlined'}
+                color="primary"
+                aria-controls="simple-menu"
+                aria-haspopup="true"
+                disabled={selectedRecords.length === 0 || isRemovingServices}
+                size="small"
+                onClick={handleClick}
+                endIcon={<ArrowDropDownIcon />}
+              >
+                {'Actions'}
+              </Button>
+              <Menu
+                anchorEl={anchorActionEl}
+                keepMounted
+                open={Boolean(anchorActionEl)}
+                onClose={handleClose}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right'
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right'
+                }}
+              >
+                <MenuItem
+                  disabled={selectedRecords.length === 0 || isRemovingServices}
+                  onClick={() => {
+                    setShowServiceConfirmBox(true);
+                    handleClose();
+                  }}
+                >
+                  Delete
+                </MenuItem>
+              </Menu>
+            </Box>
+          )}
+          <Box ml={1} />
           {canServiceAdd && (
             <ImportExportMenu
               permissions={permissions?.packages}
@@ -188,22 +245,6 @@ const ServiceTable = ({ packageId, packageData }) => {
               additionalParams={`refrenceId=${packageId}`}
             />
           )}
-          {permissions?.packages?.isUpdate && (
-            <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <DeleteButton
-                disabled={selectedRecords.length === 0 || isRemovingServices}
-                text={'Delete'}
-                onClick={() => {
-                  setShowServiceConfirmBox(true);
-                }}
-              />
-              <Box ml={1} />
-              <Button variant="outlined" color="primary" size="small" disabled={!canServiceAdd} onClick={() => setArrangeView(true)}>
-                <GrDrag fontSize="small" color="primary" className="mr-1" />
-                Arrange
-              </Button>
-            </Box>
-          )}
         </Box>
       </Box>
       {isMobile && !isTablet ? (
@@ -218,9 +259,9 @@ const ServiceTable = ({ packageId, packageData }) => {
           dataRows={dataRows}
           selectedRecords={[]}
           dispatch={dispatch}
-          onEdit={(data) => {}}
+          onEdit={(data) => { }}
           extraParamsToCheckDelete={true}
-          onDelete={(data) => {}}
+          onDelete={(data) => { }}
           rowCount={rowCount}
           page={page}
           loading={loading}
@@ -236,7 +277,7 @@ const ServiceTable = ({ packageId, packageData }) => {
             setShowServiceAssignDialog(true);
           }}
           showClone={true}
-          onClone={(data) => {}}
+          onClone={(data) => { }}
           renderedFrom={renderedFrom}
         />
       ) : Object.keys(frameWorkComponent).length > 0 ? (
