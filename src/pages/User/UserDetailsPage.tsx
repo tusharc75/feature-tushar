@@ -626,7 +626,7 @@ const UserDetailsPage = () => {
                   onClick={() => handleDeleteUser(true)}
                 />
               ) : null}
-              <ActivityButton referenceId={userData?._id} resource={ACTIVITY_RESOURCE.users} />
+              <ActivityButton referenceId={userData?._id} resource={ACTIVITY_RESOURCE.user} />
             </Box>
           </Box>
         </Box>
