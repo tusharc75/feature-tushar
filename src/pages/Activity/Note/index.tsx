@@ -102,7 +102,7 @@ const Note = () => {
   useEffect(() => {
     if (resource && resource?.optionValue) {
       setLoadingResources(true);
-      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue]
+      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue];
       axiosInstance()
         .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
         .then(({ data: { data } }) => {
@@ -360,7 +360,10 @@ const Note = () => {
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
                       if (newValue?.optionValue) {
-                        setFilter((prevState) => [...prevState, { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
+                        setFilter((prevState) => [
+                          ...prevState,
+                          { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }
+                        ]);
                       } else {
                         setFilter([]);
                       }
@@ -384,10 +387,10 @@ const Note = () => {
               </Grid>
               <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
                 <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Grid style={{ width: isMobile && !isTablet ? '75%' : '100%', display: 'flex' }}>
+                  <Box style={{ flexGrow: 1, flexBasis: 'calc(100% - 171px)' }}>
                     <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
-                  </Grid>
-                  <Grid style={{ display: 'flex', gap: '5px' }}>
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', flexBasis: '163px' }}>
                     {
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -439,7 +442,7 @@ const Note = () => {
                         </MenuItem>
                       </Menu>
                     </div>
-                  </Grid>
+                  </Box>
                 </Box>
               </Grid>
             </Grid>
@@ -459,7 +462,7 @@ const Note = () => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={(data) => { }}
+            onEdit={(data) => {}}
             extraParamsToCheckDelete={true}
             onDelete={(data) => {
               showConfirmBox(selectedRecords);
@@ -476,7 +479,7 @@ const Note = () => {
             ]}
             onCreate={false}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={'notesPage'}
           />
         ) : (
@@ -550,7 +553,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-          // noteData={noteData}
+            // noteData={noteData}
           />
         </Dialog>
       )}

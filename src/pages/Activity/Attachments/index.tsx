@@ -313,7 +313,7 @@ export default function Attachment() {
   useEffect(() => {
     if (resource && resource?.optionValue) {
       setLoadingResources(true);
-      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue]
+      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue];
       axiosInstance()
         .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
         .then(({ data: { data } }) => {
@@ -633,7 +633,10 @@ export default function Attachment() {
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
                       if (newValue?.optionValue) {
-                        setFilter((prevState) => [...prevState, { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
+                        setFilter((prevState) => [
+                          ...prevState,
+                          { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }
+                        ]);
                       } else {
                         setFilter([]);
                       }
@@ -645,10 +648,10 @@ export default function Attachment() {
               </Grid>
               <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
                 <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Grid style={{ width: '90%', display: 'flex' }}>
+                  <Box style={{ flexGrow: 1, flexBasis: 'calc(100% - 171px)' }}>
                     <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="attachment" />
-                  </Grid>
-                  <Grid style={{ display: 'flex', gap: '5px' }}>
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', flexBasis: '163px' }}>
                     {
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -694,7 +697,7 @@ export default function Attachment() {
                         Delete
                       </MenuItem>
                     </Menu>
-                  </Grid>
+                  </Box>
                 </Box>
               </Grid>
             </Grid>
@@ -714,7 +717,7 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => { }}
+              setWholeRowsCellColor={() => {}}
               renderedFrom={'attachment_render_form'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -803,8 +806,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                      ? selectedResourceData.optionValue
-                      : user?.user?._id,
+                    ? selectedResourceData.optionValue
+                    : user?.user?._id,
                   access: true
                 }
               ]}
