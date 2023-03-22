@@ -9,12 +9,13 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, sidebarResource } from '../../constants/helpers';
 import { BiEdit } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { Skeleton } from '@material-ui/lab';
 import ManageMarketSegmentDialog from './ManageMarketSegmentDialog';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const MarketSegmentDetail = () => {
   const { id } = useParams();
@@ -114,6 +115,7 @@ const MarketSegmentDetail = () => {
                 )}
                 {permissions?.marketSegment?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
+              <ActivityButton referenceId={marketSegmentData?._id} resource={ACTIVITY_RESOURCE.marketSegment} />
           </Box>
         </Box>
       </Box>

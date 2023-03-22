@@ -15,7 +15,7 @@ import PricingConditionsDialog from './PricingConditionsDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
-import { pricingCondition } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, pricingCondition } from '../../constants/helpers';
 import { startCase } from 'lodash';
 import AddConditions from './AddConditions';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -116,6 +116,7 @@ const PricingConditionsDetails = () => {
                 )}
                 {permissions?.pricingCondition?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
+              <ActivityButton referenceId={detailData?._id} resource={ACTIVITY_RESOURCE.pricingCondition} />
           </Box>
         </Box>
       </Box>

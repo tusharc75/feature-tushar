@@ -14,7 +14,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { product, productInventory, serializedAsset, warehouse } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, product, productInventory, serializedAsset, warehouse } from '../../constants/helpers';
 import CreateProduct from '../../components/Product/CreateProduct';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import DeleteButton from '../../components/Helpers/DeleteButton';
@@ -41,6 +41,7 @@ import LeadTimeMaster from '../../components/LeadTime';
 import Package from './Package';
 import ServicePackage from './ServicePackage';
 import Digital from './Digital';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -262,6 +263,7 @@ const ProductDetailsPage = () => {
             {permissions?.product?.isDelete && (
               <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
+            <ActivityButton referenceId={productData?._id} resource={ACTIVITY_RESOURCE.products} />
           </Box>
         </Box>
       </Box>

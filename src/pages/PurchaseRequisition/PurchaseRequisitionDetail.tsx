@@ -18,6 +18,8 @@ import TabPanel from '../../components/TabPanel';
 import Material from './Material';
 import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
 
 
 
@@ -132,6 +134,7 @@ const PurchaseRequisitionDetail = () => {
                 {permissions?.purchaseRequisition?.isDelete && allowedToDelete && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
+               <ActivityButton referenceId={purchaseRequisitionData?._id} resource={ACTIVITY_RESOURCE.purchaseRequisition} />
               </>
           </Box>
         </Box>
