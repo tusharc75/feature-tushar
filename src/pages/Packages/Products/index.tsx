@@ -282,6 +282,61 @@ const ProductsTable = ({ packageId, packageData }) => {
           )}
         </Box>
         <Box display="flex">
+          <Button
+            variant={'outlined'}
+            color="primary"
+            aria-controls="simple-menu"
+            aria-haspopup="true"
+            disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
+            size="small"
+            onClick={handleClick}
+            endIcon={<ArrowDropDownIcon />}
+          >
+            {'Actions'}
+          </Button>
+          <Menu
+            anchorEl={anchorActionEl}
+            keepMounted
+            open={Boolean(anchorActionEl)}
+            onClose={handleClose}
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right'
+            }}
+          >
+            <MenuItem
+              disabled={disableAssignSerializedAssets()}
+              onClick={() => {
+                const products = [];
+                selectedRecords
+                  .filter((i) => i.type === 'product' && i.serializedProduct)
+                  ?.forEach((e) => {
+                    if (e?.qty - e?.assetQty > 0) {
+                      products.push({ _id: e._id, product: e._id, qty: e?.qty - e?.assetQty, productName: e?.detail });
+                    }
+                  });
+                setAssignAssetDialog({ open: true, products: products });
+                handleClose();
+              }}
+            >
+              {`Assign ${routes.serializedAsset.title}`}
+            </MenuItem>
+            <MenuItem
+              disabled={permissions?.packages?.isUpdate && (selectedRecords.length === 0 || isRemovingProducts)}
+              onClick={() => {
+                setShowProductConfirmBox(true);
+                handleClose();
+              }}
+            >
+              Delete
+            </MenuItem>
+          </Menu>
+          <Box ml={1} />
           <ImportExportMenu
             permissions={permissions?.packages}
             module="packages-products"
@@ -295,63 +350,6 @@ const ProductsTable = ({ packageId, packageData }) => {
             ids={[]}
             additionalParams={`refrenceId=${packageId}`}
           />
-
-          <Box ml={1}>
-            <Button
-              variant={'outlined'}
-              color="primary"
-              aria-controls="simple-menu"
-              aria-haspopup="true"
-              disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
-              size="small"
-              onClick={handleClick}
-              endIcon={<ArrowDropDownIcon />}
-            >
-              {'Actions'}
-            </Button>
-            <Menu
-              anchorEl={anchorActionEl}
-              keepMounted
-              open={Boolean(anchorActionEl)}
-              onClose={handleClose}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
-              }}
-            >
-              <MenuItem
-                disabled={disableAssignSerializedAssets()}
-                onClick={() => {
-                  const products = [];
-                  selectedRecords
-                    .filter((i) => i.type === 'product' && i.serializedProduct)
-                    ?.forEach((e) => {
-                      if (e?.qty - e?.assetQty > 0) {
-                        products.push({ _id: e._id, product: e._id, qty: e?.qty - e?.assetQty, productName: e?.detail });
-                      }
-                    });
-                  setAssignAssetDialog({ open: true, products: products });
-                  handleClose();
-                }}
-              >
-                {`Assign ${routes.serializedAsset.title}`}
-              </MenuItem>
-              <MenuItem
-                disabled={permissions?.packages?.isUpdate && (selectedRecords.length === 0 || isRemovingProducts)}
-                onClick={() => {
-                  setShowProductConfirmBox(true);
-                  handleClose();
-                }}
-              >
-                Delete
-              </MenuItem>
-            </Menu>
-          </Box>
         </Box>
       </Box>
       {columns && rowsData ? (
