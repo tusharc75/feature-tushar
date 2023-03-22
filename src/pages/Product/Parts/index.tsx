@@ -1,10 +1,10 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Box, Grid, Button } from '@material-ui/core';
+import { Box, Grid, Button, Menu, MenuItem } from '@material-ui/core';
 import { Link, useParams, useLocation } from 'react-router-dom';
 import { product, isObjectEmpty, prepareDataForGrid } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
-import { Delete } from '@material-ui/icons';
+import { Delete, ExpandMore } from '@material-ui/icons';
 import { IconButton, Tooltip } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
@@ -15,6 +15,7 @@ import { camelCase } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import { isMobile, isTablet } from 'react-device-detect';
 
 function Parts({ id }) {
   const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
@@ -36,6 +37,7 @@ function Parts({ id }) {
   const [state, dispatch] = useReducer(reducer, intialState);
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const { dataRows, rowCount, loading: gridLoading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
 
   const defaultColumns = [
@@ -134,6 +136,7 @@ function Parts({ id }) {
 
   const handleRemove = () => {
     setIsDeleting(true);
+    closeActions()
     const { data } = showConfirmBox;
     if (data.length > 1) {
       data.forEach((p: any) => {
@@ -183,108 +186,126 @@ function Parts({ id }) {
       </Tooltip>
     );
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <div>
       {hasPermissions && (
-        <Box p={1} pt={2} pb={2}>
-          <Grid container>
-            <Grid item xs={6} md={6} sm={6}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() => {
-                  setOpenAssignProductDialog(true);
+        <Box display="flex" justifyContent="space-between" p={1} pt={2} pb={2}>
+          <Button variant="contained" color="primary" size="small" onClick={() => setOpenAssignProductDialog(true)}>
+            Add Product
+          </Button>
+          <Box display={'flex'}>
+            <Button
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              color="default"
+              size="small"
+              onClick={openActions}
+              disabled={selectedRecords.length ? false : true}
+              aria-controls="action-menu"
+              style={{ marginLeft: '0.6rem' }}
+            >
+              {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowConfirmBox({ open: true, data: selectedRecords })}>
+                Delete
+              </MenuItem>
+            </Menu>
+            <Box ml={1} />
+            <Box display="flex" style={{ marginLeft: 'auto' }}>
+              <ImportExportMenu
+                permissions={permissions?.packages}
+                module="packages-products"
+                api={`${product.api}/unknown/bom`}
+                afterImportCompleted={() => {
+                  fetchBOMData();
                 }}
-              >
-                Add Product
-              </Button>
-            </Grid>
-            <Grid item xs={6} md={6} sm={6}>
-              <Box display={'flex'} justifyContent={'flex-end'}>
-                <Box display="flex" style={{ marginLeft: 'auto' }}>
-                  <ImportExportMenu
-                    permissions={permissions?.packages}
-                    module="packages-products"
-                    api={`${product.api}/unknown/bom`}
-                    afterImportCompleted={() => {
-                      fetchBOMData();
-                    }}
-                    isExportAllOrSomeFeature={true}
-                    //   total={rowCount}
-                    //   recordsToExport={selectedRecords.length}
-                    ids={[]}
-                    additionalParams={`productId=${id}`}
-                  />
-                </Box>
-                <Box ml={1} />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  disabled={selectedRecords?.length === 0}
-                  onClick={() => {
-                    setShowConfirmBox({ open: true, data: selectedRecords });
-                  }}
-                >
-                  Delete
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
+                isExportAllOrSomeFeature={true}
+                //   total={rowCount}
+                //   recordsToExport={selectedRecords.length}
+                ids={[]}
+                additionalParams={`productId=${id}`}
+              />
+            </Box>
+          </Box>
         </Box>
-      )}
-      {frameWorkComponent ? (
-        <CustomAgGrid
-          allowSelection={hasPermissions}
-          allowAction={hasPermissions}
-          columns={columns}
-          dataRows={dataRows}
-          isClientSideGrid={true}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          loading={gridLoading}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchBOMData}
-        />
-      ) : (
-        <Box p={2} height={500} bgcolor="white">
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
-      {showConfirmBox.open && (
-        <ConfirmationDialogRaw
-          open={true}
-          message={`Are you sure you want to delete this product(s)?`}
-          okBtnLoading={isDeleting}
-          onClose={() => {
-            setShowConfirmBox({ open: false, data: null });
-          }}
-          onOk={handleRemove}
-        />
-      )}
-      {openAssignProductDialog && (
-        <AssignProductDialog
-          productsDialogOpen={openAssignProductDialog}
-          productId={id}
-          handleCloseDialog={() => setOpenAssignProductDialog(false)}
-          assignedProducts={[...parts?.map((p) => p.childProduct), id]}
-          renderedFrom={`${renderedFrom}_grid-sub-1`}
-          onSuccess={() => {
-            if (permissions?.serializedAsset) {
-              fetchBOMData();
-            }
-            setOpenAssignProductDialog(false);
-          }}
-        />
-      )}
-    </div>
+      )
+      }
+      {
+        frameWorkComponent ? (
+          <CustomAgGrid
+            allowSelection={hasPermissions}
+            allowAction={hasPermissions}
+            columns={columns}
+            dataRows={dataRows}
+            isClientSideGrid={true}
+            frameworkComponents={frameWorkComponent}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={150}
+            loading={gridLoading}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchBOMData}
+          />
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )
+      }
+      {
+        showConfirmBox.open && (
+          <ConfirmationDialogRaw
+            open={true}
+            message={`Are you sure you want to delete this product(s)?`}
+            okBtnLoading={isDeleting}
+            onClose={() => {
+              setShowConfirmBox({ open: false, data: null });
+            }}
+            onOk={handleRemove}
+          />
+        )
+      }
+      {
+        openAssignProductDialog && (
+          <AssignProductDialog
+            productsDialogOpen={openAssignProductDialog}
+            productId={id}
+            handleCloseDialog={() => setOpenAssignProductDialog(false)}
+            assignedProducts={[...parts?.map((p) => p.childProduct), id]}
+            renderedFrom={`${renderedFrom}_grid-sub-1`}
+            onSuccess={() => {
+              if (permissions?.serializedAsset) {
+                fetchBOMData();
+              }
+              setOpenAssignProductDialog(false);
+            }}
+          />
+        )
+      }
+    </div >
   );
 }
 

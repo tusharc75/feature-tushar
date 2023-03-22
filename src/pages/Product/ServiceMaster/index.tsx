@@ -304,29 +304,13 @@ const ServiceMaster = (props: Props) => {
           </Button>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Box ml={1} />
-            <Box display="flex" style={{ marginLeft: 'auto' }}>
-              <ImportExportMenu
-                permissions={permissions?.packages}
-                module="packages-products"
-                api={`${product.api}/unknown/service-master`}
-                afterImportCompleted={() => {
-                  fetchData();
-                }}
-                isExportAllOrSomeFeature={true}
-                total={rowCount}
-                recordsToExport={selectedRecords.length}
-                ids={[]}
-                additionalParams={`productId=${id}`}
-              />
-            </Box>
-            <Box ml={1} />
-
             {dataRows?.length ? (
               <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
                 <GrDrag fontSize="small" color="primary" className="mr-1" />
                 Arrange
               </Button>
             ) : null}
+
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
               color="default"
@@ -376,6 +360,23 @@ const ServiceMaster = (props: Props) => {
                 Remove Default
               </MenuItem>
             </Menu>
+
+            <Box ml={1} />
+            <Box display="flex" style={{ marginLeft: 'auto' }}>
+              <ImportExportMenu
+                permissions={permissions?.packages}
+                module="packages-products"
+                api={`${product.api}/unknown/service-master`}
+                afterImportCompleted={() => {
+                  fetchData();
+                }}
+                isExportAllOrSomeFeature={true}
+                total={rowCount}
+                recordsToExport={selectedRecords.length}
+                ids={[]}
+                additionalParams={`productId=${id}`}
+              />
+            </Box>
           </div>
         </Box>
       )}
@@ -392,9 +393,9 @@ const ServiceMaster = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => {}}
+            onEdit={() => { }}
             extraParamsToCheckDelete={false}
-            onDelete={() => {}}
+            onDelete={() => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -402,7 +403,7 @@ const ServiceMaster = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : (
