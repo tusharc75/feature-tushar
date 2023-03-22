@@ -138,7 +138,7 @@ const Email = () => {
   useEffect(() => {
     if (resource && resource?.optionValue) {
       setLoadingResources(true);
-      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue]
+      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue];
       axiosInstance()
         .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
         .then(({ data: { data } }) => {
@@ -447,7 +447,10 @@ const Email = () => {
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
                       if (newValue?.optionValue) {
-                        setFilter((prevState) => [...prevState, { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
+                        setFilter((prevState) => [
+                          ...prevState,
+                          { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }
+                        ]);
                       } else {
                         setFilter([]);
                       }
@@ -459,10 +462,10 @@ const Email = () => {
               </Grid>
               <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
                 <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Grid>
+                  <Box style={{ flexGrow: 1, flexBasis: 'calc(100% - 171px)' }}>
                     <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'large' }} activityName="email" />
-                  </Grid>
-                  <Grid style={{ display: 'flex', gap: '5px' }}>
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', flexBasis: '163px' }}>
                     {
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -511,7 +514,7 @@ const Email = () => {
                         Delete
                       </MenuItem>
                     </Menu>
-                  </Grid>
+                  </Box>
                 </Box>
               </Grid>
             </Grid>

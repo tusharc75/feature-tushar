@@ -263,7 +263,7 @@ const ProductDetailsPage = () => {
             {permissions?.product?.isDelete && (
               <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
-            <ActivityButton referenceId={productData?._id} resource={ACTIVITY_RESOURCE.products} />
+            <ActivityButton referenceId={productData?._id} resource={ACTIVITY_RESOURCE.product} />
           </Box>
         </Box>
       </Box>

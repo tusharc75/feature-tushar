@@ -1,6 +1,6 @@
 import { Chip, Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { resActivityColors, resActivityTextColors } from './utils';
+import { getResActivityColor } from './utils';
 import routes from '../../Helpers/Routes';
 
 const useStyles = makeStyles((theme) => ({
@@ -34,8 +34,8 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
                   label={routes[_element?.type]?.title + ' - ' + _element.name}
                   size="small"
                   style={{
-                    backgroundColor: resActivityColors[_element.type],
-                    color: resActivityTextColors[_element.type]
+                    backgroundColor: getResActivityColor(index).background,
+                    color: getResActivityColor(index).color
                   }}
                 />
               </Box>
@@ -52,8 +52,8 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
               label={` ${routes[_element?.type]?.title + ' - ' + _element.name}`}
               size="small"
               style={{
-                backgroundColor: resActivityColors[_element.type],
-                color: resActivityTextColors[_element.type]
+                backgroundColor: getResActivityColor(index).background,
+                color: getResActivityColor(index).color
               }}
             />
           </Box>
