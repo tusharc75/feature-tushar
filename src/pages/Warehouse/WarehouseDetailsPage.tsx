@@ -16,6 +16,8 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import { BiEdit } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
+import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const WarehouseDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -136,6 +138,7 @@ const WarehouseDetailsPage = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
+            <ActivityButton referenceId={warehouseData?._id} resource={ACTIVITY_RESOURCE.warehouse} />
           </Box>
         </Box>
       </Box>
