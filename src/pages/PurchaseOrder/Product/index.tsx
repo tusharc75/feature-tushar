@@ -392,38 +392,37 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
 
   const handleUpdateQty = (rows, saveAndNext = false) => {
     setLoadingEdit(true)
-    axiosInstance()
-      .put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
-      .then(() => {
-        setAddProductDialog(false);
-        fetchData();
-        setAddingProducts(false);
-        setIsBulkEdit(false);
-        if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-          if (rowIndex < rowsData?.length - 1) {
-            if (rowsData[rowIndex + 1]?.type === "Product") {
-              setShowProductDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-            }
-            else if (rowsData[rowIndex + 1]?.type === "Service") {
-              setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-            }
-            else if (rowsData[rowIndex + 1]?.type === "Manual Entry") {
-              setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-            }
-            else {
-              setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-            }
+    axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows }).then(() => {
+      setAddProductDialog(false);
+      fetchData();
+      setAddingProducts(false);
+      setIsBulkEdit(false);
+      if (saveAndNext) {
+        const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+        if (rowIndex < rowsData?.length - 1) {
+          if (rowsData[rowIndex + 1]?.type === "Product") {
+            setShowProductDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
+          }
+          else if (rowsData[rowIndex + 1]?.type === "Service") {
+            setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
+            setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
+          }
+          else if (rowsData[rowIndex + 1]?.type === "Manual Entry") {
+            setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
+            setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
+          }
+          else {
+            setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
           }
         }
-        else {
-          setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-        }
-        setLoadingEdit(false)
-      })
+      }
+      else {
+        setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
+      }
+      setLoadingEdit(false)
+    })
       .catch((error) => {
+        setLoadingEdit(false)
         setAddProductDialog(false);
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
