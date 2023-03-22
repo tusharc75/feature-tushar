@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -17,6 +17,7 @@ import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import AddRepairType from './AddRepairTypes';
+import { ExpandMore } from '@material-ui/icons';
 
 interface Props {
   renderedFrom: string;
@@ -37,6 +38,7 @@ const ProductRepairType = (props: Props) => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
+  const [anchorEl, setAnchorEl] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
 
@@ -177,6 +179,7 @@ const ProductRepairType = (props: Props) => {
       ids = selectedRecords.map((d) => d._id);
     }
     setDeleting(true);
+    closeActions();
     axiosInstance()
       .put(`${routes.product.path}/${id}/repair-type/remove`, { ids: ids })
       .then(() => {
@@ -208,6 +211,14 @@ const ProductRepairType = (props: Props) => {
       });
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Fragment>
       {permissions?.product?.isUpdate &&
@@ -219,85 +230,116 @@ const ProductRepairType = (props: Props) => {
             onClick={() => setOpenAddDialog(true)}>
             Add Repair Types
           </Button>
-          <DeleteButton
-            disabled={selectedRecords.length === 0}
-            text={'Delete'}
-            onClick={() => setShowDeleteConfirmBox(true)} />
+          <Box display={'flex'}>
+            <Button
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              color="default"
+              size="small"
+              onClick={openActions}
+              disabled={selectedRecords.length ? false : true}
+              aria-controls="action-menu"
+              style={{ marginLeft: '0.6rem' }}
+            >
+              {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
+                Delete
+              </MenuItem>
+            </Menu>
+          </Box>
         </Box>
       }
-      {columns && Object.keys(frameWorkComponent).length > 0 ? (
-        isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={false}
-            permissions={permissions?.product}
-            primaryField={columns?.find((d) => d.primaryField)}
-            onClick={(data) => {
-              history.push(`${routes.repairJobDetail.path}/${data._id}`);
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={() => { }}
-            extraParamsToCheckDelete={false}
-            onDelete={() => { }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[]}
-            chips={[]}
-            onCreate={false}
-            showClone={true}
-            onClone={() => { }}
-            renderedFrom={renderedFrom}
-          />
+      {
+        columns && Object.keys(frameWorkComponent).length > 0 ? (
+          isMobile && !isTablet ? (
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={false}
+              permissions={permissions?.product}
+              primaryField={columns?.find((d) => d.primaryField)}
+              onClick={(data) => {
+                history.push(`${routes.repairJobDetail.path}/${data._id}`);
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={() => { }}
+              extraParamsToCheckDelete={false}
+              onDelete={() => { }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              additionalDetails={[]}
+              chips={[]}
+              onCreate={false}
+              showClone={true}
+              onClone={() => { }}
+              renderedFrom={renderedFrom}
+            />
+          ) : (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              allowSelection={permissions?.product.isUpdate}
+              allowAction={permissions?.product.isUpdate}
+              actionWidth={100}
+              loading={loading}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchData}
+              showOnlyShowFilteredRecordSwitch={true}
+            />
+          )
         ) : (
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowSelection={permissions?.product.isUpdate}
-            allowAction={permissions?.product.isUpdate}
-            actionWidth={100}
-            loading={loading}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )
+      }
+      {
+        showDeleteConfirmBox && (
+          <ConfirmationDialog
+            open={showDeleteConfirmBox}
+            message={`Are you sure you want to delete the ${routes.repairType?.title} ? `}
+            onClose={() => {
+              setDeleteRecord(null)
+              setShowDeleteConfirmBox(false)
+            }}
+            onOk={handleDelete}
+            okBtnLoading={isDeleting}
           />
         )
-      ) : (
-        <Box p={2} height={500} bgcolor="white">
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
-      {showDeleteConfirmBox && (
-        <ConfirmationDialog
-          open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.repairType?.title} ? `}
-          onClose={() => {
-            setDeleteRecord(null)
-            setShowDeleteConfirmBox(false)
-          }}
-          onOk={handleDelete}
-          okBtnLoading={isDeleting}
-        />
-      )}
-      {openAddDialog && (
-        <AddRepairType
-          handleSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          renderedFrom={`${renderedFrom}_sub-grid-1`}
-          close={() => setOpenAddDialog(false)}
-          exisitingIds={dataRows.map((d: { repairTypeId: string }) => d.repairTypeId)}
-        />
-      )}
-    </Fragment>
+      }
+      {
+        openAddDialog && (
+          <AddRepairType
+            handleSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            renderedFrom={`${renderedFrom}_sub-grid-1`}
+            close={() => setOpenAddDialog(false)}
+            exisitingIds={dataRows.map((d: { repairTypeId: string }) => d.repairTypeId)}
+          />
+        )
+      }
+    </Fragment >
   );
 };
 

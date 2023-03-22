@@ -257,6 +257,7 @@ export default function ImportExportLinks({
 
   const RenderButtonMenu = () => {
     return (
+
       <Menu
         id="button-menu"
         anchorEl={imptExptDnldMenuDta.anchorEl}
@@ -306,14 +307,16 @@ export default function ImportExportLinks({
             {api === 'product' ? `Product Template` : ` Download Template`}
           </MenuItem>
         )}
-        {extraImportExportLinks?.map((d) => {
+        {extraImportExportLinks?.map((d, idx) => {
+
           if (d.type === 'import' && imptExptDnldMenuDta.action === 'import') {
             return (
               <MenuItem key={d.title}>
                 <input
                   onClick={(e: any) => (e.target.value = null)}
-                  id="importFromExcel"
-                  name="importFromExcel"
+                  id={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}
+                  name={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}
+
                   onChange={(e) => {
                     uploadExtraData(e, d.api);
                   }}
@@ -325,7 +328,8 @@ export default function ImportExportLinks({
                   }}
                   type="file"
                 />
-                <label htmlFor="importFromExcel">{d.title}</label>
+                <label htmlFor={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}>{d.title}</label>
+
               </MenuItem>
             );
           } else if (d.type === 'export' && imptExptDnldMenuDta.action === 'export') {
@@ -412,8 +416,8 @@ export default function ImportExportLinks({
                     <MenuItem>
                       <input
                         onClick={(e: any) => (e.target.value = null)}
-                        id={`importDataFromExcel-${idx}`}
-                        name={`importDataFromExcel-${idx}`}
+                        id={`${d.title}-${idx + 2}`.replace(/\s+/g, '')}
+                        name={`${d.title}-${idx + 2}`.replace(/\s+/g, '')}
                         onChange={(e) => {
                           uploadExtraData(e, d.api);
                         }}
@@ -425,7 +429,7 @@ export default function ImportExportLinks({
                         }}
                         type="file"
                       />
-                      <label htmlFor={`importDataFromExcel-${idx}`}>{d.title}</label>
+                      <label htmlFor={`${d.title}-${idx + 2}`.replace(/\s+/g, '')}>{d.title}</label>
                     </MenuItem>
                   );
                 } else {
@@ -480,14 +484,14 @@ export default function ImportExportLinks({
           Download Template
         </MenuItem>
 
-        {extraImportExportLinks?.map((d) => {
+        {extraImportExportLinks?.map((d, idx) => {
           if (d.type === 'import') {
             return (
               <MenuItem>
                 <input
                   onClick={(e: any) => (e.target.value = null)}
-                  id="importFromExcel"
-                  name="importFromExcel"
+                  id={`${d.title}-${idx + 3}`.replace(/\s+/g, '')}
+                  name={`${d.title}-${idx + 3}`.replace(/\s+/g, '')}
                   onChange={(e) => {
                     uploadExtraData(e, d.api);
                   }}
@@ -499,7 +503,7 @@ export default function ImportExportLinks({
                   }}
                   type="file"
                 />
-                <label htmlFor="importFromExcel">{d.title}</label>
+                <label htmlFor={`${d.title}-${idx + 3}`.replace(/\s+/g, '')}>{d.title}</label>
               </MenuItem>
             );
           } else {

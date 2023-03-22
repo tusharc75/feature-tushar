@@ -1,7 +1,7 @@
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, Menu, MenuItem } from '@material-ui/core';
 import CustomAgGrid from 'src/components/AgGridComponents/CustomAgGridEditable';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
@@ -16,6 +16,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Loader from 'src/components/Loader';
 import { camelCase } from 'lodash';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
 const PackagesTable = ({ packageId, packageData }) => {
@@ -38,6 +39,7 @@ const PackagesTable = ({ packageId, packageData }) => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   useEffect(() => {
@@ -155,6 +157,14 @@ const PackagesTable = ({ packageId, packageData }) => {
       });
   };
 
+  const handleClick = (event) => {
+    setAnchorActionEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorActionEl(null);
+  };
+
   return (
     <Box>
       <Box mb={1} mt={1} display="flex" justifyContent="space-between">
@@ -172,6 +182,49 @@ const PackagesTable = ({ packageId, packageData }) => {
           )}
         </Box>
         <Box display="flex">
+          {permissions?.packages?.isUpdate && (
+            <>
+              <Button
+                variant={'outlined'}
+                color="primary"
+                aria-controls="simple-menu"
+                aria-haspopup="true"
+                disabled={selectedRecords.length === 0 || isRemovingProducts}
+                size="small"
+                onClick={handleClick}
+                endIcon={<ArrowDropDownIcon />}
+              >
+                {'Actions'}
+              </Button>
+              <Menu
+                anchorEl={anchorActionEl}
+                keepMounted
+                open={Boolean(anchorActionEl)}
+                onClose={handleClose}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right'
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right'
+                }}
+              >
+                <MenuItem
+                  disabled={selectedRecords.length === 0 || isRemovingProducts}
+                  onClick={() => {
+                    setShowProductConfirmBox(true);
+                    handleClose();
+                  }}
+                >
+                  Delete
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+
+          <Box ml={1} />
           <ImportExportMenu
             permissions={permissions?.packages}
             module="packages-products"
@@ -185,16 +238,6 @@ const PackagesTable = ({ packageId, packageData }) => {
             ids={[]}
             additionalParams={`refrenceId=${packageId}`}
           />
-          <Box ml={1} />
-          {permissions?.packages?.isUpdate && (
-            <DeleteButton
-              disabled={selectedRecords.length === 0 || isRemovingProducts}
-              text={'Delete'}
-              onClick={() => {
-                setShowProductConfirmBox(true);
-              }}
-            />
-          )}
         </Box>
       </Box>
       {isMobile && !isTablet ? (
@@ -209,9 +252,9 @@ const PackagesTable = ({ packageId, packageData }) => {
           dataRows={dataRows}
           selectedRecords={[]}
           dispatch={dispatch}
-          onEdit={(data) => {}}
+          onEdit={(data) => { }}
           extraParamsToCheckDelete={true}
-          onDelete={(data) => {}}
+          onDelete={(data) => { }}
           rowCount={rowCount}
           page={page}
           loading={loading}
@@ -227,7 +270,7 @@ const PackagesTable = ({ packageId, packageData }) => {
             setShowProductAssignDialog(true);
           }}
           showClone={true}
-          onClone={(data) => {}}
+          onClone={(data) => { }}
           renderedFrom={renderedFrom}
         />
       ) : Object.keys(frameWorkComponent).length > 0 ? (

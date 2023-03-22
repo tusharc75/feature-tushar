@@ -614,7 +614,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               <ManageAttachment
                 attachmentId={open.purpose === 'add' ? null : attachmentId}
                 handleClose={() => {
-                  console.log('hello');
                   handleClose();
                   setFullScreen(false);
                 }}

@@ -741,6 +741,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       obj[key.fieldName] = value ? value : options;
     } else if (key.type === 'date') {
       obj[key.fieldName] = value ? value : new Date();
+    } else if (key.type === 'dateTime') {
+      obj[key.fieldName] = new Date();
     } else if (key.type === 'year') {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'colorPicker') {
@@ -834,6 +836,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
       }
     } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : defaultValue || 0;
+    } else if (key.type === 'dateTime') {
+      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue || new Date();
     } else if (key.type === 'lookUpDisplay') {
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue || '';
@@ -910,6 +914,8 @@ export const yupSchema = (fields: any[], validEmail = true) => {
           }
         });
     } else if (input.type === 'date') {
+      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
+    } else if (input.type === 'dateTime') {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
     } else if (input.type === 'freeStyleMultiSelect') {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`) : array();
