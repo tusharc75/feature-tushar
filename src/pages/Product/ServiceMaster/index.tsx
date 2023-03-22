@@ -6,7 +6,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import { serviceMaster, isObjectEmpty, gridLoadingTimeout } from 'src/constants/helpers';
+import { serviceMaster, isObjectEmpty, gridLoadingTimeout, product } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
@@ -21,6 +21,7 @@ import { FcApproval } from 'react-icons/fc';
 import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { ExpandMore } from '@material-ui/icons';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 interface Props {
   renderedFrom: string;
@@ -64,10 +65,16 @@ const ServiceMaster = (props: Props) => {
 
   const defaultColumns = [
     {
-      field: 'serviceName', headerName: 'Service Name', show: true, cellRenderer: 'serviceRenderer', disabled: true, lockPosition: true, primaryField: true
+      field: 'serviceName',
+      headerName: 'Service Name',
+      show: true,
+      cellRenderer: 'serviceRenderer',
+      disabled: true,
+      lockPosition: true,
+      primaryField: true
     },
     { field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'preWork', headerName: 'Pre Work', show: true, cellRenderer: 'commonRenderer',}
+    { field: 'preWork', headerName: 'Pre Work', show: true, cellRenderer: 'commonRenderer' }
   ];
 
   const fetchGridColumns = () => {
@@ -78,9 +85,7 @@ const ServiceMaster = (props: Props) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.fieldData?.fieldName !== 'serviceName'
-           && o?.fieldData?.fieldName !== "preWork"
-           ) {
+          if (o?.fieldData?.fieldName !== 'serviceName' && o?.fieldData?.fieldName !== 'preWork') {
             let currentColumn = getColumnData(routes.serviceMaster?.title, o?.fieldData, routes.serviceMasterDetail.path);
             if (currentColumn !== null) {
               columns = [...columns, currentColumn?.columnData];
@@ -94,7 +99,7 @@ const ServiceMaster = (props: Props) => {
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
           serviceRenderer: ServiceRenderer,
-          actionsRenderer: ActionsRenderer,
+          actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         setColumns([...defaultColumns, ...columns]);
@@ -110,8 +115,8 @@ const ServiceMaster = (props: Props) => {
       .get(`${routes.product.path}/${id}/service-master`)
       .then(({ data: { data } }) => {
         let rows = data?.map((u) => {
-        let  finalObject = prepareDataForGrid(u);
-         finalObject['preWork'] = u?.preWork  ?  "Yes" : "No"     
+          let finalObject = prepareDataForGrid(u);
+          finalObject['preWork'] = u?.preWork ? 'Yes' : 'No';
           let res = {
             ...finalObject
           };
@@ -299,6 +304,23 @@ const ServiceMaster = (props: Props) => {
           </Button>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Box ml={1} />
+            <Box display="flex" style={{ marginLeft: 'auto' }}>
+              <ImportExportMenu
+                permissions={permissions?.packages}
+                module="packages-products"
+                api={`${product.api}/unknown/service-master`}
+                afterImportCompleted={() => {
+                  fetchData();
+                }}
+                isExportAllOrSomeFeature={true}
+                total={rowCount}
+                recordsToExport={selectedRecords.length}
+                ids={[]}
+                additionalParams={`productId=${id}`}
+              />
+            </Box>
+            <Box ml={1} />
+
             {dataRows?.length ? (
               <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
                 <GrDrag fontSize="small" color="primary" className="mr-1" />
@@ -335,20 +357,24 @@ const ServiceMaster = (props: Props) => {
                 onClick={() => {
                   handleUpdate({
                     ids: selectedRecords.map((d) => d._id),
-                    default: true,
-                  })
-                  closeActions()
+                    default: true
+                  });
+                  closeActions();
                 }}
-              >Set Default</MenuItem>
+              >
+                Set Default
+              </MenuItem>
               <MenuItem
                 onClick={() => {
                   handleUpdate({
                     ids: selectedRecords.map((d) => d._id),
-                    default: false,
-                  })
-                  closeActions()
+                    default: false
+                  });
+                  closeActions();
                 }}
-              >Remove Default</MenuItem>
+              >
+                Remove Default
+              </MenuItem>
             </Menu>
           </div>
         </Box>
@@ -366,9 +392,9 @@ const ServiceMaster = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => { }}
+            onEdit={() => {}}
             extraParamsToCheckDelete={false}
-            onDelete={() => { }}
+            onDelete={() => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -376,7 +402,7 @@ const ServiceMaster = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : (

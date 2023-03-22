@@ -19,9 +19,9 @@ import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { HiBadgeCheck } from 'react-icons/hi';
 import { FcApproval } from 'react-icons/fc';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const ServicePackage = ({ renderedFrom, productId }) => {
-
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -258,18 +258,32 @@ const ServicePackage = ({ renderedFrom, productId }) => {
 
   return (
     <Fragment>
-      {permissions?.product?.isUpdate &&
+      {permissions?.product?.isUpdate && (
         <Box display="flex" justifyContent="space-between" p={1} pt={2} pb={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => setOpenAddDialog(true)}>
+          <Button variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
             Add Service Packages
           </Button>
-          <DeleteButton disabled={selectedRecords.length === 0} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
+          <Box display={'flex'}>
+            <Box display="flex" style={{ marginLeft: 'auto' }}>
+              <ImportExportMenu
+                permissions={permissions?.packages}
+                module="packages-products"
+                api={`${product.api}/unknown/package`}
+                afterImportCompleted={() => {
+                  fetchData();
+                }}
+                isExportAllOrSomeFeature={true}
+                //   total={rowCount}
+                //   recordsToExport={selectedRecords.length}
+                ids={[]}
+                additionalParams={`productId=${productId}`}
+              />
+            </Box>
+            <Box ml={1} />
+            <DeleteButton disabled={selectedRecords.length === 0} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
+          </Box>
         </Box>
-      }
+      )}
       {columns && Object.keys(frameWorkComponent).length > 0 ? (
         isMobile && !isTablet ? (
           <CustomSwipableList
@@ -283,9 +297,9 @@ const ServicePackage = ({ renderedFrom, productId }) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => { }}
+            onEdit={() => {}}
             extraParamsToCheckDelete={false}
-            onDelete={() => { }}
+            onDelete={() => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -293,7 +307,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -339,9 +353,9 @@ const ServicePackage = ({ renderedFrom, productId }) => {
           handleClose={() => setOpenAddDialog(false)}
           ids={[...dataRows?.map((e) => e._id)]}
           onSuccess={(rows) => {
-            handleSubmit(rows)
+            handleSubmit(rows);
           }}
-          packageType={"Service"}
+          packageType={'Service'}
         />
       )}
     </Fragment>
