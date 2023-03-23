@@ -1964,6 +1964,9 @@ export const LOG_RESOURCE = {
   inventoryCycle: sidebarResource.inventoryCycle,
   // frequentlyAskedQuestion: sidebarResource.freqentlyAskedQuestion,
   competencyMaster: sidebarResource.competencyMaster,
+  salesOrder: sidebarResource.salesOrder,
+  transferInventory: sidebarResource.transferInventory,
+  bulkAssetCreation: sidebarResource.bulkAssetCreation,
 };
 
 export const REPORT_LIST = [
