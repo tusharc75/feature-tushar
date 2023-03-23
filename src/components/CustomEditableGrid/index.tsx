@@ -42,6 +42,8 @@ import {
 import { useSticky } from 'react-table-sticky';
 import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
 import { isEmpty } from 'lodash';
+import { flattenArray } from 'src/constants/columns';
+import { calculateRowsField } from '../RentalManagment/helper';
 
 const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSave }) => {
   const [fullScreen, setFullScreen] = useState(true);
@@ -133,8 +135,8 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
       columns: newColumns,
       data: displayRows,
       initialState: {
-        // autoResetExpanded: false,
-        // expanded: true
+        autoResetExpanded: false,
+        expanded: true
       },
       getSubRows: (row: any) => row.subRows
     },
@@ -171,15 +173,21 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
     return subRows;
   };
 
-  const updateData = (row, inputField, value) => {
-    setFlatRows((prevState) => {
-      let tempIndex = prevState.findIndex((obj) => obj._id === row._id);
-      // prevState[tempIndex][inputField] = value
-      const values = { [inputField]: value };
-      const calValues = autoCalculateSpecificFields(values, { ...values, ...prevState[tempIndex] }, fields);
-      prevState[tempIndex] = { ...prevState[tempIndex], ...calValues };
-      return [...prevState];
+  const updateData = async (row, inputField, value) => {
+
+    let temflatRows = flatRows
+    let tempIndex = temflatRows.findIndex((obj) => obj._id === row._id);
+    flatRows[tempIndex][inputField] = value
+    const values = { [inputField]: value };
+    const calValues = await calculateRowsField(flattenArray(temflatRows), values, fields, temflatRows[tempIndex]);
+    temflatRows = flatRows.map(d => {
+      let calculateTempIndex = calValues.findIndex((obj) => obj._id === d._id)
+      if (calculateTempIndex > -1) {
+        return calValues[calculateTempIndex]
+      }
+      else return d;
     });
+    setFlatRows(temflatRows)
   };
 
   return (
@@ -253,9 +261,9 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
                               className={`td ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}`}
                             >
                               {cell.column.id === 'expander' ||
-                              cell.column.id === 'detail' ||
-                              cell.column.id === 'type' ||
-                              cell.column.id === 'srno' ? (
+                                cell.column.id === 'detail' ||
+                                cell.column.id === 'type' ||
+                                cell.column.id === 'srno' ? (
                                 <div className="full-height-cell">{cell.render('Cell')}</div>
                               ) : (
                                 <FormTypes
