@@ -125,7 +125,7 @@ const Steps = ({
                     ${i > currentStep ? styles.inActiveStep : ''}
                     single-step-item
                 `}
-                  key={step}
+                  key={step.name}
                 >
                   <Box className={styles.stepIcon}>
                     <img src={getIcon(step.icon)} alt={`${step}-icon`} aria-hidden />

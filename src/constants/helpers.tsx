@@ -1898,7 +1898,24 @@ export const ACTIVITY_RESOURCE = {
   demandOrder: 'demandOrder',
   fieldTicket: 'fieldTicket',
   fleetMaster: 'fleetMaster',
-  job: 'Job'
+  job: 'Job',
+  purchaseRequisition: 'purchaseRequisition',
+  planning: 'planning',
+  productCategory: 'productCategory',
+  product: 'product',
+  warehouse: 'warehouse',
+  packages: 'packages',
+  pricingCondition: 'pricingCondition',
+  wellMaster: 'wellMaster',
+  productAuction: 'productAuction',
+  serviceMaster: 'serviceMaster',
+  employeeMaster: 'employeeMaster',
+  competencyMaster: 'competencyMaster',
+  user: 'user',
+  marketSegment: 'marketSegment',
+  budget: 'budget',
+  irtTicket: 'irtTicket',
+
 };
 
 export const LOG_RESOURCE = {

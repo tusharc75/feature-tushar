@@ -13,9 +13,10 @@ import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageIrtTicket from './ManageIrtTicket';
-import { sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import Approver from './Approver';
 import IrtTicketView from './View';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const IrtTicketDetail = () => {
   const { id } = useParams();
@@ -123,6 +124,7 @@ const IrtTicketDetail = () => {
               </Button>
             )}
             {permissions?.irtTicket?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            <ActivityButton referenceId={irtTicketData?._id} resource={ACTIVITY_RESOURCE.irtTicket} />
           </Box>
         </Box>
       </Box>

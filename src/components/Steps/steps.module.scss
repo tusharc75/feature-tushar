@@ -97,4 +97,10 @@
 }
 .inActiveStep {
   background-color: #f4f4f4;
+  .stepIcon {
+    img {
+      -webkit-filter: saturate(0);
+      filter: saturate(0);
+    }
+  }
 }

@@ -13,7 +13,8 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageWellMaster from './ManageWellMaster';
 import DeleteButton from '../../components/Helpers/DeleteButton';
-import { wellMaster } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, wellMaster } from 'src/constants/helpers';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const WellMasterDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -110,6 +111,7 @@ const WellMasterDetailsPage = () => {
                 )}
                 {permissions?.address?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
+              <ActivityButton referenceId={wellMasterData?._id} resource={ACTIVITY_RESOURCE.wellMaster} />
           </Box>
         </Box>
       </Box>

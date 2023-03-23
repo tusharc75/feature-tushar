@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import { makeStyles, Dialog, Typography, IconButton, Grid, Box, Button, Tooltip } from '@material-ui/core';
+import { makeStyles, Dialog, Typography, IconButton, Grid, Box, Button } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { BiTask } from 'react-icons/bi';
@@ -33,6 +33,7 @@ import { useData } from './../../StateProvider/Provider';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CloseIcon from '@material-ui/icons/Close';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 const useStyles = makeStyles(() => ({
   activityBox: {
@@ -242,25 +243,22 @@ const Activity = (props) => {
                         <Grid item xs={4} container justify="flex-end" alignItems="center">
                           {data === 'Attachment' && (
                             <Box mr={1}>
-                              <Tooltip title={'Add Folder'}>
+                              <HtmlTooltip title={'Add Folder'}>
                                 <IconButton
                                   size="small"
                                   onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}
-                                  style={{ marginRight: '3px' }}
                                 >
-                                  {' '}
                                   <CreateNewFolderIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
                                 </IconButton>
-                              </Tooltip>
+                              </HtmlTooltip>
                             </Box>
                           )}
                           <Box mr={1}>
-                            <Tooltip title={infoTitle[data]}>
+                            <HtmlTooltip title={infoTitle[data]}>
                               <InfoOutlinedIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
-                            </Tooltip>
+                            </HtmlTooltip>
                           </Box>
                           <IconButton size="small" onClick={(event) => handleCreateActivity(event, data)}>
-                            {' '}
                             <AddOutlinedIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
                           </IconButton>
                         </Grid>
@@ -284,7 +282,7 @@ const Activity = (props) => {
                   {type === 'Email' && data === 'Email' ? (
                     <Email relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
-                  {type === 'Attachment' && data === 'Attachment' ? (
+                  {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' ? (
                     <Attachments relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
                 </Box>
