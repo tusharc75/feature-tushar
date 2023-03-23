@@ -37,7 +37,7 @@ const ResourceLogs = () => {
         const data: any = []
         for (var key in LOG_RESOURCE) {
             if (permissions[key]?.isRead === true) {
-                data.push({ optionLabel: routes[key].title, optionValue: LOG_RESOURCE[key] });
+                data.push({ optionLabel: routes[key].title, optionValue: LOG_RESOURCE[key], key: key });
             }
         }
         setResourceOptions(data);
@@ -111,6 +111,7 @@ const ResourceLogs = () => {
                 })
                 u.changeLogs = changes;
                 u.changes = changes?.toString();
+                u.key = selectedResource?.key;
                 return u;
             });
             dispatch({ type: 'initialize', data: rows, count: count });
@@ -121,10 +122,10 @@ const ResourceLogs = () => {
             });
     };
 
-    const AssetNumberRenderer = (params) => (
+    const ResourceRenderer = (params) => (
         <Fragment>
             <Link className="link text-truncate"
-                title={params?.value?.optionLabel} to={`${routes.serializedAssetDetail.path}/${params?.value?.optionValue}`}>
+                title={params?.value?.optionLabel} to={`${routes[`${params?.data?.key}Detail`]?.path}/${params?.value?.optionValue}`}>
                 {params?.value?.optionLabel}
             </Link>
         </Fragment>
@@ -142,9 +143,9 @@ const ResourceLogs = () => {
     const columns = [
         {
             field: 'resource',
-            headerName: 'Asset Number',
+            headerName: 'Resource',
             show: true,
-            cellRenderer: 'assetNumberRenderer',
+            cellRenderer: 'resourceRenderer',
             filter: false,
             sortable: false,
         },
@@ -187,7 +188,7 @@ const ResourceLogs = () => {
     }
 
     const frameworkComponents = {
-        assetNumberRenderer: AssetNumberRenderer,
+        resourceRenderer: ResourceRenderer,
         updatedByRenderer: UpdatedByRenderer,
         dateTimeRenderer: DateTimeRenderer,
         actionsRenderer: ActionsRenderer

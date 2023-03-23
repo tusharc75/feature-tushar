@@ -861,21 +861,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1919,7 +1919,54 @@ export const ACTIVITY_RESOURCE = {
 };
 
 export const LOG_RESOURCE = {
-  serializedAsset: sidebarResource.serializedAsset
+  serializedAsset: sidebarResource.serializedAsset,
+  serviceMaster: sidebarResource.serviceMaster,
+  fleetMaster: sidebarResource.fleetMaster,
+  job: sidebarResource.job,
+  quotation: sidebarResource.quotation,
+  lead: sidebarResource.lead,
+  opportunity: sidebarResource.opportunity,
+  projectSales: sidebarResource.projectSales,
+  invoice: sidebarResource.invoice,
+  zone: sidebarResource.zone,
+  eCommercePolicy: sidebarResource.eCommercePolicy,
+  productAuction: sidebarResource.productAuction,
+  leadTimeMaster: sidebarResource.leadTimeMaster,
+  irtTicket: sidebarResource.irtTicket,
+  purchaseOrder: sidebarResource.purchaseOrder,
+  rentalManagement: sidebarResource.rentalManagement,
+  sublease: sidebarResource.sublease,
+  transferAsset: sidebarResource.transferAsset,
+  planning: sidebarResource.planning,
+  fieldTicket: sidebarResource.fieldTicket,
+  repairOrder: sidebarResource.repairOrder,
+  workOrder: sidebarResource.workOrder,
+  repairJob: sidebarResource.repairJob,
+  repairType: sidebarResource.repairType,
+  employeeMaster: sidebarResource.employeeMaster,
+  serviceOrder: sidebarResource.serviceOrder,
+  product: sidebarResource.product,
+  demandOrder: sidebarResource.demandOrder,
+  address: sidebarResource.address,
+  customerAccount: sidebarResource.customerAccount,
+  customerContact: sidebarResource.customerContact,
+  entity: sidebarResource.entity,
+  packages: sidebarResource.packages,
+  pricingCondition: sidebarResource.pricingCondition,
+  productCategory: sidebarResource.productCategory,
+  supplierAccount: sidebarResource.supplierAccount,
+  supplierContact: sidebarResource.supplierContact,
+  warehouse: sidebarResource.warehouse,
+  budget: sidebarResource.budget,
+  marketSegment: sidebarResource.marketSegment,
+  user: sidebarResource.user,
+  wellMaster: sidebarResource.wellMaster,
+  inventoryCycle: sidebarResource.inventoryCycle,
+  // frequentlyAskedQuestion: sidebarResource.freqentlyAskedQuestion,
+  competencyMaster: sidebarResource.competencyMaster,
+  bulkAssetCreation: sidebarResource.bulkAssetCreation,
+  salesOrder: sidebarResource.salesOrder,
+  transferInventory: sidebarResource.transferInventory,
 };
 
 export const REPORT_LIST = [
