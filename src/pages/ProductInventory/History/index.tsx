@@ -97,6 +97,7 @@ const History = ({ product, warehouse }) => {
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
     { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'purchaseOrderRejectedDate', headerName: 'Purchase Order Rejected Date', filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' },
     { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
   ];
 
