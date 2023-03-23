@@ -189,7 +189,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
         try {
             let fieldData;
             const response: any = await axiosInstance().get("/field?resource=Quotation");
-            fieldData = response?.data?.data;
+            fieldData = response?.data?.data?.filter((obj) => !["rentalJob", "repairOrder", "salesOrder"]?.includes(obj?.fieldData?.fieldName));
 
             const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -339,340 +339,391 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
         }))
     }
 
-    return (
-        <>
-            <Dialog
-                maxWidth="md"
-                fullWidth
-                fullScreen={fullScreen || (isMobile || isTablet)}
-                TransitionComponent={CustomDialogTransition}
-                aria-labelledby="customized-dialog-title"
-                onClose={(e, reason) => {
-                    if (reason !== 'backdropClick') {
-                        setShowConfirmDialog(true)
-                    }
-                }}
-                open={open}
+    return (<Dialog
+        maxWidth="md"
+        fullWidth
+        fullScreen={fullScreen || (isMobile || isTablet)}
+        TransitionComponent={CustomDialogTransition}
+        aria-labelledby="customized-dialog-title"
+        onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+                setShowConfirmDialog(true)
+            }
+        }}
+        open={open}
+    >
+        <CustomDialogHeader
+            title={
+                !quotationId
+                    ? `Create ${routes.quotation.title}`
+                    : `${isClone ? `Clone - ${cloneHeading}` : `Update ${quotationData?.quotationNumber}`}`
+            }
+            onClose={(e, reason) => {
+                if (isFieldNotTouched(quotationInitialData, formValues)) onClose()
+                else setShowConfirmDialog(true)
+            }}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+            }}
+            showManimizeMaximize={true}
+        />
+        {!quotationInitialData.fields.length ? (
+            <>
+                <CustomDialogContent>
+                    <Skeleton width="100%" height="70px" />
+                    <Grid container spacing={2}>
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
+                            <Grid key={i} item xs={12} sm={6} md={6}>
+                                <Skeleton width="100%" height="60px" />
+                            </Grid>
+                        ))}
+                    </Grid>
+                </CustomDialogContent>
+                <CustomDialogFooter>
+                    <Button variant="outlined" size="small" color="primary" disabled
+                    >
+                        Cancel
+                    </Button>
+                    <Button variant="contained" size="small" color="primary" disabled>
+                        Submit
+                    </Button>
+                </CustomDialogFooter>
+            </>
+        ) : (
+            <Formik
+                initialValues={quotationInitialData.initialValues}
+                validationSchema={yupSchema(quotationInitialData.fields)}
+                // validateOnMount
+                // validate={validate}
+                onSubmit={() => { }}
             >
-                <CustomDialogHeader
-                    title={
-                        !quotationId
-                            ? `Create ${routes.quotation.title}`
-                            : `${isClone ? `Clone - ${cloneHeading}` : `Update ${quotationData?.quotationNumber}`}`
-                    }
-                    onClose={(e, reason) => {
-                        if (isFieldNotTouched(quotationInitialData, formValues)) onClose()
-                        else setShowConfirmDialog(true)
-                    }}
-                    isMinimized={!fullScreen}
-                    onMinimizeMaximize={() => {
-                        setFullScreen(prevState => !prevState)
-                    }}
-                    showManimizeMaximize={true}
-                />
-                {!quotationInitialData.fields.length ? (
+                {({
+                    values,
+                    errors,
+                    touched,
+                    setFieldValue,
+                    setFieldTouched,
+                    setErrors,
+                    setValues,
+                }) => (
                     <>
                         <CustomDialogContent>
-                            <Skeleton width="100%" height="70px" />
-                            <Grid container spacing={2}>
-                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                                    <Grid key={i} item xs={12} sm={6} md={6}>
-                                        <Skeleton width="100%" height="60px" />
-                                    </Grid>
-                                ))}
-                            </Grid>
-                        </CustomDialogContent>
-                        <CustomDialogFooter>
-                            <Button variant="outlined" size="small" color="primary" disabled
-                            >
-                                Cancel
-                            </Button>
-                            <Button variant="contained" size="small" color="primary" disabled>
-                                Submit
-                            </Button>
-                        </CustomDialogFooter>
-                    </>
-                ) : (
-                    <Formik
-                        initialValues={quotationInitialData.initialValues}
-                        validationSchema={yupSchema(quotationInitialData.fields)}
-                        // validateOnMount
-                        // validate={validate}
-                        onSubmit={() => { }}
-                    >
-                        {({
-                            values,
-                            errors,
-                            touched,
-                            setFieldValue,
-                            setFieldTouched,
-                            setErrors,
-                            setValues,
-                        }) => (
-                            <>
-                                <CustomDialogContent>
-                                    <Form>
-                                        {formsData && formsData.map((form, i) => {
-                                            return (
-                                                form.name && (
-                                                    <div key={i}>
-                                                        <div className={"detail-box-content"}>
-                                                            <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-                                                            <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
-                                                        </div>
-                                                        <Box marginY={2}>
-                                                            <Grid spacing={3} container>
-                                                                {form.sectionFields.map((field) => (
-                                                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
-                                                                        {field.fieldName == "customerAccount" ? (
-                                                                            <Grid container spacing={1}>
-                                                                                <Grid item xs={permissions.customerAccount?.isCreate ? 11 : 11}
-                                                                                    sm={permissions.customerAccount?.isCreate ? 11 : 11}
-                                                                                    md={permissions.customerAccount?.isCreate ? 11 : 11}
-                                                                                >
-                                                                                    <FormTypes
-                                                                                        {...field}
-                                                                                        isNew={!quotationId}
-                                                                                        values={values}
-                                                                                        errors={errors}
-                                                                                        touched={touched}
-                                                                                        label={field.fieldLabel}
-                                                                                        name={field.fieldName}
-                                                                                        type={field.type}
-                                                                                        options={accountData}
-                                                                                        disabled={!isClone ? (quotationId && field.disableOnEdit) : false}
-                                                                                        required={field.required}
-                                                                                        fullWidth
-                                                                                        isTooltip={
-                                                                                            field?.isTooltip || false
-                                                                                        }
-                                                                                        tooltipMessage={
-                                                                                            field?.tooltipMessage
-                                                                                        }
-                                                                                        size="small"
-                                                                                        doNotShowInfoTooltip={true}
-                                                                                        onChange={(e, value) => {
-                                                                                            setFieldValue(
-                                                                                                field.fieldName,
-                                                                                                value && value.optionValue
-                                                                                                    ? value.optionValue
-                                                                                                    : ""
-                                                                                            );
-                                                                                            setFieldValue("customerContact", "");
-                                                                                            setFieldValue("billingAddress", "");
-                                                                                            setFieldValue("shippingAddress", "");
-                                                                                            handleValuesChange({
-                                                                                                [field.fieldName]: value && value.optionValue ? value.optionValue : "",
-                                                                                                "customerContact": "",
-                                                                                            })
-                                                                                        }}
-                                                                                    />
-                                                                                </Grid>
-                                                                                {permissions.customerAccount?.isCreate &&
-                                                                                    <Grid item xs={1} sm={1} md={1}>
-                                                                                        <Tooltip
-                                                                                            title="Create Account"
-                                                                                            className="mt-1"
-                                                                                        >
-                                                                                            <IconButton
-                                                                                                onClick={() => {
-                                                                                                    setShowAddCustomerAccountDialog(
-                                                                                                        true
-                                                                                                    );
-                                                                                                }}
-                                                                                                disabled={!isClone ? (quotationId && field.disableOnEdit) : false}
-                                                                                                size="small"
-                                                                                            >
-                                                                                                <AddIcon color={isClone ? "primary" : quotationId && field.disableOnEdit ? "disabled" : "primary"} />
-                                                                                            </IconButton>
-                                                                                        </Tooltip>
-                                                                                    </Grid>
-                                                                                }
-                                                                                {field?.tooltipMessage ? (
-                                                                                    <Grid item xs={1} sm={1} md={1}>
-                                                                                        <Tooltip
-                                                                                            title={
-                                                                                                field?.tooltipMessage ?? ""
-                                                                                            }
-                                                                                        >
-                                                                                            <InfoIcon color="disabled" />
-                                                                                        </Tooltip>
-                                                                                    </Grid>
-                                                                                ) : null}
-                                                                            </Grid>
-                                                                        ) : field.fieldName === "customerContact" ? (
-                                                                            <Grid container spacing={1}>
-                                                                                <Grid item xs={permissions.customerContact?.isCreate ? 11 : 11}
-                                                                                    sm={permissions.customerContact?.isCreate ? 11 : 11}
-                                                                                    md={permissions.customerContact?.isCreate ? 11 : 11}
-                                                                                >
-                                                                                    <FormTypes
-                                                                                        {...field}
-                                                                                        isNew={!quotationId}
-                                                                                        values={values}
-                                                                                        errors={errors}
-                                                                                        touched={touched}
-                                                                                        label={field.fieldLabel}
-                                                                                        name={field.fieldName}
-                                                                                        type={field.type}
-                                                                                        options={customerContactDataSource}
-                                                                                        doNotShowInfoTooltip={true}
-                                                                                        setFieldValue={(name, value) => {
-                                                                                            handleValuesChange({ [name]: value })
-                                                                                            setFieldValue(name, value)
-                                                                                        }}
-                                                                                        disabled={!isClone ? (quotationId && field.disableOnEdit) : false}
-                                                                                        required={field.required}
-                                                                                        fullWidth
-                                                                                        isTooltip={false}
-                                                                                        size="small"
-                                                                                        onOpen={() =>
-                                                                                            onCustomerContactDropdownOpen(
-                                                                                                values["customerAccount"]
-                                                                                            )
-                                                                                        }
-                                                                                    // onChange={(e, value) => {
-                                                                                    //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-
-                                                                                    // }}
-                                                                                    />
-                                                                                </Grid>
-                                                                                {permissions.customerContact?.isCreate &&
-                                                                                    <Grid item xs={1} sm={1} md={1} >
-                                                                                        <Tooltip
-                                                                                            title="Create Contact"
-                                                                                            className="mt-1"
-                                                                                        >
-                                                                                            <IconButton
-                                                                                                onClick={() => {
-                                                                                                    setShowAddCustomerContactDialog(
-                                                                                                        true
-                                                                                                    );
-                                                                                                }}
-                                                                                                disabled={!isClone ? (quotationId && field.disableOnEdit) : false}
-                                                                                                size="small"
-                                                                                            >
-                                                                                                <AddIcon color={isClone ? "primary" : (quotationId && field.disableOnEdit) ? "disabled" : "primary"} />
-                                                                                            </IconButton>
-                                                                                        </Tooltip>
-                                                                                    </Grid>
-                                                                                }
-                                                                                {field?.tooltipMessage ? (
-                                                                                    <Grid item xs={1} sm={1} md={1}>
-                                                                                        <Tooltip
-                                                                                            className="mt-2"
-                                                                                            title={
-                                                                                                field?.tooltipMessage ?? ""
-                                                                                            }
-                                                                                        >
-                                                                                            <InfoIcon color="disabled" />
-                                                                                        </Tooltip>
-                                                                                    </Grid>
-                                                                                ) : null}
-                                                                            </Grid>
-                                                                        ) : field.fieldName === "owner" ? (
+                            <Form>
+                                {formsData && formsData.map((form, i) => {
+                                    return (
+                                        form.name && (
+                                            <div key={i}>
+                                                <div className={"detail-box-content"}>
+                                                    <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                                    <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                                                </div>
+                                                <Box marginY={2}>
+                                                    <Grid spacing={3} container>
+                                                        {form.sectionFields.map((field) => (
+                                                            <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
+                                                                {field.fieldName == "customerAccount" ? (
+                                                                    <Grid container spacing={1}>
+                                                                        <Grid item xs={permissions.customerAccount?.isCreate ? 11 : 11}
+                                                                            sm={permissions.customerAccount?.isCreate ? 11 : 11}
+                                                                            md={permissions.customerAccount?.isCreate ? 11 : 11}
+                                                                        >
                                                                             <FormTypes
-                                                                                quotationId={quotationId}
                                                                                 {...field}
+                                                                                isNew={!quotationId}
                                                                                 values={values}
                                                                                 errors={errors}
                                                                                 touched={touched}
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
                                                                                 type={field.type}
-                                                                                options={ownerData}
-                                                                                onChange={(e, val) => {
-                                                                                    setFieldValue(
-                                                                                        field.fieldName,
-                                                                                        val && val.optionValue
-                                                                                            ? val.optionValue
-                                                                                            : ""
-                                                                                    );
-                                                                                    handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
-
-                                                                                    if (
-                                                                                        val &&
-                                                                                        val.optionValue !== user?.user?._id
-                                                                                    ) {
-                                                                                        const checkOwnerAddedInCollaborator =
-                                                                                            values["collaborator"].find(
-                                                                                                (d) =>
-                                                                                                    d?.optionValue ===
-                                                                                                    user?.user?._id
-                                                                                            );
-                                                                                        if (
-                                                                                            !checkOwnerAddedInCollaborator
-                                                                                        ) {
-                                                                                            setFieldValue("collaborator", [
-                                                                                                ...values["collaborator"],
-                                                                                                collaboratorData.find(
-                                                                                                    (d) =>
-                                                                                                        d?.optionValue ===
-                                                                                                        user?.user?._id
-                                                                                                ).optionValue,
-                                                                                            ]);
-                                                                                            handleValuesChange({
-                                                                                                collaborator: collaboratorData.find(
-                                                                                                    (d) =>
-                                                                                                        d?.optionValue ===
-                                                                                                        user?.user?._id
-                                                                                                ).optionValue
-                                                                                            })
-                                                                                        }
-                                                                                    }
-                                                                                }}
+                                                                                options={accountData}
+                                                                                disabled={!isClone ? (quotationId && field.disableOnEdit) : false}
                                                                                 required={field.required}
                                                                                 fullWidth
-                                                                                isTooltip={field?.isTooltip || false}
-                                                                                tooltipMessage={field?.tooltipMessage}
+                                                                                isTooltip={
+                                                                                    field?.isTooltip || false
+                                                                                }
+                                                                                tooltipMessage={
+                                                                                    field?.tooltipMessage
+                                                                                }
                                                                                 size="small"
-                                                                                disabled={(!quotationId && field.disableOnEdit)}
-                                                                                onOpen={() => {
-                                                                                    onOwnerDropdownOpen(
-                                                                                        values["collaborator"]
+                                                                                doNotShowInfoTooltip={true}
+                                                                                onChange={(e, value) => {
+                                                                                    setFieldValue(
+                                                                                        field.fieldName,
+                                                                                        value && value.optionValue
+                                                                                            ? value.optionValue
+                                                                                            : ""
                                                                                     );
+                                                                                    setFieldValue("customerContact", "");
+                                                                                    setFieldValue("billingAddress", "");
+                                                                                    setFieldValue("shippingAddress", "");
+                                                                                    handleValuesChange({
+                                                                                        [field.fieldName]: value && value.optionValue ? value.optionValue : "",
+                                                                                        "customerContact": "",
+                                                                                    })
                                                                                 }}
                                                                             />
-                                                                        ) : field.fieldName === "collaborator" ? (
+                                                                        </Grid>
+                                                                        {permissions.customerAccount?.isCreate &&
+                                                                            <Grid item xs={1} sm={1} md={1}>
+                                                                                <Tooltip
+                                                                                    title="Create Account"
+                                                                                    className="mt-1"
+                                                                                >
+                                                                                    <IconButton
+                                                                                        onClick={() => {
+                                                                                            setShowAddCustomerAccountDialog(
+                                                                                                true
+                                                                                            );
+                                                                                        }}
+                                                                                        disabled={!isClone ? (quotationId && field.disableOnEdit) : false}
+                                                                                        size="small"
+                                                                                    >
+                                                                                        <AddIcon color={isClone ? "primary" : quotationId && field.disableOnEdit ? "disabled" : "primary"} />
+                                                                                    </IconButton>
+                                                                                </Tooltip>
+                                                                            </Grid>
+                                                                        }
+                                                                        {field?.tooltipMessage ? (
+                                                                            <Grid item xs={1} sm={1} md={1}>
+                                                                                <Tooltip
+                                                                                    title={
+                                                                                        field?.tooltipMessage ?? ""
+                                                                                    }
+                                                                                >
+                                                                                    <InfoIcon color="disabled" />
+                                                                                </Tooltip>
+                                                                            </Grid>
+                                                                        ) : null}
+                                                                    </Grid>
+                                                                ) : field.fieldName === "customerContact" ? (
+                                                                    <Grid container spacing={1}>
+                                                                        <Grid item xs={permissions.customerContact?.isCreate ? 11 : 11}
+                                                                            sm={permissions.customerContact?.isCreate ? 11 : 11}
+                                                                            md={permissions.customerContact?.isCreate ? 11 : 11}
+                                                                        >
                                                                             <FormTypes
-                                                                                quotationId={quotationId}
                                                                                 {...field}
-                                                                                disabled={!quotationId && field.disableOnEdit}
+                                                                                isNew={!quotationId}
                                                                                 values={values}
                                                                                 errors={errors}
                                                                                 touched={touched}
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
                                                                                 type={field.type}
-                                                                                options={collaboratorData}
+                                                                                options={customerContactDataSource}
+                                                                                doNotShowInfoTooltip={true}
                                                                                 setFieldValue={(name, value) => {
                                                                                     handleValuesChange({ [name]: value })
                                                                                     setFieldValue(name, value)
                                                                                 }}
-
+                                                                                disabled={!isClone ? (quotationId && field.disableOnEdit) : false}
                                                                                 required={field.required}
                                                                                 fullWidth
-                                                                                isTooltip={field?.isTooltip || false}
-                                                                                tooltipMessage={field?.tooltipMessage}
+                                                                                isTooltip={false}
                                                                                 size="small"
-                                                                                onOpen={() => {
-                                                                                    onCollabOwnerMultiselectOpen(
-                                                                                        values["owner"]
-                                                                                    );
-                                                                                }}
+                                                                                onOpen={() =>
+                                                                                    onCustomerContactDropdownOpen(
+                                                                                        values["customerAccount"]
+                                                                                    )
+                                                                                }
+                                                                            // onChange={(e, value) => {
+                                                                            //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+
+                                                                            // }}
                                                                             />
-                                                                        ) : field.fieldName === "billingAddress" ? (
+                                                                        </Grid>
+                                                                        {permissions.customerContact?.isCreate &&
+                                                                            <Grid item xs={1} sm={1} md={1} >
+                                                                                <Tooltip
+                                                                                    title="Create Contact"
+                                                                                    className="mt-1"
+                                                                                >
+                                                                                    <IconButton
+                                                                                        onClick={() => {
+                                                                                            setShowAddCustomerContactDialog(
+                                                                                                true
+                                                                                            );
+                                                                                        }}
+                                                                                        disabled={!isClone ? (quotationId && field.disableOnEdit) : false}
+                                                                                        size="small"
+                                                                                    >
+                                                                                        <AddIcon color={isClone ? "primary" : (quotationId && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                                                    </IconButton>
+                                                                                </Tooltip>
+                                                                            </Grid>
+                                                                        }
+                                                                        {field?.tooltipMessage ? (
+                                                                            <Grid item xs={1} sm={1} md={1}>
+                                                                                <Tooltip
+                                                                                    className="mt-2"
+                                                                                    title={
+                                                                                        field?.tooltipMessage ?? ""
+                                                                                    }
+                                                                                >
+                                                                                    <InfoIcon color="disabled" />
+                                                                                </Tooltip>
+                                                                            </Grid>
+                                                                        ) : null}
+                                                                    </Grid>
+                                                                ) : field.fieldName === "owner" ? (
+                                                                    <FormTypes
+                                                                        quotationId={quotationId}
+                                                                        {...field}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={ownerData}
+                                                                        onChange={(e, val) => {
+                                                                            setFieldValue(
+                                                                                field.fieldName,
+                                                                                val && val.optionValue
+                                                                                    ? val.optionValue
+                                                                                    : ""
+                                                                            );
+                                                                            handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
+
+                                                                            if (
+                                                                                val &&
+                                                                                val.optionValue !== user?.user?._id
+                                                                            ) {
+                                                                                const checkOwnerAddedInCollaborator =
+                                                                                    values["collaborator"].find(
+                                                                                        (d) =>
+                                                                                            d?.optionValue ===
+                                                                                            user?.user?._id
+                                                                                    );
+                                                                                if (
+                                                                                    !checkOwnerAddedInCollaborator
+                                                                                ) {
+                                                                                    setFieldValue("collaborator", [
+                                                                                        ...values["collaborator"],
+                                                                                        collaboratorData.find(
+                                                                                            (d) =>
+                                                                                                d?.optionValue ===
+                                                                                                user?.user?._id
+                                                                                        ).optionValue,
+                                                                                    ]);
+                                                                                    handleValuesChange({
+                                                                                        collaborator: collaboratorData.find(
+                                                                                            (d) =>
+                                                                                                d?.optionValue ===
+                                                                                                user?.user?._id
+                                                                                        ).optionValue
+                                                                                    })
+                                                                                }
+                                                                            }
+                                                                        }}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                        disabled={(!quotationId && field.disableOnEdit)}
+                                                                        onOpen={() => {
+                                                                            onOwnerDropdownOpen(
+                                                                                values["collaborator"]
+                                                                            );
+                                                                        }}
+                                                                    />
+                                                                ) : field.fieldName === "collaborator" ? (
+                                                                    <FormTypes
+                                                                        quotationId={quotationId}
+                                                                        {...field}
+                                                                        disabled={!quotationId && field.disableOnEdit}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={collaboratorData}
+                                                                        setFieldValue={(name, value) => {
+                                                                            handleValuesChange({ [name]: value })
+                                                                            setFieldValue(name, value)
+                                                                        }}
+
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                        onOpen={() => {
+                                                                            onCollabOwnerMultiselectOpen(
+                                                                                values["owner"]
+                                                                            );
+                                                                        }}
+                                                                    />
+                                                                ) : field.fieldName === "billingAddress" ? (
+                                                                    <FormTypes
+                                                                        {...field}
+                                                                        disabled={Boolean(quotationId) && field.disableOnEdit && !isClone}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={countryBillToDropDown}
+                                                                        setFieldValue={(name, value) => {
+                                                                            setFieldValue(name, value)
+                                                                        }}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                        onOpen={() =>
+                                                                            onCountryBillToDropDownOpen(values["customerAccount"])
+                                                                        }
+                                                                    />)
+                                                                    :
+                                                                    field.fieldName === "shippingAddress" ? (
+                                                                        <FormTypes
+                                                                            {...field}
+                                                                            disabled={Boolean(quotationId) && field.disableOnEdit && !isClone}
+                                                                            values={values}
+                                                                            errors={errors}
+                                                                            touched={touched}
+                                                                            label={field.fieldLabel}
+                                                                            name={field.fieldName}
+                                                                            type={field.type}
+                                                                            options={countrySellToDropDown}
+                                                                            setFieldValue={(name, value) => {
+                                                                                setFieldValue(name, value)
+                                                                            }}
+                                                                            required={field.required}
+                                                                            fullWidth
+                                                                            isTooltip={field?.isTooltip || false}
+                                                                            tooltipMessage={field?.tooltipMessage}
+                                                                            size="small"
+                                                                            onOpen={() =>
+                                                                                onCountrySellToDropDownOpen(values["customerAccount"])
+                                                                            }
+                                                                        />)
+                                                                        : (
                                                                             <FormTypes
+                                                                                quotationId={quotationId}
                                                                                 {...field}
-                                                                                disabled={Boolean(quotationId) && field.disableOnEdit && !isClone}
+                                                                                fieldData={field}
+                                                                                disabled={
+                                                                                    field.fieldName === "currency" ? (salesDetails && salesDetails?.material?.length ? true : false) :
+                                                                                        field.fieldName === "warehouse" ? (salesDetails && salesDetails?.productInventory?.length ? true : false) :
+                                                                                            (quotationId && field.disableOnEdit && !isClone)}
                                                                                 values={values}
                                                                                 errors={errors}
                                                                                 touched={touched}
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
                                                                                 type={field.type}
-                                                                                options={countryBillToDropDown}
+                                                                                options={field.option}
                                                                                 setFieldValue={(name, value) => {
+                                                                                    handleValuesChange({ [name]: value })
                                                                                     setFieldValue(name, value)
                                                                                 }}
                                                                                 required={field.required}
@@ -680,193 +731,136 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                                                                                 isTooltip={field?.isTooltip || false}
                                                                                 tooltipMessage={field?.tooltipMessage}
                                                                                 size="small"
-                                                                                onOpen={() =>
-                                                                                    onCountryBillToDropDownOpen(values["customerAccount"])
-                                                                                }
-                                                                            />)
-                                                                            :
-                                                                            field.fieldName === "shippingAddress" ? (
-                                                                                <FormTypes
-                                                                                    {...field}
-                                                                                    disabled={Boolean(quotationId) && field.disableOnEdit && !isClone}
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={countrySellToDropDown}
-                                                                                    setFieldValue={(name, value) => {
-                                                                                        setFieldValue(name, value)
-                                                                                    }}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={field?.isTooltip || false}
-                                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                                    size="small"
-                                                                                    onOpen={() =>
-                                                                                        onCountrySellToDropDownOpen(values["customerAccount"])
-                                                                                    }
-                                                                                />)
-                                                                                : (
-                                                                                    <FormTypes
-                                                                                        quotationId={quotationId}
-                                                                                        {...field}
-                                                                                        fieldData={field}
-                                                                                        disabled={
-                                                                                            field.fieldName === "currency" ? (salesDetails && salesDetails?.material?.length ? true : false) :
-                                                                                                field.fieldName === "warehouse" ? (salesDetails && salesDetails?.productInventory?.length ? true : false) :
-                                                                                                    (quotationId && field.disableOnEdit && !isClone)}
-                                                                                        values={values}
-                                                                                        errors={errors}
-                                                                                        touched={touched}
-                                                                                        label={field.fieldLabel}
-                                                                                        name={field.fieldName}
-                                                                                        type={field.type}
-                                                                                        options={field.option}
-                                                                                        setFieldValue={(name, value) => {
-                                                                                            handleValuesChange({ [name]: value })
-                                                                                            setFieldValue(name, value)
-                                                                                        }}
-                                                                                        required={field.required}
-                                                                                        fullWidth
-                                                                                        isTooltip={field?.isTooltip || false}
-                                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                                        size="small"
-                                                                                        imageOrFileUploadCompletePercentage={
-                                                                                            ["imageUpload", "fileUpload"].some(
-                                                                                                (s) => s === field.type
-                                                                                            )
-                                                                                                ? (completePercentage) => {
-                                                                                                    setUploadingImageOrFileProgress(
-                                                                                                        completePercentage
-                                                                                                    );
-                                                                                                }
-                                                                                                : null
+                                                                                imageOrFileUploadCompletePercentage={
+                                                                                    ["imageUpload", "fileUpload"].some(
+                                                                                        (s) => s === field.type
+                                                                                    )
+                                                                                        ? (completePercentage) => {
+                                                                                            setUploadingImageOrFileProgress(
+                                                                                                completePercentage
+                                                                                            );
                                                                                         }
-                                                                                    />
-                                                                                )}
-                                                                    </Grid>
-                                                                ))}
+                                                                                        : null
+                                                                                }
+                                                                            />
+                                                                        )}
                                                             </Grid>
-                                                        </Box>
-                                                    </div>
-                                                )
-                                            );
-                                        })}
-                                    </Form>
-                                </CustomDialogContent>
-                                <CustomDialogFooter>
-                                    <Button
-                                        type="button"
-                                        variant="outlined"
-                                        color="primary"
-                                        size="small"
-                                        onClick={() => {
-                                            if (isFieldNotTouched(quotationInitialData, values)) onClose()
-                                            else setShowConfirmDialog(true)
-                                        }}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <CustomButton
-                                        loading={loading}
-                                        variant="contained"
-                                        color="primary"
-                                        disabled={
-                                            // loading || Object.keys(errors).length > 0 ? true : false
-                                            uploadingImageOrFileProgress > 0 ||
-                                            // isFieldNotTouched(quotationInitialData, values) ||
-                                            loading
-                                        }
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            handleScroll(errors)
-                                            handleSubmit(
-                                                errors,
-                                                setFieldTouched,
-                                                values,
-                                                setValues,
-                                                setErrors
-                                            );
-                                        }}
-                                    >
-                                        Save
-                                    </CustomButton>
-                                </CustomDialogFooter>
-                                {
-                                    showConfirmDialog ?
-                                        <ConfirmCancelDialog
-                                            open={showConfirmDialog}
-                                            onSave={() => {
-                                                setShowConfirmDialog(false)
-                                                handleScroll(errors)
-
-                                                handleSubmit(
-                                                    errors,
-                                                    setFieldTouched,
-                                                    values,
-                                                    setValues,
-                                                    setErrors
-                                                );
-                                            }}
-                                            onClose={() => {
-                                                setShowConfirmDialog(false)
-                                                onClose()
-                                            }}
-                                        /> : null
+                                                        ))}
+                                                    </Grid>
+                                                </Box>
+                                            </div>
+                                        )
+                                    );
+                                })}
+                            </Form>
+                        </CustomDialogContent>
+                        <CustomDialogFooter>
+                            <Button
+                                type="button"
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                onClick={() => {
+                                    if (isFieldNotTouched(quotationInitialData, values)) onClose()
+                                    else setShowConfirmDialog(true)
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <CustomButton
+                                loading={loading}
+                                variant="contained"
+                                color="primary"
+                                disabled={
+                                    // loading || Object.keys(errors).length > 0 ? true : false
+                                    uploadingImageOrFileProgress > 0 ||
+                                    // isFieldNotTouched(quotationInitialData, values) ||
+                                    loading
                                 }
-                                {showAddCustomerAccountDialog && (
-                                    <ManageAccountDialog
-                                        open={showAddCustomerAccountDialog}
-                                        onClose={() => {
-                                            setShowAddCustomerAccountDialog(false);
-                                        }}
-                                        id={null}
-                                        accountResource={customerAccount.accountResource}
-                                        accountApi={customerAccount.accountApi}
-                                        isGetAccountData={true}
-                                        onGetAddedAccount={({ data }) => {
-                                            setNewAddedAccountId(data._id);
-                                            updateAccountDropdown(data);
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleScroll(errors)
+                                    handleSubmit(
+                                        errors,
+                                        setFieldTouched,
+                                        values,
+                                        setValues,
+                                        setErrors
+                                    );
+                                }}
+                            >
+                                Save
+                            </CustomButton>
+                        </CustomDialogFooter>
+                        {
+                            showConfirmDialog ?
+                                <ConfirmCancelDialog
+                                    open={showConfirmDialog}
+                                    onSave={() => {
+                                        setShowConfirmDialog(false)
+                                        handleScroll(errors)
 
-                                            setFieldValue("customerAccount", data._id);
-                                            setFieldValue("customerContact", "");
-                                        }}
-                                        isRedirectToDetailPage={false}
-                                    />
-                                )}
-                                {showAddCustomerContactDialog && (
-                                    <ManageContactDialog
-                                        open={showAddCustomerContactDialog}
-                                        onClose={() => setShowAddCustomerContactDialog(false)}
-                                        onSuccess={(obj) => {
-                                            if (obj) {
-                                                setShowAddCustomerContactDialog(false);
-                                                updateContactDropdown(obj.data.data);
+                                        handleSubmit(
+                                            errors,
+                                            setFieldTouched,
+                                            values,
+                                            setValues,
+                                            setErrors
+                                        );
+                                    }}
+                                    onClose={() => {
+                                        setShowConfirmDialog(false)
+                                        onClose()
+                                    }}
+                                /> : null
+                        }
+                        {showAddCustomerAccountDialog && (
+                            <ManageAccountDialog
+                                open={showAddCustomerAccountDialog}
+                                onClose={() => {
+                                    setShowAddCustomerAccountDialog(false);
+                                }}
+                                id={null}
+                                accountResource={customerAccount.accountResource}
+                                accountApi={customerAccount.accountApi}
+                                isGetAccountData={true}
+                                onGetAddedAccount={({ data }) => {
+                                    setNewAddedAccountId(data._id);
+                                    updateAccountDropdown(data);
 
-                                                setFieldValue("customerContact", obj.id);
-                                            }
-                                        }}
-                                        accountId={values["customerAccount"]}
-                                        contactResource={customerContact.contactResource}
-                                        contactApi={customerContact.contactApi}
-                                        isRedirectToDetailPage={false}
-                                        collaborators={collaboratorData}
-                                        owner={ownerData}
-                                        account={customerAccount}
-                                        isAccountFieldDisable={true}
-                                    />
-                                )}
-                            </>
+                                    setFieldValue("customerAccount", data._id);
+                                    setFieldValue("customerContact", "");
+                                }}
+                                isRedirectToDetailPage={false}
+                            />
                         )}
-                    </Formik>
+                        {showAddCustomerContactDialog && (
+                            <ManageContactDialog
+                                open={showAddCustomerContactDialog}
+                                onClose={() => setShowAddCustomerContactDialog(false)}
+                                onSuccess={(obj) => {
+                                    if (obj) {
+                                        setShowAddCustomerContactDialog(false);
+                                        updateContactDropdown(obj.data.data);
+
+                                        setFieldValue("customerContact", obj.id);
+                                    }
+                                }}
+                                accountId={values["customerAccount"]}
+                                contactResource={customerContact.contactResource}
+                                contactApi={customerContact.contactApi}
+                                isRedirectToDetailPage={false}
+                                collaborators={collaboratorData}
+                                owner={ownerData}
+                                account={customerAccount}
+                                isAccountFieldDisable={true}
+                            />
+                        )}
+                    </>
                 )}
-            </Dialog>
-
-
-
-        </>
+            </Formik>
+        )}
+    </Dialog>
     );
 
 }
