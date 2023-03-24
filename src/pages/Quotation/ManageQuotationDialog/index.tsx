@@ -337,6 +337,12 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
             ...prevState,
             ...data
         }))
+        if (data["type"] === "Rental Job" || data["type"] === "Repair Order") {
+            setFormsData(setFieldsInAscendingOrder(quotationInitialData.fields.filter(d => d.fieldName !== "expectedCustomerDeliveryDate" && d.fieldName !== "supplierSuggestedDeliveryDate")));
+        }
+        if (data["type"] === "Sales Order") {
+            setFormsData(setFieldsInAscendingOrder(quotationInitialData.fields.filter(d => d.fieldName !== "estimateStartDate" && d.fieldName !== "estimateEndDate")));
+        }
     }
 
     return (<Dialog

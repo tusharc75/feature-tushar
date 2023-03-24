@@ -145,6 +145,30 @@ const QuotationDetails = () => {
     }
   }, [id]);
 
+  const getQuotationFields = useMemo(() => {
+    let tempQuotationFields = quotationFields;
+    if(quotationData && quotationFields){
+      if (quotationData["type"] === "Rental Job" || quotationData["type"] === "Repair Order") {
+        tempQuotationFields = quotationFields.filter(d => d?.fieldData?.fieldName !== "expectedCustomerDeliveryDate" && d?.fieldData?.fieldName !== "supplierSuggestedDeliveryDate");
+      }
+      if (quotationData["type"] === "Sales Order") {
+        tempQuotationFields = quotationFields.filter(d => d?.fieldData?.fieldName !== "estimateStartDate" && d?.fieldData?.fieldName !== "estimateEndDate");
+      }
+    }
+    return tempQuotationFields;
+  }, [quotationData,quotationFields]);
+
+  useEffect(() => {
+    if (quotationData && quotationFields.length !== 0) {
+      if (quotationData["type"] === "Rental Job" || quotationData["type"] === "Repair Order") {
+        setQuotationFields(prevstate => prevstate.filter(d => d?.fieldData?.fieldName !== "expectedCustomerDeliveryDate" && d?.fieldData?.fieldName !== "supplierSuggestedDeliveryDate"));
+      }
+      if (quotationData["type"] === "Sales Order") {
+        setQuotationFields(prevstate => prevstate.filter(d => d?.fieldData?.fieldName !== "estimateStartDate" && d?.fieldData?.fieldName !== "estimateEndDate"));
+      }
+    }
+  }, [quotationData]);
+
   const getRessourceFields = async () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Quotation');
@@ -468,7 +492,7 @@ const QuotationDetails = () => {
               </Grid>
             ) : (
               <>
-                <DetailsPage data={quotationData} fields={quotationFields} />
+                <DetailsPage data={quotationData} fields={getQuotationFields} />
               </>
             )}
           </Box>
