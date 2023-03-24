@@ -1,7 +1,7 @@
 import { Dialog, IconButton, Tooltip } from '@material-ui/core';
 import { useContext, useReducer, useState } from 'react';
 import axiosInstance from '../../../axios/axiosInstance';
-import { formatAmountWithCurrency, gridLoadingTimeout } from '../../../constants/helpers';
+import { gridLoadingTimeout } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useEffect } from 'react';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';

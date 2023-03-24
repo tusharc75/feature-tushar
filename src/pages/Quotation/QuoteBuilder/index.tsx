@@ -1,9 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import {
-  Box,
-  Button,
-  IconButton,
-} from '@material-ui/core';
+import { Box, Button, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -11,38 +7,23 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { isMobile } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { dateFormat, formatAmountWithCurrency, prepareDataForGrid, quotation } from 'src/constants/helpers';
+import { prepareDataForGrid, quotation } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import SendEmail from '../SendEmail';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
+const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, stepFullScreen, fetchQuotationData, version, currentStep, versionData, allowedToEdit, renderedFrom }) => {
 
-const QuoteBuilder = ({
-  quotationData,
-  setNextStep,
-  currencySymbol,
-  sentToCustomer = false,
-  stepFullScreen,
-  fetchQuotationData,
-  version,
-  currentStep,
-  versionData,
-  allowedToEdit
-}) => {
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
+  const { state: { user, permissions } }: any = useData();
 
-  const [isRateRequired, setIsRateRequired] = useState(false);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allColumn, setAllColumn] = useState([]);
-
 
   useEffect(() => {
     fetchFields();
@@ -64,7 +45,15 @@ const QuoteBuilder = ({
 
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
-    const coloum: any = [
+    data?.forEach((e) => {
+      e.isColumnEditable = false;
+    });
+    const newColumns = genrateCustomTableColumns(data, quotationData?.currency, renderedFrom);
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
+    }
+    let column: any = [
       {
         accessor: 'srno',
         Header: 'Index',
@@ -91,7 +80,7 @@ const QuoteBuilder = ({
       },
       {
         accessor: 'detail',
-        Header: 'Detail',
+        Header: 'Details',
         minWidth: 300,
         width: 300,
         Cell: ({ row }) => (
@@ -138,120 +127,18 @@ const QuoteBuilder = ({
         }
       }
     ];
-    data.forEach((element) => {
-      if (element.fieldName === 'price' && element.required) {
-        setIsRateRequired(true);
-      }
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-        });
-      } else if (element.fieldName === 'supplierAccount') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? (
-              <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
-            ) : (
-              <NoDataCell />
-            )
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(quotationData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(quotationData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                )
-            });
-          });
-        }
-      } else if (element.fieldName === 'qty') {
-        element.fieldName = 'qtyDisplay';
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
-      }
-    });
-    coloum.forEach((element) => {
-      if (element.accessor.includes('detail')) {
-        element['Footer'] = () => {
-          return <>Total</>;
-        };
-      } else if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor]))
-            .reduce((sum, row) => row?.values[element?.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      } else if (element.accessor.includes('finalPrice')) {
-        element['Footer'] = (info) => {
-          const total = info?.rows
-            .filter((f) => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor]))
-            .reduce((sum, row) => row?.values[element?.accessor] + sum, 0);
-          return (
-            <>
-              {currencySymbol} {formatAmountWithCurrency(quotationData?.currency, total)?.amountWithouCurrencyCode ?? total}
-            </>
-          );
-        };
-      }
-    });
-    setColumns(coloum);
-    setAllColumn(coloum.map((d) => d.Header));
+    column = [...column, ...newColumns];
+    setColumns(column);
+    setAllColumn(column.map((d) => d.Header));
   };
 
   const fetchProductInventory = async () => {
     setNextStep(false);
     var data: any = [];
-    var inventory: any = [];
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionData._id}`);
     const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}/${versionData._id}`);
 
     data = response?.data?.data;
-    inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
@@ -265,26 +152,21 @@ const QuoteBuilder = ({
         }`;
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
-      parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
-      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
-      parent.subRows = generateNestedData(data.material, inventory, parent);
+      parent.isValid = true;
+      parent.subRows = generateNestedData(data.material, parent);
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
     } else {
       setNextStep(true);
     }
-
     let serviceRows = [];
     if (serviceResponse?.data?.data?.length) {
       serviceRows = serviceResponse?.data?.data?.map((item) => {
         let finalObject = prepareDataForGrid(item);
         finalObject['detail'] = item?.serviceName;
         finalObject['qtyDisplay'] = item?.qty;
-        finalObject['leadTime'] =
-          Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
+        finalObject['leadTime'] = Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
         finalObject['parentId'] = null;
         finalObject['isValid'] = true;
         finalObject['hideSelection'] = false;
@@ -299,7 +181,7 @@ const QuoteBuilder = ({
     setRowsData([...rows, ...serviceRows]);
   };
 
-  const generateNestedData = (material, inventory, parent) => {
+  const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.srno = parent.srno + '.' + `${index + 1}`;
@@ -314,18 +196,9 @@ const QuoteBuilder = ({
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
-      // _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
       _subRow.isValid = true;
-      _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
-      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
-      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+      _subRow.subRows = generateNestedData(material, _subRow);
     });
-    if (subRows.length === 0 && parent.type === 'package') {
-      parent.isValid = false;
-    }
-    if (parent.type === 'package') {
-      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
-    }
     return subRows;
   };
 
@@ -378,23 +251,21 @@ const QuoteBuilder = ({
         </Box>
       </Box>
       {columns && rowsData ? (
-        <>
-          <Box p="6px" zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-              columns={columns}
-              data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-              onSelect={() => { }}
-              hideSelection={true}
-              hideAction={true}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              renderedFrom="quotation_product_package"
-              isClientSideGrid={true}
-            />
-          </Box>
-        </>
+        <Box p="6px" zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+            columns={columns}
+            data={rowsData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+            onSelect={() => { }}
+            hideSelection={true}
+            hideAction={true}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            renderedFrom="quotation_product_package"
+            isClientSideGrid={true}
+          />
+        </Box>
       ) : (
         <Box p={2} height={500} bgcolor="white">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
