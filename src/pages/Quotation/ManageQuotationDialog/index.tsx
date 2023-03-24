@@ -154,7 +154,12 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                 );
             }
         }
-        setFormsData(setFieldsInAscendingOrder(initialData.fields));
+        if (initialData.values["type"]) {
+            handleTypeChange(initialData.values["type"])
+        }
+        else {
+            setFormsData(setFieldsInAscendingOrder(initialData.fields));
+        }
     }, [initialData.fields]);
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
@@ -196,7 +201,6 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                     let data;
                     const response: any = await axiosInstance().get(`${quotation.api}/` + quotationId);
                     data = response?.data?.data;
-
                     if (isClone) {
                         const { _id, brand, createdBy, entity, history, products, status, quotationNumber, updatedBy, ...rest } = data
                         rest.status = "New"
@@ -307,22 +311,16 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
         }
     };
 
-<<<<<<< HEAD
-    const handleValuesChange = (data) => {
-        setFormValues((prevState) => ({
-            ...prevState,
-            ...data
-        }))
-        if (data["type"] === "Rental Job" || data["type"] === "Repair Order") {
-            setFormsData(setFieldsInAscendingOrder(quotationInitialData.fields.filter(d => d.fieldName !== "expectedCustomerDeliveryDate" && d.fieldName !== "supplierSuggestedDeliveryDate")));
+    const handleTypeChange = (data) => {
+        if (data === "Rental Job" || data === "Repair Order") {
+            setFormsData(setFieldsInAscendingOrder(initialData.fields.filter(d => d.fieldName !== "expectedCustomerDeliveryDate" && d.fieldName !== "supplierSuggestedDeliveryDate")));
         }
-        if (data["type"] === "Sales Order") {
-            setFormsData(setFieldsInAscendingOrder(quotationInitialData.fields.filter(d => d.fieldName !== "estimateStartDate" && d.fieldName !== "estimateEndDate")));
+        if (data === "Sales Order") {
+            setFormsData(setFieldsInAscendingOrder(initialData.fields.filter(d => d.fieldName !== "estimateStartDate" && d.fieldName !== "estimateEndDate")));
         }
-=======
+    }
     const validate = () => {
 
->>>>>>> acf6b40e349b815e1ea5a403227e661e69a3ef0f
     }
 
     return (<Dialog
@@ -662,6 +660,9 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                                                                                 options={field.option}
                                                                                 setFieldValue={(name, value) => {
                                                                                     setFieldValue(name, value)
+                                                                                    if (field.fieldName === "type") {
+                                                                                        handleTypeChange(value)
+                                                                                    }
                                                                                 }}
                                                                                 required={field.required}
                                                                                 fullWidth
