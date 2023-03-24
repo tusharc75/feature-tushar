@@ -120,7 +120,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
             ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: [] }))
             : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: serialNumberIds.map((item) => item?._id) })),
         warehouse: warehouse,
-        customDate: values.customDate,
+        customDate: moment(values.customDate).format('MM/DD/YYYY'),
         comment: values.comment
       };
       axiosInstance()
