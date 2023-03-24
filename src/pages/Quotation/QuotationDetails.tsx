@@ -538,10 +538,10 @@ const QuotationDetails = () => {
                 <Productpackage
                   quotationData={quotationData}
                   setNextStep={setNextStep}
-                  currencySymbol={currencySymbol}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
                   version={currentVersion}
+                  allowedToEdit={allowedToEdit}
                 />
               )}
               {currentStep === 1 && quotationData && (
@@ -557,20 +557,19 @@ const QuotationDetails = () => {
                 <QuoteBuilder
                   quotationData={quotationData}
                   setNextStep={setNextStep}
-                  currencySymbol={currencySymbol}
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}
                   currentStep={currentStep}
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
+                  renderedFrom={`${renderedFrom}_grid-3`}
                 />
               )}
               {currentStep === 3 && quotationData && (
                 <QuoteBuilder
                   quotationData={quotationData}
                   setNextStep={setNextStep}
-                  currencySymbol={currencySymbol}
                   sentToCustomer={sentToCustomer}
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
@@ -578,21 +577,20 @@ const QuotationDetails = () => {
                   currentStep={currentStep}
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
-
+                  renderedFrom={`${renderedFrom}_grid-3`}
                 />
               )}
               {currentStep === 4 && quotationData && (
                 <QuoteBuilder
                   quotationData={quotationData}
                   setNextStep={setNextStep}
-                  currencySymbol={currencySymbol}
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}
                   currentStep={currentStep}
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
-
+                  renderedFrom={`${renderedFrom}_grid-3`}
                 />
               )}
             </ContentFullScreen>
