@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useMemo } from 'react';
 import { Grid, Box, Button, Tabs, Tab, Menu, MenuItem, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
@@ -119,6 +119,30 @@ const QuotationDetails = () => {
       fetchQuotationData();
     }
   }, [id]);
+
+  const getQuotationFields = useMemo(() => {
+    let tempQuotationFields = quotationFields;
+    if(quotationData && quotationFields){
+      if (quotationData["type"] === "Rental Job" || quotationData["type"] === "Repair Order") {
+        tempQuotationFields = quotationFields.filter(d => d?.fieldData?.fieldName !== "expectedCustomerDeliveryDate" && d?.fieldData?.fieldName !== "supplierSuggestedDeliveryDate");
+      }
+      if (quotationData["type"] === "Sales Order") {
+        tempQuotationFields = quotationFields.filter(d => d?.fieldData?.fieldName !== "estimateStartDate" && d?.fieldData?.fieldName !== "estimateEndDate");
+      }
+    }
+    return tempQuotationFields;
+  }, [quotationData,quotationFields]);
+
+  useEffect(() => {
+    if (quotationData && quotationFields.length !== 0) {
+      if (quotationData["type"] === "Rental Job" || quotationData["type"] === "Repair Order") {
+        setQuotationFields(prevstate => prevstate.filter(d => d?.fieldData?.fieldName !== "expectedCustomerDeliveryDate" && d?.fieldData?.fieldName !== "supplierSuggestedDeliveryDate"));
+      }
+      if (quotationData["type"] === "Sales Order") {
+        setQuotationFields(prevstate => prevstate.filter(d => d?.fieldData?.fieldName !== "estimateStartDate" && d?.fieldData?.fieldName !== "estimateEndDate"));
+      }
+    }
+  }, [quotationData]);
 
   const getRessourceFields = async () => {
     try {
@@ -437,7 +461,11 @@ const QuotationDetails = () => {
               <Grid container spacing={2} style={{ padding: '8px' }}>
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </Grid>
-            ) : (<DetailsPage data={quotationData} fields={quotationFields} />)}
+            ) : (
+              <>
+                <DetailsPage data={quotationData} fields={getQuotationFields} />
+              </>
+            )}
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>

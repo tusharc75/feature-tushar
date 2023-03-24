@@ -154,7 +154,12 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                 );
             }
         }
-        setFormsData(setFieldsInAscendingOrder(initialData.fields));
+        if (initialData.values["type"]) {
+            handleTypeChange(initialData.values["type"])
+        }
+        else {
+            setFormsData(setFieldsInAscendingOrder(initialData.fields));
+        }
     }, [initialData.fields]);
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
@@ -196,7 +201,6 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                     let data;
                     const response: any = await axiosInstance().get(`${quotation.api}/` + quotationId);
                     data = response?.data?.data;
-
                     if (isClone) {
                         const { _id, brand, createdBy, entity, history, products, status, quotationNumber, updatedBy, ...rest } = data
                         rest.status = "New"
@@ -307,6 +311,14 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
         }
     };
 
+    const handleTypeChange = (data) => {
+        if (data === "Rental Job" || data === "Repair Order") {
+            setFormsData(setFieldsInAscendingOrder(initialData.fields.filter(d => d.fieldName !== "expectedCustomerDeliveryDate" && d.fieldName !== "supplierSuggestedDeliveryDate")));
+        }
+        if (data === "Sales Order") {
+            setFormsData(setFieldsInAscendingOrder(initialData.fields.filter(d => d.fieldName !== "estimateStartDate" && d.fieldName !== "estimateEndDate")));
+        }
+    }
     const validate = () => {
 
     }
@@ -648,6 +660,9 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                                                                                 options={field.option}
                                                                                 setFieldValue={(name, value) => {
                                                                                     setFieldValue(name, value)
+                                                                                    if (field.fieldName === "type") {
+                                                                                        handleTypeChange(value)
+                                                                                    }
                                                                                 }}
                                                                                 required={field.required}
                                                                                 fullWidth
