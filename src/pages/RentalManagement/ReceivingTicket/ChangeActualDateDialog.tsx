@@ -31,7 +31,7 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
             data?.isAllowedEndDate ? { manualEndDate: new Date(data?.manualEndDate) } : {}}
         onSubmit={(values) => { }}>
         {({ values, errors, touched, setFieldValue }) => (
-          <Form>
+          <Form >
             <CustomDialogHeader title={data?.assetNumber || ''} onClose={onClose} />
             <CustomDialogContent>
               <Box p={2}>
