@@ -15,12 +15,10 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AddExistingProductInventory from './AddExistingProductInventory';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
-import moment from 'moment';
-import { quotation, dateFormat, pricingCondition, formatAmountWithCurrency, supplierContact } from '../../../constants/helpers';
+import { quotation, pricingCondition, supplierContact } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QuotationQtyDialog from './QuotationQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -34,13 +32,17 @@ import { startCase } from 'lodash';
 import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
 
-const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFrom, stepFullScreen, version }) => {
+const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
+  const { state: { user, permissions } }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
 
@@ -59,7 +61,6 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [isRateRequired, setIsRateRequired] = useState(false);
   const [requestDialog, setRequestDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
@@ -71,13 +72,25 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
 
   useEffect(() => {
     fetchFields();
-    version && fetchProductInventory();
+    if (version) {
+      fetchData();
+    }
   }, [version]);
 
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
+    if (!allowedToEdit) {
+      data?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
+    }
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const coloum: any = [
+    const newColumns = genrateCustomTableColumns(data, quotationData?.currency, renderedFrom);
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
+    }
+    let column: any = [
       {
         accessor: 'srno',
         Header: 'Index',
@@ -104,7 +117,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
       },
       {
         accessor: 'detail',
-        Header: 'Detail',
+        Header: 'Details',
         minWidth: 300,
         width: 300,
         Cell: ({ row }) => (
@@ -167,158 +180,50 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
         }
       }
     ];
-    data.forEach((element) => {
-      if (element.fieldName === 'price' && element.required) {
-        setIsRateRequired(true);
-      }
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-        });
-      } else if (element.fieldName === 'supplierAccount') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? (
-              <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
-            ) : (
-              <NoDataCell />
-            )
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(quotationData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(quotationData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                )
-            });
-          });
-        }
-      } else if (element.fieldName === 'qty') {
-        element.fieldName = 'qtyDisplay';
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
-      }
-    });
-    {
-      isMobile ? (
-        <Box display={'none'} />
-      ) : (
-        coloum.push({
-          accessor: 'action',
-          Header: '',
-          minWidth: 100,
-          width: 100,
-          sticky: 'right',
-          disableFilters: true,
-          canDrag: false,
-          Cell: ({ row }) =>
-            !row.original.hideSelection && (
-              <Grid container spacing={1}>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setLeadTimeDialog({ open: true, data: row.original });
-                  }}
-                >
-                  <DateRangeIcon fontSize="small" color="primary" />
-                </IconButton>
-                <Box ml={1} />
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                    setDeleteData(obj);
-                  }}
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </Grid>
-            )
-        })
-      );
-    }
-    coloum.forEach((element) => {
-      if (element.accessor.includes('detail')) {
-        element['Footer'] = () => {
-          return <>Total</>;
-        };
-      } else if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      } else if (element.accessor.includes('finalPrice')) {
-        element['Footer'] = (info) => {
-          const total = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return (
-            <>
-              {currencySymbol} {formatAmountWithCurrency(quotationData?.currency, total)?.amountWithouCurrencyCode ?? total}
-            </>
-          );
-        };
-      }
-    });
-    setColumns(coloum);
+    column = [...column, ...newColumns];
+    column.push({
+      accessor: 'action',
+      Header: '',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) =>
+        !row.original.hideSelection && (
+          <Grid container spacing={1}>
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                setLeadTimeDialog({ open: true, data: row.original });
+              }}
+            >
+              <DateRangeIcon fontSize="small" color="primary" />
+            </IconButton>
+            <Box ml={1} />
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                setDeleteData(obj);
+              }}
+            >
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+          </Grid>
+        )
+    })
+    setColumns(column);
   };
 
-  const fetchProductInventory = async () => {
+  const fetchData = async () => {
     setNextStep(false);
     var data: any = [];
-    var inventory: any = [];
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
-    inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
@@ -334,12 +239,10 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
-      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
-      parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
-      parent.subRows = generateNestedData(data.material, inventory, parent);
+      parent.subRows = generateNestedData(data.material, parent);
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(true);
+      setNextStep(false);
     } else {
       setNextStep(true);
     }
@@ -347,7 +250,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
     setSelectedProducts([]);
   };
 
-  const generateNestedData = (material, inventory, parent) => {
+  const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.srno = parent.srno + '.' + `${index + 1}`;
@@ -363,9 +266,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
-      _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
-      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
-      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+      _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -418,7 +319,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
       .post(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`, { material })
       .then(() => {
         setAddDialog({ open: false, type: '', parentId: null });
-        fetchProductInventory();
+        fetchData();
         setAddingProducts(false);
       })
       .catch((error) => {
@@ -435,7 +336,6 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
       delete element.qtyDisplay;
       delete element.isValid;
       delete element.hideSelection;
-      delete element.assetQty;
       delete element.productDetail;
       delete element.packageDetail;
       delete element.serviceDetail;
@@ -450,7 +350,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
-        fetchProductInventory();
+        fetchData();
       })
       .catch((error) => {
         setUpdating(false);
@@ -464,7 +364,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
       .put(`${quotation.api}/productpackage/${quotationData?._id}/${versionId}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
-        fetchProductInventory();
+        fetchData();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -546,6 +446,15 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
     setAddAnchorEl(null);
   };
 
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    if (inputField.hasOwnProperty('qtyDisplay')) {
+      inputField['qty'] = inputField['qtyDisplay'];
+    }
+    let rows: any = [{ ...rowData, ...updatedData }];
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    handleSaveData(rows);
+  };
 
   return (
     <Fragment>
@@ -700,21 +609,21 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
         </Box>
       </Box>
       {columns && rowsData ? (
-        <>
-          <Box p="6px" zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-              columns={columns}
-              data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={setSelectedProducts}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              renderedFrom="quotation_product_package"
-              isClientSideGrid={true}
-            />
-          </Box>
-        </>
+        <Box p="6px" zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+            columns={columns}
+            data={rowsData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+            onSelect={setSelectedProducts}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            renderedFrom="quotation_product_package"
+            isClientSideGrid={true}
+            onSaveEdit={onSaveInlineEdit}
+
+          />
+        </Box>
       ) : (
         <Box p={2} height={500} bgcolor="white">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -744,23 +653,40 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
           selectedProducts={selectedProducts}
         />
       )}
-      {addDialog.open && (
-        <AddExistingProductInventory
-          renderedFrom={
-            addDialog.type === 'product'
-              ? `${renderedFrom}-product`
-              : addDialog.type === 'service'
-                ? `${renderedFrom}-service`
-                : `${renderedFrom}-package`
-          }
-          isAddingProducts={isAddingProducts}
-          addProductInventory={handleAdd}
-          handleProductInventoryClose={() => {
-            setAddDialog({ open: false, type: '', parentId: null });
+      {addDialog.open && addDialog.type === 'product' && (
+        <AssignProductDialog
+          reference={'quotation'}
+          serialized={null}
+          productsDialogOpen={addDialog.open}
+          productId={null}
+          handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
+          assignedProducts={[]}
+          renderedFrom={renderedFrom}
+          onSuccess={(d) => {
+            handleAdd(d);
           }}
-          type={addDialog.type}
-          referenceType={'Quotation'}
-          ignoreIds={rowsData?.map((e) => e?.materialId)}
+        />
+      )}
+       {addDialog.open && addDialog.type === 'service' && (
+        <AssignServiceDialog
+          reference={'quotation'}
+          referenceId={quotationData?._id}
+          handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
+          ids={[]}
+          onSuccess={(rows) => {
+            handleAdd(rows);
+          }}
+        />
+      )}
+      {addDialog.open && addDialog.type === 'package' && (
+        <AssignPackageDialog
+          referenceType={'quotation'}
+          handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
+          ids={[]}
+          onSuccess={(rows) => {
+            handleAdd(rows)
+          }}
+          packageType={null}
         />
       )}
       {requestDialog && selectedType && (
@@ -794,7 +720,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, renderedFr
           }}
           handleSucess={() => {
             setLeadTimeDialog({ open: false, data: null });
-            fetchProductInventory();
+            fetchData();
           }}
         />
       )}

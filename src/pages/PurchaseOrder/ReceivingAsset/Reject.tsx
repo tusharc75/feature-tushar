@@ -24,7 +24,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const [lockDate, setLockDate] = useState(null);
-  
+
   useEffect(() => {
     fetchSettingsData();
   }, []);
@@ -59,7 +59,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
     });
     if (data?.length) {
       axiosInstance()
-        .post(`${purchaseOrder.api}/reject-inventory/${purchaseOrderID}`, { products: data, rejectDate: rejectDate })
+        .post(`${purchaseOrder.api}/reject-inventory/${purchaseOrderID}`, { products: data, rejectDate: moment(rejectDate).format('MM/DD/YYYY') })
         .then(({ data }) => {
           setIsSubmitting(false);
           toastConfig.setToastConfig({
