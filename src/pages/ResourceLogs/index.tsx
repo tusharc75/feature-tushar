@@ -83,6 +83,7 @@ const ResourceLogs = () => {
         axiosInstance().get(`/log?${queryString}`).then(({ data: { data: { data, count } } }) => {
             let rows = data?.map((u) => {
                 var changes = [];
+                let createLink = [];
                 u?.changes?.forEach((e) => {
                     if (e?.fieldLabel) {
                         var oldValue = e?.oldValue;
@@ -107,9 +108,13 @@ const ResourceLogs = () => {
                         else {
                             changes.push(`${e.fieldLabel} changed to ${newValue}`)
                         }
+                        createLink.push(e)
                     }
                 })
-                u.changeLogs = changes;
+                u.changeLogs = {
+                    changes,
+                    data: createLink
+                };
                 u.changes = changes?.toString();
                 u.key = selectedResource?.key;
                 return u;
