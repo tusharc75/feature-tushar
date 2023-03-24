@@ -214,11 +214,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                           ) : (
                             <Tooltip
                               className="cursor-stop"
-                              title={
-                                permissions.quoteBuilder.isDelete
-                                  ? 'Signed quote attachments can not be deleted'
-                                  : "You don't have permissions to delete attachment"
-                              }
+                              title={"You don't have permissions to delete attachment"}
                             >
                               <IconButton>
                                 <DeleteIcon color="disabled" />
