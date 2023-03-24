@@ -83,12 +83,10 @@ const ResourceLogs = () => {
         axiosInstance().get(`/log?${queryString}`).then(({ data: { data: { data, count } } }) => {
             let rows = data?.map((u) => {
                 var changes = [];
-                let createLink = [];
                 u?.changes?.forEach((e) => {
                     if (e?.fieldLabel) {
                         var oldValue = e?.oldValue;
                         var newValue = e?.newValue;
-
                         if (e?.type === "date") {
                             if (oldValue && moment(oldValue)?.isValid) {
                                 oldValue = moment(oldValue).format(dateFormat)
@@ -101,21 +99,15 @@ const ResourceLogs = () => {
                             oldValue = oldValue?.label;
                             newValue = newValue?.label;
                         }
-
                         if (oldValue && newValue) {
                             changes.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`)
                         }
                         else {
                             changes.push(`${e.fieldLabel} changed to ${newValue}`)
                         }
-                        createLink.push(e)
                     }
                 })
-                u.changeLogs = {
-                    changes,
-                    data: createLink
-                };
-                u.changes = changes?.toString();
+                u.changeString = changes?.toString();
                 u.key = selectedResource?.key;
                 return u;
             });
@@ -171,7 +163,7 @@ const ResourceLogs = () => {
             sortable: false,
         },
         {
-            field: 'changes',
+            field: 'changeString',
             headerName: 'Changes',
             show: true,
             cellRenderer: 'commonRenderer',
@@ -184,7 +176,7 @@ const ResourceLogs = () => {
         return <>
             <HtmlTooltip title="View Changes">
                 <IconButton
-                    onClick={() => setOpenDialog({ open: true, changes: params?.data?.changeLogs })}
+                    onClick={() => setOpenDialog({ open: true, changes: params?.data?.changes })}
                 >
                     <VisibilityIcon color="primary" fontSize='small' />
                 </IconButton>

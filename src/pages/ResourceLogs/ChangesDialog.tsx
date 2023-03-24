@@ -1,11 +1,14 @@
-import { Dialog, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
+import { Box, Dialog, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@material-ui/core';
 import { Fragment, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormat } from 'src/constants/helpers';
 import { Link } from 'react-router-dom';
 import routes from "src/components/Helpers/Routes";
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import moment from 'moment';
+import { camelCase } from 'lodash';
 
 const ChangesDialog = ({ open, onClose, changes }) => {
 
@@ -36,39 +39,38 @@ const ChangesDialog = ({ open, onClose, changes }) => {
             <Table aria-label="customized table">
               <TableHead>
                 <TableRow>
-                  <TableCell>Detail</TableCell>
+                  <TableCell>Field Name</TableCell>
+                  <TableCell>Old Value</TableCell>
+                  <TableCell>New Value</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {changes && changes?.changes?.map((item: any, index: any) => {
-
-                  if (changes?.data[index]?.lookup) {
-                    
-                    const lookup_resource = changes?.data[index]?.lookup_resource?.replaceAll(' ', '');
-                    const route = `${lookup_resource.charAt(0).toLowerCase() + lookup_resource.slice(1)}Detail`
-
-                    item = <Fragment>{changes?.data[index]?.fieldLabel} changed { }
-                      {changes?.data[index]?.oldValue && <>
-                        from { }
-                        <Link className="link text-truncate"
-                          title={changes?.data[index]?.oldValue?.label} to={`${routes[route].path}/${changes?.data[index]?.oldValue?.value}`}>
-                          {changes?.data[index]?.oldValue?.label}
-                        </Link>
-                      </>
-                      }
-                      to { }
-                      <Link className="link text-truncate"
-                        title={changes?.data[index]?.oldValue?.label} to={`${routes[route].path}/${changes?.data[index]?.newValue?.value}`}>
-                        {changes?.data[index]?.newValue?.label}
-                      </Link>
-                    </Fragment>
-                  }
-
-                  return (
+                {changes?.map((data: any, index: any) => {
+                  return (data?.fieldLabel &&
                     <TableRow key={index}>
-                      <TableCell>{item}</TableCell>
-                    </TableRow>
-                  )
+                      <TableCell>{data?.fieldLabel}</TableCell>
+                      <TableCell>{data?.oldValue ?
+                        data?.type === "date" ? moment(data?.oldValue).format(dateFormat) :
+                          data?.type === "dropDown" && data?.lookup ?
+                            <Link
+                              className="link text-truncate"
+                              title={data?.oldValue?.label}
+                              to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.oldValue?.value}`}
+                            >
+                              {data?.oldValue?.label}
+                            </Link> : data?.oldValue : <NoDataCell />}</TableCell>
+                      <TableCell>{data?.newValue ?
+                        data?.type === "date" ? moment(data?.newValue).format(dateFormat) :
+                          data?.type === "dropDown" && data?.lookup ?
+                            <Link
+                              className="link text-truncate"
+                              title={data?.newValue?.label}
+                              to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.newValue?.value}`}
+                            >
+                              {data?.newValue?.label}
+                            </Link>
+                            : data?.newValue : <NoDataCell />}</TableCell>
+                    </TableRow>)
                 })}
               </TableBody>
             </Table>
