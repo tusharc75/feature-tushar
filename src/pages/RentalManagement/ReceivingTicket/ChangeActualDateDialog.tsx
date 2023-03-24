@@ -43,7 +43,7 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
                         fullWidth
                         values={values}
                         maxDate={values.manualEndDate || moment().add(5, 'years')}
-                        error={errors}
+                        errors={errors}
                         touched={touched}
                         type="date"
                         label="Start Date"
@@ -60,7 +60,7 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
                         fullWidth
                         minDate={data?.minEndDate || values.manualStartDate}
                         values={values}
-                        error={errors}
+                        errors={errors}
                         touched={touched}
                         type="date"
                         label="End Date"
