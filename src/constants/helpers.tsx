@@ -2185,11 +2185,13 @@ export const COLOUR_MASTER = {
 export const leadTimeStatusDropdown = ['Production', 'Supplier', 'Assemble', 'Freight', 'Customer'];
 
 export const QUOTATION_STATUS = {
+  new: 'New',
   buildingQuote: 'Building Quote',
   waitingForSupplierPrice: 'Waiting for Supplier Price',
   sentToCustomer: 'Sent to Customer',
   acceptByCustomer: 'Accepted by Customer',
-  rejectByCustomer: 'Rejected by Customer'
+  rejectByCustomer: 'Rejected by Customer',
+  converted: 'Converted',
 };
 
 export const WORKORDER_SERVICE_COLOR = {
