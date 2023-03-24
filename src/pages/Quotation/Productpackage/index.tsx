@@ -15,7 +15,6 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AddExistingProductInventory from './AddExistingProductInventory';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
@@ -35,6 +34,9 @@ import DateRangeIcon from '@material-ui/icons/DateRange';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
 
 const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit }) => {
@@ -651,23 +653,40 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           selectedProducts={selectedProducts}
         />
       )}
-      {addDialog.open && (
-        <AddExistingProductInventory
-          renderedFrom={
-            addDialog.type === 'product'
-              ? `${renderedFrom}-product`
-              : addDialog.type === 'service'
-                ? `${renderedFrom}-service`
-                : `${renderedFrom}-package`
-          }
-          isAddingProducts={isAddingProducts}
-          addProductInventory={handleAdd}
-          handleProductInventoryClose={() => {
-            setAddDialog({ open: false, type: '', parentId: null });
+      {addDialog.open && addDialog.type === 'product' && (
+        <AssignProductDialog
+          reference={'quotation'}
+          serialized={null}
+          productsDialogOpen={addDialog.open}
+          productId={null}
+          handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
+          assignedProducts={[]}
+          renderedFrom={renderedFrom}
+          onSuccess={(d) => {
+            handleAdd(d);
           }}
-          type={addDialog.type}
-          referenceType={'Quotation'}
-          ignoreIds={rowsData?.map((e) => e?.materialId)}
+        />
+      )}
+       {addDialog.open && addDialog.type === 'service' && (
+        <AssignServiceDialog
+          reference={'quotation'}
+          referenceId={quotationData?._id}
+          handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
+          ids={[]}
+          onSuccess={(rows) => {
+            handleAdd(rows);
+          }}
+        />
+      )}
+      {addDialog.open && addDialog.type === 'package' && (
+        <AssignPackageDialog
+          referenceType={'quotation'}
+          handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
+          ids={[]}
+          onSuccess={(rows) => {
+            handleAdd(rows)
+          }}
+          packageType={null}
         />
       )}
       {requestDialog && selectedType && (
