@@ -77,7 +77,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
     ];
     setLoading(true);
     axiosInstance()
-      .post(`/purchase-order/reject-inventory/${POId}`, { products: data, rejectDate: values?.rejectDate })
+      .post(`/purchase-order/reject-inventory/${POId}`, { products: data, rejectDate: moment(values?.rejectDate).format('MM/DD/YYYY') })
       .then(() => {
         setLoading(false);
         handleSuccess();
