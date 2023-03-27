@@ -44,8 +44,8 @@ const Steps = ({ serviceId }) => {
 
   const [columns, setColumns] = useState([
     { field: 'stepName', headerName: 'Step Name', show: true, disabled: true, cellRenderer: 'stepNameRenderer' },
-    { field: 'order', headerName: 'Order', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'leadDay', headerName: 'Lead Day', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'order', headerName: 'Sequence', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'leadDay', headerName: 'Lead Time', show: true, cellRenderer: 'commonRenderer' },
     { field: 'price', headerName: 'Price', show: true, cellRenderer: 'commonRenderer' },
     { field: 'fieldCount', headerName: 'Fields', show: true, cellRenderer: 'commonRenderer' }
   ]);

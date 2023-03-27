@@ -6,15 +6,15 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Formik, Form, FieldArray, Field } from 'formik';
+import { Formik, Form, FieldArray } from 'formik';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { KeyboardDatePicker } from 'formik-material-ui-pickers';
-import { dateFormat, productInventory, purchaseOrder } from '../../../constants/helpers';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { dateFormatForInputControl, productInventory, purchaseOrder } from '../../../constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
+import DateUtils from '@date-io/date-fns';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrderData }) => {
   const {
@@ -186,13 +186,12 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                           <Box mt={1}>
                                             <Grid container spacing={2} alignItems="center">
                                               <Grid item xs={12} md={4}>
-                                                <Field
+                                                <TextField
                                                   fullWidth
                                                   label="Reject Quantity"
                                                   variant="outlined"
                                                   type="number"
                                                   size="small"
-                                                  component={TextField}
                                                   name="rejectQuantity"
                                                   placeholder="Reject Quantity"
                                                   value={data.rejectQuantity}
@@ -209,13 +208,12 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                                 />
                                               </Grid>
                                               <Grid item xs={12} md={8}>
-                                                <Field
+                                                <TextField
                                                   fullWidth
                                                   label="Comment"
                                                   variant="outlined"
                                                   type="text"
                                                   size="small"
-                                                  component={TextField}
                                                   name="comment"
                                                   placeholder="Comment"
                                                   value={data.comment}
@@ -242,31 +240,32 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                       <Box pt={2}>
                         <Grid container>
                           <Grid item xs={12} md={6}>
-                            <Field
-                              fullWidth
-                              label="Reject Date"
-                              variant="inline"
-                              inputVariant="outlined"
-                              autoOk
-                              size="small"
-                              margin="dense"
-                              component={KeyboardDatePicker}
-                              name="rejectDate"
-                              placeholder="Reject Date"
-                              value={values.rejectDate}
-                              format={dateFormat}
-                              minDate={
-                                lockDate
-                                  ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
-                                    ? lockDate
+                            <MuiPickersUtilsProvider utils={DateUtils}>
+                              <KeyboardDatePicker
+                                fullWidth
+                                label="Reject Date"
+                                variant="inline"
+                                inputVariant="outlined"
+                                autoOk
+                                size="small"
+                                margin="dense"
+                                name="rejectDate"
+                                placeholder="Reject Date"
+                                value={values.rejectDate}
+                                format={dateFormatForInputControl}
+                                minDate={
+                                  lockDate
+                                    ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                                      ? lockDate
+                                      : purchaseOrderData?.purchaseOrderDate
                                     : purchaseOrderData?.purchaseOrderDate
-                                  : purchaseOrderData?.purchaseOrderDate
-                              }
-                              maxDate={new Date()}
-                              onChange={(value) => {
-                                setFieldValue('rejectDate', value);
-                              }}
-                            />
+                                }
+                                maxDate={new Date()}
+                                onChange={(value) => {
+                                  setFieldValue('rejectDate', value);
+                                }}
+                              />
+                            </MuiPickersUtilsProvider>
                           </Grid>
                         </Grid>
                       </Box>

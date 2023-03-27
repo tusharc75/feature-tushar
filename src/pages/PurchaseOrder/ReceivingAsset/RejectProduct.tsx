@@ -4,19 +4,18 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Formik, Form, Field } from 'formik';
-import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
+import { Formik, Form } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { productInventory } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
-import { KeyboardDatePicker } from 'formik-material-ui-pickers';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
-import { dateFormat, purchaseOrder } from '../../../constants/helpers';
+import { dateFormatForInputControl } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
+import DateUtils from '@date-io/date-fns';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, purchaseOrderData }) => {
   const {
@@ -150,8 +149,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                       primary={product?.productName}
                       secondary={`Quantity : ${product?.qty - (product?.rejectQuantity || 0) - (product?.assetQty || 0)}`}
                     />
-                    <Field
-                      component={TextFieldFormik}
+                    <TextField
                       margin="dense"
                       type="number"
                       required
@@ -169,8 +167,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                   </ListItem>
                 </List>
                 <Box m={1}>
-                  <Field
-                    component={TextFieldFormik}
+                  <TextField
                     margin="dense"
                     type="text"
                     label="Comment"
@@ -221,32 +218,33 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                   </Fragment>
                 ) : null}
                 <Box m={1}>
-                  <Field
-                    fullWidth
-                    label="Reject Date"
-                    variant="inline"
-                    inputVariant="outlined"
-                    autoOk
-                    required
-                    size="small"
-                    margin="dense"
-                    component={KeyboardDatePicker}
-                    name="rejectDate"
-                    placeholder="Reject Date"
-                    value={values.rejectDate}
-                    format={dateFormat}
-                    minDate={
-                      lockDate
-                        ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
-                          ? lockDate
+                  <MuiPickersUtilsProvider utils={DateUtils}>
+                    <KeyboardDatePicker
+                      fullWidth
+                      label="Reject Date"
+                      variant="inline"
+                      inputVariant="outlined"
+                      autoOk
+                      required
+                      size="small"
+                      margin="dense"
+                      name="rejectDate"
+                      placeholder="Reject Date"
+                      value={values.rejectDate}
+                      format={dateFormatForInputControl}
+                      minDate={
+                        lockDate
+                          ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                            ? lockDate
+                            : purchaseOrderData?.purchaseOrderDate
                           : purchaseOrderData?.purchaseOrderDate
-                        : purchaseOrderData?.purchaseOrderDate
-                    }
-                    maxDate={new Date()}
-                    onChange={(value) => {
-                      setFieldValue('rejectDate', value);
-                    }}
-                  />
+                      }
+                      maxDate={new Date()}
+                      onChange={(value) => {
+                        setFieldValue('rejectDate', value);
+                      }}
+                    />
+                  </MuiPickersUtilsProvider>
                 </Box>
               </CustomDialogContent>
               <CustomDialogFooter>

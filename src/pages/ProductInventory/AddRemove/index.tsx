@@ -12,21 +12,20 @@ import {
   TextField,
   Typography
 } from '@material-ui/core';
+import DateUtils from '@date-io/date-fns';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { Autocomplete } from '@material-ui/lab';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Formik, Form, Field } from 'formik';
-import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
+import { Formik, Form } from 'formik';
 import { read, utils, writeFile } from 'xlsx';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { capitalize } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormat, productInventory } from '../../../constants/helpers';
+import { dateFormatForInputControl, productInventory } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { KeyboardDatePicker } from 'formik-material-ui-pickers';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
@@ -274,8 +273,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                       ) : (
                         <ListItemText primary={`${product?.length} Products`} />
                       )}
-                      <Field
-                        component={TextFieldFormik}
+                      <TextField
                         margin="dense"
                         type="number"
                         label="Qty"
@@ -294,8 +292,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                   </List>
                   {type === 'add' ? (
                     <Box m={1}>
-                      <Field
-                        component={TextFieldFormik}
+                      <TextField
                         margin="dense"
                         type="number"
                         label="Price"
@@ -314,46 +311,46 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                     </Box>
                   ) : null}
                   <Box m={1}>
-                    <Field
-                      fullWidth
-                      label="Custom Date"
-                      variant="inline"
-                      inputVariant="outlined"
-                      autoOk
-                      required
-                      size="small"
-                      margin="dense"
-                      component={KeyboardDatePicker}
-                      name="customDate"
-                      placeholder={type === 'add' ? 'Receive Date' : 'Remove Date'}
-                      value={values.customDate}
-                      format={dateFormat}
-                      maxDate={new Date()}
-                      onChange={(value) => {
-                        setFieldValue('customDate', value);
-                        if (type === 'remove' && product.length === 1) {
-                          var date = moment(value);
-                          if (date.isValid()) {
-                            axiosInstance()
-                              .get(`${productInventory.api}/inventory-at-date?date=${value}&warehouse=${warehouse}&product=${product[0]._id}`)
-                              .then(({ data: { data } }) => {
-                                setAvailableQtyOnRemoveDate(data);
-                              })
-                              .catch((err) => {
-                                toastConfig.setToastConfig(err);
-                              });
+                    <MuiPickersUtilsProvider utils={DateUtils}>
+                      <KeyboardDatePicker
+                        {...(lockDate ? { minDate: lockDate } : {})}
+                        fullWidth
+                        size="small"
+                        margin="dense"
+                        autoOk
+                        required
+                        variant="inline"
+                        inputVariant="outlined"
+                        value={values.customDate}
+                        name="customDate"
+                        placeholder={type === 'add' ? 'Receive Date' : 'Remove Date'}
+                        label="Custom Date"
+                        format={dateFormatForInputControl}
+                        maxDate={new Date()}
+                        onChange={(value) => {
+                          setFieldValue('customDate', value);
+                          if (type === 'remove' && product.length === 1) {
+                            var date = moment(value);
+                            if (date.isValid()) {
+                              axiosInstance()
+                                .get(`${productInventory.api}/inventory-at-date?date=${value}&warehouse=${warehouse}&product=${product[0]._id}`)
+                                .then(({ data: { data } }) => {
+                                  setAvailableQtyOnRemoveDate(data);
+                                })
+                                .catch((err) => {
+                                  toastConfig.setToastConfig(err);
+                                });
+                            }
                           }
-                        }
-                      }}
-                      {...(lockDate ? { minDate: lockDate } : {})}
-                    />
+                        }}
+                      />
+                    </MuiPickersUtilsProvider>
                     {availableQtyOnRemoveDate || availableQtyOnRemoveDate === 0 ? (
                       <Typography variant="caption">{`Inventory on custom date : ${availableQtyOnRemoveDate}`}</Typography>
                     ) : null}
                   </Box>
                   <Box m={1}>
-                    <Field
-                      component={TextFieldFormik}
+                    <TextField
                       margin="dense"
                       type="text"
                       label="Comment"
