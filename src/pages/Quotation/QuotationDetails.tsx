@@ -55,7 +55,7 @@ const QuotationDetails = () => {
 
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.quotation.title);
-  
+
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -122,7 +122,7 @@ const QuotationDetails = () => {
 
   const getQuotationFields = useMemo(() => {
     let tempQuotationFields = quotationFields;
-    if(quotationData && quotationFields){
+    if (quotationData && quotationFields) {
       if (quotationData["type"] === "Rental Job" || quotationData["type"] === "Repair Order") {
         tempQuotationFields = quotationFields.filter(d => d?.fieldData?.fieldName !== "expectedCustomerDeliveryDate" && d?.fieldData?.fieldName !== "supplierSuggestedDeliveryDate");
       }
@@ -131,7 +131,7 @@ const QuotationDetails = () => {
       }
     }
     return tempQuotationFields;
-  }, [quotationData,quotationFields]);
+  }, [quotationData, quotationFields]);
 
   useEffect(() => {
     if (quotationData && quotationFields.length !== 0) {
@@ -305,7 +305,8 @@ const QuotationDetails = () => {
                     {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
                   </Button>
                 </HtmlTooltip>
-                {allowedToEdit && quotationData?.type && quotationData?.status !== QUOTATION_STATUS.converted &&
+                {allowedToEdit && quotationData?.type && quotationData?.status === QUOTATION_STATUS.acceptByCustomer &&
+                  !quotationData?.rentalJob && !quotationData?.repairOrder && !quotationData?.salesOrder &&
                   <HtmlTooltip title="Convert">
                     <Button
                       onClick={() => {
