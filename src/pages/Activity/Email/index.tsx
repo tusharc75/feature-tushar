@@ -18,7 +18,7 @@ import { Delete as DeleteIcon } from '@material-ui/icons';
 import reactHtmlparser, { convertNodeToElement } from 'react-html-parser';
 import { HiOutlineMail } from 'react-icons/hi';
 import Dialog from '@material-ui/core/Dialog';
-import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
+import { CreateEmail2 } from '../../../components/Activity/Email/CreateEmail2';
 import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
 import styles from '../../Leads/Header.module.scss';
 import emailStyles from './email.module.scss';
@@ -600,7 +600,7 @@ const Email = () => {
             }}
             fullWidth
           >
-            <CreateEmail
+            <CreateEmail2
               emailId={emailId}
               handleClose={() => {
                 handleClose();
