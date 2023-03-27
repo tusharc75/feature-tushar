@@ -5,6 +5,7 @@ import {
   Grid,
   Button,
   TextField,
+  Select,
   Divider,
   MenuItem,
   InputLabel,
@@ -14,10 +15,9 @@ import {
   CircularProgress
 } from '@material-ui/core';
 import TableChartIcon from '@material-ui/icons/TableChart';
-import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
-import { Formik, Form, Field } from 'formik';
-import { KeyboardDatePicker } from 'formik-material-ui-pickers';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { Formik, Form } from 'formik';
+import DateUtils from '@date-io/date-fns';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import { object, string } from 'yup';
 import moment from 'moment';
@@ -79,7 +79,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
           setInitialValues(data);
           setFormValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       let initialData = {
         name: '',
@@ -196,8 +196,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                             }}
                           />
                           <Box pt={1}>
-                            <Field
-                              component={TextFieldFormik}
+                            <TextField
                               fullWidth
                               margin="dense"
                               type="text"
@@ -254,8 +253,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                               <Box>
                                 <FormControl variant="outlined" fullWidth>
                                   <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
-                                  <Field
-                                    component={Select}
+                                  <Select
                                     labelId="demo-simple-select-outlined-label"
                                     id="demo-simple-select-outlined"
                                     margin="dense"
@@ -267,7 +265,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                         {_status.status}
                                       </MenuItem>
                                     ))}
-                                  </Field>
+                                  </Select>
                                 </FormControl>
                               </Box>
                               <Box pt={1}>
@@ -308,38 +306,46 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                               <Box pt={1}>
                                 <Grid container spacing={1}>
                                   <Grid item xs={12} sm={12} md={12}>
-                                    <Field
-                                      component={KeyboardDatePicker}
-                                      label="Start Date"
-                                      name="startDate"
-                                      autoOk
-                                      variant="inline"
-                                      inputVariant="outlined"
-                                      fullWidth
-                                      margin="dense"
-                                      format={dateFormat}
-                                      minDate={new Date()}
-                                      onChange={(value) => {
-                                        setFieldValue('dueDate', value);
-                                        setFieldValue('startDate', value);
-                                      }}
-                                      maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                                    />
+                                    <MuiPickersUtilsProvider utils={DateUtils}>
+                                      <KeyboardDatePicker
+                                        label="Start Date"
+                                        name="startDate"
+                                        autoOk
+                                        variant="inline"
+                                        inputVariant="outlined"
+                                        fullWidth
+                                        margin="dense"
+                                        format={dateFormatForInputControl}
+                                        minDate={new Date()}
+                                        value={values.startDate}
+                                        onChange={(value) => {
+                                          setFieldValue('dueDate', value);
+                                          setFieldValue('startDate', value);
+                                        }}
+                                        maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                                      />
+                                    </MuiPickersUtilsProvider>
                                   </Grid>
                                   <Grid item xs={12} sm={12} md={12}>
-                                    <Field
-                                      component={KeyboardDatePicker}
-                                      label="Due Date"
-                                      name="dueDate"
-                                      autoOk
-                                      variant="inline"
-                                      inputVariant="outlined"
-                                      fullWidth
-                                      margin="dense"
-                                      minDate={values.startDate}
-                                      maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                                      format={dateFormat}
-                                    />
+                                    <MuiPickersUtilsProvider utils={DateUtils}>
+                                      <KeyboardDatePicker
+                                        label="Due Date"
+                                        name="dueDate"
+                                        autoOk
+                                        variant="inline"
+                                        inputVariant="outlined"
+                                        fullWidth
+                                        margin="dense"
+                                        minDate={values.startDate}
+                                        maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                                        value={values.dueDate}
+                                        onChange={(value) => {
+                                          setFieldValue('dueDate', value);
+                                        }}
+                                        format={dateFormatForInputControl}
+
+                                      />
+                                    </MuiPickersUtilsProvider>
                                     {initialValues.createdBy && initialValues.createdBy.date && (
                                       <Box mt={1} color="text.secondary">
                                         <Typography variant="body2">Created {moment(initialValues.createdBy.date).format(dateFormat)}</Typography>

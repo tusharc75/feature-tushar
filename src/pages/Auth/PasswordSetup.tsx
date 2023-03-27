@@ -7,9 +7,9 @@ import {
   Paper,
   Button,
   CircularProgress,
+  TextField,
 } from "@material-ui/core";
-import { Formik, Form, Field } from "formik";
-import { TextField } from "formik-material-ui";
+import { Formik, Form } from "formik";
 import queryString from "query-string";
 import { useHistory, Redirect } from "react-router-dom";
 
@@ -138,8 +138,7 @@ const PasswordSetup = () => {
               >
                 {({ submitForm }) => (
                   <Form className={classes.form}>
-                    <Field
-                      component={TextField}
+                    <TextField
                       name="email"
                       type="email"
                       label="Email"
@@ -148,8 +147,7 @@ const PasswordSetup = () => {
                       required
                     />
                     <br />
-                    <Field
-                      component={TextField}
+                    <TextField
                       type="password"
                       label="New Password"
                       name="password"
@@ -157,8 +155,7 @@ const PasswordSetup = () => {
                       required
                     />
                     <br />
-                    <Field
-                      component={TextField}
+                    <TextField
                       type='password'
                       label='Confirm Password'
                       name='confirmPassword'
@@ -172,7 +169,7 @@ const PasswordSetup = () => {
                       size="small"
                       disabled={isSubmitting}
                       onClick={submitForm}
-                      startIcon={isSubmitting && <CircularProgress size={20} color='inherit' /> }
+                      startIcon={isSubmitting && <CircularProgress size={20} color='inherit' />}
                     >
                       Submit
                     </Button>

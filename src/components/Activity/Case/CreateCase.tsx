@@ -12,18 +12,17 @@ import {
   TextField,
   Divider,
   Link,
-  CircularProgress
+  CircularProgress,
+  Select
 } from '@material-ui/core';
 import { UserDropdown } from '../Helpers/userDropdown';
 import statusList from '../Helpers/statusList';
-import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
-import { Formik, Form, Field } from 'formik';
-import { KeyboardDatePicker } from 'formik-material-ui-pickers';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { Formik, Form } from 'formik';
 import MomentUtils from '@date-io/moment';
 import { object, string } from 'yup';
 import moment from 'moment';
-
+import DateUtils from '@date-io/date-fns';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { GetCaseDetail, CreateNewCase, UpdateCase } from '../../../axios/activity';
 import { Comment } from '../Comment';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay';
@@ -34,7 +33,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../../StateProvider/Provider';
 import Loader from '../../Loader';
-import { dateFormat } from '../../../constants/helpers';
+import { dateFormatForInputControl } from '../../../constants/helpers';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { map } from 'lodash';
 
@@ -197,8 +196,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                             }}
                           />
                           <Box pt={1}>
-                            <Field
-                              component={TextFieldFormik}
+                            <TextField
                               fullWidth
                               margin="dense"
                               type="text"
@@ -254,8 +252,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                           <Box pt={1}>
                             <FormControl variant="outlined" fullWidth>
                               <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
-                              <Field
-                                component={Select}
+                              <Select
                                 labelId="demo-simple-select-outlined-label"
                                 id="demo-simple-select-outlined"
                                 margin="dense"
@@ -267,7 +264,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                                     {_status.status}
                                   </MenuItem>
                                 ))}
-                              </Field>
+                              </Select>
                             </FormControl>
                           </Box>
                           <Box pt={1}>
@@ -302,38 +299,45 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                             />
                           </Box>
                           <Box pt={1}>
-                            <Field
-                              component={KeyboardDatePicker}
-                              label="Start Date"
-                              name="startDate"
-                              autoOk
-                              variant="inline"
-                              inputVariant="outlined"
-                              fullWidth
-                              margin="dense"
-                              format={dateFormat}
-                              minDate={new Date()}
-                              onChange={(value) => {
-                                setFieldValue('startDate', value);
-                                setFieldValue('dueDate', value);
-                              }}
-                              maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                            />
+                            <MuiPickersUtilsProvider utils={DateUtils}>
+                              <KeyboardDatePicker
+                                label="Start Date"
+                                name="startDate"
+                                autoOk
+                                variant="inline"
+                                inputVariant="outlined"
+                                fullWidth
+                                margin="dense"
+                                value={values.startDate}
+                                format={dateFormatForInputControl}
+                                minDate={new Date()}
+                                onChange={(value) => {
+                                  setFieldValue('startDate', value);
+                                  setFieldValue('dueDate', value);
+                                }}
+                                maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                              />
+                            </MuiPickersUtilsProvider>
                           </Box>
                           <Box pt={1}>
-                            <Field
-                              component={KeyboardDatePicker}
-                              label="Due Date"
-                              name="dueDate"
-                              autoOk
-                              variant="inline"
-                              inputVariant="outlined"
-                              fullWidth
-                              margin="dense"
-                              format={dateFormat}
-                              minDate={values.startDate}
-                              maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                            />
+                            <MuiPickersUtilsProvider utils={DateUtils}>
+                              <KeyboardDatePicker
+                                label="Due Date"
+                                name="dueDate"
+                                autoOk
+                                variant="inline"
+                                value={values.dueDate}
+                                inputVariant="outlined"
+                                fullWidth
+                                margin="dense"
+                                format={dateFormatForInputControl}
+                                minDate={values.startDate}
+                                maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                                onChange={(value) => {
+                                  setFieldValue('dueDate', value);
+                                }}
+                              />
+                            </MuiPickersUtilsProvider>
                           </Box>
                           {id && (
                             <Fragment>

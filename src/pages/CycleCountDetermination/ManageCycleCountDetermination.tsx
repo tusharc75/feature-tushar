@@ -9,7 +9,7 @@ import { Box, Table, TableHead, Paper, TableContainer, TableBody, TableCell, Tex
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition } from './../../constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
-import { Formik, Form, FieldArray, Field } from 'formik';
+import { Formik, Form, FieldArray } from 'formik';
 import routes from 'src/components/Helpers/Routes';
 
 const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, warehouseName }) => {
