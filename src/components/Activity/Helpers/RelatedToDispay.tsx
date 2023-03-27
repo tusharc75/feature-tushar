@@ -23,17 +23,17 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export const RelatedToDispay = ({ relatedTo }) => {
+export const RelatedToDispay = ({ relatedTo, inline = false }) => {
   const classes = useStyles();
   const history = useHistory();
   const handleClick = (obj, resourceName) => {
     history.push(`${routes[resourceName].path}/detail/${obj?._id}`);
   };
   return (
-    <Box>
-      <Box mb={1}>
+    <Box style={{ display: inline ? 'flex' : 'block', flexWrap: 'wrap', alignItems: 'center' }}>
+      <Box mb={inline ? 0 : 1}>
         <Typography variant="body2" className={classes.boldFont}>
-          Related to
+          Related to {inline && ' : '}
         </Typography>
       </Box>
       {relatedTo &&

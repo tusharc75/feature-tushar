@@ -23,11 +23,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { CircularProgress, IconButton } from '@material-ui/core';
 import { useAccount, useMsal } from '@azure/msal-react';
 import getAzureAcessToken from '../../Azure/getAzureAccessToken';
-import { purchaseOrder, validations, rentalManagement } from '../../../constants/helpers';
-import DeleteIcon from '@material-ui/icons/Delete';
-import GetAppIcon from '@material-ui/icons/GetApp';
-import { GoArrowDown } from 'react-icons/go';
-import emailStyles from '../../../pages/Activity/Email/email.module.scss';
+import { validations } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import ImagePreview from './ImagePreview';
@@ -35,20 +31,10 @@ import { Paper, FormControlLabel, Switch } from '@material-ui/core';
 import Skeleton from '@material-ui/lab/Skeleton';
 import ImageAttachments from './ImageAttachments';
 import { imageUploadMaxSize, dateTimeFormat } from '../../../constants/helpers';
-import { fileIcons } from './FileIcons';
 import { useData } from '../../../StateProvider/Provider';
 import TinyMce from '../../../components/TinyMCE';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { values } from 'lodash';
-
-// const emailSchemaHelper = array()
-//   .transform(function (value, originalValue) {
-//     if (this.isType(value) && value !== null) {
-//       return value;
-//     }
-//     return originalValue ? originalValue.split(/[\s,]+/) : [];
-//   })
-//   .of(string().email(({ value }) => `${value} is not a valid email`));
+import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 
 const EmailSchema = object().shape({
   subject: string().required('please enter subject'),
@@ -61,8 +47,6 @@ const EmailSchema = object().shape({
       return originalValue ? originalValue.split(/[\s,]+/) : [];
     })
     .of(string().email(({ value }) => `${value} is not a valid email`))
-  // to: emailSchemaHelper.min(1),
-  // cc: emailSchemaHelper,   //  Commented by punit
 });
 
 const useStyles = makeStyles(() => ({
@@ -75,10 +59,44 @@ const useStyles = makeStyles(() => ({
   },
   root: {
     width: '80%'
-  }
+  },
+  inboundEmail: {
+    '& > div': {
+      borderBottom: '1px solid #E7E7E7',
+      marginTop: '14px',
+      paddingBottom: '24px'
+    }
+  },
+  profile: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '100vmax',
+    background: 'lightgray',
+    display: 'grid',
+    placeItems: 'center',
+    flexBasis: '48px',
+    fontWeight: 600
+  },
+  mailText: {
+    marginLeft: '14px'
+  },
+  mailtextHead: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: '15px',
+    alignItems: 'center'
+  },
+  mailFrom: {
+    fontSize: '14px',
+    lineHeight: '119%',
+    color: '#5B5B5B',
+    fontWeight: 600
+  },
+  mailTimeStamp: { fontWeight: 400, fontSize: '11px', lineHeight: '151%', color: '#717171' }
 }));
 
-export const CreateEmail = ({
+export const CreateEmail2 = ({
   relatedTo,
   emailId,
   handleClose,
@@ -234,6 +252,31 @@ export const CreateEmail = ({
     } catch (e) {}
   };
 
+  const emailReply = async (values) => {
+    let payload = {
+      relatedTo: relatedTo,
+      message: values.content.toString('html'),
+      to: values.to,
+      cc: values.cc,
+      subject: values.subject,
+      attachment:
+        otherAttachments.length || fileImageAttachments.length
+          ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments]
+          : [...imageAttachments]
+    };
+    setSending(true);
+    axiosInstance()
+      .post(`/email/reply-to/${values._id}`, payload)
+      .then(() => {
+        handleClose();
+        setSending(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setSending(false);
+      });
+  };
+
   const handleSendQuoteEmail = async (values) => {
     setSending(true);
     const body = {
@@ -268,18 +311,6 @@ export const CreateEmail = ({
       event.preventDefault();
     }
   };
-
-  // const handleToCcChange = (value) => {
-  //   let val = [];
-  //   value.map((currentEmail) => {
-  //     let email =
-  //       typeof currentEmail === "object" ? currentEmail?.email : currentEmail;
-  //     if (/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
-  //       val.push(email);
-  //     }
-  //   });
-  //   return val;
-  // };
 
   const handleUploadImage = (event) => {
     if (event.target.files && event.target.files.length) {
@@ -337,126 +368,7 @@ export const CreateEmail = ({
     setQuoteBuilderOtherAttachments(quoteBuilderOtherAttachments.filter((o) => o?.name !== name));
   };
 
-  const handleDownloadFile = (file) => {
-    const linkSource = `data:${file.contentType};base64,${file.base64}`;
-    const link = document.createElement('a');
-    link.href = linkSource;
-    link.setAttribute('download', `${file.name}`);
-    document.body.appendChild(link);
-    link.click();
-  };
-
-  const getFileIconSrc = (file) => {
-    let extension = isQuoteBuilder ? file : file.substring(file.lastIndexOf('.')).toLowerCase();
-    let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
-    if (data && data?.source) return data.source;
-  };
-
   const classes = useStyles();
-
-  const renderQuotesOtherFileThumbnails = (
-    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
-      {quoteBuilderOtherAttachments && quoteBuilderOtherAttachments.length > 0 ? (
-        <>
-          {quoteBuilderOtherAttachments.map((attachment, i) => {
-            return (
-              <>
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
-                  <Paper className={emailStyles.fileContainer}>
-                    <img src={getFileIconSrc(attachment?.extension)} className={emailStyles.file} alt="attchment" />
-                    <Typography noWrap variant="body2">
-                      {attachment && attachment?.name ? attachment?.name : 'Quotation'}
-                    </Typography>
-                    <div className={emailStyles.fileOverlay}>
-                      <Typography variant="subtitle2">{attachment && attachment?.name ? attachment?.name : 'Quotation'}</Typography>
-                      <div className={emailStyles.actionButton}>
-                        <IconButton>
-                          <GetAppIcon onClick={() => handleDownloadFile(attachment)} />
-                        </IconButton>
-                        <IconButton className={emailStyles.text}>
-                          <DeleteIcon className={emailStyles.deleteIcon} onClick={() => handleDeleteQuoteBuilderOtherAttachment(attachment?.name)} />
-                        </IconButton>
-                      </div>
-                    </div>
-                  </Paper>
-                </Grid>
-              </>
-            );
-          })}
-        </>
-      ) : null}
-    </Grid>
-  );
-
-  const renderQuotesFileThumbnails = (
-    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
-      {stateQuoteBuilderAttachments && stateQuoteBuilderAttachments.length > 0 ? (
-        <>
-          {stateQuoteBuilderAttachments.map((attachment, i) => {
-            return (
-              <>
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
-                  <Paper className={emailStyles.fileContainer}>
-                    <img src={getFileIconSrc(attachment?.contentType)} className={emailStyles.file} alt="attchment" />
-                    <Typography noWrap variant="body2">
-                      {attachment && attachment?.name ? attachment?.name : 'Quotation'}
-                    </Typography>
-                    <div className={emailStyles.fileOverlay}>
-                      <Typography variant="subtitle2">{attachment && attachment?.name ? attachment?.name : 'Quotation'}</Typography>
-                      <div className={emailStyles.actionButton}>
-                        <IconButton>
-                          <GetAppIcon onClick={() => handleDownloadFile(attachment)} />
-                        </IconButton>
-                        <IconButton className={emailStyles.text}>
-                          <DeleteIcon className={emailStyles.deleteIcon} onClick={() => handleDeleteQuoteBuilderAttachment(attachment)} />
-                        </IconButton>
-                      </div>
-                    </div>
-                  </Paper>
-                </Grid>
-              </>
-            );
-          })}
-        </>
-      ) : null}
-    </Grid>
-  );
-
-  const renderFileThumbnails = (
-    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
-      {otherAttachments && otherAttachments.length > 0 ? (
-        <>
-          {otherAttachments.map((attachment, i) => {
-            return (
-              <>
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
-                  <Paper className={emailStyles.fileContainer}>
-                    <img src={getFileIconSrc(attachment)} className={emailStyles.file} alt="attchment" />
-                    <Typography noWrap variant="body2">
-                      {attachment ? attachment.substring(attachment.lastIndexOf('/') + 1) : 'attachment'}
-                    </Typography>
-                    <div className={emailStyles.fileOverlay}>
-                      <Typography variant="subtitle2">{attachment ? attachment.substring(attachment.lastIndexOf('/') + 1) : 'attachment'}</Typography>
-                      <div className={emailStyles.actionButton}>
-                        <IconButton className={emailStyles.text}>
-                          <a href={`${attachment} `} download={true}>
-                            <GoArrowDown color="white" size={21} />
-                          </a>
-                        </IconButton>
-                        <IconButton className={emailStyles.text}>
-                          <DeleteIcon className={emailStyles.deleteIcon} onClick={() => handleDeleteAttachment(attachment)} />
-                        </IconButton>
-                      </div>
-                    </div>
-                  </Paper>
-                </Grid>
-              </>
-            );
-          })}
-        </>
-      ) : null}
-    </Grid>
-  );
 
   const onUploadFile = (file) => {
     if (checkImageUrl(file)) {
@@ -492,7 +404,7 @@ export const CreateEmail = ({
   return (
     <>
       <CustomDialogHeader
-        title={`${emailId ? 'View' : 'New'} Email`}
+        title={`${emailId ? 'Email Thread' : 'New Email'}`}
         onClose={() => {
           if (isFieldNotTouched(initialValues, formValues)) handleClose();
           else setShowConfirmDialog(true);
@@ -514,12 +426,11 @@ export const CreateEmail = ({
           <Formik
             initialValues={initialValues}
             validationSchema={EmailSchema}
-            onSubmit={isQuoteBuilder ? handleSendQuoteEmail : handleSave}
+            onSubmit={isQuoteBuilder ? handleSendQuoteEmail : emailId ? emailReply : handleSave}
             onKeyPress={onKeyPress}
           >
             {({ submitForm, touched, errors, setFieldValue, values }) => (
               <>
-                {console.log({ values })}
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
                     {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
@@ -527,24 +438,97 @@ export const CreateEmail = ({
                       <Box padding={1}>
                         {emailId ? (
                           <Fragment>
-                            <Typography variant="subtitle1">Subject : {initialValues.name || initialValues.subject} </Typography>
-                            <Box mt={1} mb={1}>
-                              <Typography variant="subtitle1">To : {initialValues.to.join()} </Typography>
+                            <Box mb={1}>
+                              <Grid container spacing={1} justifyContent="space-between">
+                                <Grid item xs={12} sm={6}>
+                                  <Typography variant="subtitle1">
+                                    <span style={{ fontWeight: 500, fontSize: '0.875rem' }}>Subject</span> :{' '}
+                                    {initialValues.name || initialValues.subject}{' '}
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                  <Typography variant="subtitle1">
+                                    <span style={{ fontWeight: 500, fontSize: '0.875rem' }}>To</span> : {initialValues.to.join()}{' '}
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                  {initialValues.to.length && (
+                                    <Typography variant="subtitle1">
+                                      <span style={{ fontWeight: 500, fontSize: '0.875rem' }}>Cc</span> : {initialValues.cc.join() || '----'}{' '}
+                                    </Typography>
+                                  )}
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                  {initialValues?.relatedTo && initialValues.relatedTo.length ? (
+                                    <RelatedToDispay relatedTo={initialValues.relatedTo} inline />
+                                  ) : null}
+                                </Grid>
+                              </Grid>
                             </Box>
-                            {initialValues.to.length && (
-                              <Box mt={1} mb={1}>
-                                <Typography variant="subtitle1">Cc : {initialValues.cc.join() || '----'} </Typography>
-                              </Box>
-                            )}
                             <Divider />
-                            <Box mt={2} paddingLeft={3}>
-                              <div
-                                dangerouslySetInnerHTML={{
-                                  __html: initialValues.content || initialValues.message
-                                }}
-                              />
+                            <Box className={classes.inboundEmail}>
+                              <Box>
+                                <Grid container>
+                                  <Grid item style={{ flexBasis: '48px' }}>
+                                    <Box className={classes.profile}>{'You'}</Box>
+                                  </Grid>
+                                  <Grid item style={{ flexBasis: 'calc(100% - 48px)' }}>
+                                    <Box className={classes.mailText}>
+                                      <Box className={classes.mailtextHead}>
+                                        <Typography className={classes.mailFrom}>{values.mailbox}</Typography>
+                                        <Typography className={classes.mailTimeStamp}>
+                                          {moment(values?.createdBy.date).format(dateTimeFormat)}
+                                        </Typography>
+                                      </Box>
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html: initialValues.content || initialValues.message
+                                        }}
+                                      />
+                                    </Box>
+                                  </Grid>
+                                </Grid>
+                              </Box>
+                              {values?.inboundEmails?.map((incomingMail) => {
+                                const nameWords = incomingMail.from.trim().split(' ');
+                                const initials = incomingMail.type === 'sender' ? 'You' : `${nameWords[0][0]} ${nameWords[1][0]}`;
+                                return (
+                                  <Box>
+                                    <Grid container>
+                                      <Grid item style={{ flexBasis: '48px' }}>
+                                        <Box className={classes.profile}>{initials}</Box>
+                                      </Grid>
+                                      <Grid item style={{ flexBasis: 'calc(100% - 48px)' }}>
+                                        <Box className={classes.mailText}>
+                                          <Box className={classes.mailtextHead}>
+                                            <Typography className={classes.mailFrom}>{incomingMail.from}</Typography>
+                                            <Typography className={classes.mailTimeStamp}>
+                                              {moment(incomingMail.date).format(dateTimeFormat)}
+                                            </Typography>
+                                          </Box>
+                                          <div
+                                            dangerouslySetInnerHTML={{
+                                              __html: incomingMail.message
+                                            }}
+                                          />
+
+                                          <Grid container>
+                                            <Grid item xs={6} sm={4} md={3}>
+                                              <AttachmentThumbnail
+                                                attachments={incomingMail.attachments}
+                                                handleDeleteAttachment={null}
+                                                canEdit={false}
+                                              />
+                                            </Grid>
+                                          </Grid>
+                                        </Box>
+                                      </Grid>
+                                    </Grid>
+                                  </Box>
+                                );
+                              })}
                             </Box>
-                            {renderFileThumbnails}
+                            {<AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={true} />}
                             <ImageAttachments
                               imageAttachments={imageAttachments}
                               onImageClick={(attachment) => {
@@ -556,13 +540,62 @@ export const CreateEmail = ({
                               emailId={emailId}
                             />
 
-                            {initialValues?.relatedTo && initialValues.relatedTo.length ? (
-                              <Box mt={2}>
-                                <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                              </Box>
-                            ) : null}
-                            <Box mt={1} color="text.secondary">
-                              <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format(dateTimeFormat)}</Typography>
+                            <Box>
+                              {<AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={true} />}
+                              {isQuoteBuilder ? (
+                                <AttachmentThumbnail
+                                  attachments={stateQuoteBuilderAttachments}
+                                  handleDeleteAttachment={handleDeleteQuoteBuilderAttachment}
+                                  canEdit={true}
+                                />
+                              ) : null}
+                              {isQuoteBuilder ? (
+                                <AttachmentThumbnail
+                                  attachments={quoteBuilderOtherAttachments}
+                                  handleDeleteAttachment={handleDeleteQuoteBuilderOtherAttachment}
+                                  canEdit={true}
+                                />
+                              ) : null}
+                              {fileImageAttachments?.length > 0 && (
+                                <ImageAttachments
+                                  imageAttachments={fileImageAttachments}
+                                  onImageClick={(attachment) => {
+                                    setImageSource(attachment);
+                                    setOpen(true);
+                                  }}
+                                  isCreateOnly={true}
+                                  onDelete={handleDeleteFileImageAttachment}
+                                  emailId={emailId}
+                                />
+                              )}
+                              {imageAttachments?.length > 0 && (
+                                <ImageAttachments
+                                  imageAttachments={imageAttachments}
+                                  onImageClick={(attachment) => {
+                                    setImageSource(attachment);
+                                    setOpen(true);
+                                  }}
+                                  isCreateOnly={true}
+                                  onDelete={handleDeleteImageAttachment}
+                                  emailId={emailId}
+                                />
+                              )}
+                              <TinyMce
+                                onChange={(value) => {
+                                  setFieldValue('content', value);
+                                  handleValuesChange({ content: value });
+                                }}
+                                initialValue={initialValues?.content}
+                                imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                  setUploadingImageOrFileProgress(completePercentage);
+                                }}
+                                doNotShowUploadFile={false}
+                                onUploadFile={onUploadFile}
+                                onUploadImage={handleUploadImage}
+                                usePublicUrlforFileUpload={true}
+                                isSendToCustomer={isQuoteBuilder ? true : false}
+                                onQuoteUpload={handleQuoteUpload}
+                              />
                             </Box>
                           </Fragment>
                         ) : (
@@ -683,9 +716,27 @@ export const CreateEmail = ({
                               />
 
                               <Box>
-                                {renderFileThumbnails}
-                                {isQuoteBuilder ? renderQuotesFileThumbnails : null}
-                                {isQuoteBuilder ? renderQuotesOtherFileThumbnails : null}
+                                {
+                                  <AttachmentThumbnail
+                                    attachments={otherAttachments}
+                                    handleDeleteAttachment={handleDeleteAttachment}
+                                    canEdit={true}
+                                  />
+                                }
+                                {isQuoteBuilder ? (
+                                  <AttachmentThumbnail
+                                    attachments={stateQuoteBuilderAttachments}
+                                    handleDeleteAttachment={handleDeleteQuoteBuilderAttachment}
+                                    canEdit={true}
+                                  />
+                                ) : null}
+                                {isQuoteBuilder ? (
+                                  <AttachmentThumbnail
+                                    attachments={quoteBuilderOtherAttachments}
+                                    handleDeleteAttachment={handleDeleteQuoteBuilderOtherAttachment}
+                                    canEdit={true}
+                                  />
+                                ) : null}
                                 <ImageAttachments
                                   imageAttachments={fileImageAttachments}
                                   onImageClick={(attachment) => {
@@ -743,28 +794,27 @@ export const CreateEmail = ({
                   >
                     Cancel
                   </Button>
-                  {!emailId && (
-                    <Button
-                      type="button"
-                      size="small"
-                      color="primary"
-                      variant="contained"
-                      disabled={sending || uploadingImageOrFileProgress > 0 || generatingFile}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        submitForm();
-                      }}
-                    >
-                      {sending ? (
-                        <>
-                          <CircularProgress color="inherit" size={14} style={{ marginRight: '10px' }} />
-                          Sending ...{' '}
-                        </>
-                      ) : (
-                        'send'
-                      )}
-                    </Button>
-                  )}
+
+                  <Button
+                    type="button"
+                    size="small"
+                    color="primary"
+                    variant="contained"
+                    disabled={sending || uploadingImageOrFileProgress > 0 || generatingFile}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      submitForm();
+                    }}
+                  >
+                    {sending ? (
+                      <>
+                        <CircularProgress color="inherit" size={14} style={{ marginRight: '10px' }} />
+                        Sending ...{' '}
+                      </>
+                    ) : (
+                      'send'
+                    )}
+                  </Button>
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
@@ -817,7 +867,7 @@ export const CreateEmail = ({
   );
 };
 
-CreateEmail.propTypes = {
+CreateEmail2.propTypes = {
   relatedTo: PropTypes.any,
   taskId: PropTypes.any,
   handleClose: PropTypes.any,

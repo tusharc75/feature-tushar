@@ -13,6 +13,7 @@ import _ from 'lodash';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import moment from 'moment';
 import { dateTimeFormat } from 'src/constants/helpers';
+import axios from 'axios';
 
 const fileIcons = [
   {
@@ -117,37 +118,70 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
         message: `Downloading, Please wait...`
       });
     }
-    setDownloadProgress(0);
     setIsDownloading(true);
-    axiosInstance()
-      .get(`user/download?fileName=${file.url}`, {
-        responseType: 'blob',
-        onDownloadProgress: (progressEvent) => {
-          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-          setDownloadProgress(percentCompleted);
+    setDownloadProgress(0);
 
-          if (percentCompleted === 100) {
-            toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
-            setTimeout(() => {
-              setDownloadProgress(0);
-              setIsDownloading(false);
-            }, 2000);
+    if (file.url) {
+      axiosInstance()
+        .get(`user/download?fileName=${file.url}`, {
+          responseType: 'blob',
+          onDownloadProgress: (progressEvent) => {
+            let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+            setDownloadProgress(percentCompleted);
+
+            if (percentCompleted === 100) {
+              toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
+              setTimeout(() => {
+                setDownloadProgress(0);
+                setIsDownloading(false);
+              }, 2000);
+            }
           }
-        }
-      })
-      .then(({ data }) => {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', file.url);
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(() => setIsDownloading(false), 2000);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setIsDownloading(false);
-      });
+        })
+        .then(({ data }) => {
+          const url = window.URL.createObjectURL(new Blob([data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', file.url);
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => setIsDownloading(false), 2000);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+          setIsDownloading(false);
+        });
+    } else {
+      axios
+        .get(file, {
+          responseType: 'blob',
+          onDownloadProgress: (progressEvent) => {
+            let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+            setDownloadProgress(percentCompleted);
+
+            if (percentCompleted === 100) {
+              toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
+              setTimeout(() => {
+                setDownloadProgress(0);
+                setIsDownloading(false);
+              }, 2000);
+            }
+          }
+        })
+        .then((data) => {
+          const url = window.URL.createObjectURL(new Blob([data.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', file?.substring(file.lastIndexOf('/') + 1));
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => setIsDownloading(false), 2000);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+          setIsDownloading(false);
+        });
+    }
   };
 
   return (
@@ -160,23 +194,25 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                 <>
                   <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
                     <Paper className={emailStyles.fileContainer}>
-                      <img src={getFileIconSrc(attachment.url)} className={emailStyles.file} alt="attchment" />
+                      <img src={getFileIconSrc(attachment.url ? attachment.url : attachment)} className={emailStyles.file} alt="attchment" />
                       <Typography noWrap variant="body2">
                         {attachment
                           ? attachment?.name
                             ? attachment?.name
-                            : attachment.url.substring(attachment.url.lastIndexOf('/') + 1)
+                            : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                            ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                            : attachment.substring(attachment.lastIndexOf('/') + 1)
                           : 'attachment'}
                       </Typography>
-                      {attachment?.date && <Typography variant="body2">
-                        {moment(attachment?.date)?.format(dateTimeFormat)}
-                      </Typography>}
+                      {attachment?.date && <Typography variant="body2">{moment(attachment?.date)?.format(dateTimeFormat)}</Typography>}
                       <div className={emailStyles.fileOverlay}>
                         <Typography variant="subtitle2">
                           {attachment
                             ? attachment?.name
                               ? attachment?.name
-                              : attachment.url.substring(attachment.url.lastIndexOf('/') + 1)
+                              : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                              ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                              : attachment?.substring(attachment.lastIndexOf('/') + 1)
                             : 'attachment'}
                         </Typography>
                         <div style={{ display: 'flex', justifyContent: 'space-between', width: '50%', float: 'right', bottom: '0' }}>
@@ -244,7 +280,9 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
           }}
           onOk={() => {
             setShowConfirmationDialog(false);
-            handleDeleteAttachment(attachmentToDelete);
+            if (handleDeleteAttachment) {
+              handleDeleteAttachment(attachmentToDelete);
+            }
           }}
         />
       )}
