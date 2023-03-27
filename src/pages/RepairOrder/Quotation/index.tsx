@@ -135,7 +135,7 @@ const Quotation = ({
       },
       {
         accessor: 'detail',
-        Header: 'Detail',
+        Header: 'Details',
         width: 250,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (

@@ -44,6 +44,7 @@ const CustomGridFilterHeader = (props) => {
 
   const clearSingleFilter = (name) => {
     currentGridApi.destroyFilter(name);
+    currentGridApi.onFilterChanged();
     let formValues = { ...currentFomValue };
     delete formValues[name];
     setCurrentFomValue(formValues);
