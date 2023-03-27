@@ -152,10 +152,7 @@ export default function Account(props) {
       });
     });
   }
-  console.log(`
-    resourceLabel: ${RESOURCE_LABEL[accountResource]},
-    accountResource: ${accountResource}
-    `)
+
   useEffect(() => {
     if (queryPage === undefined) {
       sessionStorage.removeItem('page');
