@@ -597,26 +597,28 @@ export default function StepDialog({
                             </Grid>
                           </Grid>
                         </Box>
-                        <Box pt={2}>
-                          <Grid container>
-                            <Grid item xs={6}>
-                              <FormControlLabel
-                                control={
-                                  <Checkbox
-                                    name="isQuoteRevisionOnFail"
-                                    disabled={notEditable}
-                                    checked={values?.isQuoteRevisionOnFail}
-                                    onChange={(e) => {
-                                      setFieldValue('isQuoteRevisionOnFail', e.target.checked);
-                                    }}
-                                    color="primary"
-                                  />
-                                }
-                                label="Quote Revision On Fail"
-                              />
+                        {user?.brandPolicy?.repairOrderQuotation &&
+                          <Box pt={2}>
+                            <Grid container>
+                              <Grid item xs={6}>
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      name="isQuoteRevisionOnFail"
+                                      disabled={notEditable}
+                                      checked={values?.isQuoteRevisionOnFail}
+                                      onChange={(e) => {
+                                        setFieldValue('isQuoteRevisionOnFail', e.target.checked);
+                                      }}
+                                      color="primary"
+                                    />
+                                  }
+                                  label="Quote Revision On Fail"
+                                />
+                              </Grid>
                             </Grid>
-                          </Grid>
-                        </Box>
+                          </Box>
+                        }
                         <Box pt={2}>
                           <Grid container>
                             <Grid item xs={6}>
@@ -755,23 +757,25 @@ export default function StepDialog({
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>}
       </Dialog>
-      {openFieldDialog && (
-        <FieldDialog
-          reference={'workOrder'}
-          serviceId={serviceId}
-          stepIds={[stepId]}
-          steps={[]}
-          fields={fields}
-          notEditable={notEditable}
-          handleClose={() => {
-            setOpenFieldDialog(false);
-          }}
-          handleSucess={(data: any) => {
-            setFields(data);
-            setOpenFieldDialog(false);
-          }}
-        />
-      )}
+      {
+        openFieldDialog && (
+          <FieldDialog
+            reference={'workOrder'}
+            serviceId={serviceId}
+            stepIds={[stepId]}
+            steps={[]}
+            fields={fields}
+            notEditable={notEditable}
+            handleClose={() => {
+              setOpenFieldDialog(false);
+            }}
+            handleSucess={(data: any) => {
+              setFields(data);
+              setOpenFieldDialog(false);
+            }}
+          />
+        )
+      }
     </>
   );
 }
