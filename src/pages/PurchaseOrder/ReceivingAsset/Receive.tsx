@@ -6,16 +6,16 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { dateFormat, productInventory, purchaseOrder } from '../../../constants/helpers';
-import { Formik, Form, FieldArray, Field } from 'formik';
+import { dateFormatForInputControl, productInventory, purchaseOrder } from '../../../constants/helpers';
+import { Formik, Form, FieldArray } from 'formik';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { read, utils, writeFile } from 'xlsx';
-import { KeyboardDatePicker } from 'formik-material-ui-pickers';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import moment from 'moment';
+import DateUtils from '@date-io/date-fns';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrderData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -85,7 +85,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
           setIsSubmitting(false);
         });
     }
-    else{
+    else {
       setIsSubmitting(false);
       onSuccess();
     }
@@ -286,13 +286,12 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                           <Box mt={1}>
                                             <Grid container spacing={2} alignItems="center">
                                               <Grid item xs={12} md={4}>
-                                                <Field
+                                                <TextField
                                                   fullWidth
                                                   label="Inventory Quantity"
                                                   variant="outlined"
                                                   type="number"
                                                   size="small"
-                                                  component={TextField}
                                                   onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                   name="inventoryQuantity"
                                                   placeholder="Inventory Quantity"
@@ -404,13 +403,12 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                           )}
                                           <Box mt={2}>
                                             <Grid item xs={12} md={8}>
-                                              <Field
+                                              <TextField
                                                 fullWidth
                                                 label="Comment"
                                                 variant="outlined"
                                                 type="text"
                                                 size="small"
-                                                component={TextField}
                                                 name="comment"
                                                 placeholder="Comment"
                                                 value={data.comment}
@@ -436,31 +434,32 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                       <Box pt={2}>
                         <Grid container>
                           <Grid item xs={12} md={6}>
-                            <Field
-                              fullWidth
-                              label="Received Date"
-                              variant="inline"
-                              inputVariant="outlined"
-                              autoOk
-                              size="small"
-                              margin="dense"
-                              component={KeyboardDatePicker}
-                              name="receiveDate"
-                              placeholder="Receive Date"
-                              value={values.receiveDate}
-                              format={dateFormat}
-                              minDate={
-                                lockDate
-                                  ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
-                                    ? lockDate
+                            <MuiPickersUtilsProvider utils={DateUtils}>
+                              <KeyboardDatePicker
+                                fullWidth
+                                label="Received Date"
+                                variant="inline"
+                                inputVariant="outlined"
+                                autoOk
+                                size="small"
+                                margin="dense"
+                                name="receiveDate"
+                                placeholder="Receive Date"
+                                value={values.receiveDate}
+                                format={dateFormatForInputControl}
+                                minDate={
+                                  lockDate
+                                    ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                                      ? lockDate
+                                      : purchaseOrderData?.purchaseOrderDate
                                     : purchaseOrderData?.purchaseOrderDate
-                                  : purchaseOrderData?.purchaseOrderDate
-                              }
-                              maxDate={new Date()}
-                              onChange={(value) => {
-                                setFieldValue('receiveDate', value);
-                              }}
-                            />
+                                }
+                                maxDate={new Date()}
+                                onChange={(value) => {
+                                  setFieldValue('receiveDate', value);
+                                }}
+                              />
+                            </MuiPickersUtilsProvider>
                           </Grid>
                         </Grid>
                       </Box>
