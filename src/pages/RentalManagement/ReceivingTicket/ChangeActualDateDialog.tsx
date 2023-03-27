@@ -12,15 +12,15 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
 
   function validate(values) {
     const errors = {};
-    let manualStartDate = moment(values?.manualStartDate);
-    let manualEndDate = moment(values?.manualEndDate);
-    if (manualEndDate.diff(manualStartDate, 'days') < 0) {
-      errors['manualEndDate'] = 'Please enter valid end date';
+    if (data?.isAllowedStartDate && data?.isAllowedEndDate) {
+      let manualStartDate = moment(values?.manualStartDate);
+      let manualEndDate = moment(values?.manualEndDate);
+      if (manualEndDate.diff(manualStartDate, 'days') < 0) {
+        errors['manualEndDate'] = 'Please enter valid end date';
+      }
     }
     return errors;
   }
-
-
 
   return (
     <Dialog
