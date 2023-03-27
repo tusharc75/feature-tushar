@@ -9,9 +9,9 @@ import {
   Box,
   Link as MuiLink,
   CircularProgress,
+  TextField,
 } from '@material-ui/core';
-import { Formik, Form, Field } from 'formik';
-import { TextField } from 'formik-material-ui';
+import { Formik, Form } from 'formik';
 import queryString from 'query-string';
 import { Redirect, Link } from 'react-router-dom';
 import demoImg from '../../assets/clip-hardworking-man.png';
@@ -190,8 +190,7 @@ const ResetPassword = () => {
                 onSubmit={handleSubmit}>
                 {({ submitForm }) => (
                   <Form className={classes.form}>
-                    <Field
-                      component={TextField}
+                    <TextField
                       name='email'
                       type='email'
                       label='Email'
@@ -200,8 +199,7 @@ const ResetPassword = () => {
                       required
                     />
                     <br />
-                    <Field
-                      component={TextField}
+                    <TextField
                       type='password'
                       label='New Password'
                       name='password'
@@ -210,8 +208,7 @@ const ResetPassword = () => {
                       required
                     />
                     <br />
-                    <Field
-                      component={TextField}
+                    <TextField
                       type='password'
                       label='Confirm Password'
                       name='confirmPassword'
@@ -227,7 +224,7 @@ const ResetPassword = () => {
                       disabled={isSubmitting || !isTokenValid || !tokenChecking}
                       onClick={submitForm}
                       startIcon={isSubmitting && <CircularProgress size={20} color='inherit' />}
-                      >
+                    >
                       Submit
                     </Button>
                   </Form>

@@ -8,9 +8,9 @@ import {
     Paper,
     Link as MuiLink,
     CircularProgress,
+    TextField,
 } from '@material-ui/core';
-import { Field, Form, Formik } from 'formik';
-import { TextField } from 'formik-material-ui';
+import { Form, Formik } from 'formik';
 import { object, string } from "yup";
 import { Link } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -140,8 +140,7 @@ const ForgetPassword = () => {
                                     onSubmit={handleSubmit}>
                                     {({ submitForm }) => (
                                         <Form className={classes.form}>
-                                            <Field
-                                                component={TextField}
+                                            <TextField
                                                 name='email'
                                                 type='email'
                                                 size="small"

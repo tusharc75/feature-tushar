@@ -11,8 +11,7 @@ import {
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { ArrowRightAlt } from "@material-ui/icons";
-import { TextField as TextFieldFormik } from "formik-material-ui";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
@@ -467,8 +466,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                         </Grid>
                       </Box>
 
-                      <Field
-                        component={TextFieldFormik}
+                      <TextField
                         fullWidth
                         margin="dense"
                         type="text"
@@ -477,8 +475,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                         variant="outlined"
                       />
 
-                      <Field
-                        component={TextFieldFormik}
+                      <TextField
                         fullWidth
                         margin="dense"
                         type="text"
@@ -488,7 +485,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                         name="description"
                         variant="outlined"
                       />
-
                       {eventId && (
                         <Fragment>
                           {initialValues.createdBy &&

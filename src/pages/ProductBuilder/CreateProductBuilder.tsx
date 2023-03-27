@@ -4,9 +4,8 @@ import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import { useParams, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import { object, string } from "yup";
-import { TextField } from "formik-material-ui";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
@@ -18,6 +17,7 @@ import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import FormTypes from "../../components/Helpers/FormTypes";
 import { useData } from "../../StateProvider/Provider";
+import { TextField } from "@material-ui/core";
 
 const ProductBuilderSchema = object().shape({
   name: string()
@@ -100,8 +100,7 @@ const CreateProductBuilder = () => {
                 <Box p={1} bgcolor="white">
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={3}>
-                      <Field
-                        component={TextField}
+                      <TextField
                         fullWidth
                         margin="dense"
                         type="text"
