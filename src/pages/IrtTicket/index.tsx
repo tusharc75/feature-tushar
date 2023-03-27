@@ -21,6 +21,7 @@ import {
   isObjectEmpty,
   prepareDataForGrid,
   removeLocalStorage,
+  RESOURCE_LABEL,
   sidebarResource
 } from 'src/constants/helpers';
 import { getColumnData } from 'src/constants/columns';
@@ -424,6 +425,8 @@ const IrtTicket = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchIrtTicketData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={RESOURCE_LABEL.irtTicket}
             />
           )
         ) : null}

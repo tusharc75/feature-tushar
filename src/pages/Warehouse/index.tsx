@@ -17,7 +17,7 @@ import routes from 'src/components/Helpers/Routes';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, sidebarResource } from 'src/constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, RESOURCE_LABEL, sidebarResource } from 'src/constants/helpers';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -554,6 +554,8 @@ const Warehouse = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchWarehouses}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={RESOURCE_LABEL.warehouse}
             /> : null}
 
         {showDeleteConfirmBox && (

@@ -9,7 +9,7 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import { useData } from "../../StateProvider/Provider";
 import CreateProjectSales from "./CreateProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { customerAccount, gridLoadingTimeout, gridPageSizes, isObjectEmpty, supplierAccount } from "../../constants/helpers";
+import { customerAccount, gridLoadingTimeout, gridPageSizes, isObjectEmpty, RESOURCE_LABEL, supplierAccount } from "../../constants/helpers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
@@ -665,6 +665,9 @@ const ProjectSales: FC = () => {
                   loading={loading}
                   renderedFrom={renderedFrom}
                   refreshGrid={fetchProjects}
+                  showOnlyShowFilteredRecordSwitch={true}
+                  showFilters={true}
+                  resource={RESOURCE_LABEL.projectSales}
                 /> : null
           }
         </div>

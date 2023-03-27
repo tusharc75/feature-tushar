@@ -1,7 +1,7 @@
 import { useState, FC, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Box, Button, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
-import { quotePdfTemplate, isObjectEmpty, gridLoadingTimeout, quoteBuilder, prepareDataForGrid } from '../../constants/helpers';
+import { quotePdfTemplate, isObjectEmpty, gridLoadingTimeout, quoteBuilder, prepareDataForGrid, RESOURCE_LABEL } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -483,6 +483,8 @@ const QuotePdfTemplate: FC = () => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchQuotePdfTemplate}
             showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={RESOURCE_LABEL.quotePdfTemplate}
           />
         )}
 

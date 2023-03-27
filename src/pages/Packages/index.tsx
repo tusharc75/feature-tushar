@@ -9,7 +9,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { BiPackage } from "react-icons/bi";
-import { isObjectEmpty, gridLoadingTimeout, packages, product } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, packages, product, RESOURCE_LABEL } from '../../constants/helpers';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
 import { useHistory } from 'react-router-dom';
@@ -489,6 +489,8 @@ const PackageList = () => {
                                 allowSelection={true}
                                 refreshGrid={fetchPackages}
                                 showOnlyShowFilteredRecordSwitch={true}
+                                showFilters={true}
+                                resource={RESOURCE_LABEL.packages}
                             />
                     ) : null}
 

@@ -30,7 +30,7 @@ import CustomAgGrid, {
 } from "../../components/AgGridComponents/CustomAgGrid";
 import { Menu, MenuItem } from "@material-ui/core";
 import { AddOutlined, ExpandMore } from "@material-ui/icons";
-import { gridLoadingTimeout, prepareDataForGrid } from "../../constants/helpers";
+import { gridLoadingTimeout, prepareDataForGrid, RESOURCE_LABEL } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
@@ -325,6 +325,9 @@ const ProductBuilder = () => {
             loading={loading}
             renderedFrom={renderedFrom}
             refreshGrid={fetchProductBuilder}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={RESOURCE_LABEL.productBuilder}
           />
         }
         {showDeleteWarningConfirmBox ? (

@@ -12,7 +12,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { prepareDataForGrid, gridLoadingTimeout } from 'src/constants/helpers';
+import { prepareDataForGrid, gridLoadingTimeout, RESOURCE_LABEL } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ManageScheduleReport from './ManageScheduleReport';
@@ -361,7 +361,9 @@ const ScheduleReport = () => {
                   allowSelection={true}
                   allowAction={true}
                   refreshGrid={fetchResourceData}
-                  showOnlyShowFilteredRecordSwitch={false}
+                  showOnlyShowFilteredRecordSwitch={true}
+                  showFilters={true}
+                  resource={RESOURCE_LABEL.scheduleReport}
                 />
               )
             ) : (

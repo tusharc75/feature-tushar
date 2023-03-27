@@ -20,6 +20,7 @@ import {
   isObjectEmpty,
   prepareDataForGrid,
   removeLocalStorage,
+  RESOURCE_LABEL,
   sidebarResource
 } from 'src/constants/helpers';
 import { Link } from 'react-router-dom';
@@ -419,6 +420,8 @@ const FieldTicket = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchFieldTicketData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={RESOURCE_LABEL.fieldTicket}
             />
           )
         ) : null}

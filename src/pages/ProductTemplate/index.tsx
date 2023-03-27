@@ -9,7 +9,7 @@ import {
     Tooltip,
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { productTemplate, isObjectEmpty, gridLoadingTimeout } from "../../constants/helpers";
+import { productTemplate, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
@@ -468,6 +468,8 @@ const ProductTemplate: FC = () => {
                         renderedFrom={renderedFrom}
                         refreshGrid={fetchProductTemplate}
                         showOnlyShowFilteredRecordSwitch={true}
+                        showFilters={true}
+                        resource={RESOURCE_LABEL.productTemplate}
                     />
                 }
                 {showDeleteConfirmBox &&

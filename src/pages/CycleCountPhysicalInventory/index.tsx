@@ -6,7 +6,7 @@ import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridCompone
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
-import { cycleCountPhysicalInventory } from 'src/constants/helpers';
+import { cycleCountPhysicalInventory, RESOURCE_LABEL } from 'src/constants/helpers';
 import Products from './Products';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { gridLoadingTimeout, getLocalStorageArrayData } from '../../constants/helpers';
@@ -171,6 +171,10 @@ const CycleCountPInventory = () => {
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           isClientSideGrid={true}
+          isMultipleSelection={true}
+          showOnlyShowFilteredRecordSwitch={true}
+          showFilters={true}
+          resource={RESOURCE_LABEL.cycleCountPhysicalInventory}
         />
         {productDialog.open && (
           <Products

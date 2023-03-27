@@ -23,7 +23,7 @@ import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { MdAccountCircle } from 'react-icons/md';
-import { gridLoadingTimeout, entity, sidebarResource, prepareDataForGrid, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
+import { gridLoadingTimeout, entity, sidebarResource, prepareDataForGrid, getLocalStorageArrayData, removeLocalStorage, RESOURCE_LABEL } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from './../../components/Helpers/Routes';
@@ -152,7 +152,10 @@ export default function Account(props) {
       });
     });
   }
-
+  console.log(`
+    resourceLabel: ${RESOURCE_LABEL[accountResource]},
+    accountResource: ${accountResource}
+    `)
   useEffect(() => {
     if (queryPage === undefined) {
       sessionStorage.removeItem('page');
@@ -1422,6 +1425,8 @@ export default function Account(props) {
               allowAction={!isOffline}
               allowSelection={!isOffline}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={RESOURCE_LABEL[accountResource]}
             />
           )
         ) : null}

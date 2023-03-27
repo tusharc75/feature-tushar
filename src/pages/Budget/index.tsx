@@ -12,7 +12,7 @@ import styles from '../Leads/Header.module.scss';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { MdAdd, MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import { isObjectEmpty, gridLoadingTimeout, budget, prepareDataForGrid } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, budget, prepareDataForGrid, RESOURCE_LABEL } from '../../constants/helpers';
 import routes from './../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
@@ -530,6 +530,8 @@ function Budget() {
                   renderedFrom={renderedFrom}
                   refreshGrid={fetchBudgetList}
                   showOnlyShowFilteredRecordSwitch={true}
+                  showFilters={true}
+                  resource={RESOURCE_LABEL.budget}
                 />
             ) : null}
           </Box>

@@ -20,6 +20,7 @@ import {
   isObjectEmpty,
   prepareDataForGrid,
   removeLocalStorage,
+  RESOURCE_LABEL,
   sidebarResource
 } from 'src/constants/helpers';
 import { Link } from 'react-router-dom';
@@ -535,6 +536,8 @@ const Planning = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={RESOURCE_LABEL.planning}
             />
           )
         ) : null}

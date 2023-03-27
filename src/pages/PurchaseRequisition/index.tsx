@@ -21,6 +21,7 @@ import {
   isObjectEmpty,
   prepareDataForGrid,
   removeLocalStorage,
+  RESOURCE_LABEL,
   sidebarResource
 } from 'src/constants/helpers';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -421,6 +422,8 @@ const PurchaseRequisition = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchPurchaseRequisitionData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={RESOURCE_LABEL.purchaseRequisition}
             />
           )
         ) : null}

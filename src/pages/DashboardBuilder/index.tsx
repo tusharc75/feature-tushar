@@ -8,7 +8,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomContainer from 'src/components/CustomContainer';
-import { gridLoadingTimeout } from 'src/constants/helpers';
+import { gridLoadingTimeout, RESOURCE_LABEL } from 'src/constants/helpers';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import { useData } from 'src/StateProvider/Provider';
@@ -247,6 +247,9 @@ const Dashboards = () => {
           loading={loading}
           renderedFrom={'dashboard-builder'}
           refreshGrid={fetchDashboards}
+          showOnlyShowFilteredRecordSwitch={true}
+          showFilters={true}
+          resource={RESOURCE_LABEL.dashboard}
         />
       </CustomContainer>
       {showDeleteDialog.open && (

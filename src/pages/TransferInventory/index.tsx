@@ -15,7 +15,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import { transferInventory, isObjectEmpty, gridLoadingTimeout, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
+import { transferInventory, isObjectEmpty, gridLoadingTimeout, TRANSFER_INVENTORY_STATUS, RESOURCE_LABEL } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -503,6 +503,8 @@ const TransferInventory = () => {
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchTransferInventory}
                 showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={RESOURCE_LABEL.transferInventory}
               />
             )
           ) : null

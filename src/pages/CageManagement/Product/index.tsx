@@ -4,7 +4,7 @@ import axiosInstance from "src/axios/axiosInstance";
 import { useData } from "src/StateProvider/Provider";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { cageManagement, gridLoadingTimeout, isObjectEmpty } from "src/constants/helpers";
+import { cageManagement, gridLoadingTimeout, isObjectEmpty, RESOURCE_LABEL } from "src/constants/helpers";
 import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, ImageRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
@@ -143,7 +143,11 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
                     loading={loading}
                     renderedFrom={renderedFrom}
                     refreshGrid={fetchProducts}
-                    allowSelection={false} />
+                    allowSelection={false} 
+                    showOnlyShowFilteredRecordSwitch={true}
+                    showFilters={true}
+                    resource={RESOURCE_LABEL.cageManagement}
+                    />
                 : <Box
                     p={2}
                     height={500}

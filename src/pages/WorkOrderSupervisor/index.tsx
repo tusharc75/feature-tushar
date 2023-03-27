@@ -8,7 +8,7 @@ import { MdOutlineSupervisorAccount } from 'react-icons/md';
 import { Autocomplete } from '@material-ui/lab';
 import { FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { workOrderSupervisor, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from '../../constants/helpers';
+import { workOrderSupervisor, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, RESOURCE_LABEL } from '../../constants/helpers';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { camelCase } from 'lodash';
@@ -350,6 +350,8 @@ const WorkOrderSupervisor = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={RESOURCE_LABEL.workOrderSupervisor}
             />)
             : (
               <Box p={2} height={500} bgcolor="white">

@@ -467,6 +467,8 @@ const ServiceMaster = () => {
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchData}
                 showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={RESOURCE_LABEL.serviceMaster}
               />
             )
           ) : null
