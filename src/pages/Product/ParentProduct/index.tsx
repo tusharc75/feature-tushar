@@ -123,7 +123,7 @@ const ParentProduct = ({ renderedFrom, productId }) => {
                         allowAction={false}
                         loading={loading}
                         allowSelection={false}
-                        showOnlyShowFilteredRecordSwitch={true}
+                        showOnlyShowFilteredRecordSwitch={false}
                         refreshGrid={fetchProduct}
                         renderedFrom={renderedFrom}
                         isClientSideGrid={true}
