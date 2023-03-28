@@ -81,7 +81,7 @@ const ServiceTable = ({ packageId, packageData }) => {
       });
   };
 
-  const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
+  const defaultColumns = [{ field: 'order', headerName: 'Sequence', show: true, cellRenderer: 'commonRenderer' }];
 
   const fetchGridColumns = () => {
     axiosInstance()
