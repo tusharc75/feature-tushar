@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Box, Grid, Button } from '@material-ui/core';
-import { prepareDataForGrid, serviceMaster } from '../../../constants/helpers';
+import { Box, Grid, Button, Menu, MenuItem } from '@material-ui/core';
+import { getLocalStorageArrayData, prepareDataForGrid, serviceMaster } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
-import { Delete } from '@material-ui/icons';
+import { Delete, ExpandMore } from '@material-ui/icons';
 import { IconButton, Tooltip } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
@@ -13,11 +13,12 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { camelCase } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { gridLoadingTimeout } from 'src/constants/helpers';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 function Product({ id }) {
-  
   const renderedFrom = `${camelCase(routes?.product.title)}_product`;
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
     state: { permissions, user, selectedEntity }
@@ -35,11 +36,21 @@ function Product({ id }) {
   const [state, dispatch] = useReducer(reducer, intialState);
   const [columns, setColumns] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
+
   const { dataRows, rowCount, loading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
 
   const defaultColumns = [
     { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
   ];
+
+  const openActions = (event) => {
+    setAnchorActionEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorActionEl(null);
+  };
 
   useEffect(() => {
     fetchGridColumns();
@@ -50,7 +61,6 @@ function Product({ id }) {
       fetchBOMData();
     }
   }, [id, page, limit, filters, sorting, selectedEntity]);
-
 
   const fetchBOMData = () => {
     dispatch({ type: 'loading', loading: true });
@@ -188,7 +198,7 @@ function Product({ id }) {
             </Grid>
             <Grid item xs={6} md={6} sm={6}>
               <Box display={'flex'} justifyContent={'flex-end'}>
-                <Button
+                {/* <Button
                   variant="contained"
                   color="primary"
                   size="small"
@@ -198,7 +208,78 @@ function Product({ id }) {
                   }}
                 >
                   Delete
+                </Button> */}
+                <Button
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  disabled={selectedRecords.length === 0}
+                >
+                  Actions <ExpandMore />
                 </Button>
+                <Menu
+                  anchorEl={anchorActionEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorActionEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      setShowConfirmBox({ open: true, data: selectedRecords });
+                      // closeActions();
+                      // setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                </Menu>
+                <Box ml={1} />
+                <ImportExportMenu
+                  permissions={permissions?.packages}
+                  module="packages-products"
+                  api={`${serviceMaster.api}/product/${id}`}
+                  afterImportCompleted={() => {
+                    fetchBOMData();
+                  }}
+                  isExportAllOrSomeFeature={true}
+                  total={rowCount}
+                  recordsToExport={selectedRecords.length}
+                  ids={
+                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                      : []
+                  }
+                />
+                {/* <ImportExportLinks
+                  permissions={permissions?.serviceMaster}
+                  module="Service Master Steps"
+                  api={`${serviceMaster.api}/product/${id}`}
+                  afterImportCompleted={() => {
+                    fetchBOMData();
+                  }}
+                  isExportAllOrSomeFeature={true}
+                  total={rowCount}
+                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+                  ids={
+                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                      : []
+                  }
+                  onExportToExcelSuccess={() => {
+                    if (gridApi) gridApi.deselectAll();
+                    else fetchBOMData();
+                  }}
+                  isDropDownIconShow={true}
+                  isBackgroundWhite={true}
+                /> */}
               </Box>
             </Grid>
           </Grid>
