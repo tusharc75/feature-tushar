@@ -10,7 +10,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { productInventory } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
-import MomentUtils from '@date-io/moment';
 import { dateFormatForInputControl } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
@@ -128,7 +127,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
       }}
       aria-labelledby="assign-roles-dialog"
     >
-      <MuiPickersUtilsProvider utils={MomentUtils}>
+      <MuiPickersUtilsProvider utils={DateUtils}>
         <Formik initialValues={{ qty: 1, rejectDate: new Date(), comment: '' }} onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
@@ -218,33 +217,31 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                   </Fragment>
                 ) : null}
                 <Box m={1}>
-                  <MuiPickersUtilsProvider utils={DateUtils}>
-                    <KeyboardDatePicker
-                      fullWidth
-                      label="Reject Date"
-                      variant="inline"
-                      inputVariant="outlined"
-                      autoOk
-                      required
-                      size="small"
-                      margin="dense"
-                      name="rejectDate"
-                      placeholder="Reject Date"
-                      value={values.rejectDate}
-                      format={dateFormatForInputControl}
-                      minDate={
-                        lockDate
-                          ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
-                            ? lockDate
-                            : purchaseOrderData?.purchaseOrderDate
+                  <KeyboardDatePicker
+                    fullWidth
+                    label="Reject Date"
+                    variant="inline"
+                    inputVariant="outlined"
+                    autoOk
+                    required
+                    size="small"
+                    margin="dense"
+                    name="rejectDate"
+                    placeholder="Reject Date"
+                    value={values.rejectDate}
+                    format={dateFormatForInputControl}
+                    minDate={
+                      lockDate
+                        ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                          ? lockDate
                           : purchaseOrderData?.purchaseOrderDate
-                      }
-                      maxDate={new Date()}
-                      onChange={(value) => {
-                        setFieldValue('rejectDate', value);
-                      }}
-                    />
-                  </MuiPickersUtilsProvider>
+                        : purchaseOrderData?.purchaseOrderDate
+                    }
+                    maxDate={new Date()}
+                    onChange={(value) => {
+                      setFieldValue('rejectDate', value);
+                    }}
+                  />
                 </Box>
               </CustomDialogContent>
               <CustomDialogFooter>

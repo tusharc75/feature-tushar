@@ -10,7 +10,6 @@ import { Formik, Form, FieldArray } from 'formik';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { dateFormatForInputControl, productInventory, purchaseOrder } from '../../../constants/helpers';
-import MomentUtils from '@date-io/moment';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
 import DateUtils from '@date-io/date-fns';
@@ -112,7 +111,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
         }}
         showManimizeMaximize={true}
       ></CustomDialogHeader>
-      <MuiPickersUtilsProvider utils={MomentUtils}>
+      <MuiPickersUtilsProvider utils={DateUtils}>
         <Formik
           initialValues={{
             rejectDate: new Date(),
@@ -240,32 +239,30 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                       <Box pt={2}>
                         <Grid container>
                           <Grid item xs={12} md={6}>
-                            <MuiPickersUtilsProvider utils={DateUtils}>
-                              <KeyboardDatePicker
-                                fullWidth
-                                label="Reject Date"
-                                variant="inline"
-                                inputVariant="outlined"
-                                autoOk
-                                size="small"
-                                margin="dense"
-                                name="rejectDate"
-                                placeholder="Reject Date"
-                                value={values.rejectDate}
-                                format={dateFormatForInputControl}
-                                minDate={
-                                  lockDate
-                                    ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
-                                      ? lockDate
-                                      : purchaseOrderData?.purchaseOrderDate
+                            <KeyboardDatePicker
+                              fullWidth
+                              label="Reject Date"
+                              variant="inline"
+                              inputVariant="outlined"
+                              autoOk
+                              size="small"
+                              margin="dense"
+                              name="rejectDate"
+                              placeholder="Reject Date"
+                              value={values.rejectDate}
+                              format={dateFormatForInputControl}
+                              minDate={
+                                lockDate
+                                  ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                                    ? lockDate
                                     : purchaseOrderData?.purchaseOrderDate
-                                }
-                                maxDate={new Date()}
-                                onChange={(value) => {
-                                  setFieldValue('rejectDate', value);
-                                }}
-                              />
-                            </MuiPickersUtilsProvider>
+                                  : purchaseOrderData?.purchaseOrderDate
+                              }
+                              maxDate={new Date()}
+                              onChange={(value) => {
+                                setFieldValue('rejectDate', value);
+                              }}
+                            />
                           </Grid>
                         </Grid>
                       </Box>
