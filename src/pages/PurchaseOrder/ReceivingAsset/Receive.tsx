@@ -6,15 +6,14 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { dateFormatForInputControl, productInventory, purchaseOrder } from '../../../constants/helpers';
+import { convertDateInDateTime, dateFormatForInputControl, productInventory, purchaseOrder } from '../../../constants/helpers';
 import { Formik, Form, FieldArray } from 'formik';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { read, utils, writeFile } from 'xlsx';
-import MomentUtils from '@date-io/moment';
-import moment from 'moment';
 import DateUtils from '@date-io/date-fns';
+import moment from 'moment';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrderData }) => {
@@ -180,7 +179,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
         }}
         showManimizeMaximize={true}
       ></CustomDialogHeader>
-      <MuiPickersUtilsProvider utils={MomentUtils}>
+      <MuiPickersUtilsProvider utils={DateUtils}>
         <Formik
           initialValues={{
             receiveDate: new Date(),
@@ -434,32 +433,30 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                       <Box pt={2}>
                         <Grid container>
                           <Grid item xs={12} md={6}>
-                            <MuiPickersUtilsProvider utils={DateUtils}>
-                              <KeyboardDatePicker
-                                fullWidth
-                                label="Received Date"
-                                variant="inline"
-                                inputVariant="outlined"
-                                autoOk
-                                size="small"
-                                margin="dense"
-                                name="receiveDate"
-                                placeholder="Receive Date"
-                                value={values.receiveDate}
-                                format={dateFormatForInputControl}
-                                minDate={
-                                  lockDate
-                                    ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
-                                      ? lockDate
-                                      : purchaseOrderData?.purchaseOrderDate
+                            <KeyboardDatePicker
+                              fullWidth
+                              label="Received Date"
+                              variant="inline"
+                              inputVariant="outlined"
+                              autoOk
+                              size="small"
+                              margin="dense"
+                              name="receiveDate"
+                              placeholder="Receive Date"
+                              value={values.receiveDate}
+                              format={dateFormatForInputControl}
+                              minDate={
+                                lockDate
+                                  ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                                    ? lockDate
                                     : purchaseOrderData?.purchaseOrderDate
-                                }
-                                maxDate={new Date()}
-                                onChange={(value) => {
-                                  setFieldValue('receiveDate', value);
-                                }}
-                              />
-                            </MuiPickersUtilsProvider>
+                                  : purchaseOrderData?.purchaseOrderDate
+                              }
+                              maxDate={new Date()}
+                              onChange={(value) => {
+                                setFieldValue('receiveDate', convertDateInDateTime(value));
+                              }}
+                            />
                           </Grid>
                         </Grid>
                       </Box>

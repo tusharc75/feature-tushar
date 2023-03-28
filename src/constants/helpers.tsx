@@ -1009,6 +1009,13 @@ export const displayCardDate = (date) => {
   return date ? moment(date).format(cardDateFormat) : date;
 };
 
+export const convertDateInDateTime = (date) => {
+  var newDate = new Date(date);
+  var currentDate = new Date();
+  newDate.setHours(currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds())
+  return newDate;
+};
+
 export const materialTableIcons: any = {
   Add: forwardRef((props: any, ref: any) => <AddBox {...props} ref={ref} />),
   Check: forwardRef((props: any, ref: any) => <Check {...props} ref={ref} />),
