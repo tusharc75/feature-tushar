@@ -17,7 +17,7 @@ import { useData } from '../../StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase } from 'lodash';
-import { prepareDataForGrid } from 'src/constants/helpers';
+import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageInventoryCycle from './ManageInventoryCycle';
@@ -392,6 +392,8 @@ const InventoryCycle = () => {
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchData}
                 showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.inventoryCycle}
               />
             )
           ) : null

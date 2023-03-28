@@ -17,7 +17,7 @@ import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage } from 'src/constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
 import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -411,6 +411,8 @@ const FrequentlyAskedQuestion = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchFrequentlyAskedQuestionData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.freqentlyAskedQuestion}
             />
           )
         ) : null}
