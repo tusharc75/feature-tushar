@@ -421,6 +421,8 @@ const PurchaseRequisition = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchPurchaseRequisitionData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.purchaseRequisition}
             />
           )
         ) : null}

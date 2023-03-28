@@ -15,7 +15,7 @@ import SearchBox from 'src/components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "src/components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "src/components/AgGridComponents/CustomAgGrid";
-import { bulkAssetCreation, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from 'src/constants/helpers';
+import { bulkAssetCreation, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { useData } from "src/StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -513,6 +513,8 @@ const BulkAssetCreation = () => {
                             renderedFrom={renderedFrom}
                             refreshGrid={fetchBulkAssetCreation}
                             showOnlyShowFilteredRecordSwitch={true}
+                            showFilters={true}
+                            resource={sidebarResource.bulkAssetCreation}
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
