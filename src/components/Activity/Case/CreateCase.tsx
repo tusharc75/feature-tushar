@@ -18,7 +18,6 @@ import {
 import { UserDropdown } from '../Helpers/userDropdown';
 import statusList from '../Helpers/statusList';
 import { Formik, Form } from 'formik';
-import MomentUtils from '@date-io/moment';
 import { object, string } from 'yup';
 import moment from 'moment';
 import DateUtils from '@date-io/date-fns';
@@ -160,10 +159,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {/* <h2 className="form-label-style" style={{ borderBottom: 'none' }}>
-                    * Required Fields
-                  </h2> */}
-                  <MuiPickersUtilsProvider utils={MomentUtils}>
+                  <MuiPickersUtilsProvider utils={DateUtils}>
                     <Box padding={1}>
                       <Box mb={2}>
                         <Breadcrumbs separator=">" aria-label="breadcrumb">
@@ -257,6 +253,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                                 id="demo-simple-select-outlined"
                                 margin="dense"
                                 label="Status"
+                                value={values['status']}
                                 name="status"
                               >
                                 {statusList.map((_status, index) => (
@@ -273,7 +270,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               label="Assignee"
                               errors={errors}
                               touched={touched}
-                              required={true}
+                              required={false}
                               setFieldValue={(name, value) => {
                                 handleValuesChange({ [name]: value });
                                 setFieldValue(name, value);
@@ -299,45 +296,41 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                             />
                           </Box>
                           <Box pt={1}>
-                            <MuiPickersUtilsProvider utils={DateUtils}>
-                              <KeyboardDatePicker
-                                label="Start Date"
-                                name="startDate"
-                                autoOk
-                                variant="inline"
-                                inputVariant="outlined"
-                                fullWidth
-                                margin="dense"
-                                value={values.startDate}
-                                format={dateFormatForInputControl}
-                                minDate={new Date()}
-                                onChange={(value) => {
-                                  setFieldValue('startDate', value);
-                                  setFieldValue('dueDate', value);
-                                }}
-                                maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                              />
-                            </MuiPickersUtilsProvider>
+                            <KeyboardDatePicker
+                              label="Start Date"
+                              name="startDate"
+                              autoOk
+                              variant="inline"
+                              inputVariant="outlined"
+                              fullWidth
+                              margin="dense"
+                              value={values.startDate}
+                              format={dateFormatForInputControl}
+                              minDate={new Date()}
+                              onChange={(value) => {
+                                setFieldValue('startDate', value);
+                                setFieldValue('dueDate', value);
+                              }}
+                              maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                            />
                           </Box>
                           <Box pt={1}>
-                            <MuiPickersUtilsProvider utils={DateUtils}>
-                              <KeyboardDatePicker
-                                label="Due Date"
-                                name="dueDate"
-                                autoOk
-                                variant="inline"
-                                value={values.dueDate}
-                                inputVariant="outlined"
-                                fullWidth
-                                margin="dense"
-                                format={dateFormatForInputControl}
-                                minDate={values.startDate}
-                                maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                                onChange={(value) => {
-                                  setFieldValue('dueDate', value);
-                                }}
-                              />
-                            </MuiPickersUtilsProvider>
+                            <KeyboardDatePicker
+                              label="Due Date"
+                              name="dueDate"
+                              autoOk
+                              variant="inline"
+                              value={values.dueDate}
+                              inputVariant="outlined"
+                              fullWidth
+                              margin="dense"
+                              format={dateFormatForInputControl}
+                              minDate={values.startDate}
+                              maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                              onChange={(value) => {
+                                setFieldValue('dueDate', value);
+                              }}
+                            />
                           </Box>
                           {id && (
                             <Fragment>

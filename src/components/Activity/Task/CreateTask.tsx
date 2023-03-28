@@ -18,7 +18,6 @@ import TableChartIcon from '@material-ui/icons/TableChart';
 import { Formik, Form } from 'formik';
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
 import { object, string } from 'yup';
 import moment from 'moment';
 import { GetTaskDetail, CreateNewTask, UpdateTask } from '../../../axios/activity';
@@ -158,7 +157,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Box padding={1}>
-                    <MuiPickersUtilsProvider utils={MomentUtils}>
+                    <MuiPickersUtilsProvider utils={DateUtils}>
                       <Box mb={2}>
                         <Breadcrumbs separator="/" aria-label="breadcrumb">
                           {initialValues.parent &&
@@ -259,6 +258,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                     margin="dense"
                                     label="Status"
                                     name="status"
+                                    value={values['status']}
                                   >
                                     {statusList.map((_status, index) => (
                                       <MenuItem key={index} value={_status.status}>
@@ -306,46 +306,40 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                               <Box pt={1}>
                                 <Grid container spacing={1}>
                                   <Grid item xs={12} sm={12} md={12}>
-                                    <MuiPickersUtilsProvider utils={DateUtils}>
-                                      <KeyboardDatePicker
-                                        label="Start Date"
-                                        name="startDate"
-                                        autoOk
-                                        variant="inline"
-                                        inputVariant="outlined"
-                                        fullWidth
-                                        margin="dense"
-                                        format={dateFormatForInputControl}
-                                        minDate={new Date()}
-                                        value={values.startDate}
-                                        onChange={(value) => {
-                                          setFieldValue('dueDate', value);
-                                          setFieldValue('startDate', value);
-                                        }}
-                                        maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                                      />
-                                    </MuiPickersUtilsProvider>
+                                    <KeyboardDatePicker
+                                      label="Start Date"
+                                      name="startDate"
+                                      autoOk
+                                      variant="inline"
+                                      inputVariant="outlined"
+                                      fullWidth
+                                      margin="dense"
+                                      format={dateFormatForInputControl}
+                                      value={values.startDate}
+                                      onChange={(value) => {
+                                        setFieldValue('dueDate', value);
+                                        setFieldValue('startDate', value);
+                                      }}
+                                      maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                                    />
                                   </Grid>
                                   <Grid item xs={12} sm={12} md={12}>
-                                    <MuiPickersUtilsProvider utils={DateUtils}>
-                                      <KeyboardDatePicker
-                                        label="Due Date"
-                                        name="dueDate"
-                                        autoOk
-                                        variant="inline"
-                                        inputVariant="outlined"
-                                        fullWidth
-                                        margin="dense"
-                                        minDate={values.startDate}
-                                        maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                                        value={values.dueDate}
-                                        onChange={(value) => {
-                                          setFieldValue('dueDate', value);
-                                        }}
-                                        format={dateFormatForInputControl}
-
-                                      />
-                                    </MuiPickersUtilsProvider>
+                                    <KeyboardDatePicker
+                                      label="Due Date"
+                                      name="dueDate"
+                                      autoOk
+                                      variant="inline"
+                                      inputVariant="outlined"
+                                      fullWidth
+                                      margin="dense"
+                                      minDate={values.startDate}
+                                      maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                                      value={values.dueDate}
+                                      onChange={(value) => {
+                                        setFieldValue('dueDate', value);
+                                      }}
+                                      format={dateFormatForInputControl}
+                                    />
                                     {initialValues.createdBy && initialValues.createdBy.date && (
                                       <Box mt={1} color="text.secondary">
                                         <Typography variant="body2">Created {moment(initialValues.createdBy.date).format(dateFormat)}</Typography>
