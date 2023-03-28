@@ -21,9 +21,10 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { ExpandMore } from '@material-ui/icons';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { GrDrag } from 'react-icons/gr';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const Steps = ({ serviceId }) => {
+
   const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_steps`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -204,6 +205,13 @@ const Steps = ({ serviceId }) => {
             </Grid>
             <Grid item xs={9} md={9} sm={9}>
               <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
+                {dataRows?.length ? (
+                  <Button variant="outlined" className="btn-outline-v1" size="small" onClick={() => setArrangeView(true)}>
+                    <GrDrag fontSize="small" color="primary" className="mr-1" />
+                    Arrange
+                  </Button>
+                ) : null}
+                <Box ml={1} />
                 <Button
                   variant="outlined"
                   color="default"
@@ -244,14 +252,7 @@ const Steps = ({ serviceId }) => {
                   </MenuItem>
                 </Menu>
                 <Box ml={1} />
-                {dataRows?.length ? (
-                  <Button variant="outlined" className="btn-outline-v1" size="small" onClick={() => setArrangeView(true)}>
-                    <GrDrag fontSize="small" color="primary" className="mr-1" />
-                    Arrange
-                  </Button>
-                ) : null}
-                <Box ml={1} />
-                <ImportExportLinks
+                <ImportExportMenu
                   permissions={permissions?.serviceMaster}
                   module="Service Master Steps"
                   api={`${serviceMaster.api}/steps/${serviceId}`}
@@ -259,19 +260,11 @@ const Steps = ({ serviceId }) => {
                     fetchStepsData();
                   }}
                   isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                  ids={
-                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                      : []
-                  }
+                  ids={[]}
                   onExportToExcelSuccess={() => {
                     if (gridApi) gridApi.deselectAll();
                     else fetchStepsData();
                   }}
-                  isDropDownIconShow={true}
-                  isBackgroundWhite={true}
                 />
               </Box>
             </Grid>
