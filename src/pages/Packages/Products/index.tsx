@@ -345,8 +345,6 @@ const ProductsTable = ({ packageId, packageData }) => {
               fetchData();
             }}
             isExportAllOrSomeFeature={true}
-            // total={rowCount}
-            recordsToExport={selectedRecords.length}
             ids={[]}
             additionalParams={`refrenceId=${packageId}`}
           />
