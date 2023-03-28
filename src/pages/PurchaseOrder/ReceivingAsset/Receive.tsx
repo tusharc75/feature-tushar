@@ -117,6 +117,19 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
     return errors;
   };
 
+  const validateDate = (values) => {
+    let errors: any = {};
+    if (lockDate) {
+      if (!moment(values["receiveDate"]).isSameOrAfter(moment(lockDate))) {
+        errors['receiveDate'] = `Please selecte valid date`;
+      }
+    }
+    if (moment(values["receiveDate"]).isAfter(moment())) {
+      errors['receiveDate'] = `Please selecte valid date`;
+    }
+    return errors;
+  }
+
   const handleExportField = (data: any) => {
     const qty = parseInt(data?.inventoryQuantity) || 0;
     let json_data = [...Array(qty).keys()].map((item) => ({
@@ -479,7 +492,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                       !validate(values.seriaizedAsset).warehouse &&
                       !validate(values.seriaizedAsset).assetQuantity &&
                       !validate(values.seriaizedAsset).serialNumber &&
-                      !errors['receiveDate']
+                      !validateDate(values)?.receiveDate
                     ) {
                       handleCreateSerializedAsset(values);
                     }
