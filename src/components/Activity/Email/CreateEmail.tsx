@@ -519,7 +519,6 @@ export const CreateEmail = ({
           >
             {({ submitForm, touched, errors, setFieldValue, values }) => (
               <>
-                {console.log({ values })}
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
                     <MuiPickersUtilsProvider utils={DateUtils}>
