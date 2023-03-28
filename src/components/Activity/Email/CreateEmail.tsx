@@ -6,7 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import { Formik, Form } from 'formik';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
+import DateUtils from '@date-io/date-fns';
 import TextField from '@material-ui/core/TextField';
 import { object, string, array } from 'yup';
 import { GetEmailDetail, CreateNewEmail, UpdateEmail } from '../../../axios/activity';
@@ -522,8 +522,7 @@ export const CreateEmail = ({
                 {console.log({ values })}
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                    {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
-                    <MuiPickersUtilsProvider utils={MomentUtils}>
+                    <MuiPickersUtilsProvider utils={DateUtils}>
                       <Box padding={1}>
                         {emailId ? (
                           <Fragment>
