@@ -534,6 +534,8 @@ const Quotation = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchQuotation}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.quotation}
             />
           ) : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         {showDeleteWarningConfirmBox &&

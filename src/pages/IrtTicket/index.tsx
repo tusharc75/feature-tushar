@@ -424,6 +424,8 @@ const IrtTicket = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchIrtTicketData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.irtTicket}
             />
           )
         ) : null}

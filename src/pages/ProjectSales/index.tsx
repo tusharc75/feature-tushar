@@ -665,6 +665,9 @@ const ProjectSales: FC = () => {
                   loading={loading}
                   renderedFrom={renderedFrom}
                   refreshGrid={fetchProjects}
+                  showOnlyShowFilteredRecordSwitch={true}
+                  showFilters={true}
+                  resource={sidebarResource.projectSales}
                 /> : null
           }
         </div>

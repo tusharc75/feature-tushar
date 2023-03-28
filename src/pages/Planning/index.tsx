@@ -535,6 +535,8 @@ const Planning = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.planning}
             />
           )
         ) : null}

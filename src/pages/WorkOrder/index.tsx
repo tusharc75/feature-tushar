@@ -461,6 +461,8 @@ const WorkOrder = () => {
                 return params.data.deleted;
               },
           }}
+          showFilters={true}
+          resource={sidebarResource.workOrder}
         />
       ) : null}
       {showDeleteWarningConfirmBox ? (
