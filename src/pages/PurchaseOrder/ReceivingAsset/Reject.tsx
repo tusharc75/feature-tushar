@@ -90,6 +90,20 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
     return errors;
   };
 
+  const validateDate = (values) => {
+    let errors: any = {};
+    if (lockDate) {
+      if (!moment(values["rejectDate"]).isSameOrAfter(moment(lockDate))) {
+        errors['rejectDate'] = `Please selecte valid date`;
+      }
+    }
+    if (moment(values["rejectDate"]).isAfter(moment())) {
+      errors['rejectDate'] = `Please selecte valid date`;
+    }
+    return errors;
+  }
+
+
   return (
     <Dialog
       open
@@ -280,7 +294,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                 </Button>
                 <Button
                   onClick={() => {
-                    if (!validate(values.products).rejectQuantity && !errors['rejectDate']) {
+                    if (!validate(values.products).rejectQuantity && !validateDate(values)?.rejectDate) {
                       handleReject(values.products, values.rejectDate);
                     }
                   }}
