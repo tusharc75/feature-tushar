@@ -18,7 +18,7 @@ import { Delete as DeleteIcon } from '@material-ui/icons';
 import reactHtmlparser, { convertNodeToElement } from 'react-html-parser';
 import { HiOutlineMail } from 'react-icons/hi';
 import Dialog from '@material-ui/core/Dialog';
-import { CreateEmail2 } from '../../../components/Activity/Email/CreateEmail2';
+import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
 import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
 import styles from '../../Leads/Header.module.scss';
 import emailStyles from './email.module.scss';
@@ -70,7 +70,7 @@ const Email = () => {
   const columnState = JSON.parse(localStorage.getItem('emailPage'));
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [fullScreenViewEmail, setFullScreenViewEmail] = useState(isMobile || isTablet);
+  const [fullScreenViewEmail, setFullScreenViewEmail] = useState(true);
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = 'emailPage_selected';
@@ -608,7 +608,8 @@ const Email = () => {
             }}
             fullWidth
           >
-            <CreateEmail2
+            <CreateEmail
+              emailId={emailId}
               handleClose={() => {
                 handleClose();
                 setFullScreen(false);
@@ -641,7 +642,6 @@ const Email = () => {
             onClose={(e, reason) => {
               if (reason !== 'backdropClick') {
                 handleCloseViewEmail();
-                setFullScreenViewEmail(false);
               }
             }}
             fullWidth
@@ -650,7 +650,6 @@ const Email = () => {
               emailId={emailId}
               handleClose={() => {
                 handleCloseViewEmail();
-                setFullScreenViewEmail(false);
               }}
               fetchData={fetchEmails}
               relatedTo={[
