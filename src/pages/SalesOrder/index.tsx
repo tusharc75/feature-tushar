@@ -13,8 +13,7 @@ import {
   sidebarResource,
   prepareDataForGrid,
   getLocalStorageArrayData,
-  removeLocalStorage,
-  RESOURCE_LABEL
+  removeLocalStorage
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -527,8 +526,6 @@ const SalesOrder = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchSalesOrder}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={RESOURCE_LABEL.salesOrder}
             />
           ) : null}
         {showDeleteWarningConfirmBox ? (

@@ -22,8 +22,7 @@ import {
   supplierContact,
   quote,
   getLocalStorageArrayData,
-  removeLocalStorage,
-  RESOURCE_LABEL
+  removeLocalStorage
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -922,8 +921,6 @@ const QuoteBuilders = () => {
                     renderedFrom={renderedFrom}
                     refreshGrid={fetchQuoteBuilder}
                     showOnlyShowFilteredRecordSwitch={true}
-                    showFilters={true}
-                    resource={RESOURCE_LABEL.quoteBuilder}
                   /> : null
               )
           }

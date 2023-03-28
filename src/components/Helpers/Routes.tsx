@@ -21,14 +21,14 @@ const routes = {
     title:
       storedRoutes && storedRoutes.supplierAccount && storedRoutes.supplierAccount.title
         ? storedRoutes.supplierAccount?.title
-        : RESOURCE_LABEL.supplierAccount,
+        : RESOURCE_LABEL.account,
     path: '/supplier-account'
   },
   supplierAccountDetail: {
     title:
       storedRoutes && storedRoutes.supplierAccount && storedRoutes.supplierAccount.title
         ? storedRoutes.supplierAccount?.title
-        : RESOURCE_LABEL.supplierAccount,
+        : RESOURCE_LABEL.account,
     path: '/supplier-account/detail'
   },
   customerContact: {
@@ -49,14 +49,14 @@ const routes = {
     title:
       storedRoutes && storedRoutes.supplierContact && storedRoutes.supplierContact.title
         ? storedRoutes.supplierContact?.title
-        : RESOURCE_LABEL.supplierContact,
+        : RESOURCE_LABEL.contact,
     path: '/supplier-contact'
   },
   supplierContactDetail: {
     title:
       storedRoutes && storedRoutes.supplierContact && storedRoutes.supplierContact.title
         ? storedRoutes.supplierContact?.title
-        : RESOURCE_LABEL.supplierContact,
+        : RESOURCE_LABEL.contact,
     path: '/supplier-contact/detail'
   },
   lead: {

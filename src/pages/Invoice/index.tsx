@@ -13,8 +13,7 @@ import {
   sidebarResource,
   prepareDataForGrid,
   getLocalStorageArrayData,
-  removeLocalStorage,
-  RESOURCE_LABEL
+  removeLocalStorage
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -530,8 +529,6 @@ const Invoice = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchInvoiceData}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={RESOURCE_LABEL.invoice}
             />
           )
         ) : null}

@@ -11,8 +11,7 @@ import {
   gridLoadingTimeout,
   prepareDataForGrid,
   getLocalStorageArrayData,
-  leadTimeMaster,
-  RESOURCE_LABEL
+  leadTimeMaster
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -552,8 +551,6 @@ const LeadTimeMaster = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchLeadTimeMasters}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={RESOURCE_LABEL.leadTimeMaster}
             />
           )
         ) : null}

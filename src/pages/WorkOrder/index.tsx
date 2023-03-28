@@ -10,7 +10,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { isObjectEmpty, gridLoadingTimeout, workOrder, getLocalStorageArrayData, removeLocalStorage, RESOURCE_LABEL } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, workOrder, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
@@ -461,8 +461,6 @@ const WorkOrder = () => {
                 return params.data.deleted;
               },
           }}
-          showFilters={true}
-          resource={RESOURCE_LABEL.workOrder}
         />
       ) : null}
       {showDeleteWarningConfirmBox ? (

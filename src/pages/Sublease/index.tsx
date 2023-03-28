@@ -503,8 +503,6 @@ const Sublease = () => {
                             renderedFrom={renderedFrom}
                             refreshGrid={fetchData}
                             showOnlyShowFilteredRecordSwitch={true}
-                            showFilters={true}
-                            resource={RESOURCE_LABEL.sublease}
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

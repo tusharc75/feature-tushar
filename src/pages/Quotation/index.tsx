@@ -14,8 +14,7 @@ import {
   sidebarResource,
   prepareDataForGrid,
   getLocalStorageArrayData,
-  removeLocalStorage,
-  RESOURCE_LABEL
+  removeLocalStorage
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from '../../components/Helpers/Routes';
@@ -535,8 +534,6 @@ const Quotation = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchQuotation}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={RESOURCE_LABEL.quotation}
             />
           ) : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         {showDeleteWarningConfirmBox &&

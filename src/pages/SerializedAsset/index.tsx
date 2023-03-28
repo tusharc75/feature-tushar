@@ -24,8 +24,7 @@ import {
   INVENTORY_STATUS,
   COLOUR_MASTER,
   getLocalStorageArrayData,
-  removeLocalStorage,
-  RESOURCE_LABEL
+  removeLocalStorage
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -834,8 +833,6 @@ const SerializedAsset = () => {
                     return false
                   },
               }}
-              showFilters={true}
-              resource={RESOURCE_LABEL.serializedAsset}
             />
           ) : null
         ) : (

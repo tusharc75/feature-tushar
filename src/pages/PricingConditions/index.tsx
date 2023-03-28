@@ -10,7 +10,7 @@ import styles from '../Leads/Header.module.scss';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { MdContacts, MdSort, MdFilterList } from 'react-icons/md';
 import axiosInstance from 'src/axios/axiosInstance';
-import { isObjectEmpty, gridLoadingTimeout, pricingCondition, RESOURCE_LABEL } from 'src/constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, pricingCondition } from 'src/constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -440,8 +440,6 @@ const PricingConditions = () => {
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchPriceConditionList}
                 showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={RESOURCE_LABEL.pricingCondition}
               />
             </Box>
           )

@@ -17,7 +17,7 @@ import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage, RESOURCE_LABEL } from 'src/constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage } from 'src/constants/helpers';
 import ManageContactUs from './ManageContactUs';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -390,8 +390,6 @@ const ContactUs = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchContactUsData}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={RESOURCE_LABEL.contactUs}
             />
           )
         ) : null}

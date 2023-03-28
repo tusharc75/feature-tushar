@@ -17,7 +17,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import { isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, userType, getLocalStorageArrayData, removeLocalStorage, RESOURCE_LABEL } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, userType, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { Chip } from '@material-ui/core';
@@ -1069,8 +1069,6 @@ export default function Contact(props) {
               renderedFrom={renderedFrom}
               refreshGrid={getContacts}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={RESOURCE_LABEL[contactResource]}
             />
           ))}
 

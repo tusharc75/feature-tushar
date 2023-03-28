@@ -7,7 +7,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { getLocalStorageArrayData, prepareDataForGrid, removeLocalStorage, RESOURCE_LABEL } from '../../constants/helpers';
+import { getLocalStorageArrayData, prepareDataForGrid, removeLocalStorage } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { FaRegistered, FaSuitcase, FaAddressBook, FaAddressCard } from 'react-icons/fa';
 import { SiStatuspage } from 'react-icons/all';
@@ -579,8 +579,6 @@ const RentalManagement = () => {
                 isClientSideGrid={isOffline}
                 refreshGrid={fetchRentalManagement}
                 showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={RESOURCE_LABEL.rentalManagement}
               />
             )
           ) : null}

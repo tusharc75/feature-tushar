@@ -5,7 +5,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
 import ManageRepairJobDialog from './ManageRepairJob';
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairJob, prepareDataForGrid, getLocalStorageArrayData, RESOURCE_LABEL } from '../../constants/helpers';
+import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairJob, prepareDataForGrid, getLocalStorageArrayData } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -550,8 +550,6 @@ const RepairJob = () => {
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchRepairJobs}
                 showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={RESOURCE_LABEL.repairJob}
               /> : null
         }
 

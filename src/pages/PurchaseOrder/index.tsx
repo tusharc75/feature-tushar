@@ -15,7 +15,7 @@ import SearchBox from 'src/components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "src/components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "src/components/AgGridComponents/CustomAgGrid";
-import { purchaseOrder, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, RESOURCE_LABEL } from 'src/constants/helpers';
+import { purchaseOrder, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from 'src/constants/helpers';
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { useData } from "src/StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -597,8 +597,6 @@ const PurchaseOrder = () => {
                             }}
                             refreshGrid={fetchPurchaseOrder}
                             showOnlyShowFilteredRecordSwitch={true}
-                            showFilters={true}
-                            resource={RESOURCE_LABEL.purchaseOrder}
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

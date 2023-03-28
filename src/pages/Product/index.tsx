@@ -18,7 +18,7 @@ import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { product, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage, RESOURCE_LABEL } from '../../constants/helpers';
+import { product, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -926,8 +926,6 @@ const Product = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchProduct}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={RESOURCE_LABEL.product}
             />
           )
         ) : (

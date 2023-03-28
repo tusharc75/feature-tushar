@@ -11,7 +11,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import { camelCase } from 'lodash';
-import { prepareDataForGrid, RESOURCE_LABEL } from 'src/constants/helpers';
+import { prepareDataForGrid } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { gridLoadingTimeout, getLocalStorageArrayData } from '../../constants/helpers';
 import useColumns, { getFrameworkComponents } from '../../constants/useColumns';
@@ -273,9 +273,7 @@ const CycleCountDetermination = () => {
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchCycleCountDetermination}
                 isClientSideGrid={true}
-                showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={RESOURCE_LABEL.cycleCountDetermination}
+                showOnlyShowFilteredRecordSwitch={false}
               />
             )
           ) : null

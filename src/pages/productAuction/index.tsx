@@ -15,7 +15,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, productAuction, removeLocalStorage, RESOURCE_LABEL } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, productAuction, removeLocalStorage } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -452,8 +452,6 @@ const ProductAuction = () => {
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchData}
                 showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={RESOURCE_LABEL.productAuction}
               />
             )
           ) : null

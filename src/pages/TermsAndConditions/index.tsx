@@ -11,7 +11,7 @@ import CustomContainer from '../../components/CustomContainer';
 import styles from '../Leads/Header.module.scss';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { termsAndCondition, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
+import { termsAndCondition, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import ManageTermsAndCondition from './ManageTermsAndCondition';
 import { cloneDeep } from 'lodash';
 import { IoDocumentTextOutline } from 'react-icons/io5';
@@ -423,9 +423,6 @@ export default function TermsAndCondition(props) {
             refreshGrid={fetchTermsAndConditions}
             renderedFrom={routes.termsAndConditions.title}
             isClientSideGrid={true}
-            showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
-            resource={RESOURCE_LABEL.termsAndConditions}
           />
         )}
 

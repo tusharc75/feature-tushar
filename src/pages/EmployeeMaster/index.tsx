@@ -23,7 +23,6 @@ import {
   isObjectEmpty,
   prepareDataForGrid,
   removeLocalStorage,
-  RESOURCE_LABEL,
   sidebarResource
 } from 'src/constants/helpers';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
@@ -424,8 +423,6 @@ const EmployeeMaster = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchEmployeeMasterData}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={RESOURCE_LABEL.employeeMaster}
             />
           )
         ) : null}

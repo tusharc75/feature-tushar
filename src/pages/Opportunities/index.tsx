@@ -12,7 +12,7 @@ import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { GiHiveMind } from 'react-icons/gi';
 import ManageOpportunityDialog from './ManageOpportunityDialog/ManageOpportunityDialog';
-import { opportunity, isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
+import { opportunity, isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
@@ -652,9 +652,6 @@ const Opportunities = () => {
                 loading={loading}
                 renderedFrom={opportunityResource}
                 refreshGrid={fetchOpportunities}
-                showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={RESOURCE_LABEL.opportunity}
               /> : null
         }
 
