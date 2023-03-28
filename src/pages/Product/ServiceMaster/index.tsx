@@ -65,17 +65,7 @@ const ServiceMaster = (props: Props) => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const defaultColumns = [
-    {
-      field: 'serviceName',
-      headerName: 'Service Name',
-      show: true,
-      cellRenderer: 'serviceRenderer',
-      disabled: true,
-      lockPosition: true,
-      primaryField: true
-    },
-    { field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'preWork', headerName: 'Pre Work', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'order', headerName: 'Sequence', show: true, cellRenderer: 'commonRenderer' },
   ];
 
   const fetchGridColumns = () => {
@@ -86,13 +76,11 @@ const ServiceMaster = (props: Props) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.fieldData?.fieldName !== 'serviceName' && o?.fieldData?.fieldName !== 'preWork') {
-            let currentColumn = getColumnData(routes.serviceMaster?.title, o?.fieldData, routes.serviceMasterDetail.path);
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName);
-              }
+          let currentColumn = getColumnData(routes.serviceMaster?.title, o?.fieldData, routes.serviceMasterDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
         });
