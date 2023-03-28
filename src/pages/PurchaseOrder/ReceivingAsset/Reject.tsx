@@ -92,6 +92,11 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
 
   const validateDate = (values) => {
     let errors: any = {};
+    
+    if (moment(values["rejectDate"]).isBefore(moment(purchaseOrderData?.purchaseOrderDate))) {
+      errors['rejectDate'] = `Please selecte valid date`;
+    }
+
     if (lockDate) {
       if (!moment(values["rejectDate"]).isSameOrAfter(moment(lockDate))) {
         errors['rejectDate'] = `Please selecte valid date`;
