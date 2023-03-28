@@ -245,7 +245,8 @@ export const sidebarResource = {
   fleetMaster: `Fleet Master`,
   job: 'Job',
   fleetDispatch: 'Fleet Dispatch',
-  fleetReceiver: 'Fleet Receiver'
+  fleetReceiver: 'Fleet Receiver',
+  storageLocation: 'Storage Location'
 };
 
 export const primaryFields = {
@@ -355,7 +356,8 @@ export const RESOURCE_LABEL = {
   resourceLogs: `Resource Logs`,
   fleetMaster: `Fleet Master`,
   job: 'Job',
-  fleetReceiver: 'Fleet Receiver'
+  fleetReceiver: 'Fleet Receiver',
+  storageLocation: 'Storage Location'
 };
 
 export const CHILD_RESOURCE = {
@@ -660,6 +662,14 @@ export const repairType = {
   permission: 'Repair Type',
   resource: 'Repair Type'
 };
+
+export const storageLocation = {
+  api: '/storage-location',
+  route: '/storage-location',
+  permission: 'Storage Location',
+  resource: 'Storage Location'
+};
+
 export const cageManagement = {
   api: '/cage-management',
   route: '/cage-management',

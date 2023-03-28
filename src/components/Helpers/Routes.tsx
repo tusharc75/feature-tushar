@@ -546,6 +546,16 @@ const routes = {
     title: storedRoutes && storedRoutes.repairType && storedRoutes.repairType.title ? storedRoutes.repairType?.title : RESOURCE_LABEL.repairType,
     path: '/repair-type/detail'
   },
+
+  storageLocation: {
+    title: storedRoutes && storedRoutes.storageLocation && storedRoutes.storageLocation.title ? storedRoutes.storageLocation?.title : RESOURCE_LABEL.storageLocation,
+    path: '/storage-location'
+  },
+  storageLocationDetail: {
+    title: storedRoutes && storedRoutes.storageLocation && storedRoutes.storageLocation.title ? storedRoutes.storageLocation?.title : RESOURCE_LABEL.storageLocation,
+    path: '/storage-location/detail'
+  },
+
   cageManagement: {
     title:
       storedRoutes && storedRoutes.cageManagement && storedRoutes.cageManagement.title
