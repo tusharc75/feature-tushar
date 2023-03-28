@@ -9,9 +9,9 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../constants/helpers';
-import { TextField as TextFieldFormik } from 'formik-material-ui';
-import { Field, Form, Formik } from 'formik';
+import { Form, Formik } from 'formik';
 import { object, string } from 'yup';
+import { TextField } from '@material-ui/core';
 
 const CreateZip = (props) => {
   const { setToastConfig } = useContext(CustomToastContext);
@@ -87,8 +87,7 @@ const CreateZip = (props) => {
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <Field
-                    component={TextFieldFormik}
+                  <TextField
                     margin="dense"
                     type="text"
                     size="small"

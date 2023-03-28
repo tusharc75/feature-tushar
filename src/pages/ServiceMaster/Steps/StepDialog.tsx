@@ -9,8 +9,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { serviceMaster } from 'src/constants/helpers';
-import { Formik, Form, Field } from 'formik';
-import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
+import { Formik, Form } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import Checkbox from '@material-ui/core/Checkbox';
 import { Autocomplete } from '@material-ui/lab';
@@ -265,8 +264,7 @@ export default function StepDialog({
                   <CustomDialogContent>
                     <Grid container spacing={2}>
                       <Grid xs={12} md={6} sm={6} item>
-                        <Field
-                          component={TextFieldFormik}
+                        <TextField
                           margin="dense"
                           type="text"
                           label="Step Name"
@@ -284,8 +282,7 @@ export default function StepDialog({
                         />
                       </Grid>
                       <Grid xs={12} md={6} sm={6} item>
-                        <Field
-                          component={TextFieldFormik}
+                        <TextField
                           margin="dense"
                           type="number"
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}

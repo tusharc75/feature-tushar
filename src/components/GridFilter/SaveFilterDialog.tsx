@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef, useContext, Fragment } from 'react';
-import { Button, Dialog } from '@material-ui/core';
+import { Button, Dialog, TextField } from '@material-ui/core';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../Helpers/CustomButton';
-import { Field, Form, Formik } from 'formik';
-import { TextField } from 'formik-material-ui';
+import { Form, Formik } from 'formik';
 import { object, string } from 'yup';
 
 const schema = object().shape({
@@ -85,8 +84,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                 <Fragment>
                     <CustomDialogContent>
                         <Form autoComplete="off" autoCorrect="off" noValidate>
-                            <Field
-                                component={TextField}
+                            <TextField
                                 fullWidth
                                 margin="dense"
                                 type="text"

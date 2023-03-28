@@ -20,7 +20,7 @@ import { FaUserCheck, FaUserAltSlash, FaSuitcase, IoCreateSharp, MdEmail } from 
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import { userType, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, getLocalStorageArrayData, removeLocalStorage } from './../../constants/helpers'
+import { userType, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, getLocalStorageArrayData, removeLocalStorage, sidebarResource } from './../../constants/helpers'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { camelCase, uniqBy } from "lodash";
@@ -832,6 +832,10 @@ const User: FC = () => {
                 loading={loading}
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchUsers}
+                showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.user}
+                
               /> : null}
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (

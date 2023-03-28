@@ -3,7 +3,7 @@ import { Dialog, Button, Box, TextField, Grid, Chip, Typography } from '@materia
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { Formik, Form, FieldArray, Field } from 'formik';
+import { Formik, Form, FieldArray } from 'formik';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -130,14 +130,13 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                           <Box mt={1}>
                                             <Grid container spacing={2} alignItems="center">
                                               <Grid item xs={12} md={3}>
-                                                <Field
+                                                <TextField
                                                   fullWidth
                                                   label="Return Quantity"
                                                   variant="outlined"
                                                   type="number"
                                                   onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                   size="small"
-                                                  component={TextField}
                                                   name="returnQuantity"
                                                   placeholder="Return Quantity"
                                                   value={data.returnQuantity}
@@ -153,14 +152,13 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                 />
                                               </Grid>
                                               <Grid item xs={12} md={3}>
-                                                <Field
+                                                <TextField
                                                   fullWidth
                                                   label="Product is Consumed"
                                                   variant="outlined"
                                                   type="number"
                                                   onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                   size="small"
-                                                  component={TextField}
                                                   disabled
                                                   name="consumeQty"
                                                   placeholder="Consumed Quantity"
@@ -177,14 +175,13 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                 />
                                               </Grid>
                                               <Grid item xs={12} md={3}>
-                                                <Field
+                                                <TextField
                                                   fullWidth
                                                   label="Invoiced Quantity"
                                                   variant="outlined"
                                                   type="number"
                                                   onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                   size="small"
-                                                  component={TextField}
                                                   disabled
                                                   name="invoiceQty"
                                                   placeholder="Invoiced Quantity"
@@ -201,13 +198,12 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                 />
                                               </Grid>
                                               <Grid item xs={12} md={3}>
-                                                <Field
+                                                <TextField
                                                   fullWidth
                                                   label="Order Quantity"
                                                   variant="outlined"
                                                   type="number"
                                                   size="small"
-                                                  component={TextField}
                                                   name="orderQuantity"
                                                   placeholder="Order Quantity"
                                                   value={data.orderQuantity}

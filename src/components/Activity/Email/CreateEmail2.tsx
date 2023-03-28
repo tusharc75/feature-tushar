@@ -6,7 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import { Formik, Form } from 'formik';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
+import DateUtils from '@date-io/date-fns';
 import TextField from '@material-ui/core/TextField';
 import { object, string, array } from 'yup';
 import { GetEmailDetail, CreateNewEmail, UpdateEmail } from '../../../axios/activity';
@@ -20,7 +20,7 @@ import PropTypes from 'prop-types';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { CircularProgress, IconButton } from '@material-ui/core';
+import { CircularProgress, Tooltip, IconButton } from '@material-ui/core';
 import { useAccount, useMsal } from '@azure/msal-react';
 import getAzureAcessToken from '../../Azure/getAzureAccessToken';
 import { validations } from '../../../constants/helpers';
@@ -35,6 +35,9 @@ import { useData } from '../../../StateProvider/Provider';
 import TinyMce from '../../../components/TinyMCE';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
+import { AiOutlineSend } from 'react-icons/ai';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 const EmailSchema = object().shape({
   subject: string().required('please enter subject'),
@@ -71,11 +74,15 @@ const useStyles = makeStyles(() => ({
     width: '48px',
     height: '48px',
     borderRadius: '100vmax',
-    background: 'lightgray',
+    background: '#b8e986',
+    color: '#169286',
     display: 'grid',
     placeItems: 'center',
     flexBasis: '48px',
     fontWeight: 600
+  },
+  myProfile: {
+    background: '#cef2ef'
   },
   mailText: {
     marginLeft: '14px'
@@ -85,6 +92,7 @@ const useStyles = makeStyles(() => ({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     gap: '15px',
+    marginBlock: '15px',
     alignItems: 'center'
   },
   mailFrom: {
@@ -93,7 +101,16 @@ const useStyles = makeStyles(() => ({
     color: '#5B5B5B',
     fontWeight: 600
   },
-  mailTimeStamp: { fontWeight: 400, fontSize: '11px', lineHeight: '151%', color: '#717171' }
+  mailTimeStamp: { fontWeight: 400, fontSize: '11px', lineHeight: '151%', color: '#717171' },
+  inputBox: {
+    background: '#FFFFFF',
+    border: '0.945308px solid #EBEBEB',
+    boxShadow: '0px 3.78123px 37.8123px rgba(0, 0, 0, 0.08)',
+    borderRadius: '5px'
+  },
+  footer: {
+    padding: '15px'
+  }
 }));
 
 export const CreateEmail2 = ({
@@ -268,12 +285,13 @@ export const CreateEmail2 = ({
     axiosInstance()
       .post(`/email/reply-to/${values._id}`, payload)
       .then(() => {
-        handleClose();
         setSending(false);
+        fetchEmailDetail();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setSending(false);
+        fetchEmailDetail();
       });
   };
 
@@ -415,11 +433,14 @@ export const CreateEmail2 = ({
       ></CustomDialogHeader>
       {loading ? (
         <div className={classes.root}>
-          {[...Array(10).keys()].map((i) => (
+          {/* {[...Array(10).keys()].map((i) => (
             <Typography style={{ marginLeft: '20px' }} key={`skeleton${i} `} variant="subtitle1">
               <Skeleton animation="wave" />
             </Typography>
-          ))}
+          ))} */}
+          <Box p={3}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         </div>
       ) : (
         initialValues && (
@@ -433,12 +454,39 @@ export const CreateEmail2 = ({
               <>
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                    {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
-                    <MuiPickersUtilsProvider utils={MomentUtils}>
+                    <MuiPickersUtilsProvider utils={DateUtils}>
                       <Box padding={1}>
                         {emailId ? (
-                          <Fragment>
-                            <Box mb={1}>
+                          <Box style={{ position: 'relative' }}>
+                            <Box
+                              style={{
+                                position: 'sticky',
+                                top: '23px',
+                                left: 0,
+                                right: 0,
+                                zIndex: '3',
+                                marginLeft: 'auto',
+                                maxWidth: 'max-content'
+                              }}
+                            >
+                              <Tooltip title="Refresh" placement="top">
+                                <IconButton
+                                  onClick={() => fetchEmailDetail()}
+                                  style={{
+                                    width: '46px',
+                                    height: '32px',
+                                    background: 'white',
+                                    padding: '11px',
+                                    border: '1px solid rgb(229, 229, 229)',
+                                    color: 'rgb(115, 115, 115)'
+                                  }}
+                                  size="small"
+                                >
+                                  <RefreshIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                            <Box mb={1} style={{ marginTop: '-31px', paddingRight: '52px' }}>
                               <Grid container spacing={1} justifyContent="space-between">
                                 <Grid item xs={12} sm={6}>
                                   <Typography variant="subtitle1">
@@ -470,7 +518,7 @@ export const CreateEmail2 = ({
                               <Box>
                                 <Grid container>
                                   <Grid item style={{ flexBasis: '48px' }}>
-                                    <Box className={classes.profile}>{'You'}</Box>
+                                    <Box className={`${classes.profile} ${classes.myProfile}`}>{'You'}</Box>
                                   </Grid>
                                   <Grid item style={{ flexBasis: 'calc(100% - 48px)' }}>
                                     <Box className={classes.mailText}>
@@ -491,12 +539,14 @@ export const CreateEmail2 = ({
                               </Box>
                               {values?.inboundEmails?.map((incomingMail) => {
                                 const nameWords = incomingMail.from.trim().split(' ');
-                                const initials = incomingMail.type === 'sender' ? 'You' : `${nameWords[0][0]} ${nameWords[1][0]}`;
+                                const initials = incomingMail.type === 'sender' ? 'You' : `${nameWords[0][0]}${nameWords[1][0]}`;
                                 return (
                                   <Box>
                                     <Grid container>
                                       <Grid item style={{ flexBasis: '48px' }}>
-                                        <Box className={classes.profile}>{initials}</Box>
+                                        <Box className={`${classes.profile} ${incomingMail.type === 'sender' ? classes.myProfile : ''}`}>
+                                          {initials}
+                                        </Box>
                                       </Grid>
                                       <Grid item style={{ flexBasis: 'calc(100% - 48px)' }}>
                                         <Box className={classes.mailText}>
@@ -540,64 +590,97 @@ export const CreateEmail2 = ({
                               emailId={emailId}
                             />
 
-                            <Box>
-                              {<AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={true} />}
-                              {isQuoteBuilder ? (
-                                <AttachmentThumbnail
-                                  attachments={stateQuoteBuilderAttachments}
-                                  handleDeleteAttachment={handleDeleteQuoteBuilderAttachment}
-                                  canEdit={true}
-                                />
-                              ) : null}
-                              {isQuoteBuilder ? (
-                                <AttachmentThumbnail
-                                  attachments={quoteBuilderOtherAttachments}
-                                  handleDeleteAttachment={handleDeleteQuoteBuilderOtherAttachment}
-                                  canEdit={true}
-                                />
-                              ) : null}
-                              {fileImageAttachments?.length > 0 && (
-                                <ImageAttachments
-                                  imageAttachments={fileImageAttachments}
-                                  onImageClick={(attachment) => {
-                                    setImageSource(attachment);
-                                    setOpen(true);
-                                  }}
-                                  isCreateOnly={true}
-                                  onDelete={handleDeleteFileImageAttachment}
-                                  emailId={emailId}
-                                />
-                              )}
-                              {imageAttachments?.length > 0 && (
-                                <ImageAttachments
-                                  imageAttachments={imageAttachments}
-                                  onImageClick={(attachment) => {
-                                    setImageSource(attachment);
-                                    setOpen(true);
-                                  }}
-                                  isCreateOnly={true}
-                                  onDelete={handleDeleteImageAttachment}
-                                  emailId={emailId}
-                                />
-                              )}
-                              <TinyMce
-                                onChange={(value) => {
-                                  setFieldValue('content', value);
-                                  handleValuesChange({ content: value });
-                                }}
-                                initialValue={initialValues?.content}
-                                imageOrFileUploadCompletePercentage={(completePercentage) => {
-                                  setUploadingImageOrFileProgress(completePercentage);
-                                }}
-                                doNotShowUploadFile={false}
-                                onUploadFile={onUploadFile}
-                                onUploadImage={handleUploadImage}
-                                usePublicUrlforFileUpload={true}
-                                isSendToCustomer={isQuoteBuilder ? true : false}
-                                onQuoteUpload={handleQuoteUpload}
-                              />
+                            <Box className={classes.inboundEmail}>
+                              <Box>
+                                <Grid container>
+                                  <Grid item style={{ flexBasis: '48px' }}>
+                                    <Box className={`${classes.profile} ${classes.myProfile}`}>{'You'}</Box>
+                                  </Grid>
+                                  <Grid item style={{ flexBasis: 'calc(100% - 48px)' }}>
+                                    <Box className={`${classes.mailText} ${classes.inputBox}`}>
+                                      {otherAttachments.length > 0 && (
+                                        <AttachmentThumbnail
+                                          attachments={otherAttachments}
+                                          handleDeleteAttachment={handleDeleteAttachment}
+                                          canEdit={true}
+                                        />
+                                      )}
+                                      {isQuoteBuilder ? (
+                                        <AttachmentThumbnail
+                                          attachments={stateQuoteBuilderAttachments}
+                                          handleDeleteAttachment={handleDeleteQuoteBuilderAttachment}
+                                          canEdit={true}
+                                        />
+                                      ) : null}
+                                      {isQuoteBuilder ? (
+                                        <AttachmentThumbnail
+                                          attachments={quoteBuilderOtherAttachments}
+                                          handleDeleteAttachment={handleDeleteQuoteBuilderOtherAttachment}
+                                          canEdit={true}
+                                        />
+                                      ) : null}
+                                      {fileImageAttachments?.length > 0 && (
+                                        <ImageAttachments
+                                          imageAttachments={fileImageAttachments}
+                                          onImageClick={(attachment) => {
+                                            setImageSource(attachment);
+                                            setOpen(true);
+                                          }}
+                                          isCreateOnly={true}
+                                          onDelete={handleDeleteFileImageAttachment}
+                                          emailId={emailId}
+                                        />
+                                      )}
+                                      {imageAttachments?.length > 0 && (
+                                        <ImageAttachments
+                                          imageAttachments={imageAttachments}
+                                          onImageClick={(attachment) => {
+                                            setImageSource(attachment);
+                                            setOpen(true);
+                                          }}
+                                          isCreateOnly={true}
+                                          onDelete={handleDeleteImageAttachment}
+                                          emailId={emailId}
+                                        />
+                                      )}
+                                      <TinyMce
+                                        onChange={(value) => {
+                                          setFieldValue('content', value);
+                                          handleValuesChange({ content: value });
+                                        }}
+                                        initialValue={initialValues?.content}
+                                        imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                          setUploadingImageOrFileProgress(completePercentage);
+                                        }}
+                                        doNotShowUploadFile={false}
+                                        onUploadFile={onUploadFile}
+                                        onUploadImage={handleUploadImage}
+                                        usePublicUrlforFileUpload={true}
+                                        isSendToCustomer={isQuoteBuilder ? true : false}
+                                        onQuoteUpload={handleQuoteUpload}
+                                      />
+                                      <Box className={classes.footer}>
+                                        <Button
+                                          type="button"
+                                          size="small"
+                                          color="primary"
+                                          variant="contained"
+                                          endIcon={sending ? <CircularProgress color="inherit" size={14} /> : <AiOutlineSend size={14} />}
+                                          disabled={sending || uploadingImageOrFileProgress > 0 || generatingFile}
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            submitForm();
+                                          }}
+                                        >
+                                          {sending ? <>Sending ... </> : 'send'}
+                                        </Button>
+                                      </Box>
+                                    </Box>
+                                  </Grid>
+                                </Grid>
+                              </Box>
                             </Box>
-                          </Fragment>
+                          </Box>
                         ) : (
                           <Grid container spacing={3}>
                             {showESign && (
@@ -795,26 +878,28 @@ export const CreateEmail2 = ({
                     Cancel
                   </Button>
 
-                  <Button
-                    type="button"
-                    size="small"
-                    color="primary"
-                    variant="contained"
-                    disabled={sending || uploadingImageOrFileProgress > 0 || generatingFile}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      submitForm();
-                    }}
-                  >
-                    {sending ? (
-                      <>
-                        <CircularProgress color="inherit" size={14} style={{ marginRight: '10px' }} />
-                        Sending ...{' '}
-                      </>
-                    ) : (
-                      'send'
-                    )}
-                  </Button>
+                  {!emailId && (
+                    <Button
+                      type="button"
+                      size="small"
+                      color="primary"
+                      variant="contained"
+                      disabled={sending || uploadingImageOrFileProgress > 0 || generatingFile}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        submitForm();
+                      }}
+                    >
+                      {sending ? (
+                        <>
+                          <CircularProgress color="inherit" size={14} style={{ marginRight: '10px' }} />
+                          Sending ...{' '}
+                        </>
+                      ) : (
+                        'send'
+                      )}
+                    </Button>
+                  )}
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog

@@ -307,7 +307,7 @@ const DoaDialog = ({
                       <ToggleButtonGroup size="small" value={filter} exclusive onChange={handleFilter}>
                         {DOAType.map((k, index) => {
                           return (
-                            <ToggleButton style={{width:80}} value={k.key} key={index}>
+                            <ToggleButton style={{ width: 80 }} value={k.key} key={index}>
                               {k.key}
                             </ToggleButton>
                           );
@@ -318,14 +318,14 @@ const DoaDialog = ({
                       <ToggleButtonGroup size="small" value={selectedDoaApprove} exclusive onChange={handleDOAAproveTypeFilter}>
                         {DoaApproveType.map((k, index) => {
                           return (
-                            <ToggleButton style={{width:80}} value={k.key} key={index}>
-                              {k.key} 
+                            <ToggleButton style={{ width: 80 }} value={k.key} key={index}>
+                              {k.key}
                             </ToggleButton>
                           );
                         })}
                       </ToggleButtonGroup>
                     </Grid>
-                    <Grid item  xs={6} md={3} sm={6} >
+                    <Grid item xs={6} md={3} sm={6} >
                       {selectedType === 2 && (
                         <>
                           <TextField
@@ -468,7 +468,7 @@ const DoaDialog = ({
                                               </Grid>
                                               {selectedType === 2 && (
                                                 <Grid item xs={6} sm={3} md={3}>
-                                                  <Field
+                                                  {/* <Field
                                                     fullWidth
                                                     InputProps={{
                                                       startAdornment: (
@@ -482,6 +482,33 @@ const DoaDialog = ({
                                                     type="text"
                                                     size="small"
                                                     component={TextField}
+                                                    name="amount"
+                                                    placeholder="Enter Amount"
+                                                    label="Enter Amount"
+                                                    value={userVal.amount}
+                                                    onChange={(e) => {
+                                                      arrayHelpers.replace(index, {
+                                                        ...values.users[index],
+                                                        ['amount']: e.target.value.replace(/[^0-9]/g, '')
+                                                      });
+                                                    }}
+                                                    error={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined}
+                                                    helperText={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined ? " User is Required" : ""}
+                                                    required
+                                                  /> */}
+                                                  <TextField
+                                                    fullWidth
+                                                    InputProps={{
+                                                      startAdornment: (
+                                                        <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                                                      )
+                                                    }}
+                                                    // startAdornment={
+                                                    //   currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''
+                                                    // }
+                                                    variant="outlined"
+                                                    type="text"
+                                                    size="small"
                                                     name="amount"
                                                     placeholder="Enter Amount"
                                                     label="Enter Amount"

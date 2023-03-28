@@ -7,7 +7,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import axiosInstance from 'src/axios/axiosInstance';
 import { productInventory } from '../../../constants/helpers';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form } from 'formik';
 import { Autocomplete } from '@material-ui/lab';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';

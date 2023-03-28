@@ -24,9 +24,8 @@ import { read, utils, writeFile } from 'xlsx';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { capitalize } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormatForInputControl, productInventory } from '../../../constants/helpers';
+import { convertDateInDateTime, dateFormatForInputControl, productInventory } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import MomentUtils from '@date-io/moment';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -254,7 +253,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
         >
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
-              <MuiPickersUtilsProvider utils={MomentUtils}>
+              <MuiPickersUtilsProvider utils={DateUtils}>
                 <CustomDialogHeader
                   title={`${capitalize(type)} Inventory`}
                   showRequiredLabel={true}
@@ -311,40 +310,39 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                     </Box>
                   ) : null}
                   <Box m={1}>
-                    <MuiPickersUtilsProvider utils={DateUtils}>
-                      <KeyboardDatePicker
-                        {...(lockDate ? { minDate: lockDate } : {})}
-                        fullWidth
-                        size="small"
-                        margin="dense"
-                        autoOk
-                        required
-                        variant="inline"
-                        inputVariant="outlined"
-                        value={values.customDate}
-                        name="customDate"
-                        placeholder={type === 'add' ? 'Receive Date' : 'Remove Date'}
-                        label="Custom Date"
-                        format={dateFormatForInputControl}
-                        maxDate={new Date()}
-                        onChange={(value) => {
-                          setFieldValue('customDate', value);
-                          if (type === 'remove' && product.length === 1) {
-                            var date = moment(value);
-                            if (date.isValid()) {
-                              axiosInstance()
-                                .get(`${productInventory.api}/inventory-at-date?date=${value}&warehouse=${warehouse}&product=${product[0]._id}`)
-                                .then(({ data: { data } }) => {
-                                  setAvailableQtyOnRemoveDate(data);
-                                })
-                                .catch((err) => {
-                                  toastConfig.setToastConfig(err);
-                                });
-                            }
+                    <KeyboardDatePicker
+                      {...(lockDate ? { minDate: lockDate } : {})}
+                      fullWidth
+                      size="small"
+                      margin="dense"
+                      autoOk
+                      required
+                      variant="inline"
+                      inputVariant="outlined"
+                      value={values.customDate}
+                      name="customDate"
+                      placeholder={type === 'add' ? 'Receive Date' : 'Remove Date'}
+                      label="Custom Date"
+                      format={dateFormatForInputControl}
+                      maxDate={new Date()}
+                      onChange={(value) => {
+                        var newDate = convertDateInDateTime(value);
+                        setFieldValue('customDate', newDate);
+                        if (type === 'remove' && product.length === 1) {
+                          var date = moment(newDate);
+                          if (date.isValid()) {
+                            axiosInstance()
+                              .get(`${productInventory.api}/inventory-at-date?date=${newDate}&warehouse=${warehouse}&product=${product[0]._id}`)
+                              .then(({ data: { data } }) => {
+                                setAvailableQtyOnRemoveDate(data);
+                              })
+                              .catch((err) => {
+                                toastConfig.setToastConfig(err);
+                              });
                           }
-                        }}
-                      />
-                    </MuiPickersUtilsProvider>
+                        }
+                      }}
+                    />
                     {availableQtyOnRemoveDate || availableQtyOnRemoveDate === 0 ? (
                       <Typography variant="caption">{`Inventory on custom date : ${availableQtyOnRemoveDate}`}</Typography>
                     ) : null}

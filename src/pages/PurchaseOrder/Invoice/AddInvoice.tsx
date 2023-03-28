@@ -5,13 +5,12 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, purchaseOrder } from '../../../constants/helpers';
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid, TextField } from '@material-ui/core';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { TextField as TextFieldFormik } from 'formik-material-ui';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form } from 'formik';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { dateFormat } from '../../../constants/helpers';
 
@@ -101,8 +100,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
               <CustomDialogContent>
                 <Grid container spacing={2}>
                   <Grid xs={12} md={12} sm={12} item>
-                    <Field
-                      component={TextFieldFormik}
+                    <TextField
                       margin="dense"
                       type="text"
                       label="Invoice Number"

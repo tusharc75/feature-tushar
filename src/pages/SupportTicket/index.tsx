@@ -14,7 +14,7 @@ import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { MdAdd } from 'react-icons/md';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage } from 'src/constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
 import { Link } from 'react-router-dom';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -409,6 +409,8 @@ const SupportTicket = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchSupportTicketData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.supportTicket}
             />
           )
         ) : null}

@@ -423,6 +423,8 @@ const EmployeeMaster = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchEmployeeMasterData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.employeeMaster}
             />
           )
         ) : null}
