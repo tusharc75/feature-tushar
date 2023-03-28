@@ -9,7 +9,8 @@ import {
   prepareDataForGrid,
   getLocalStorageArrayData,
   removeLocalStorage,
-  RESOURCE_LABEL
+  RESOURCE_LABEL,
+  sidebarResource
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -504,7 +505,7 @@ const Job = () => {
                   refreshGrid={fetchJob}
                   showOnlyShowFilteredRecordSwitch={true}
                   showFilters={true}
-                  resource={RESOURCE_LABEL.job}
+                  resource={sidebarResource.job}
                 />
               )
             ) : null}

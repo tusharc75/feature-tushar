@@ -419,6 +419,8 @@ const FieldTicket = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchFieldTicketData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.fieldTicket}
             />
           )
         ) : null}

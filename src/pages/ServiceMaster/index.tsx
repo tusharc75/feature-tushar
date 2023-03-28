@@ -19,7 +19,8 @@ import {
   getLocalStorageArrayData,
   serviceMaster,
   removeLocalStorage,
-  RESOURCE_LABEL
+  RESOURCE_LABEL,
+  sidebarResource
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -467,6 +468,8 @@ const ServiceMaster = () => {
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchData}
                 showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.serviceMaster}
               />
             )
           ) : null

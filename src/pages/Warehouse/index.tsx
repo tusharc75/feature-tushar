@@ -554,6 +554,8 @@ const Warehouse = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchWarehouses}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.warehouse}
             /> : null}
 
         {showDeleteConfirmBox && (

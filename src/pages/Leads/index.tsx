@@ -10,7 +10,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import { leadDetailPage } from '../../routes/Lead';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, isObjectEmpty, processFieldName } from '../../constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, processFieldName, sidebarResource } from '../../constants/helpers';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import { HiUserGroup } from 'react-icons/hi';
 import { lead, prepareDataForGrid } from '../../constants/helpers';
@@ -669,6 +669,9 @@ const Leads = () => {
               loading={loading}
               renderedFrom={leadResource}
               refreshGrid={fetchLeads}
+              showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.lead}
             />
           )
         ) : null}

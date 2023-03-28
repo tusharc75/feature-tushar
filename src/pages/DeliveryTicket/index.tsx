@@ -505,6 +505,8 @@ const DeliveryTicket = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchDeliveryTicket}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.deliveryTicket}
             />
           ) : null}
 

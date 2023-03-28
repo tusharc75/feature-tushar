@@ -12,7 +12,7 @@ import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CreateRole from './CreateRole';
 import { PERMISSION } from '../../constants/Roles';
-import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
+import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import RoleHeader from './RoleHeader';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
@@ -418,6 +418,9 @@ const Roles: FC = () => {
               isClientSideGrid={true}
               refreshGrid={fetchRoles}
               renderedFrom={renderedFrom}
+              showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.role}
             />
           )}
         </CustomContainer>
