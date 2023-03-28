@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import { Box, Grid, Button, Menu, MenuItem } from '@material-ui/core';
-import { Link, useParams, useLocation } from 'react-router-dom';
-import { product, isObjectEmpty, prepareDataForGrid } from '../../../constants/helpers';
+import { product, prepareDataForGrid } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { Delete, ExpandMore } from '@material-ui/icons';
@@ -12,7 +11,7 @@ import AssignProductDialog from '../../../components/AssignRolesDialog/AssignPro
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
+import useColumns, { getFrameworkComponents } from '../../../constants/useColumns';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -129,7 +128,6 @@ function Parts({ id }) {
           ...tempFrameworkComponent,
           actionsRenderer: ActionsRenderer
         });
-        columns = [...columns, ...getStaticFields()];
         setColumns([...defaultColumns, ...columns]);
       });
   };
@@ -239,8 +237,6 @@ function Parts({ id }) {
                   fetchBOMData();
                 }}
                 isExportAllOrSomeFeature={true}
-                //   total={rowCount}
-                //   recordsToExport={selectedRecords.length}
                 ids={[]}
                 additionalParams={`productId=${id}`}
               />

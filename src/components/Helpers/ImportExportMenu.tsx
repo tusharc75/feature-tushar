@@ -15,7 +15,7 @@ const ImportExportMenu = ({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -76,6 +76,7 @@ const ImportExportMenu = ({
             });
             afterImportCompleted();
           }
+          handleClose()
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -191,8 +192,8 @@ const ImportExportMenu = ({
         }}
       >
         {permissions?.isCreate && !onlyExport && (
-          <MenuItem>
-            <label htmlFor="importFromExcel">
+          <MenuItem  >
+            <label htmlFor="importFromExcel" style={{ cursor: "pointer" }}>
               {ImportInput}
               Import from Excel
             </label>

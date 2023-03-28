@@ -305,7 +305,7 @@ const ProductRepairType = (props: Props) => {
               loading={loading}
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
-              showOnlyShowFilteredRecordSwitch={true}
+              showOnlyShowFilteredRecordSwitch={false}
             />
           )
         ) : (

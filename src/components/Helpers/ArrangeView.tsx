@@ -26,6 +26,8 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
   const [preRows, setPreRows] = React.useState([]);
   const [postRows, setPostRows] = React.useState([]);
 
+  console.log(data)
+
   useEffect(() => {
     setPreRows(data?.filter((e) => e.preWork)?.sort((a, b) => a.order - b.order));
     setPostRows(data?.filter((e) => !e.preWork)?.sort((a, b) => a.order - b.order));
@@ -56,7 +58,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
           [hoverIndex, 0, dragCard]
         ]
       });
-      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({...n, order: i + 1}))
+      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 }))
       setPreRows(updatedIndexColumns);
     },
     [preRows]
@@ -77,7 +79,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
           [hoverIndex, 0, dragCard]
         ]
       });
-      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({...n, order: i + 1 + preRows.length}))
+      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 + preRows.length }))
       setPostRows(updatedIndexColumns);
     },
     [postRows]
@@ -114,7 +116,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
           {(preRows?.length > 0) &&
             <Box mb={2} p={1} border={1} borderColor="grey.300" bgcolor="grey.100">
-              <Typography variant="subtitle2" gutterBottom> Pre Work</Typography>
+              {postRows?.length > 0 ? <Typography variant="subtitle2" gutterBottom>Pre Work</Typography> : null}
               {preRows?.length && (
                 preRows?.map((column: any, index) => (
                   <RenderListItem
@@ -174,7 +176,7 @@ interface DragItem {
 
 const RenderListItem = ({ column, moveItem, id, index, onChangeValue }) => {
   const ref = React.useRef<HTMLDivElement>(null);
-  const [{ handlerId}, drop] = useDrop({
+  const [{ handlerId }, drop] = useDrop({
     accept: ItemTypes.CARD,
     collect(monitor) {
       return {

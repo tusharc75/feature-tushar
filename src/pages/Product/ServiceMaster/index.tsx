@@ -46,6 +46,7 @@ const ServiceMaster = (props: Props) => {
   const [arrangeView, setArrangeView] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [orignalData, setOrignalData] = useState([]);
 
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
@@ -114,6 +115,7 @@ const ServiceMaster = (props: Props) => {
     axiosInstance()
       .get(`${routes.product.path}/${id}/service-master`)
       .then(({ data: { data } }) => {
+        setOrignalData([...data])
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['preWork'] = u?.preWork ? 'Yes' : 'No';
@@ -371,8 +373,6 @@ const ServiceMaster = (props: Props) => {
                   fetchData();
                 }}
                 isExportAllOrSomeFeature={true}
-                total={rowCount}
-                recordsToExport={selectedRecords.length}
                 ids={[]}
                 additionalParams={`productId=${id}`}
               />
@@ -423,6 +423,7 @@ const ServiceMaster = (props: Props) => {
             loading={loading}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
+            refreshGrid={fetchData}
           />
         )
       ) : (
@@ -433,7 +434,7 @@ const ServiceMaster = (props: Props) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.serviceMaster?.title} ? `}
+          message={`Are you sure you want to delete this ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -454,7 +455,7 @@ const ServiceMaster = (props: Props) => {
       {arrangeView && (
         <ArrangeView
           data={
-            dataRows?.map((d) => {
+            orignalData?.map((d) => {
               return { _id: d?._id, name: d?.serviceName, order: d?.order, preWork: d?.preWork };
             }) || []
           }

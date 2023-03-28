@@ -315,8 +315,6 @@ const ServicePackage = ({ renderedFrom, productId }) => {
                   fetchData();
                 }}
                 isExportAllOrSomeFeature={true}
-                //   total={rowCount}
-                //   recordsToExport={selectedRecords.length}
                 ids={[]}
                 additionalParams={`productId=${productId}`}
               />
@@ -366,8 +364,9 @@ const ServicePackage = ({ renderedFrom, productId }) => {
             actionWidth={100}
             loading={loading}
             renderedFrom={renderedFrom}
+            isClientSideGrid={true}
             refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
+            showOnlyShowFilteredRecordSwitch={false}
           />
         )
       ) : (

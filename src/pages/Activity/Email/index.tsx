@@ -34,6 +34,7 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import { Autocomplete } from '@material-ui/lab';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
+import { ViewEmail } from 'src/components/Activity/Email/ViewEmail';
 
 const tabs = {
   Inbox: 1,
@@ -58,6 +59,7 @@ const Email = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [openViewEmail, setOpenViewEmail] = useState(false);
   const [emailId, setEmailId] = useState(null);
   const [currentTab, setCurrentTab] = useState(1);
   const [emailUsersOptions, setEmailUsersOptions] = useState([]);
@@ -68,6 +70,7 @@ const Email = () => {
   const columnState = JSON.parse(localStorage.getItem('emailPage'));
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [fullScreenViewEmail, setFullScreenViewEmail] = useState(isMobile || isTablet);
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = 'emailPage_selected';
@@ -241,7 +244,7 @@ const Email = () => {
       className="link cursor-pointer"
       onClick={(e) => {
         if (permissions?.email?.isUpdate) {
-          setOpen(true);
+          setOpenViewEmail(true);
           setEmailId(params.data.id);
         }
       }}
@@ -389,6 +392,11 @@ const Email = () => {
   const handleClose = () => {
     setEmailId(null);
     setOpen(false);
+  };
+
+  const handleCloseViewEmail = () => {
+    setEmailId(null);
+    setOpenViewEmail(false);
   };
 
   const handleTab = (e, currentTab) => {
@@ -601,7 +609,6 @@ const Email = () => {
             fullWidth
           >
             <CreateEmail2
-              emailId={emailId}
               handleClose={() => {
                 handleClose();
                 setFullScreen(false);
@@ -618,6 +625,45 @@ const Email = () => {
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+            />
+          </Dialog>
+        ) : null}
+
+        {openViewEmail ? (
+          <Dialog
+            open={openViewEmail}
+            fullScreen={fullScreenViewEmail || isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+            aria-labelledby="customized-dialog-title"
+            maxWidth="md"
+            onClose={(e, reason) => {
+              if (reason !== 'backdropClick') {
+                handleCloseViewEmail();
+                setFullScreenViewEmail(false);
+              }
+            }}
+            fullWidth
+          >
+            <ViewEmail
+              emailId={emailId}
+              handleClose={() => {
+                handleCloseViewEmail();
+                setFullScreenViewEmail(false);
+              }}
+              fetchData={fetchEmails}
+              relatedTo={[
+                {
+                  type: resource && selectedResourceData ? resource.optionValue : 'user',
+                  referenceId: resource && selectedResourceData ? selectedResourceData.optionValue : user?.user?._id,
+                  access: true
+                }
+              ]}
+              options={emailUsersOptions}
+              isMinimized={!fullScreenViewEmail}
+              onMinimizeMaximize={() => {
+                setFullScreenViewEmail((prevState) => !prevState);
               }}
               showManimizeMaximize={true}
             />
