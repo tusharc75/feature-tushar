@@ -411,6 +411,9 @@ const Address = () => {
               loading={loading}
               renderedFrom={renderedFrom}
               refreshGrid={fetchAddresses}
+              showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.address}
             />
           )
         ) : null}

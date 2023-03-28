@@ -1069,6 +1069,8 @@ export default function Contact(props) {
               renderedFrom={renderedFrom}
               refreshGrid={getContacts}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource[contactResource]}
             />
           ))}
 

@@ -526,6 +526,8 @@ const SalesOrder = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchSalesOrder}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.salesOrder}
             />
           ) : null}
         {showDeleteWarningConfirmBox ? (

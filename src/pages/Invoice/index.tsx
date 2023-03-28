@@ -529,6 +529,8 @@ const Invoice = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchInvoiceData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.invoice}
             />
           )
         ) : null}

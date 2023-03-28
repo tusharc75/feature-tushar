@@ -1422,6 +1422,8 @@ export default function Account(props) {
               allowAction={!isOffline}
               allowSelection={!isOffline}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource[accountResource]}
             />
           )
         ) : null}
