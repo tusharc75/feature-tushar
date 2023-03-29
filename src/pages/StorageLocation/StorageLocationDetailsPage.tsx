@@ -72,7 +72,7 @@ const StorageLocationDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.storageLocation, { title: storageLocationData?.storageLocation }]} />
+          <CustomBreadCrumbs routes={[routes.storageLocation, { title: storageLocationData?.storageLocationName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

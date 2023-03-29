@@ -104,7 +104,7 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
                     message: data.message
                 });
                 setLoading(false);
-                history.push(`${routes.storageLocation.path}/detail/${data?.data?._id}`);
+                history.push(`${routes.storageLocation.path}/detail/${data?.data[0]._id}`);
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
@@ -154,7 +154,7 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
                     setFieldValue,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={storageLocationId ? (isClone ? "Clone" : `Update ${storageLocationData?.storageLocation}`) : "Create " + routes.storageLocation.title}
+                        <CustomDialogHeader title={storageLocationId ? (isClone ? "Clone" : `Update ${storageLocationData?.storageLocationName}`) : "Create " + routes.storageLocation.title}
                             onClose={() => {
                                 if (!isEqual(ref.current.values, initialData.values)) {
                                     setShowConfirmDialog(true)
