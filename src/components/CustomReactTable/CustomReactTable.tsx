@@ -145,6 +145,12 @@ export default function CustomReactTable({
   const [isCellEditing, setIsCellEditing] = React.useState(false);
   const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
 
+  useEffect(() => {
+    setIsCellEditing(false);
+    setCurrentRowEditing(null);
+    setCellValue(null);
+  }, [data]);
+
   const newColumns = React.useMemo(
     () =>
       hideExpander
