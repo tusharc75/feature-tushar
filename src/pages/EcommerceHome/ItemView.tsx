@@ -10,7 +10,6 @@ interface Item {
 }
 
 const ItemView = ({ itemData, label, handleRemove, id, findCard, moveCard, setFormData }) => {
-
   const originalIndex = findCard(itemData?._id).index;
 
   const [editDialog, setEditDialog] = useState(false);
@@ -45,35 +44,44 @@ const ItemView = ({ itemData, label, handleRemove, id, findCard, moveCard, setFo
     [findCard, moveCard]
   );
 
-  return (<Grid ref={(node) => drag(drop(node))} item xs={6} sm={itemData?.column} md={itemData?.column}>
-    <Paper>
-      <Box p={2}>
-        <Typography variant="body1" style={{ fontWeight: 500 }} className="text-truncate">
-          {label}
-        </Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <HtmlTooltip title="Edit">
-            <IconButton onClick={() => { setEditDialog(true) }} style={{ display: 'flex', justifyContent: 'flex-end' }} size="small">
-              <Edit color="primary" />
-            </IconButton>
-          </HtmlTooltip>
-          <HtmlTooltip title="Delete">
-            <IconButton onClick={() => handleRemove(id)} style={{ display: 'flex', justifyContent: 'flex-end' }} size="small">
-              <Delete color="error" />
-            </IconButton>
-          </HtmlTooltip>
+  return (
+    <Grid ref={(node) => drag(drop(node))} item xs={6} sm={itemData?.column} md={itemData?.column}>
+      <Paper>
+        <Box p={2}>
+          <Typography variant="body1" style={{ fontWeight: 500 }} className="text-truncate">
+            {label}
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <HtmlTooltip title="Edit">
+              <IconButton
+                onClick={() => {
+                  setEditDialog(true);
+                }}
+                style={{ display: 'flex', justifyContent: 'flex-end' }}
+                size="small"
+              >
+                <Edit color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip title="Delete">
+              <IconButton onClick={() => handleRemove(id)} style={{ display: 'flex', justifyContent: 'flex-end' }} size="small">
+                <Delete color="error" />
+              </IconButton>
+            </HtmlTooltip>
+          </Box>
         </Box>
-      </Box>
-    </Paper>
-    {editDialog &&
-      <ConfigureItemDialog
-        open={editDialog}
-        onClose={() => { setEditDialog(false) }}
-        itemData={itemData}
-        setFormData={setFormData}
-      />}
-  </Grid>
-
+      </Paper>
+      {editDialog && (
+        <ConfigureItemDialog
+          open={editDialog}
+          onClose={() => {
+            setEditDialog(false);
+          }}
+          itemData={itemData}
+          setFormData={setFormData}
+        />
+      )}
+    </Grid>
   );
 };
 
