@@ -93,21 +93,15 @@ const StorageLocationDetailsPage = () => {
         </Box>
       </Box>
       <Box className='detail-container-v1'>
-        <Grid container spacing={1}>
-        <Grid item xs={12} sm={12} md={8} lg={8}>
-          <div style={{ height: '650px' }}>
-            <Box>
-              {storageLocationData && fields.length ? (
-                <DetailsPage data={storageLocationData} fields={fields} />
-              ) : (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              )}
-            </Box>
-          </div>
-        </Grid>
-        </Grid>
+        <Box>
+          {storageLocationData && fields.length ? (
+            <DetailsPage data={storageLocationData} fields={fields} />
+          ) : (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          )}
+        </Box>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
