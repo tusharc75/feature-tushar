@@ -242,7 +242,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     setShowTicketDialog({ open: true, data: data });
   };
 
-  const handelReceiveAssets = () => {
+  const handelReceive = () => {
     setIsLoading(true);
     let data = {};
     const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
@@ -438,7 +438,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           onClose={() => {
             setShowConfirmBoxReceive(false);
           }}
-          onOk={handelReceiveAssets}
+          onOk={handelReceive}
         />
       )}
     </Fragment>
