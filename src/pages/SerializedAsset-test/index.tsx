@@ -144,46 +144,46 @@ const SerializedAssetTest = () => {
 
   const ActionsRenderer = [
     {
-    accessor: 'action',
-    Header: '',
-    minWidth: 100,
-    width: 100,
-    sticky: 'right',
-    disableFilters: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <>
-        {permissions?.serializedAsset?.isCreate && (
-          <HtmlTooltip title="Clone">
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              onClick={() => {
-                setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: row.original._id });
-              }}
-            >
-              <FileCopyIcon color="primary" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-        {permissions?.serializedAsset?.isDelete && (
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon color="error" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-      </>
-    )
-  }
-]
+      accessor: 'action',
+      Header: '',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          {permissions?.serializedAsset?.isCreate && (
+            <HtmlTooltip title="Clone">
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                onClick={() => {
+                  setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: row.original._id });
+                }}
+              >
+                <FileCopyIcon color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          {permissions?.serializedAsset?.isDelete && (
+            <HtmlTooltip title="Delete">
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                onClick={() => {
+                  setDeleteRecord(row.original);
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                <DeleteIcon color="error" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+        </>
+      )
+    }
+  ]
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -371,7 +371,10 @@ const SerializedAssetTest = () => {
   };
 
   const handleStatusUpdate = (status) => {
-    const ids = selectedRecords.map((d) => d._id);
+    const ids = selectedRecords.map((d) => ({
+      _id: d._id,
+      currentStatus: d.status
+    }));
     axiosInstance()
       .put(`${serializedAsset.api}/update-status`, {
         assets: ids,

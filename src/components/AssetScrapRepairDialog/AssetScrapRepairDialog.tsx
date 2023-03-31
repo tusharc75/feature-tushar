@@ -70,7 +70,10 @@ export default function AssetScrapRepairDialog({ statusToUpdate, setStatusToUpda
                         setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
                         axiosInstance().put(`${serializedAsset.api}/update-status`, {
                             comment: statusToUpdate.message,
-                            assets: selectedRecords.map(m => m?._id ?? m?.id),
+                            assets: selectedRecords.map(m => ({
+                                _id: m?._id ?? m?.id,
+                                currentStatus: m.status
+                            })),
                             status: statusToUpdate.status,
                             reference: {
                                 _id: id,
