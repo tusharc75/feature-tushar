@@ -485,7 +485,7 @@ const Quotation = ({
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: 'Process Sucessfully'
+          message: 'Processed Quote Successfully'
         });
       })
       .catch((error) => {
