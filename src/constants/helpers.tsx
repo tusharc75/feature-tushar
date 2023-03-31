@@ -54,7 +54,7 @@ export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Invoice'];
 export const invoiceProcessSteps = ['Add Products', 'Ready To Invoice'];
 export const jobProcessSteps = ['Add', 'Fleet'];
-export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Send To Customer', 'End'];
+export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Quote Approval', 'End'];
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
   'Add Products',
@@ -2212,6 +2212,12 @@ export const QUOTATION_STATUS = {
   rejectByCustomer: 'Rejected by Customer',
   converted: 'Converted',
 };
+
+export const QUOTATION_TYPE = {
+  salesOrder: 'Sales Order',
+  rentalJob: 'Rental Job',
+  repairOrder: 'Repair Order'
+}
 
 export const WORKORDER_SERVICE_COLOR = {
   preWork: 'rgba(254, 249, 230, 1)',

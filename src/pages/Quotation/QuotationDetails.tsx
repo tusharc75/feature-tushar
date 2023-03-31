@@ -14,7 +14,8 @@ import {
   quotation,
   ACTIVITY_RESOURCE,
   quotationProcessSteps,
-  QUOTATION_STATUS
+  QUOTATION_STATUS,
+  QUOTATION_TYPE
 } from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import TabPanel from '../../components/TabPanel';
@@ -245,6 +246,7 @@ const QuotationDetails = () => {
   const handleConvert = () => {
     axiosInstance().post(`${quotation.api}/${quotationData._id}/convert`)
       .then(({ data: { data } }) => {
+        console.log(data)
         fetchQuotationData();
         setConvertConfirmBox(false);
         toastConfig.setToastConfig({
@@ -252,6 +254,15 @@ const QuotationDetails = () => {
           type: 'success',
           message: `Converted Successfully`
         });
+        if (quotationData?.type === QUOTATION_TYPE.rentalJob) {
+          history.push(`${routes.rentalManagementDetail.path}/${data?._id}`)
+        }
+        if (quotationData?.type === QUOTATION_TYPE.salesOrder) {
+          history.push(`${routes.salesOrderDetail.path}/${data?._id}`)
+        }
+        if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
+          history.push(`${routes.repairOrderDetail.path}/${data?._id}`)
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -359,6 +370,7 @@ const QuotationDetails = () => {
                       <Button
                         onClick={() => {
                           setConvertConfirmBox(true);
+                          closeActionsAction();
                         }}
                         variant="text"
                         type="button"
