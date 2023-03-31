@@ -893,7 +893,15 @@ const routes = {
         ? storedRoutes.fleetReceiver?.title
         : RESOURCE_LABEL.fleetReceiver,
     path: '/fleet-receiver'
-  }
+  },
+  transactionLock: {
+    title: storedRoutes && storedRoutes.transactionLock && storedRoutes.transactionLock.title ? storedRoutes.transactionLock?.title : RESOURCE_LABEL.transactionLock,
+    path: '/transaction-lock'
+  },
+  transactionLockDetail: {
+    title: storedRoutes && storedRoutes.transactionLock && storedRoutes.transactionLock.title ? storedRoutes.transactionLock?.title : RESOURCE_LABEL.transactionLock,
+    path: '/transaction-lock/detail'
+  },
 };
 
 export default routes;

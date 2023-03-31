@@ -246,7 +246,8 @@ export const sidebarResource = {
   job: 'Job',
   fleetDispatch: 'Fleet Dispatch',
   fleetReceiver: 'Fleet Receiver',
-  storageLocation: 'Storage Location'
+  storageLocation: 'Storage Location',
+  transactionLock: 'Transaction Lock'
 };
 
 export const primaryFields = {
@@ -357,7 +358,8 @@ export const RESOURCE_LABEL = {
   fleetMaster: `Fleet Master`,
   job: 'Job',
   fleetReceiver: 'Fleet Receiver',
-  storageLocation: 'Storage Location'
+  storageLocation: 'Storage Location',
+  transactionLock: 'Transaction Lock',
 };
 
 export const CHILD_RESOURCE = {
