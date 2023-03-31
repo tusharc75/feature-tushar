@@ -511,7 +511,13 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
         <Box display="flex">
           <div className="d-flex gap-2">
             <span>
-              <Button variant={'outlined'} color="default" size="small" onClick={openActions} aria-controls="action-menu">
+              <Button
+                variant={'outlined'}
+                color="default"
+                size="small"
+                disabled={rowsData?.length > 0 ? false : true}
+                onClick={openActions}
+                aria-controls="action-menu">
                 {' '}
                 {'Actions'} <ExpandMore />
               </Button>
@@ -667,7 +673,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           }}
         />
       )}
-       {addDialog.open && addDialog.type === 'service' && (
+      {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
           reference={'quotation'}
           referenceId={quotationData?._id}
