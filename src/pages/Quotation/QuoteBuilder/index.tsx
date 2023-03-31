@@ -213,7 +213,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: sendMail ? 'Sent to Customer Sucessfully' : 'Process Quote Sucessfully'
+          message: sendMail ? 'Sent to Customer Sucessfully' : 'Processed Quote Successfully'
         });
       })
       .catch((error) => {
