@@ -54,7 +54,7 @@ export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Invoice'];
 export const invoiceProcessSteps = ['Add Products', 'Ready To Invoice'];
 export const jobProcessSteps = ['Add', 'Fleet'];
-export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Send To Customer', 'End'];
+export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Quote Approval', 'End'];
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
   'Add Products',
@@ -246,7 +246,8 @@ export const sidebarResource = {
   job: 'Job',
   fleetDispatch: 'Fleet Dispatch',
   fleetReceiver: 'Fleet Receiver',
-  storageLocation: 'Storage Location'
+  storageLocation: 'Storage Location',
+  transactionLock: 'Transaction Lock'
 };
 
 export const primaryFields = {
@@ -357,7 +358,8 @@ export const RESOURCE_LABEL = {
   fleetMaster: `Fleet Master`,
   job: 'Job',
   fleetReceiver: 'Fleet Receiver',
-  storageLocation: 'Storage Location'
+  storageLocation: 'Storage Location',
+  transactionLock: 'Transaction Lock',
 };
 
 export const CHILD_RESOURCE = {
@@ -2210,6 +2212,12 @@ export const QUOTATION_STATUS = {
   rejectByCustomer: 'Rejected by Customer',
   converted: 'Converted',
 };
+
+export const QUOTATION_TYPE = {
+  salesOrder: 'Sales Order',
+  rentalJob: 'Rental Job',
+  repairOrder: 'Repair Order'
+}
 
 export const WORKORDER_SERVICE_COLOR = {
   preWork: 'rgba(254, 249, 230, 1)',

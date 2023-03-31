@@ -337,7 +337,12 @@ const SerializedAsset = () => {
   };
 
   const handleStatusUpdate = (status) => {
-    const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => d._id);
+    const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => (
+      {
+        _id: d._id,
+        currentStatus: d.status
+      }
+    ));
     axiosInstance()
       .put(`${serializedAsset.api}/update-status`, {
         assets: ids,

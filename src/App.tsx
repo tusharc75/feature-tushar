@@ -201,6 +201,8 @@ import JobDetail from './pages/Job/JobDetail';
 import FleetReceiver from './pages/FleetReceiver';
 import StorageLocationDetailsPage from './pages/StorageLocation/StorageLocationDetailsPage';
 import StorageLocation from './pages/StorageLocation';
+import TransactionLock from './pages/TransactionLock';
+import TransactionLockDetail from './pages/TransactionLock/TransactionLockDetail';
 
 var notificationInterval: any = null;
 
@@ -992,6 +994,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.storageLocationDetail.path}/:id`}>
               <StorageLocationDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.transactionLock.path}`}>
+              <TransactionLock />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.transactionLockDetail.path}/:id`}>
+              <TransactionLockDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

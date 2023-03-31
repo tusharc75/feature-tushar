@@ -349,23 +349,46 @@ const StorageLocation = () => {
                                     }} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary" className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
                                         startIcon={isMobile && !isTablet ? null : <AddOutlined />}> {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}</Button>
                                 }
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    keepMounted
-                                    getContentAnchorEl={null}
-                                    anchorOrigin={{
-                                        vertical: "bottom",
-                                        horizontal: "left",
+                               {permissions?.storageLocation?.isDelete && (
+                                <>
+                                    <Button
+                                      variant={isMobile && !isTablet ? "text" : "outlined"}
+                                      color="default"
+                                      size="small"
+                                      onClick={openActions}
+                                      disabled={selectedRecords.length ? false : true}
+                                      aria-controls="action-menu"
+                                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                                    >
+                                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                                    </Button>
+                                    <Menu
+                                      anchorEl={anchorEl}
+                                      keepMounted
+                                      getContentAnchorEl={null}
+                                      anchorOrigin={{
+                                      vertical: "bottom",
+                                      horizontal: "left"
                                     }}
-                                    id="action-menu"
-                                    open={Boolean(anchorEl)}
-                                    onClose={closeActions}
-                                >
-                                    {permissions?.storageLocation?.isDelete && <MenuItem onClick={() => {
-                                        closeActions()
-                                        setShowDeleteConfirmBox(true)
-                                    }}>Delete</MenuItem>}
-                                </Menu>
+                                      id="action-menu"
+                                      open={Boolean(anchorEl)}
+                                      onClose={closeActions}
+                                    >
+                                    <MenuItem
+                                       onClick={() => {
+                                       closeActions();
+                                     // eslint-disable-next-line no-lone-blocks
+                                        {
+                                        selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                                        }
+                                       setShowDeleteConfirmBox(true);
+                                        }}
+                                    >
+                                        Delete
+                                     </MenuItem>
+                                    </Menu>
+                                </>
+                                 )}
                             </Grid>
                         </Box>
                     </Grid>
