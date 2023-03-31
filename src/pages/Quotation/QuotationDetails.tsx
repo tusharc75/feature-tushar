@@ -122,27 +122,19 @@ const QuotationDetails = () => {
 
   const getQuotationFields = useMemo(() => {
     let tempQuotationFields = quotationFields;
-    if (quotationData && quotationFields) {
-      if (quotationData["type"] === "Rental Job" || quotationData["type"] === "Repair Order") {
-        tempQuotationFields = quotationFields.filter(d => d?.fieldData?.fieldName !== "expectedCustomerDeliveryDate" && d?.fieldData?.fieldName !== "supplierSuggestedDeliveryDate");
+    if (quotationData && quotationFields.length !== 0) {
+      if (quotationData["type"] === "Rental Job") {
+        tempQuotationFields = tempQuotationFields.filter(d => d?.fieldData?.fieldName !== "expectedCustomerDeliveryDate" && d?.fieldData?.fieldName !== "supplierSuggestedDeliveryDate" && d?.fieldData?.fieldName !== "repairOrder" && d?.fieldData?.fieldName !== "salesOrder");
+      }
+      if (quotationData["type"] === "Repair Order") {
+        tempQuotationFields = tempQuotationFields.filter(d => d?.fieldData?.fieldName !== "expectedCustomerDeliveryDate" && d?.fieldData?.fieldName !== "supplierSuggestedDeliveryDate" && d?.fieldData?.fieldName !== "rentalJob" && d?.fieldData?.fieldName !== "salesOrder");
       }
       if (quotationData["type"] === "Sales Order") {
-        tempQuotationFields = quotationFields.filter(d => d?.fieldData?.fieldName !== "estimateStartDate" && d?.fieldData?.fieldName !== "estimateEndDate");
+        tempQuotationFields = tempQuotationFields.filter(d => d?.fieldData?.fieldName !== "estimateStartDate" && d?.fieldData?.fieldName !== "estimateEndDate" && d?.fieldData?.fieldName !== "repairOrder" && d?.fieldData?.fieldName !== "rentalJob");
       }
     }
     return tempQuotationFields;
   }, [quotationData, quotationFields]);
-
-  useEffect(() => {
-    if (quotationData && quotationFields.length !== 0) {
-      if (quotationData["type"] === "Rental Job" || quotationData["type"] === "Repair Order") {
-        setQuotationFields(prevstate => prevstate.filter(d => d?.fieldData?.fieldName !== "expectedCustomerDeliveryDate" && d?.fieldData?.fieldName !== "supplierSuggestedDeliveryDate"));
-      }
-      if (quotationData["type"] === "Sales Order") {
-        setQuotationFields(prevstate => prevstate.filter(d => d?.fieldData?.fieldName !== "estimateStartDate" && d?.fieldData?.fieldName !== "estimateEndDate"));
-      }
-    }
-  }, [quotationData]);
 
   const getRessourceFields = async () => {
     try {
@@ -305,22 +297,7 @@ const QuotationDetails = () => {
                     {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
                   </Button>
                 </HtmlTooltip>
-                {allowedToEdit && quotationData?.type && quotationData?.status === QUOTATION_STATUS.acceptByCustomer &&
-                  !quotationData?.rentalJob && !quotationData?.repairOrder && !quotationData?.salesOrder &&
-                  <HtmlTooltip title="Convert">
-                    <Button
-                      onClick={() => {
-                        setConvertConfirmBox(true);
-                      }}
-                      variant='outlined'
-                      size="small"
-                      className="mx-1"
-                      color="primary"
-                      startIcon={<CachedIcon />}
-                    >
-                      Convert
-                    </Button>
-                  </HtmlTooltip>}
+
                 {allowedToEdit &&
                   <Button
                     variant="outlined"
@@ -345,6 +322,53 @@ const QuotationDetails = () => {
                   open={Boolean(anchorElAction)}
                   onClose={closeActionsAction}
                 >
+                  {allowedToEdit && (
+                    <MenuItem>
+                      <Button
+                        variant="text"
+                        color="primary"
+                        size="small"
+                        startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
+                        onClick={() => {
+                          handleOpenUpdateDialog();
+                          closeActionsAction();
+                        }}
+                      >
+                        Edit Quote
+                      </Button>
+                    </MenuItem>
+                  )}
+                  <MenuItem>
+                    <Button
+                      disabled={!allowedToEdit || isCloning || loading}
+                      variant="text"
+                      type="button"
+                      size="small"
+                      startIcon={isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />}
+                      onClick={() => {
+                        cloneVersion();
+                        closeActionsAction();
+                      }}
+                    >
+                      {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
+                    </Button>
+                  </MenuItem>
+                  {allowedToEdit && quotationData?.type && quotationData?.status === QUOTATION_STATUS.acceptByCustomer &&
+                    !quotationData?.rentalJob && !quotationData?.repairOrder && !quotationData?.salesOrder &&
+                    <MenuItem>
+                      <Button
+                        onClick={() => {
+                          setConvertConfirmBox(true);
+                        }}
+                        variant='outlined'
+                        size="small"
+                        className="mx-1"
+                        color="primary"
+                        startIcon={<CachedIcon />}
+                      >
+                        Convert to Order
+                      </Button>
+                    </MenuItem>}
                   {permissions?.quotation?.isDelete && (
                     <MenuItem>
                       <Button
@@ -373,37 +397,6 @@ const QuotationDetails = () => {
                         }}
                       >
                         Delete Version-{currentVersion}
-                      </Button>
-                    </MenuItem>
-                  )}
-                  <MenuItem>
-                    <Button
-                      disabled={!allowedToEdit || isCloning || loading}
-                      variant="text"
-                      type="button"
-                      size="small"
-                      startIcon={isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />}
-                      onClick={() => {
-                        cloneVersion();
-                        closeActionsAction();
-                      }}
-                    >
-                      {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
-                    </Button>
-                  </MenuItem>
-                  {allowedToEdit && (
-                    <MenuItem>
-                      <Button
-                        variant="text"
-                        color="primary"
-                        size="small"
-                        startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                        onClick={() => {
-                          handleOpenUpdateDialog();
-                          closeActionsAction();
-                        }}
-                      >
-                        Edit Quote
                       </Button>
                     </MenuItem>
                   )}
