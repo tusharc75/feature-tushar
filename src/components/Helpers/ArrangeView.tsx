@@ -26,8 +26,6 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
   const [preRows, setPreRows] = React.useState([]);
   const [postRows, setPostRows] = React.useState([]);
 
-  console.log(data)
-
   useEffect(() => {
     setPreRows(data?.filter((e) => e.preWork)?.sort((a, b) => a.order - b.order));
     setPostRows(data?.filter((e) => !e.preWork)?.sort((a, b) => a.order - b.order));

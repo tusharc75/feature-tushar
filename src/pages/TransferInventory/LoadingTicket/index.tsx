@@ -26,6 +26,8 @@ import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwip
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map, groupBy } from 'lodash';
 import { AiFillFilePdf } from 'react-icons/ai';
+import ReceiveDialog from './ReceiveDialog';
+
 
 const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive }) => {
 
@@ -39,7 +41,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
   const [downloadingFile, setDownlodingFile] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [columns, setColumns] = useState(null)
 
   useEffect(() => {
@@ -242,32 +243,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     setShowTicketDialog({ open: true, data: data });
   };
 
-  const handelReceive = () => {
-    setIsLoading(true);
-    let data = {};
-    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
-    if (loadingTicketIds.length) {
-      data['_ids'] = loadingTicketIds?.map((e) => e);
-      data['status'] = DELIVERY_TICKET_STATUS.delivered;
-      data['signatures'] = [];
-      axiosInstance()
-        .post(`${deliveryTicket.api}/updatebulk`, data)
-        .then(({ data: { data } }) => {
-          fetchProducts();
-          setShowConfirmBoxReceive(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `Assets Received Successfully`
-          });
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          setIsLoading(false);
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
 
   return (
     <Fragment>
@@ -431,14 +406,15 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         />
       )}
       {showConfirmBoxReceive && (
-        <ConfirmationDialog
-          okBtnLoading={isLoading}
-          open={showConfirmBoxReceive}
-          message={`Are you sure you have received the inventory?`}
-          onClose={() => {
+        <ReceiveDialog
+          handleClose={() => {
             setShowConfirmBoxReceive(false);
           }}
-          onOk={handelReceive}
+          handleSucess={() => {
+            setShowConfirmBoxReceive(false);
+            fetchProducts();
+          }}
+          selectedRecords={selectedRecords}
         />
       )}
     </Fragment>
