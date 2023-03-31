@@ -360,10 +360,9 @@ const QuotationDetails = () => {
                         onClick={() => {
                           setConvertConfirmBox(true);
                         }}
-                        variant='outlined'
+                        variant="text"
+                        type="button"
                         size="small"
-                        className="mx-1"
-                        color="primary"
                         startIcon={<CachedIcon />}
                       >
                         Convert to Order
