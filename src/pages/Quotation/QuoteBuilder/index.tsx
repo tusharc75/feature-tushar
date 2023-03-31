@@ -221,31 +221,55 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
         </Box>
         <Box display="flex">
           {versionData?.processStatus === 'Send To Customer' && (
-            <HtmlTooltip title={'Send to customer'}>
-              <Button
-                variant="contained"
-                size="small"
-                color="primary"
-                disabled={sentToCustomer}
-                onClick={() => {
-                  axiosInstance()
-                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${versionData._id}?sendMail=true`)
-                    .then(() => {
-                      fetchQuotationData(version, false);
-                      toastConfig.setToastConfig({
-                        open: true,
-                        type: 'success',
-                        message: 'Sent to customer Sucessfully'
-                      });
-                    })
-                    .catch((error) => {
-                      toastConfig.setToastConfig(error);
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              disabled={sentToCustomer}
+              onClick={() => {
+                axiosInstance()
+                  .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${versionData._id}?sendMail=false`)
+                  .then(() => {
+                    fetchQuotationData(version, false);
+                    toastConfig.setToastConfig({
+                      open: true,
+                      type: 'success',
+                      message: 'Sent to customer Sucessfully'
                     });
-                }}
-              >
-                Send to Customer
-              </Button>
-            </HtmlTooltip>
+                  })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+              }}
+            >
+              Process Quote
+            </Button>
+          )}
+          <Box p={1} />
+          {versionData?.processStatus === 'Send To Customer' && (
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              disabled={sentToCustomer}
+              onClick={() => {
+                axiosInstance()
+                  .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${versionData._id}?sendMail=true`)
+                  .then(() => {
+                    fetchQuotationData(version, false);
+                    toastConfig.setToastConfig({
+                      open: true,
+                      type: 'success',
+                      message: 'Sent to customer Sucessfully'
+                    });
+                  })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+              }}
+            >
+              Send to Customer
+            </Button>
           )}
           <Box p={1} />
         </Box>
