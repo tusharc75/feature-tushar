@@ -371,7 +371,10 @@ const SerializedAssetTest = () => {
   };
 
   const handleStatusUpdate = (status) => {
-    const ids = selectedRecords.map((d) => d._id);
+    const ids = selectedRecords.map((d) => ({
+      _id: d._id,
+      currentStatus: d.status
+    }));
     axiosInstance()
       .put(`${serializedAsset.api}/update-status`, {
         assets: ids,
