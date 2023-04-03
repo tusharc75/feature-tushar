@@ -293,13 +293,13 @@ const ServiceMaster = () => {
             title={routes.serviceMaster.title}
             extraImportExportLinks={[
               {
-                title: 'Child Product Template',
-                api: `${serviceMaster.api}/unknown/bom/template`,
+                title: 'Consumable Template',
+                api: `${serviceMaster.api}/product/unknown/template`,
                 type: 'download'
               },
               {
-                title: 'Child Product Export',
-                api: `${serviceMaster.api}/unknown/bom/template?export=true${
+                title: 'Consumable Export',
+                api: `${serviceMaster.api}/product/unknown/template?export=true${
                   getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                     ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
                     : ''
@@ -307,46 +307,8 @@ const ServiceMaster = () => {
                 type: 'export'
               },
               {
-                title: 'Child Product Import',
-                api: `${serviceMaster.api}/unknown/bom/import`,
-                type: 'import'
-              },
-              {
-                title: 'Service Template',
-                api: `${serviceMaster.api}/unknown/service-master/template`,
-                type: 'download'
-              },
-              {
-                title: 'Service Export',
-                api: `${serviceMaster.api}/unknown/service-master/template?export=true${
-                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                    : ''
-                }`,
-                type: 'export'
-              },
-              {
-                title: 'Service Import',
-                api: `${serviceMaster.api}/unknown/service-master/import`,
-                type: 'import'
-              },
-              {
-                title: 'Service Package Template',
-                api: `${serviceMaster.api}/unknown/package/template`,
-                type: 'download'
-              },
-              {
-                title: 'Service Package Export',
-                api: `${serviceMaster.api}/unknown/package/template?export=true${
-                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                    : ''
-                }`,
-                type: 'export'
-              },
-              {
-                title: 'Service Package Import',
-                api: `${serviceMaster.api}/unknown/package/import`,
+                title: 'Consumable Import',
+                api: `${serviceMaster.api}/product/unknown/import`,
                 type: 'import'
               }
             ]}
