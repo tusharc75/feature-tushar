@@ -26,15 +26,15 @@ const customNodeStyles = {
     background: '#E6E8F5',
     borderColor: '#9789F0'
   },
-  package: {
-    name: 'Package',
-    background: '#DFFBF5',
-    borderColor: '#66CDB7'
-  },
   product: {
     name: 'Product',
     background: '#E2F8FF',
     borderColor: '#8BCBDF'
+  },
+  package: {
+    name: 'Package',
+    background: '#DFFBF5',
+    borderColor: '#66CDB7'
   },
   service: {
     name: 'Service',
@@ -42,12 +42,12 @@ const customNodeStyles = {
     borderColor: '#FDD33E'
   },
   approve: {
-    name: 'Quotation-Approved',
+    name: 'Quotation-On-Going',
     background: '#EDFFE1',
     borderColor: '#86DB71'
   },
   decline: {
-    name: 'Quotation-Declined',
+    name: 'Quotation-Rejected',
     background: '#FFEAEA',
     borderColor: '#FFA0A0'
   }
@@ -55,7 +55,6 @@ const customNodeStyles = {
 
 const QuotationViews = (props) => {
   const { quoteName, quoteId, status, versionId } = props;
-  console.log(status);
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
   const history = useHistory();
@@ -186,7 +185,7 @@ const QuotationViews = (props) => {
             ref_type: 'quotation',
             ref_id: quoteId,
             label: (
-              <HtmlTooltip arrow placement="top" title={routes.quotation.title}>
+              <HtmlTooltip arrow placement="top" title={status}>
                 <div>
                   <Typography variant="body2">{routes.quotation.title}</Typography>
                   <Typography variant="subtitle2">{quoteName ?? quoteName}</Typography>
