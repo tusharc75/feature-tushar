@@ -257,6 +257,7 @@ function Product({ id }) {
                       ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
                       : []
                   }
+                  additionalParams={`serviceId=${id}`}
                 />
                 {/* <ImportExportLinks
                   permissions={permissions?.serviceMaster}
