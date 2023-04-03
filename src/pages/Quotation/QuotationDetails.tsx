@@ -15,7 +15,8 @@ import {
   ACTIVITY_RESOURCE,
   quotationProcessSteps,
   QUOTATION_STATUS,
-  QUOTATION_TYPE
+  QUOTATION_TYPE,
+  quotationDOAProcessSteps
 } from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import TabPanel from '../../components/TabPanel';
@@ -51,6 +52,7 @@ import QuotationSummeryDialog from './QuotationSummeryDialog';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CachedIcon from '@material-ui/icons/Cached';
+import { checkDOA } from 'src/components/Quotation/helper';
 
 const QuotationDetails = () => {
 
@@ -62,7 +64,7 @@ const QuotationDetails = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
 
-  const { state: { user, permissions } }: any = useData();
+  const { state: { user, permissions, selectedEntity } }: any = useData();
 
   const [loading, setLoading] = useState(false);
   const [quotationData, setQuotationData] = useState(null);
@@ -84,6 +86,7 @@ const QuotationDetails = () => {
   const [currVersionId, setCurrVersionId] = useState(null);
   const [sentToCustomer, setSentToCustomer] = useState(false);
   const [versionStatus, setVersionStatus] = useState(QUOTATION_STATUS.acceptByCustomer);
+  const [processSteps, setProcessSteps] = useState(quotationProcessSteps);
 
 
   const [convertConfirmBox, setConvertConfirmBox] = useState(false);
@@ -120,6 +123,16 @@ const QuotationDetails = () => {
       fetchQuotationData();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (quotationData && currVersionId) {
+      (async () => {
+        let DOAneeded: any = await checkDOA(selectedEntity, quotationData, currVersionId);
+        if (DOAneeded) setProcessSteps(quotationDOAProcessSteps)
+        else setProcessSteps(quotationProcessSteps)
+      })();
+    }
+  }, [quotationData?._id, currVersionId]);
 
   const getQuotationFields = useMemo(() => {
     let tempQuotationFields = quotationFields;
@@ -159,8 +172,8 @@ const QuotationDetails = () => {
         setCurrentVersion(parseInt(keys[keys.length - 1]));
         setCurrVersionId(data.versions[keys[keys.length - 1]]?._id);
         setCurrentStep(
-          quotationProcessSteps.includes(data.versions[keys[keys.length - 1]]?.processStatus)
-            ? quotationProcessSteps.indexOf(data.versions[keys[keys.length - 1]]?.processStatus)
+          processSteps.includes(data.versions[keys[keys.length - 1]]?.processStatus)
+            ? processSteps.indexOf(data.versions[keys[keys.length - 1]]?.processStatus)
             : 0
         );
         setSentToCustomer(data.versions[keys[keys.length - 1]]?.status === QUOTATION_STATUS.sentToCustomer);
@@ -169,8 +182,8 @@ const QuotationDetails = () => {
         setCurrentVersion(version);
         setCurrVersionId(data.versions[version]?._id);
         setCurrentStep(
-          quotationProcessSteps.includes(data.versions[version]?.processStatus)
-            ? quotationProcessSteps.indexOf(data.versions[version]?.processStatus)
+          processSteps.includes(data.versions[version]?.processStatus)
+            ? processSteps.indexOf(data.versions[version]?.processStatus)
             : 0
         );
         setVersionStatus(data.versions[version]?.status);
@@ -191,7 +204,7 @@ const QuotationDetails = () => {
 
   const updateProcessStatus = (currStep) => {
     axiosInstance()
-      .put(`${quotation.api}/${id}/process-status/${currVersionId}`, { processStatus: quotationProcessSteps[currStep] })
+      .put(`${quotation.api}/${id}/process-status/${currVersionId}`, { processStatus: processSteps[currStep] })
       .then(() => {
         fetchQuotationData(currentVersion, false);
       })
@@ -494,10 +507,10 @@ const QuotationDetails = () => {
             <Steps
               isNextStep={false}
               nextStep={nextStep}
-              steps={quotationProcessSteps}
+              steps={processSteps}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
-              isStepEnded={quotationProcessSteps[currentStep] === 'End'}
+              isStepEnded={processSteps[currentStep] === 'End'}
               setStepFullScreen={() => setStepFullScreen(true)}
               isPrevStep={!sentToCustomer}
               updateStatus={updateProcessStatus}
@@ -509,8 +522,8 @@ const QuotationDetails = () => {
                   : null
               }
             />
-            <ContentFullScreen title={quotationProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-              {currentStep === 0 && quotationData && (
+            <ContentFullScreen title={processSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+              {processSteps[currentStep] === 'Add Products' && quotationData && (
                 <Productpackage
                   quotationData={quotationData}
                   setNextStep={setNextStep}
@@ -520,7 +533,7 @@ const QuotationDetails = () => {
                   allowedToEdit={allowedToEdit}
                 />
               )}
-              {currentStep === 1 && quotationData && (
+              {processSteps[currentStep] === 'Services and Consumables' && quotationData && (
                 <Service
                   quotationData={quotationData}
                   renderedFrom={`${renderedFrom}_grid-2`}
@@ -529,7 +542,7 @@ const QuotationDetails = () => {
                   version={currentVersion}
                 />
               )}
-              {currentStep === 2 && quotationData && (
+              {processSteps[currentStep] === 'Quote Builder' && quotationData && (
                 <QuoteBuilder
                   quotationData={quotationData}
                   setNextStep={setNextStep}
@@ -542,7 +555,7 @@ const QuotationDetails = () => {
                   renderedFrom={`${renderedFrom}_grid-3`}
                 />
               )}
-              {currentStep === 3 && quotationData && (
+              {processSteps[currentStep] === 'Quote Approval' && quotationData && (
                 <QuoteBuilder
                   quotationData={quotationData}
                   setNextStep={setNextStep}
@@ -556,7 +569,7 @@ const QuotationDetails = () => {
                   renderedFrom={`${renderedFrom}_grid-3`}
                 />
               )}
-              {currentStep === 4 && quotationData && (
+              {processSteps[currentStep] === 'End' && quotationData && (
                 <QuoteBuilder
                   quotationData={quotationData}
                   setNextStep={setNextStep}
