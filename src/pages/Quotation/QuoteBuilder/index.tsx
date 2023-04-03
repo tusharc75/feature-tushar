@@ -36,7 +36,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
   }, [versionData]);
 
   useEffect(() => {
-    if (currentStep === 3 && rowsData && !sentToCustomer) {
+    if (currentStep === "Quote Approval" && rowsData && !sentToCustomer) {
       setNextStep(false);
     } else {
       setNextStep(true);
@@ -238,7 +238,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
             hideVersions={true}
           />
         </Box>
-        {versionData?.processStatus === 'Quote Approval' &&
+        {currentStep === 'Quote Approval' &&
           <Box display="flex">
             <Button
               variant="contained"
