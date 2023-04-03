@@ -20,6 +20,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
+import moment from 'moment';
 
 const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -134,6 +135,16 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
     }
   };
 
+  function validate(values) {
+    const errors = {};
+    let fromDate = moment(values?.fromDate);
+    let toDate = moment(values?.toDate);
+    if ( toDate.diff(fromDate, 'days') < 0 ) {
+      errors['toDate'] = 'Please enter valid to date'
+    }
+    return errors;
+  }
+
   return (
     <Dialog
       maxWidth="md"
@@ -154,6 +165,7 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
+          validate={validate}
           onSubmit={handleSubmit}
         >
           {({ values, errors, touched, submitForm, setFieldValue }) => (
