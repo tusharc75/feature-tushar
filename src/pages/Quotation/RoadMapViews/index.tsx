@@ -2,32 +2,54 @@ import _ from 'lodash';
 import React, { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
-import { DELIVERY_TICKET_TYPE, INVENTORY_STATUS, rentalManagement, RENTAL_STATUS, COLOUR_MASTER, quotation } from '../../../constants/helpers';
+import {
+  DELIVERY_TICKET_TYPE,
+  INVENTORY_STATUS,
+  rentalManagement,
+  RENTAL_STATUS,
+  COLOUR_MASTER,
+  quotation,
+  QUOTATION_STATUS
+} from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { MdZoomOutMap } from 'react-icons/md';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { Box, Button, Paper } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandMore, ExpandLess } from '@material-ui/icons';
 
 const customNodeStyles = {
   quotation: {
     name: 'Quotation',
-    ...COLOUR_MASTER.rentalJob
-  },
-  package: {
-    name: 'Package',
-    ...COLOUR_MASTER.package
+    background: '#E6E8F5',
+    borderColor: '#9789F0'
   },
   product: {
     name: 'Product',
-    ...COLOUR_MASTER.product
+    background: '#E2F8FF',
+    borderColor: '#8BCBDF'
+  },
+  package: {
+    name: 'Package',
+    background: '#DFFBF5',
+    borderColor: '#66CDB7'
   },
   service: {
     name: 'Service',
-    ...COLOUR_MASTER.loadingTicket
+    background: '#FFF7D9',
+    borderColor: '#FDD33E'
+  },
+  approve: {
+    name: 'Quotation-On-Going',
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
+  },
+  decline: {
+    name: 'Quotation-Rejected',
+    background: '#FFEAEA',
+    borderColor: '#FFA0A0'
   }
 };
 
@@ -62,7 +84,15 @@ const QuotationViews = (props) => {
           data: {
             ref_type: 'quotation',
             ref_id: quoteId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{quoteName ?? quoteName}</div>
+            label: (
+              <HtmlTooltip arrow placement="top" title={routes.quotation.title}>
+                <div>
+                  <Typography variant="body2">{routes.quotation.title}</Typography>
+                  <Typography variant="subtitle2">{quoteName ?? quoteName}</Typography>
+                </div>
+              </HtmlTooltip>
+            )
+            // <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{quoteName ?? quoteName}</div>
           },
           position: { x: xPosition, y: 70 },
           style: customNodeStyles.quotation
@@ -80,18 +110,21 @@ const QuotationViews = (props) => {
             ref_type: item.type,
             ref_id: item.materialId,
             label: (
-              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {item.productDetail?.productName || item.packageDetail?.packageName || item.serviceDetail?.serviceName}
-                <br />
-                {_.startCase(_.camelCase(item.type))}
-              </div>
+              <HtmlTooltip arrow placement="top" title={_.startCase(_.camelCase(item.type))}>
+                <div>
+                  <Typography variant="body2">{_.startCase(_.camelCase(item.type))}</Typography>
+                  <Typography variant="subtitle2">
+                    {item.productDetail?.productName || item.packageDetail?.packageName || item.serviceDetail?.serviceName}
+                  </Typography>
+                </div>
+              </HtmlTooltip>
             )
           },
           position: {
             x: xPosition,
-            y: pIdx * 80
+            y: pIdx * 95
           },
-          style: item.type == 'service' ? customNodeStyles.service : item.type === 'package' ? customNodeStyles.package : customNodeStyles.product
+          style: item.type === 'service' ? customNodeStyles.service : item.type === 'package' ? customNodeStyles.package : customNodeStyles.product
         });
         flowEdge.push({
           id: `quote-parent-${item._id}`,
@@ -101,22 +134,25 @@ const QuotationViews = (props) => {
         });
       });
 
-      xPosition += 300;
+      if (child?.length) xPosition += 300;
       child?.map((item: any, cIdx) => {
         flow.push({
           id: `${item._id}`,
           sourcePosition: 'right',
           targetPosition: 'left',
-          type: 'output',
+          type: 'default',
           data: {
             ref_type: item.type,
             ref_id: item.materialId,
             label: (
-              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {item.productDetail?.productName || item.packageDetail?.packageName || item.serviceDetail?.serviceName}
-                <br />
-                {_.startCase(_.camelCase(item.type))}
-              </div>
+              <HtmlTooltip arrow placement="top" title={_.startCase(_.camelCase(item.type))}>
+                <div>
+                  <Typography variant="body2">{_.startCase(_.camelCase(item.type))}</Typography>
+                  <Typography variant="subtitle2">
+                    {item.productDetail?.productName || item.packageDetail?.packageName || item.serviceDetail?.serviceName}
+                  </Typography>
+                </div>
+              </HtmlTooltip>
             )
           },
           position: {
@@ -132,6 +168,53 @@ const QuotationViews = (props) => {
           target: `${item._id}`
         });
       });
+
+      if (
+        [QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted, QUOTATION_STATUS.rejectByCustomer].includes(
+          status
+        )
+      ) {
+        xPosition += 300;
+        flow.push({
+          id: `${quoteId}-output`,
+          type: 'output',
+          className: 'dark-node',
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          data: {
+            ref_type: 'quotation',
+            ref_id: quoteId,
+            label: (
+              <HtmlTooltip arrow placement="top" title={status}>
+                <div>
+                  <Typography variant="body2">{routes.quotation.title}</Typography>
+                  <Typography variant="subtitle2">{quoteName ?? quoteName}</Typography>
+                </div>
+              </HtmlTooltip>
+            )
+          },
+          position: { x: xPosition, y: 70 },
+          style: [QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted].includes(status)
+            ? customNodeStyles.approve
+            : customNodeStyles.decline
+        });
+        parent?.map((item: any, pIdx) => {
+          flowEdge.push({
+            id: `${item._id}-ouput-line`,
+            source: `${item._id}`,
+            arrowHeadType: 'arrow',
+            target: `${quoteId}-output`
+          });
+        });
+        child?.map((item: any, cIdx) => {
+          flowEdge.push({
+            id: `${item._id}-ouput-line`,
+            source: `${item._id}`,
+            arrowHeadType: 'arrow',
+            target: `${quoteId}-output`
+          });
+        });
+      }
 
       setFlowData([...flow, ...flowEdge]);
       setLoading(false);

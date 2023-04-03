@@ -290,6 +290,28 @@ const ServiceMaster = () => {
               else fetchData();
             }}
             additionalParams={getQueryString(true)}
+            title={routes.serviceMaster.title}
+            extraImportExportLinks={[
+              {
+                title: 'Consumable Template',
+                api: `${serviceMaster.api}/product/unknown/template`,
+                type: 'download'
+              },
+              {
+                title: 'Consumable Export',
+                api: `${serviceMaster.api}/product/unknown/template?export=true${
+                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                    : ''
+                }`,
+                type: 'export'
+              },
+              {
+                title: 'Consumable Import',
+                api: `${serviceMaster.api}/product/unknown/import`,
+                type: 'import'
+              }
+            ]}
           />
         </Grid>
       </Grid>
