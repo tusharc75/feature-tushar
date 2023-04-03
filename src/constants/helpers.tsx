@@ -55,7 +55,6 @@ export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables
 export const invoiceProcessSteps = ['Add Products', 'Ready To Invoice'];
 export const jobProcessSteps = ['Add', 'Fleet'];
 export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Quote Approval', 'End'];
-export const quotationDOAProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'DOA', 'Quote Approval', 'End'];
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
   'Add Products',
