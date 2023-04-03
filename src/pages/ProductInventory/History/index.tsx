@@ -5,7 +5,7 @@ import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridCo
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, productInventory } from 'src/constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, productInventory } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
@@ -22,7 +22,7 @@ const History = ({ product, warehouse }) => {
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting, } = state;
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
@@ -30,43 +30,70 @@ const History = ({ product, warehouse }) => {
   const [isRevertConfirmation, setIsRevertConfirmation] = useState({ open: false, _id: "", product: "" });
   const [revertLoading, setRevertLoading] = useState(false);
 
-
   useEffect(() => {
     fetchRecords();
-  }, []);
+  }, [page, limit, filters, sorting, selectedEntity]);
 
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    let data;
-    const query = warehouse ? `?warehouse=${warehouse}` : ``;
-    const response = await axiosInstance().get(`/history/product-ledger/${product}${query}`);
-    data = response?.data?.data;
-    let rows = data.map((u) => {
+    const queryString = getQueryString();
+
+    const response = await axiosInstance().get(`/history/product-ledger/${product}${queryString}`);
+    let rows = response?.data?.data?.map((u) => {
       let finalObject: any = prepareDataForGrid(u, user);
       finalObject.type = capitalize(u.type);
       finalObject.serialNumber = u?.serialNumber?.map((e) => e.serialNumber)?.toString();
       return finalObject;
     });
 
-    var qty = 0;
-    rows
-      ?.slice()
-      .reverse()
-      .forEach(function (item) {
-        if (item.type === 'Credit') {
-          qty = qty + item?.qty;
-        } else {
-          qty = qty - item?.qty;
-        }
-        item.finalInventory = qty;
-      });
-    dispatch({ type: 'initialize', data: rows, count: rows.length });
+    // var qty = 0;
+    // rows
+    //   ?.slice()
+    //   .reverse()
+    //   .forEach(function (item) {
+    //     if (item.type === 'Credit') {
+    //       qty = qty + item?.qty;
+    //     } else {
+    //       qty = qty - item?.qty;
+    //     }
+    //     item.finalInventory = qty;
+    //   });
+
+    dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
     setTimeout(() => {
       dispatch({ type: 'loading', loading: false });
     }, gridLoadingTimeout);
+  };
+
+  const getQueryString = () => {
+
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (warehouse) {
+      deepFilter = `${deepFilter}&warehouse=${warehouse}`
+    }
+
+    let filterById = [];
+    if (filterById.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
+    }
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+      Object.keys(filters).forEach((field) => {
+        updatedFilters.push({
+          field: field,
+          term: filters[field].filter
+        });
+      });
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    }
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    return deepFilter;
   };
 
   const columns = [
@@ -93,6 +120,7 @@ const History = ({ product, warehouse }) => {
     { field: 'finalInventory', headerName: 'Final Inventory', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
     { field: 'price', headerName: 'Price', show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
+    { field: 'finalAvgPrice', headerName: 'Final Average Price', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
     { field: 'warehouse', headerName: 'Plant', show: true, cellRenderer: 'commonRenderer' },
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
@@ -204,7 +232,6 @@ const History = ({ product, warehouse }) => {
             page={page}
             allowAction={true}
             loading={loading}
-            isClientSideGrid={true}
             allowSelection={false}
             renderedFrom={'product_history'}
             refreshGrid={fetchRecords}
