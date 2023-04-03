@@ -15,8 +15,7 @@ import {
   ACTIVITY_RESOURCE,
   quotationProcessSteps,
   QUOTATION_STATUS,
-  QUOTATION_TYPE,
-  quotationDOAProcessSteps
+  QUOTATION_TYPE
 } from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import TabPanel from '../../components/TabPanel';
@@ -124,12 +123,18 @@ const QuotationDetails = () => {
     }
   }, [id]);
 
+
+  const insert = (arr, index, newItem) => [...arr.slice(0, index), newItem, ...arr.slice(index)]
+
   useEffect(() => {
     if (quotationData && currVersionId) {
       (async () => {
         let DOAneeded: any = await checkDOA(selectedEntity, quotationData, currVersionId);
-        if (DOAneeded) setProcessSteps(quotationDOAProcessSteps);
-        else setProcessSteps(quotationProcessSteps);
+        if (DOAneeded) {
+          if (!quotationProcessSteps?.includes("DOA")) {
+            setProcessSteps(insert(quotationProcessSteps, 3, "DOA"))
+          }
+        }
       })();
     }
   }, [quotationData?._id, currVersionId]);
@@ -536,12 +541,10 @@ const QuotationDetails = () => {
               setStepFullScreen={() => setStepFullScreen(true)}
               isPrevStep={!sentToCustomer}
               updateStatus={updateProcessStatus}
-              handleNext={
-                currentStep > 2
-                  ? () => {
-                      setCustomerAcceptable(true);
-                    }
-                  : null
+              handleNext={processSteps[currentStep] === 'Quote Approval' ? () => {
+                setCustomerAcceptable(true);
+              }
+                : null
               }
             />
             <ContentFullScreen title={processSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
@@ -571,10 +574,24 @@ const QuotationDetails = () => {
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}
-                  currentStep={currentStep}
+                  currentStep={processSteps[currentStep]}
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
+                />
+              )}
+              {processSteps[currentStep] === 'DOA' && quotationData && (
+                <QuoteBuilder
+                  quotationData={quotationData}
+                  setNextStep={setNextStep}
+                  stepFullScreen={stepFullScreen}
+                  fetchQuotationData={fetchQuotationData}
+                  version={currentVersion}
+                  currentStep={processSteps[currentStep]}
+                  versionData={quotationData?.versions[currentVersion]}
+                  allowedToEdit={allowedToEdit}
+                  renderedFrom={`${renderedFrom}_grid-3`}
+                  sentToCustomer={sentToCustomer}
                 />
               )}
               {processSteps[currentStep] === 'Quote Approval' && quotationData && (
@@ -585,7 +602,7 @@ const QuotationDetails = () => {
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}
-                  currentStep={currentStep}
+                  currentStep={processSteps[currentStep]}
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
@@ -598,7 +615,7 @@ const QuotationDetails = () => {
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}
-                  currentStep={currentStep}
+                  currentStep={processSteps[currentStep]}
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
