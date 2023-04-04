@@ -76,28 +76,3 @@ export const handleViewPdf = (view = false, download = false, quotationData = nu
         });
 
 };
-
-export const checkDOA = async (selectedEntity, quotationData, versionId) => {
-    const responseDoa = await axiosInstance().post('doa-request/limit', { entity: selectedEntity })
-    const DOAsetup = responseDoa?.data?.data.doasetup
-    const DOAlimit = responseDoa?.data?.data.limit && responseDoa?.data?.data.limit !== 0 ? responseDoa?.data?.data.limit : responseDoa?.data?.data.minLimit;
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
-    const data = response?.data?.data;
-    const rows = data.material.filter((e) => e.parentId === null);
-    const totalFinalPrice = rows
-        .filter(
-            (f) =>
-                f?.parentId === null &&
-                f?.hasOwnProperty('finalPrice_' + quotationData?.currency?.toLowerCase()) &&
-                !isNaN(f['finalPrice_' + quotationData?.currency?.toLowerCase()])
-        )
-        .reduce((sum, row) => row['finalPrice_' + quotationData?.currency?.toLowerCase()] + sum, 0);
-
-    if (DOAsetup && totalFinalPrice > DOAlimit) {
-        return true;
-    } else {
-        return false;
-    }
-
-
-};

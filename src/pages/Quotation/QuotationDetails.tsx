@@ -51,7 +51,6 @@ import QuotationSummeryDialog from './QuotationSummeryDialog';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CachedIcon from '@material-ui/icons/Cached';
-import { checkDOA } from 'src/components/Quotation/helper';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -126,18 +125,16 @@ const QuotationDetails = () => {
 
   const insert = (arr, index, newItem) => [...arr.slice(0, index), newItem, ...arr.slice(index)]
 
-  useEffect(() => {
-    if (quotationData && currVersionId) {
-      (async () => {
-        let DOAneeded: any = await checkDOA(selectedEntity, quotationData, currVersionId);
-        if (DOAneeded) {
-          if (!quotationProcessSteps?.includes("DOA")) {
-            setProcessSteps(insert(quotationProcessSteps, 3, "DOA"))
-          }
-        }
-      })();
+  const updateDOASetup = (doasetup) => {
+    if (doasetup) {
+      if (!quotationProcessSteps?.includes("DOA")) {
+        setProcessSteps(insert(quotationProcessSteps, 3, "DOA"))
+      }
     }
-  }, [quotationData?._id, currVersionId]);
+    else {
+      setProcessSteps(quotationProcessSteps)
+    }
+  }
 
   const getQuotationFields = useMemo(() => {
     let tempQuotationFields = quotationFields;
@@ -190,6 +187,7 @@ const QuotationDetails = () => {
       data = response?.data?.data;
 
       setQuotationData(data);
+      updateDOASetup(data?.doasetup)
       let keys = Object.keys(data.versions);
       if (version == 0) {
         setCurrentVersion(parseInt(keys[keys.length - 1]));
@@ -281,7 +279,6 @@ const QuotationDetails = () => {
     axiosInstance()
       .post(`${quotation.api}/${quotationData._id}/convert`)
       .then(({ data: { data } }) => {
-        console.log(data);
         fetchQuotationData();
         setConvertConfirmBox(false);
         toastConfig.setToastConfig({
@@ -556,6 +553,7 @@ const QuotationDetails = () => {
                   stepFullScreen={stepFullScreen}
                   version={currentVersion}
                   allowedToEdit={allowedToEdit}
+                  updateDOASetup={updateDOASetup}
                 />
               )}
               {processSteps[currentStep] === 'Services and Consumables' && quotationData && (
