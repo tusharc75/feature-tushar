@@ -26,6 +26,7 @@ import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageContactDialog from "../../Contact/ManageContact";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { isEqual } from "lodash";
+import moment from "moment";
 
 const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onClose, onSuccess, open }) => {
 
@@ -319,8 +320,23 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
             setFormsData(setFieldsInAscendingOrder(initialData.fields.filter(d => d.fieldName !== "estimateStartDate" && d.fieldName !== "estimateEndDate")));
         }
     }
-    const validate = () => {
 
+    const validate = (values) => {
+        const errors = {};
+        let estimateStartDate = moment(values?.estimateStartDate);
+        let estimateEndDate = moment(values?.estimateEndDate);
+        let supplierSuggestedDeliveryDate = moment(values?.supplierSuggestedDeliveryDate);
+        let expectedCustomerDeliveryDate = moment(values?.expectedCustomerDeliveryDate);
+
+        if ( estimateEndDate.diff(estimateStartDate, 'days') < 0 ) {
+            errors['estimateEndDate'] = 'Please enter valid estimate end date';
+        }
+
+        if ( expectedCustomerDeliveryDate.diff(supplierSuggestedDeliveryDate, 'days') < 0  ) {
+            errors['expectedCustomerDeliveryDate'] = 'Please enter valid expected customer delivery date';
+        }
+
+        return errors;
     }
 
     return (<Dialog
