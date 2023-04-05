@@ -32,6 +32,7 @@ import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ExpandMore from '@material-ui/icons/ExpandMore';
+import MergeRecords from 'src/components/MergeRecords';
 
 let searchTimeout;
 
@@ -418,6 +419,12 @@ const WellMaster = () => {
                         >
                           Delete
                         </MenuItem>
+                        <MergeRecords 
+                          selectedRecords={selectedRecords}
+                          resource={sidebarResource?.wellMaster}
+                          closeActions={closeActions}
+                          onSuccess={fetchData}
+                        />
                       </Menu>
                     </>
                   )}
