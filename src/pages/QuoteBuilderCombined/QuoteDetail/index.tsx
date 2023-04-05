@@ -617,7 +617,7 @@ export default function QuoteDetail() {
     if (DOARequestId) {
       if (accepted !== 'Rejected') {
         axiosInstance()
-          .post('/doa-request/DOAResponse/' + DOARequestId, { response: 'Accepted' })
+          .post('/doa-request/doaResponse/' + DOARequestId, { response: 'Accepted' })
           .then(({ data }) => {
             toastConfig.setToastConfig({
               open: true,
@@ -632,7 +632,7 @@ export default function QuoteDetail() {
           });
       } else {
         axiosInstance()
-          .post('/doa-request/DOAResponse/' + DOARequestId, { response: 'Rejected', comment: comment })
+          .post('/doa-request/doaResponse/' + DOARequestId, { response: 'Rejected', comment: comment })
           .then(({ data }) => {
             toastConfig.setToastConfig({
               open: true,
