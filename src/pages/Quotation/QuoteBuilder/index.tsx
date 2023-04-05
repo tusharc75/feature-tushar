@@ -265,6 +265,28 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
             </Button>
           </Box>
         }
+        {currentStep === 'DOA' &&
+          <Box display="flex">
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              disabled={sentToCustomer}
+              onClick={() => {
+                axiosInstance()
+                  .post(`/doa-request/create/${quotationData._id}?version=${version}`)
+                  .then(({ data }) => {
+
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                  });
+              }}
+            >
+              Send for DOA
+            </Button>
+          </Box>
+        }
       </Box>
       {columns && rowsData ? (
         <Box p="6px" zIndex={5} width={'100%'}>
