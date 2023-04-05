@@ -101,7 +101,7 @@ const RepairOrderDetails = () => {
 
   const repairOrderStepNames = React.useMemo(() => {
     return repairOrderProcessSteps.map((item) => item.name);
-  }, []);
+  }, [repairOrderProcessSteps]);
 
   useEffect(() => {
     if (id) {
@@ -559,7 +559,7 @@ const RepairOrderDetails = () => {
               return newStep;
             });
           }}
-          forwardText={'Yes'}
+          // forwardText={'Yes'}
           cancelText={'No'}
         />
       )}

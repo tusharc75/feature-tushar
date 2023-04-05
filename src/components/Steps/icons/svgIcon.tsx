@@ -233,11 +233,11 @@ export const ReceiveProduct: React.FC<svgInterface> = ({ colors, ...others }) =>
       <path d="M7.70117 17.3594H9.68516V19.449H7.70117V17.3594Z" fill="url(#paint4_linear_2819_7877)" />
       <path
         d="M34.4383 24.0849C34.4383 28.3053 31.1898 31.7267 27.1829 31.7267C23.1752 31.7267 19.9268 28.3053 19.9268 24.0849C19.9268 19.8638 23.1752 16.4424 27.1829 16.4424C31.1898 16.4424 34.4383 19.8638 34.4383 24.0849Z"
-        fill="#01B763"
+        fill={colors ? '#01B763' : 'currentcolor'}
       />
       <path
         d="M34.438 24.0849C34.438 28.3053 31.1896 31.7267 27.1826 31.7267V16.4424C31.1896 16.4424 34.438 19.8638 34.438 24.0849Z"
-        fill="#01B763"
+        fill={colors ? '#01B763' : 'currentcolor'}
       />
       <path
         d="M30.9798 22.8475L27.1831 26.8463L26.5251 27.5394L23.3857 24.2329L24.7891 22.7555L26.5251 24.5839L27.1831 23.8909L29.5764 21.3701L30.9798 22.8475Z"
@@ -250,16 +250,16 @@ export const ReceiveProduct: React.FC<svgInterface> = ({ colors, ...others }) =>
           <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
         <linearGradient id="paint1_linear_2819_7877" x1="17.8664" y1="0.566406" x2="35.8621" y2="11.7127" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#5B7FFE" />
-          <stop offset="1" stop-color="#2A1DC2" />
+          <stop stop-color={colors ? '#5B7FFE' : 'currentcolor'} />
+          <stop offset="1" stop-color={colors ? '#2A1DC2' : 'currentcolor'} />
         </linearGradient>
         <linearGradient id="paint2_linear_2819_7877" x1="2.8735" y1="0.566406" x2="7.71889" y2="11.894" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#AABDFF" />
-          <stop offset="1" stop-color="#8A83E0" />
+          <stop stop-color={colors ? '#AABDFF' : 'currentcolor'} />
+          <stop offset="1" stop-color={colors ? '#8A83E0' : 'currentcolor'} />
         </linearGradient>
         <linearGradient id="paint3_linear_2819_7877" x1="18.3374" y1="0.566406" x2="23.1828" y2="11.894" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#AABDFF" />
-          <stop offset="1" stop-color="#8A83E0" />
+          <stop stop-color={colors ? '#AABDFF' : 'currentcolor'} />
+          <stop offset="1" stop-color={colors ? '#8A83E0' : 'currentcolor'} />
         </linearGradient>
         <linearGradient id="paint4_linear_2819_7877" x1="7.99567" y1="17.3594" x2="9.78753" y2="19.3572" gradientUnits="userSpaceOnUse">
           <stop stop-color={colors ? colors[0] : 'currentcolor'} />
