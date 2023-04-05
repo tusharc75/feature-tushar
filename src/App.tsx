@@ -203,6 +203,7 @@ import StorageLocationDetailsPage from './pages/StorageLocation/StorageLocationD
 import StorageLocation from './pages/StorageLocation';
 import TransactionLock from './pages/TransactionLock';
 import TransactionLockDetail from './pages/TransactionLock/TransactionLockDetail';
+import DOAApprovalQuotation from './pages/DOA/DOAApprovalQuotation';
 
 var notificationInterval: any = null;
 
@@ -670,6 +671,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.DOARequest.path}/:id`}>
               <DOAapproval />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.DOARequest.path}/quotation/:id`}>
+              <DOAApprovalQuotation />
             </PrivateRoute>
             <PrivateRoute exact path={routes.quoteBuilder.path}>
               <QuoteBuilderCombined />

@@ -101,7 +101,7 @@ const DOARequest = () => {
   const NameRenderer = (params) => (
     <Link
       className="link"
-      to={`/doa-request/${params.data.id}`}
+      to={params.data.quotation ?`/doa-request/quotation/${params.data.id}`:`/doa-request/${params.data.id}`}
       title={params.value}
     >
       {params.value}
