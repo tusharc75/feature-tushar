@@ -22,12 +22,12 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import { MdAdd, MdSort, MdFilterList, FaSuitcase } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
-import { camelCase } from 'lodash'
+import { camelCase } from 'lodash';
 
 let quotePdfTemplateTimeout;
 
 const QuotePdfTemplate: FC = () => {
-  const renderedFrom = camelCase(routes?.quotePdfTemplate.title)
+  const renderedFrom = camelCase(routes?.quotePdfTemplate.title);
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const { qbApi } = quoteBuilder;
@@ -48,7 +48,7 @@ const QuotePdfTemplate: FC = () => {
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('quotePdfPage'));
-  const localStorageSelectedRecords = `${renderedFrom}_selected`
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const columns = [
     { field: 'name', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
@@ -266,7 +266,7 @@ const QuotePdfTemplate: FC = () => {
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -284,7 +284,7 @@ const QuotePdfTemplate: FC = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject.type = routes[camelCase(u?.type)] ? routes[camelCase(u?.type)]?.title : u?.type
+          finalObject.type = routes[camelCase(u?.type)] ? routes[camelCase(u?.type)]?.title : u?.type;
           finalObject['canDelete'] = permissions.quotePdfTemplate.isDelete && user?.user?._id === finalObject['owner'];
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions.quotePdfTemplate.isUpdate;
@@ -407,8 +407,9 @@ const QuotePdfTemplate: FC = () => {
                       onClick={openActions}
                       disabled={selectedRecords.length ? false : true}
                       aria-controls="action-menu"
+                      endIcon={<ExpandMore />}
                     >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      {isMobile && !isTablet ? '' : 'Actions'}
                     </Button>
                   )}
                   <Menu
@@ -456,15 +457,15 @@ const QuotePdfTemplate: FC = () => {
             loading={loading}
             additionalDetails={[
               {
-                icon: < FaSuitcase size={18} />,
-                field: "createdBy"
+                icon: <FaSuitcase size={18} />,
+                field: 'createdBy'
               }
             ]}
             chips={[]}
             owerCollaboratorInitialsOrImages=""
             onCreate={false}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -490,7 +491,10 @@ const QuotePdfTemplate: FC = () => {
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure, you want to delete ${routes?.quotePdfTemplate?.title?.toLowerCase()} ${deleteRecord?.name || ''} ?`}
-            onClose={() => { setDeleteRecord(null); setShowDeleteConfirmBox(false) }}
+            onClose={() => {
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
+            }}
             onOk={handleDelete}
           />
         )}

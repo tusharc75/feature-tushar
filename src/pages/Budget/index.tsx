@@ -24,20 +24,17 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
-import { MdSort, MdFilterList, ImCalendar, FaSuitcase } from "react-icons/all";
+import { MdSort, MdFilterList, ImCalendar, FaSuitcase } from 'react-icons/all';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import MobileSortDialog from "../../components/MobileSortDialog";
-import MobileFilterDialog from "../../components/MobileFilterDialog"
+import MobileSortDialog from '../../components/MobileSortDialog';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 
-
-
-
 let timeout;
 function Budget() {
-  const renderedFrom = camelCase(routes?.budget.title)
+  const renderedFrom = camelCase(routes?.budget.title);
   const location = useLocation();
   const history = useHistory();
   const {
@@ -62,13 +59,9 @@ function Budget() {
   const toastConfig = useContext(CustomToastContext);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const localStorageSelectedRecords = `${renderedFrom}_selected`
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-
-
-  const [isOpenDialog, setisOpenDialog] = useState(false)
-
-
+  const [isOpenDialog, setisOpenDialog] = useState(false);
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -86,11 +79,7 @@ function Budget() {
 
   const handleClickClose = () => {
     setOpen(false);
-
   };
-
-
-
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -231,7 +220,7 @@ function Budget() {
 
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -346,12 +335,12 @@ function Budget() {
         <CustomContainer>
           <div className="header-panel">
             <Grid className={styles.filter_side_container} container justify="space-between">
-              <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+              <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
                 <div className="d-flex align-items-center">
                   <MdContacts className="headerLogo" />
                   <span className="listingHeader">{routes.budget.title}</span>
                 </div>
-                {isMobile && !isTablet &&
+                {isMobile && !isTablet && (
                   <div className="d-flex ">
                     <Button
                       onClick={handleClickOpen}
@@ -371,12 +360,10 @@ function Budget() {
                       isOpen={open}
                       handleClose={handleClickClose}
                       contentPart={null}
-                      secHeading={["Sort Budget"]}
+                      secHeading={['Sort Budget']}
                       columns={columns}
                       dispatch={dispatch}
                     />
-
-
 
                     <Button
                       id="demo-customized-button"
@@ -392,7 +379,6 @@ function Budget() {
                       Filter
                     </Button>
 
-
                     <MobileFilterDialog
                       isOpen={isOpenDialog}
                       handleClose={handleClose}
@@ -403,9 +389,7 @@ function Budget() {
                       filters={filters}
                     />
                   </div>
-                }
-
-
+                )}
               </Grid>
               <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>
                 <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -444,8 +428,9 @@ function Budget() {
                         onClick={openActions}
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
+                        endIcon={<ExpandMore />}
                       >
-                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                        {isMobile && !isTablet ? '' : 'Actions'}
                       </Button>
 
                       <Menu
@@ -462,7 +447,6 @@ function Budget() {
                       >
                         <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
                       </Menu>
-
                     </>
                   </Grid>
                 </Box>
@@ -497,24 +481,23 @@ function Budget() {
                   additionalDetails={[
                     {
                       icon: <FaSuitcase />,
-                      field: "entity"
+                      field: 'entity'
                     }
                   ]}
                   chips={[
                     {
                       icon: <ImCalendar />,
-                      label: "Year: ",
-                      field: "year"
-                    },
-
+                      label: 'Year: ',
+                      field: 'year'
+                    }
                   ]}
                   owerCollaboratorInitialsOrImages=""
                   onCreate={() => setShowManageBudgetDialog({ show: true, id: null, isClone: null })}
                   showClone={false}
-                  onClone={() => { }}
+                  onClone={() => {}}
                   renderedFrom={renderedFrom}
                 />
-              ) :
+              ) : (
                 <CustomAgGrid
                   columns={columns}
                   dataRows={dataRows}
@@ -533,6 +516,7 @@ function Budget() {
                   showFilters={true}
                   resource={sidebarResource.budget}
                 />
+              )
             ) : null}
           </Box>
         </CustomContainer>
@@ -547,7 +531,7 @@ function Budget() {
             }
             onClose={() => {
               setDeleteRecord(null);
-              setShowDeleteConfirmBox(false)
+              setShowDeleteConfirmBox(false);
             }}
             onOk={handleDelete}
           />

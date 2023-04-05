@@ -21,7 +21,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, FaSuitcase } from 'react-icons/all';
 import PricingConditionsDialog from './PricingConditionsDialog';
-import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
+import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { prepareDataForGrid } from 'src/constants/helpers';
@@ -29,12 +29,12 @@ import { startCase } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import MobileFilterDialog from 'src/components/MobileFilterDialog';
-import { camelCase } from 'lodash'
+import { camelCase } from 'lodash';
 
 let timeout;
 
 const PricingConditions = () => {
-  const renderedFrom = camelCase(routes?.pricingCondition.title)
+  const renderedFrom = camelCase(routes?.pricingCondition.title);
   const {
     state: { permissions }
   }: any = useData();
@@ -202,7 +202,7 @@ const PricingConditions = () => {
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -363,8 +363,9 @@ const PricingConditions = () => {
                     onClick={openActions}
                     disabled={selectedRecords.length ? false : true}
                     aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'}
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -391,21 +392,20 @@ const PricingConditions = () => {
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions.pricingCondition}
-              primaryField={columns?.find(d => d.field)}
+              primaryField={columns?.find((d) => d.field)}
               onClick={(data) => {
-                history.push(`${routes.pricingConditionDetail.path}/${data._id}`)
+                history.push(`${routes.pricingConditionDetail.path}/${data._id}`);
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.pricingConditionDetail.path}/${data._id}?openEdit=true`)
+                history.push(`${routes.pricingConditionDetail.path}/${data._id}?openEdit=true`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {
                 setDeleteRecord(data);
                 setShowDeleteConfirmBox(true);
-
               }}
               rowCount={rowCount}
               page={page}
@@ -413,14 +413,14 @@ const PricingConditions = () => {
               additionalDetails={[
                 {
                   icon: <FaSuitcase size={18} />,
-                  field: "conditionName"
-                },
+                  field: 'conditionName'
+                }
               ]}
               chips={[]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
-              onClone={(data) => { }}
+              onClone={(data) => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -456,8 +456,8 @@ const PricingConditions = () => {
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${routes?.pricingCondition?.title?.toLowerCase()}  ${deleteRecord?.conditionName || ''} ?`}
           onClose={() => {
-            setDeleteRecord(null)
-            setShowDeleteConfirmBox(false)
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

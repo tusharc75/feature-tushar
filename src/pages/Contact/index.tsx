@@ -17,7 +17,14 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import { isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, userType, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
+import {
+  isObjectEmpty,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  userType,
+  getLocalStorageArrayData,
+  removeLocalStorage
+} from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { Chip } from '@material-ui/core';
@@ -114,14 +121,14 @@ export default function Contact(props) {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
   const columnState = JSON.parse(localStorage.getItem(contactResource));
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [entityAccess, setEntityAccess] = useState([]);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
-  let renderedFrom = camelCase(contactResource)
+  let renderedFrom = camelCase(contactResource);
   const localStorageSelectedRecords = `${contactResource}_selected`;
-
 
   useEffect(() => {
     if (queryPage === undefined) {
@@ -134,36 +141,36 @@ export default function Contact(props) {
         queryType && querySearch && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
           : queryType && queryColFilter
-            ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-            : queryType && querySearch
-              ? `?page=${page}&type=${queryType}&search=${querySearch}`
-              : queryColFilter && querySearch
-                ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-                : queryType
-                  ? `?page=${page}&type=${queryType}`
-                  : queryColFilter
-                    ? `?page=${page}&colFilter=${queryColFilter}`
-                    : querySearch
-                      ? `?page=${page}&search=${querySearch}`
-                      : `?page=${page}`
+          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+          : queryType && querySearch
+          ? `?page=${page}&type=${queryType}&search=${querySearch}`
+          : queryColFilter && querySearch
+          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+          : queryType
+          ? `?page=${page}&type=${queryType}`
+          : queryColFilter
+          ? `?page=${page}&colFilter=${queryColFilter}`
+          : querySearch
+          ? `?page=${page}&search=${querySearch}`
+          : `?page=${page}`
       );
     } else {
       history.replace(
         queryType && querySearch && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
           : queryType && queryColFilter
-            ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-            : queryType && querySearch
-              ? `?page=${page}&type=${queryType}&search=${querySearch}`
-              : queryColFilter && querySearch
-                ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-                : queryType
-                  ? `?page=${page}&type=${queryType}`
-                  : queryColFilter
-                    ? `?page=${page}&colFilter=${queryColFilter}`
-                    : querySearch
-                      ? `?page=${page}&search=${querySearch}`
-                      : `?page=${page}`
+          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+          : queryType && querySearch
+          ? `?page=${page}&type=${queryType}&search=${querySearch}`
+          : queryColFilter && querySearch
+          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+          : queryType
+          ? `?page=${page}&type=${queryType}`
+          : queryColFilter
+          ? `?page=${page}&colFilter=${queryColFilter}`
+          : querySearch
+          ? `?page=${page}&search=${querySearch}`
+          : `?page=${page}`
       );
     }
   }, [page, queryPage]);
@@ -237,10 +244,10 @@ export default function Contact(props) {
         querySearch && queryColFilter
           ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}&search=${search}`
           : queryColFilter
-            ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
-            : querySearch
-              ? `?page=${page}&type=${newFilter}&search=${search}`
-              : `?page=${page}&type=${newFilter}`
+          ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
+          : querySearch
+          ? `?page=${page}&type=${newFilter}&search=${search}`
+          : `?page=${page}&type=${newFilter}`
       );
       sessionStorage.setItem('filterSuccess', JSON.stringify('filterSuccess'));
     }
@@ -286,20 +293,20 @@ export default function Contact(props) {
         queryType && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${search}`
           : queryType
-            ? `?page=${page}&type=${queryType}&search=${search}`
-            : queryColFilter
-              ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
-              : `?page=${page}&search=${search}`
+          ? `?page=${page}&type=${queryType}&search=${search}`
+          : queryColFilter
+          ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
+          : `?page=${page}&search=${search}`
       );
     } else {
       history.replace(
         queryType && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
           : queryType
-            ? `?page=${page}&type=${queryType}`
-            : queryColFilter
-              ? `?page=${page}&colFilter=${queryColFilter}`
-              : `?page=${page}`
+          ? `?page=${page}&type=${queryType}`
+          : queryColFilter
+          ? `?page=${page}&colFilter=${queryColFilter}`
+          : `?page=${page}`
       );
     }
   }, [search]);
@@ -327,10 +334,10 @@ export default function Contact(props) {
         queryType && querySearch
           ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]&search=${querySearch}`
           : queryType
-            ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
-            : querySearch
-              ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-              : `?page=${page}&colFilter=[${serialize(filters)}]`
+          ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
+          : querySearch
+          ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+          : `?page=${page}&colFilter=[${serialize(filters)}]`
       );
     }
 
@@ -339,17 +346,16 @@ export default function Contact(props) {
         queryType && querySearch
           ? `?page=${page}&type=${queryType}&search=${querySearch}`
           : queryType
-            ? `?page=${page}&type=${queryType}`
-            : querySearch
-              ? `?page=${page}&search=${querySearch}`
-              : `?page=${page}`
+          ? `?page=${page}&type=${queryType}`
+          : querySearch
+          ? `?page=${page}&search=${querySearch}`
+          : `?page=${page}`
       );
     }
     if (Object.keys(filters).length === 0 && queryColFilter === undefined) {
       sessionStorage.removeItem('filters');
     }
   }, [filters]);
-
 
   const handleEntityChange = (entityId) => {
     entityDispatch({ type: SET_SELECTED_ENTITY, payload: entityId });
@@ -417,33 +423,25 @@ export default function Contact(props) {
 
   const ActionsRenderer = (params) => (
     <>
-      {contactPermissions.isCreate ? (<HtmlTooltip
-        title='Clone'
-      >
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setShowCreateContactDialog({ open: true, isClone: true, idToClone: params.data._id });
-          }}
-        >
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </HtmlTooltip>) :
-        (
-          <HtmlTooltip
-            className='cursor-stop'
-            title='You do not have permission to clone/create'
+      {contactPermissions.isCreate ? (
+        <HtmlTooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setShowCreateContactDialog({ open: true, isClone: true, idToClone: params.data._id });
+            }}
           >
-            <IconButton
-              size="small"
-              aria-label="Clone"
-            >
-              <FileCopyIcon fontSize="small" color="disabled" />
-            </IconButton>
-          </HtmlTooltip>
-        )
-      }
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+      ) : (
+        <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
+          <IconButton size="small" aria-label="Clone">
+            <FileCopyIcon fontSize="small" color="disabled" />
+          </IconButton>
+        </HtmlTooltip>
+      )}
       <GridDeleteIcon
         hasDeletePermission={contactPermissions.isDelete}
         ownerId={params.data.ownerId}
@@ -565,7 +563,7 @@ export default function Contact(props) {
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -657,7 +655,7 @@ export default function Contact(props) {
           type: 'success',
           message: data.message
         });
-        removeLocalStorage(`${localStorageSelectedRecords}`)
+        removeLocalStorage(`${localStorageSelectedRecords}`);
         getContacts();
       })
       .catch((error) => {
@@ -695,7 +693,7 @@ export default function Contact(props) {
             type: 'success',
             message: data.message
           });
-          removeLocalStorage(`${localStorageSelectedRecords}`)
+          removeLocalStorage(`${localStorageSelectedRecords}`);
           getContacts();
         })
         .catch((error) => {
@@ -760,7 +758,11 @@ export default function Contact(props) {
             isExportAllOrSomeFeature={true}
             total={rowCount}
             recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id) : []}
+            ids={
+              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                : []
+            }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else getContacts();
@@ -903,7 +905,6 @@ export default function Contact(props) {
                     </>
                   )}
 
-
                   {(contactPermissions.isDelete || contactPermissions.isUpdate) && (
                     <>
                       <Button
@@ -914,8 +915,9 @@ export default function Contact(props) {
                         onClick={openActions}
                         className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                         aria-controls="action-menu"
+                        endIcon={<ExpandMore />}
                       >
-                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                        {isMobile && !isTablet ? '' : 'Actions'}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -947,21 +949,28 @@ export default function Contact(props) {
                         )}
                         {user.user?.userType === userType.brandAdmin && (
                           <MenuItem
-                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 || getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((record) => record?.isUserExist)}
+                            disabled={
+                              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 ||
+                              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((record) => record?.isUserExist)
+                            }
                             onClick={handleAccessToPortal}
                           >
                             Give Access to Portal
                           </MenuItem>
                         )}
-                        {(contactPermissions.isUpdate && contactResource === 'customerContact' && permissions?.productInventory) && (
+                        {contactPermissions.isUpdate && contactResource === 'customerContact' && permissions?.productInventory && (
                           <MenuItem
-                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 || [...new Set(getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d.accountNameId))].length > 1}
+                            disabled={
+                              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 ||
+                              [...new Set(getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d.accountNameId))].length > 1
+                            }
                             onClick={() => {
-                              setOpenAddPlantsDialog(true)
+                              setOpenAddPlantsDialog(true);
                               closeActions();
                             }}
                           >
-                            Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
+                            Assign {routes.warehouse.title} &nbsp;{' '}
+                            <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
                           </MenuItem>
                         )}
                         {contactPermissions.isUpdate && (
@@ -1151,35 +1160,42 @@ export default function Contact(props) {
               onOk={handleSingleDeleteContacts}
             />
           ) : null}
-          {openAddPlantsDialog &&
+          {openAddPlantsDialog && (
             <WarhouseList
               isCustomer={true}
               api={`/customer-account/${selectedRecords[0]?.accountNameId}/warehouse`}
               isAddingWarehouse={isAddingWarehouse}
               addWarehouse={(selectedPlants: any) => {
-                setAddingWarehouse(true)
-                axiosInstance().post(`/customer-contact/assign-warehouse`, {
-                  ids: selectedRecords.map((d: any) => d._id),
-                  warehouse: selectedPlants.map((d: any) => d._id),
-                }).then(() => {
-                  getContacts();
-                  setAddingWarehouse(false)
-                  setOpenAddPlantsDialog(false)
-                }).catch(err => {
-                  toastConfig.setToastConfig(err)
-                  setAddingWarehouse(false)
-                  setOpenAddPlantsDialog(false)
-                })
+                setAddingWarehouse(true);
+                axiosInstance()
+                  .post(`/customer-contact/assign-warehouse`, {
+                    ids: selectedRecords.map((d: any) => d._id),
+                    warehouse: selectedPlants.map((d: any) => d._id)
+                  })
+                  .then(() => {
+                    getContacts();
+                    setAddingWarehouse(false);
+                    setOpenAddPlantsDialog(false);
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setAddingWarehouse(false);
+                    setOpenAddPlantsDialog(false);
+                  });
               }}
               onClose={() => setOpenAddPlantsDialog(false)}
               assignedWarehouse={[]}
             />
-          }
+          )}
           {showEntityDialog ? (
             <EntitySelectionsDialog
               open={showEntityDialog}
               resource={sidebarResource[contactResource]}
-              resourceIds={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((o) => o._id) : [contactId]}
+              resourceIds={
+                getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                  ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((o) => o._id)
+                  : [contactId]
+              }
               onClose={() => {
                 setShowEntityDialog(false);
                 setContactId('');

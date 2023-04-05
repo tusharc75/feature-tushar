@@ -57,17 +57,19 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, ver
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
 
   const versionId = quotationData?.versions[version]?._id || null;
-  
+
   useEffect(() => {
     fetchFields();
     versionId && fetchQuotationService();
   }, [versionId]);
 
-  const extraColoum = [{
-    field: 'leadTime',
-    headerName: 'Lead Time (Days)',
-    cellRenderer: 'leadTimeRenderer'
-  }]
+  const extraColoum = [
+    {
+      field: 'leadTime',
+      headerName: 'Lead Time (Days)',
+      cellRenderer: 'leadTimeRenderer'
+    }
+  ];
 
   const fetchFields = async () => {
     const fields = await fetch_quotation_service_fields(quotationData?.currency);
@@ -235,9 +237,9 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, ver
                 onClick={openActions}
                 disabled={selectedRecords.length ? false : true}
                 aria-controls="action-menu"
+                endIcon={<ExpandMore />}
               >
-                {' '}
-                {'Actions'} <ExpandMore />
+                {'Actions'}
               </Button>
             </span>
           </HtmlTooltip>
@@ -304,7 +306,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, ver
             showClone={false}
             fullHeight={true}
             renderedFrom={renderedFrom}
-            onClone={() => { }}
+            onClone={() => {}}
           />
         ) : (
           <CustomAgGridEditable

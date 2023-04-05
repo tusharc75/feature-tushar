@@ -22,14 +22,7 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import { flattenArray } from 'src/constants/columns';
 
-const Material = ({
-  productionOrderData,
-  setNextStep,
-  renderedFrom,
-  stepFullScreen,
-  allowedToEdit,
-  allowedToDelete
-}) => {
+const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -80,58 +73,58 @@ const Material = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-          {allowedToEdit ? (
-            <p
-              onClick={() => {
-                setMaterialEdit({
-                  open: true,
-                  data: row.original,
-                  bulkedit: false,
-                  showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                });
-              }}
-              className="link text-truncate"
-              title={row.original?.detail}
-            >
-              {row.original?.detail}
-            </p>
-          ) : (
-            <p className="text-truncate">{row.original?.detail}</p>
-          )}
-          {allowedToEdit && (
-            <>
-              <Box ml={1}>
-                <span>({row.original?.subRows?.length})</span>
-              </Box>
-              <Box ml={1}>
-                <HtmlTooltip title="Add Product">
-                  <IconButton
-                    onClick={() => {
-                      setAddDialog({ open: true, type: 'product', parentId: row.original?._id });
-                    }}
-                    size="small"
-                  >
-                    <Add fontSize="small" color="primary" />
-                  </IconButton>
-                </HtmlTooltip>
-              </Box>
-            </>
-          )}
-          <Box ml={1}>
-            <IconButton
-              size="small"
-              onClick={() => {
-                if (row.original.type === 'product') {
-                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                } else {
-                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                }
-              }}
-            >
-              <OpenInNewIcon fontSize="small" color="primary" />
-            </IconButton>
-          </Box>
-        </div>
+            {allowedToEdit ? (
+              <p
+                onClick={() => {
+                  setMaterialEdit({
+                    open: true,
+                    data: row.original,
+                    bulkedit: false,
+                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                  });
+                }}
+                className="link text-truncate"
+                title={row.original?.detail}
+              >
+                {row.original?.detail}
+              </p>
+            ) : (
+              <p className="text-truncate">{row.original?.detail}</p>
+            )}
+            {allowedToEdit && (
+              <>
+                <Box ml={1}>
+                  <span>({row.original?.subRows?.length})</span>
+                </Box>
+                <Box ml={1}>
+                  <HtmlTooltip title="Add Product">
+                    <IconButton
+                      onClick={() => {
+                        setAddDialog({ open: true, type: 'product', parentId: row.original?._id });
+                      }}
+                      size="small"
+                    >
+                      <Add fontSize="small" color="primary" />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
+              </>
+            )}
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
         )
       },
       {
@@ -201,15 +194,9 @@ const Material = ({
     let rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail =
-        parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.packageDetail?.packageName
+      parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
 
-      parent.description =
-        parent.type === 'product'
-          ? parent?.productDetail?.productDescription
-          : parent?.packageDetail?.packageDescription
+      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
 
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
@@ -233,10 +220,8 @@ const Material = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName :
-       _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription :
-         _subRow?.packageDetail?.packageDescription 
+      _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
+      _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -327,9 +312,13 @@ const Material = ({
         });
         if (saveAndNext) {
           const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-          setMaterialEdit({ open: true, data: rowsData[rowIndex + 1], bulkedit: false, showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
-        }
-        else {
+          setMaterialEdit({
+            open: true,
+            data: rowsData[rowIndex + 1],
+            bulkedit: false,
+            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+          });
+        } else {
           setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
         }
       })
@@ -355,19 +344,12 @@ const Material = ({
     setAddAnchorEl(null);
   };
 
-
   return (
     <Fragment>
-      {allowedToEdit &&
+      {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" m={1}>
           <Box display="flex" alignItems="center">
-            <Button
-              variant={'outlined'}
-              color="primary"
-              size="small"
-              startIcon={<Add />}
-              onClick={openAddActions}
-              aria-controls="add-menu">
+            <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
               {'Add'}
               <ExpandMore fontSize="small" />
             </Button>
@@ -409,8 +391,9 @@ const Material = ({
               size="small"
               onClick={openActions}
               aria-controls="action-menu"
+              endIcon={<ExpandMore />}
             >
-              {isMobile ? '' : 'Actions'} <ExpandMore />
+              {isMobile ? '' : 'Actions'}
             </Button>
             <Menu
               anchorEl={anchorEl}
@@ -434,13 +417,15 @@ const Material = ({
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection).map((rec: any) => {
-                    const obj: any = {};
-                    obj.id = rec._id;
-                    obj.type = rec?.type;
-                    obj.materialId = rec?.materialId;
-                    return obj;
-                  });
+                  const dataToDelete = selectedRecords
+                    ?.filter((e) => !e.hideSelection)
+                    .map((rec: any) => {
+                      const obj: any = {};
+                      obj.id = rec._id;
+                      obj.type = rec?.type;
+                      obj.materialId = rec?.materialId;
+                      return obj;
+                    });
                   setDeleteData(dataToDelete);
                   closeActions();
                 }}
@@ -450,8 +435,8 @@ const Material = ({
             </Menu>
           </Box>
         </Box>
-      }
-        {columns && rowsData ? (
+      )}
+      {columns && rowsData ? (
         <>
           <Box p="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
@@ -498,28 +483,28 @@ const Material = ({
           }}
         />
       )}
-       {addDialog.open && addDialog.type === 'package' && (
+      {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
           referenceType="productionOrder"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           ids={[]}
           onSuccess={(rows) => {
-            handleAdd(rows)
+            handleAdd(rows);
           }}
           packageType={null}
         />
       )}
       {materialEdit.open && (
         <MaterialDialog
-        onClose={() => {
-          setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
-        }}
-        materialData={materialEdit.data}
-        productionOrderData={productionOrderData}
-        handleUpdate={handleSaveData}
-        loadingEdit={isUpdating}
-        bulkEdit={materialEdit.bulkedit}
-        showSaveAndNext={materialEdit.showSaveAndNext}
+          onClose={() => {
+            setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
+          }}
+          materialData={materialEdit.data}
+          productionOrderData={productionOrderData}
+          handleUpdate={handleSaveData}
+          loadingEdit={isUpdating}
+          bulkEdit={materialEdit.bulkedit}
+          showSaveAndNext={materialEdit.showSaveAndNext}
         />
       )}
     </Fragment>

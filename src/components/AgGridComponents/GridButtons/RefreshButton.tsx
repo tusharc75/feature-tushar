@@ -12,8 +12,8 @@ const RefreshButton = ({ isOffline, refreshGrid = null, style = {}, ...otherProp
           height: '32px',
           background: 'white',
           padding: '11px',
-          border: '1px solid #e5e5e5',
-          color: '#737373',
+          border: '1px solid #DEDEDE',
+          color: '#424242',
           ...style
         }}
         disabled={isOffline}

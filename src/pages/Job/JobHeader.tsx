@@ -51,7 +51,6 @@ function JobHeader(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
-
     }
   };
 
@@ -69,17 +68,10 @@ function JobHeader(props) {
 
   const handleClickClose = () => {
     setOpen(false);
-
   };
 
   let toggleInner = options && (
-    <ToggleButtonGroup
-      size="small"
-      className=" toggle-button-layout"
-      value={filter}
-      exclusive
-      onChange={handleFilter}
-    >
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
         return (
           <ToggleButton value={k.key} key={index}>
@@ -163,34 +155,38 @@ function JobHeader(props) {
             })}
           </ToggleButtonGroup>
         )}
-        {permissions?.fleetDispatch?.isRead &&
+        {permissions?.fleetDispatch?.isRead && (
           <Box ml={1}>
-            <ToggleButtonGroup size="small" >
-              <ToggleButton onClick={() => {
-                history.push(`${routes.fleetDispatch.path}`)
-              }}>
+            <ToggleButtonGroup size="small">
+              <ToggleButton
+                onClick={() => {
+                  history.push(`${routes.fleetDispatch.path}`);
+                }}
+              >
                 <span>{routes.fleetDispatch.title}</span>
               </ToggleButton>
             </ToggleButtonGroup>
           </Box>
-        }
-        {permissions?.fleetReceiver?.isRead &&
+        )}
+        {permissions?.fleetReceiver?.isRead && (
           <Box ml={1}>
-            <ToggleButtonGroup size="small" >
-              <ToggleButton onClick={() => {
-                history.push(`${routes.fleetReceiver.path}`)
-              }}>
+            <ToggleButtonGroup size="small">
+              <ToggleButton
+                onClick={() => {
+                  history.push(`${routes.fleetReceiver.path}`);
+                }}
+              >
                 <span>{routes.fleetReceiver.title}</span>
               </ToggleButton>
             </ToggleButtonGroup>
           </Box>
-        }
+        )}
         <Box ml={1}>
           <IconButton
             size="small"
             aria-label="Clone"
             onClick={() => {
-              setViewType(1)
+              setViewType(1);
             }}
           >
             <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
@@ -199,7 +195,7 @@ function JobHeader(props) {
             size="small"
             aria-label="Clone"
             onClick={() => {
-              setViewType(2)
+              setViewType(2);
             }}
           >
             <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
@@ -237,14 +233,15 @@ function JobHeader(props) {
               <>
                 <Button
                   disabled={canDelete}
-                  variant={isMobile ? "text" : "outlined"}
+                  variant={isMobile ? 'text' : 'outlined'}
                   color="default"
                   size="small"
                   onClick={openActions}
                   aria-controls="action-menu"
-                  className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                  className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                  endIcon={<ExpandMore />}
                 >
-                  {isMobile ? "" : "Actions"} <ExpandMore />
+                  {isMobile ? '' : 'Actions'}
                 </Button>
                 <Menu
                   anchorEl={anchorEl}

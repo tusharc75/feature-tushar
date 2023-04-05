@@ -64,9 +64,7 @@ const ServiceMaster = (props: Props) => {
     fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-  const defaultColumns = [
-    { field: 'order', headerName: 'Sequence', show: true, cellRenderer: 'commonRenderer' },
-  ];
+  const defaultColumns = [{ field: 'order', headerName: 'Sequence', show: true, cellRenderer: 'commonRenderer' }];
 
   const fetchGridColumns = () => {
     setColumns(null);
@@ -103,7 +101,7 @@ const ServiceMaster = (props: Props) => {
     axiosInstance()
       .get(`${routes.product.path}/${id}/service-master`)
       .then(({ data: { data } }) => {
-        setOrignalData([...data])
+        setOrignalData([...data]);
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['preWork'] = u?.preWork ? 'Yes' : 'No';
@@ -309,8 +307,9 @@ const ServiceMaster = (props: Props) => {
               disabled={selectedRecords.length ? false : true}
               aria-controls="action-menu"
               style={{ marginLeft: '0.6rem' }}
+              endIcon={<ExpandMore />}
             >
-              {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+              {isMobile && !isTablet ? '' : 'Actions'}
             </Button>
             <Menu
               anchorEl={anchorEl}
@@ -381,9 +380,9 @@ const ServiceMaster = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => { }}
+            onEdit={() => {}}
             extraParamsToCheckDelete={false}
-            onDelete={() => { }}
+            onDelete={() => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -391,7 +390,7 @@ const ServiceMaster = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : (

@@ -70,10 +70,18 @@ export const rentalManagementSteps = [
 export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loading Ticket'];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
-export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Loading Ticket', 'Invoice'];
+
 export const demandOrderSteps = ['Add Products'];
 export const purchaseRequisitionSteps = ['Add Products'];
-// export const serviceOrderSteps = ['Add Services', 'Add Products', 'Assign Technician', 'Technician Dispatch', 'Invoice'];
+
+export const repairOrderSteps: stepInterface[] = [
+  { name: 'Add Assets', title: 'Add', icon: 'add' },
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
+  { name: 'Quotation', title: 'Quotation', icon: 'quote' },
+  { name: 'Post Work Service', title: 'Service', icon: 'postWork' },
+  { name: 'Loading Ticket', title: 'Loading Ticket', icon: 'dispatch' },
+  { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
+];
 
 export const serviceOrderSteps: stepInterface[] = [
   { name: 'Add Services', title: 'Add', icon: 'add' },
@@ -359,7 +367,7 @@ export const RESOURCE_LABEL = {
   job: 'Job',
   fleetReceiver: 'Fleet Receiver',
   storageLocation: 'Storage Location',
-  transactionLock: 'Transaction Lock',
+  transactionLock: 'Transaction Lock'
 };
 
 export const CHILD_RESOURCE = {
@@ -873,21 +881,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1024,7 +1032,7 @@ export const displayCardDate = (date) => {
 export const convertDateInDateTime = (date) => {
   var newDate = new Date(date);
   var currentDate = new Date();
-  newDate.setHours(currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds())
+  newDate.setHours(currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
   return newDate;
 };
 
@@ -1933,8 +1941,7 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket',
-
+  irtTicket: 'irtTicket'
 };
 
 export const LOG_RESOURCE = {
@@ -1985,7 +1992,7 @@ export const LOG_RESOURCE = {
   competencyMaster: sidebarResource.competencyMaster,
   bulkAssetCreation: sidebarResource.bulkAssetCreation,
   salesOrder: sidebarResource.salesOrder,
-  transferInventory: sidebarResource.transferInventory,
+  transferInventory: sidebarResource.transferInventory
 };
 
 export const REPORT_LIST = [
@@ -2210,14 +2217,14 @@ export const QUOTATION_STATUS = {
   sentToCustomer: 'Sent to Customer',
   acceptByCustomer: 'Accepted by Customer',
   rejectByCustomer: 'Rejected by Customer',
-  converted: 'Converted',
+  converted: 'Converted'
 };
 
 export const QUOTATION_TYPE = {
   salesOrder: 'Sales Order',
   rentalJob: 'Rental Job',
   repairOrder: 'Repair Order'
-}
+};
 
 export const WORKORDER_SERVICE_COLOR = {
   preWork: 'rgba(254, 249, 230, 1)',

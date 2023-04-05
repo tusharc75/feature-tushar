@@ -134,7 +134,7 @@ function Parts({ id }) {
 
   const handleRemove = () => {
     setIsDeleting(true);
-    closeActions()
+    closeActions();
     const { data } = showConfirmBox;
     if (data.length > 1) {
       data.forEach((p: any) => {
@@ -208,8 +208,9 @@ function Parts({ id }) {
               disabled={selectedRecords.length ? false : true}
               aria-controls="action-menu"
               style={{ marginLeft: '0.6rem' }}
+              endIcon={<ExpandMore />}
             >
-              {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+              {isMobile && !isTablet ? '' : 'Actions'}
             </Button>
             <Menu
               anchorEl={anchorEl}
@@ -243,65 +244,58 @@ function Parts({ id }) {
             </Box>
           </Box>
         </Box>
-      )
-      }
-      {
-        frameWorkComponent ? (
-          <CustomAgGrid
-            allowSelection={hasPermissions}
-            allowAction={hasPermissions}
-            columns={columns}
-            dataRows={dataRows}
-            isClientSideGrid={true}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={150}
-            loading={gridLoading}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchBOMData}
-          />
-        ) : (
-          <Box p={2} height={500} bgcolor="white">
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )
-      }
-      {
-        showConfirmBox.open && (
-          <ConfirmationDialogRaw
-            open={true}
-            message={`Are you sure you want to delete this product(s)?`}
-            okBtnLoading={isDeleting}
-            onClose={() => {
-              setShowConfirmBox({ open: false, data: null });
-            }}
-            onOk={handleRemove}
-          />
-        )
-      }
-      {
-        openAssignProductDialog && (
-          <AssignProductDialog
-            productsDialogOpen={openAssignProductDialog}
-            productId={id}
-            handleCloseDialog={() => setOpenAssignProductDialog(false)}
-            assignedProducts={[...parts?.map((p) => p.childProduct), id]}
-            renderedFrom={`${renderedFrom}_grid-sub-1`}
-            onSuccess={() => {
-              if (permissions?.serializedAsset) {
-                fetchBOMData();
-              }
-              setOpenAssignProductDialog(false);
-            }}
-          />
-        )
-      }
-    </div >
+      )}
+      {frameWorkComponent ? (
+        <CustomAgGrid
+          allowSelection={hasPermissions}
+          allowAction={hasPermissions}
+          columns={columns}
+          dataRows={dataRows}
+          isClientSideGrid={true}
+          frameworkComponents={frameWorkComponent}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          actionWidth={150}
+          loading={gridLoading}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchBOMData}
+        />
+      ) : (
+        <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+      {showConfirmBox.open && (
+        <ConfirmationDialogRaw
+          open={true}
+          message={`Are you sure you want to delete this product(s)?`}
+          okBtnLoading={isDeleting}
+          onClose={() => {
+            setShowConfirmBox({ open: false, data: null });
+          }}
+          onOk={handleRemove}
+        />
+      )}
+      {openAssignProductDialog && (
+        <AssignProductDialog
+          productsDialogOpen={openAssignProductDialog}
+          productId={id}
+          handleCloseDialog={() => setOpenAssignProductDialog(false)}
+          assignedProducts={[...parts?.map((p) => p.childProduct), id]}
+          renderedFrom={`${renderedFrom}_grid-sub-1`}
+          onSuccess={() => {
+            if (permissions?.serializedAsset) {
+              fetchBOMData();
+            }
+            setOpenAssignProductDialog(false);
+          }}
+        />
+      )}
+    </div>
   );
 }
 
