@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -18,7 +18,8 @@ import TabPanel from 'src/components/TabPanel';
 import AddSerializedAsset from './AddSerializedAsset';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
-import Steps from '../RentalManagement/Steps';
+
+import Steps2, { getIndex } from 'src/components/Steps';
 import { GiAbstract055 } from 'react-icons/gi';
 import { camelCase } from 'lodash';
 import { RiFlowChart } from 'react-icons/ri';
@@ -64,6 +65,9 @@ const RepairJobDetails = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
+  const repairJobProcessStepsNames = React.useMemo(() => {
+    return repairJobProcessSteps.map((item) => item.name);
+  }, [repairJobProcessSteps]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -98,7 +102,7 @@ const RepairJobDetails = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 2) {
-      updateProcessStatus(repairJobProcessSteps[currentStep]);
+      updateProcessStatus(repairJobProcessStepsNames[currentStep]);
     }
   }, [currentStep]);
 
@@ -114,19 +118,19 @@ const RepairJobDetails = () => {
   };
 
   const fetchAssetStatusRights = () => {
-    axiosInstance().get(`/field?resource=${serializedAsset.resource}&view=true`)
+    axiosInstance()
+      .get(`/field?resource=${serializedAsset.resource}&view=true`)
       .then(({ data }) => {
         if (data.data && data.data.length) {
-          data.data.some(o => {
-            if (o?.fieldData?.fieldName === "status") {
-              setAllowUpdateStatus(o?.isUpdate)
-              return true
+          data.data.some((o) => {
+            if (o?.fieldData?.fieldName === 'status') {
+              setAllowUpdateStatus(o?.isUpdate);
+              return true;
             }
-          })
+          });
         }
       })
-      .catch((err) => {
-      });
+      .catch((err) => {});
   };
 
   const fetchRepairJobData = () => {
@@ -134,11 +138,11 @@ const RepairJobDetails = () => {
       .get(`${routes.repairJob.path}/${id}`)
       .then(({ data: { data } }) => {
         setRepairJobData({ ...data });
-        setCurrentStep(repairJobProcessSteps.indexOf(data?.processStatus) !== -1 ? repairJobProcessSteps.indexOf(data?.processStatus) : 0);
+        setCurrentStep(getIndex(data?.processStatus, repairJobProcessSteps));
 
         let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         if (user?.role?.selectedEntity?.superAdminAccess) {
-          isAllowedToEdit = true
+          isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit);
 
@@ -182,15 +186,14 @@ const RepairJobDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairJob.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => {
-      });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => { })
+      .then(({ data: { data } }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -217,11 +220,7 @@ const RepairJobDetails = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.repairJob?.isUpdate && allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className={'btn-outline-v1'}
-                  onClick={handleOpenUpdateDialog}
-                >
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
@@ -293,7 +292,7 @@ const RepairJobDetails = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Steps
+            <Steps2
               isNextStep={false}
               nextStep={nextStep}
               steps={repairJobProcessSteps}
@@ -302,7 +301,7 @@ const RepairJobDetails = () => {
               isStepEnded={[REPAIR_JOB_STATUS.completed].includes(repairJobData?.status)}
               setStepFullScreen={() => setStepFullScreen(true)}
             />
-            <ContentFullScreen title={repairJobProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+            <ContentFullScreen title={repairJobProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
               {currentStep === 0 && (
                 <AddSerializedAsset
                   repairJobData={repairJobData}
@@ -361,21 +360,19 @@ const RepairJobDetails = () => {
           okBtnLoading={okBtnLoading}
         />
       } */}
-      {
-        openUpdateDialog && (
-          <ManageRepairJob
-            isClone={false}
-            repairJobId={id}
-            onClose={() => {
-              setOpenUpdateDialog(false);
-            }}
-            onSuccess={() => {
-              fetchRepairJobData();
-              setOpenUpdateDialog(false);
-            }}
-          />
-        )
-      }
+      {openUpdateDialog && (
+        <ManageRepairJob
+          isClone={false}
+          repairJobId={id}
+          onClose={() => {
+            setOpenUpdateDialog(false);
+          }}
+          onSuccess={() => {
+            fetchRepairJobData();
+            setOpenUpdateDialog(false);
+          }}
+        />
+      )}
     </Box>
   );
 };

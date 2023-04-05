@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Grid, Box, Button, Tabs, Tab, Menu, MenuItem } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
@@ -17,7 +17,7 @@ import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import Steps from '../RentalManagement/Steps';
+import Steps2, { getIndex } from 'src/components/Steps';
 import Material from './Material';
 import Invoice from './Invoice';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -39,7 +39,6 @@ const InvoiceDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [invoiceData, setInvoiceData] = useState(null);
@@ -55,6 +54,10 @@ const InvoiceDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+
+  const invoiceProcessStepsNames = React.useMemo(() => {
+    return invoiceProcessSteps.map((item) => item.name);
+  }, [invoiceProcessSteps]);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -91,7 +94,7 @@ const InvoiceDetails = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 1) {
-      updateProcessStatus(invoiceProcessSteps[currentStep]);
+      updateProcessStatus(invoiceProcessStepsNames[currentStep]);
     }
   }, [currentStep]);
 
@@ -127,7 +130,7 @@ const InvoiceDetails = () => {
       const response: any = await axiosInstance().get(`${invoice.api}/${id}`);
       data = response?.data?.data;
 
-      setCurrentStep(invoiceProcessSteps.indexOf(data?.processStatus) !== -1 ? invoiceProcessSteps.indexOf(data?.processStatus) : 0);
+      setCurrentStep(getIndex(data?.processStatus, invoiceProcessSteps));
       setHeadingLabel(data.invoiceNumber);
       setCustomizedRoutes([routes.invoice, { title: `${data.invoiceNumber}` }]);
       setInvoiceData(data);
@@ -303,7 +306,7 @@ const InvoiceDetails = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps
+          <Steps2
             isNextStep={false}
             nextStep={nextStep}
             steps={invoiceProcessSteps}
@@ -311,7 +314,7 @@ const InvoiceDetails = () => {
             setCurrentStep={setCurrentStep}
             isStepEnded={['Invoiced', 'Closed'].includes(invoiceData?.status)}
           />
-          <ContentFullScreen title={invoiceProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <ContentFullScreen title={invoiceProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && invoiceData && (
               <Material
                 invoiceData={invoiceData}
