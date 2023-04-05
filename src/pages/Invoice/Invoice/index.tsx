@@ -47,32 +47,32 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
       let data = await fetch_invoice_product_fields(invoiceData?.currency);
       setAllFields(JSON.parse(JSON.stringify(data)));
       const newColumns = genrateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
-    let coloum: any = [
-      {
-        accessor: 'index',
-        Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
-        Footer: () => {
-          return <>Total</>;
-        }
-      },
-      {
-        accessor: 'type',
-        Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${row.original?.type === "serializedAsset" ? "Asset" : startCase(row.original?.type)} `}</p>
-          </div>
-        )
-      },
-      {
+      let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
+      if (qtyIndex > -1) {
+        newColumns[qtyIndex].accessor = 'qtyDisplay';
+      }
+      let coloum: any = [
+        {
+          accessor: 'index',
+          Header: 'Index',
+          width: 70,
+          sticky: isMobile ? 'none' : 'left',
+          Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+          Footer: () => {
+            return <>Total</>;
+          }
+        },
+        {
+          accessor: 'type',
+          Header: 'Type',
+          sticky: isMobile ? 'none' : 'left',
+          Cell: ({ row }) => (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p>{`${row.original?.type === 'serializedAsset' ? 'Asset' : startCase(row.original?.type)} `}</p>
+            </div>
+          )
+        },
+        {
           accessor: 'detail',
           Header: 'Detail',
           minWidth: 300,
@@ -104,14 +104,22 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === 'product' ? parent.productDetail?.productName :
-        parent.type === 'package' ? parent.packageDetail?.packageName :
-        parent.type === 'serializedAsset' ? parent.serializedAssetDetail?.assetNumber :
-        parent.serviceDetail?.serviceName;
-      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription :
-        parent.type === 'package' ? parent?.packageDetail?.packageDescription :
-        parent.type === 'serializedAsset' ? parent?.description :
-          parent?.serviceDetail?.serviceDescription
+      parent.detail =
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'package'
+          ? parent.packageDetail?.packageName
+          : parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.serviceDetail?.serviceName;
+      parent.description =
+        parent.type === 'product'
+          ? parent?.productDetail?.productDescription
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription
+          : parent.type === 'serializedAsset'
+          ? parent?.description
+          : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
@@ -128,14 +136,22 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName :
-        _subRow.type === 'package' ? _subRow.packageDetail?.packageName :
-          _subRow.type === 'serializedAsset' ? _subRow.serializedAssetDetail.assetNumber :
-            _subRow.serviceDetail?.serviceName;
-      _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription :
-        _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription :
-          _subRow.type === 'serializedAsset' ? parent.description :
-            _subRow?.serviceDetail?.serviceDescription
+      _subRow.detail =
+        _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'package'
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail.assetNumber
+          : _subRow.serviceDetail?.serviceName;
+      _subRow.description =
+        _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDescription
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow.type === 'serializedAsset'
+          ? parent.description
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -149,7 +165,7 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns && rowsData ? (
           <>
-            <Box p="6px" zIndex={5}>
+            <Box zIndex={5}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                 columns={columns}

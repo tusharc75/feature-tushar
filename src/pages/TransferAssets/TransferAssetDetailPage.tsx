@@ -12,7 +12,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, transferAsset } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, transferAsset, transferSteps, transferSteps1 } from 'src/constants/helpers';
 import ManageTransferAsset from './ManageTransferAsset';
 import queryString from 'query-string';
 import TransferStepper from './TransferAssetSteps';
@@ -25,16 +25,14 @@ import TabPanel from 'src/components/TabPanel';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import { camelCase } from 'lodash';
+import { camelCase, findIndex } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import Steps from 'src/pages/RentalManagement/Steps';
+import Steps2, { getIndex } from 'src/components/Steps';
 import { RiFlowChart } from 'react-icons/ri';
 import TransferAssetViews from './RoadMapViews';
 import { isMobile, isTablet } from 'react-device-detect';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 
-const transferSteps = ['Add Assets', 'Loading Ticket'];
-const transferSteps1 = ['Add Assets', 'Loading Ticket', 'Receiving Ticket'];
 const status = ['New', 'In Progress', 'Completed'];
 
 const TransferAssetDetailPage = () => {
@@ -74,6 +72,13 @@ const TransferAssetDetailPage = () => {
   const [locationKeys, setLocationKeys] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
+  const transferStepsNames = React.useMemo(() => {
+    return transferSteps.map((item) => item.name);
+  }, [transferSteps]);
+  const transferSteps1Names = React.useMemo(() => {
+    return transferSteps1.map((item) => item.name);
+  }, [transferSteps1]);
+
   useEffect(() => {
     return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
@@ -103,7 +108,7 @@ const TransferAssetDetailPage = () => {
   }, [id]);
 
   const updateStatus = (step) => {
-    const processStatus = transferType === 'Internal' ? transferSteps[step] : transferSteps1[step];
+    const processStatus = transferType === 'Internal' ? transferStepsNames[step] : transferSteps1Names[step];
     axiosInstance()
       .put(`${routes.transferAsset.path}/${id}/process-status`, { processStatus })
       .catch((error) => {
@@ -172,7 +177,7 @@ const TransferAssetDetailPage = () => {
         setPlantId(data?.transferFromPlant.optionValue);
         setHeadingLabel(data.transferAssetNumber);
         const steps = data?.transferType === 'Internal' ? transferSteps : transferSteps1;
-        setCurrentStep(steps.indexOf(data?.processStatus) !== -1 ? steps.indexOf(data?.processStatus) : 0);
+        setCurrentStep(getIndex(data?.processStatus, steps));
         setCustomizedRoutes([routes.transferAsset, { title: data.transferAssetNumber }]);
 
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
@@ -188,8 +193,8 @@ const TransferAssetDetailPage = () => {
           data?.transferType === 'Internal'
             ? data?.transfertoPlant?.entity
             : data?.transferType === 'External Customer'
-              ? data?.transfertoCustomer?.entity
-              : data?.transfertoSupplier?.entity;
+            ? data?.transfertoCustomer?.entity
+            : data?.transfertoSupplier?.entity;
 
         if (warehouseEntity?.length) {
           const isReceiveable = warehouseEntity.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0;
@@ -287,7 +292,6 @@ const TransferAssetDetailPage = () => {
       });
   };
 
-
   const handleViewPdf = (download) => {
     setFileDownloading(true);
     axiosInstance()
@@ -334,11 +338,7 @@ const TransferAssetDetailPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.transferAsset?.isUpdate && !isTransferEnded && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                onClick={handleOpenUpdateDialog}
-                className={'btn-outline-v1'}
-              >
+              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
                 {isMobile ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
@@ -399,7 +399,7 @@ const TransferAssetDetailPage = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <Box my={2}>
-            <Steps
+            <Steps2
               isNextStep={false}
               nextStep={isNextStep}
               steps={transferAssetData?.transferType === 'Internal' ? transferSteps : transferSteps1}
@@ -423,7 +423,7 @@ const TransferAssetDetailPage = () => {
                   /> */}
 
             <ContentFullScreen
-              title={transferAssetData?.transferType === 'Internal' ? transferSteps[currentStep] : transferSteps1[currentStep]}
+              title={transferAssetData?.transferType === 'Internal' ? transferStepsNames[currentStep] : transferSteps1Names[currentStep]}
               fullScreen={stepFullScreen}
               setFullScreen={setStepFullScreen}
             >
@@ -491,38 +491,34 @@ const TransferAssetDetailPage = () => {
         </TabPanel>
       </Box>
       {/* Confirm Delete Dialog */}
-      {
-        showConfirmBox && (
-          <ConfirmationDialog
-            okBtnLoading={isDeleting}
-            open={showConfirmBox}
-            message={`Are you sure you want to delete this transfer asset: ${headingLabel} ?`}
-            onClose={() => {
-              setShowConfirmBox(false);
-            }}
-            onOk={handleDelete}
-          />
-        )
-      }
+      {showConfirmBox && (
+        <ConfirmationDialog
+          okBtnLoading={isDeleting}
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this transfer asset: ${headingLabel} ?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
       {/* Manage Transfer Asset Data */}
-      {
-        openUpdateDialog && (
-          <ManageTransferAsset
-            isEditable={existingAssets.length > 0}
-            isMainInfoEditable={currentStep >= 1 && (loadingTickets.length > 0 || receivingTickets.length > 0)}
-            number={transferAssetData?.transferAssetNumber}
-            isClone={false}
-            transferAssetId={id}
-            onClose={() => {
-              setOpenUpdateDialog(false);
-            }}
-            onSuccess={() => {
-              fetchTransferAssetData();
-              setOpenUpdateDialog(false);
-            }}
-          />
-        )
-      }
+      {openUpdateDialog && (
+        <ManageTransferAsset
+          isEditable={existingAssets.length > 0}
+          isMainInfoEditable={currentStep >= 1 && (loadingTickets.length > 0 || receivingTickets.length > 0)}
+          number={transferAssetData?.transferAssetNumber}
+          isClone={false}
+          transferAssetId={id}
+          onClose={() => {
+            setOpenUpdateDialog(false);
+          }}
+          onSuccess={() => {
+            fetchTransferAssetData();
+            setOpenUpdateDialog(false);
+          }}
+        />
+      )}
     </Box>
   );
 };
