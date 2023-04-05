@@ -3,8 +3,8 @@ import { Fragment, useState } from 'react';
 import MergeRecordsDialog from './MergeRecordsDialog';
 
 const MergeRecords = ({ selectedRecords, resource, closeActions, onSuccess }) => {
+
   const [open, setOpen] = useState(false);
-  const id = selectedRecords[0]?._id;
 
   return (
     <Fragment>
@@ -17,14 +17,14 @@ const MergeRecords = ({ selectedRecords, resource, closeActions, onSuccess }) =>
       >
         Merge
       </MenuItem>
-      {open && 
-      <MergeRecordsDialog 
-        id={id} 
-        open={open} 
-        onClose={() => setOpen(false)} 
-        resource={resource} 
-        onSuccess={onSuccess} 
-      />}
+      {open &&
+        <MergeRecordsDialog
+          id={selectedRecords[0]?._id}
+          onClose={() => setOpen(false)}
+          resource={resource}
+          onSuccess={onSuccess}
+        />
+      }
     </Fragment>
   );
 };

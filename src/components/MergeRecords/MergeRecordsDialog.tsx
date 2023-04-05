@@ -10,17 +10,22 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const MergeRecordsDialog = ({ id, open, onClose, resource, onSuccess }) => {
+const MergeRecordsDialog = ({ id, onClose, resource, onSuccess }) => {
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState(null);
+
   const [mergeValue, setMergeValue] = useState(null);
+  const [fromLabel, setFromLabel] = useState("");
+
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=${resource}`)
       .then(({ data: { data } }) => {
+        setFromLabel(data[resource]?.find((item) => item.optionValue === id)?.optionLabel)
         let options = data[resource]?.filter((item) => item.optionValue !== id);
         setOptions(options);
       })
@@ -53,55 +58,58 @@ const MergeRecordsDialog = ({ id, open, onClose, resource, onSuccess }) => {
       });
   };
 
-  return (
-    <>
-      <Dialog
-        maxWidth="sm"
-        fullScreen={fullScreen || isMobile || isTablet}
-        TransitionComponent={CustomDialogTransition}
-        aria-labelledby="customized-dialog-title"
-        open={open}
-        onClose={(e, reason) => {
-          if (reason !== 'backdropClick') {
-          }
-        }}
-        fullWidth
-      >
-        <CustomDialogHeader
-          title="Merge Records"
-          onClose={onClose}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen((prevState) => !prevState);
+  return (<Dialog
+    maxWidth="sm"
+    fullScreen={fullScreen || isMobile || isTablet}
+    TransitionComponent={CustomDialogTransition}
+    aria-labelledby="customized-dialog-title"
+    open={true}
+    onClose={(e, reason) => {
+      if (reason !== 'backdropClick') {
+      }
+    }}
+    fullWidth
+  >
+    <CustomDialogHeader
+      title={`Merge - ${fromLabel}`}
+      onClose={onClose}
+      isMinimized={!fullScreen}
+      onMinimizeMaximize={() => {
+        setFullScreen((prevState) => !prevState);
+      }}
+      showManimizeMaximize={true}
+    />
+    <CustomDialogContent>
+      <Box py={2}>
+        <Autocomplete
+          size="small"
+          options={options}
+          value={mergeValue}
+          onChange={(_, val) => {
+            setMergeValue(val);
           }}
-          showManimizeMaximize={true}
+          getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
+          getOptionLabel={(option) => option.optionLabel}
+          renderInput={(props) => <TextField {...props} required variant="outlined" label={`${resource}`} />}
         />
-        <CustomDialogContent>
-          <Box py={2}>
-            <Autocomplete
-              size="small"
-              options={options}
-              value={mergeValue}
-              onChange={(_, val) => {
-                setMergeValue(val);
-              }}
-              getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
-              getOptionLabel={(option) => option.optionLabel}
-              renderInput={(props) => <TextField {...props} variant="outlined" label={`To ${resource}`} />}
-            />
-          </Box>
-        </CustomDialogContent>
-        <CustomDialogFooter>
-          <Button size="small" color="primary" onClick={onClose}>
-            Cancel
-          </Button>
-          <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={handleSave}>
-            {' '}
-            Save
-          </CustomButton>
-        </CustomDialogFooter>
-      </Dialog>
-    </>
+      </Box>
+    </CustomDialogContent>
+    <CustomDialogFooter>
+      <Button size="small" color="primary" onClick={onClose}>
+        Cancel
+      </Button>
+      <CustomButton
+        loading={loading}
+        disabled={loading || !mergeValue}
+        variant="contained"
+        color="primary"
+        type="submit"
+        onClick={handleSave}>
+        Save
+      </CustomButton>
+    </CustomDialogFooter>
+  </Dialog>
+
   );
 };
 

@@ -384,50 +384,48 @@ const WellMaster = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions?.wellMaster?.isDelete && (
-                    <>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        color="default"
-                        size="small"
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                        onClick={openActions}
-                        disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
-                        aria-controls="action-menu"
-                        endIcon={<ExpandMore />}
-                      >
-                        {isMobile && !isTablet ? '' : 'Actions'}
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        <MenuItem
-                          disabled={!permissions?.wellMaster?.isDelete}
-                          onClick={() => {
-                            closeActions();
-                            setShowDeleteConfirmBox(true);
-                          }}
-                        >
-                          Delete
-                        </MenuItem>
-                        <MergeRecords 
-                          selectedRecords={selectedRecords}
-                          resource={sidebarResource?.wellMaster}
-                          closeActions={closeActions}
-                          onSuccess={fetchData}
-                        />
-                      </Menu>
-                    </>
-                  )}
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="default"
+                    size="small"
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    onClick={openActions}
+                    disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
+                    aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
+                  >
+                    {isMobile && !isTablet ? '' : 'Actions'}
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      disabled={!permissions?.wellMaster?.isDelete}
+                      onClick={() => {
+                        closeActions();
+                        setShowDeleteConfirmBox(true);
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                    {permissions?.wellMaster?.isUpdate &&
+                      <MergeRecords
+                        selectedRecords={selectedRecords}
+                        resource={sidebarResource?.wellMaster}
+                        closeActions={closeActions}
+                        onSuccess={fetchData}
+                      />
+                    }
+                  </Menu>
                 </Grid>
               </Box>
             </Grid>
