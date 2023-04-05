@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment, useContext, useReducer } from 'react';
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -22,55 +22,55 @@ import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridCompone
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { useData } from 'src/StateProvider/Provider';
-import EntitySelectionsDialog from "src/components/EntitySelections"
-import { AiOutlineDeploymentUnit } from "react-icons/ai"
+import EntitySelectionsDialog from 'src/components/EntitySelections';
+import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import Chip from "@material-ui/core/Chip"
-import useColumns, { getStaticFields, getFrameworkComponents } from "src/constants/useColumns"
-import { prepareDataForGrid } from "src/constants/helpers"
-import { useLocation } from "react-router-dom";
-import queryString from "query-string";
-import { MdSort, MdFilterList } from "react-icons/md";
-import { MdAdd } from "react-icons/all";
-import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
+import Chip from '@material-ui/core/Chip';
+import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
+import { prepareDataForGrid } from 'src/constants/helpers';
+import { useLocation } from 'react-router-dom';
+import queryString from 'query-string';
+import { MdSort, MdFilterList } from 'react-icons/md';
+import { MdAdd } from 'react-icons/all';
+import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import MobileSortDialog from "src/components/MobileSortDialog"
-import MobileFilterDialog from "src/components/MobileFilterDialog"
-import { camelCase } from 'lodash'
+import MobileSortDialog from 'src/components/MobileSortDialog';
+import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import { camelCase } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const Warehouse = () => {
-
-  const renderedFrom = camelCase(routes?.warehouse.title)
+  const renderedFrom = camelCase(routes?.warehouse.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const location = useLocation();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const { state: { permissions, user, selectedEntity } }: any = useData();
+  const {
+    state: { permissions, user, selectedEntity }
+  }: any = useData();
   const { getColumnData } = useColumns();
-
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [addressResource, setAddressResource] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [showEntityDialog, setShowEntityDialog] = useState(false)
-  const [warehouseId, setWarehouseId] = useState("")
-  const [entities, setEntities] = useState([])
-  const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false)
-  const [columns, setColumns] = useState([])
-  const [frameWorkComponent, setFrameWorkComponent] = useState({})
-
+  const [showEntityDialog, setShowEntityDialog] = useState(false);
+  const [warehouseId, setWarehouseId] = useState('');
+  const [entities, setEntities] = useState([]);
+  const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false);
+  const [columns, setColumns] = useState([]);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
   const [sortOpen, setSortOpen] = React.useState(false);
-  const [isOpenDialog, setisOpenDialog] = useState(false)
+  const [isOpenDialog, setisOpenDialog] = useState(false);
 
   useEffect(() => {
     const parsedParams = queryString.parse(location?.search);
@@ -78,38 +78,37 @@ const Warehouse = () => {
       setAddressResource({ id: parsedParams?.id });
       setOpen({ open: true, isClone: false });
     }
-  }, [location])
+  }, [location]);
 
   useEffect(() => {
-    fetchGridColumns()
-  }, [])
+    fetchGridColumns();
+  }, []);
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get("/field?resource=Warehouse")
+      .get('/field?resource=Warehouse')
       .then(({ data: { data } }) => {
-        let columns = []
-        let rendererNames = []
-        data.forEach(o => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.warehouseDetail.path)
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.warehouseDetail.path);
           if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData]
+            columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName)
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
-        })
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
           actionsRenderer: ActionsRenderer
-        }
-        setFrameWorkComponent({ ...tempFrameworkComponent })
-        columns = [...columns, ...getStaticFields()]
-        setColumns([...columns])
-      })
-  }
-
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...getStaticFields()];
+        setColumns([...columns]);
+      });
+  };
 
   const fetchWarehouses = () => {
     dispatch({ type: 'loading', loading: true });
@@ -124,21 +123,25 @@ const Warehouse = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject["canDelete"] = permissions?.warehouse?.isDelete;
-          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-          finalObject["allowedToEdit"] = permissions?.warehouse?.isUpdate;
+          finalObject['canDelete'] = permissions?.warehouse?.isDelete;
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['allowedToEdit'] = permissions?.warehouse?.isUpdate;
 
-          return finalObject
+          return finalObject;
         });
         if (appendRows) {
           dispatch({
-            type: "initialize", data: [...dataRows, ...rows],
-            count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count,
+            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
-            type: "initialize", data: rows, count: count,
-            selectedRecords: rows.filter(f => f.isChecked === true)
+            type: 'initialize',
+            data: rows,
+            count: count,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
 
@@ -157,11 +160,12 @@ const Warehouse = () => {
     fetchWarehouses();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-
   const ActionsRenderer = (params) => (
     <>
-      <HtmlTooltip className={permissions?.warehouse?.isCreate ? "" : "cursor-stop"}
-        title={permissions?.warehouse?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+      <HtmlTooltip
+        className={permissions?.warehouse?.isCreate ? '' : 'cursor-stop'}
+        title={permissions?.warehouse?.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
+      >
         <span>
           <IconButton
             size="small"
@@ -169,9 +173,10 @@ const Warehouse = () => {
             disabled={!permissions?.warehouse?.isCreate}
             onClick={() => {
               setAddressResource(params.data);
-              setOpen({ open: true, isClone: true })
-            }}>
-            <FileCopyIcon fontSize="small" color={permissions?.warehouse?.isCreate ? "primary" : "inherit"} />
+              setOpen({ open: true, isClone: true });
+            }}
+          >
+            <FileCopyIcon fontSize="small" color={permissions?.warehouse?.isCreate ? 'primary' : 'inherit'} />
           </IconButton>
         </span>
       </HtmlTooltip>
@@ -194,36 +199,37 @@ const Warehouse = () => {
           </IconButton>
         </HtmlTooltip>
       )}
-      {permissions?.warehouse?.isUpdate && params.data?.isAllowedToUpdate ?
+      {permissions?.warehouse?.isUpdate && params.data?.isAllowedToUpdate ? (
         <HtmlTooltip title="Entity">
           <IconButton
             size="small"
             aria-label="Entity"
             onClick={() => {
-              setShowEntityDialog(true)
-              setWarehouseId(params.data._id)
+              setShowEntityDialog(true);
+              setWarehouseId(params.data._id);
               if (params?.data?.entity) {
-                let entities = []
+                let entities = [];
                 if (params?.data?.entityId) {
-                  entities.push(params?.data?.entityId)
+                  entities.push(params?.data?.entityId);
                 }
                 if (params?.data?.restentity) {
-                  let restEntities = params?.data?.restentity.map(o => o.optionValue)
-                  entities = [...entities, ...restEntities]
+                  let restEntities = params?.data?.restentity.map((o) => o.optionValue);
+                  entities = [...entities, ...restEntities];
                 }
-                setEntities([...entities])
+                setEntities([...entities]);
               }
-            }}>
+            }}
+          >
             <AiOutlineDeploymentUnit fontSize="15" color="primary" />
           </IconButton>
-        </HtmlTooltip> : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to update entity">
-            <IconButton aria-label="Clone" size="small">
-              <AiOutlineDeploymentUnit fontSize="15" />
-            </IconButton>
-          </HtmlTooltip>
-        )
-      }
+        </HtmlTooltip>
+      ) : (
+        <HtmlTooltip className="cursor-stop" title="You do not have permission to update entity">
+          <IconButton aria-label="Clone" size="small">
+            <AiOutlineDeploymentUnit fontSize="15" />
+          </IconButton>
+        </HtmlTooltip>
+      )}
     </>
   );
 
@@ -264,7 +270,7 @@ const Warehouse = () => {
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -302,7 +308,6 @@ const Warehouse = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-
   const handleOpen = () => {
     setisOpenDialog(true);
   };
@@ -316,13 +321,7 @@ const Warehouse = () => {
 
   const handleClickClose = () => {
     setSortOpen(false);
-
   };
-
-
-
-
-
 
   return (
     <Fragment>
@@ -335,7 +334,6 @@ const Warehouse = () => {
             permissions={permissions?.warehouse}
             module="warehouse"
             api={'warehouse'}
-
             afterImportCompleted={() => {
               fetchWarehouses();
             }}
@@ -344,8 +342,8 @@ const Warehouse = () => {
             recordsToExport={selectedRecords.length}
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll()
-              else fetchWarehouses()
+              if (gridApi) gridApi.deselectAll();
+              else fetchWarehouses();
             }}
             additionalParams={getQueryString(true)}
           />
@@ -354,8 +352,8 @@ const Warehouse = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-              {isMobile && !isTablet &&
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+              {isMobile && !isTablet && (
                 <div className="d-flex ">
                   <Button
                     onClick={handleClickOpen}
@@ -374,7 +372,7 @@ const Warehouse = () => {
                     isOpen={sortOpen}
                     handleClose={handleClickClose}
                     contentPart={null}
-                    secHeading={["Sort Plants"]}
+                    secHeading={['Sort Plants']}
                     columns={columns}
                     dispatch={dispatch}
                   />
@@ -400,16 +398,16 @@ const Warehouse = () => {
                     title={routes?.warehouse?.title}
                     filters={filters}
                   />
-                </div>}
+                </div>
+              )}
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-
-                <Grid style={{ display: "flex", flex: 1 }}>
+                <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}
-                    width={isMobile && !isTablet ? "200px" : "242px"}
+                    width={isMobile && !isTablet ? '200px' : '242px'}
                     style={isMobile && !isTablet ? { flex: 1 } : {}}
                     size="small"
                     value={search}
@@ -417,34 +415,34 @@ const Warehouse = () => {
                   />
                 </Grid>
 
-                <Grid style={{ display: "flex", gap: "5px" }}>
+                <Grid style={{ display: 'flex', gap: '5px' }}>
                   {permissions?.warehouse?.isCreate && (
                     <Button
                       onClick={() => {
                         setAddressResource(null);
                         setOpen({ open: true, isClone: false });
                       }}
-                      variant={isMobile && !isTablet ? "text" : "contained"}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
                       size="small"
                       color="primary"
-                      className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                     >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
 
-
                   <Button
-                    variant={isMobile && !isTablet ? "text" : "outlined"}
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="default"
                     size="small"
                     onClick={openActions}
                     disabled={selectedRecords.length ? false : true}
                     aria-controls="action-menu"
-                    className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'}
                   </Button>
 
                   <Menu
@@ -459,34 +457,32 @@ const Warehouse = () => {
                     open={Boolean(anchorEl)}
                     onClose={closeActions}
                   >
-                    {permissions?.warehouse?.isDelete ?
-                      <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                      : null}
+                    {permissions?.warehouse?.isDelete ? <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem> : null}
                     {permissions?.warehouse?.isUpdate && (
                       <MenuItem
                         disabled={selectedRecords.length === 0}
                         onClick={() => {
                           if (selectedRecords.some((d) => d.isUpdate === false)) {
                             closeActions();
-                            setShowUpdateWarningConfirmBox(true)
+                            setShowUpdateWarningConfirmBox(true);
                           } else {
                             closeActions();
                             if (selectedRecords.length) {
-                              let entities = []
-                              selectedRecords.map(current => {
+                              let entities = [];
+                              selectedRecords.map((current) => {
                                 if (current?.entity) {
                                   if (current?.entityId) {
-                                    entities.push(current?.entityId)
+                                    entities.push(current?.entityId);
                                   }
                                   if (current?.restentity) {
-                                    let restEntities = current?.restentity.map(o => o.optionValue)
-                                    entities = [...entities, ...restEntities]
+                                    let restEntities = current?.restentity.map((o) => o.optionValue);
+                                    entities = [...entities, ...restEntities];
                                   }
                                 }
-                              })
-                              setEntities([...entities])
+                              });
+                              setEntities([...entities]);
                             }
-                            setShowEntityDialog(true)
+                            setShowEntityDialog(true);
                           }
                         }}
                       >
@@ -500,21 +496,21 @@ const Warehouse = () => {
           </Grid>
         </div>
 
-        {
-          Object.keys(frameWorkComponent).length > 0 ?
-            isMobile && !isTablet ? <CustomSwipableList
+        {Object.keys(frameWorkComponent).length > 0 ? (
+          isMobile && !isTablet ? (
+            <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions?.warehouse}
-              primaryField={columns?.find(d => d.field)}
+              primaryField={columns?.find((d) => d.field)}
               onClick={(data) => {
-                history.push(`${routes.warehouseDetail.path}/${data._id}`)
+                history.push(`${routes.warehouseDetail.path}/${data._id}`);
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.warehouseDetail.path}/${data._id}?openEdit=true`)
+                history.push(`${routes.warehouseDetail.path}/${data._id}?openEdit=true`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {
@@ -524,22 +520,21 @@ const Warehouse = () => {
               rowCount={rowCount}
               page={page}
               loading={loading}
-              additionalDetails={[
-
-              ]}
+              additionalDetails={[]}
               chips={[
                 {
-                  label: "Storage Type",
-                  field: "storageType",
-                },
-
+                  label: 'Storage Type',
+                  field: 'storageType'
+                }
               ]}
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
-            /> : <CustomAgGrid
+            />
+          ) : (
+            <CustomAgGrid
               columns={columns}
               dataRows={dataRows}
               frameworkComponents={frameWorkComponent}
@@ -556,16 +551,18 @@ const Warehouse = () => {
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
               resource={sidebarResource.warehouse}
-            /> : null}
+            />
+          )
+        ) : null}
 
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${routes?.warehouse?.title?.toLowerCase()} 
-            ${deleteRecord ? deleteRecord?._id ? deleteRecord?.warehouseName : "" : ""}?`}
+            ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.warehouseName : '') : ''}?`}
             onClose={() => {
               setDeleteRecord(null);
-              setShowDeleteConfirmBox(false)
+              setShowDeleteConfirmBox(false);
             }}
             onOk={handleDelete}
           />
@@ -590,20 +587,19 @@ const Warehouse = () => {
             onClose={() => setShowUpdateWarningConfirmBox(false)}
           />
         ) : null}
-        {
-          showEntityDialog ?
-            <EntitySelectionsDialog
-              open={showEntityDialog}
-              resource={sidebarResource.warehouse}
-              resourceIds={selectedRecords.length ? selectedRecords.map(o => o._id) : [warehouseId]}
-              onClose={() => {
-                setShowEntityDialog(false)
-                setWarehouseId("")
-              }}
-              onSuccess={fetchWarehouses}
-              entities={entities}
-            /> : null
-        }
+        {showEntityDialog ? (
+          <EntitySelectionsDialog
+            open={showEntityDialog}
+            resource={sidebarResource.warehouse}
+            resourceIds={selectedRecords.length ? selectedRecords.map((o) => o._id) : [warehouseId]}
+            onClose={() => {
+              setShowEntityDialog(false);
+              setWarehouseId('');
+            }}
+            onSuccess={fetchWarehouses}
+            entities={entities}
+          />
+        ) : null}
       </CustomContainer>
     </Fragment>
   );

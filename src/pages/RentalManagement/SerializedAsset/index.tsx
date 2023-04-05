@@ -9,12 +9,7 @@ import { Delete } from '@material-ui/icons';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import AddSerializedAsset from './AddSerializedAsset';
-import {
-  rentalManagement,
-  sidebarResource,
-  treeToFlatArray,
-  INVENTORY_STATUS
-} from '../../../constants/helpers';
+import { rentalManagement, sidebarResource, treeToFlatArray, INVENTORY_STATUS } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
@@ -38,13 +33,7 @@ import { removeAssetsInRental } from '../rentalOfflineHelper';
 import WarningIcon from '@material-ui/icons/Warning';
 import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
 
-const SerializedAsset = ({
-  rentalManagementData,
-  setNextStep,
-  currencySymbol,
-  stepFullScreen,
-  allowedToEdit
-}) => {
+const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -87,7 +76,7 @@ const SerializedAsset = ({
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, "");
+    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, '');
     let coloum: any = [
       {
         accessor: 'srno',
@@ -114,12 +103,12 @@ const SerializedAsset = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -210,7 +199,7 @@ const SerializedAsset = ({
             )}
             {row.original?.type === 'asset' && (
               <span className="d-flex align-items-center gap-2">
-                {(allowedToEdit && row?.original?.canRemove) && (
+                {allowedToEdit && row?.original?.canRemove && (
                   <HtmlTooltip title={`Remove`}>
                     <IconButton
                       size="small"
@@ -326,20 +315,21 @@ const SerializedAsset = ({
       let rows = data.material.filter((e) => e.parentId === null);
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
+        parent.detail = `${
+          parent.type === 'service'
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent?.packageDetail?.packageName
-          }`;
+        }`;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-              ? parent?.productDetail?.productDescription || ''
-              : parent.type === 'package'
-                ? parent?.packageDetail?.packageDescription || ''
-                : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+            ? parent?.packageDetail?.packageDescription || ''
+            : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
@@ -379,10 +369,10 @@ const SerializedAsset = ({
             ? true
             : false
           : parent.subRows.length !== 0
-            ? parent.assetAssignedQty ===
-            parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+          ? parent.assetAssignedQty ===
+              parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
             parent.subRows.every((d) => d.isValid)
-            : true;
+          : true;
 
         if (parent.subRows.length && parent.isValid) {
           if (parent.subRows.every((d) => d.isValid)) {
@@ -431,10 +421,11 @@ const SerializedAsset = ({
         if (_inventory?.status === INVENTORY_STATUS.reserved) {
           canRemove = true;
         }
-      }
-      else {
-        if ([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.reserved].includes(_inventory?.inventoryDetail?.status) &&
-          (!_inventory?.status || _inventory?.status === INVENTORY_STATUS.reserved)) {
+      } else {
+        if (
+          [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.reserved].includes(_inventory?.inventoryDetail?.status) &&
+          (!_inventory?.status || _inventory?.status === INVENTORY_STATUS.reserved)
+        ) {
           canRemove = true;
         }
       }
@@ -471,7 +462,7 @@ const SerializedAsset = ({
         status: _inventory?.status,
         warehouse: rentalManagementData?.warehouse?.optionValue,
         isValid: true,
-        canRemove: true,
+        canRemove: true
       });
     });
 
@@ -484,16 +475,16 @@ const SerializedAsset = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
       // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
       _subRow.assetQty =
@@ -536,11 +527,11 @@ const SerializedAsset = ({
           ? true
           : false
         : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
-          ? true
-          : _subRow.assetAssignedQty ===
-            tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
-            ? true
-            : false;
+        ? true
+        : _subRow.assetAssignedQty ===
+          tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+        ? true
+        : false;
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
@@ -656,7 +647,6 @@ const SerializedAsset = ({
 
     flatArray = uniqBy(flatArray, '_id');
 
-
     const products = newFlatArray.map((m) => {
       return {
         _id: m.materialId,
@@ -681,7 +671,6 @@ const SerializedAsset = ({
         products: uniqProduct
       };
     });
-
 
     const assetProduct = [];
     flatArray.forEach((element) => {
@@ -767,8 +756,8 @@ const SerializedAsset = ({
                 {`Assign ${routes.serializedAsset.title}`}
               </Button>
               {!isOffline && (
-                <Button variant="outlined" color="default" size="small" onClick={openActions} aria-controls="action-menu">
-                  Actions <ExpandMore />
+                <Button variant="outlined" color="default" size="small" onClick={openActions} aria-controls="action-menu" endIcon={<ExpandMore />}>
+                  Actions
                 </Button>
               )}
               <Menu
@@ -910,11 +899,7 @@ const SerializedAsset = ({
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={'100%'}
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-            >
+            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
@@ -1024,7 +1009,11 @@ const SerializedAsset = ({
               message: `${sidebarResource.purchaseOrder} has been created successfully`
             });
           }}
-          products={showOrderDialog?.products?.filter((e) => e.serialized === false)?.map((e) => { return { product: e._id, unit: e.unit, qty: e.assetsCount } })}
+          products={showOrderDialog?.products
+            ?.filter((e) => e.serialized === false)
+            ?.map((e) => {
+              return { product: e._id, unit: e.unit, qty: e.assetsCount };
+            })}
           currency={rentalManagementData.currency}
           refrenceData={{ wellName: rentalManagementData?.wellName?.optionValue, afeNumber: rentalManagementData?.afeNumber }}
           rentalManagementId={rentalManagementData._id}

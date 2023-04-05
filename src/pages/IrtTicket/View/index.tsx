@@ -44,7 +44,6 @@ const customNodeStyles = {
 };
 
 const IrtTicketView = ({ id }) => {
-
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
   const [flowData, setFlowData] = useState([]);
@@ -56,7 +55,6 @@ const IrtTicketView = ({ id }) => {
   }, [id]);
 
   const fetchData = async () => {
-
     setLoading(true);
 
     const irtTicketResponce: any = await axiosInstance().get(`${routes?.irtTicket?.path}/${id}`);
@@ -78,8 +76,8 @@ const IrtTicketView = ({ id }) => {
           label: (
             <HtmlTooltip arrow placement="top" title={'IRT Ticket'}>
               <div>
-                <Typography variant='body2'>IRT Ticket</Typography>
-                <Typography variant='subtitle2'>{irtTicketData?.irtTicketNumber}</Typography>
+                <Typography variant="body2">IRT Ticket</Typography>
+                <Typography variant="subtitle2">{irtTicketData?.irtTicketNumber}</Typography>
               </div>
             </HtmlTooltip>
           )
@@ -103,8 +101,8 @@ const IrtTicketView = ({ id }) => {
         label: (
           <HtmlTooltip arrow placement="top" title={'Purchase Order'}>
             <div>
-              <Typography variant='body2'>Purchase Order</Typography>
-              <Typography variant='subtitle2'>{irtTicketData?.purchaseOrder?.optionLabel}</Typography>
+              <Typography variant="body2">Purchase Order</Typography>
+              <Typography variant="subtitle2">{irtTicketData?.purchaseOrder?.optionLabel}</Typography>
             </div>
           </HtmlTooltip>
         )
@@ -132,10 +130,10 @@ const IrtTicketView = ({ id }) => {
         label: (
           <HtmlTooltip arrow placement="top" title={'Product'}>
             <div>
-              <Typography variant='body2'>Product/Part</Typography>
-              <Typography variant='subtitle2'>{irtTicketData?.product?.optionLabel}</Typography>
-              <Typography variant='body2'>{`Qty : ${irtTicketData?.qty}`}</Typography>
-              <Typography variant='body2'>{`PO Amount : $ ${irtTicketData?.amount}`}</Typography>
+              <Typography variant="body2">Product/Part</Typography>
+              <Typography variant="subtitle2">{irtTicketData?.product?.optionLabel}</Typography>
+              <Typography variant="body2">{`Qty : ${irtTicketData?.qty}`}</Typography>
+              <Typography variant="body2">{`PO Amount : $ ${irtTicketData?.amount}`}</Typography>
             </div>
           </HtmlTooltip>
         )
@@ -152,7 +150,6 @@ const IrtTicketView = ({ id }) => {
 
     xPosition += 300;
     approver?.map((s, index) => {
-
       const flowId = `${index}_${s?.user?.optionValue}`;
 
       flow.push({
@@ -167,16 +164,20 @@ const IrtTicketView = ({ id }) => {
           label: (
             <HtmlTooltip arrow placement="top" title={'Approver'}>
               <div>
-                <Typography variant='subtitle2'>{s?.type}</Typography>
-                <Typography variant='subtitle2'>{s?.user.optionLabel}</Typography>
-                <Typography variant='subtitle2'>{s?.status}</Typography>
+                <Typography variant="subtitle2">{s?.type}</Typography>
+                <Typography variant="subtitle2">{s?.user.optionLabel}</Typography>
+                <Typography variant="subtitle2">{s?.status}</Typography>
               </div>
             </HtmlTooltip>
           )
         },
         position: { x: xPosition, y: index * 120 },
-        style: s?.status === IRT_APPROVER_STATUS.send ? customNodeStyles.send :
-          s?.status === IRT_APPROVER_STATUS.approved ? customNodeStyles.approve : customNodeStyles.decline
+        style:
+          s?.status === IRT_APPROVER_STATUS.send
+            ? customNodeStyles.send
+            : s?.status === IRT_APPROVER_STATUS.approved
+            ? customNodeStyles.approve
+            : customNodeStyles.decline
       });
 
       flowEdge.push({
@@ -197,8 +198,8 @@ const IrtTicketView = ({ id }) => {
             label: (
               <HtmlTooltip arrow placement="top" title={'IRT Ticket'}>
                 <div>
-                  <Typography variant='body2'>IRT Ticket</Typography>
-                  <Typography variant='subtitle2'>{irtTicketData?.status}</Typography>
+                  <Typography variant="body2">IRT Ticket</Typography>
+                  <Typography variant="subtitle2">{irtTicketData?.status}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -226,14 +227,12 @@ const IrtTicketView = ({ id }) => {
   };
 
   const onElementClick = (event, element) => {
-    if (element?.data?.ref_type === "purchaseOrder") {
-      history.push(`${routes.purchaseOrderDetail.path}/${element?.data?.ref_id}`)
-    }
-    else if (element?.data?.ref_type === "product") {
-      history.push(`${routes.productDetail.path}/${element?.data?.ref_id}`)
-    }
-    else if (element?.data?.ref_type === "user") {
-      history.push(`${routes.userDetail.path}/${element?.data?.ref_id}`)
+    if (element?.data?.ref_type === 'purchaseOrder') {
+      history.push(`${routes.purchaseOrderDetail.path}/${element?.data?.ref_id}`);
+    } else if (element?.data?.ref_type === 'product') {
+      history.push(`${routes.productDetail.path}/${element?.data?.ref_id}`);
+    } else if (element?.data?.ref_type === 'user') {
+      history.push(`${routes.userDetail.path}/${element?.data?.ref_id}`);
     }
   };
 
@@ -249,8 +248,9 @@ const IrtTicketView = ({ id }) => {
               setColorInfo(!colorInfo);
             }}
             aria-controls="action-menu"
+            endIcon={colorInfo ? <ExpandLess /> : <ExpandMore />}
           >
-            {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
+            {'Color Info'}
           </Button>
         </Box>
         {colorInfo && (

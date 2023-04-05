@@ -285,8 +285,9 @@ const ServicePackage = ({ renderedFrom, productId }) => {
                 disabled={selectedRecords.length ? false : true}
                 aria-controls="action-menu"
                 style={{ marginLeft: '0.6rem' }}
+                endIcon={<ExpandMore />}
               >
-                {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                {isMobile && !isTablet ? '' : 'Actions'}
               </Button>
               <Menu
                 anchorEl={anchorEl}
@@ -335,9 +336,9 @@ const ServicePackage = ({ renderedFrom, productId }) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => { }}
+            onEdit={() => {}}
             extraParamsToCheckDelete={false}
-            onDelete={() => { }}
+            onDelete={() => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -345,7 +346,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : (

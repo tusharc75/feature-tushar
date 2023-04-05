@@ -26,8 +26,9 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
-
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
   const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
@@ -79,19 +80,19 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${row.original?.type === "serializedAsset" ? `Asset` : startCase(row.original?.type)}`}</p>
+            <p>{`${row.original?.type === 'serializedAsset' ? `Asset` : startCase(row.original?.type)}`}</p>
             <Box pl={1}>
               {row.original['type'] === 'product'
                 ? row.original?.productDetail?.serializedProduct
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail?.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail?.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </Box>
           </div>
         )
@@ -104,11 +105,13 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {allowedToEdit && row.original.type !== 'serializedAsset' ?
+            {allowedToEdit && row.original.type !== 'serializedAsset' ? (
               <p
                 onClick={() => {
                   setMaterialEdit({
-                    open: true, data: row.original, bulkedit: false,
+                    open: true,
+                    data: row.original,
+                    bulkedit: false,
                     showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
@@ -117,27 +120,30 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
               >
                 {row.original?.detail}
               </p>
-              : <p className="text-truncate">{row.original?.detail}</p>}
-            {row?.original?.type !== 'service' || row.original.type !== 'serializedAsset' && allowedToEdit &&
-              <>
-                <Box ml={1} >
-                  <span>({row.original?.subRows?.length})</span>
-                </Box>
-                <Box ml={1} >
-                  <HtmlTooltip title="Add Product">
-                    <IconButton
-                      onClick={() => {
-                        setAddDialog({ open: true, type: "product", parentId: row.original?._id });
-                      }}
-                      size="small"
-                    >
-                      <Add fontSize="small" color="primary" />
-                    </IconButton>
-                  </HtmlTooltip>
-                </Box>
-              </>
-            }
-            <Box ml={1} >
+            ) : (
+              <p className="text-truncate">{row.original?.detail}</p>
+            )}
+            {row?.original?.type !== 'service' ||
+              (row.original.type !== 'serializedAsset' && allowedToEdit && (
+                <>
+                  <Box ml={1}>
+                    <span>({row.original?.subRows?.length})</span>
+                  </Box>
+                  <Box ml={1}>
+                    <HtmlTooltip title="Add Product">
+                      <IconButton
+                        onClick={() => {
+                          setAddDialog({ open: true, type: 'product', parentId: row.original?._id });
+                        }}
+                        size="small"
+                      >
+                        <Add fontSize="small" color="primary" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </Box>
+                </>
+              ))}
+            <Box ml={1}>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -147,8 +153,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === 'serializedAsset') {
                     window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                  }
-                  else {
+                  } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   }
                 }}
@@ -161,7 +166,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       },
       {
         accessor: 'description',
-        Header: "Description",
+        Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
@@ -177,25 +182,26 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) => allowedToEdit && (
-        <Grid container spacing={1}>
-          <IconButton
-            size="small"
-            aria-label="Details"
-            onClick={() => {
-              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-              setDeleteData(obj);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </Grid>
-      )
-    })
+      Cell: ({ row }) =>
+        allowedToEdit && (
+          <Grid container spacing={1}>
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                setDeleteData(obj);
+              }}
+            >
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+          </Grid>
+        )
+    });
     if (!allowedToEdit) {
       coloum?.forEach((e: any) => {
         e.editable = false;
-      })
+      });
     }
     setColumns(coloum);
     fetchData();
@@ -205,14 +211,21 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
     var data: any = [];
     const response = await axiosInstance().get(`${routes.planning.path}/material/${planningData._id}`);
     data = response?.data?.data;
-    let rows = data.material.filter((e) => e.parentId === null)
+    let rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === 'product' ? parent.productDetail?.productName :
-        parent.type === 'package' ? parent.packageDetail?.packageName : parent.serviceDetail?.serviceName;
-      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription :
-        parent.type === 'package' ? parent?.packageDetail?.packageDescription :
-          parent?.serviceDetail?.serviceDescription
+      parent.detail =
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'package'
+          ? parent.packageDetail?.packageName
+          : parent.serviceDetail?.serviceName;
+      parent.description =
+        parent.type === 'product'
+          ? parent?.productDetail?.productDescription
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription
+          : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === 'serializedAsset')?.length;
@@ -227,14 +240,22 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName :
-        _subRow.type === 'package' ? _subRow.packageDetail?.packageName :
-          _subRow.type === 'serializedAsset' ? _subRow.assetDetail.assetNumber :
-            _subRow.serviceDetail?.serviceName;
-      _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription :
-        _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription :
-          _subRow.type === 'serializedAsset' ? parent.description :
-            _subRow?.serviceDetail?.serviceDescription
+      _subRow.detail =
+        _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'package'
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow.assetDetail.assetNumber
+          : _subRow.serviceDetail?.serviceName;
+      _subRow.description =
+        _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDescription
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow.type === 'serializedAsset'
+          ? parent.description
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === 'serializedAsset')?.length;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
@@ -245,12 +266,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
   };
 
   const handleAdd = async (rows) => {
-    setIsAdding(true)
+    setIsAdding(true);
     const material: any = [];
-    if (addDialog.type === "serializedAsset") {
+    if (addDialog.type === 'serializedAsset') {
       rows?.forEach((e) => {
-        material.push(e)
-      })
+        material.push(e);
+      });
     } else {
       rows.forEach((d) => {
         const element: any = {};
@@ -272,10 +293,10 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           message: data.message
         });
         fetchData();
-        setIsAdding(false)
+        setIsAdding(false);
       })
       .catch((error) => {
-        setIsAdding(false)
+        setIsAdding(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -305,9 +326,13 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         });
         if (saveAndNext) {
           const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-          setMaterialEdit({ open: true, data: rowsData[rowIndex + 1], bulkedit: false, showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
-        }
-        else {
+          setMaterialEdit({
+            open: true,
+            data: rowsData[rowIndex + 1],
+            bulkedit: false,
+            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+          });
+        } else {
           setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
         }
       })
@@ -370,19 +395,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
     return flatArray.length === 0;
   };
 
-
   return (
     <Fragment>
-      {allowedToEdit &&
+      {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" m={1}>
           <Box display="flex" alignItems="center">
-            <Button
-              variant={'outlined'}
-              color="primary"
-              size="small"
-              startIcon={<AddIcon />}
-              onClick={openAddActions}
-              aria-controls="add-menu">
+            <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
               {'Add'}
               <ExpandMore fontSize="small" />
             </Button>
@@ -432,8 +450,9 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
               size="small"
               onClick={openActions}
               aria-controls="action-menu"
+              endIcon={<ExpandMore />}
             >
-              {isMobile ? '' : 'Actions'} <ExpandMore />
+              {isMobile ? '' : 'Actions'}
             </Button>
             <Menu
               anchorEl={anchorEl}
@@ -447,18 +466,18 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
               open={Boolean(anchorEl)}
               onClose={closeActions}
             >
-              {planningData.type === 'Rental Job' && <MenuItem
-                disabled={
-                  disableAssignSerializedAssets()
-                }
-                onClick={() => {
-                  closeActions();
-                  setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === 'product' && i?.productDetail?.serializedProduct))
-                  setAddDialog({ open: true, type: 'serializedAsset', parentId: null })
-                }}
-              >
-                Assign Serialized Asset
-              </MenuItem>}
+              {planningData.type === 'Rental Job' && (
+                <MenuItem
+                  disabled={disableAssignSerializedAssets()}
+                  onClick={() => {
+                    closeActions();
+                    setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === 'product' && i?.productDetail?.serializedProduct));
+                    setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
+                  }}
+                >
+                  Assign Serialized Asset
+                </MenuItem>
+              )}
               <MenuItem
                 onClick={() => {
                   closeActions();
@@ -469,13 +488,15 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection).map((rec: any) => {
-                    const obj: any = {};
-                    obj.id = rec._id;
-                    obj.type = rec?.type;
-                    obj.materialId = rec?.materialId;
-                    return obj;
-                  });
+                  const dataToDelete = selectedRecords
+                    ?.filter((e) => !e.hideSelection)
+                    .map((rec: any) => {
+                      const obj: any = {};
+                      obj.id = rec._id;
+                      obj.type = rec?.type;
+                      obj.materialId = rec?.materialId;
+                      return obj;
+                    });
                   setDeleteData(dataToDelete);
                   closeActions();
                 }}
@@ -485,7 +506,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
             </Menu>
           </Box>
         </Box>
-      }
+      )}
       {columns && rowsData ? (
         <Box p="6px" zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -546,7 +567,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       )}
       {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={"planning"}
+          reference={'planning'}
           referenceId={planningData?._id}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           ids={[]}
@@ -561,7 +582,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           ids={[]}
           onSuccess={(rows) => {
-            handleAdd(rows)
+            handleAdd(rows);
           }}
           packageType={null}
         />
@@ -574,15 +595,23 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
             toDate: planningData?.endDate
           }}
           handleClose={() => {
-            setAddDialog({ open: false, type: '', parentId: null })
-            setAssetAssignedProduct([])
+            setAddDialog({ open: false, type: '', parentId: null });
+            setAssetAssignedProduct([]);
           }}
-          ids={flattenArray(rowsData)?.filter((e) => e.type === 'serializedAsset')?.map((e) => e.materialId)}
+          ids={flattenArray(rowsData)
+            ?.filter((e) => e.type === 'serializedAsset')
+            ?.map((e) => e.materialId)}
           handleSucess={(rows) => {
-            handleAdd(rows?.map((e) => { return { materialId: e.asset, type: 'serializedAsset', parentId: e._id } }))
+            handleAdd(
+              rows?.map((e) => {
+                return { materialId: e.asset, type: 'serializedAsset', parentId: e._id };
+              })
+            );
           }}
           isAssigning={isAdding}
-          selectedProducts={assetAssignedProduct?.map((i) => { return { _id: i._id, product: i.materialId, productName: i.detail, qty: i.qty - i.assetQty } })}
+          selectedProducts={assetAssignedProduct?.map((i) => {
+            return { _id: i._id, product: i.materialId, productName: i.detail, qty: i.qty - i.assetQty };
+          })}
         />
       )}
     </Fragment>

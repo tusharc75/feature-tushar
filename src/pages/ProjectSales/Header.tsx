@@ -10,8 +10,8 @@ import routes from '../../components/Helpers/Routes';
 import { isMobile } from 'react-device-detect';
 import { MdAdd, MdFilterList, MdSort } from 'react-icons/all';
 
-import MobileSortDialog from "../../components/MobileSortDialog"
-import MobileFilterDialog from "../../components/MobileFilterDialog"
+import MobileSortDialog from '../../components/MobileSortDialog';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
 
 const ProjectStrategyHeader = (props) => {
   const {
@@ -52,11 +52,9 @@ const ProjectStrategyHeader = (props) => {
     setisOpenDialog(false);
   };
 
-
   const handleFilter = (event, newFilter) => {
     if (newFilter !== null) {
       handleFilterChange(newFilter);
-
     }
   };
 
@@ -75,12 +73,9 @@ const ProjectStrategyHeader = (props) => {
     </ToggleButtonGroup>
   );
 
-
-
-
   return (
     <Grid container className={styles.filter_side_container}>
-      <Grid item xs={12} md={6} sm={6} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+      <Grid item xs={12} md={6} sm={6} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
         <div className="d-flex align-items-center">
           <BiNetworkChart className="headerLogo" />
           <span className="listingHeader">{routes.projectSales.title}</span>
@@ -178,8 +173,9 @@ const ProjectStrategyHeader = (props) => {
                   onClick={openActions}
                   aria-controls="action-menu"
                   className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                  endIcon={<ExpandMore />}
                 >
-                  {isMobile ? '' : 'Actions'} <ExpandMore />
+                  {isMobile ? '' : 'Actions'}
                 </Button>
 
                 <Menu

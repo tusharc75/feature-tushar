@@ -18,17 +18,18 @@ import { isMobile, isTablet } from 'react-device-detect';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
-import EditIcon from "@material-ui/icons/Edit";
+import EditIcon from '@material-ui/icons/Edit';
 
 const AddCost = ({ id, fieldTicketData }) => {
-
   const renderedFrom = camelCase(routes?.fieldTicket.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const { state: { permissions } }: any = useData();
+  const {
+    state: { permissions }
+  }: any = useData();
   const [rowsData, setRowsData] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -100,7 +101,7 @@ const AddCost = ({ id, fieldTicketData }) => {
     axiosInstance()
       .get(`/field-ticket/${id}/cost`)
       .then(({ data: { data } }) => {
-        let rows = []
+        let rows = [];
         if (data) {
           rows = data?.map((i, index) => {
             return { index: index + 1, ...i };
@@ -148,7 +149,8 @@ const AddCost = ({ id, fieldTicketData }) => {
   };
 
   const handleViewPdf = (download) => {
-    axiosInstance().get(`/field-ticket/${fieldTicketData._id}/pdf`)
+    axiosInstance()
+      .get(`/field-ticket/${fieldTicketData._id}/pdf`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -203,7 +205,7 @@ const AddCost = ({ id, fieldTicketData }) => {
             size="small"
             startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
             onClick={(e) => {
-              handleViewPdf(false)
+              handleViewPdf(false);
             }}
           >
             Preview
@@ -217,7 +219,7 @@ const AddCost = ({ id, fieldTicketData }) => {
             size="small"
             startIcon={<IoMdDownload />}
             onClick={(e) => {
-              handleViewPdf(true)
+              handleViewPdf(true);
             }}
           >
             Download
@@ -230,8 +232,9 @@ const AddCost = ({ id, fieldTicketData }) => {
             size="small"
             onClick={openActions}
             aria-controls="action-menu"
+            endIcon={<ExpandMore />}
           >
-            {'Actions'} <ExpandMore />
+            {'Actions'}
           </Button>
           <Menu
             anchorEl={anchorEl}

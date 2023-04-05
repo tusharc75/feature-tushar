@@ -274,9 +274,7 @@ const InventoryCycle = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-            
-            </Grid>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>
@@ -311,8 +309,9 @@ const InventoryCycle = () => {
                     disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
                     aria-controls="action-menu"
                     className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'}
                   </Button>
                   <Menu
                     anchorEl={anchorEl}

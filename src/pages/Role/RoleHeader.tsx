@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { Box, Grid, MenuItem, Button, Menu } from "@material-ui/core";
-import { AddOutlined, ExpandMore } from "@material-ui/icons";
-import SearchBox from "../../components/Helpers/SearchBox";
+import { useState } from 'react';
+import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import SearchBox from '../../components/Helpers/SearchBox';
 
 import { BsPersonBoundingBox } from 'react-icons/bs';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
-import styles from "../Leads/Header.module.scss";
-import { useData } from "../../StateProvider/Provider";
-import { localStorageKeys } from "../../constants/helpers";
-import routes from "../../components/Helpers/Routes";
-import { isMobile, isTablet } from "react-device-detect";
-import { MdAdd, MdSort, MdFilterList } from "react-icons/all";
+import styles from '../Leads/Header.module.scss';
+import { useData } from '../../StateProvider/Provider';
+import { localStorageKeys } from '../../constants/helpers';
+import routes from '../../components/Helpers/Routes';
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
 
 const RoleHeader = (props) => {
   const {
@@ -30,19 +30,20 @@ const RoleHeader = (props) => {
     filters
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
-  const [filter, setFilter] = useState(localStorage.getItem(localStorageKeys.currentSelectedRoleType) ?
-    localStorage.getItem(localStorageKeys.currentSelectedRoleType) : "Global");
+  const [filter, setFilter] = useState(
+    localStorage.getItem(localStorageKeys.currentSelectedRoleType) ? localStorage.getItem(localStorageKeys.currentSelectedRoleType) : 'Global'
+  );
   const [sortOpen, setSortOpen] = useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const {
-    state: { selectedEntity },
+    state: { selectedEntity }
   }: any = useData();
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
-      localStorage.setItem("currentSelectedRoleType", newFilter)
+      localStorage.setItem('currentSelectedRoleType', newFilter);
     }
   };
   const openActions = (event) => {
@@ -68,7 +69,6 @@ const RoleHeader = (props) => {
   const handleFilterClose = () => {
     setisOpenDialog(false);
   };
-
 
   return (
     <Grid container className={styles.filter_side_container}>
@@ -128,7 +128,6 @@ const RoleHeader = (props) => {
           </>
         )}
 
-
         {/* {options && (
           <ToggleButtonGroup
             size="small"
@@ -148,29 +147,29 @@ const RoleHeader = (props) => {
       </Grid>
       <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
         <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header}>
-          <Grid style={{ display: "flex", flex: 1 }}>
+          <Grid style={{ display: 'flex', flex: 1 }}>
             <SearchBox
               searchbox={styles.search_box_input}
               onSearch={onSearch}
               value={searchVal}
               size="small"
               placeholder="Search Role"
-              width={isMobile && !isTablet ? "200px" : "242px"}
+              width={isMobile && !isTablet ? '200px' : '242px'}
               style={isMobile && !isTablet ? { flex: 1 } : {}}
             />
           </Grid>
 
-          <Grid style={{ display: "flex", gap: "5px" }}>
-            {rolePermissions.isCreate && (filter === "Global" || (filter === "Regional" && selectedEntity)) && (
+          <Grid style={{ display: 'flex', gap: '5px' }}>
+            {rolePermissions.isCreate && (filter === 'Global' || (filter === 'Regional' && selectedEntity)) && (
               <Button
-                variant={isMobile && !isTablet ? "text" : "contained"}
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
                 color="primary"
                 size="small"
                 onClick={onCreate}
-                className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                 startIcon={isMobile && !isTablet ? null : <AddOutlined />}
               >
-                {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
+                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
               </Button>
             )}
 
@@ -178,22 +177,23 @@ const RoleHeader = (props) => {
               <>
                 <Button
                   disabled={selectedRecords.length === 0}
-                  className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
-                  variant={isMobile && !isTablet ? "text" : "outlined"}
+                  className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
                   color="default"
                   size="small"
                   onClick={openActions}
                   aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
                 >
-                  {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                  {isMobile && !isTablet ? '' : 'Actions'}
                 </Button>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
                   getContentAnchorEl={null}
                   anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
+                    vertical: 'bottom',
+                    horizontal: 'left'
                   }}
                   id="action-menu"
                   open={Boolean(anchorEl)}

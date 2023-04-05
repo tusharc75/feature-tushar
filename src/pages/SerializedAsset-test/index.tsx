@@ -144,46 +144,46 @@ const SerializedAssetTest = () => {
 
   const ActionsRenderer = [
     {
-    accessor: 'action',
-    Header: '',
-    minWidth: 100,
-    width: 100,
-    sticky: 'right',
-    disableFilters: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <>
-        {permissions?.serializedAsset?.isCreate && (
-          <HtmlTooltip title="Clone">
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              onClick={() => {
-                setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: row.original._id });
-              }}
-            >
-              <FileCopyIcon color="primary" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-        {permissions?.serializedAsset?.isDelete && (
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon color="error" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-      </>
-    )
-  }
-]
+      accessor: 'action',
+      Header: '',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          {permissions?.serializedAsset?.isCreate && (
+            <HtmlTooltip title="Clone">
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                onClick={() => {
+                  setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: row.original._id });
+                }}
+              >
+                <FileCopyIcon color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          {permissions?.serializedAsset?.isDelete && (
+            <HtmlTooltip title="Delete">
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                onClick={() => {
+                  setDeleteRecord(row.original);
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                <DeleteIcon color="error" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+        </>
+      )
+    }
+  ];
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -207,23 +207,24 @@ const SerializedAssetTest = () => {
           if (e.field === 'assetNumber') {
             e.cellRenderer = 'assetNumberRenderer';
             e.cellStyle = (params) => {
-              if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
+              if (
+                [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(
+                  params?.data?.status
+                )
+              ) {
                 return { backgroundColor: COLOUR_MASTER.lostAssets.background };
               }
               if (params.data?.recertDate) {
                 var a = moment(params.data?.recertDate);
                 var b = moment();
-                const days = a.diff(b, 'days')
+                const days = a.diff(b, 'days');
                 if (days < 60 && days > 30) {
-                  return { backgroundColor: "#00FF00" };
-                }
-                else if (days < 30 && days > 15) {
-                  return { backgroundColor: "#FFFF00" };
-                }
-                else if (days < 15 && days > 0) {
-                  return { backgroundColor: "#FF0000" };
-                }
-                else if (days < 0) {
+                  return { backgroundColor: '#00FF00' };
+                } else if (days < 30 && days > 15) {
+                  return { backgroundColor: '#FFFF00' };
+                } else if (days < 15 && days > 0) {
+                  return { backgroundColor: '#FF0000' };
+                } else if (days < 0) {
                   return { backgroundColor: COLOUR_MASTER.lostAssets.background };
                 }
               }
@@ -414,8 +415,6 @@ const SerializedAssetTest = () => {
     </Fragment>
   );
 
-
-
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -440,7 +439,6 @@ const SerializedAssetTest = () => {
         return field;
     }
   };
-
 
   return (
     <Fragment>
@@ -658,8 +656,9 @@ const SerializedAssetTest = () => {
                     onClick={openActions}
                     disabled={selectedRecords.length ? false : true}
                     aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'}
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -682,25 +681,39 @@ const SerializedAssetTest = () => {
                     >
                       Delete
                     </MenuItem>
-                    {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && [INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].map((status) => (
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          handleStatusUpdate(status);
-                        }}
-                        disabled={selectedRecords?.filter((o) => [INVENTORY_STATUS.new, INVENTORY_STATUS.available, INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(o.status)).length === selectedRecords.length ? false : true}
-                      >
-                        {`Status Change - ${status}`}
-                      </MenuItem>
-                    ))}
-                    {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && selectedRecords?.length &&
+                    {permissions?.serializedAsset?.isUpdate &&
+                      allowUpdateStatus &&
+                      [INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].map((status) => (
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            handleStatusUpdate(status);
+                          }}
+                          disabled={
+                            selectedRecords?.filter((o) =>
+                              [INVENTORY_STATUS.new, INVENTORY_STATUS.available, INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(
+                                o.status
+                              )
+                            ).length === selectedRecords.length
+                              ? false
+                              : true
+                          }
+                        >
+                          {`Status Change - ${status}`}
+                        </MenuItem>
+                      ))}
+                    {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && selectedRecords?.length && (
                       <>
                         <MenuItem
                           onClick={() => {
                             closeActions();
                             handleStatusUpdate(INVENTORY_STATUS.scrap);
                           }}
-                          disabled={selectedRecords?.filter((o) => ![INVENTORY_STATUS.scrap].includes(o.status)).length === selectedRecords.length ? false : true}
+                          disabled={
+                            selectedRecords?.filter((o) => ![INVENTORY_STATUS.scrap].includes(o.status)).length === selectedRecords.length
+                              ? false
+                              : true
+                          }
                         >
                           {`Status Change - ${INVENTORY_STATUS.scrap}`}
                         </MenuItem>
@@ -709,12 +722,16 @@ const SerializedAssetTest = () => {
                             closeActions();
                             handleStatusUpdate(INVENTORY_STATUS.lost);
                           }}
-                          disabled={selectedRecords?.filter((o) => ![INVENTORY_STATUS.lost].includes(o.status)).length === selectedRecords.length ? false : true}
+                          disabled={
+                            selectedRecords?.filter((o) => ![INVENTORY_STATUS.lost].includes(o.status)).length === selectedRecords.length
+                              ? false
+                              : true
+                          }
                         >
                           {`Status Change - ${INVENTORY_STATUS.lost}`}
                         </MenuItem>
                       </>
-                    }
+                    )}
                   </Menu>
                 </Grid>
               </Box>
@@ -760,7 +777,7 @@ const SerializedAssetTest = () => {
               }}
               renderedFrom={renderedFrom}
             />
-          ) :
+          ) : (
             // Object.keys(frameWorkComponent).length > 0 && columns ? (
             //   <CustomAgGrid
             //     columns={columns}
@@ -779,7 +796,7 @@ const SerializedAssetTest = () => {
             //   />
             // ) : null
             <CustomReactTable
-              height={"calc(100vh - 200px)"}
+              height={'calc(100vh - 200px)'}
               columns={columns}
               data={dataRows}
               currentPage={page}
@@ -789,7 +806,7 @@ const SerializedAssetTest = () => {
               dispatch={dispatch}
               childrenProperty="subRows"
               uniqueKey="_id"
-              setWholeRowsCellColor={() => { }}
+              setWholeRowsCellColor={() => {}}
               renderedFrom={renderedFrom}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -798,6 +815,7 @@ const SerializedAssetTest = () => {
               sorting={sorting}
               loading={loading}
             />
+          )
         ) : (
           <Box p={2} height={500} bgcolor="white">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -819,11 +837,12 @@ const SerializedAssetTest = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
-            setShowDeleteConfirmBox(false)
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

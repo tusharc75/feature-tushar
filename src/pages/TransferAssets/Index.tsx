@@ -28,26 +28,25 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { FaSuitcase } from 'react-icons/fa';
 import { MdAdd, MdFilterList, MdSort, RiFileTransferFill, GiCargoShip, RiFolderTransferFill, SiStatuspage } from 'react-icons/all';
-import MobileSortDialog from "src/components/MobileSortDialog"
-import MobileFilterDialog from "src/components/MobileFilterDialog"
+import MobileSortDialog from 'src/components/MobileSortDialog';
+import MobileFilterDialog from 'src/components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 
-
 const TransferAsset = () => {
   const TransferAssetType = [
     {
       key: `All ${routes.transferAsset.title}`,
-      value: 1,
+      value: 1
     },
     {
       key: `My ${routes.transferAsset.title}`,
-      value: 2,
-    },
+      value: 2
+    }
   ];
-  let renderedFrom = camelCase(routes?.transferAsset.title)
+  let renderedFrom = camelCase(routes?.transferAsset.title);
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferAssetDialog, setShowManageTransferAssetDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -60,13 +59,13 @@ const TransferAsset = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [open, setOpen] = React.useState(false);
-  const [isOpenDialog, setisOpenDialog] = useState(false)
+  const [isOpenDialog, setisOpenDialog] = useState(false);
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.transferAsset.title}`);
   const [fromRental, setFromRental] = useState(history.location?.state?.rental);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
     state: { user, permissions, selectedEntity }
@@ -148,13 +147,13 @@ const TransferAsset = () => {
     }
     if (fromRental) {
       let filterById = [];
-      filterById.push({ field: "rentalJob", term: fromRental?._id });
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
+      filterById.push({ field: 'rentalJob', term: fromRental?._id });
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
     }
 
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
     if (!isObjectEmpty(filters)) {
@@ -214,14 +213,13 @@ const TransferAsset = () => {
   };
   const handleTransferAssetTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`)
-  }
+    history.push(`?type=${filterValues}`);
+  };
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
       setFilter(newFilter);
       handleTransferAssetTypeSel(TransferAssetType.find((d) => d.key === newFilter).value);
-
     }
   };
 
@@ -253,17 +251,13 @@ const TransferAsset = () => {
             <DeleteIcon color="error" />
           </IconButton>
         </Tooltip>
-      ) :
+      ) : (
         <Tooltip title="Don't have the permissions to Delete">
-          <IconButton
-            size="small"
-            aria-label="Delete"
-            className='cursor-stop'
-          >
+          <IconButton size="small" aria-label="Delete" className="cursor-stop">
             <DeleteIcon color="disabled" />
           </IconButton>
         </Tooltip>
-      }
+      )}
     </>
   );
 
@@ -292,8 +286,6 @@ const TransferAsset = () => {
     }
   };
 
-
-
   const handleOpen = () => {
     setisOpenDialog(true);
   };
@@ -308,12 +300,7 @@ const TransferAsset = () => {
 
   const handleClickClose = () => {
     setOpen(false);
-
   };
-
-
-
-
 
   return (
     <Fragment>
@@ -348,12 +335,12 @@ const TransferAsset = () => {
       <div className="main-container">
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
               <div className="d-flex align-items-center">
                 <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
                 <span className="listingHeader">{routes.transferAsset?.title} </span>
               </div>
-              {isMobile && !isTablet ?
+              {isMobile && !isTablet ? (
                 <div className="d-flex ">
                   <Button
                     onClick={handleClickOpen}
@@ -372,7 +359,7 @@ const TransferAsset = () => {
                     isOpen={open}
                     handleClose={handleClickClose}
                     contentPart={null}
-                    secHeading={["Sort Transfer Assests"]}
+                    secHeading={['Sort Transfer Assests']}
                     columns={columns}
                     dispatch={dispatch}
                   />
@@ -399,11 +386,17 @@ const TransferAsset = () => {
                     filters={filters}
                   />
                 </div>
-                :
+              ) : (
                 <HideWhenOffline>
                   <div className={`align-items-center gap-1 layout-for-mobile `}>
                     {TransferAssetType && (
-                      <ToggleButtonGroup size="small" className="ml-2" value={TransferAssetType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                      <ToggleButtonGroup
+                        size="small"
+                        className="ml-2"
+                        value={TransferAssetType[selectedType - 1].key}
+                        exclusive
+                        onChange={handleFilter}
+                      >
                         {TransferAssetType.map((k, index) => {
                           return (
                             <ToggleButton value={k.key} key={index}>
@@ -414,7 +407,8 @@ const TransferAsset = () => {
                       </ToggleButtonGroup>
                     )}
                   </div>
-                </HideWhenOffline>}
+                </HideWhenOffline>
+              )}
               {fromRental && (
                 <Chip
                   className="ml-3"
@@ -428,7 +422,7 @@ const TransferAsset = () => {
             </Grid>
             <Grid xs={12} sm={12} md={6} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1, gap: "5px" }} className={isMobile ? styles.content_box : ""}>
+                <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile ? styles.content_box : ''}>
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}
@@ -454,8 +448,6 @@ const TransferAsset = () => {
                     )}
                   </Grid>
 
-
-
                   {/* <HtmlTooltip title={selectedRecords.length > 0 ? '' : 'Please select some records'}>
                     <span>
                       <Button
@@ -466,8 +458,9 @@ const TransferAsset = () => {
                         onClick={openActions}
                         disabled={selectedRecords.length === 0 || selectedRecords.filter((t: any) => t.status !== 'New').length > 0}
                         aria-controls="action-menu"
+                        endIcon={<ExpandMore />}
                       >
-                        {isMobile ? '' : 'Actions'} <ExpandMore />
+                        {isMobile ? '' : 'Actions'}
                       </Button>
                     </span>
                   </HtmlTooltip>
@@ -513,7 +506,7 @@ const TransferAsset = () => {
                 dataRows={dataRows}
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
-                onEdit={() => { }}
+                onEdit={() => {}}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {
                   setDeleteRecord(data);
@@ -525,30 +518,30 @@ const TransferAsset = () => {
                 chips={[
                   {
                     icons: <RiFileTransferFill />,
-                    label: "Transfer From Plant: ",
-                    field: "transferFromPlant",
+                    label: 'Transfer From Plant: ',
+                    field: 'transferFromPlant'
                   },
                   {
                     icons: <RiFolderTransferFill />,
-                    label: "Transfer To Plant: ",
-                    field: "transferToPlant",
+                    label: 'Transfer To Plant: ',
+                    field: 'transferToPlant'
                   },
                   {
                     icons: <GiCargoShip />,
-                    label: "Plant Ship To: ",
-                    field: "plantShipTo"
+                    label: 'Plant Ship To: ',
+                    field: 'plantShipTo'
                   },
                   {
                     icon: <SiStatuspage />,
-                    label: "Status: ",
-                    field: "status: "
+                    label: 'Status: ',
+                    field: 'status: '
                   }
                 ]}
                 additionalDetails={[
                   {
                     icon: <FaSuitcase size={18} />,
-                    field: "transferType"
-                  },
+                    field: 'transferType'
+                  }
                 ]}
                 owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                 onCreate={false}
@@ -600,8 +593,9 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()
-            } ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''} ? `}
+          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

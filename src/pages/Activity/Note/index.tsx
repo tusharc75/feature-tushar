@@ -416,8 +416,9 @@ const Note = () => {
                         aria-controls="action-menu"
                         disabled={selectedRecords.length > 0 ? false : true}
                         className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        endIcon={<ExpandMore />}
                       >
-                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                        {isMobile && !isTablet ? '' : 'Actions'}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}

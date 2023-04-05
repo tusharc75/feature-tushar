@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Menu, MenuItem, Typography, IconButton } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
@@ -26,6 +26,7 @@ import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import TabPanel from 'src/components/TabPanel';
 import Steps from '../RentalManagement/Steps';
+import Steps2, { getIndex } from 'src/components/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -99,6 +100,10 @@ const RepairOrderDetails = () => {
     });
   }, [locationKeys]);
 
+  const repairOrderStepNames = React.useMemo(() => {
+    return repairOrderProcessSteps.map((item) => item.name);
+  }, []);
+
   useEffect(() => {
     if (id) {
       fetchRepairOrderData();
@@ -114,7 +119,7 @@ const RepairOrderDetails = () => {
       fetchQuotationData();
       updateProcessStatus(repairOrderProcessSteps[currentStep]);
     }
-    if (['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep])) fetchQuotationData();
+    if (['Add Assets', 'Work Order'].includes(repairOrderStepNames[currentStep])) fetchQuotationData();
   }, [currentStep]);
 
   const getResourceFields = () => {
@@ -140,14 +145,22 @@ const RepairOrderDetails = () => {
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
         setisAnyMaterial(data?.canDelete ? false : true);
-        setCurrentStep(repairOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? repairOrderProcessSteps.indexOf(data?.processStatus) : 0);
+        setCurrentStep(getIndex(data?.processStatus, repairOrderProcessSteps));
         var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         if (user?.role?.selectedEntity?.superAdminAccess) {
-          isAllowedToEdit = true
+          isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit);
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
-          setRepairOrderProcessSteps(repairOrderSteps.filter((d) => !['Quotation', `Post Work Service`, 'Loading Ticket', `Invoice`]?.includes(d)));
+          setRepairOrderProcessSteps(
+            repairOrderSteps.filter(
+              (d) =>
+                !repairOrderSteps
+                  .slice(2)
+                  .map((item) => item.name)
+                  ?.includes(d.name)
+            )
+          );
         }
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setRepairOrderData({ ...data });
@@ -208,8 +221,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -310,8 +323,13 @@ const RepairOrderDetails = () => {
                         {statusOptions?.map((o, index) => {
                           return (
                             <MenuItem
-                              disabled={[REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.completed]?.includes(o?.optionLabel)
-                                ? index <= statusOptions.findIndex((d) => d.optionLabel === repairOrderData?.status) : true}
+                              disabled={
+                                [REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.completed]?.includes(
+                                  o?.optionLabel
+                                )
+                                  ? index <= statusOptions.findIndex((d) => d.optionLabel === repairOrderData?.status)
+                                  : true
+                              }
                               onClick={() => {
                                 closeActions();
                                 handleStatusChange(o);
@@ -327,7 +345,7 @@ const RepairOrderDetails = () => {
                   )}
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
-                  ['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep]) &&
+                  ['Add Assets', 'Work Order'].includes(repairOrderStepNames[currentStep]) &&
                   [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                     quotationVersionData?.status
                   ) && (
@@ -349,7 +367,7 @@ const RepairOrderDetails = () => {
                   !(
                     [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                       quotationVersionData?.status
-                    ) && ['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep])
+                    ) && ['Add Assets', 'Work Order'].includes(repairOrderStepNames[currentStep])
                   ) && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -413,7 +431,7 @@ const RepairOrderDetails = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps
+          <Steps2
             isNextStep={false}
             nextStep={nextStep}
             steps={repairOrderProcessSteps}
@@ -426,7 +444,7 @@ const RepairOrderDetails = () => {
                 [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                   quotationVersionData?.status
                 ) &&
-                repairOrderProcessSteps[currentStep] === 'Quotation' &&
+                repairOrderStepNames[currentStep] === 'Quotation' &&
                 allowedToEdit
               ) {
                 setShowQuotationConfirmBox(true);
@@ -438,8 +456,8 @@ const RepairOrderDetails = () => {
               }
             }}
           />
-          <ContentFullScreen title={repairOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {repairOrderProcessSteps[currentStep] === 'Add Assets' && repairOrderData && (
+          <ContentFullScreen title={repairOrderStepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            {repairOrderStepNames[currentStep] === 'Add Assets' && repairOrderData && (
               <Productpackage
                 fetchRepairOrderData={fetchRepairOrderData}
                 repairOrderData={repairOrderData}
@@ -457,28 +475,27 @@ const RepairOrderDetails = () => {
                 allowedToDelete={allowedToDelete}
               />
             )}
-            {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') &&
-              repairOrderData && (
-                <WorkOrder
-                  repairOrderData={repairOrderData}
-                  setNextStep={setNextStep}
-                  stepFullScreen={stepFullScreen}
-                  allowedToEdit={
-                    currentStep === 3
-                      ? allowedToEdit
-                      : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+            {(repairOrderStepNames[currentStep] === 'Work Order' || repairOrderStepNames[currentStep] === 'Post Work Service') && repairOrderData && (
+              <WorkOrder
+                repairOrderData={repairOrderData}
+                setNextStep={setNextStep}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={
+                  currentStep === 3
+                    ? allowedToEdit
+                    : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                         quotationVersionData?.status
                       )
-                        ? false
-                        : allowedToEdit
-                  }
-                  allowedToDelete={allowedToDelete}
-                  isPostWorkService={Boolean(currentStep === 3)}
-                  setCurrentStep={setCurrentStep}
-                  createNewVersionQuote={createNewVersionQuote}
-                />
-              )}
-            {repairOrderProcessSteps[currentStep] === 'Quotation' && repairOrderData && (
+                    ? false
+                    : allowedToEdit
+                }
+                allowedToDelete={allowedToDelete}
+                isPostWorkService={Boolean(currentStep === 3)}
+                setCurrentStep={setCurrentStep}
+                createNewVersionQuote={createNewVersionQuote}
+              />
+            )}
+            {repairOrderStepNames[currentStep] === 'Quotation' && repairOrderData && (
               <Quotation
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
@@ -491,7 +508,7 @@ const RepairOrderDetails = () => {
                 updateOrderStatus={updateOrderStatus}
               />
             )}
-            {repairOrderProcessSteps[currentStep] === 'Loading Ticket' && repairOrderData && (
+            {repairOrderStepNames[currentStep] === 'Loading Ticket' && repairOrderData && (
               <LoadingTicket
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
@@ -499,7 +516,7 @@ const RepairOrderDetails = () => {
                 allowedToEdit={allowedToEdit}
               />
             )}
-            {repairOrderProcessSteps[currentStep] === 'Invoice' && repairOrderData && (
+            {repairOrderStepNames[currentStep] === 'Invoice' && repairOrderData && (
               <Quotation
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}

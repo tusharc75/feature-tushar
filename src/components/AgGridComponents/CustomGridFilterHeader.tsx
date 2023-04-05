@@ -79,7 +79,7 @@ const CustomGridFilterHeader = (props) => {
           {showFilters && (
             <Tooltip title="Apply filter" placement="top">
               <Button
-                style={{ marginRight: buttonGap }}
+                style={{ marginRight: buttonGap, color: '#424242' }}
                 startIcon={<BiFilterAlt />}
                 size={'small'}
                 className="btn-outline-v1 light "

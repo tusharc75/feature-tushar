@@ -6,7 +6,7 @@ import { Button, IconButton, Box, Typography } from '@material-ui/core';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
 import { FiMaximize2 } from 'react-icons/fi';
-import { LeftIcon, RightIcon, getIcon } from './icons';
+import { LeftIcon, RightIcon, getIcon, stepIconInterface, getColorOficon } from './icons';
 
 const STEP_GAP = 15;
 
@@ -116,32 +116,35 @@ const Steps = ({
               </IconButton>
             </Box>
             <div className={styles.contentContainer} ref={containerRef}>
-              {steps.map((step, i) => (
-                <Box
-                  className={`
+              {steps.map((step, i) => {
+                const Icon = getIcon(step.icon);
+                return (
+                  <Box
+                    className={`
                     ${styles.singleStep} 
                     ${i < currentStep || isStepEnded ? styles.activeSteps : ''}
                     ${i === currentStep ? styles.currentStep : ''}
                     ${i > currentStep ? styles.inActiveStep : ''}
                     single-step-item
                 `}
-                  key={step.name}
-                >
-                  <Box className={styles.stepIcon}>
-                    <img src={getIcon(step.icon)} alt={`${step}-icon`} aria-hidden />
+                    key={step.name}
+                  >
+                    <Box className={styles.stepIcon}>
+                      <Icon colors={i > currentStep ? null : getColorOficon(i) || ['#FAC94B', '#FF9B04']} />
+                    </Box>
+                    <Typography className={styles.label}>{step.title}</Typography>
+                    {!isStepEnded && setStepFullScreen && currentStep === i && (
+                      <HtmlTooltip title={`Full Screen`}>
+                        <Box className={styles.fullScrceen}>
+                          <IconButton aria-label="Full Screen" onClick={setStepFullScreen} size="small">
+                            <FiMaximize2 />
+                          </IconButton>
+                        </Box>
+                      </HtmlTooltip>
+                    )}
                   </Box>
-                  <Typography className={styles.label}>{step.title}</Typography>
-                  {!isStepEnded && setStepFullScreen && currentStep === i && (
-                    <HtmlTooltip title={`Full Screen`}>
-                      <Box className={styles.fullScrceen}>
-                        <IconButton aria-label="Full Screen" onClick={setStepFullScreen} size="small">
-                          <FiMaximize2 />
-                        </IconButton>
-                      </Box>
-                    </HtmlTooltip>
-                  )}
-                </Box>
-              ))}
+                );
+              })}
             </div>
             <Box className={styles.iconButton}>
               <IconButton disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep} onClick={goNext}>
@@ -156,3 +159,18 @@ const Steps = ({
 };
 
 export default Steps;
+
+interface stepInterface extends stepIconInterface {
+  name: string;
+  title: string;
+}
+
+export const getIndex = (name: string, steps: stepInterface[]) => {
+  const index = steps.findIndex((step) => step.name === name);
+  return index === -1 ? 0 : index;
+};
+
+export const doesStepsContainStep = (name: string, steps: stepInterface[]) => {
+  const names = steps.map((step) => step.name);
+  return name.includes(name);
+};

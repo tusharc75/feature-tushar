@@ -216,8 +216,9 @@ function Product({ id }) {
                   onClick={openActions}
                   aria-controls="action-menu"
                   disabled={selectedRecords.length === 0}
+                  endIcon={<ExpandMore />}
                 >
-                  Actions <ExpandMore />
+                  Actions
                 </Button>
                 <Menu
                   anchorEl={anchorActionEl}
