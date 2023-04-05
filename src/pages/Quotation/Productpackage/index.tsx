@@ -29,7 +29,7 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
-const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit }) => {
+const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -234,6 +234,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     }
     setRowsData(rows);
     setSelectedProducts([]);
+    updateDOASetup(data?.doasetup);
   };
 
   const generateNestedData = (material, parent) => {
