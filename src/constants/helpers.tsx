@@ -55,7 +55,7 @@ export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables
 export const invoiceProcessSteps = ['Add Products', 'Ready To Invoice'];
 export const jobProcessSteps = ['Add', 'Fleet'];
 export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Quote Approval', 'End'];
-export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
+
 export const rentalManagementSteps = [
   'Add Products',
   'Add Services',
@@ -73,6 +73,11 @@ export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
 
 export const demandOrderSteps = ['Add Products'];
 export const purchaseRequisitionSteps = ['Add Products'];
+
+export const purchaseOrderSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Receive Products', title: 'Product', icon: 'receiveProduct' } // need icon
+];
 
 export const repairOrderSteps: stepInterface[] = [
   { name: 'Add Assets', title: 'Add', icon: 'add' },

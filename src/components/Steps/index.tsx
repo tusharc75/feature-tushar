@@ -166,6 +166,7 @@ interface stepInterface extends stepIconInterface {
 }
 
 export const getIndex = (name: string, steps: stepInterface[]) => {
+  if (!name) return 0;
   const index = steps.findIndex((step) => step.name === name);
   return index === -1 ? 0 : index;
 };

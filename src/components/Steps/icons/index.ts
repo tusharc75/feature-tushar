@@ -1,9 +1,20 @@
 import { LeftIcon } from './left';
 import { RightIcon } from './right';
 
-import { Add, Assign, Dispatch, Invoice, PostWork, Quote, RepairOrder, SerializedAsset, WorkOrder } from './svgIcon';
+import { Add, Assign, Dispatch, Invoice, PostWork, Quote, RepairOrder, SerializedAsset, WorkOrder, Ticket, ReceiveProduct } from './svgIcon';
 export interface stepIconInterface {
-  icon: 'add' | 'assign' | 'dispatch' | 'invoice' | 'postWork' | 'quote' | 'repairOrder' | 'serializedAssets' | 'workOrder';
+  icon:
+    | 'add'
+    | 'assign'
+    | 'dispatch'
+    | 'invoice'
+    | 'postWork'
+    | 'quote'
+    | 'repairOrder'
+    | 'serializedAssets'
+    | 'workOrder'
+    | 'ticket'
+    | 'receiveProduct';
 }
 
 export const getIcon = (name: string) => {
@@ -34,6 +45,12 @@ export const getIcon = (name: string) => {
       break;
     case name === 'workOrder':
       return WorkOrder;
+      break;
+    case name === 'ticket':
+      return Ticket;
+      break;
+    case name === 'receiveProduct':
+      return ReceiveProduct;
       break;
     default:
       return SerializedAsset;
