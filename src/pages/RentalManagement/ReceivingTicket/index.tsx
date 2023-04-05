@@ -96,7 +96,6 @@ const ReceivingTicket = ({
   const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
   const [showConformationCancleTicket, setShowConformationCancleTicket] = useState(false);
 
-
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
 
@@ -128,7 +127,7 @@ const ReceivingTicket = ({
   const [columnHeader, setColumnHeader] = useState(null);
 
   const [invoiceData, setInvoiceData] = useState(null);
-  const [openDateDialog, setOpenDateDialog] = useState({ open: false, data: null, loading: false })
+  const [openDateDialog, setOpenDateDialog] = useState({ open: false, data: null, loading: false });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
 
   const [repairJobCount, setRepairJobCount] = useState(0);
@@ -153,7 +152,6 @@ const ReceivingTicket = ({
   const closeActions = () => {
     setAnchorActionEl(null);
   };
-
 
   const openLinkActions = (event) => {
     setAnchorLinkActionEl(event.currentTarget);
@@ -183,7 +181,7 @@ const ReceivingTicket = ({
       var products: any = [];
       var nonSerializeAsset: any = [];
       var consumeProducts: any = [];
-      var transactionData: any = []
+      var transactionData: any = [];
 
       var invoiceData: any = [];
 
@@ -203,7 +201,7 @@ const ReceivingTicket = ({
           startDate: u?.actualStartDate,
           endDate: u?.actualEndDate,
           manualStartDate: u?.manualStartDate,
-          manualEndDate: u?.manualEndDate,
+          manualEndDate: u?.manualEndDate
         }));
 
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id);
@@ -215,7 +213,7 @@ const ReceivingTicket = ({
         productAssets = response?.data?.data;
         productAssets = productAssets
           .map((d) => {
-            return ({
+            return {
               ...d.inventory,
               rentalAssetStatus: d.status,
               startDate: d.actualStartDate || d.startDate,
@@ -224,9 +222,11 @@ const ReceivingTicket = ({
               manualEndDate: d.manualEndDate,
               isReplaced: d.isReplaced,
               replaceReason: d.replaceReason,
-              replaceAsset: d?.replaceAsset ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset : "",
-              description: d?.product?.productDescription,
-            })
+              replaceAsset: d?.replaceAsset
+                ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
+                : '',
+              description: d?.product?.productDescription
+            };
           })
           .map((u) => ({
             ...u,
@@ -242,7 +242,7 @@ const ReceivingTicket = ({
             startDate: u?.startDate,
             endDate: u?.endDate,
             manualStartDate: u?.manualStartDate,
-            manualEndDate: u?.manualEndDate,
+            manualEndDate: u?.manualEndDate
           }));
 
         const transactionResult = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`);
@@ -258,8 +258,8 @@ const ReceivingTicket = ({
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
         consumeProducts = productResponse?.data?.data?.consumeProducts;
 
-        const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`)
-        invoiceData = invoiceResponse?.data?.data?.material || []
+        const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`);
+        invoiceData = invoiceResponse?.data?.data?.material || [];
 
         setInvoiceData(invoiceData);
       }
@@ -283,7 +283,7 @@ const ReceivingTicket = ({
             element.isRepairOrder = true;
             element.repairOrder = repairOrder?._id;
           }
-        })
+        });
       }
 
       const loadingTicketProducts = [];
@@ -328,10 +328,10 @@ const ReceivingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDescription || ''
-                : element.type === 'package'
-                  ? element?.packageDetail?.packageDescription || ''
-                  : '';
+              ? element?.productDetail?.productDescription || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.qty = ele.qty;
           obj.consumeQty = consumeQty;
           obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicketProducts[element?.materialId] || 0 : 0;
@@ -340,17 +340,20 @@ const ReceivingTicket = ({
           obj.productId = element?.productDetail?._id;
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
-          obj.status = element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true ? element?.status : "N/A";
+          obj.status =
+            element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true
+              ? element?.status
+              : 'N/A';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
             ? ele.qty === consumeQty
               ? 'Consumed'
               : consumeQty < ele.qty && consumeQty > 0
-                ? 'Partially Consumed'
-                : ele.qty === returnTicketProducts[element?.materialId]
-                  ? 'Returned'
-                  : ''
+              ? 'Partially Consumed'
+              : ele.qty === returnTicketProducts[element?.materialId]
+              ? 'Returned'
+              : ''
             : element?.status;
           obj.startDate = element?.actualStartDate;
           obj.endDate = element?.actualEndDate;
@@ -360,7 +363,10 @@ const ReceivingTicket = ({
           obj.loadingTicket = ele?.loadingTicket;
           obj.loadingTicketId = ele?.loadingTicketId;
           obj.loadingTicketStatus = ele?.loadingTicketStatus;
-          obj.currentLocation = element?.currentLocation?.optionValue || rentalManagementData?.shippingAddress?.optionValue || rentalManagementData?.billingAddress?.optionValue
+          obj.currentLocation =
+            element?.currentLocation?.optionValue ||
+            rentalManagementData?.shippingAddress?.optionValue ||
+            rentalManagementData?.billingAddress?.optionValue;
           productAssets.push(obj);
           qty = qty - ele.qty;
         });
@@ -375,10 +381,10 @@ const ReceivingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDescription || ''
-                : element.type === 'package'
-                  ? element?.packageDetail?.packageDescription || ''
-                  : '';
+              ? element?.productDetail?.productDescription || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.qty = qty;
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
@@ -395,12 +401,15 @@ const ReceivingTicket = ({
             ? qty === consumeQty
               ? 'Consumed'
               : consumeQty < qty && consumeQty > 0
-                ? 'Partially Consumed'
-                : qty === returnTicketProducts[element?.materialId]
-                  ? 'Returned'
-                  : ''
+              ? 'Partially Consumed'
+              : qty === returnTicketProducts[element?.materialId]
+              ? 'Returned'
+              : ''
             : element?.status;
-          obj.currentLocation = element?.currentLocation?.optionValue || rentalManagementData?.shippingAddress?.optionValue || rentalManagementData?.billingAddress?.optionValue
+          obj.currentLocation =
+            element?.currentLocation?.optionValue ||
+            rentalManagementData?.shippingAddress?.optionValue ||
+            rentalManagementData?.billingAddress?.optionValue;
 
           productAssets.push(obj);
         }
@@ -454,47 +463,53 @@ const ReceivingTicket = ({
         d['parentName'] = d?.hasOwnProperty('parentName') && d?.parentName !== '' ? d?.parentName : d?.productName;
         d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.productId;
         d['isChecked'] = false;
-        d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved
-          || d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered ? false : true;
+        d['hideSelection'] =
+          [INVENTORY_STATUS.lost].includes(d.status) ||
+          d?.manualStatus === INVENTORY_STATUS.reserved ||
+          (d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered)
+            ? false
+            : true;
 
-        const invoiceMaterial = invoiceData?.find(obj => obj?._id === d?._id || obj?._id === d?.uniqueId)
-        d['isAllowedStartDate'] = d?.manualStartDate && !invoiceMaterial ? true : false
-        d['isAllowedEndDate'] = d?.manualEndDate ? true : false
+        const invoiceMaterial = invoiceData?.find((obj) => obj?._id === d?._id || obj?._id === d?.uniqueId);
+        d['isAllowedStartDate'] = d?.manualStartDate && !invoiceMaterial ? true : false;
+        d['isAllowedEndDate'] = d?.manualEndDate ? true : false;
         if (d['isAllowedEndDate'] && invoiceMaterial) {
-          d['minEndDate'] = new Date(invoiceMaterial?.endDate)
+          d['minEndDate'] = new Date(invoiceMaterial?.endDate);
         }
       });
 
-      if (productAssets.filter((e) =>
-        [
-          INVENTORY_STATUS.underReview,
-          INVENTORY_STATUS.available,
-          INVENTORY_STATUS.repair,
-          INVENTORY_STATUS.scrap,
-          INVENTORY_STATUS.lost,
-          INVENTORY_STATUS.notApplied
-        ].includes(e.status) ||
-        [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
-          e.rentalAssetStatus
-        )
-      ).length === productAssets.length
+      if (
+        productAssets.filter(
+          (e) =>
+            [
+              INVENTORY_STATUS.underReview,
+              INVENTORY_STATUS.available,
+              INVENTORY_STATUS.repair,
+              INVENTORY_STATUS.scrap,
+              INVENTORY_STATUS.lost,
+              INVENTORY_STATUS.notApplied
+            ].includes(e.status) ||
+            [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
+              e.rentalAssetStatus
+            )
+        ).length === productAssets.length
       ) {
         setNextStep(true);
       }
 
       setUniqueReceivingTicket([...new Set(productAssets.filter((d) => d.receivingTicketId !== undefined).map((d) => d.receivingTicketId))]);
 
-      productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)]
+      productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)];
 
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
-      setLoadingData(false)
+      setLoadingData(false);
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
-      setLoadingData(false)
+      setLoadingData(false);
     }
   };
 
@@ -533,7 +548,9 @@ const ReceivingTicket = ({
       )}
       {params?.data?.isReplaced && (
         <Box ml={1}>
-          <HtmlTooltip title={`This Asset has been Replaced by ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}>
+          <HtmlTooltip
+            title={`This Asset has been Replaced by ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}
+          >
             <InfoIcon fontSize="small" color={'primary'} />
           </HtmlTooltip>
         </Box>
@@ -543,9 +560,11 @@ const ReceivingTicket = ({
           <HtmlTooltip title={`${routes.repairJob.title}`}>
             <IconButton
               size="small"
-              onClick={() => { history.push(`${routes.repairJobDetail.path}/${params?.data?.repairJob}`) }}
+              onClick={() => {
+                history.push(`${routes.repairJobDetail.path}/${params?.data?.repairJob}`);
+              }}
             >
-              <OpenInNewIcon fontSize="small" color='primary' />
+              <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
         </Box>
@@ -555,9 +574,11 @@ const ReceivingTicket = ({
           <HtmlTooltip title={`${routes.repairOrder.title}`}>
             <IconButton
               size="small"
-              onClick={() => { history.push(`${routes.repairOrderDetail.path}/${params?.data?.repairOrder}`) }}
+              onClick={() => {
+                history.push(`${routes.repairOrderDetail.path}/${params?.data?.repairOrder}`);
+              }}
             >
-              <OpenInNewIcon fontSize="small" color='primary' />
+              <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
         </Box>
@@ -609,23 +630,32 @@ const ReceivingTicket = ({
       <NoDataCell />
     );
 
-  const ActionRenderer = (params) => (
-    allowedToEdit ?
-      <HtmlTooltip title={(params?.data?.isAllowedStartDate === false && params?.data?.isAllowedEndDate === false) ? `Invoice created cannot update start date` :
-        params?.data?.isAllowedEndDate === false && params?.data?.isAllowedStartDate !== true ? `Can change the end date after received` : 'Update start date / end date'}>
+  const ActionRenderer = (params) =>
+    allowedToEdit ? (
+      <HtmlTooltip
+        title={
+          params?.data?.isAllowedStartDate === false && params?.data?.isAllowedEndDate === false
+            ? `Invoice created cannot update start date`
+            : params?.data?.isAllowedEndDate === false && params?.data?.isAllowedStartDate !== true
+            ? `Can change the end date after received`
+            : 'Update start date / end date'
+        }
+      >
         <span>
           <IconButton
-            size='small'
-            disabled={(params?.data?.isAllowedStartDate || params?.data?.isAllowedEndDate) ? false : true}
+            size="small"
+            disabled={params?.data?.isAllowedStartDate || params?.data?.isAllowedEndDate ? false : true}
             onClick={() => {
-              setOpenDateDialog({ ...openDateDialog, open: true, data: params?.data })
-            }}>
-            <Edit fontSize='small'
-              color={(params?.data?.isAllowedStartDate || params?.data?.isAllowedEndDate) ? 'primary' : 'inherit'} />
+              setOpenDateDialog({ ...openDateDialog, open: true, data: params?.data });
+            }}
+          >
+            <Edit fontSize="small" color={params?.data?.isAllowedStartDate || params?.data?.isAllowedEndDate ? 'primary' : 'inherit'} />
           </IconButton>
         </span>
-      </HtmlTooltip> : ""
-  )
+      </HtmlTooltip>
+    ) : (
+      ''
+    );
 
   const frameworkComponents = {
     receivingTicketRenderer: ReceivingTicketRenderer,
@@ -701,7 +731,7 @@ const ReceivingTicket = ({
     { field: 'startDate', headerName: 'System Start Date', show: false, cellRenderer: 'dateRenderer' },
     { field: 'endDate', headerName: 'System End Date', show: false, cellRenderer: 'dateRenderer' },
     { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' }
   ];
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
@@ -754,7 +784,7 @@ const ReceivingTicket = ({
       .then(({ data }) => {
         axiosInstance()
           .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
-          .then(({ data: { data } }) => { })
+          .then(({ data: { data } }) => {})
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
@@ -980,40 +1010,44 @@ const ReceivingTicket = ({
       receivingTicketIds?.forEach((receivingTicketId) => {
         const ele: any = {};
         ele._id = receivingTicketId;
-        ele.products = selectedRecords?.filter((e) => e?.receivingTicketId === receivingTicketId && e?.type === "Product")?.map((e) => e?.productId);
-        ele.assets = selectedRecords?.filter((e) => e?.receivingTicketId === receivingTicketId && e?.type === "Asset")?.map((e) => e?._id);
+        ele.products = selectedRecords?.filter((e) => e?.receivingTicketId === receivingTicketId && e?.type === 'Product')?.map((e) => e?.productId);
+        ele.assets = selectedRecords?.filter((e) => e?.receivingTicketId === receivingTicketId && e?.type === 'Asset')?.map((e) => e?._id);
         data.push(ele);
-      })
-      axiosInstance().put(`${deliveryTicket.api}/revert-partially`, data).then(({ data: { data } }) => {
-        fetchRecords();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Reverted Successfully`
-        });
-      })
+      });
+      axiosInstance()
+        .put(`${deliveryTicket.api}/revert-partially`, data)
+        .then(({ data: { data } }) => {
+          fetchRecords();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Reverted Successfully`
+          });
+        })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
     }
-  }
+  };
 
   const handelCancleTickets = () => {
     const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
     if (receivingTicketIds.length) {
-      axiosInstance().put(`${deliveryTicket.api}/revert`, { ids: receivingTicketIds }).then(({ data: { data } }) => {
-        fetchRecords();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Cancelled Successfully`
-        });
-      })
+      axiosInstance()
+        .put(`${deliveryTicket.api}/revert`, { ids: receivingTicketIds })
+        .then(({ data: { data } }) => {
+          fetchRecords();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Cancelled Successfully`
+          });
+        })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
     }
-  }
+  };
 
   useEffect(() => {
     const product = selectedRecords?.filter((e) => e.type === 'Product');
@@ -1036,34 +1070,35 @@ const ReceivingTicket = ({
     }
   }, [selectedRecords]);
 
-
   const handleSubmitChangeDates = (values) => {
-    if (!openDateDialog.data) return
-    setOpenDateDialog({ ...openDateDialog, loading: true })
+    if (!openDateDialog.data) return;
+    setOpenDateDialog({ ...openDateDialog, loading: true });
     const data: any = {
-      "material": openDateDialog?.data?.displayType !== "Asset" ? openDateDialog?.data?.uniqueId : "",
-      "inventory": openDateDialog?.data?.displayType === "Asset" ? openDateDialog?.data?._id : "",
-    }
+      material: openDateDialog?.data?.displayType !== 'Asset' ? openDateDialog?.data?.uniqueId : '',
+      inventory: openDateDialog?.data?.displayType === 'Asset' ? openDateDialog?.data?._id : ''
+    };
     if (values.manualStartDate) {
       data.startDate = values.manualStartDate;
     }
     if (values.manualEndDate) {
       data.endDate = values.manualEndDate;
     }
-    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
+    axiosInstance()
+      .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
       .then(() => {
         toastConfig.setToastConfig({
           open: true,
-          message: "Dates Updated Successfully",
-          type: "success"
-        })
-        setOpenDateDialog({ open: false, data: null, loading: false })
-        fetchRecords()
-      }).catch((err) => {
-        toastConfig.setToastConfig(err)
-        setOpenDateDialog({ open: false, data: null, loading: false })
+          message: 'Dates Updated Successfully',
+          type: 'success'
+        });
+        setOpenDateDialog({ open: false, data: null, loading: false });
+        fetchRecords();
       })
-  }
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setOpenDateDialog({ open: false, data: null, loading: false });
+      });
+  };
 
   return (
     <>
@@ -1148,17 +1183,17 @@ const ReceivingTicket = ({
                       (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
                     [INVENTORY_STATUS.underReview].includes(f.status)
                 )?.length === selectedRecords?.length && (
-                    <Fragment>
-                      <MenuItem
-                        onClick={() => {
-                          setAnchorEl(null);
-                          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: '' });
-                        }}
-                      >
-                        {INVENTORY_STATUS.available}
-                      </MenuItem>
-                    </Fragment>
-                  )}
+                  <Fragment>
+                    <MenuItem
+                      onClick={() => {
+                        setAnchorEl(null);
+                        setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: '' });
+                      }}
+                    >
+                      {INVENTORY_STATUS.available}
+                    </MenuItem>
+                  </Fragment>
+                )}
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
@@ -1202,8 +1237,9 @@ const ReceivingTicket = ({
             onClick={openActions}
             aria-controls="action-menu"
             disabled={selectedRecords.length === 0}
+            endIcon={<ExpandMore />}
           >
-            Actions <ExpandMore />
+            Actions
           </Button>
           <Menu
             anchorEl={anchorActionEl}
@@ -1227,7 +1263,13 @@ const ReceivingTicket = ({
                     f.hasOwnProperty('returnTicketId') ||
                     !f.hasOwnProperty('loadingTicketId') ||
                     [INVENTORY_STATUS.lost].includes(f.status) ||
-                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.notApplied].includes(f.status)
+                    ![
+                      INVENTORY_STATUS.inUse,
+                      INVENTORY_STATUS.scrap,
+                      INVENTORY_STATUS.needRepair,
+                      INVENTORY_STATUS.needRecert,
+                      INVENTORY_STATUS.notApplied
+                    ].includes(f.status)
                 )
               }
               onClick={() => {
@@ -1239,8 +1281,8 @@ const ReceivingTicket = ({
             </MenuItem>
 
             {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                ?.length === selectedRecords?.length ? (
+            selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
+              ?.length === selectedRecords?.length ? (
               <MenuItem
                 onClick={() => {
                   setShowRemoveAssetFromReceivingTicketDialog(true);
@@ -1265,8 +1307,14 @@ const ReceivingTicket = ({
                     f.hasOwnProperty('receivingTicketId') ||
                     f.hasOwnProperty('returnTicketId') ||
                     [INVENTORY_STATUS.lost].includes(f.status) ||
-                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair,
-                    INVENTORY_STATUS.needRecert, INVENTORY_STATUS.notApplied].includes(f.status)
+                    ![
+                      INVENTORY_STATUS.inUse,
+                      INVENTORY_STATUS.reserved,
+                      INVENTORY_STATUS.scrap,
+                      INVENTORY_STATUS.needRepair,
+                      INVENTORY_STATUS.needRecert,
+                      INVENTORY_STATUS.notApplied
+                    ].includes(f.status)
                 )
               }
             >
@@ -1276,7 +1324,10 @@ const ReceivingTicket = ({
             <MenuItem
               disabled={
                 selectedRecords?.length === 0 ||
-                selectedRecords?.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length !== selectedRecords?.length ||
+                selectedRecords?.filter(
+                  (e: any) =>
+                    e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.indTransit
+                )?.length !== selectedRecords?.length ||
                 anchorActionEl === null
               }
               onClick={() => {
@@ -1290,7 +1341,7 @@ const ReceivingTicket = ({
             <MenuItem
               onClick={() => {
                 closeActions();
-                handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier)
+                handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier);
               }}
               disabled={
                 selectedRecords.length === 0 ||
@@ -1320,51 +1371,59 @@ const ReceivingTicket = ({
             </MenuItem>
 
             {permissions?.repairJob?.isCreate &&
-              selectedRecords.length &&
-              selectedRecords?.filter(
-                (f) =>
-                  ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    f.status === INVENTORY_STATUS.scrap) &&
-                  [
-                    INVENTORY_STATUS.underReview,
-                    INVENTORY_STATUS.scrap,
-                    INVENTORY_STATUS.available,
-                    INVENTORY_STATUS.needRecert,
-                    INVENTORY_STATUS.needRepair
-                  ].includes(f.status) &&
-                  !f.subleaseAsset &&
-                  checkUniqWarehouse()
-              )?.length === selectedRecords?.length &&
-              !isOffline ? (
-              <MenuItem onClick={() => {
-                closeActions();
-                setShowRepairJobDialog(true)
-              }}>Create Repair Job</MenuItem>
+            selectedRecords.length &&
+            selectedRecords?.filter(
+              (f) =>
+                ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  f.status === INVENTORY_STATUS.scrap) &&
+                [
+                  INVENTORY_STATUS.underReview,
+                  INVENTORY_STATUS.scrap,
+                  INVENTORY_STATUS.available,
+                  INVENTORY_STATUS.needRecert,
+                  INVENTORY_STATUS.needRepair
+                ].includes(f.status) &&
+                !f.subleaseAsset &&
+                checkUniqWarehouse()
+            )?.length === selectedRecords?.length &&
+            !isOffline ? (
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setShowRepairJobDialog(true);
+                }}
+              >
+                Create Repair Job
+              </MenuItem>
             ) : null}
 
             {permissions?.repairOrder?.isCreate &&
-              selectedRecords.length &&
-              selectedRecords?.filter(
-                (f) =>
-                  ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    f.status === INVENTORY_STATUS.scrap) &&
-                  [
-                    INVENTORY_STATUS.underReview,
-                    INVENTORY_STATUS.scrap,
-                    INVENTORY_STATUS.available,
-                    INVENTORY_STATUS.needRecert,
-                    INVENTORY_STATUS.needRepair
-                  ].includes(f.status) &&
-                  !f.subleaseAsset &&
-                  checkUniqWarehouse()
-              )?.length === selectedRecords?.length &&
-              !isOffline ? (
-              <MenuItem onClick={() => {
-                closeActions();
-                setShowRepairOrderDialog(true)
-              }}>Create Repair Order</MenuItem>
+            selectedRecords.length &&
+            selectedRecords?.filter(
+              (f) =>
+                ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  f.status === INVENTORY_STATUS.scrap) &&
+                [
+                  INVENTORY_STATUS.underReview,
+                  INVENTORY_STATUS.scrap,
+                  INVENTORY_STATUS.available,
+                  INVENTORY_STATUS.needRecert,
+                  INVENTORY_STATUS.needRepair
+                ].includes(f.status) &&
+                !f.subleaseAsset &&
+                checkUniqWarehouse()
+            )?.length === selectedRecords?.length &&
+            !isOffline ? (
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setShowRepairOrderDialog(true);
+                }}
+              >
+                Create Repair Order
+              </MenuItem>
             ) : null}
 
             {/* <MenuItem
@@ -1402,13 +1461,13 @@ const ReceivingTicket = ({
             </MenuItem> */}
 
             {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length ===
-              selectedRecords?.length ? (
+            selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
+              ?.length === selectedRecords?.length ? (
               <Fragment>
                 <MenuItem
                   onClick={() => {
                     closeActions();
-                    setShowConformationRevertTicket(true)
+                    setShowConformationRevertTicket(true);
                   }}
                 >
                   Revert Line Items
@@ -1416,7 +1475,7 @@ const ReceivingTicket = ({
                 <MenuItem
                   onClick={() => {
                     closeActions();
-                    setShowConformationCancleTicket(true)
+                    setShowConformationCancleTicket(true);
                   }}
                 >
                   Cancel Receiving Ticket
@@ -1425,24 +1484,25 @@ const ReceivingTicket = ({
             ) : null}
 
             {selectedRecords?.filter(
-              (f) => f.type === 'Product'
-                && f.hasOwnProperty('loadingTicketId')
-                && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
-                && Number(f?.consumeQty) + Number(f?.returnQty) < Number(f?.qty)
+              (f) =>
+                f.type === 'Product' &&
+                f.hasOwnProperty('loadingTicketId') &&
+                f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
+                Number(f?.consumeQty) + Number(f?.returnQty) < Number(f?.qty)
             ).length === selectedRecords.length && (
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    if (selectedRecords?.length === 1) {
-                      setShowConformationConsume({ open: true, type: 'add' });
-                    } else {
-                      setShowConformationConsumeMultiple(true);
-                    }
-                  }}
-                >
-                  {RENTAL_INTERNAL_ASSET_STATUS.consumed}
-                </MenuItem>
-              )}
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  if (selectedRecords?.length === 1) {
+                    setShowConformationConsume({ open: true, type: 'add' });
+                  } else {
+                    setShowConformationConsumeMultiple(true);
+                  }
+                }}
+              >
+                {RENTAL_INTERNAL_ASSET_STATUS.consumed}
+              </MenuItem>
+            )}
             {selectedRecords.length === 1 &&
               selectedRecords?.filter(
                 (f) =>
@@ -1566,7 +1626,7 @@ const ReceivingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -1588,10 +1648,9 @@ const ReceivingTicket = ({
               refreshGrid={fetchRecords}
               actionWidth={80}
               rowClassRules={{
-                "light-grey-data-row":
-                  function (params) {
-                    return params?.data?.isReplaced;
-                  },
+                'light-grey-data-row': function (params) {
+                  return params?.data?.isReplaced;
+                }
               }}
             />
           )
@@ -1865,7 +1924,7 @@ const ReceivingTicket = ({
           open={openDateDialog.open}
           loading={openDateDialog.loading}
           onClose={() => {
-            setOpenDateDialog({ open: false, data: null, loading: false })
+            setOpenDateDialog({ open: false, data: null, loading: false });
           }}
           handleSubmit={handleSubmitChangeDates}
         />

@@ -71,13 +71,7 @@ function DemandOrderHeader(props) {
   };
 
   let toggleInner = options && (
-    <ToggleButtonGroup
-      size="small"
-      className=" toggle-button-layout"
-      value={filter}
-      exclusive
-      onChange={handleFilter}
-    >
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
         return (
           <ToggleButton value={k.key} key={index}>
@@ -91,9 +85,7 @@ function DemandOrderHeader(props) {
   return (
     <Grid className={styles.filter_side_container} container>
       <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-        <div className="d-flex align-items-center">
-          
-        </div>
+        <div className="d-flex align-items-center"></div>
         {isMobile && (
           <>
             <Grid style={{ display: 'inline-flex' }}>
@@ -120,7 +112,7 @@ function DemandOrderHeader(props) {
                 dispatch={dispatch}
               />
               <Button
-               onClick={handleOpen}
+                onClick={handleOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
@@ -199,8 +191,9 @@ function DemandOrderHeader(props) {
                   onClick={openActions}
                   className={isMobile ? 'mobile_button' : styles.action_submit_btn}
                   aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
                 >
-                  {isMobile ? '' : 'Actions'} <ExpandMore />
+                  {isMobile ? '' : 'Actions'}
                 </Button>
                 <Menu
                   anchorEl={anchorEl}

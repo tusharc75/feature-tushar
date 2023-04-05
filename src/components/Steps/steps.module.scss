@@ -1,5 +1,6 @@
 .gradient {
   position: relative;
+  padding-bottom: 15px;
   &::before {
     content: '';
     position: absolute;
@@ -7,7 +8,7 @@
     top: -30px;
     left: 0;
     right: 0;
-    height: calc(100% + 90px);
+    height: calc(100% + 150px);
     background: linear-gradient(180deg, #ffffff 0%, #e1f5f4 100%);
     pointer-events: none;
     z-index: -1;
@@ -64,9 +65,11 @@
   padding: 15px 10px 13px;
   text-align: center;
   .stepIcon {
-    img {
+    svg {
       margin-inline: auto;
       display: block;
+      width: 28px;
+      height: 28px;
     }
     margin-bottom: 16px;
   }
@@ -98,9 +101,8 @@
 .inActiveStep {
   background-color: #f4f4f4;
   .stepIcon {
-    img {
-      -webkit-filter: saturate(0);
-      filter: saturate(0);
+    svg {
+      color: gray;
     }
   }
 }

@@ -28,15 +28,7 @@ import styles from '../../Leads/Header.module.scss';
 import { genrateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
-const Productpackage = ({
-  subleaseData,
-  setNextStep,
-  fetchData,
-  isIssued,
-  renderedFrom,
-  allowedToEdit,
-  stepFullScreen
-}) => {
+const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -74,9 +66,9 @@ const Productpackage = ({
     var data = await fetch_sublease_product_fields(subleaseData.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = genrateCustomTableColumns(data, subleaseData?.currency, renderedFrom);
-    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay'
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
     let coloum: any = [
       {
@@ -144,7 +136,7 @@ const Productpackage = ({
       },
       {
         accessor: 'description',
-        Header: "Description",
+        Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
@@ -460,8 +452,9 @@ const Productpackage = ({
                   onClick={openActions}
                   className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                   aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
                 >
-                  {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                  {isMobile && !isTablet ? '' : 'Actions'}
                 </Button>
                 <Menu
                   anchorEl={anchorEl}

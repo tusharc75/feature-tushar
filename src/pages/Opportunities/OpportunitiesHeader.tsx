@@ -3,25 +3,14 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import { AddOutlined } from '@material-ui/icons';
-import {
-  Box,
-  Grid,
-  MenuItem,
-  Button,
-  Menu,
-} from '@material-ui/core';
+import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
 import { isMobile, isTablet } from 'react-device-detect';
-import {
-  MdAdd,
-  MdFilterList,
-  MdSort,
-} from 'react-icons/all';
+import { MdAdd, MdFilterList, MdSort } from 'react-icons/all';
 import routes from 'src/components/Helpers/Routes';
-
 
 function OpportunitiesHeader(props) {
   const ref = useRef(null);
@@ -99,7 +88,6 @@ function OpportunitiesHeader(props) {
       handleClose();
     }
   };
-
 
   let toggleInner = options && (
     <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
@@ -213,8 +201,9 @@ function OpportunitiesHeader(props) {
                   onClick={openActions}
                   className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                   aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
                 >
-                  {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                  {isMobile && !isTablet ? '' : 'Actions'}
                 </Button>
                 <Menu
                   anchorEl={anchorEl}

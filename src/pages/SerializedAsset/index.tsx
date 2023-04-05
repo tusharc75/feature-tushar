@@ -169,7 +169,11 @@ const SerializedAsset = () => {
           if (e.field === 'assetNumber') {
             e.cellRenderer = 'assetNumberRenderer';
             e.cellStyle = (params) => {
-              if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
+              if (
+                [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(
+                  params?.data?.status
+                )
+              ) {
                 return { backgroundColor: COLOUR_MASTER.lostAssets.background };
               }
               // if (params.data?.recertDate) {
@@ -194,8 +198,8 @@ const SerializedAsset = () => {
           }
         });
 
-        columns.push({ field: 'ownerType', headerName: 'Actual Owner Type', show: true, disabled: true, cellRenderer: 'commonRenderer' })
-        columns.push({ field: 'owner', headerName: 'Actual Owner', show: true, disabled: true, cellRenderer: 'commonRenderer' })
+        columns.push({ field: 'ownerType', headerName: 'Actual Owner Type', show: true, disabled: true, cellRenderer: 'commonRenderer' });
+        columns.push({ field: 'owner', headerName: 'Actual Owner', show: true, disabled: true, cellRenderer: 'commonRenderer' });
 
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
@@ -325,7 +329,7 @@ const SerializedAsset = () => {
     axiosInstance()
       .put(`${serializedAsset.api}/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords)
+        removeLocalStorage(localStorageSelectedRecords);
         fetchProductInventory();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -337,12 +341,10 @@ const SerializedAsset = () => {
   };
 
   const handleStatusUpdate = (status) => {
-    const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => (
-      {
-        _id: d._id,
-        currentStatus: d.status
-      }
-    ));
+    const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => ({
+      _id: d._id,
+      currentStatus: d.status
+    }));
     axiosInstance()
       .put(`${serializedAsset.api}/update-status`, {
         assets: ids,
@@ -354,7 +356,7 @@ const SerializedAsset = () => {
         if (gridApi) {
           gridApi.deselectAll();
         }
-        localStorage.removeItem(localStorageSelectedRecords)
+        localStorage.removeItem(localStorageSelectedRecords);
         fetchProductInventory();
         setAnchorEl(null);
         toastConfig.setToastConfig({
@@ -399,10 +401,7 @@ const SerializedAsset = () => {
         </HtmlTooltip>
       ) : (
         <HtmlTooltip title="You do not have permission to clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-          >
+          <IconButton size="small" aria-label="Clone">
             <FileCopyIcon />
           </IconButton>
         </HtmlTooltip>
@@ -422,10 +421,7 @@ const SerializedAsset = () => {
         </HtmlTooltip>
       ) : (
         <HtmlTooltip title="You do not have permission to delete">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-          >
+          <IconButton size="small" aria-label="Clone">
             <DeleteIcon />
           </IconButton>
         </HtmlTooltip>
@@ -458,7 +454,6 @@ const SerializedAsset = () => {
     }
   };
 
-
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -476,7 +471,11 @@ const SerializedAsset = () => {
             isExportAllOrSomeFeature={true}
             total={rowCount}
             recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)].length}
-            ids={[...getLocalStorageArrayData(localStorageSelectedRecords)].length ? [...getLocalStorageArrayData(localStorageSelectedRecords)].map((obj) => obj._id) : []}
+            ids={
+              [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                ? [...getLocalStorageArrayData(localStorageSelectedRecords)].map((obj) => obj._id)
+                : []
+            }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchProductInventory();
@@ -491,7 +490,7 @@ const SerializedAsset = () => {
             <Grid item xs={12} sm={12} md={8} className="d-flex align-items-center gap-1">
               <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
               <span className="listingHeader">{routes.serializedAsset?.title} </span>
-              {(warehouse || warehouse || fromPurchaseOrder?.pOId) ?
+              {warehouse || warehouse || fromPurchaseOrder?.pOId ? (
                 <Fragment>
                   {warehouse && (
                     <Chip
@@ -533,7 +532,8 @@ const SerializedAsset = () => {
                       />
                     </Fragment>
                   )}
-                </Fragment> :
+                </Fragment>
+              ) : (
                 <Fragment>
                   <Autocomplete
                     style={{ width: '250px' }}
@@ -625,7 +625,8 @@ const SerializedAsset = () => {
                       label="Sublease Assets"
                     />
                   )}
-                </Fragment>}
+                </Fragment>
+              )}
             </Grid>
             <Grid md={4} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -654,17 +655,19 @@ const SerializedAsset = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {(permissions?.serializedAsset?.isDelete || permissions?.serializedAsset?.isUpdate) && (<Button
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
-                    aria-controls="action-menu"
-                  >
-                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                  </Button>
+                  {(permissions?.serializedAsset?.isDelete || permissions?.serializedAsset?.isUpdate) && (
+                    <Button
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
+                      aria-controls="action-menu"
+                      endIcon={<ExpandMore />}
+                    >
+                      {isMobile && !isTablet ? '' : 'Actions'}
+                    </Button>
                   )}
                   <Menu
                     anchorEl={anchorEl}
@@ -687,56 +690,91 @@ const SerializedAsset = () => {
                     >
                       Delete
                     </MenuItem>
-                    {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && [INVENTORY_STATUS.available].map((status) => (
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          handleStatusUpdate(status);
-                        }}
-                        disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => [INVENTORY_STATUS.new, INVENTORY_STATUS.available, INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(o.status)).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
-                      >
-                        {`Status Change - ${status}`}
-                      </MenuItem>
-                    ))}
-                    {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && [...getLocalStorageArrayData(localStorageSelectedRecords)]?.length &&
-                      <>
+                    {permissions?.serializedAsset?.isUpdate &&
+                      allowUpdateStatus &&
+                      [INVENTORY_STATUS.available].map((status) => (
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(INVENTORY_STATUS.needRepair);
+                            handleStatusUpdate(status);
                           }}
-                          disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![INVENTORY_STATUS.needRepair].includes(o.status)).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
+                          disabled={
+                            [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) =>
+                              [INVENTORY_STATUS.new, INVENTORY_STATUS.available, INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(
+                                o.status
+                              )
+                            ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                              ? false
+                              : true
+                          }
                         >
-                          {`Status Change - ${INVENTORY_STATUS.needRepair}`}
+                          {`Status Change - ${status}`}
                         </MenuItem>
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            handleStatusUpdate(INVENTORY_STATUS.needRecert);
-                          }}
-                          disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![INVENTORY_STATUS.needRecert].includes(o.status)).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
-                        >
-                          {`Status Change - ${INVENTORY_STATUS.needRecert}`}
-                        </MenuItem>
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            handleStatusUpdate(INVENTORY_STATUS.scrap);
-                          }}
-                          disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![INVENTORY_STATUS.scrap].includes(o.status)).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
-                        >
-                          {`Status Change - ${INVENTORY_STATUS.scrap}`}
-                        </MenuItem>
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            handleStatusUpdate(INVENTORY_STATUS.lost);
-                          }}
-                          disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![INVENTORY_STATUS.lost].includes(o.status)).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
-                        >
-                          {`Status Change - ${INVENTORY_STATUS.lost}`}
-                        </MenuItem>
-                      </>}
+                      ))}
+                    {permissions?.serializedAsset?.isUpdate &&
+                      allowUpdateStatus &&
+                      [...getLocalStorageArrayData(localStorageSelectedRecords)]?.length && (
+                        <>
+                          <MenuItem
+                            onClick={() => {
+                              closeActions();
+                              handleStatusUpdate(INVENTORY_STATUS.needRepair);
+                            }}
+                            disabled={
+                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter(
+                                (o) => ![INVENTORY_STATUS.needRepair].includes(o.status)
+                              ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                                ? false
+                                : true
+                            }
+                          >
+                            {`Status Change - ${INVENTORY_STATUS.needRepair}`}
+                          </MenuItem>
+                          <MenuItem
+                            onClick={() => {
+                              closeActions();
+                              handleStatusUpdate(INVENTORY_STATUS.needRecert);
+                            }}
+                            disabled={
+                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter(
+                                (o) => ![INVENTORY_STATUS.needRecert].includes(o.status)
+                              ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                                ? false
+                                : true
+                            }
+                          >
+                            {`Status Change - ${INVENTORY_STATUS.needRecert}`}
+                          </MenuItem>
+                          <MenuItem
+                            onClick={() => {
+                              closeActions();
+                              handleStatusUpdate(INVENTORY_STATUS.scrap);
+                            }}
+                            disabled={
+                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![INVENTORY_STATUS.scrap].includes(o.status))
+                                .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                                ? false
+                                : true
+                            }
+                          >
+                            {`Status Change - ${INVENTORY_STATUS.scrap}`}
+                          </MenuItem>
+                          <MenuItem
+                            onClick={() => {
+                              closeActions();
+                              handleStatusUpdate(INVENTORY_STATUS.lost);
+                            }}
+                            disabled={
+                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![INVENTORY_STATUS.lost].includes(o.status))
+                                .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                                ? false
+                                : true
+                            }
+                          >
+                            {`Status Change - ${INVENTORY_STATUS.lost}`}
+                          </MenuItem>
+                        </>
+                      )}
                   </Menu>
                 </Grid>
               </Box>
@@ -799,45 +837,41 @@ const SerializedAsset = () => {
               refreshGrid={fetchProductInventory}
               showOnlyShowFilteredRecordSwitch={true}
               rowClassRules={{
-                "light-red-data-row":
-                  function (params) {
-                    if (params.data?.recertDate) {
-                      var a = moment(params.data?.recertDate);
-                      var b = moment();
-                      const days = a.diff(b, 'days')
-                      if (days < 15 && days >= 0) {
-                        return true;
-                      }
-                      else if (days < 0) {
-                        return true;
-                      }
+                'light-red-data-row': function (params) {
+                  if (params.data?.recertDate) {
+                    var a = moment(params.data?.recertDate);
+                    var b = moment();
+                    const days = a.diff(b, 'days');
+                    if (days < 15 && days >= 0) {
+                      return true;
+                    } else if (days < 0) {
+                      return true;
                     }
-                    return false
-                  },
-                "light-yellow-data-row":
-                  function (params) {
-                    if (params.data?.recertDate) {
-                      var a = moment(params.data?.recertDate);
-                      var b = moment();
-                      const days = a.diff(b, 'days')
-                      if (days < 30 && days >= 15) {
-                        return true;
-                      }
+                  }
+                  return false;
+                },
+                'light-yellow-data-row': function (params) {
+                  if (params.data?.recertDate) {
+                    var a = moment(params.data?.recertDate);
+                    var b = moment();
+                    const days = a.diff(b, 'days');
+                    if (days < 30 && days >= 15) {
+                      return true;
                     }
-                    return false
-                  },
-                "light-green-data-row":
-                  function (params) {
-                    if (params.data?.recertDate) {
-                      var a = moment(params.data?.recertDate);
-                      var b = moment();
-                      const days = a.diff(b, 'days')
-                      if (days <= 60 && days >= 30) {
-                        return true;
-                      }
+                  }
+                  return false;
+                },
+                'light-green-data-row': function (params) {
+                  if (params.data?.recertDate) {
+                    var a = moment(params.data?.recertDate);
+                    var b = moment();
+                    const days = a.diff(b, 'days');
+                    if (days <= 60 && days >= 30) {
+                      return true;
                     }
-                    return false
-                  },
+                  }
+                  return false;
+                }
               }}
               showFilters={true}
               resource={sidebarResource.serializedAsset}
@@ -864,11 +898,12 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
-            setShowDeleteConfirmBox(false)
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

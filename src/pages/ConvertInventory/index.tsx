@@ -24,14 +24,14 @@ import { SiConvertio } from 'react-icons/si';
 import CachedIcon from '@material-ui/icons/Cached';
 
 const ConvertInventory = () => {
-
   const renderedFrom = camelCase(routes?.inventoryToAsset.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
   const [plantId, setPlantId] = useState(null);
   const [plantOptions, setPlantOptions] = useState([]);
   const [frameworkComponents, setFrameworkComponents] = useState({});
@@ -70,9 +70,7 @@ const ConvertInventory = () => {
     axiosInstance()
       .get(`/warehouse`)
       .then(({ data: { data } }) => {
-        setPlantOptions([
-          ...data
-        ]);
+        setPlantOptions([...data]);
         if (plantId === null && data?.length) {
           setPlantId(data[0]._id);
         }
@@ -98,7 +96,7 @@ const ConvertInventory = () => {
         e.show = false;
       }
     });
-    columns.push({ field: "availableInventory", headerName: "Available Inventory", show: true, cellRenderer: "commonRenderer" })
+    columns.push({ field: 'availableInventory', headerName: 'Available Inventory', show: true, cellRenderer: 'commonRenderer' });
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     setFrameworkComponents({
       ...tempFrameworkComponent,
@@ -287,8 +285,9 @@ const ConvertInventory = () => {
                     className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                     onClick={openActions}
                     aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'}
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -307,7 +306,7 @@ const ConvertInventory = () => {
                         closeActions();
                         setInventory({
                           open: true,
-                          product: getLocalStorageArrayData(`${localStorageSelectedRecords}`),
+                          product: getLocalStorageArrayData(`${localStorageSelectedRecords}`)
                         });
                       }}
                     >

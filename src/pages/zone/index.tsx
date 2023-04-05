@@ -35,7 +35,6 @@ import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 
 const Zone = () => {
-
   const renderedFrom = camelCase(routes?.zone.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -399,8 +398,9 @@ const Zone = () => {
                       disabled={selectedRecords.length ? false : true}
                       aria-controls="action-menu"
                       className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      endIcon={<ExpandMore />}
                     >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      {isMobile && !isTablet ? '' : 'Actions'}
                     </Button>
                   )}
                   <Menu

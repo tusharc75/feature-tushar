@@ -184,8 +184,9 @@ const TransferAssetViews = (props) => {
               setColorInfo(!colorInfo);
             }}
             aria-controls="action-menu"
+            endIcon={colorInfo ? <ExpandLess /> : <ExpandMore />}
           >
-            {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
+            {'Color Info'}
           </Button>
         </Box>
         {colorInfo && (

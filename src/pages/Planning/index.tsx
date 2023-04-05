@@ -37,7 +37,6 @@ import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import queryString from 'query-string';
 
 const Planning = () => {
-
   const PlanningType = [
     {
       key: `All ${routes?.planning.title}`,
@@ -59,16 +58,17 @@ const Planning = () => {
     state: { permissions, selectedEntity, user }
   }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
   const { type }: any = queryString.parse(history.location.search);
 
-  const [selectedPlanningType, setSelectedPlanningType] = useState(history.location.state)
+  const [selectedPlanningType, setSelectedPlanningType] = useState(history.location.state);
   const [planningId, setPlanningId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [showConverConfirmBox, setShowConverConfirmBox] = useState({ open: false, id: null, planningNumber: "" });
+  const [showConverConfirmBox, setShowConverConfirmBox] = useState({ open: false, id: null, planningNumber: '' });
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
@@ -211,10 +211,11 @@ const Planning = () => {
   };
 
   const handleConvert = () => {
-    axiosInstance().post(`${routes?.planning?.path}/convert-planning`, { id: showConverConfirmBox?.id })
+    axiosInstance()
+      .post(`${routes?.planning?.path}/convert-planning`, { id: showConverConfirmBox?.id })
       .then(({ data }) => {
-        setShowConverConfirmBox({ open: false, id: null, planningNumber: "" });
-        fetchData()
+        setShowConverConfirmBox({ open: false, id: null, planningNumber: '' });
+        fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -224,11 +225,11 @@ const Planning = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      <HtmlTooltip title={permissions?.planning?.isCreate ? "Clone" : "You do not have permission to clone/create"}>
+      <HtmlTooltip title={permissions?.planning?.isCreate ? 'Clone' : 'You do not have permission to clone/create'}>
         <span>
           <IconButton
             disabled={permissions?.planning?.isCreate ? false : true}
@@ -239,45 +240,47 @@ const Planning = () => {
               setOpen({ open: true, isClone: true });
             }}
           >
-            <FileCopyIcon fontSize="small" color={permissions?.planning?.isCreate ? "primary" : "disabled"} />
+            <FileCopyIcon fontSize="small" color={permissions?.planning?.isCreate ? 'primary' : 'disabled'} />
           </IconButton>
         </span>
       </HtmlTooltip>
-      {params?.data?.status === "Closed" ?
+      {params?.data?.status === 'Closed' ? (
         <HtmlTooltip title={`View Converted ${params?.data?.type}`}>
           <span>
             <IconButton
               aria-label="Convert"
               onClick={() => {
-                if (params?.data?.type === "Rental Job") {
-                  history.push(`${routes.rentalManagementDetail.path}/${params?.data?.rentalJobId}`)
+                if (params?.data?.type === 'Rental Job') {
+                  history.push(`${routes.rentalManagementDetail.path}/${params?.data?.rentalJobId}`);
                 }
-                if (params?.data?.type === "Sales Order") {
-                  history.push(`${routes.salesOrderDetail.path}/${params?.data?.salesOrderId}`)
+                if (params?.data?.type === 'Sales Order') {
+                  history.push(`${routes.salesOrderDetail.path}/${params?.data?.salesOrderId}`);
                 }
-                if (params?.data?.type === "Field Service Order") {
-                  history.push(`${routes.serviceOrderDetail.path}/${params?.data?.serviceOrderId}`)
+                if (params?.data?.type === 'Field Service Order') {
+                  history.push(`${routes.serviceOrderDetail.path}/${params?.data?.serviceOrderId}`);
                 }
               }}
             >
-              <VisibilityIcon fontSize="small" color={"primary"} />
+              <VisibilityIcon fontSize="small" color={'primary'} />
             </IconButton>
           </span>
         </HtmlTooltip>
-        : <HtmlTooltip title={permissions?.planning?.isUpdate ? "Convert" : "You do not have permission to convert"}>
+      ) : (
+        <HtmlTooltip title={permissions?.planning?.isUpdate ? 'Convert' : 'You do not have permission to convert'}>
           <span>
             <IconButton
               disabled={permissions?.planning?.isUpdate ? false : true}
               aria-label="Convert"
               onClick={() => {
-                setShowConverConfirmBox({ open: true, id: params?.data?._id, planningNumber: params?.data?.planningNumber })
+                setShowConverConfirmBox({ open: true, id: params?.data?._id, planningNumber: params?.data?.planningNumber });
               }}
             >
-              <AutorenewIcon fontSize="small" color={permissions?.planning?.isUpdate ? "primary" : "disabled"} />
+              <AutorenewIcon fontSize="small" color={permissions?.planning?.isUpdate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
-        </HtmlTooltip>}
-      <HtmlTooltip title={params?.data?.canDelete ? "Delete" : "You do not have permission to delete"}>
+        </HtmlTooltip>
+      )}
+      <HtmlTooltip title={params?.data?.canDelete ? 'Delete' : 'You do not have permission to delete'}>
         <span>
           <IconButton
             disabled={params?.data?.canDelete ? false : true}
@@ -288,7 +291,7 @@ const Planning = () => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon fontSize="small" color={params?.data?.canDelete ? "error" : "disabled"} />
+            <DeleteIcon fontSize="small" color={params?.data?.canDelete ? 'error' : 'disabled'} />
           </IconButton>
         </span>
       </HtmlTooltip>
@@ -326,9 +329,9 @@ const Planning = () => {
 
   const onTypeChange = (event, type) => {
     const value = PlanningType.find((d) => d.key === type).value;
-    setSelectedType(value)
+    setSelectedType(value);
     history.push(`?type=${value}`);
-  }
+  };
 
   useEffect(() => {
     fetchData();
@@ -384,24 +387,26 @@ const Planning = () => {
                 })}
               </ToggleButtonGroup>
               <Box ml={1}>
-                <ToggleButtonGroup size="small" >
-                  <ToggleButton onClick={() => {
-                    history.push(`${routes.rentalPlanningCalendar.path}`)
-                  }}>
+                <ToggleButtonGroup size="small">
+                  <ToggleButton
+                    onClick={() => {
+                      history.push(`${routes.rentalPlanningCalendar.path}`);
+                    }}
+                  >
                     <span>{`Calendar`}</span>
                   </ToggleButton>
                 </ToggleButtonGroup>
               </Box>
-              {selectedPlanningType &&
+              {selectedPlanningType && (
                 <Chip
                   className="ml-3"
                   color="primary"
                   label={'Type: Rental Job'}
                   onDelete={() => {
-                    setSelectedPlanningType(null)
+                    setSelectedPlanningType(null);
                   }}
                 />
-              }
+              )}
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -441,8 +446,9 @@ const Planning = () => {
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
                         className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        endIcon={<ExpandMore />}
                       >
-                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                        {isMobile && !isTablet ? '' : 'Actions'}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -556,7 +562,7 @@ const Planning = () => {
             open={true}
             message={`Are you sure you want to convert planning  ${showConverConfirmBox?.planningNumber} ?`}
             onClose={() => {
-              setShowConverConfirmBox({ open: false, id: null, planningNumber: "" })
+              setShowConverConfirmBox({ open: false, id: null, planningNumber: '' });
             }}
             onOk={handleConvert}
           />

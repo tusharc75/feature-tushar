@@ -406,8 +406,9 @@ const ServiceMaster = () => {
                     onClick={openActions}
                     aria-controls="action-menu"
                     disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
+                    endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'}
                   </Button>
                   <Menu
                     anchorEl={anchorEl}

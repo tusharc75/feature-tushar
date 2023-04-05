@@ -221,6 +221,22 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
       });
   }
 
+  const handleSendForDOA = () => {
+    axiosInstance()
+      .post(`/doa-request/create/${quotationData._id}?version=${version}`)
+      .then(({ data }) => {
+        fetchQuotationData(version, false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'DOA Sended Sucessfully'
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }
+
   return (
     <Fragment>
       <Box pb={2} display="flex" justifyContent="space-between">
@@ -262,6 +278,19 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
               }}
             >
               Send to Customer
+            </Button>
+          </Box>
+        }
+        {currentStep === 'DOA' &&
+          <Box display="flex">
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              disabled={sentToCustomer}
+              onClick={handleSendForDOA}
+            >
+              Send for DOA
             </Button>
           </Box>
         }

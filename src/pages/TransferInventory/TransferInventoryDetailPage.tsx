@@ -16,6 +16,7 @@ import { ACTIVITY_RESOURCE, transferInventory } from 'src/constants/helpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
 import Steps from 'src/pages/RentalManagement/Steps';
+import Steps2, { getIndex } from 'src/components/Steps';
 import { MdEdit } from 'react-icons/md';
 import { transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import TabPanel from 'src/components/TabPanel';
@@ -31,7 +32,6 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 const TransferInventoryDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferInventory.title);
   const toastConfig = useContext(CustomToastContext);
-
 
   const { id } = useParams();
   const history = useHistory();
@@ -61,6 +61,10 @@ const TransferInventoryDetailPage = () => {
 
   const [canReceive, setCanReceive] = useState(false);
   const [canLoad, setCanLoad] = useState(false);
+
+  const transferInventoryStepNames = React.useMemo(() => {
+    return transferInventorySteps.map((item) => item.name);
+  }, [transferInventorySteps]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -141,7 +145,7 @@ const TransferInventoryDetailPage = () => {
             // if (!isSerializedAssetsStep) {
             //   steps = steps?.filter((e) => e !== "Serialized Assets")
             // }
-            steps = steps?.filter((e) => e !== 'Serialized Assets');
+            steps = steps?.filter((e) => e.name !== 'Serialized Assets');
             setTransferInvSteps(steps);
             getRessourceFields();
             setHeadingLabel(transferData.transferNumber);
@@ -218,9 +222,9 @@ const TransferInventoryDetailPage = () => {
   const updateProcessStatus = (step: number) => {
     axiosInstance()
       .put(`${routes.transferInventory.path}/${id}/process-status`, {
-        processStatus: transferInvSteps[step]
+        processStatus: transferInvSteps[step].name
       })
-      .then(() => { })
+      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -296,7 +300,7 @@ const TransferInventoryDetailPage = () => {
         <TabPanel value={tabValue} index={1}>
           {transferInventoryData && (
             <Box>
-              <Steps
+              <Steps2
                 steps={transferInvSteps}
                 currentStep={currentStep}
                 setCurrentStep={setCurrentStep}
@@ -306,8 +310,8 @@ const TransferInventoryDetailPage = () => {
                 isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
                 setStepFullScreen={() => setStepFullScreen(true)}
               />
-              <ContentFullScreen title={transferInvSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                {transferInvSteps[currentStep] === 'Add Products' && (
+              <ContentFullScreen title={transferInventoryStepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                {transferInventoryStepNames[currentStep] === 'Add Products' && (
                   <Products
                     transferInventoryData={transferInventoryData}
                     setNextStep={setNextStep}
@@ -317,7 +321,7 @@ const TransferInventoryDetailPage = () => {
                     fetchTransferInventoryData={fetchTransferInventoryData}
                   />
                 )}
-                {transferInvSteps[currentStep] === 'Serialized Assets' && (
+                {transferInventoryStepNames[currentStep] === 'Serialized Assets' && (
                   <SerializesAssets
                     transferInventoryData={transferInventoryData}
                     setNextStep={setNextStep}
@@ -327,7 +331,7 @@ const TransferInventoryDetailPage = () => {
                     canLoad={canLoad}
                   />
                 )}
-                {transferInvSteps[currentStep] === 'Loading Ticket' && (
+                {transferInventoryStepNames[currentStep] === 'Loading Ticket' && (
                   <LoadingTicket
                     transferInventoryData={transferInventoryData}
                     updateStatus={updateStatus}

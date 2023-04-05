@@ -111,7 +111,7 @@ const LoadingTicket = ({
   }, []);
 
   const fetchRecords = async () => {
-    setLoadingData(true)
+    setLoadingData(true);
     setNextStep(false);
     try {
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
@@ -139,7 +139,7 @@ const LoadingTicket = ({
           warehouseId: u?.warehouse?.optionValue,
           currentOwner: u?.currentOwner,
           currentLocation: u?.currentLocation?.optionValue,
-          rentalAssetStatus: u?.status,
+          rentalAssetStatus: u?.status
         }));
 
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id);
@@ -149,36 +149,42 @@ const LoadingTicket = ({
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
-        productAssets = productAssets?.filter((e) => e.replace != true).map((d) => ({
-          ...d.inventory,
-          isReplaced: d.isReplaced,
-          replaceReason: d.replaceReason,
-          replaceAsset: d?.replaceAsset ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset : "",
-          description: d?.product?.productDescription,
-          rentalAssetStatus: d?.status,
-        })).map((u) => ({
-          ...u,
-          type: 'Asset',
-          displayType: 'Asset',
-          qty: 1,
-          productName: u?.product?.optionLabel,
-          productId: u?.product?.optionValue,
-          warehouse: u?.warehouse?.optionLabel,
-          warehouseId: u?.warehouse?.optionValue,
-          currentOwner: u?.currentOwner,
-          currentLocation: u?.currentLocation?.optionValue,
-        }));
+        productAssets = productAssets
+          ?.filter((e) => e.replace != true)
+          .map((d) => ({
+            ...d.inventory,
+            isReplaced: d.isReplaced,
+            replaceReason: d.replaceReason,
+            replaceAsset: d?.replaceAsset
+              ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
+              : '',
+            description: d?.product?.productDescription,
+            rentalAssetStatus: d?.status
+          }))
+          .map((u) => ({
+            ...u,
+            type: 'Asset',
+            displayType: 'Asset',
+            qty: 1,
+            productName: u?.product?.optionLabel,
+            productId: u?.product?.optionValue,
+            warehouse: u?.warehouse?.optionLabel,
+            warehouseId: u?.warehouse?.optionValue,
+            currentOwner: u?.currentOwner,
+            currentLocation: u?.currentLocation?.optionValue
+          }));
 
-        const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`);
+        const result = await axiosInstance().get(
+          `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+        );
         deliveryTicketList = result?.data?.data;
 
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
         material = productResponse?.data?.data?.material;
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
 
-        const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`)
-        invoiceData = invoiceResponse?.data?.data?.material || []
-
+        const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`);
+        invoiceData = invoiceResponse?.data?.data?.material || [];
       }
 
       const loadingTicketProducts = [];
@@ -210,10 +216,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDescription || ''
-                : element.type === 'package'
-                  ? element?.packageDetail?.packageDescription || ''
-                  : '';
+              ? element?.productDetail?.productDescription || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -221,7 +227,10 @@ const LoadingTicket = ({
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
-          obj.status = element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true ? element?.status : "N/A";
+          obj.status =
+            element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true
+              ? element?.status
+              : 'N/A';
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
           obj.loadingTicket = ele?.loadingTicket;
           obj.loadingTicketId = ele?.loadingTicketId;
@@ -239,10 +248,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDescription || ''
-                : element.type === 'package'
-                  ? element?.packageDetail?.packageDescription || ''
-                  : '';
+              ? element?.productDetail?.productDescription || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.assetNumber = element?.productDetail?.productName;
@@ -271,8 +280,10 @@ const LoadingTicket = ({
         d['parentName'] = d?.hasOwnProperty('parentName') && d?.parentName !== '' ? d?.parentName : d?.productName;
         d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.productId;
         d['isChecked'] = false;
-        d['hideSelection'] = [INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status) ||
-          d?.manualStatus === INVENTORY_STATUS.reserved || d?.isReplaced;
+        d['hideSelection'] =
+          [INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status) ||
+          d?.manualStatus === INVENTORY_STATUS.reserved ||
+          d?.isReplaced;
 
         d['isReplaceable'] = true;
         if (invoiceData?.length && invoiceData?.some((e) => isEqual(e._id, d._id))) {
@@ -286,15 +297,17 @@ const LoadingTicket = ({
 
       setUniqueLoadingTicket([...new Set(productAssets.filter((d) => d.loadingTicketId !== undefined).map((d) => d.loadingTicketId))]);
 
-      productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)]
+      productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)];
 
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
-      setTimeout(() => { dispatch({ type: 'loading', loading: false }) }, gridLoadingTimeout);
-      setLoadingData(false)
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+      setLoadingData(false);
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
-      setLoadingData(false)
+      setLoadingData(false);
     }
   };
 
@@ -351,7 +364,9 @@ const LoadingTicket = ({
       )}
       {params?.data?.isReplaced && (
         <Box ml={1}>
-          <HtmlTooltip title={`This Asset has been Replaced by ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}>
+          <HtmlTooltip
+            title={`This Asset has been Replaced by ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}
+          >
             <InfoIcon fontSize="small" color={'primary'} />
           </HtmlTooltip>
         </Box>
@@ -577,40 +592,44 @@ const LoadingTicket = ({
       loadingTicketIds?.forEach((loadingTicketId) => {
         const ele: any = {};
         ele._id = loadingTicketId;
-        ele.products = selectedRecords?.filter((e) => e.loadingTicketId === loadingTicketId && e.type === "Product")?.map((e) => e.productId);
-        ele.assets = selectedRecords?.filter((e) => e.loadingTicketId === loadingTicketId && e.type === "Asset")?.map((e) => e._id);
+        ele.products = selectedRecords?.filter((e) => e.loadingTicketId === loadingTicketId && e.type === 'Product')?.map((e) => e.productId);
+        ele.assets = selectedRecords?.filter((e) => e.loadingTicketId === loadingTicketId && e.type === 'Asset')?.map((e) => e._id);
         data.push(ele);
-      })
-      axiosInstance().put(`${deliveryTicket.api}/revert-partially`, data).then(({ data: { data } }) => {
-        fetchRecords();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Reverted Successfully`
-        });
-      })
+      });
+      axiosInstance()
+        .put(`${deliveryTicket.api}/revert-partially`, data)
+        .then(({ data: { data } }) => {
+          fetchRecords();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Reverted Successfully`
+          });
+        })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
     }
-  }
+  };
 
   const handelCancleTickets = () => {
     const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
     if (loadingTicketIds.length) {
-      axiosInstance().put(`${deliveryTicket.api}/revert`, { ids: loadingTicketIds }).then(({ data: { data } }) => {
-        fetchRecords();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Cancelled Successfully`
-        });
-      })
+      axiosInstance()
+        .put(`${deliveryTicket.api}/revert`, { ids: loadingTicketIds })
+        .then(({ data: { data } }) => {
+          fetchRecords();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Cancelled Successfully`
+          });
+        })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
     }
-  }
+  };
 
   return (
     <>
@@ -713,8 +732,9 @@ const LoadingTicket = ({
                 onClick={openActions}
                 aria-controls="action-menu"
                 disabled={selectedRecords.length === 0}
+                endIcon={<ExpandMore />}
               >
-                Actions <ExpandMore />
+                Actions
               </Button>
               <Menu
                 anchorEl={anchorActionEl}
@@ -751,8 +771,8 @@ const LoadingTicket = ({
                   Delivered to Customer
                 </MenuItem>
                 {selectedRecords.length &&
-                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId')
-                    && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length === selectedRecords?.length ? (
+                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
+                  ?.length === selectedRecords?.length ? (
                   <Fragment>
                     <MenuItem
                       onClick={() => {
@@ -773,40 +793,41 @@ const LoadingTicket = ({
                   </Fragment>
                 ) : null}
                 {selectedRecords.length &&
-                  selectedRecords?.filter((f) =>
-                    f.hasOwnProperty('loadingTicketId')
-                    && f?.type === 'Asset'
-                    && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
-                    && f?.status === INVENTORY_STATUS.inUse
-                    && f?.isReplaceable)?.length === selectedRecords?.length
-                  &&
-                  <MenuItem
-                    onClick={() => {
-                      const products = [];
-                      selectedRecords?.forEach((element) => {
-                        const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
-                        if (foundProduct.length) {
-                          foundProduct[0].qty += 1;
-                        } else {
-                          products.push({
-                            _id: element?.product?.optionValue,
-                            id: element?.product?.optionValue,
-                            productName: element?.product?.optionLabel,
-                            qty: 1
-                          });
-                        }
-                      });
-                      setAddSerializedAssetDialog({ open: true, products: products });
-                      closeActions();
-                    }}
-                  >
-                    Replace Asset
-                  </MenuItem>
-                }
+                  selectedRecords?.filter(
+                    (f) =>
+                      f.hasOwnProperty('loadingTicketId') &&
+                      f?.type === 'Asset' &&
+                      f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
+                      f?.status === INVENTORY_STATUS.inUse &&
+                      f?.isReplaceable
+                  )?.length === selectedRecords?.length && (
+                    <MenuItem
+                      onClick={() => {
+                        const products = [];
+                        selectedRecords?.forEach((element) => {
+                          const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
+                          if (foundProduct.length) {
+                            foundProduct[0].qty += 1;
+                          } else {
+                            products.push({
+                              _id: element?.product?.optionValue,
+                              id: element?.product?.optionValue,
+                              productName: element?.product?.optionLabel,
+                              qty: 1
+                            });
+                          }
+                        });
+                        setAddSerializedAssetDialog({ open: true, products: products });
+                        closeActions();
+                      }}
+                    >
+                      Replace Asset
+                    </MenuItem>
+                  )}
               </Menu>
               <Box mx={1} />
               {selectedRecords.length &&
-                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
                 selectedRecords?.length ? (
                 <Fragment>
                   <Tooltip title="Remove Assets From Loading Ticket(s)">
@@ -884,7 +905,7 @@ const LoadingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -903,10 +924,9 @@ const LoadingTicket = ({
               isClientSideGrid={true}
               allowSelection={allowedToEdit || isProcessor}
               rowClassRules={{
-                "light-grey-data-row":
-                  function (params) {
-                    return params?.data?.isReplaced;
-                  },
+                'light-grey-data-row': function (params) {
+                  return params?.data?.isReplaced;
+                }
               }}
               renderedFrom={renderedFrom}
               refreshGrid={fetchRecords}

@@ -30,7 +30,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 
 const PurchaseRequisition = () => {
-
   const renderedFrom = camelCase(routes?.purchaseRequisition.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -327,8 +326,9 @@ const PurchaseRequisition = () => {
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
                         className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        endIcon={<ExpandMore />}
                       >
-                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                        {isMobile && !isTablet ? '' : 'Actions'}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}

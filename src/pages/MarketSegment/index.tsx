@@ -133,8 +133,6 @@ const MarketSegment = () => {
       });
   };
 
-
-
   const ActionsRenderer = (params) => (
     <Fragment>
       <Tooltip
@@ -401,8 +399,9 @@ const MarketSegment = () => {
                       onClick={openActions}
                       disabled={selectedRecords.length ? false : true}
                       aria-controls="action-menu"
+                      endIcon={<ExpandMore />}
                     >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      {isMobile && !isTablet ? '' : 'Actions'}
                     </Button>
                   )}
                   <Menu

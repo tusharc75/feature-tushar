@@ -215,12 +215,12 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
         pathName = detailPagePath[joinedFieldName]
           ? detailPagePath[joinedFieldName]
           : field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-            ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-            : routes[joinedFieldName]?.path
-              ? routes[joinedFieldName]?.path
-              : routes[`${joinedFieldName}Detail`]?.path
-                ? routes[`${joinedFieldName}Detail`]?.path
-                : '';
+          ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+          : routes[joinedFieldName]?.path
+          ? routes[joinedFieldName]?.path
+          : routes[`${joinedFieldName}Detail`]?.path
+          ? routes[`${joinedFieldName}Detail`]?.path
+          : '';
       }
       return {
         columnData: {
@@ -489,8 +489,7 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
             ...currentColumn,
             disableFilters: true,
             width: 200,
-            Cell: ({ row }) =>
-              row.original[ele.fieldName] ? <p>{moment(row.original[ele.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+            Cell: ({ row }) => (row.original[ele.fieldName] ? <p>{moment(row.original[ele.fieldName])?.format(dateFormat) || ''}</p> : <NoDataCell />)
           });
         } else if (ele.type === 'dateTime') {
           column.push({

@@ -40,8 +40,7 @@ import { useHistory } from 'react-router-dom';
 import { camelCase } from 'lodash';
 
 const Address = () => {
-
-  const renderedFrom = camelCase(routes?.address.title)
+  const renderedFrom = camelCase(routes?.address.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const location = useLocation();
@@ -51,7 +50,6 @@ const Address = () => {
     state: { permissions, user, selectedEntity }
   }: any = useData();
   const { getColumnData } = useColumns();
-
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -171,7 +169,10 @@ const Address = () => {
           </IconButton>
         </span>
       </Tooltip>
-      <Tooltip className={permissions?.address?.isDelete ? '' : 'cursor-stop'} title={permissions?.address?.isDelete ? 'Delete' : "You don't have permission to delete"} >
+      <Tooltip
+        className={permissions?.address?.isDelete ? '' : 'cursor-stop'}
+        title={permissions?.address?.isDelete ? 'Delete' : "You don't have permission to delete"}
+      >
         <span>
           <IconButton
             disabled={!permissions?.address?.isDelete}
@@ -288,9 +289,7 @@ const Address = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-
-            </Grid>
+            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1"></Grid>
             <Grid
               item
               md={6}
@@ -339,23 +338,24 @@ const Address = () => {
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
                         className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        endIcon={<ExpandMore />}
                       >
-                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                        {isMobile && !isTablet ? '' : 'Actions'}
+                        <Menu
+                          anchorEl={anchorEl}
+                          keepMounted
+                          getContentAnchorEl={null}
+                          anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left'
+                          }}
+                          id="action-menu"
+                          open={Boolean(anchorEl)}
+                          onClose={closeActions}
+                        >
+                          <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                        </Menu>{' '}
                       </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                      </Menu>{' '}
                     </>
                   )}
                 </Grid>
@@ -393,7 +393,7 @@ const Address = () => {
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (

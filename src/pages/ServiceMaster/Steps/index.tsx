@@ -24,7 +24,6 @@ import { GrDrag } from 'react-icons/gr';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const Steps = ({ serviceId }) => {
-
   const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_steps`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -219,8 +218,9 @@ const Steps = ({ serviceId }) => {
                   onClick={openActions}
                   aria-controls="action-menu"
                   disabled={selectedRecords.length === 0}
+                  endIcon={<ExpandMore />}
                 >
-                  Actions <ExpandMore />
+                  Actions
                 </Button>
                 <Menu
                   anchorEl={anchorActionEl}

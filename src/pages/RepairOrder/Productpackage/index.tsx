@@ -83,7 +83,7 @@ const Productpackage = ({
         Header: 'Type',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
       },
       {
         accessor: 'detail',
@@ -92,15 +92,21 @@ const Productpackage = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-
-            <a className="link text-truncate" target='_blank' href={`${row.original.type === 'service'
-              ? routes.serviceMasterDetail.path
-              : row.original.type === 'product'
-                ? routes.productDetail.path
-                : row.original.type === 'serializedAsset'
+            <a
+              className="link text-truncate"
+              target="_blank"
+              href={`${
+                row.original.type === 'service'
+                  ? routes.serviceMasterDetail.path
+                  : row.original.type === 'product'
+                  ? routes.productDetail.path
+                  : row.original.type === 'serializedAsset'
                   ? routes.serializedAssetDetail.path
                   : routes.packagesDetail.path
-              }/${row.original.materialId}`}>{row.original.detail}</a>
+              }/${row.original.materialId}`}
+            >
+              {row.original.detail}
+            </a>
             <Box ml={1} className="d-flex align-items-center">
               <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
@@ -198,38 +204,40 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'service'
-        ? parent.serviceDetail?.serviceName
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail.assetNumber
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serializedAssetDetail.assetNumber
+          : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'serializedAsset'
-                ? parent?.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.status = `${parent.type === 'service'
-        ? parent.serviceDetail?.status
-        : parent.type === 'product'
+      parent.status = `${
+        parent.type === 'service'
+          ? parent.serviceDetail?.status
+          : parent.type === 'product'
           ? parent?.productDetail?.status
           : parent.type === 'serializedAsset'
-            ? parent?.serializedAssetDetail?.status
-            : parent.packageDetail?.status
-        }`;
+          ? parent?.serializedAssetDetail?.status
+          : parent.packageDetail?.status
+      }`;
     });
 
     if (rows.length !== 0) {
@@ -253,22 +261,23 @@ const Productpackage = ({
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = `${_subRow.type === 'service'
-        ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'serializedAsset'
-            ? _subRow.serializedAssetDetail.assetNumber
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serializedAssetDetail.assetNumber
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -276,14 +285,15 @@ const Productpackage = ({
       _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
-      parent.status = `${parent.type === 'service'
-        ? parent.serviceDetail?.status
-        : parent.type === 'product'
+      parent.status = `${
+        parent.type === 'service'
+          ? parent.serviceDetail?.status
+          : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
-        }`;
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -455,8 +465,9 @@ const Productpackage = ({
                   onClick={openActions}
                   aria-controls="action-menu"
                   disabled={selectedProducts.length === 0}
+                  endIcon={<ExpandMore />}
                 >
-                  Actions <ExpandMore />
+                  Actions
                 </Button>
                 <Menu
                   anchorEl={anchorActionEl}

@@ -1,14 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import {
-  Grid,
-  Box,
-  Button,
-  IconButton,
-  Menu,
-  MenuItem,
-  MenuList,
-  Popover
-} from '@material-ui/core';
+import { Grid, Box, Button, IconButton, Menu, MenuItem, MenuList, Popover } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -38,11 +29,11 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
-
-const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit }) => {
-
+const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
 
@@ -96,7 +87,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (<p className="text-truncate">{row.original.srno}</p>),
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -106,14 +97,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
         width: 100,
-        Cell: ({ row }) =>
-          row.original['type'] ? (
-            <p>
-              {`${startCase(row.original?.type)} `}
-            </p>
-          ) : (
-            <NoDataCell />
-          )
+        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       },
       {
         accessor: 'detail',
@@ -131,12 +115,12 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
             >
               {row.original?.detail}
             </p>
-            {row.original?.subRows?.length ?
-              <Box ml={1} >
+            {row.original?.subRows?.length ? (
+              <Box ml={1}>
                 <span>({row.original?.subRows?.length})</span>
               </Box>
-              : null}
-            <Box ml={1} >
+            ) : null}
+            <Box ml={1}>
               <HtmlTooltip title="Add ">
                 <IconButton
                   onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
@@ -151,13 +135,14 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === 'product'
+                    `${
+                      row.original.type === 'serializedAsset'
+                        ? routes.serializedAssetDetail.path
+                        : row.original.type === 'product'
                         ? routes.productDetail.path
                         : row.original.type === 'package'
-                          ? routes.packagesDetail.path
-                          : routes.serviceMasterDetail.path
+                        ? routes.packagesDetail.path
+                        : routes.serviceMasterDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -214,7 +199,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
             </IconButton>
           </Grid>
         )
-    })
+    });
     setColumns(column);
   };
 
@@ -227,14 +212,15 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -248,20 +234,22 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     }
     setRowsData(rows);
     setSelectedProducts([]);
+    updateDOASetup(data?.doasetup);
   };
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.srno = parent.srno + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -460,13 +448,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center">
-          <Button
-            variant={'outlined'}
-            color="primary"
-            size="small"
-            startIcon={<Add />}
-            onClick={openAddActions}
-            aria-controls="add-menu">
+          <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
             {'Add'}
             <ExpandMore fontSize="small" />
           </Button>
@@ -517,9 +499,10 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                 size="small"
                 disabled={rowsData?.length > 0 ? false : true}
                 onClick={openActions}
-                aria-controls="action-menu">
-                {' '}
-                {'Actions'} <ExpandMore />
+                aria-controls="action-menu"
+                endIcon={<ExpandMore />}
+              >
+                {'Actions'}
               </Button>
             </span>
             <Menu
@@ -584,7 +567,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
               <MenuItem
                 disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
                 onClick={() => {
-                  setIsProductEdit({ open: true, isBulkedit: true })
+                  setIsProductEdit({ open: true, isBulkedit: true });
                   closeActions();
                 }}
               >
@@ -627,7 +610,6 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
             renderedFrom="quotation_product_package"
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
-
           />
         </Box>
       ) : (
@@ -690,7 +672,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           ids={[]}
           onSuccess={(rows) => {
-            handleAdd(rows)
+            handleAdd(rows);
           }}
           packageType={null}
         />
