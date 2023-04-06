@@ -356,7 +356,7 @@ export const CreateEmail = ({
   const classes = useStyles();
 
   const renderQuotesOtherFileThumbnails = (
-    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
+    <>
       {quoteBuilderOtherAttachments && quoteBuilderOtherAttachments.length > 0 ? (
         <>
           <AttachmentThumbnail
@@ -366,11 +366,11 @@ export const CreateEmail = ({
           />
         </>
       ) : null}
-    </Grid>
+    </>
   );
 
   const renderQuotesFileThumbnails = (
-    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
+    <>
       {stateQuoteBuilderAttachments && stateQuoteBuilderAttachments.length > 0 ? (
         <>
           <AttachmentThumbnail
@@ -380,7 +380,7 @@ export const CreateEmail = ({
           />
         </>
       ) : null}
-    </Grid>
+    </>
   );
 
   const renderFileThumbnails = <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={true} />;
