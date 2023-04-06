@@ -17,7 +17,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Skeleton } from '@material-ui/lab';
 import CustomButton from 'src/components/Helpers/CustomButton';

@@ -74,7 +74,6 @@ const WellMasterDetailsPage = () => {
           .put(`${wellMaster.api}/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
-
             history.goBack();
           })
           .catch((err) => {
@@ -94,24 +93,22 @@ const WellMasterDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.address?.isUpdate && (
-                  <Button
-                    variant="contained"
-                    className={`btn-outline-v1`}
-                    size="small"
-                    onClick={() => {
-                      if (permissions?.wellMaster?.isUpdate) {
-                        setShowManageDialog({ open: true, isClone: false, idToClone: wellMasterData._id });
-                      }
-                    }}
-                  >
-                    Edit
-                  </Button>
-                )}
-                {permissions?.address?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </>
-              <ActivityButton referenceId={wellMasterData?._id} resource={ACTIVITY_RESOURCE.wellMaster} />
+            {permissions?.wellMaster?.isUpdate && (
+              <Button
+                variant="contained"
+                className={`btn-outline-v1`}
+                size="small"
+                onClick={() => {
+                  if (permissions?.wellMaster?.isUpdate) {
+                    setShowManageDialog({ open: true, isClone: false, idToClone: wellMasterData._id });
+                  }
+                }}
+              >
+                Edit
+              </Button>
+            )}
+            {permissions?.wellMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            <ActivityButton referenceId={wellMasterData?._id} resource={ACTIVITY_RESOURCE.wellMaster} />
           </Box>
         </Box>
       </Box>

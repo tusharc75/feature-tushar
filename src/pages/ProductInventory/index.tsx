@@ -11,7 +11,14 @@ import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { isObjectEmpty, gridLoadingTimeout, productInventory, getLocalStorageArrayData, removeLocalStorage, TOOLTIP_MESSAGE } from 'src/constants/helpers';
+import {
+  isObjectEmpty,
+  gridLoadingTimeout,
+  productInventory,
+  getLocalStorageArrayData,
+  removeLocalStorage,
+  TOOLTIP_MESSAGE
+} from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -218,9 +225,9 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-          .filter((d) => d._id !== 'All')
-          .map((d) => d._id)
-          .toString()
+            .filter((d) => d._id !== 'All')
+            .map((d) => d._id)
+            .toString()
         : plantId;
 
     let deepFilter = '';
@@ -301,38 +308,52 @@ const InventoryProduct = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      <HtmlTooltip title={!permissions?.productInventory?.isCreate ? TOOLTIP_MESSAGE.add :
-        params?.data?.plantId === "All" ? "Select Plant" : "Add"}>
+      <HtmlTooltip title={!permissions?.productInventory?.isCreate ? TOOLTIP_MESSAGE.add : params?.data?.plantId === 'All' ? 'Select Plant' : 'Add'}>
         <span>
           <IconButton
             size="small"
             aria-label="Add"
-            disabled={permissions?.productInventory?.isCreate && params?.data?.plantId !== "All" ? false : true}
+            disabled={permissions?.productInventory?.isCreate && params?.data?.plantId !== 'All' ? false : true}
             onClick={() => {
-              setInventory({ open: true, product: [params?.data], type: 'add' })
+              setInventory({ open: true, product: [params?.data], type: 'add' });
             }}
           >
             <AddCircleOutlineIcon
               fontSize="small"
-              color={permissions?.productInventory?.isCreate && params?.data?.plantId !== "All" ? "secondary" : "disabled"} />
+              color={permissions?.productInventory?.isCreate && params?.data?.plantId !== 'All' ? 'secondary' : 'disabled'}
+            />
           </IconButton>
         </span>
       </HtmlTooltip>
       <Box pl={1}>
-        <HtmlTooltip title={!permissions?.productInventory?.isUpdate ? TOOLTIP_MESSAGE.remove :
-          params?.data?.plantId === "All" ? "Select Plant" : !params?.data?.availableInventory ? "Inventory not available" : "Remove"}>
+        <HtmlTooltip
+          title={
+            !permissions?.productInventory?.isUpdate
+              ? TOOLTIP_MESSAGE.remove
+              : params?.data?.plantId === 'All'
+              ? 'Select Plant'
+              : !params?.data?.availableInventory
+              ? 'Inventory not available'
+              : 'Remove'
+          }
+        >
           <span>
             <IconButton
               size="small"
               aria-label="Clone"
-              disabled={permissions?.productInventory?.isUpdate && params?.data?.availableInventory && params?.data?.plantId !== "All" ? false : true}
+              disabled={permissions?.productInventory?.isUpdate && params?.data?.availableInventory && params?.data?.plantId !== 'All' ? false : true}
               onClick={() => {
-                setInventory({ open: true, product: [params?.data], type: 'remove' })
+                setInventory({ open: true, product: [params?.data], type: 'remove' });
               }}
             >
               <RemoveCircleOutlineIcon
                 fontSize="small"
-                color={permissions?.productInventory?.isUpdate && params?.data?.availableInventory && params?.data?.plantId !== "All" ? "error" : "disabled"} />
+                color={
+                  permissions?.productInventory?.isUpdate && params?.data?.availableInventory && params?.data?.plantId !== 'All'
+                    ? 'error'
+                    : 'disabled'
+                }
+              />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -392,56 +413,59 @@ const InventoryProduct = () => {
     });
   }
 
-
   const checkReport = () => {
     const products = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((e) => e._id);
-    let api = `${productInventory.api}/automation`
+    let api = `${productInventory.api}/automation`;
     if (products?.length) {
-      api = api + `?products=${products?.toString()}`
+      api = api + `?products=${products?.toString()}`;
     }
-    axiosInstance().get(api).then(({ data }) => {
-      console.log(data)
-    })
+    axiosInstance()
+      .get(api)
+      .then(({ data }) => {
+        console.log(data);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const handleRemap = () => {
     const products = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((e) => e._id);
     if (products?.length) {
-      axiosInstance().put(`${productInventory.api}/re-map/ledger-remap`, { products, warehouse: plantId })
+      axiosInstance()
+        .put(`${productInventory.api}/re-map/ledger-remap`, { products, warehouse: plantId })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: data.message
           });
-          fetchProductInventory()
+          fetchProductInventory();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
     }
-  }
+  };
 
   const handleRemapPurchaseOrder = () => {
     const products = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((e) => e._id);
     if (products?.length) {
-      axiosInstance().put(`${productInventory.api}/re-map/purchase-order-remap`, { products, warehouse: plantId })
+      axiosInstance()
+        .put(`${productInventory.api}/re-map/purchase-order-remap`, { products, warehouse: plantId })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: data.message
           });
-          fetchProductInventory()
+          fetchProductInventory();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
     }
-  }
+  };
 
   return (
     <Fragment>
@@ -544,8 +568,9 @@ const InventoryProduct = () => {
                     className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                     onClick={openActions}
                     aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'}
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -582,7 +607,7 @@ const InventoryProduct = () => {
                       style={{ display: 'none' }}
                       onClick={() => {
                         closeActions();
-                        checkReport()
+                        checkReport();
                       }}
                     >
                       Check Report
@@ -592,7 +617,7 @@ const InventoryProduct = () => {
                       style={{ display: 'none' }}
                       onClick={() => {
                         closeActions();
-                        handleRemap()
+                        handleRemap();
                       }}
                     >
                       Remap
@@ -602,7 +627,7 @@ const InventoryProduct = () => {
                       style={{ display: 'none' }}
                       onClick={() => {
                         closeActions();
-                        handleRemapPurchaseOrder()
+                        handleRemapPurchaseOrder();
                       }}
                     >
                       Remap Purchase Order
@@ -612,7 +637,7 @@ const InventoryProduct = () => {
               ) : null}
               {user?.role?.selectedEntity?.policy?.isProductInventorySettings && (
                 <Box ml={1}>
-                  <HtmlTooltip title={plantId === 'All' ? "Select Plant" : "Setting"}>
+                  <HtmlTooltip title={plantId === 'All' ? 'Select Plant' : 'Setting'}>
                     <span>
                       <IconButton
                         size="small"
@@ -664,9 +689,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                  .filter((d) => d._id !== 'All')
-                  .map((d) => d._id)
-                  .toString()
+                    .filter((d) => d._id !== 'All')
+                    .map((d) => d._id)
+                    .toString()
                 : plantId
             }
           />
@@ -675,16 +700,16 @@ const InventoryProduct = () => {
         {showHistory.open && (
           <HistoryDialog
             close={() => {
-              setShowHistory({ open: false, product: '', productName: '' })
-              fetchProductInventory()
+              setShowHistory({ open: false, product: '', productName: '' });
+              fetchProductInventory();
             }}
             product={showHistory.product}
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                  .filter((d) => d._id !== 'All')
-                  .map((d) => d._id)
-                  .toString()
+                    .filter((d) => d._id !== 'All')
+                    .map((d) => d._id)
+                    .toString()
                 : plantId
             }
             productName={showHistory.productName}
@@ -699,9 +724,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                  .filter((d) => d._id !== 'All')
-                  .map((d) => d._id)
-                  .toString()
+                    .filter((d) => d._id !== 'All')
+                    .map((d) => d._id)
+                    .toString()
                 : plantId
             }
           />
@@ -719,11 +744,7 @@ const InventoryProduct = () => {
             warehouse={plantId}
           />
         )}
-        {settingDialogOpen &&
-          <SettingsDialog
-            warehouse={plantId}
-            onClose={() => setSettingDialogOpen(false)}
-          />}
+        {settingDialogOpen && <SettingsDialog warehouse={plantId} onClose={() => setSettingDialogOpen(false)} />}
       </div>
     </Fragment>
   );

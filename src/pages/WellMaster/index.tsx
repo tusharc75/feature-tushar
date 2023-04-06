@@ -1,482 +1,521 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from "react";
+import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import IconButton from '@material-ui/core/IconButton';
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../axios/axiosInstance";
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../axios/axiosInstance';
 import { GiStockpiles } from 'react-icons/gi';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import { AddOutlined } from "@material-ui/icons";
-import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
-import SearchBox from '../../components/Helpers/SearchBox'
-import styles from "../Leads/Header.module.scss";
-import routes from "../../components/Helpers/Routes";
-import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { AddOutlined } from '@material-ui/icons';
+import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
+import SearchBox from '../../components/Helpers/SearchBox';
+import styles from '../Leads/Header.module.scss';
+import routes from '../../components/Helpers/Routes';
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { wellMaster, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, sidebarResource } from '../../constants/helpers';
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { useData } from "../../StateProvider/Provider";
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import HtmlTooltip from "../../components/CustomTooltipTitle";
-import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
-import { prepareDataForGrid } from "../../constants/helpers"
-import ManageWellMaster from "./ManageWellMaster";
-import { MdAdd, MdSort, MdFilterList } from "react-icons/all";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import { prepareDataForGrid } from '../../constants/helpers';
+import ManageWellMaster from './ManageWellMaster';
+import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from "react-router-dom";
-import { FaSuitcase } from "react-icons/fa";
-import MobileSortDialog from "../../components/MobileSortDialog";
-import MobileFilterDialog from "../../components/MobileFilterDialog"
-import { camelCase } from "lodash";
-import DeleteIcon from "@material-ui/icons/Delete";
-import ExpandMore from "@material-ui/icons/ExpandMore";
+import { useHistory } from 'react-router-dom';
+import { FaSuitcase } from 'react-icons/fa';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
+import { camelCase } from 'lodash';
+import DeleteIcon from '@material-ui/icons/Delete';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import MergeRecords from 'src/components/MergeRecords';
 
 let searchTimeout;
 
 const WellMaster = () => {
+  const renderedFrom = camelCase(routes?.wellMaster.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const history = useHistory();
+  const toastConfig = useContext(CustomToastContext);
 
-    const renderedFrom = camelCase(routes?.wellMaster.title)
-    const localStorageSelectedRecords = `${renderedFrom}_selected`
-    const history = useHistory();
-    const toastConfig = useContext(CustomToastContext)
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [gridApi, setGridApi] = useState(null);
+  const [sortOpen, setSortOpen] = useState(false);
+  const [columns, setColumns] = useState([]);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
-    const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
-    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
-    const [deleteRecord, setDeleteRecord] = useState(null)
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [gridApi, setGridApi] = useState(null);
-    const [sortOpen, setSortOpen] = useState(false);
-    const [columns, setColumns] = useState([])
-    const [frameWorkComponent, setFrameWorkComponent] = useState({})
-    const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const [isOpenDialog, setisOpenDialog] = useState(false);
 
-    const [isOpenDialog, setisOpenDialog] = useState(false)
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
+  const { getColumnData } = useColumns();
 
-    const {
-        state: { user, permissions, selectedEntity },
-    }: any = useData();
-    const { getColumnData } = useColumns();
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
 
-    useEffect(() => {
-        fetchGridColumns()
-    }, [])
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 600;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-    useEffect(() => {
-        let millisec = Object.keys(search).length > 0 ? 600 : 600;
-        if (searchTimeout) {
-            clearTimeout(searchTimeout);
-        }
-        searchTimeout = setTimeout(() => {
-            fetchData()
-        }, millisec);
-    }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
-
-    const fetchGridColumns = () => {
-        axiosInstance()
-            .get(`/field?resource=Well Master&view=true`)
-            .then(({ data: { data } }) => {
-                let columns = [];
-                let rendererNames = [];
-                data.forEach((o) => {
-                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes?.wellMasterDetail?.path);
-                    if (currentColumn !== null) {
-                        columns = [...columns, currentColumn?.columnData];
-                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                            rendererNames.push(currentColumn?.rendererName);
-                        }
-                    }
-                });
-                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-                tempFrameworkComponent = {
-                    ...tempFrameworkComponent,
-                    actionsRenderer: ActionsRenderer
-                };
-                setFrameWorkComponent({ ...tempFrameworkComponent });
-                columns = [...columns, ...getStaticFields()];
-                setColumns([...columns]);
-            });
-    };
-
-    const fetchData = () => {
-        dispatch({ type: "loading", loading: true });
-        if (gridApi) {
-            gridApi.setRowData([]);
-        }
-        const queryString = getQueryString();
-        axiosInstance().get(`${wellMaster.api}${queryString}`).then(({ data: { data, count } }) => {
-            let rows = data?.map((u) => {
-                let finalObject = prepareDataForGrid(u, user);
-                finalObject["isChecked"] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some(s => s._id === u._id);
-                return finalObject;
-            });
-            if (appendRows) {
-                dispatch({
-                    type: "initialize", data: [...dataRows, ...rows],
-                    count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
-                });
-            } else {
-                dispatch({
-                    type: "initialize", data: rows, count: count,
-                    selectedRecords: rows.filter(f => f.isChecked === true)
-                });
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get(`/field?resource=Well Master&view=true`)
+      .then(({ data: { data } }) => {
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes?.wellMasterDetail?.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
-            setTimeout(() => {
-                dispatch({ type: "loading", loading: false });
-            }, gridLoadingTimeout);
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-            dispatch({ type: "loading", loading: false });
+          }
         });
-    };
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...getStaticFields()];
+        setColumns([...columns]);
+      });
+  };
 
-    const getQueryString = (isExport = false) => {
-        let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-
-        let filterById = [];
-
-        if (filterById.length > 0) {
-            deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
-        }
-
-        if (showFilteredRecordsOnly) {
-            const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
-            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
-        }
-
-        if (!isObjectEmpty(filters)) {
-            const updatedFilters = [];
-            Object.keys(filters).forEach((field) => {
-                updatedFilters.push({
-                    field: replaceFieldName(field),
-                    term: filters[field].filter,
-                });
-            });
-            deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
-        }
-
-        if (sorting.length > 0) {
-            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
-        }
-        if (search) {
-            deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
-        }
-        return deepFilter;
-    };
-
-    const handleDelete = () => {
-        let ids = []
-        if (deleteRecord) {
-            ids.push(deleteRecord._id)
-        }
-        else {
-            ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map(d => d._id);
-        }
-        axiosInstance().put(`${wellMaster.api}/remove`, { "ids": ids }).then(() => {
-            localStorage.removeItem(localStorageSelectedRecords)
-            setShowDeleteConfirmBox(false)
-            setDeleteRecord(null)
-            setAnchorEl(null)
-            fetchData();
-        }).catch((error) => {
-            toastConfig.setToastConfig(error)
+  const fetchData = () => {
+    dispatch({ type: 'loading', loading: true });
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+    const queryString = getQueryString();
+    axiosInstance()
+      .get(`${wellMaster.api}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data?.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
+          return finalObject;
         });
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count,
+            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
+          });
+        }
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        dispatch({ type: 'loading', loading: false });
+      });
+  };
+
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+
+    let filterById = [];
+
+    if (filterById.length > 0) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
     }
 
-    const ActionsRenderer = params => (
-        <>
-            {
-                permissions?.wellMaster?.isCreate &&
-                <HtmlTooltip title="Clone">
-                    <IconButton
-                        size="small"
-                        aria-label="Clone"
-                        onClick={() => {
-                            setShowManageDialog({ open: true, isClone: true, idToClone: params.data._id });
-                        }}
-                    >
-                        <FileCopyIcon color="primary" />
-                    </IconButton>
-                </HtmlTooltip>
-            }
-            {permissions?.wellMaster?.isDelete &&
-                <HtmlTooltip title="Delete">
-                    <IconButton size="small" aria-label="Delete" onClick={() => {
-                        setDeleteRecord(params.data);
-                        setShowDeleteConfirmBox(true)
-                    }} >
-                        <DeleteIcon color="error" />
-                    </IconButton>
-                </HtmlTooltip >
-            }
-        </>
-    )
+    if (showFilteredRecordsOnly) {
+      const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+    }
 
-    const handleSearch = (e) => {
-        dispatch({ type: "search", search: e.target.value });
-    };
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+      Object.keys(filters).forEach((field) => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        });
+      });
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    }
 
-    const openActions = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+    }
+    return deepFilter;
+  };
 
-    const closeActions = () => {
+  const handleDelete = () => {
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
+    }
+    axiosInstance()
+      .put(`${wellMaster.api}/remove`, { ids: ids })
+      .then(() => {
+        localStorage.removeItem(localStorageSelectedRecords);
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
         setAnchorEl(null);
-    };
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
-    const replaceFieldName = (field) => {
-        switch (field) {
-            case "createdBy":
-                return "createdBy.user.concatedName";
+  const ActionsRenderer = (params) => (
+    <>
+      {permissions?.wellMaster?.isCreate && (
+        <HtmlTooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setShowManageDialog({ open: true, isClone: true, idToClone: params.data._id });
+            }}
+          >
+            <FileCopyIcon color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+      )}
+      {permissions?.wellMaster?.isDelete && (
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(params.data);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </HtmlTooltip>
+      )}
+    </>
+  );
 
-            case "updatedBy":
-                return "updatedBy.user.concatedName";
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
 
-            default:
-                return field;
-        }
-    };
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
 
-    const handleOpen = () => {
-        setisOpenDialog(true);
-    };
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
 
-    const handleClickOpen = () => {
-        setSortOpen(true);
-    };
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case 'createdBy':
+        return 'createdBy.user.concatedName';
 
-    const handleClickClose = () => {
-        setSortOpen(false);
+      case 'updatedBy':
+        return 'updatedBy.user.concatedName';
 
-    };
+      default:
+        return field;
+    }
+  };
 
-    const handleFilterClose = () => {
-        setisOpenDialog(false);
-    };
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
 
+  const handleClickOpen = () => {
+    setSortOpen(true);
+  };
 
-    return (<Fragment>
-        <Grid container className="headerbox">
-            <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[routes.wellMaster]} />
-            </Grid>
-            <Grid item md={8} sm={1} xs={2}>
-                <ImportExportLinks
-                    permissions={permissions?.wellMaster}
-                    module="well master"
-                    api={wellMaster.api}
-                    afterImportCompleted={() => {
-                        fetchData();
-                    }}
-                    isExportAllOrSomeFeature={true}
-                    total={rowCount}
-                    recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.length}
-                    ids={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.length ? [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((obj) => obj._id) : []}
-                    onExportToExcelSuccess={() => {
-                        if (gridApi) gridApi.deselectAll()
-                        else fetchData()
-                    }}
-                    additionalParams={getQueryString(true)}
-                />
-            </Grid>
+  const handleClickClose = () => {
+    setSortOpen(false);
+  };
+
+  const handleFilterClose = () => {
+    setisOpenDialog(false);
+  };
+
+  return (
+    <Fragment>
+      <Grid container className="headerbox">
+        <Grid item md={4} sm={11} xs={10}>
+          <CustomBreadCrumbs routes={[routes.wellMaster]} />
         </Grid>
-        <div className="main-container">
-            <div className="header-panel">
-                <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-                        {isMobile && (
-                            <>
-                                <Grid style={{ display: 'inline-flex' }}>
-                                    <Button
-                                        onClick={handleClickOpen}
-                                        id="demo-customized-button"
-                                        aria-controls="demo-customized-menu"
-                                        aria-haspopup="true"
-                                        aria-expanded={'true'}
-                                        color="secondary"
-                                        variant="text"
-                                        disableElevation
-                                        startIcon={<MdSort />}
-                                        className={'sort-filter-tablet'}
-                                        style={isTablet ? { marginLeft: '50px' } : {}}
-                                    >
-                                        Sort
-                                    </Button>
-                                    <MobileSortDialog
-                                        isOpen={sortOpen}
-                                        handleClose={handleClickClose}
-                                        contentPart={null}
-                                        secHeading={['Sort Well Master']}
-                                        columns={columns}
-                                        dispatch={dispatch}
-                                    />
+        <Grid item md={8} sm={1} xs={2}>
+          <ImportExportLinks
+            permissions={permissions?.wellMaster}
+            module="well master"
+            api={wellMaster.api}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.length}
+            ids={
+              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.length
+                ? [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((obj) => obj._id)
+                : []
+            }
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll();
+              else fetchData();
+            }}
+            additionalParams={getQueryString(true)}
+          />
+        </Grid>
+      </Grid>
+      <div className="main-container">
+        <div className="header-panel">
+          <Grid container className={styles.filter_side_container}>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+              {isMobile && (
+                <>
+                  <Grid style={{ display: 'inline-flex' }}>
+                    <Button
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      color="secondary"
+                      variant="text"
+                      disableElevation
+                      startIcon={<MdSort />}
+                      className={'sort-filter-tablet'}
+                      style={isTablet ? { marginLeft: '50px' } : {}}
+                    >
+                      Sort
+                    </Button>
+                    <MobileSortDialog
+                      isOpen={sortOpen}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={['Sort Well Master']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
 
-                                    <Button
-                                        id="demo-customized-button"
-                                        aria-controls="demo-customized-menu"
-                                        aria-haspopup="true"
-                                        aria-expanded={'true'}
-                                        variant="text"
-                                        color="secondary"
-                                        disableElevation
-                                        className={'sort-filter-tablet'}
-                                        startIcon={<MdFilterList />}
-                                        onClick={handleOpen}
-                                    >
-                                        Filter
-                                    </Button>
-                                    <MobileFilterDialog
-                                        isOpen={isOpenDialog}
-                                        handleClose={handleFilterClose}
-                                        contentPart={null}
-                                        columns={columns}
-                                        dispatch={dispatch}
-                                        title={routes?.wellMaster?.title}
-                                        filters={filters}
-                                    />
-                                </Grid>
-                            </>
-                        )}
-
-                    </Grid>
-                    <Grid xs={12} sm={12} md={6} container className={styles.filter_side} >
-                        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
-                            <Grid style={{ display: "flex", flex: 1, gap: "5px" }} className={styles.content_box}>
-                                <SearchBox
-                                    onSearch={handleSearch}
-                                    searchbox={isMobile ? styles.search_box_input : ""}
-                                    width="242px"
-                                    size="small"
-                                    value={search}
-                                    style={isMobile ? { flex: 1 } : {}}
-                                />
-                            </Grid>
-                            <Grid style={{ display: "flex", gap: "5px" }}>
-                                {permissions?.wellMaster?.isCreate &&
-                                    <Button onClick={() => {
-                                        setShowManageDialog({ open: true, isClone: false, idToClone: null })
-                                    }} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary" className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
-                                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}> {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}</Button>
-                                }
-                                {permissions?.wellMaster?.isDelete && (
-                                    <>
-                                        <Button
-                                            variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                                            color="default"
-                                            size="small"
-                                            className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                                            onClick={openActions}
-                                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
-                                            aria-controls="action-menu"
-                                        >
-                                            {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                                        </Button>
-                                        <Menu
-                                            anchorEl={anchorEl}
-                                            keepMounted
-                                            getContentAnchorEl={null}
-                                            anchorOrigin={{
-                                                vertical: "bottom",
-                                                horizontal: "left",
-                                            }}
-                                            id="action-menu"
-                                            open={Boolean(anchorEl)}
-                                            onClose={closeActions}
-                                        >
-                                            <MenuItem
-                                                disabled={!permissions?.wellMaster?.isDelete}
-                                                onClick={() => {
-                                                    closeActions()
-                                                    setShowDeleteConfirmBox(true)
-                                                }}>Delete
-                                            </MenuItem>
-                                        </Menu>
-                                    </>
-                                )}
-                            </Grid>
-                        </Box>
-                    </Grid>
+                    <Button
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      variant="text"
+                      color="secondary"
+                      disableElevation
+                      className={'sort-filter-tablet'}
+                      startIcon={<MdFilterList />}
+                      onClick={handleOpen}
+                    >
+                      Filter
+                    </Button>
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleFilterClose}
+                      contentPart={null}
+                      columns={columns}
+                      dispatch={dispatch}
+                      title={routes?.wellMaster?.title}
+                      filters={filters}
+                    />
+                  </Grid>
+                </>
+              )}
+            </Grid>
+            <Grid xs={12} sm={12} md={6} container className={styles.filter_side}>
+              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={styles.content_box}>
+                  <SearchBox
+                    onSearch={handleSearch}
+                    searchbox={isMobile ? styles.search_box_input : ''}
+                    width="242px"
+                    size="small"
+                    value={search}
+                    style={isMobile ? { flex: 1 } : {}}
+                  />
                 </Grid>
-            </div>
-            {columns ?
-                Object.keys(frameWorkComponent).length > 0 ?
-                    isMobile && !isTablet ?
-                        <CustomSwipableList
-                            allowSelection={true}
-                            allowSwipe={true}
-                            permissions={permissions?.wellMaster}
-                            primaryField={columns?.find(d => d.primaryField)}
-                            onClick={(data) => {
-                                history.push(`${routes.wellMasterDetail.path}/${data._id}`)
-                            }}
-                            dataRows={dataRows}
-                            selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
-                            dispatch={dispatch}
-                            onEdit={(data) => {
-                                history.push(`${routes.wellMasterDetail.path}/${data._id}`)
-                            }}
-                            extraParamsToCheckDelete={true}
-                            onDelete={(data) => {
-                                setDeleteRecord(data);
-                                setShowDeleteConfirmBox(true)
-                            }}
-                            rowCount={rowCount}
-                            page={page}
-                            loading={loading}
-                            additionalDetails={[]}
-                            chips={[]}
-                            onCreate={false}
-                            showClone={true}
-                            onClone={(data) => { setShowManageDialog({ open: true, isClone: true, idToClone: data._id }); }}
-                            renderedFrom={renderedFrom}
-                        /> :
-                        <CustomAgGrid
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameWorkComponent}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            actionWidth={150}
-                            loading={loading}
-                            renderedFrom={renderedFrom}
-                            refreshGrid={fetchData}
-                            showOnlyShowFilteredRecordSwitch={true}
-                            showFilters={true}
-                            resource={sidebarResource.wellMaster}
-                        /> : null
-                : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+                <Grid style={{ display: 'flex', gap: '5px' }}>
+                  {permissions?.wellMaster?.isCreate && (
+                    <Button
+                      onClick={() => {
+                        setShowManageDialog({ open: true, isClone: false, idToClone: null });
+                      }}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      size="small"
+                      color="primary"
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                    >
+                      {' '}
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                    </Button>
+                  )}
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="default"
+                    size="small"
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    onClick={openActions}
+                    disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
+                    aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
+                  >
+                    {isMobile && !isTablet ? '' : 'Actions'}
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      disabled={!permissions?.wellMaster?.isDelete}
+                      onClick={() => {
+                        closeActions();
+                        setShowDeleteConfirmBox(true);
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                    {permissions?.wellMaster?.isUpdate &&
+                      <MergeRecords
+                        selectedRecords={selectedRecords}
+                        resource={sidebarResource?.wellMaster}
+                        closeActions={closeActions}
+                        onSuccess={fetchData}
+                      />
+                    }
+                  </Menu>
+                </Grid>
+              </Box>
+            </Grid>
+          </Grid>
         </div>
-        {
-            showManageDialog.open &&
-            <ManageWellMaster
-                isClone={showManageDialog.isClone}
-                wellMasterId={showManageDialog.idToClone}
-                onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
-                onSuccess={() => {
-                    setShowManageDialog({ open: false, isClone: false, idToClone: null });
-                    fetchData()
+        {columns ? (
+          Object.keys(frameWorkComponent).length > 0 ? (
+            isMobile && !isTablet ? (
+              <CustomSwipableList
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={permissions?.wellMaster}
+                primaryField={columns?.find((d) => d.primaryField)}
+                onClick={(data) => {
+                  history.push(`${routes.wellMasterDetail.path}/${data._id}`);
                 }}
-            />
-        }
-        {showDeleteConfirmBox &&
-            <ConfirmationDialog
-                open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the ${routes.wellMaster?.title?.toLowerCase()} ${deleteRecord?.wellName || ""} ? `}
-                onClose={() => {
-                    setDeleteRecord(null);
-                    setShowDeleteConfirmBox(false)
+                dataRows={dataRows}
+                selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
+                dispatch={dispatch}
+                onEdit={(data) => {
+                  history.push(`${routes.wellMasterDetail.path}/${data._id}`);
                 }}
-                onOk={handleDelete}
-            />
-        }
-    </Fragment >
-    );
-}
+                extraParamsToCheckDelete={true}
+                onDelete={(data) => {
+                  setDeleteRecord(data);
+                  setShowDeleteConfirmBox(true);
+                }}
+                rowCount={rowCount}
+                page={page}
+                loading={loading}
+                additionalDetails={[]}
+                chips={[]}
+                onCreate={false}
+                showClone={true}
+                onClone={(data) => {
+                  setShowManageDialog({ open: true, isClone: true, idToClone: data._id });
+                }}
+                renderedFrom={renderedFrom}
+              />
+            ) : (
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                actionWidth={150}
+                loading={loading}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchData}
+                showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.wellMaster}
+              />
+            )
+          ) : null
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </div>
+      {showManageDialog.open && (
+        <ManageWellMaster
+          isClone={showManageDialog.isClone}
+          wellMasterId={showManageDialog.idToClone}
+          onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
+          onSuccess={() => {
+            setShowManageDialog({ open: false, isClone: false, idToClone: null });
+            fetchData();
+          }}
+        />
+      )}
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete the ${routes.wellMaster?.title?.toLowerCase()} ${deleteRecord?.wellName || ''} ? `}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
+    </Fragment>
+  );
+};
 
 export default WellMaster;

@@ -22,7 +22,7 @@ import { sidebarResource, prepareDataForGrid } from '../../constants/helpers';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
 import { PickupFromRenderer, DeliveryToRenderer } from '../../components/DeliveryTicket/helper';
 import { camelCase } from 'lodash';
@@ -37,21 +37,23 @@ const DeliveryTicket = () => {
   const DeliveryTicketType = [
     {
       key: `All ${routes.deliveryTicket.title}`,
-      value: 1,
+      value: 1
     },
     {
       key: `My ${routes.deliveryTicket.title}`,
-      value: 2,
-    },
+      value: 2
+    }
   ];
-  let renderedFrom = camelCase(routes?.deliveryTicket.title)
+  let renderedFrom = camelCase(routes?.deliveryTicket.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
-  const [fromRental, setFromRental] = useState(history?.location?.state?.rental)
+  const [fromRental, setFromRental] = useState(history?.location?.state?.rental);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.deliveryTicket.title}`);
-  const { state: { user, selectedEntity, permissions } }: any = useData();
+  const {
+    state: { user, selectedEntity, permissions }
+  }: any = useData();
   const { getColumnData } = useColumns();
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -72,9 +74,10 @@ const DeliveryTicket = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
   const { isOffline } = useContext(CustomOfflineContext);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   useEffect(() => {
     fetchGridColumns();
@@ -83,13 +86,14 @@ const DeliveryTicket = () => {
   const fetchGridColumns = async () => {
     let data;
     if (isOffline) {
-      data = await findOne(objectStore.resource, objectStore.deliveryTicket)
+      data = await findOne(objectStore.resource, objectStore.deliveryTicket);
+    } else {
+      const response = await axiosInstance().get(
+        `/field?resource=${sidebarResource['deliveryTicket']}&entity=${selectedEntity}&view=true&showHiddenFields=true`
+      );
+      data = response?.data?.data;
     }
-    else {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}&entity=${selectedEntity}&view=true&showHiddenFields=true`)
-      data = response?.data?.data
-    }
-    data = data.filter((e) => !["productInventory", "pickupFromType", "deliveryToType"].includes(e?.fieldData?.fieldName))
+    data = data.filter((e) => !['productInventory', 'pickupFromType', 'deliveryToType'].includes(e?.fieldData?.fieldName));
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
@@ -111,15 +115,15 @@ const DeliveryTicket = () => {
     };
     setFrameWorkComponent({ ...tempFrameworkComponent });
     columns = [...columns, ...getStaticFields()];
-    columns = columns.filter((e) => !["warehouse", "customerAccount", "supplierAccount"].includes(e.field))
+    columns = columns.filter((e) => !['warehouse', 'customerAccount', 'supplierAccount'].includes(e.field));
     columns.forEach((e) => {
-      if (e.field === "pickupFrom") {
-        e.cellRenderer = "pickupFromRenderer";
+      if (e.field === 'pickupFrom') {
+        e.cellRenderer = 'pickupFromRenderer';
       }
-      if (e.field === "deliveryTo") {
-        e.cellRenderer = "deliveryToRenderer";
+      if (e.field === 'deliveryTo') {
+        e.cellRenderer = 'deliveryToRenderer';
       }
-    })
+    });
     setColumns([...columns]);
   };
 
@@ -130,14 +134,14 @@ const DeliveryTicket = () => {
         if (gridApi) {
           gridApi.setRowData([]);
         }
-        let data: any = [], count;
+        let data: any = [],
+          count;
         if (!isOffline) {
           const queryString = getQueryString();
           const response: any = await axiosInstance().get(`${deliveryTicket.api}${queryString}`);
           data = response?.data?.data;
           count = response?.data?.count;
-        }
-        else {
+        } else {
           data = await findAll(objectStore.deliveryTicket);
           count = data?.length || 0;
         }
@@ -145,7 +149,7 @@ const DeliveryTicket = () => {
           let res = {
             ...prepareDataForGrid(u, user)
           };
-          res["isChecked"] = false;
+          res['isChecked'] = false;
           return res;
         });
         if (appendRows) {
@@ -153,10 +157,11 @@ const DeliveryTicket = () => {
         } else {
           dispatch({ type: 'initialize', data: rows, count: count });
         }
-        setTimeout(() => { dispatch({ type: 'loading', loading: false }); }, gridLoadingTimeout);
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       }
-    }
-    catch (error) {
+    } catch (error) {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
     }
@@ -257,7 +262,7 @@ const DeliveryTicket = () => {
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -268,14 +273,13 @@ const DeliveryTicket = () => {
 
   const handleDeliveryTicketTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`)
-  }
+    history.push(`?type=${filterValues}`);
+  };
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
       setFilter(newFilter);
       handleDeliveryTicketTypeSel(DeliveryTicketType.find((d) => d.key === newFilter).value);
-
     }
   };
 
@@ -388,7 +392,13 @@ const DeliveryTicket = () => {
                 <HideWhenOffline>
                   <div className={`align-items-center gap-1 layout-for-mobile `}>
                     {DeliveryTicketType && (
-                      <ToggleButtonGroup size="small" className="ml-2" value={DeliveryTicketType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                      <ToggleButtonGroup
+                        size="small"
+                        className="ml-2"
+                        value={DeliveryTicketType[selectedType - 1].key}
+                        exclusive
+                        onChange={handleFilter}
+                      >
                         {DeliveryTicketType.map((k, index) => {
                           return (
                             <ToggleButton value={k.key} key={index}>
@@ -400,15 +410,13 @@ const DeliveryTicket = () => {
                     )}
                   </div>
                 </HideWhenOffline>
-
-
               </Grid>
               <Grid item xs={isMobile && !isTablet ? 12 : 6} container className={isMobile ? styles.filter_side : styles.filter_side_deck}>
                 <Box className={isMobile && !isTablet ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                  <Grid style={{ display: 'flex', flex: 1, gap: "5px" }} className={isMobile && !isTablet ? styles.content_box : ""}>
+                  <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile && !isTablet ? styles.content_box : ''}>
                     <SearchBox
                       onSearch={handleSearch}
-                      searchbox={isMobile ? styles.search_box_input : ""}
+                      searchbox={isMobile ? styles.search_box_input : ''}
                       width="242px"
                       size="small"
                       value={search}
@@ -429,7 +437,8 @@ const DeliveryTicket = () => {
                       onClick={openActions}
                       disabled={selectedRecords.length ? false : true}
                       aria-controls="action-menu"
-                    >Actions <ExpandMore />
+                      endIcon={<ExpandMore />}
+                    >Actions
                     </Button>
                   }
                   <Menu
@@ -466,9 +475,9 @@ const DeliveryTicket = () => {
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
-              onEdit={() => { }}
+              onEdit={() => {}}
               extraParamsToCheckDelete={true}
-              onDelete={() => { }}
+              onDelete={() => {}}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -484,7 +493,7 @@ const DeliveryTicket = () => {
               ]}
               onCreate={null}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -520,7 +529,9 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}}   ${deleteRecord.ticketName || ''}?`}
+              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}}   ${
+                deleteRecord.ticketName || ''
+              }?`}
               onClose={() => {
                 setDeleteRecord(null);
                 setIsConformDialogVisible(false);

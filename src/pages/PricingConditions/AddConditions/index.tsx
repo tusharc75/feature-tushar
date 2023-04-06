@@ -72,7 +72,13 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then(({ data: { data } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${element.materialType === 'product' ? element.productDetail?.productName : element.materialType === 'service' ? element.serviceDetail?.serviceName : element.packageDetail?.packageName}`;
+          element.detail = `${
+            element.materialType === 'product'
+              ? element.productDetail?.productName
+              : element.materialType === 'service'
+              ? element.serviceDetail?.serviceName
+              : element.packageDetail?.packageName
+          }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = element.conditionType?.join(',');
           element.unit = element.unit?.join(',');
@@ -159,7 +165,13 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           aria-label="Details"
           onClick={() => {
             window.open(
-              `${params.data.materialType === 'Product' ? routes.productDetail.path : params.data.materialType === 'Service' ? routes.serviceMasterDetail.path : routes.packagesDetail.path}/${params.data.materialId}`
+              `${
+                params.data.materialType === 'Product'
+                  ? routes.productDetail.path
+                  : params.data.materialType === 'Service'
+                  ? routes.serviceMasterDetail.path
+                  : routes.packagesDetail.path
+              }/${params.data.materialId}`
             );
           }}
         >
@@ -262,10 +274,11 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       type: 'info',
       message: `Your file will be downloaded/uploaded in a matter of seconds`
     });
-    let exportApi = `${pricingCondition.api}/condition/template/${pricingConditionId}${getLocalStorageArrayData(localStorageSelectedRecords).length
-      ? `?ids=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((e) => e?.materialId) || [])}`
-      : ''
-      }`;
+    let exportApi = `${pricingCondition.api}/condition/template/${pricingConditionId}${
+      getLocalStorageArrayData(localStorageSelectedRecords).length
+        ? `?ids=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((e) => e?.materialId) || [])}`
+        : ''
+    }`;
 
     axiosInstance()
       .get(exportApi, {
@@ -350,8 +363,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
             onClick={openActions}
             aria-controls="action-menu"
+            endIcon={<ExpandMore />}
           >
-            {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+            {isMobile && !isTablet ? '' : 'Actions'}
           </Button>
           <Menu
             anchorEl={anchorEl}
@@ -393,7 +407,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 ? `(${getLocalStorageArrayData(localStorageSelectedRecords).length})`
                 : '(All)'}
             </MenuItem>
-            <MenuItem onClick={() => { }}>
+            <MenuItem onClick={() => {}}>
               <label htmlFor="importFromExcel">{ImportInput}Import from Excel</label>
             </MenuItem>
           </Menu>
@@ -452,8 +466,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete pricing setup condition  ${deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
-            } ?`}
+          message={`Are you sure you want to delete pricing setup condition  ${
+            deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

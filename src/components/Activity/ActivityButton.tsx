@@ -33,7 +33,7 @@ const ActivityButton = ({ referenceId, resource }) => {
           endIcon={<ArrowForwardIcon />}
           variant="contained"
           onClick={() => setActivityShow(!showActivity)}
-          style={{ background: 'var(--new_theme_color)', color: 'white', boxShadow: '0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06)' }}
+          style={{ background: 'var(--new_theme_color)', color: 'white', boxShadow: 'unset' }}
         >
           Activities
         </Button>

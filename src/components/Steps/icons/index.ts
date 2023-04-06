@@ -1,30 +1,74 @@
-import add from './add.svg';
-import assign from './assign.svg';
-import dispatch from './dispatch.svg';
-import invoice from './invoice.svg';
 import { LeftIcon } from './left';
 import { RightIcon } from './right';
+
+import { Add, Assign, Dispatch, Invoice, PostWork, Quote, RepairOrder, SerializedAsset, WorkOrder, Ticket, ReceiveProduct } from './svgIcon';
 export interface stepIconInterface {
-  icon: 'add' | 'assign' | 'dispatch' | 'invoice' | 'dispatch';
+  icon:
+    | 'add'
+    | 'assign'
+    | 'dispatch'
+    | 'invoice'
+    | 'postWork'
+    | 'quote'
+    | 'repairOrder'
+    | 'serializedAssets'
+    | 'workOrder'
+    | 'ticket'
+    | 'receiveProduct';
 }
 
 export const getIcon = (name: string) => {
-  name = name.toLowerCase();
   switch (true) {
-    case name.includes('add'):
-      return add;
+    case name === 'add':
+      return Add;
       break;
-    case name.includes('assign'):
-      return assign;
+    case name === 'assign':
+      return Assign;
       break;
-    case name.includes('dispatch'):
-      return dispatch;
+    case name === 'dispatch':
+      return Dispatch;
       break;
-    case name.includes('invoice'):
-      return invoice;
+    case name === 'invoice':
+      return Invoice;
+      break;
+    case name === 'postWork':
+      return PostWork;
+      break;
+    case name === 'quote':
+      return Quote;
+      break;
+    case name === 'repairOrder':
+      return RepairOrder;
+      break;
+    case name === 'serializedAssets':
+      return SerializedAsset;
+      break;
+    case name === 'workOrder':
+      return WorkOrder;
+      break;
+    case name === 'ticket':
+      return Ticket;
+      break;
+    case name === 'receiveProduct':
+      return ReceiveProduct;
       break;
     default:
-      return dispatch;
+      return SerializedAsset;
   }
 };
+
 export { LeftIcon, RightIcon };
+
+export const stepColorPalette: [string, string][] = [
+  ['#FAC94B', '#FF9B04'],
+  ['#577BFC', '#1608BD'],
+  ['#FC5757', '#C60707'],
+  ['#3BE961', '#058D12'],
+  ['#AD14F5', '#6203AC ']
+];
+
+export const getColorOficon = (index: number): [string, string] => {
+  if (!index) return;
+  const colorIndex = index % stepColorPalette.length;
+  return stepColorPalette[colorIndex];
+};
