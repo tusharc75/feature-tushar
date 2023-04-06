@@ -204,6 +204,8 @@ import StorageLocation from './pages/StorageLocation';
 import TransactionLock from './pages/TransactionLock';
 import TransactionLockDetail from './pages/TransactionLock/TransactionLockDetail';
 import DOAApprovalQuotation from './pages/DOA/DOAApprovalQuotation';
+import WellNumber from './pages/WellNumber';
+import WellNumberDetail from './pages/WellNumber/WellNumberDetail';
 
 var notificationInterval: any = null;
 
@@ -1004,6 +1006,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.transactionLockDetail.path}/:id`}>
               <TransactionLockDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.wellNumber.path}`}>
+              <WellNumber />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.wellNumberDetail.path}/:id`}>
+              <WellNumberDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
