@@ -40,6 +40,7 @@ import { useData } from '../../../StateProvider/Provider';
 import TinyMce from '../../../components/TinyMCE';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { values } from 'lodash';
+import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 
 // const emailSchemaHelper = array()
 //   .transform(function (value, originalValue) {
@@ -355,108 +356,34 @@ export const CreateEmail = ({
   const classes = useStyles();
 
   const renderQuotesOtherFileThumbnails = (
-    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
+    <>
       {quoteBuilderOtherAttachments && quoteBuilderOtherAttachments.length > 0 ? (
         <>
-          {quoteBuilderOtherAttachments.map((attachment, i) => {
-            return (
-              <>
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
-                  <Paper className={emailStyles.fileContainer}>
-                    <img src={getFileIconSrc(attachment?.extension)} className={emailStyles.file} alt="attchment" />
-                    <Typography noWrap variant="body2">
-                      {attachment && attachment?.name ? attachment?.name : 'Quotation'}
-                    </Typography>
-                    <div className={emailStyles.fileOverlay}>
-                      <Typography variant="subtitle2">{attachment && attachment?.name ? attachment?.name : 'Quotation'}</Typography>
-                      <div className={emailStyles.actionButton}>
-                        <IconButton>
-                          <GetAppIcon onClick={() => handleDownloadFile(attachment)} />
-                        </IconButton>
-                        <IconButton className={emailStyles.text}>
-                          <DeleteIcon className={emailStyles.deleteIcon} onClick={() => handleDeleteQuoteBuilderOtherAttachment(attachment?.name)} />
-                        </IconButton>
-                      </div>
-                    </div>
-                  </Paper>
-                </Grid>
-              </>
-            );
-          })}
+          <AttachmentThumbnail
+            attachments={quoteBuilderOtherAttachments}
+            handleDeleteAttachment={handleDeleteQuoteBuilderOtherAttachment}
+            canEdit={true}
+          />
         </>
       ) : null}
-    </Grid>
+    </>
   );
 
   const renderQuotesFileThumbnails = (
-    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
+    <>
       {stateQuoteBuilderAttachments && stateQuoteBuilderAttachments.length > 0 ? (
         <>
-          {stateQuoteBuilderAttachments.map((attachment, i) => {
-            return (
-              <>
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
-                  <Paper className={emailStyles.fileContainer}>
-                    <img src={getFileIconSrc(attachment?.contentType)} className={emailStyles.file} alt="attchment" />
-                    <Typography noWrap variant="body2">
-                      {attachment && attachment?.name ? attachment?.name : 'Quotation'}
-                    </Typography>
-                    <div className={emailStyles.fileOverlay}>
-                      <Typography variant="subtitle2">{attachment && attachment?.name ? attachment?.name : 'Quotation'}</Typography>
-                      <div className={emailStyles.actionButton}>
-                        <IconButton>
-                          <GetAppIcon onClick={() => handleDownloadFile(attachment)} />
-                        </IconButton>
-                        <IconButton className={emailStyles.text}>
-                          <DeleteIcon className={emailStyles.deleteIcon} onClick={() => handleDeleteQuoteBuilderAttachment(attachment)} />
-                        </IconButton>
-                      </div>
-                    </div>
-                  </Paper>
-                </Grid>
-              </>
-            );
-          })}
+          <AttachmentThumbnail
+            attachments={stateQuoteBuilderAttachments}
+            handleDeleteAttachment={handleDeleteQuoteBuilderAttachment}
+            canEdit={true}
+          />
         </>
       ) : null}
-    </Grid>
+    </>
   );
 
-  const renderFileThumbnails = (
-    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
-      {otherAttachments && otherAttachments.length > 0 ? (
-        <>
-          {otherAttachments.map((attachment, i) => {
-            return (
-              <>
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
-                  <Paper className={emailStyles.fileContainer}>
-                    <img src={getFileIconSrc(attachment)} className={emailStyles.file} alt="attchment" />
-                    <Typography noWrap variant="body2">
-                      {attachment ? attachment.substring(attachment.lastIndexOf('/') + 1) : 'attachment'}
-                    </Typography>
-                    <div className={emailStyles.fileOverlay}>
-                      <Typography variant="subtitle2">{attachment ? attachment.substring(attachment.lastIndexOf('/') + 1) : 'attachment'}</Typography>
-                      <div className={emailStyles.actionButton}>
-                        <IconButton className={emailStyles.text}>
-                          <a href={`${attachment} `} download={true}>
-                            <GoArrowDown color="white" size={21} />
-                          </a>
-                        </IconButton>
-                        <IconButton className={emailStyles.text}>
-                          <DeleteIcon className={emailStyles.deleteIcon} onClick={() => handleDeleteAttachment(attachment)} />
-                        </IconButton>
-                      </div>
-                    </div>
-                  </Paper>
-                </Grid>
-              </>
-            );
-          })}
-        </>
-      ) : null}
-    </Grid>
-  );
+  const renderFileThumbnails = <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={true} />;
 
   const onUploadFile = (file) => {
     if (checkImageUrl(file)) {
