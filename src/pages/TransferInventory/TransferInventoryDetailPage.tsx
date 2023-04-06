@@ -15,9 +15,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { ACTIVITY_RESOURCE, transferInventory } from 'src/constants/helpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
-import Steps from 'src/pages/RentalManagement/Steps';
-import Steps2, { getIndex } from 'src/components/Steps';
-import { MdEdit } from 'react-icons/md';
+import Steps from 'src/components/Steps';
 import { transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import TabPanel from 'src/components/TabPanel';
 import { BiFoodMenu } from 'react-icons/bi';
@@ -57,14 +55,11 @@ const TransferInventoryDetailPage = () => {
   const [statusOptions, setStatusOptions] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
-  const [transferInvSteps, setTransferInvSteps] = useState([]);
+  const [stepNames, setStepNames] = useState(transferInventorySteps?.map((item) => item.name));
 
   const [canReceive, setCanReceive] = useState(false);
   const [canLoad, setCanLoad] = useState(false);
 
-  const transferInventoryStepNames = React.useMemo(() => {
-    return transferInventorySteps.map((item) => item.name);
-  }, [transferInventorySteps]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -135,22 +130,10 @@ const TransferInventoryDetailPage = () => {
         axiosInstance()
           .get(`${routes.transferInventory.path}/${id}/product`)
           .then(({ data: { data } }) => {
-            var isSerializedAssetsStep = false;
-            data?.products?.forEach((e) => {
-              if (e?.productDetail?.serializedProduct) {
-                isSerializedAssetsStep = true;
-              }
-            });
-            var steps = transferInventorySteps;
-            // if (!isSerializedAssetsStep) {
-            //   steps = steps?.filter((e) => e !== "Serialized Assets")
-            // }
-            steps = steps?.filter((e) => e.name !== 'Serialized Assets');
-            setTransferInvSteps(steps);
             getRessourceFields();
             setHeadingLabel(transferData.transferNumber);
             setCustomizedRoutes([routes.transferInventory, { title: transferData.transferNumber }]);
-            setCurrentStep(steps.indexOf(transferData?.processStatus) !== -1 ? steps.indexOf(transferData?.processStatus) : 0);
+            setCurrentStep(stepNames.indexOf(transferData?.processStatus) !== -1 ? stepNames.indexOf(transferData?.processStatus) : 0);
             const isAllowedToEdit = [...(transferData.collaborator ?? []), transferData.owner].some((d) => d?.optionValue === user?.user?._id);
             setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
             setTransferInventoryData(transferData);
@@ -222,9 +205,9 @@ const TransferInventoryDetailPage = () => {
   const updateProcessStatus = (step: number) => {
     axiosInstance()
       .put(`${routes.transferInventory.path}/${id}/process-status`, {
-        processStatus: transferInvSteps[step].name
+        processStatus: stepNames[step]
       })
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -300,8 +283,8 @@ const TransferInventoryDetailPage = () => {
         <TabPanel value={tabValue} index={1}>
           {transferInventoryData && (
             <Box>
-              <Steps2
-                steps={transferInvSteps}
+              <Steps
+                steps={transferInventorySteps}
                 currentStep={currentStep}
                 setCurrentStep={setCurrentStep}
                 isNextStep={false}
@@ -310,8 +293,8 @@ const TransferInventoryDetailPage = () => {
                 isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
                 setStepFullScreen={() => setStepFullScreen(true)}
               />
-              <ContentFullScreen title={transferInventoryStepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                {transferInventoryStepNames[currentStep] === 'Add Products' && (
+              <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                {stepNames[currentStep] === 'Add Products' && (
                   <Products
                     transferInventoryData={transferInventoryData}
                     setNextStep={setNextStep}
@@ -321,7 +304,7 @@ const TransferInventoryDetailPage = () => {
                     fetchTransferInventoryData={fetchTransferInventoryData}
                   />
                 )}
-                {transferInventoryStepNames[currentStep] === 'Serialized Assets' && (
+                {stepNames[currentStep] === 'Serialized Assets' && (
                   <SerializesAssets
                     transferInventoryData={transferInventoryData}
                     setNextStep={setNextStep}
@@ -331,7 +314,7 @@ const TransferInventoryDetailPage = () => {
                     canLoad={canLoad}
                   />
                 )}
-                {transferInventoryStepNames[currentStep] === 'Loading Ticket' && (
+                {stepNames[currentStep] === 'Loading Ticket' && (
                   <LoadingTicket
                     transferInventoryData={transferInventoryData}
                     updateStatus={updateStatus}
