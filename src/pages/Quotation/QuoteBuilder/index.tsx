@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton, Typography } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -15,11 +15,30 @@ import SendEmail from '../SendEmail';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { genrateCustomTableColumns } from 'src/constants/columns';
+import NewStepper from 'src/components/Helpers/NewStepper';
+import { FcApproval, FcCancel, FcClock } from 'react-icons/fc';
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme) => ({
+  sent: {
+    color: "#00acc1",
+    fontWeight: "bold",
+  },
+  approved: {
+    color: "#6ca826",
+    fontWeight: "bold",
+  },
+  rejectedByDoa: {
+    color: "#d60f0f",
+    fontWeight: "bold",
+  },
+}));
 
 const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, stepFullScreen, fetchQuotationData, version, currentStep, versionData, allowedToEdit, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
+  const classes = useStyles();
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -223,6 +242,45 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
 
   return (
     <Fragment>
+      <Box>
+        {quotationData.versions[version].status.includes("Sent for DOA") && (
+          <>
+            {
+              <>
+                {/* <NewStepper heading={" "} quoteDOA={DOAData} /> */}
+                <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                  <FcClock size={30} />
+                  <Typography className={classes.sent}>DOA Sent</Typography>
+                </div>
+              </>
+            }
+          </>
+        )}
+        {quotationData.versions[version].status.includes("Accepted  by DOA") && (
+          <>
+            {/* {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />} */}
+
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcApproval size={30} />
+              <Typography className={classes.approved}>
+                Approved by DOA
+              </Typography>
+            </div>
+          </>
+        )}
+        {quotationData.versions[version].status.includes("Rejected by DOA") && (
+          <>
+            {/* {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />} */}
+
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcCancel size={30} />
+              <Typography className={classes.rejectedByDoa}>
+                Rejected by DOA
+              </Typography>
+            </div>
+          </>
+        )}
+      </Box>
       <Box pb={2} display="flex" justifyContent="space-between">
         <Box display="flex">
           <SendEmail
@@ -265,7 +323,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
             </Button>
           </Box>
         }
-        {currentStep === 'DOA' &&
+        {currentStep === 'DOA' && !quotationData.versions[version].status.includes("DOA") &&
           <Box display="flex">
             <Button
               variant="contained"
