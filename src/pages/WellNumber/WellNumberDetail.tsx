@@ -56,7 +56,7 @@ const WellNumberDetail = () => {
 
   const handleDelete = () => {
     axiosInstance()
-      .put(`${routes.wellMaster.path}/remove`, { ids: [id] })
+      .put(`${routes.wellNumber.path}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
         history.goBack();
