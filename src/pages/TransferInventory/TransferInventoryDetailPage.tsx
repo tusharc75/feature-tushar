@@ -142,15 +142,15 @@ const TransferInventoryDetailPage = () => {
               }
             });
             var steps = transferInventorySteps;
-            // if (!isSerializedAssetsStep) {
-            //   steps = steps?.filter((e) => e !== "Serialized Assets")
-            // }
-            steps = steps?.filter((e) => e.name !== 'Serialized Assets');
+
+            if (!isSerializedAssetsStep) {
+              steps = steps?.filter((e) => e.name !== 'Serialized Assets');
+            }
             setTransferInvSteps(steps);
             getRessourceFields();
             setHeadingLabel(transferData.transferNumber);
             setCustomizedRoutes([routes.transferInventory, { title: transferData.transferNumber }]);
-            setCurrentStep(steps.indexOf(transferData?.processStatus) !== -1 ? steps.indexOf(transferData?.processStatus) : 0);
+            setCurrentStep(getIndex(transferData?.processStatus, steps));
             const isAllowedToEdit = [...(transferData.collaborator ?? []), transferData.owner].some((d) => d?.optionValue === user?.user?._id);
             setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
             setTransferInventoryData(transferData);
