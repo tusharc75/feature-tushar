@@ -164,21 +164,21 @@ const ServiceMaster = (props: Props) => {
 
     const columns: any = [
       {
-        accessor: 'index',
-        Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
-        // Footer: () => {
-        //   return <>Total</>;
-        // }
-      },
-      {
         accessor: 'order',
-        Header: 'Order',
+        Header: 'Sequence',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.order || <NoDataCell />}</p>
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p>{`${row.original?.type || <NoDataCell />} `}</p>
+          </div>
+        )
       },
       {
         accessor: 'detail',
@@ -201,12 +201,22 @@ const ServiceMaster = (props: Props) => {
         )
       },
       {
-        accessor: 'type',
-        Header: 'Type',
+        accessor: 'description',
+        Header: 'Description',
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${startCase(row.original?.type) || <NoDataCell />} `}</p>
+            <p>{row.original?.serviceDescription || row.original?.productDetail?.productDescription || <NoDataCell />}</p>
+          </div>
+        )
+      },
+      {
+        accessor: 'serviceType',
+        Header: 'Service Type',
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p>{row.original?.serviceType || <NoDataCell />}</p>
           </div>
         )
       },
@@ -228,7 +238,7 @@ const ServiceMaster = (props: Props) => {
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'end' }}>
           {row.original?.type !== 'Product' && (
-            <HtmlTooltip title="Add Consumable">
+            <HtmlTooltip title="Add Consumables">
               <IconButton
                 size="small"
                 aria-label="Delete"
@@ -293,10 +303,6 @@ const ServiceMaster = (props: Props) => {
       )
     });
     setColumns([...columns]);
-    // axiosInstance()
-    //   .get(`/field?resource=${serviceMaster.resource}`)
-    //   .then(({ data: { data } }) => {
-    //   });
   };
 
   const fetchData = async () => {
