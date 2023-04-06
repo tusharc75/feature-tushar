@@ -258,45 +258,32 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
 
   return (
     <Fragment>
-      <Box>
-        {quotationData.versions[version].status.includes("Sent for DOA") && (
-          <>
-            {
-              <>
-                {/* <NewStepper heading={" "} quoteDOA={DOAData} /> */}
-                <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                  <FcClock size={30} />
-                  <Typography className={classes.sent}>DOA Sent</Typography>
-                </div>
-              </>
-            }
-          </>
-        )}
-        {quotationData.versions[version].status.includes("Accepted  by DOA") && (
-          <>
-            {/* {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />} */}
-
+      {currentStep === 'DOA' &&
+        <Box>
+          {quotationData.versions[version].status.includes("Sent for DOA") && (
+            <div className="d-flex align-items-center justify-content-center flex-column m-3">
+              <FcClock size={30} />
+              <Typography className={classes.sent}>DOA Sent</Typography>
+            </div>
+          )}
+          {quotationData.versions[version].status.includes("Accepted by DOA") && (
             <div className="d-flex align-items-center justify-content-center flex-column m-3">
               <FcApproval size={30} />
               <Typography className={classes.approved}>
                 Approved by DOA
               </Typography>
             </div>
-          </>
-        )}
-        {quotationData.versions[version].status.includes("Rejected by DOA") && (
-          <>
-            {/* {DOAData && <NewStepper heading={" "} quoteDOA={DOAData} />} */}
-
+          )}
+          {quotationData.versions[version].status.includes("Rejected by DOA") && (
             <div className="d-flex align-items-center justify-content-center flex-column m-3">
               <FcCancel size={30} />
               <Typography className={classes.rejectedByDoa}>
                 Rejected by DOA
               </Typography>
             </div>
-          </>
-        )}
-      </Box>
+          )}
+        </Box>
+      }
       <Box pb={2} display="flex" justifyContent="space-between">
         <Box display="flex">
           <SendEmail
