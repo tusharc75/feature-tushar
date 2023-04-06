@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
