@@ -76,6 +76,7 @@ const LookupResource = [
   { name: 'Sublease', value: 'Sublease' },
   { name: 'Zone', value: 'Zone' },
   { name: 'Well Master', value: 'Well Master' },
+  { name: 'Well Number', value: 'Well Number' },
   { name: 'Bulk Asset Creation', value: 'Bulk Asset Creation' },
   { name: 'Repair Type', value: 'Repair Type' },
   { name: 'Transfer Inventory', value: 'Transfer Inventory' },

@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton, Typography } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -8,13 +8,14 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { isMobile } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { prepareDataForGrid, quotation } from 'src/constants/helpers';
+import { QUOTATION_STATUS, prepareDataForGrid, quotation } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import SendEmail from '../SendEmail';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { genrateCustomTableColumns } from 'src/constants/columns';
+
 
 const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, stepFullScreen, fetchQuotationData, version, currentStep, versionData, allowedToEdit, renderedFrom }) => {
 
@@ -38,7 +39,11 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
   useEffect(() => {
     if (currentStep === "Quote Approval" && rowsData && !sentToCustomer) {
       setNextStep(false);
-    } else {
+    }
+    else if (currentStep === "DOA" && (quotationData.versions[version].status.includes(QUOTATION_STATUS.sentforDOA) || quotationData.versions[version].status.includes(QUOTATION_STATUS.rejectedbyDOA))) {
+      setNextStep(false)
+    }
+    else {
       setNextStep(true);
     }
   }, [currentStep, sentToCustomer, rowsData]);
@@ -281,7 +286,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
             </Button>
           </Box>
         }
-        {currentStep === 'DOA' &&
+        {currentStep === 'DOA' && !quotationData.versions[version].status.includes("DOA") &&
           <Box display="flex">
             <Button
               variant="contained"

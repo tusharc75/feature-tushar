@@ -53,6 +53,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Invoice'];
 
 export const jobProcessSteps = ['Add', 'Fleet'];
+
 export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Quote Approval', 'End'];
 
 export const rentalManagementSteps = [
@@ -68,10 +69,13 @@ export const rentalManagementSteps = [
 ];
 
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
+
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
 
 export const demandOrderSteps = ['Add Products'];
+
 export const purchaseRequisitionSteps = ['Add Products'];
+
 
 export const productionOrderSteps: stepInterface[] = [{ name: 'Add', title: 'Add', icon: 'add' }];
 
@@ -79,43 +83,41 @@ export const invoiceProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
   { name: 'Ready To Invoice', title: 'Invoice', icon: 'invoice' }
 ];
+
 export const repairJobProcessSteps: stepInterface[] = [
   { name: 'Serialized Assets', title: 'Assets', icon: 'serializedAssets' },
   { name: 'Repair Process', title: 'Repair', icon: 'repairOrder' }
 ];
-export const transferSteps: stepInterface[] = [
+
+export const transferAssetSteps: stepInterface[] = [
   { name: 'Add Assets', title: 'Add', icon: 'add' },
-  { name: 'Loading Ticket', title: 'Ticket', icon: 'ticket' }
-];
-export const transferSteps1: stepInterface[] = [
-  { name: 'Add Assets', title: 'Add', icon: 'add' },
-  { name: 'Loading Ticket', title: 'Ticket', icon: 'ticket' },
-  { name: 'Receiving Ticket', title: 'Receiving Ticket', icon: 'ticket' }
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
+  { name: 'Receiving Ticket', title: 'Receiving', icon: 'ticket' }
 ];
 
 export const transferInventorySteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Serialized Assets', title: 'Serialized Assets', icon: 'serializedAssets' },
-  { name: 'Loading Ticket', title: 'Ticket', icon: 'ticket' }
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' }
 ];
+
 export const purchaseOrderSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Receive Products', title: 'Product', icon: 'receiveProduct' } // need icon
+  { name: 'Receive Products', title: 'Receive', icon: 'receiveProduct' } // need icon
 ];
 
 export const repairOrderSteps: stepInterface[] = [
   { name: 'Add Assets', title: 'Add', icon: 'add' },
   { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
-  { name: 'Post Work Service', title: 'Service', icon: 'postWork' },
-  { name: 'Loading Ticket', title: 'Loading Ticket', icon: 'dispatch' },
+  { name: 'Post Work Service', title: 'Post Work', icon: 'postWork' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'dispatch' },
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
 export const serviceOrderSteps: stepInterface[] = [
   { name: 'Add Services', title: 'Add', icon: 'add' },
-  { name: 'Add Products', title: 'Products', icon: 'add' },
-  { name: 'Assign Technician', title: 'Assign', icon: 'assign' },
+  { name: 'Add Products', title: 'Products', icon: 'assign' },
+  { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
   { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
 ];
@@ -284,7 +286,8 @@ export const sidebarResource = {
   fleetDispatch: 'Fleet Dispatch',
   fleetReceiver: 'Fleet Receiver',
   storageLocation: 'Storage Location',
-  transactionLock: 'Transaction Lock'
+  transactionLock: 'Transaction Lock',
+  wellNumber: 'Well Number',
 };
 
 export const primaryFields = {
@@ -396,7 +399,8 @@ export const RESOURCE_LABEL = {
   job: 'Job',
   fleetReceiver: 'Fleet Receiver',
   storageLocation: 'Storage Location',
-  transactionLock: 'Transaction Lock'
+  transactionLock: 'Transaction Lock',
+  wellNumber: 'Well Number',
 };
 
 export const CHILD_RESOURCE = {
@@ -910,21 +914,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -2246,7 +2250,10 @@ export const QUOTATION_STATUS = {
   sentToCustomer: 'Sent to Customer',
   acceptByCustomer: 'Accepted by Customer',
   rejectByCustomer: 'Rejected by Customer',
-  converted: 'Converted'
+  converted: 'Converted',
+  sentforDOA: "Sent for DOA",
+  acceptedbyDOA: "Accepted by DOA",
+  rejectedbyDOA: "Rejected by DOA"
 };
 
 export const QUOTATION_TYPE = {

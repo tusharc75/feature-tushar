@@ -135,6 +135,8 @@ export const ViewEmail = ({
   const [fileImageAttachments, setFileImageAttachments] = useState([]);
   const [imageAttachments, setImageAttachments] = useState([]);
   const [otherAttachments, setOtherAttachments] = useState([]);
+  const [newImageAttachments, setNewImageAttachments] = useState([]);
+  const [newOtherAttachments, setNewOtherAttachments] = useState([]);
   const [open, setOpen] = useState(false);
   const [imageSource, setImageSource] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -204,10 +206,7 @@ export const ViewEmail = ({
       to: values.to,
       cc: values.cc,
       subject: values.subject,
-      attachment:
-        otherAttachments.length || fileImageAttachments.length
-          ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments]
-          : [...imageAttachments]
+      attachment: newOtherAttachments.length || newImageAttachments.length ? [...newOtherAttachments, ...newImageAttachments] : []
     };
     setSending(true);
     axiosInstance()
@@ -215,6 +214,8 @@ export const ViewEmail = ({
       .then(() => {
         setSending(false);
         fetchEmailDetail();
+        setNewImageAttachments([]);
+        setNewOtherAttachments([]);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -292,11 +293,11 @@ export const ViewEmail = ({
   };
 
   const handleDeleteAttachment = (url) => {
-    setOtherAttachments(otherAttachments.filter((currentUrl) => currentUrl !== url));
+    setNewOtherAttachments(otherAttachments.filter((currentUrl) => currentUrl !== url));
   };
 
   const handleDeleteImageAttachment = (url) => {
-    setImageAttachments(imageAttachments.filter((currentUrl) => currentUrl !== url));
+    setNewImageAttachments(imageAttachments.filter((currentUrl) => currentUrl !== url));
   };
 
   const handleDeleteFileImageAttachment = (url) => {
@@ -320,9 +321,9 @@ export const ViewEmail = ({
 
   const onUploadFile = (file) => {
     if (checkImageUrl(file)) {
-      setFileImageAttachments((prevState) => [...prevState, file]);
+      setNewImageAttachments((prevState) => [...prevState, file]);
     } else {
-      setOtherAttachments((prevState) => [...prevState, file]);
+      setNewOtherAttachments((prevState) => [...prevState, file]);
     }
   };
 
@@ -451,6 +452,23 @@ export const ViewEmail = ({
                                           __html: initialValues.content || initialValues.message
                                         }}
                                       />
+                                      {
+                                        <AttachmentThumbnail
+                                          attachments={otherAttachments}
+                                          canEdit={false}
+                                          handleDeleteAttachment={(attachment) => {}}
+                                        />
+                                      }
+                                      <ImageAttachments
+                                        imageAttachments={imageAttachments}
+                                        onImageClick={(attachment) => {
+                                          setImageSource(attachment);
+                                          setOpen(true);
+                                        }}
+                                        isCreateOnly={true}
+                                        onDelete={handleDeleteImageAttachment}
+                                        emailId={emailId}
+                                      />
                                     </Box>
                                   </Grid>
                                 </Grid>
@@ -496,17 +514,6 @@ export const ViewEmail = ({
                                 );
                               })}
                             </Box>
-                            {<AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={true} />}
-                            <ImageAttachments
-                              imageAttachments={imageAttachments}
-                              onImageClick={(attachment) => {
-                                setImageSource(attachment);
-                                setOpen(true);
-                              }}
-                              isCreateOnly={true}
-                              onDelete={handleDeleteImageAttachment}
-                              emailId={emailId}
-                            />
 
                             <Box className={classes.inboundEmail}>
                               <Box>
@@ -516,7 +523,7 @@ export const ViewEmail = ({
                                   </Grid>
                                   <Grid item style={{ flexBasis: 'calc(100% - 48px)' }}>
                                     <Box className={`${classes.mailText} ${classes.inputBox}`}>
-                                      {otherAttachments.length > 0 && (
+                                      {newOtherAttachments.length > 0 && (
                                         <AttachmentThumbnail
                                           attachments={otherAttachments}
                                           handleDeleteAttachment={handleDeleteAttachment}
@@ -549,7 +556,7 @@ export const ViewEmail = ({
                                           emailId={emailId}
                                         />
                                       )}
-                                      {imageAttachments?.length > 0 && (
+                                      {newImageAttachments?.length > 0 && (
                                         <ImageAttachments
                                           imageAttachments={imageAttachments}
                                           onImageClick={(attachment) => {
