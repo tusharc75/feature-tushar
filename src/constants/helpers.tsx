@@ -2246,7 +2246,10 @@ export const QUOTATION_STATUS = {
   sentToCustomer: 'Sent to Customer',
   acceptByCustomer: 'Accepted by Customer',
   rejectByCustomer: 'Rejected by Customer',
-  converted: 'Converted'
+  converted: 'Converted',
+  sentforDOA :"Sent for DOA",
+  acceptedbyDOA : "Accepted by DOA",
+  rejectedbyDOA:"Rejected by DOA"
 };
 
 export const QUOTATION_TYPE = {

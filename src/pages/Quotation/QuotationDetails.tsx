@@ -35,7 +35,8 @@ import {
   MdDelete,
   MdDeleteSweep,
   RiFlowChart,
-  VscVersions
+  VscVersions,
+  FcApproval
 } from 'react-icons/all';
 import { camelCase } from 'lodash';
 import Service from './Service';
@@ -51,10 +52,28 @@ import QuotationSummeryDialog from './QuotationSummeryDialog';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CachedIcon from '@material-ui/icons/Cached';
+import { makeStyles } from "@material-ui/core/styles";
+import NewStepper from 'src/components/Helpers/NewStepper';
+
+const useStyles = makeStyles((theme) => ({
+  sent: {
+    color: "#00acc1",
+    fontWeight: "bold",
+  },
+  approved: {
+    color: "#6ca826",
+    fontWeight: "bold",
+  },
+  rejectedByDoa: {
+    color: "#d60f0f",
+    fontWeight: "bold",
+  },
+}));
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.quotation.title);
+  const classes = useStyles();
 
   const { id } = useParams();
   const history = useHistory();
@@ -78,7 +97,7 @@ const QuotationDetails = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
-
+  const [DOAData, setDOAData] = useState([]);
   const [currentVersion, setCurrentVersion] = useState(0);
   const [isCloning, setCloning] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
@@ -130,6 +149,7 @@ const QuotationDetails = () => {
       if (!quotationProcessSteps?.includes("DOA")) {
         setProcessSteps(insert(quotationProcessSteps, 3, "DOA"))
       }
+      fetchDOAData()
     }
     else {
       setProcessSteps(quotationProcessSteps)
@@ -218,6 +238,16 @@ const QuotationDetails = () => {
     } catch (error) {
       setLoading(false);
       toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchDOAData = () => {
+    if (processSteps?.includes("DOA")) {
+      axiosInstance()
+        .get(`doa-request/doaFlow/${quotationData._id}/${currVersionId}`)
+        .then(({ data: { data } }) => {
+          setDOAData(data.reverse());
+        })
     }
   };
 
@@ -527,6 +557,35 @@ const QuotationDetails = () => {
               <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
             </div>
           ) : null}
+          {processSteps[currentStep] === 'DOA' && quotationData.versions &&
+            <Box>
+              {quotationData.versions[currentVersion].status.includes(QUOTATION_STATUS.sentforDOA) && (
+                <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                  <NewStepper heading={" "} quoteDOA={DOAData} />
+                  <FcClock size={30} />
+                  <Typography className={classes.sent}>DOA Sent</Typography>
+                </div>
+              )}
+              {quotationData.versions[currentVersion].status.includes(QUOTATION_STATUS.acceptedbyDOA) && (
+                <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                  <NewStepper heading={" "} quoteDOA={DOAData} />
+                  <FcApproval size={30} />
+                  <Typography className={classes.approved}>
+                    Approved by DOA
+                  </Typography>
+                </div>
+              )}
+              {quotationData.versions[currentVersion].status.includes(QUOTATION_STATUS.rejectedbyDOA) && (
+                <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                  <NewStepper heading={" "} quoteDOA={DOAData} />
+                  <FcCancel size={30} />
+                  <Typography className={classes.rejectedByDoa}>
+                    Rejected by DOA
+                  </Typography>
+                </div>
+              )}
+            </Box>
+          }
           <div>
             <Steps
               isNextStep={false}
@@ -536,7 +595,7 @@ const QuotationDetails = () => {
               setCurrentStep={setCurrentStep}
               isStepEnded={processSteps[currentStep] === 'End'}
               setStepFullScreen={() => setStepFullScreen(true)}
-              isPrevStep={!sentToCustomer}
+              isPrevStep={!sentToCustomer || !(processSteps[currentStep] === 'DOA' && (quotationData.versions[currentVersion].status.includes(QUOTATION_STATUS.sentforDOA) || quotationData.versions[currentVersion].status.includes(QUOTATION_STATUS.rejectedbyDOA)))}
               updateStatus={updateProcessStatus}
               handleNext={processSteps[currentStep] === 'Quote Approval' ? () => {
                 setCustomerAcceptable(true);
