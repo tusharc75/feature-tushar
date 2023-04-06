@@ -28,6 +28,7 @@ const Steps = ({
   let activeStep = currentStep;
   const containerRef = useRef(null);
 
+  console.log({ isStepEnded });
   const goNext = () => {
     if (handleNext) {
       handleNext();
@@ -111,7 +112,11 @@ const Steps = ({
         <Box {...others} className={`${className} ${styles.gradient}`}>
           <Box className={styles.mainContainer}>
             <Box className={styles.iconButton}>
-              <IconButton disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep} onClick={goPrev}>
+              <IconButton
+                style={{ opacity: isStepEnded && '0' }}
+                disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep}
+                onClick={goPrev}
+              >
                 <LeftIcon />
               </IconButton>
             </Box>
@@ -123,7 +128,7 @@ const Steps = ({
                     className={`
                     ${styles.singleStep} 
                     ${i < currentStep || isStepEnded ? styles.activeSteps : ''}
-                    ${i === currentStep ? styles.currentStep : ''}
+                    ${i === currentStep && !isStepEnded ? styles.currentStep : ''}
                     ${i > currentStep ? styles.inActiveStep : ''}
                     single-step-item
                 `}
@@ -147,7 +152,11 @@ const Steps = ({
               })}
             </div>
             <Box className={styles.iconButton}>
-              <IconButton disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep} onClick={goNext}>
+              <IconButton
+                style={{ opacity: isStepEnded && '0' }}
+                disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep}
+                onClick={goNext}
+              >
                 <RightIcon />
               </IconButton>
             </Box>
