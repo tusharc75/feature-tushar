@@ -518,7 +518,7 @@ const ServiceMaster = (props: Props) => {
               <MenuItem
                 onClick={() => {
                   handleUpdate({
-                    ids: selectedRecords.map((d) => d._id),
+                    ids: selectedRecords?.filter((p) => p.type !== 'Product')?.map((d) => d._id),
                     default: true
                   });
                   closeActions();
@@ -529,7 +529,7 @@ const ServiceMaster = (props: Props) => {
               <MenuItem
                 onClick={() => {
                   handleUpdate({
-                    ids: selectedRecords.map((d) => d._id),
+                    ids: selectedRecords?.filter((p) => p.type !== 'Product')?.map((d) => d._id),
                     default: false
                   });
                   closeActions();
