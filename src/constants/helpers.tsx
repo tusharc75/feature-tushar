@@ -53,6 +53,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Invoice'];
 
 export const jobProcessSteps = ['Add', 'Fleet'];
+
 export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Quote Approval', 'End'];
 
 export const rentalManagementSteps = [
@@ -68,10 +69,13 @@ export const rentalManagementSteps = [
 ];
 
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
+
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
 
 export const demandOrderSteps = ['Add Products'];
+
 export const purchaseRequisitionSteps = ['Add Products'];
+
 
 export const productionOrderSteps: stepInterface[] = [{ name: 'Add', title: 'Add', icon: 'add' }];
 
@@ -87,6 +91,7 @@ export const transferSteps: stepInterface[] = [
   { name: 'Add Assets', title: 'Add', icon: 'add' },
   { name: 'Loading Ticket', title: 'Ticket', icon: 'ticket' }
 ];
+
 export const transferSteps1: stepInterface[] = [
   { name: 'Add Assets', title: 'Add', icon: 'add' },
   { name: 'Loading Ticket', title: 'Ticket', icon: 'ticket' },
@@ -98,9 +103,10 @@ export const transferInventorySteps: stepInterface[] = [
   { name: 'Serialized Assets', title: 'Serialized Assets', icon: 'serializedAssets' },
   { name: 'Loading Ticket', title: 'Ticket', icon: 'ticket' }
 ];
+
 export const purchaseOrderSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Receive Products', title: 'Product', icon: 'receiveProduct' } // need icon
+  { name: 'Receive Products', title: 'Receive', icon: 'receiveProduct' } // need icon
 ];
 
 export const repairOrderSteps: stepInterface[] = [
@@ -284,7 +290,8 @@ export const sidebarResource = {
   fleetDispatch: 'Fleet Dispatch',
   fleetReceiver: 'Fleet Receiver',
   storageLocation: 'Storage Location',
-  transactionLock: 'Transaction Lock'
+  transactionLock: 'Transaction Lock',
+  wellNumber: 'Well Number',
 };
 
 export const primaryFields = {
@@ -396,7 +403,8 @@ export const RESOURCE_LABEL = {
   job: 'Job',
   fleetReceiver: 'Fleet Receiver',
   storageLocation: 'Storage Location',
-  transactionLock: 'Transaction Lock'
+  transactionLock: 'Transaction Lock',
+  wellNumber: 'Well Number',
 };
 
 export const CHILD_RESOURCE = {
@@ -2246,7 +2254,10 @@ export const QUOTATION_STATUS = {
   sentToCustomer: 'Sent to Customer',
   acceptByCustomer: 'Accepted by Customer',
   rejectByCustomer: 'Rejected by Customer',
-  converted: 'Converted'
+  converted: 'Converted',
+  sentforDOA :"Sent for DOA",
+  acceptedbyDOA : "Accepted by DOA",
+  rejectedbyDOA:"Rejected by DOA"
 };
 
 export const QUOTATION_TYPE = {

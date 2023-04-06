@@ -902,6 +902,14 @@ const routes = {
     title: storedRoutes && storedRoutes.transactionLock && storedRoutes.transactionLock.title ? storedRoutes.transactionLock?.title : RESOURCE_LABEL.transactionLock,
     path: '/transaction-lock/detail'
   },
+  wellNumber: {
+    title: storedRoutes && storedRoutes.wellNumber && storedRoutes.wellNumber.title ? storedRoutes.wellNumber?.title : RESOURCE_LABEL.wellNumber,
+    path: '/well-number'
+  },
+  wellNumberDetail: {
+    title: storedRoutes && storedRoutes.wellNumber && storedRoutes.wellNumber.title ? storedRoutes.wellNumber?.title : RESOURCE_LABEL.wellNumber,
+    path: '/well-number/detail'
+  },
 };
 
 export default routes;
