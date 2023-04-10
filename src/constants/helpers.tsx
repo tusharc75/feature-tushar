@@ -50,10 +50,6 @@ export const termsAndConditionDocumentUploadMaxSize = {
   text: '2 MB'
 };
 
-export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Invoice'];
-
-export const jobProcessSteps = ['Add', 'Fleet'];
-
 export const rentalManagementSteps = [
   'Add Products',
   'Add Services',
@@ -66,15 +62,33 @@ export const rentalManagementSteps = [
   'Final Slip'
 ];
 
-export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
-
-export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
-
 export const demandOrderSteps = ['Add Products'];
 
 export const purchaseRequisitionSteps = ['Add Products'];
 
 export const productionOrderSteps: stepInterface[] = [{ name: 'Add', title: 'Add', icon: 'add' }];
+
+export const jobProcessSteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Fleet', title: 'Fleet', icon: 'ticket' }
+];
+
+export const salesOrderProcessSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Services and Consumables', title: 'Consumables', icon: 'consumable' },
+  { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
+];
+
+export const bulkAssetCreationSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' }
+];
+
+export const subleaseSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Start Sublease', title: 'Sublease', icon: 'startSublease' },
+  { name: 'End Sublease', title: 'End', icon: 'end' }
+];
 
 export const quotationProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },

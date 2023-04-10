@@ -18,7 +18,7 @@ import TabPanel from '../../components/TabPanel';
 import { isMobile, isTablet } from 'react-device-detect';
 import { camelCase } from 'lodash';
 import ManageServiceOrderDialog from './ManageServiceOrder';
-import Steps from 'src/components/Steps';
+import Steps2 from 'src/components/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Services from './Services';
 import Products from './Products';
@@ -243,7 +243,7 @@ const ServiceOrderDetailsPage = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps
+          <Steps2
             isNextStep={false}
             nextStep={nextStep}
             steps={serviceOrderSteps}
