@@ -24,14 +24,7 @@ import Reject from './Reject';
 import Logs from './Logs';
 import History from './History';
 
-const ReceivingAsset = ({
-  purchaseOrderData,
-  updateStatus,
-  stepFullScreen,
-  renderedFrom,
-  checkReceivedProduct,
-  allowedToEdit
-}) => {
+const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -59,7 +52,9 @@ const ReceivingAsset = ({
     setColumns(null);
     const column = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
-    const productFields = productResult?.data?.data?.filter((e) => ['productCategory', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName));
+    const productFields = productResult?.data?.data?.filter((e) =>
+      ['productCategory', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName)
+    );
     column.push({
       accessor: 'index',
       Header: 'Index',
@@ -104,7 +99,7 @@ const ReceivingAsset = ({
     });
     column.push({
       accessor: 'description',
-      Header: "Description",
+      Header: 'Description',
       width: 200,
       Cell: ({ row }) => {
         return row.original['description'] ? <p className="text-truncate">{row?.original?.description}</p> : <NoDataCell />;
@@ -262,30 +257,36 @@ const ReceivingAsset = ({
           Cell: ({ row }) =>
             row?.original?.type === 'Product' ? (
               <>
-                {permissions?.purchaseOrder?.isUpdate && allowedToEdit && row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0)
-                  && ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status)
-                  ? (
-                    <HtmlTooltip title="Reject">
-                      <span>
-                        <IconButton
-                          size="small"
-                          aria-label="reject"
-                          onClick={() => {
-                            setRejectProductDialog(row.original);
-                          }}
-                        >
-                          <TransformIcon fontSize="small" color={'primary'} />
-                        </IconButton>
-                      </span>
-                    </HtmlTooltip>
-                  ) : null}
+                {permissions?.purchaseOrder?.isUpdate &&
+                allowedToEdit &&
+                row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) &&
+                ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+                  <HtmlTooltip title="Reject">
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="reject"
+                        onClick={() => {
+                          setRejectProductDialog(row.original);
+                        }}
+                      >
+                        <TransformIcon fontSize="small" color={'primary'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                ) : null}
                 <HtmlTooltip title="History">
                   <span>
                     <IconButton
                       size="small"
                       aria-label="History"
                       onClick={() => {
-                        setHistoryDialog({ open: true, _id: row?.original?._id, product: row?.original?.productId, productName: row?.original?.detail });
+                        setHistoryDialog({
+                          open: true,
+                          _id: row?.original?._id,
+                          product: row?.original?.productId,
+                          productName: row?.original?.detail
+                        });
                       }}
                     >
                       <HistoryIcon fontSize="small" color={'primary'} />
@@ -358,7 +359,13 @@ const ReceivingAsset = ({
           let actualReceived = item.actualReceived;
           subRowsproductSerialNumber?.forEach((e: any, index: any) => {
             if (actualReceived && !e.isUsed) {
-              res.subRows.push({ index: `${res.index}.${index + 1}`, detail: e.serialNumber, type: 'Serial Number', assetId: e?._id, hideSelection: true });
+              res.subRows.push({
+                index: `${res.index}.${index + 1}`,
+                detail: e.serialNumber,
+                type: 'Serial Number',
+                assetId: e?._id,
+                hideSelection: true
+              });
               actualReceived = actualReceived - 1;
               e.isUsed = true;
             }
@@ -369,7 +376,11 @@ const ReceivingAsset = ({
         return res;
       });
 
-      checkReceivedProduct(result?.data?.data?.map((e) => { return { ...e, type: "Product" } }));
+      checkReceivedProduct(
+        result?.data?.data?.map((e) => {
+          return { ...e, type: 'Product' };
+        })
+      );
       setRowsData(rows);
       setSelectedRecords([]);
     } catch (error) {
@@ -379,7 +390,7 @@ const ReceivingAsset = ({
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between" m={1} pb={2}>
+      <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex">
           {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
             <Button

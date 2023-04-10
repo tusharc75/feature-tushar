@@ -39,8 +39,8 @@
   }
 }
 .contentContainer {
-  flex-basis: calc(100% - calc(calc(var(--icon-size) + var(--left-right-icon-spacing, 15px)) * 2));
-  max-width: calc(100% - calc(calc(var(--icon-size) + var(--left-right-icon-spacing, 15px)) * 2));
+  flex-basis: var(--flex-basis);
+  max-width: var(--flex-basis);
   overflow-x: auto;
   display: grid;
   grid-auto-flow: column;
@@ -64,6 +64,14 @@
   border-radius: 11px;
   padding: 15px 10px 13px;
   text-align: center;
+
+  .stepCompleteIcon {
+    position: absolute;
+    top: -9px;
+    right: -8px;
+    width: 18px;
+    height: 18px;
+  }
   .stepIcon {
     svg {
       margin-inline: auto;

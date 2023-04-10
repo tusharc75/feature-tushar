@@ -1,7 +1,24 @@
 import { LeftIcon } from './left';
 import { RightIcon } from './right';
 
-import { Add, Assign, Dispatch, Invoice, PostWork, Quote, RepairOrder, SerializedAsset, WorkOrder, Ticket, ReceiveProduct } from './svgIcon';
+import {
+  Add,
+  Assign,
+  Dispatch,
+  Invoice,
+  PostWork,
+  Quote,
+  RepairOrder,
+  SerializedAsset,
+  WorkOrder,
+  Ticket,
+  ReceiveProduct,
+  Consumable,
+  DOA,
+  Approval,
+  End
+} from './svgIcon';
+import StepCompleteIcon from './StepCompleteIcon';
 export interface stepIconInterface {
   icon:
     | 'add'
@@ -14,7 +31,11 @@ export interface stepIconInterface {
     | 'serializedAssets'
     | 'workOrder'
     | 'ticket'
-    | 'receiveProduct';
+    | 'receiveProduct'
+    | 'consumable'
+    | 'doa'
+    | 'approval'
+    | 'end';
 }
 
 export const getIcon = (name: string) => {
@@ -52,19 +73,32 @@ export const getIcon = (name: string) => {
     case name === 'receiveProduct':
       return ReceiveProduct;
       break;
+    case name === 'consumable':
+      return Consumable;
+      break;
+    case name === 'doa':
+      return DOA;
+      break;
+    case name === 'approval':
+      return Approval;
+      break;
+    case name === 'end':
+      return End;
+      break;
     default:
       return SerializedAsset;
   }
 };
 
-export { LeftIcon, RightIcon };
+export { LeftIcon, RightIcon, StepCompleteIcon };
 
 export const stepColorPalette: [string, string][] = [
   ['#FAC94B', '#FF9B04'],
   ['#577BFC', '#1608BD'],
   ['#FC5757', '#C60707'],
   ['#3BE961', '#058D12'],
-  ['#AD14F5', '#6203AC ']
+  ['#AD14F5', '#6203AC '],
+  ['#3BE961', '#058D12']
 ];
 
 export const getColorOficon = (index: number): [string, string] => {

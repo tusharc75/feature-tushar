@@ -162,7 +162,7 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
   return (
     <Fragment>
       <InvoiceFacility invoiceData={invoiceData} />
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid item xs={12} md={12} sm={12}>
         {columns && rowsData ? (
           <>
             <Box zIndex={5}>

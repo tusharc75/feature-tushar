@@ -16,11 +16,22 @@ import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { genrateCustomTableColumns } from 'src/constants/columns';
 
-
-const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, stepFullScreen, fetchQuotationData, version, currentStep, versionData, allowedToEdit, renderedFrom }) => {
-
+const QuoteBuilder = ({
+  quotationData,
+  setNextStep,
+  sentToCustomer = false,
+  stepFullScreen,
+  fetchQuotationData,
+  version,
+  currentStep,
+  versionData,
+  allowedToEdit,
+  renderedFrom
+}) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -37,13 +48,15 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
   }, [versionData]);
 
   useEffect(() => {
-    if (currentStep === "Quote Approval" && rowsData && !sentToCustomer) {
+    if (currentStep === 'Quote Approval' && rowsData && !sentToCustomer) {
       setNextStep(false);
-    }
-    else if (currentStep === "DOA" && (quotationData.versions[version].status.includes(QUOTATION_STATUS.sentforDOA) || quotationData.versions[version].status.includes(QUOTATION_STATUS.rejectedbyDOA))) {
-      setNextStep(false)
-    }
-    else {
+    } else if (
+      currentStep === 'DOA' &&
+      (quotationData.versions[version].status.includes(QUOTATION_STATUS.sentforDOA) ||
+        quotationData.versions[version].status.includes(QUOTATION_STATUS.rejectedbyDOA))
+    ) {
+      setNextStep(false);
+    } else {
       setNextStep(true);
     }
   }, [currentStep, sentToCustomer, rowsData]);
@@ -64,7 +77,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (<p className="text-truncate">{row.original.srno}</p>),
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -74,14 +87,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
         width: 100,
-        Cell: ({ row }) =>
-          row.original['type'] ? (
-            <p>
-              {`${startCase(row.original?.type)} `}
-            </p>
-          ) : (
-            <NoDataCell />
-          )
+        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       },
       {
         accessor: 'detail',
@@ -94,22 +100,23 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
               {row.original?.detail}
             </p>
             {row.original?.subRows?.length ? (
-              <Box ml={1} >
+              <Box ml={1}>
                 <span>({row.original?.subRows?.length})</span>
               </Box>
             ) : null}
-            <Box ml={1} >
+            <Box ml={1}>
               <IconButton
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === 'product'
+                    `${
+                      row.original.type === 'serializedAsset'
+                        ? routes.serializedAssetDetail.path
+                        : row.original.type === 'product'
                         ? routes.productDetail.path
                         : row.original.type === 'package'
-                          ? routes.packagesDetail.path
-                          : routes.serviceMasterDetail.path
+                        ? routes.packagesDetail.path
+                        : routes.serviceMasterDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -147,14 +154,15 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
@@ -171,7 +179,8 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
         let finalObject = prepareDataForGrid(item);
         finalObject['detail'] = item?.serviceName;
         finalObject['qtyDisplay'] = item?.qty;
-        finalObject['leadTime'] = Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
+        finalObject['leadTime'] =
+          Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
         finalObject['parentId'] = null;
         finalObject['isValid'] = true;
         finalObject['hideSelection'] = false;
@@ -190,14 +199,15 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.srno = parent.srno + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -210,9 +220,10 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
   const handleSendToCustomer = (sendMail) => {
     var api = `${quotation.api}/${quotationData?._id}/send-to-customer/${versionData._id}`;
     if (sendMail) {
-      api = api + `?sendMail=true`
+      api = api + `?sendMail=true`;
     }
-    axiosInstance().put(api)
+    axiosInstance()
+      .put(api)
       .then(() => {
         fetchQuotationData(version, false);
         toastConfig.setToastConfig({
@@ -224,7 +235,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const handleSendForDOA = () => {
     axiosInstance()
@@ -240,11 +251,11 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  }
+  };
 
   return (
     <Fragment>
-      <Box pb={2} display="flex" justifyContent="space-between">
+      <Box m={1} display="flex" justifyContent="space-between">
         <Box display="flex">
           <SendEmail
             versionData={versionData}
@@ -259,7 +270,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
             hideVersions={true}
           />
         </Box>
-        {currentStep === 'Quote Approval' &&
+        {currentStep === 'Quote Approval' && (
           <Box display="flex">
             <Button
               variant="contained"
@@ -267,7 +278,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
               color="primary"
               disabled={sentToCustomer}
               onClick={() => {
-                handleSendToCustomer(false)
+                handleSendToCustomer(false);
               }}
             >
               Process Quote
@@ -279,35 +290,29 @@ const QuoteBuilder = ({ quotationData, setNextStep, sentToCustomer = false, step
               color="primary"
               disabled={sentToCustomer}
               onClick={() => {
-                handleSendToCustomer(true)
+                handleSendToCustomer(true);
               }}
             >
               Send to Customer
             </Button>
           </Box>
-        }
-        {currentStep === 'DOA' && !quotationData.versions[version].status.includes("DOA") &&
+        )}
+        {currentStep === 'DOA' && !quotationData.versions[version].status.includes('DOA') && (
           <Box display="flex">
-            <Button
-              variant="contained"
-              size="small"
-              color="primary"
-              disabled={sentToCustomer}
-              onClick={handleSendForDOA}
-            >
+            <Button variant="contained" size="small" color="primary" disabled={sentToCustomer} onClick={handleSendForDOA}>
               Send for DOA
             </Button>
           </Box>
-        }
+        )}
       </Box>
       {columns && rowsData ? (
-        <Box p="6px" zIndex={5} width={'100%'}>
+        <Box zIndex={5} width={'100%'}>
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
             data={rowsData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={() => { }}
+            onSelect={() => {}}
             hideSelection={true}
             hideAction={true}
             childrenProperty="subRows"

@@ -23,7 +23,7 @@ const CustomGridFilterHeader = (props) => {
     columnApi,
     renderedFrom,
     isClientSideGrid,
-    buttonGap = '10px',
+    buttonGap = '8px',
     dispatch,
     showOnlyShowFilteredRecordSwitch = false,
     selectedRecords = null
@@ -60,7 +60,7 @@ const CustomGridFilterHeader = (props) => {
 
   return (
     <>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', marginBottom: '15px', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', margin: '8px', justifyContent: 'space-between' }}>
         <div className="table-filter-v1" style={{ flexBasis: '766px', maxWidth: '766px', paddingRight: '52px' }}>
           {showOnlyShowFilteredRecordSwitch && (
             <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '0px 0 10px' }} />

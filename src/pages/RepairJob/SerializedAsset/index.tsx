@@ -415,7 +415,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
           )}
         </Box>
       </Box>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList

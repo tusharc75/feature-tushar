@@ -12,16 +12,22 @@ import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwip
 import { useData } from 'src/StateProvider/Provider';
 import AddInventory from './AddInventory';
 import AssignSerialNumber from './AssignSerialNumber';
-import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS, deliveryTicket, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE } from 'src/constants/helpers';
+import {
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  TRANSFER_INVENTORY_STATUS,
+  deliveryTicket,
+  DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_TYPE
+} from 'src/constants/helpers';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
-import HtmlTooltip from "../../../components/CustomTooltipTitle";
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -37,19 +43,21 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const [state, dispatch] = useReducer(gridReducer, gridState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const [isAdding, setIsAdding] = useState(false);
-  const [columns, setColumns] = useState(null)
+  const [columns, setColumns] = useState(null);
 
   const history = useHistory();
 
-  const [assignNumber, setAssignNumber] = useState({ open: false, serialNumber: [], qty: 0, product: "" });
+  const [assignNumber, setAssignNumber] = useState({ open: false, serialNumber: [], qty: 0, product: '' });
 
   useEffect(() => {
-    fetchFields()
+    fetchFields();
   }, []);
 
   const fetchFields = async () => {
     const column = [];
-    const { data: { data } } = await axiosInstance().put(`/field/find-field-labels`, {
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
       fields: [
         {
           resource: 'Product',
@@ -59,16 +67,21 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     });
     const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
     productFields?.forEach((e) => {
-      if (e?.fieldName === "productName") {
-        column.push({ field: "productName", primaryField: true, headerName: e?.fieldLabel, show: true, disabled: true, cellRenderer: "productNameRenderer" })
+      if (e?.fieldName === 'productName') {
+        column.push({
+          field: 'productName',
+          primaryField: true,
+          headerName: e?.fieldLabel,
+          show: true,
+          disabled: true,
+          cellRenderer: 'productNameRenderer'
+        });
+      } else if (e?.fieldName === 'serializedProduct') {
+        column.push({ field: 'serializedProductShow', headerName: e?.fieldLabel, show: true, cellRenderer: 'commonRenderer' });
+      } else {
+        column.push({ field: e?.fieldName, headerName: e?.fieldLabel, show: true, cellRenderer: 'commonRenderer' });
       }
-      else if (e?.fieldName === "serializedProduct") {
-        column.push({ field: "serializedProductShow", headerName: e?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
-      }
-      else {
-        column.push({ field: e?.fieldName, headerName: e?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
-      }
-    })
+    });
     column.push({
       field: 'qty',
       headerName: 'Quantity',
@@ -76,27 +89,29 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       disabled: false,
       cellRenderer: 'commonRenderer',
       cellEditor: 'numericCellEditor',
-      filter: false, sortable: false,
+      filter: false,
+      sortable: false,
       editable: permissions?.transferInventory?.isUpdate
     });
     column.push({
       field: 'inventory',
       headerName: 'Inventory',
       show: true,
-      filter: false, sortable: false,
-      cellRenderer: 'commonRenderer',
+      filter: false,
+      sortable: false,
+      cellRenderer: 'commonRenderer'
     });
     column.push({
       field: 'serialNumber',
       headerName: 'Serial Number',
       show: true,
-      cellRenderer: 'serialNumberRenderer',
+      cellRenderer: 'serialNumberRenderer'
     });
-    setColumns([...column])
-  }
+    setColumns([...column]);
+  };
 
   useEffect(() => {
-    fetchProducts()
+    fetchProducts();
   }, [transferInventoryData]);
 
   const fetchProducts = async () => {
@@ -106,13 +121,17 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       gridApi.setRowData([]);
     }
 
-    const { data: { data: deliveryTicketList } } = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.transferInventory}&referenceId=${transferInventoryData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`);
-    var deliveryTicketProduct = []
+    const {
+      data: { data: deliveryTicketList }
+    } = await axiosInstance().get(
+      `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.transferInventory}&referenceId=${transferInventoryData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+    );
+    var deliveryTicketProduct = [];
     deliveryTicketList?.forEach((e) => {
       if (e?.products && e?.products?.length) {
-        deliveryTicketProduct = [...deliveryTicketProduct, ...e?.products]
+        deliveryTicketProduct = [...deliveryTicketProduct, ...e?.products];
       }
-    })
+    });
 
     axiosInstance()
       .get(`${routes.transferInventory.path}/${transferInventoryData?._id}/product`)
@@ -125,7 +144,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           finalObject['productNumber'] = u?.productDetail?.productNumber;
           finalObject['productDescription'] = u?.productDetail?.productDescription;
           finalObject['serializedProduct'] = u?.productDetail?.serializedProduct;
-          finalObject['serializedProductShow'] = u?.productDetail?.serializedProduct ? "Yes" : "No";
+          finalObject['serializedProductShow'] = u?.productDetail?.serializedProduct ? 'Yes' : 'No';
           finalObject['qty'] = u.qty;
           finalObject['inventory'] = u.inventoryDetail?.inventory || 0;
           finalObject['isChecked'] = false;
@@ -158,7 +177,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       })
       .then(() => {
         fetchProducts();
-        fetchTransferInventoryData()
+        fetchTransferInventoryData();
         toastConfig.setToastConfig({
           open: true,
           message: 'Records added successfully',
@@ -167,7 +186,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         setIsAdding(false);
         closeDialog();
         if (transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.new) {
-          updateStatus(TRANSFER_INVENTORY_STATUS.inProgress)
+          updateStatus(TRANSFER_INVENTORY_STATUS.inProgress);
         }
       })
       .catch((err) => {
@@ -187,7 +206,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         setShowConfirmBox(false);
         setRemovingInventory(false);
         fetchProducts();
-        fetchTransferInventoryData()
+        fetchTransferInventoryData();
       } catch (error) {
         setShowConfirmBox(false);
         setRemovingInventory(false);
@@ -203,21 +222,23 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     </Link>
   );
 
-  const SerialNumberRenderer = (params) => (
-    params?.data?.serialNumber?.length ?
-      params?.data?.serialNumber?.map((e) => e.serialNumber)?.toString() :
-      <NoDataCell />
-  );
+  const SerialNumberRenderer = (params) =>
+    params?.data?.serialNumber?.length ? params?.data?.serialNumber?.map((e) => e.serialNumber)?.toString() : <NoDataCell />;
 
   const ActionRenderer = (params) =>
     params?.data?.canDelete ? (
       <Fragment>
-        {params?.data?.serializedProduct &&
+        {params?.data?.serializedProduct && (
           <Box pr={1}>
             <HtmlTooltip title={`Assign Serial Number`}>
               <IconButton
                 onClick={() => {
-                  setAssignNumber({ open: true, serialNumber: params?.data?.serialNumber, qty: parseInt(params?.data?.qty), product: params?.data?.productId });
+                  setAssignNumber({
+                    open: true,
+                    serialNumber: params?.data?.serialNumber,
+                    qty: parseInt(params?.data?.qty),
+                    product: params?.data?.productId
+                  });
                 }}
                 size="small"
                 color="primary"
@@ -225,7 +246,8 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
                 <AddBoxOutlinedIcon color="primary" fontSize="small" />
               </IconButton>
             </HtmlTooltip>
-          </Box>}
+          </Box>
+        )}
         <IconButton
           onClick={() => {
             setShowConfirmBox(true);
@@ -250,7 +272,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     if (!Number(data?.qty) || Number(data?.qty) <= 0) {
       toastConfig.setToastConfig({
         type: 'error',
-        message: "Please enter valid Qty.",
+        message: 'Please enter valid Qty.',
         open: true
       });
       fetchProducts();
@@ -305,11 +327,10 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       });
   };
 
-
   return (
     <React.Fragment>
       {allowedToEdit && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inProgress]?.includes(transferInventoryData?.status) && (
-        <Box display="flex" justifyContent="space-between" p={1}>
+        <Box display="flex" justifyContent="space-between" m={1}>
           <Button
             variant={'contained'}
             color="primary"
@@ -337,7 +358,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         </Box>
       )}
       <Box mt={1}>
-        {columns ?
+        {columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
               allowSelection={allowedToEdit}
@@ -350,10 +371,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
-              onEdit={(data) => {
-              }}
+              onEdit={(data) => {}}
               extraParamsToCheckDelete={true}
-              onDelete={(data) => { }}
+              onDelete={(data) => {}}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -371,7 +391,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={(data) => { }}
+              onClone={(data) => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -395,10 +415,11 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               refreshGrid={fetchProducts}
             />
           )
-          : <Box p={2} height={500} bgcolor="white">
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        }
+        )}
       </Box>
       {openAddNewInventory && transferInventoryData?.transferFromPlant?.optionValue && (
         <AddInventory
@@ -424,11 +445,11 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       {assignNumber.open && (
         <AssignSerialNumber
           handleClose={() => {
-            setAssignNumber({ open: false, serialNumber: [], qty: 0, product: "" });
+            setAssignNumber({ open: false, serialNumber: [], qty: 0, product: '' });
           }}
           handleSuccess={() => {
-            setAssignNumber({ open: false, serialNumber: [], qty: 0, product: "" });
-            fetchProducts()
+            setAssignNumber({ open: false, serialNumber: [], qty: 0, product: '' });
+            fetchProducts();
           }}
           product={assignNumber.product}
           serialNumber={assignNumber.serialNumber}
