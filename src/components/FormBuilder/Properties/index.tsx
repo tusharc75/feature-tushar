@@ -10,7 +10,6 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import Chip from '@material-ui/core/Chip';
 import FieldList from '../FieldList';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -33,8 +32,6 @@ import { camelCase } from 'lodash';
 import { checkFormula } from '../../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { ResourceDropdown } from './resourceDropdown';
-
-import styles from '../Form.module.scss';
 import { MinMax } from '../AddField/minMax';
 
 const FieldSchema = object().shape({
@@ -349,6 +346,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.formulainputFields = values.formulainputFields;
               ele.formulaoption = values.formulaoption;
             }
+
             if (ele.isDropdown) {
               ele.dropdownOnConverter = values.dropdownOnConverter;
             }
@@ -359,6 +357,15 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               }
               else {
                 ele.signatureUsers = [];
+              }
+            }
+
+            if (fieldData?.lookup) {
+              if (values.lookupDependentOn) {
+                ele.lookupDependentOn = values.lookupDependentOn;
+              }
+              else {
+                ele.lookupDependentOn = "";
               }
             }
 
@@ -661,29 +668,43 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                                 label="Lookup Resource"
                                 placeholder="Lookup Resource"
                                 name="lookupResource"
+                                required
                                 error={touched['lookupResource'] && Boolean(errors['lookupResource'])}
                                 helperText={touched['lookupResource'] && errors['lookupResource']}
                               />
                             )}
                           />
-                          {/* <FormControl fullWidth margin="dense" variant="outlined">
-                            <InputLabel id="demo-simple-select-outlined-label">Lookup Resource</InputLabel>
-                            <Select
-                              labelId="demo-simple-select-outlined-label"
-                              id="demo-simple-select-outlined"
-                              value={values['lookupResource']}
-                              onChange={(e) => {
-                                setFieldValue('lookupResource', e.target.value)
-                                handleValuesChange({ lookupResource: e.target.value })
-                              }}
-                              label="Lookup Resource"
-                              name="lookupResource"
-                            >
-                              {LookupResource.map((_data) => (
-                                <MenuItem value={_data.value}>{_data.name}</MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl> */}
+                          <Box pt={1} pb={1}>
+                            <Grid container>
+                              <Grid item xs={6} sm={6} md={6}>
+                                <Autocomplete
+                                  id="tags-filled"
+                                  options={fields && fields.filter((_f) => _f._id !== values["_id"] && _f.type === "dropDown" && _f?.lookup)}
+                                  getOptionLabel={(option: any) =>
+                                    option ? option.fieldLabel : ""
+                                  }
+                                  getOptionSelected={(option: any, val) =>
+                                    option.fieldName === val
+                                  }
+                                  value={fields && fields.filter((data) => data.fieldName === values["lookupDependentOn"]).length
+                                    ? fields && fields.filter((data) => data.fieldName === values["lookupDependentOn"])[0] : ""
+                                  }
+                                  onChange={(e, val) => {
+                                    setFieldValue("lookupDependentOn", val && val.fieldName ? val.fieldName : "");
+                                  }}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      margin="dense"
+                                      variant="outlined"
+                                      label="Lookup Dependent On"
+                                      placeholder="Lookup Dependent On"
+                                    />
+                                  )}
+                                />
+                              </Grid>
+                            </Grid>
+                          </Box>
                         </Box>
                       )}
                     </Fragment>
