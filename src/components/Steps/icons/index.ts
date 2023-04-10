@@ -16,7 +16,8 @@ import {
   Consumable,
   DOA,
   Approval,
-  End
+  End,
+  StartSublease
 } from './svgIcon';
 import StepCompleteIcon from './StepCompleteIcon';
 export interface stepIconInterface {
@@ -35,7 +36,8 @@ export interface stepIconInterface {
     | 'consumable'
     | 'doa'
     | 'approval'
-    | 'end';
+    | 'end'
+    | 'startSublease';
 }
 
 export const getIcon = (name: string) => {
@@ -84,6 +86,9 @@ export const getIcon = (name: string) => {
       break;
     case name === 'end':
       return End;
+      break;
+    case name === 'startSublease':
+      return StartSublease;
       break;
     default:
       return SerializedAsset;

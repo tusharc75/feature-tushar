@@ -28,7 +28,6 @@ const Steps = ({
   let activeStep = currentStep;
   const containerRef = useRef(null);
 
-  console.log({ isStepEnded });
   const goNext = () => {
     if (handleNext) {
       handleNext();
