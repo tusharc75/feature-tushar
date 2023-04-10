@@ -14,11 +14,13 @@ import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import ManageWellNumber from './ManageWellNumber';
+import ManageWellNumber from '../../WellNumber/ManageWellNumber';
 
-const WellNumber = ({ id }) => {
+const WellNumber = ({ wellName }) => {
+
   let renderedFrom = camelCase(routes.wellNumber?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const toastConfig = useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = useState({ open: false, id: null });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
@@ -78,8 +80,7 @@ const WellNumber = ({ id }) => {
     axiosInstance()
       .get(`${routes.wellNumber.path}${queryString}`)
       .then(({ data: { data } }) => {
-        let filteredData = data?.data?.filter((item) => item?.wellName?.optionValue === id);
-        let rows = filteredData?.map((u) => {
+        let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.wellNumber?.isUpdate;
@@ -117,17 +118,20 @@ const WellNumber = ({ id }) => {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     let filterById = [];
+    filterById.push({ field: 'wellName', term: wellName });
     if (filterById.length > 0) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}&filterType=and`;
     }
+    const updatedFilters = [];
     if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
         });
       });
+    }
+    if (updatedFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
     if (sorting.length > 0) {
@@ -216,7 +220,7 @@ const WellNumber = ({ id }) => {
 
   return (
     <Fragment>
-      <Box p={1}>
+      <Box p={1} pb={2}>
         <Grid container>
           <Grid item xs={3} md={3} sm={3}>
             <Button
@@ -227,7 +231,7 @@ const WellNumber = ({ id }) => {
                 setOpenDialog({ open: true, id: null });
               }}
             >
-              Add Well Number
+              Add
             </Button>
           </Grid>
           <Grid item xs={9} md={9} sm={9}>
@@ -258,11 +262,12 @@ const WellNumber = ({ id }) => {
                 <MenuItem
                   onClick={() => {
                     closeActions();
-                    // eslint-disable-next-line no-lone-blocks
-                    {
-                      selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                    if (selectedRecords.length === 1) {
+                      setDeleteRecord(selectedRecords[0])
                     }
-                    setShowDeleteConfirmBox(true);
+                    else {
+                      setShowDeleteConfirmBox(true);
+                    }
                   }}
                 >
                   Delete
@@ -288,8 +293,6 @@ const WellNumber = ({ id }) => {
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           showOnlyShowFilteredRecordSwitch={true}
-          showFilters={true}
-          resource={sidebarResource.wellNumber}
         />
       ) : (
         <Box p={2} height={500} bgcolor="white">
@@ -300,7 +303,7 @@ const WellNumber = ({ id }) => {
         <ManageWellNumber
           id={openDialog.id}
           onClose={() => setOpenDialog({ open: false, id: null })}
-          wellMasterId={id}
+          refrenceData={{ wellName: wellName }}
           onSuccess={() => {
             setOpenDialog({ open: false, id: null });
             fetchData();
