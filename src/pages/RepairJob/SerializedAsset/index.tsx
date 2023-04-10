@@ -245,7 +245,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   return (
     <>
       <Box display="flex" justifyContent="flex-end" m={1}>
-        <Box display="flex" alignItems="center">
+        <Box display="flex" alignItems="center" gridGap={'8px'}>
           {!isMobile && (
             <Button
               onClick={() => {
@@ -285,7 +285,6 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
               {downlodingFile ? 'Please wait...' : 'Preview'}
             </Button>
           )}
-          <Box mx={1} />
           {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
             <Fragment>
               <Button
