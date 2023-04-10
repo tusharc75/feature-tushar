@@ -348,7 +348,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   return (
     <Fragment>
-      <Box display="flex" flexDirection={'row'} justifyContent={'flex-end'} mx="4px">
+      <Box display="flex" flexDirection={'row'} justifyContent={'flex-end'} mx={1} my={1}>
         <Box>
           {permissions?.transferAsset?.isRead && !isMobile && !isMobile && (
             <Button

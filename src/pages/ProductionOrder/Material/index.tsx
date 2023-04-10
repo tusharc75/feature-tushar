@@ -438,7 +438,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       )}
       {columns && rowsData ? (
         <>
-          <Box p="6px" zIndex={5} width={'100%'}>
+          <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}

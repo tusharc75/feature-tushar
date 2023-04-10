@@ -28,9 +28,7 @@ import { uniq, map, groupBy } from 'lodash';
 import { AiFillFilePdf } from 'react-icons/ai';
 import ReceiveDialog from './ReceiveDialog';
 
-
 const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -41,7 +39,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
   const [downloadingFile, setDownlodingFile] = useState(false);
-  const [columns, setColumns] = useState(null)
+  const [columns, setColumns] = useState(null);
 
   useEffect(() => {
     fetchFields();
@@ -53,7 +51,9 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
 
   const fetchFields = async () => {
     const column = [];
-    const { data: { data } } = await axiosInstance().put(`/field/find-field-labels`, {
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
       fields: [
         {
           resource: 'Product',
@@ -63,24 +63,29 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     });
     const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
     productFields?.forEach((e) => {
-      if (e?.fieldName === "productName") {
-        column.push({ field: "productName", primaryField: true, headerName: e?.fieldLabel, show: true, disabled: true, cellRenderer: "productNameRenderer" })
+      if (e?.fieldName === 'productName') {
+        column.push({
+          field: 'productName',
+          primaryField: true,
+          headerName: e?.fieldLabel,
+          show: true,
+          disabled: true,
+          cellRenderer: 'productNameRenderer'
+        });
+      } else if (e?.fieldName === 'serializedProduct') {
+        column.push({ field: 'serializedProductShow', headerName: e?.fieldLabel, show: true, cellRenderer: 'commonRenderer' });
+      } else {
+        column.push({ field: e?.fieldName, headerName: e?.fieldLabel, show: true, cellRenderer: 'commonRenderer' });
       }
-      else if (e?.fieldName === "serializedProduct") {
-        column.push({ field: "serializedProductShow", headerName: e?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
-      }
-      else {
-        column.push({ field: e?.fieldName, headerName: e?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
-      }
-    })
+    });
     const extracolumns = [
       { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
       { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'serialNumberRenderer' },
       { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-      { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
+      { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
     ];
-    setColumns([...column, ...extracolumns])
-  }
+    setColumns([...column, ...extracolumns]);
+  };
 
   const TicketRenderer = (params) =>
     params?.value ? (
@@ -159,7 +164,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         obj['productNumber'] = product?.productDetail?.productNumber;
         obj['productDescription'] = product?.productDetail?.productDescription;
         obj['serializedProduct'] = product?.productDetail?.serializedProduct;
-        obj['serializedProductShow'] = product?.productDetail?.serializedProduct ? "Yes" : "No";
+        obj['serializedProductShow'] = product?.productDetail?.serializedProduct ? 'Yes' : 'No';
         obj['qty'] = product.qty;
         obj['type'] = 'Product';
         obj['isChecked'] = false;
@@ -184,9 +189,9 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
 
       if (transferInventoryData.status !== TRANSFER_INVENTORY_STATUS.delivered) {
         if (rows?.filter((d) => d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === rows?.length) {
-          updateStatus(TRANSFER_INVENTORY_STATUS.delivered)
+          updateStatus(TRANSFER_INVENTORY_STATUS.delivered);
         }
-      };
+      }
 
       dispatch({ type: 'initialize', data: rows, count: rows.length });
       setTimeout(() => {
@@ -200,11 +205,8 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     }
   };
 
-  const SerialNumberRenderer = (params) => (
-    params?.data?.serialNumber?.length ?
-      params?.data?.serialNumber?.map((e) => e.serialNumber)?.toString() :
-      <NoDataCell />
-  );
+  const SerialNumberRenderer = (params) =>
+    params?.data?.serialNumber?.length ? params?.data?.serialNumber?.map((e) => e.serialNumber)?.toString() : <NoDataCell />;
 
   const frameworkComponents = {
     serialNumberRenderer: SerialNumberRenderer,
@@ -243,14 +245,14 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     setShowTicketDialog({ open: true, data: data });
   };
 
-
   return (
     <Fragment>
-      <Box display="flex" justifyContent="flex-end" p={1}>
+      <Box display="flex" justifyContent="flex-end" m={1}>
         <Button
           onClick={() => {
             setDownlodingFile(true);
-            axiosInstance().get(`${transferInventory.api}/${transferInventoryData._id}/pdf`)
+            axiosInstance()
+              .get(`${transferInventory.api}/${transferInventoryData._id}/pdf`)
               .then(({ data }) => {
                 axiosInstance()
                   .get(`user/download?fileName=${data.data.fileName}`, {
@@ -284,7 +286,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           {downloadingFile ? 'Please wait...' : 'Preview'}
         </Button>
         <Box ml={1}>
-          {(allowedToEdit && canLoad) &&
+          {allowedToEdit && canLoad && (
             <Button
               variant={'outlined'}
               color="primary"
@@ -294,9 +296,9 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
             >
               {`Create Loading Ticket`}
             </Button>
-          }
+          )}
           <Box component="span" ml={1} />
-          {canReceive &&
+          {canReceive && (
             <Button
               variant={'outlined'}
               color="primary"
@@ -311,7 +313,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
             >
               {`Receive`}
             </Button>
-          }
+          )}
         </Box>
       </Box>
       <Box>
@@ -323,10 +325,9 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
               permissions={true}
               primaryField={columns?.find((d: any) => d.primaryField)}
               onClick={(data) => {
-                if (data.type === "Asset") {
+                if (data.type === 'Asset') {
                   history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-                }
-                else {
+                } else {
                   history.push(`${routes.productDetail.path}/${data._id}`);
                 }
               }}
@@ -362,7 +363,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -398,7 +399,10 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           productInventory={selectedRecords?.filter((e) => e.type === 'Asset')}
           products={selectedRecords?.filter((e) => e.type === 'Product')}
-          serialNumber={selectedRecords?.filter((e) => e.type === 'Product')?.map((e) => e?.serialNumber?.map((e) => e._id))?.flat()}
+          serialNumber={selectedRecords
+            ?.filter((e) => e.type === 'Product')
+            ?.map((e) => e?.serialNumber?.map((e) => e._id))
+            ?.flat()}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchProducts();
