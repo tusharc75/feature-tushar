@@ -6,7 +6,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { product, gridPageSizes } from 'src/constants/helpers';
+import { product, gridPageSizes, serviceMaster } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -54,11 +54,21 @@ const ServiceMaster = (props: Props) => {
   }: any = useData();
 
   useEffect(() => {
-    fetchGridColumns()
+    // fetchGridColumns()
+    getServiceMasterColumns()
     fetchData();
   }, [selectedEntity, id]);
 
-  const fetchGridColumns = () => {
+  const getServiceMasterColumns = () => {
+    axiosInstance()
+      .get(`/field?resource=${serviceMaster.resource}`)
+      .then(({ data: { data } }) => {
+        // setServiceColumns(data)
+        fetchGridColumns(data)
+      });
+  }
+
+  const fetchGridColumns = (serViceColumns: any) => {
     const columns: any = [
       {
         accessor: 'order',
@@ -106,7 +116,35 @@ const ServiceMaster = (props: Props) => {
           </div>
         )
       },
-      {
+      // {
+      //   accessor: 'serviceType',
+      //   Header: 'Service Type',
+      //   sticky: isMobile ? 'none' : 'left',
+      //   Cell: ({ row }) => (
+      //     <div style={{ display: 'flex', alignItems: 'center' }}>
+      //       <p>{row.original?.serviceType || <NoDataCell />}</p>
+      //     </div>
+      //   )
+      // },
+      // {
+      //   accessor: 'preWork',
+      //   Header: 'Pre Work',
+      //   width: 70,
+      //   sticky: isMobile ? 'none' : 'left',
+      //   Cell: ({ row }) => <p className="text-truncate">{row.original?.preWork || <NoDataCell />}</p>
+      // }
+    ];
+    if (serViceColumns && serViceColumns.some(column => column?.fieldData?.fieldName === "preWork")) {
+      columns.push({
+        accessor: 'preWork',
+        Header: 'Pre Work',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original?.preWork || <NoDataCell />}</p>
+      })
+    }
+    if (serViceColumns && serViceColumns.some(column => column?.fieldData?.fieldName === "serviceType")) {
+      columns.push({
         accessor: 'serviceType',
         Header: 'Service Type',
         sticky: isMobile ? 'none' : 'left',
@@ -115,15 +153,8 @@ const ServiceMaster = (props: Props) => {
             <p>{row.original?.serviceType || <NoDataCell />}</p>
           </div>
         )
-      },
-      {
-        accessor: 'preWork',
-        Header: 'Pre Work',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original?.preWork || <NoDataCell />}</p>
-      }
-    ];
+      })
+    }
     columns.push({
       accessor: 'action',
       Header: 'Action',
