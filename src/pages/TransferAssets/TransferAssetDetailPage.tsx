@@ -20,12 +20,11 @@ import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import Steps from 'src/components/Steps';
+import Steps2 from 'src/components/Steps';
 import { RiFlowChart } from 'react-icons/ri';
 import TransferAssetViews from './RoadMapViews';
 import { isMobile, isTablet } from 'react-device-detect';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-
 
 const TransferAssetDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferAsset.title);
@@ -38,7 +37,6 @@ const TransferAssetDetailPage = () => {
   const {
     state: { user, permissions }
   }: any = useData();
-
 
   const [headingLabel, setHeadingLabel] = useState('');
   const [tabValue, setTabValue] = useState(parsedTab);
@@ -94,14 +92,13 @@ const TransferAssetDetailPage = () => {
   }, [id]);
 
   const updateProcessStatus = (step: number) => {
-    console.log(stepNames)
+    console.log(stepNames);
     axiosInstance()
       .put(`${routes.transferAsset.path}/${id}/process-status`, { processStatus: stepNames[step] })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
-
 
   const getRessourceFields = (transferType) => {
     axiosInstance()
@@ -157,12 +154,14 @@ const TransferAssetDetailPage = () => {
         setHeadingLabel(data.transferAssetNumber);
         var steps: any = transferAssetSteps;
         if (data?.transferType === 'Internal') {
-          steps = steps?.filter((e) => e.name !== "Receiving Ticket")
+          steps = steps?.filter((e) => e.name !== 'Receiving Ticket');
         }
-        setStepNames(steps?.map((item) => item.name))
-        setStepList(steps)
+        setStepNames(steps?.map((item) => item.name));
+        setStepList(steps);
 
-        setCurrentStep(steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0);
+        setCurrentStep(
+          steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
+        );
 
         setCustomizedRoutes([routes.transferAsset, { title: data.transferAssetNumber }]);
 
@@ -179,8 +178,8 @@ const TransferAssetDetailPage = () => {
           data?.transferType === 'Internal'
             ? data?.transfertoPlant?.entity
             : data?.transferType === 'External Customer'
-              ? data?.transfertoCustomer?.entity
-              : data?.transfertoSupplier?.entity;
+            ? data?.transfertoCustomer?.entity
+            : data?.transfertoSupplier?.entity;
 
         if (warehouseEntity?.length) {
           const isReceiveable = warehouseEntity.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0;
@@ -222,7 +221,6 @@ const TransferAssetDetailPage = () => {
       });
   };
 
-
   const fetchAssets = (forceRefresh) =>
     new Promise((resolve, reject) => {
       if (existingAssets.length > 0 && !forceRefresh) {
@@ -249,7 +247,6 @@ const TransferAssetDetailPage = () => {
           });
       }
     });
-
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -380,7 +377,7 @@ const TransferAssetDetailPage = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <Box my={2}>
-            <Steps
+            <Steps2
               isNextStep={false}
               nextStep={isNextStep}
               steps={stepList}
@@ -390,11 +387,7 @@ const TransferAssetDetailPage = () => {
               setStepFullScreen={() => setStepFullScreen(true)}
               updateStatus={updateProcessStatus}
             />
-            <ContentFullScreen
-              title={stepNames[currentStep]}
-              fullScreen={stepFullScreen}
-              setFullScreen={setStepFullScreen}
-            >
+            <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
               {currentStep === 0 && (
                 <AssetsGrid
                   fetchAssets={fetchAssets}

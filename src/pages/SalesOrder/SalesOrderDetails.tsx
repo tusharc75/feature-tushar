@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Grid, Box, Button, Paper, Tabs, Tab, useMediaQuery, Menu, MenuItem } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
@@ -30,6 +30,7 @@ import { GrStatusInfo } from 'react-icons/all';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import Steps2, { getIndex } from 'src/components/Steps';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -58,6 +59,10 @@ const SalesOrderDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+
+  const salesOrderProcessStepsNames = React.useMemo(() => {
+    return salesOrderProcessSteps.map((item) => item.name);
+  }, [salesOrderProcessSteps]);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -94,14 +99,14 @@ const SalesOrderDetails = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
-      updateProcessStatus(salesOrderProcessSteps[currentStep]);
+      updateProcessStatus(salesOrderProcessStepsNames[currentStep]);
     }
   }, [currentStep]);
 
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${salesOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -130,7 +135,7 @@ const SalesOrderDetails = () => {
       const response: any = await axiosInstance().get(`${salesOrder.api}/${id}`);
       data = response?.data?.data;
 
-      setCurrentStep(salesOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? salesOrderProcessSteps.indexOf(data?.processStatus) : 0);
+      setCurrentStep(getIndex(data?.processStatus, salesOrderProcessSteps));
       setHeadingLabel(data.salesOrderNo);
       setCustomizedRoutes([routes.salesOrder, { title: `${data.salesOrderNo}` }]);
       setSalesOrderData(data);
@@ -309,7 +314,7 @@ const SalesOrderDetails = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps
+          <Steps2
             isNextStep={false}
             nextStep={nextStep}
             steps={salesOrderProcessSteps}
@@ -317,7 +322,7 @@ const SalesOrderDetails = () => {
             setCurrentStep={setCurrentStep}
             isStepEnded={['Invoiced', 'Closed'].includes(salesOrderData?.status)}
           />
-          <ContentFullScreen title={salesOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <ContentFullScreen title={salesOrderProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && salesOrderData && (
               <Material
                 salesOrderData={salesOrderData}

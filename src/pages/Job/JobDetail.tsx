@@ -1,5 +1,5 @@
 import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -15,15 +15,16 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import TabPanel from '../../components/TabPanel';
 import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
-import { TbFileInvoice } from 'react-icons/tb'
+import { TbFileInvoice } from 'react-icons/tb';
 import ManageJobDialog from './ManageJobDialog';
 import Material from './Material';
 import Steps from '../RentalManagement/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { ACTIVITY_RESOURCE, jobProcessSteps } from 'src/constants/helpers';
-import Fleet from "./Fleet"
-import Invoice from "./Invoice"
+import Fleet from './Fleet';
+import Invoice from './Invoice';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import Steps2, { getIndex } from 'src/components/Steps';
 
 const JobDetail = () => {
   const renderedFrom = camelCase(routes?.job.title);
@@ -43,6 +44,10 @@ const JobDetail = () => {
   const [nextStep, setNextStep] = useState(true);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
+  const jobProcessStepsNames = React.useMemo(() => {
+    return jobProcessSteps.map((item) => item.name);
+  }, [jobProcessSteps]);
+
   const {
     state: { permissions, user }
   }: any = useData();
@@ -53,7 +58,6 @@ const JobDetail = () => {
       fetchData();
     }
   }, [id]);
-
 
   const fetchFields = async () => {
     axiosInstance()
@@ -72,9 +76,7 @@ const JobDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.job.path}/${id}`);
-      setCurrentStep(
-        jobProcessSteps.indexOf(data?.processStatus) !== -1 ? jobProcessSteps.indexOf(data?.processStatus) : 0
-      );
+      setCurrentStep(getIndex(data?.processStatus, jobProcessSteps));
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
@@ -122,13 +124,13 @@ const JobDetail = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${routes.job.path}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= jobProcessSteps.length) {
-      updateProcessStatus(jobProcessSteps[currentStep]);
+    if (currentStep !== null && currentStep >= 0 && currentStep <= jobProcessStepsNames.length) {
+      updateProcessStatus(jobProcessStepsNames[currentStep]);
     }
   }, [currentStep]);
 
@@ -150,9 +152,7 @@ const JobDetail = () => {
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
-            {permissions?.job?.isDelete && allowedToDelete && (
-              <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-            )}
+            {permissions?.job?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton referenceId={jobData?._id} resource={ACTIVITY_RESOURCE.job} />
           </Box>
         </Box>
@@ -215,7 +215,7 @@ const JobDetail = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps
+          <Steps2
             isNextStep={false}
             nextStep={nextStep}
             steps={jobProcessSteps}
@@ -224,7 +224,7 @@ const JobDetail = () => {
             isStepEnded={false}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
-          <ContentFullScreen title={jobProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <ContentFullScreen title={jobProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && jobData && (
               <Material
                 renderedFrom={`${renderedFrom}_grid-1`}
@@ -234,13 +234,7 @@ const JobDetail = () => {
               />
             )}
 
-            {currentStep === 1 && jobData && (
-              <Fleet
-                renderedFrom={`${renderedFrom}_grid-1`}
-                jobData={jobData}
-                setNextStep={setNextStep}
-              />
-            )}
+            {currentStep === 1 && jobData && <Fleet renderedFrom={`${renderedFrom}_grid-1`} jobData={jobData} setNextStep={setNextStep} />}
           </ContentFullScreen>
         </TabPanel>
         <TabPanel value={tabValue} index={2}>

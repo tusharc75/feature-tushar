@@ -598,7 +598,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
         </Box>
       </Box>
       {columns && rowsData ? (
-        <Box p="6px" zIndex={5} width={'100%'}>
+        <Box zIndex={5} width={'100%'}>
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
@@ -613,7 +613,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           />
         </Box>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box height={500} bgcolor="white">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

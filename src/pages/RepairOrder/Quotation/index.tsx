@@ -495,9 +495,8 @@ const Quotation = ({
     <Fragment>
       <Box
         display="flex"
-        justifyContent="space-between"
-        mt={1}
-        mb={2}
+        m={1}
+        my={1}
         className={`flex-wrap`}
         style={{ gap: isMobileScreen ? '5px' : 0, justifyContent: isMobileScreen ? 'center' : 'space-between' }}
       >
@@ -537,92 +536,89 @@ const Quotation = ({
             ) : null}
           </Box>
         )}
-        <Box display="flex">
-          {allowedToEdit && (
-            <div>
-              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
-                <Button
-                  disabled={material
-                    .filter((e) => e.parentId === null)
-                    .some(
-                      (d) =>
-                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
-                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
-                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
-                    )}
-                  onClick={handleSendToCustomer}
-                  variant="contained"
-                  size="small"
-                  className="mx-1"
-                  color="primary"
-                >
-                  Process Quote
-                </Button>
-              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                <Button
-                  onClick={() => {
-                    setCustomerAcceptable(true);
-                  }}
-                  variant="contained"
-                  size="small"
-                  className="mx-1"
-                  color="primary"
-                >
-                  Accept / Reject
-                </Button>
-              ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(quotationData?.versions[currentVersion]?.status) ? (
-                <Button
-                  onClick={() => {
-                    cloneVersion();
-                  }}
-                  variant="contained"
-                  size="small"
-                  className="mx-1"
-                  color="primary"
-                >
-                  Create New Version
-                </Button>
-              ) : null}
-              {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                quotationData?.versions[currentVersion]?.status
-              ) && (
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedProducts.length === 0}
-                  endIcon={<ExpandMore />}
-                >
-                  Actions
-                </Button>
-              )}
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
+        {allowedToEdit && (
+          <Box display={'flex'} gridGap={8}>
+            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
+            quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+              <Button
+                disabled={material
+                  .filter((e) => e.parentId === null)
+                  .some(
+                    (d) =>
+                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
+                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
+                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
+                  )}
+                onClick={handleSendToCustomer}
+                variant="contained"
+                size="small"
+                color="primary"
               >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setIsProductEdit({ open: true, isBulkedit: true });
-                  }}
-                >
-                  Bulk Edit
-                </MenuItem>
-              </Menu>
-            </div>
-          )}
-        </Box>
+                Process Quote
+              </Button>
+            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+              <Button
+                onClick={() => {
+                  setCustomerAcceptable(true);
+                }}
+                variant="contained"
+                size="small"
+                className="mx-1"
+                color="primary"
+              >
+                Accept / Reject
+              </Button>
+            ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(quotationData?.versions[currentVersion]?.status) ? (
+              <Button
+                onClick={() => {
+                  cloneVersion();
+                }}
+                variant="contained"
+                size="small"
+                className="mx-1"
+                color="primary"
+              >
+                Create New Version
+              </Button>
+            ) : null}
+            {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+              quotationData?.versions[currentVersion]?.status
+            ) && (
+              <Button
+                variant="outlined"
+                color="default"
+                size="small"
+                onClick={openActions}
+                aria-controls="action-menu"
+                disabled={selectedProducts.length === 0}
+                endIcon={<ExpandMore />}
+              >
+                Actions
+              </Button>
+            )}
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setIsProductEdit({ open: true, isBulkedit: true });
+                }}
+              >
+                Bulk Edit
+              </MenuItem>
+            </Menu>
+          </Box>
+        )}
         {isMobileScreen && (
           <Box display="flex" style={{ margin: '0 auto' }}>
             {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (

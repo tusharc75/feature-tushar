@@ -248,10 +248,9 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
   return (
     <>
       <Box display="flex" justifyContent="flex-end" pt={1}>
-        <Box display="flex" alignItems="center">
+        <Box display="flex" alignItems="center" gridGap={8}>
           {allowedToEdit && (
             <Fragment>
-              <Box mx={1} />
               <Button
                 variant="outlined"
                 color="default"

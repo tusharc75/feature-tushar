@@ -13,7 +13,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile } from 'react-device-detect';
-import {  startCase } from 'lodash';
+import { startCase } from 'lodash';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import SalesOrderQtyDialog from './SalesOrderQtyDialog';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
@@ -97,7 +97,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
               </p>
             }
 
-            {row?.original?.type !== 'service' &&
+            {row?.original?.type !== 'service' && (
               <Box ml={1} className="d-flex align-items-center">
                 {row.original?.subRows?.length > 0 && (
                   <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
@@ -113,7 +113,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
                   </HtmlTooltip>
                 </Box>
               </Box>
-            }
+            )}
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -197,7 +197,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${
-           parent.type === 'product'
+        parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
           ? parent.serviceDetail?.serviceName
@@ -228,7 +228,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.detail = `${
-       _subRow.type === 'product'
+        _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
           ? _subRow.serviceDetail?.serviceName
@@ -462,8 +462,8 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
                 Actions
               </Button>
             </span>
-            </HtmlTooltip>
-            <Menu
+          </HtmlTooltip>
+          <Menu
             anchorEl={anchorActionEl}
             keepMounted
             getContentAnchorEl={null}
@@ -476,7 +476,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           >
             <MenuItem
               onClick={() => {
-                setIsProductEdit({ open: true, isBulkedit: true })
+                setIsProductEdit({ open: true, isBulkedit: true });
                 closeActions();
               }}
             >
@@ -484,7 +484,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
             </MenuItem>
 
             <MenuItem
-               onClick={() => {
+              onClick={() => {
                 const dataToDelete =
                   selectedProducts &&
                   selectedProducts
@@ -497,7 +497,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
                       return obj;
                     });
                 setDeleteData(dataToDelete);
-                closeActions()
+                closeActions();
               }}
             >
               Delete
@@ -507,7 +507,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       </Box>
       {columns && rowsData ? (
         <>
-          <Box p="6px" zIndex={5} width={'100%'}>
+          <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}

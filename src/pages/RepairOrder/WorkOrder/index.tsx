@@ -521,92 +521,88 @@ const WorkOrder = ({
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="flex-end" mt={1} mb={2}>
-        <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1}>
-          {allowedToEdit && (
-            <Box display="flex" gridColumnGap={5}>
-              <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedProducts?.length === 0}
-                endIcon={<ExpandMore />}
-              >
-                Actions
-              </Button>
-              <Menu
-                anchorEl={anchorActionEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
+      <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
+        {allowedToEdit && (
+          <Box display="flex" gridColumnGap={5}>
+            <Button
+              variant="outlined"
+              color="default"
+              size="small"
+              onClick={openActions}
+              aria-controls="action-menu"
+              disabled={selectedProducts?.length === 0}
+              endIcon={<ExpandMore />}
+            >
+              Actions
+            </Button>
+            <Menu
+              anchorEl={anchorActionEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorActionEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setAddServicesDialog({ open: true });
                 }}
-                id="action-menu"
-                open={Boolean(anchorActionEl)}
-                onClose={closeActions}
               >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setAddServicesDialog({ open: true });
-                  }}
-                >
-                  Add Services
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setUserAssignDialog(true);
-                  }}
-                >
-                  Assign Technician
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setArrangeView(true);
-                  }}
-                  disabled={
-                    selectedProducts?.length && selectedProducts?.every((d) => d.workOrder?._id === selectedServices[0]?.workOrder?._id)
+                Add Services
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setUserAssignDialog(true);
+                }}
+              >
+                Assign Technician
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setArrangeView(true);
+                }}
+                disabled={
+                  selectedProducts?.length && selectedProducts?.every((d) => d.workOrder?._id === selectedServices[0]?.workOrder?._id) ? false : true
+                }
+              >
+                Arrange Services
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setDeleteData(selectedServices?.length ? selectedServices : selectedAssets);
+                  setShowConfirmBox(true);
+                  closeActions();
+                }}
+                disabled={
+                  selectedProducts?.filter((e) => e.type === 'service').length
+                    ? selectedServices?.filter(
+                        (d) =>
+                          d.type === 'service' &&
+                          d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
+                          d.status === WORKORDER_SERVICE_STATUS.pending
+                      )?.length === selectedServices?.length
                       ? false
                       : true
-                  }
-                >
-                  Arrange Services
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setDeleteData(selectedServices?.length ? selectedServices : selectedAssets);
-                    setShowConfirmBox(true);
-                    closeActions();
-                  }}
-                  disabled={
-                    selectedProducts?.filter((e) => e.type === 'service').length
-                      ? selectedServices?.filter(
-                          (d) =>
-                            d.type === 'service' &&
-                            d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
-                            d.status === WORKORDER_SERVICE_STATUS.pending
-                        )?.length === selectedServices?.length
-                        ? false
-                        : true
-                      : selectedAssets?.length
-                      ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
-                        selectedAssets?.length
-                        ? false
-                        : true
+                    : selectedAssets?.length
+                    ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
+                      selectedAssets?.length
+                      ? false
                       : true
-                  }
-                >
-                  Delete
-                </MenuItem>
-              </Menu>
-            </Box>
-          )}
-        </Box>
+                    : true
+                }
+              >
+                Delete
+              </MenuItem>
+            </Menu>
+          </Box>
+        )}
       </Box>
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>

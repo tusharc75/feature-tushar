@@ -21,7 +21,8 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 
-const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess }) => {
+const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refrenceData = null }) => {
+
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -56,6 +57,14 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess }) =>
                 });
                 setLoading(false);
               } else {
+                if (refrenceData?.wellName) {
+                  fieldsDataForCreate?.forEach((e) => {
+                    if (e.fieldName === "wellName") {
+                      e.disableOnEdit = true
+                      e.isUneditable = true;
+                    }
+                  })
+                }
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
@@ -67,6 +76,15 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess }) =>
             });
         } else {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
+          if (refrenceData?.wellName) {
+            fieldsDataForCreate?.forEach((e) => {
+              if (e.fieldName === "wellName") {
+                createValues.wellName = refrenceData?.wellName;
+                e.disableOnEdit = true
+                e.isUneditable = true;
+              }
+            })
+          }
           setInitialData({
             fields: fieldsDataForCreate,
             values: createValues
@@ -111,7 +129,12 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess }) =>
             message: data.message
           });
           setLoading(false);
-          history.push(`${routes.wellNumberDetail.path}/${data?.data?._id}`);
+          if (refrenceData) {
+            onSuccess()
+          }
+          else {
+            history.push(`${routes.wellNumberDetail.path}/${data?.data?._id}`);
+          }
         })
         .catch((error) => {
           setLoading(false);
@@ -131,11 +154,6 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess }) =>
       });
     }
   };
-
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
 
   return (
     <Dialog
@@ -157,7 +175,6 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess }) =>
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
-          validate={validate}
           onSubmit={handleSubmit}
         >
           {({ values, errors, touched, submitForm, setFieldValue }) => (

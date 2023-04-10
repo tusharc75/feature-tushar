@@ -6,7 +6,7 @@ import { Button, IconButton, Box, Typography } from '@material-ui/core';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
 import { FiMaximize2 } from 'react-icons/fi';
-import { LeftIcon, RightIcon, getIcon, stepIconInterface, getColorOficon } from './icons';
+import { LeftIcon, RightIcon, getIcon, stepIconInterface, getColorOficon, StepCompleteIcon } from './icons';
 
 const STEP_GAP = 15;
 
@@ -28,7 +28,6 @@ const Steps = ({
   let activeStep = currentStep;
   const containerRef = useRef(null);
 
-  console.log({ isStepEnded });
   const goNext = () => {
     if (handleNext) {
       handleNext();
@@ -111,16 +110,28 @@ const Steps = ({
       ) : (
         <Box {...others} className={`${className} ${styles.gradient}`}>
           <Box className={styles.mainContainer}>
-            <Box className={styles.iconButton}>
-              <IconButton
-                style={{ opacity: isStepEnded && '0' }}
-                disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep}
-                onClick={goPrev}
-              >
-                <LeftIcon />
-              </IconButton>
-            </Box>
-            <div className={styles.contentContainer} ref={containerRef}>
+            {isStepEnded || (
+              <Box className={styles.iconButton}>
+                <IconButton
+                  style={{ opacity: currentStep === 0 && '0' }}
+                  disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep}
+                  onClick={goPrev}
+                >
+                  <LeftIcon />
+                </IconButton>
+              </Box>
+            )}
+            <div
+              className={styles.contentContainer}
+              style={
+                {
+                  '--flex-basis': isStepEnded ? '100%' : 'calc(100% - calc(calc(var(--icon-size) + var(--left-right-icon-spacing, 15px)) * 2))',
+                  marginLeft: isStepEnded ? '8px' : 'unset',
+                  padding: isStepEnded ? '9px 8px 0 0' : 'unset'
+                } as React.CSSProperties
+              }
+              ref={containerRef}
+            >
               {steps.map((step, i) => {
                 const Icon = getIcon(step.icon);
                 return (
@@ -134,6 +145,11 @@ const Steps = ({
                 `}
                     key={step.name}
                   >
+                    {isStepEnded && (
+                      <Box className={styles.stepCompleteIcon}>
+                        <StepCompleteIcon />
+                      </Box>
+                    )}
                     <Box className={styles.stepIcon}>
                       <Icon colors={i > currentStep ? null : getColorOficon(i) || ['#FAC94B', '#FF9B04']} />
                     </Box>
@@ -151,15 +167,17 @@ const Steps = ({
                 );
               })}
             </div>
-            <Box className={styles.iconButton}>
-              <IconButton
-                style={{ opacity: isStepEnded && '0' }}
-                disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep}
-                onClick={goNext}
-              >
-                <RightIcon />
-              </IconButton>
-            </Box>
+            {!isStepEnded && (
+              <Box className={styles.iconButton}>
+                <IconButton
+                  style={{ opacity: currentStep === steps.length - 1 && '0' }}
+                  disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep}
+                  onClick={goNext}
+                >
+                  <RightIcon />
+                </IconButton>
+              </Box>
+            )}
           </Box>
         </Box>
       )}

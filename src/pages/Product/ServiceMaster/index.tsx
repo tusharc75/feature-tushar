@@ -4,15 +4,11 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { serviceMaster, isObjectEmpty, gridLoadingTimeout, product, gridPageSizes } from 'src/constants/helpers';
+import { product, gridPageSizes } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
-import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
-import { prepareDataForGrid } from 'src/constants/helpers';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, Link } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -25,108 +21,16 @@ import { ExpandMore } from '@material-ui/icons';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import { startCase } from 'lodash';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { genrateCustomTableColumns } from 'src/constants/columns';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
-function reducer(state, action) {
-  switch (action.type) {
-    case 'loading':
-      return {
-        ...state,
-        loading: action.loading
-      };
-
-    case 'initialize':
-      return {
-        ...state,
-        dataRows: action.data,
-        rowCount: action.count
-      };
-
-    case 'selection':
-      return {
-        ...state,
-        selectedRecords: action.selectedRecords
-      };
-
-    case 'update':
-      return {
-        ...state,
-        dataRows: action.data,
-        loading: false
-      };
-
-    case 'filter':
-      return {
-        ...state,
-        loading: true,
-        filters: action.filters,
-        page: 0
-      };
-
-    case 'sort':
-      return {
-        ...state,
-        sorting: action.sorting,
-        loading: true
-      };
-
-    case 'search':
-      return {
-        ...state,
-        search: action.search,
-        loading: true
-      };
-
-    case 'pageChange':
-      return {
-        ...state,
-        page: action.page
-      };
-
-    case 'pageSizeChange':
-      return {
-        ...state,
-        limit: action.limit,
-        page: 0,
-        loading: true
-      };
-
-    case 'complete':
-      return {
-        ...state,
-        loading: false
-      };
-
-    default:
-      break;
-  }
-
-  return state;
-}
-
-const intialState = {
-  dataRows: [],
-  rowCount: 0,
-  loading: false,
-  page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
-  search: '',
-  filters: {},
-  sorting: [],
-  selectedRecords: []
-};
 interface Props {
   renderedFrom: string;
   id: string;
 }
 
 const ServiceMaster = (props: Props) => {
+
   const { renderedFrom, id } = props;
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -140,28 +44,21 @@ const ServiceMaster = (props: Props) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isAssigning, setIsAssigning] = useState(false);
   const [orignalData, setOrignalData] = useState([]);
-  const [state, dispatch] = useReducer(reducer, intialState);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [dataRows, setDataRows] = useState([]);
 
-  const { page, limit, filters } = state;
-  const [assignProductDialog, setAssignProductDialog] = useState({ open: false, products: null, serviceUniqueId: null });
+  const [assignProductDialog, setAssignProductDialog] = useState({ open: false, products: null, service: null, uniqueId: null });
 
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
 
-  // useEffect(() => {
-  //   fetchGridColumns();
-  // }, []);
-
   useEffect(() => {
+    fetchGridColumns()
     fetchData();
-  }, [page, limit, filters, selectedEntity]);
+  }, [selectedEntity, id]);
 
   const fetchGridColumns = () => {
-    setColumns(null);
-
     const columns: any = [
       {
         accessor: 'order',
@@ -184,7 +81,6 @@ const ServiceMaster = (props: Props) => {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 100,
-        // width: 00,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <Link
@@ -237,22 +133,22 @@ const ServiceMaster = (props: Props) => {
       canDrag: false,
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'end' }}>
-          {row.original?.type !== 'Product' && (
+          {permissions?.product?.isUpdate && row.original?.type === 'Service' && (
             <HtmlTooltip title="Add Consumables">
               <IconButton
                 size="small"
                 aria-label="Delete"
+                color="primary"
                 onClick={() => {
                   const subProduct = row.original?.subRows?.map((item) => item?.product);
-                  setAssignProductDialog({ open: true, products: subProduct || [], serviceUniqueId: row.original?._id });
+                  setAssignProductDialog({ open: true, products: subProduct || [], service: row.original?.serviceId, uniqueId: row.original?._id });
                 }}
               >
                 <AddCircleOutlineIcon />
               </IconButton>
             </HtmlTooltip>
           )}
-          {permissions?.product?.isUpdate &&
-            row.original?.type !== 'Product' &&
+          {permissions?.product?.isUpdate && row.original?.type === 'Service' &&
             (row.original?.default ? (
               <HtmlTooltip title={'Remove Default'}>
                 <IconButton
@@ -306,55 +202,28 @@ const ServiceMaster = (props: Props) => {
   };
 
   const fetchData = async () => {
-    setColumns(null);
     try {
       const services = await axiosInstance().get(`${routes.product.path}/${id}/service-master`);
       const consumables = await axiosInstance().get(`${routes.product.path}/${id}/service-master/consumables`);
       const serviceData = services?.data?.data;
       const consumableData = consumables?.data?.data;
-
       setOrignalData([...serviceData]);
       serviceData?.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail = parent?.serviceName;
-        parent.type = parent?.serviceType;
+        parent.type = 'Service';
         parent.preWork = parent?.preWork ? 'Yes' : 'No';
-        parent.subRows = consumableData
-          ?.filter((c) => c?.service === parent?._id)
-          ?.map((c, idx) => {
-            c.index = i + 1 + '.' + `${idx + 1}`;
-            c.detail = c?.productDetail?.productName;
-            c.type = 'Product';
-            return c;
-          });
-
-        // parent.subRows = generateNestedData(consumableData, parent);
+        parent.subRows = consumableData?.filter((c) => c?.uniqueId === parent?._id)?.map((c, idx) => {
+          c.order = (i + 1) + '.' + `${idx + 1}`;
+          c.detail = c?.productDetail?.productName;
+          c.type = 'Product';
+          return c;
+        });
       });
-
-      //   let finalObject = prepareDataForGrid(u);
-
       setDataRows([...serviceData]);
-      fetchGridColumns();
     } catch (e) {
       toastConfig.setToastConfig(e);
-      dispatch({ type: 'loading', loading: false });
     }
-
-    // const generateNestedData = async (material, parent) => {
-    //   console.log(material, parent);
-    //   const subRows: any = material?.filter((m) => m?.service === parent?._id);
-    //   await subRows.forEach((_subRow, index) => {
-    //     console.log('sub', _subRow);
-    //     _subRow.index = parent.index + '.' + `${index + 1}`;
-    //     _subRow.detail = _subRow.productDetail?.productName || '';
-    //     _subRow.type = 'Product';
-    //     _subRow.description = _subRow?.productDetail?.productDescription || '';
-    //     _subRow.qty = _subRow.qty;
-    //     // _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
-    //     // _subRow.subRows = generateNestedData(material, _subRow);
-    //   });
-    //   return subRows;
-    // };
   };
 
   const handleDelete = async () => {
@@ -367,13 +236,11 @@ const ServiceMaster = (props: Props) => {
         } else {
           serviceIds.push(deleteRecord._id);
         }
-        // ids.push(deleteRecord._id);
         setDeleteRecord(null);
       } else {
         selectedRecords.map((d) => {
           if (d.type !== 'Product') {
             serviceIds.push(d._id);
-            // return d._id;
           } else {
             productIds.push(d._id);
           }
@@ -381,10 +248,12 @@ const ServiceMaster = (props: Props) => {
       }
       setDeleting(true);
       closeActions();
-      if (serviceIds.length > 0) await axiosInstance().put(`${routes.product.path}/${id}/service-master/remove`, { ids: serviceIds });
-
-      if (productIds.length > 0) await axiosInstance().put(`${routes.product.path}/${id}/service-master/remove-consumables`, { ids: productIds });
-
+      if (serviceIds.length > 0) {
+        await axiosInstance().put(`${routes.product.path}/${id}/service-master/remove`, { ids: serviceIds });
+      }
+      if (productIds.length > 0) {
+        await axiosInstance().put(`${routes.product.path}/${id}/service-master/remove-consumables`, { ids: productIds });
+      }
       fetchData();
       setShowDeleteConfirmBox(false);
       setDeleteRecord(null);
@@ -398,7 +267,12 @@ const ServiceMaster = (props: Props) => {
   const handleUpdate = (data: any) => {
     axiosInstance()
       .put(`${routes.product.path}/${id}/service-master/update-default`, data)
-      .then(() => {
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         fetchData();
       })
       .catch((err) => {
@@ -458,16 +332,16 @@ const ServiceMaster = (props: Props) => {
     axiosInstance()
       .post(`${routes.product.path}/${id}/service-master/consumables`, data)
       .then(({ data }) => {
-        setAssignProductDialog({ open: false, products: null, serviceUniqueId: null });
+        setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null });
         fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: 'Consumables assigned successfully'
+          message: data.message
         });
       })
       .catch((error) => {
-        setAssignProductDialog({ open: false, products: null, serviceUniqueId: null });
+        setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null });
         toastConfig.setToastConfig(error);
       });
   };
@@ -487,7 +361,6 @@ const ServiceMaster = (props: Props) => {
                 Arrange
               </Button>
             ) : null}
-
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
               color="default"
@@ -611,7 +484,7 @@ const ServiceMaster = (props: Props) => {
         <AssignProductDialog
           productsDialogOpen={assignProductDialog.open}
           productId={id}
-          handleCloseDialog={() => setAssignProductDialog({ open: false, products: null, serviceUniqueId: null })}
+          handleCloseDialog={() => setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null })}
           assignedProducts={assignProductDialog.products}
           reference={'productService'}
           renderedFrom={`${renderedFrom}_grid-sub-1`}
@@ -620,7 +493,8 @@ const ServiceMaster = (props: Props) => {
               return {
                 product: d?.id,
                 qty: Number(d.qty),
-                service: assignProductDialog.serviceUniqueId
+                service: assignProductDialog.service,
+                uniqueId: assignProductDialog.uniqueId
               };
             });
             handleAssignConsumable(data);
