@@ -47,7 +47,7 @@ const ServiceMaster = (props: Props) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [dataRows, setDataRows] = useState([]);
 
-  const [assignProductDialog, setAssignProductDialog] = useState({ open: false, products: null, serviceUniqueId: null });
+  const [assignProductDialog, setAssignProductDialog] = useState({ open: false, products: null, service: null, uniqueId: null });
 
   const {
     state: { permissions, selectedEntity }
@@ -141,7 +141,7 @@ const ServiceMaster = (props: Props) => {
                 color="primary"
                 onClick={() => {
                   const subProduct = row.original?.subRows?.map((item) => item?.product);
-                  setAssignProductDialog({ open: true, products: subProduct || [], serviceUniqueId: row.original?._id });
+                  setAssignProductDialog({ open: true, products: subProduct || [], service: row.original?.serviceId, uniqueId: row.original?._id });
                 }}
               >
                 <AddCircleOutlineIcon />
@@ -213,7 +213,7 @@ const ServiceMaster = (props: Props) => {
         parent.detail = parent?.serviceName;
         parent.type = 'Service';
         parent.preWork = parent?.preWork ? 'Yes' : 'No';
-        parent.subRows = consumableData?.filter((c) => c?.service === parent?._id)?.map((c, idx) => {
+        parent.subRows = consumableData?.filter((c) => c?.uniqueId === parent?._id)?.map((c, idx) => {
           c.order = (i + 1) + '.' + `${idx + 1}`;
           c.detail = c?.productDetail?.productName;
           c.type = 'Product';
@@ -267,7 +267,12 @@ const ServiceMaster = (props: Props) => {
   const handleUpdate = (data: any) => {
     axiosInstance()
       .put(`${routes.product.path}/${id}/service-master/update-default`, data)
-      .then(() => {
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         fetchData();
       })
       .catch((err) => {
@@ -327,7 +332,7 @@ const ServiceMaster = (props: Props) => {
     axiosInstance()
       .post(`${routes.product.path}/${id}/service-master/consumables`, data)
       .then(({ data }) => {
-        setAssignProductDialog({ open: false, products: null, serviceUniqueId: null });
+        setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null });
         fetchData();
         toastConfig.setToastConfig({
           open: true,
@@ -336,7 +341,7 @@ const ServiceMaster = (props: Props) => {
         });
       })
       .catch((error) => {
-        setAssignProductDialog({ open: false, products: null, serviceUniqueId: null });
+        setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null });
         toastConfig.setToastConfig(error);
       });
   };
@@ -479,7 +484,7 @@ const ServiceMaster = (props: Props) => {
         <AssignProductDialog
           productsDialogOpen={assignProductDialog.open}
           productId={id}
-          handleCloseDialog={() => setAssignProductDialog({ open: false, products: null, serviceUniqueId: null })}
+          handleCloseDialog={() => setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null })}
           assignedProducts={assignProductDialog.products}
           reference={'productService'}
           renderedFrom={`${renderedFrom}_grid-sub-1`}
@@ -488,7 +493,8 @@ const ServiceMaster = (props: Props) => {
               return {
                 product: d?.id,
                 qty: Number(d.qty),
-                service: assignProductDialog.serviceUniqueId
+                service: assignProductDialog.service,
+                uniqueId: assignProductDialog.uniqueId
               };
             });
             handleAssignConsumable(data);
