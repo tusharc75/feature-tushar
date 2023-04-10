@@ -33,6 +33,7 @@ import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 
 const WellNumber = () => {
+  
   let renderedFrom = camelCase(routes.wellNumber?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -101,7 +102,7 @@ const WellNumber = () => {
     axiosInstance()
       .get(`${routes.wellNumber.path}${queryString}`)
       .then(({ data: { data } }) => {
-        let rows = data?.data?.map((u) => {
+        let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.wellNumber?.isUpdate;

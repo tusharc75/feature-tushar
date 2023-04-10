@@ -149,7 +149,7 @@ const WellMasterDetailsPage = () => {
             )}
           </Box>
         )}
-        {tabValue === 1 && <WellNumber id={id} />}
+        {tabValue === 1 && <WellNumber wellName={id} />}
       </Box>
       {showManageDialog.open && (
         <ManageWellMaster
