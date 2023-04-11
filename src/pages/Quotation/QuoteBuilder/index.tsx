@@ -48,6 +48,10 @@ const QuoteBuilder = ({
     }
   }, [versionData]);
 
+  useEffect(() => {
+    handleCheckNextPrev()
+  }, [sentToCustomer, DOAData]);
+
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
     data?.forEach((e) => {
@@ -174,8 +178,10 @@ const QuoteBuilder = ({
       });
     }
     setRowsData([...rows, ...serviceRows]);
+    handleCheckNextPrev()
+  };
 
-
+  const handleCheckNextPrev = () => {
     if (currentStep === "Quote Builder") {
       setNextStep(true);
       setPrevStep(true);
@@ -204,7 +210,7 @@ const QuoteBuilder = ({
         setPrevStep(true);
       }
     }
-  };
+  }
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);

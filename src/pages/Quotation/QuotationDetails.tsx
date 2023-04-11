@@ -183,10 +183,16 @@ const QuotationDetails = () => {
       data = response?.data?.data;
 
       setQuotationData(data);
-      updateDOASetup(data?.doasetup);
+
+      var tempStepList = quotationProcessSteps;
+      if (!data?.doasetup) {
+        tempStepList = quotationProcessSteps?.filter((e) => e.name !== 'DOA');
+      }
+      setStepList(tempStepList);
+      setStepNames(tempStepList?.map((item) => item.name));
 
       let versionIndex = 0;
-      if (version == 0) {
+      if (version === 0) {
         let keys = Object.keys(data.versions);
         versionIndex = parseInt(keys[keys.length - 1]);
       } else {
@@ -194,7 +200,7 @@ const QuotationDetails = () => {
       }
       setCurrentVersion(versionIndex);
       setCurrVersionId(data.versions[versionIndex]?._id);
-      setCurrentStep(getIndex(data.versions[versionIndex]?.processStatus, stepList));
+      setCurrentStep(getIndex(data.versions[versionIndex]?.processStatus, tempStepList));
       setVersionStatus(data.versions[versionIndex]?.status);
       setSentToCustomer(data.versions[versionIndex]?.status === QUOTATION_STATUS.sentToCustomer);
 
@@ -456,14 +462,6 @@ const QuotationDetails = () => {
       <Box className={`detail-container-v1`}>
         <Tabs
           className="new-tab-container-v1"
-          style={{
-            marginBottom:
-              (stepNames[currentStep] === 'DOA' ||
-                sentToCustomer ||
-                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ||
-                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer) &&
-              0
-          }}
           value={tabValue}
           onChange={handleMainTabChange}
           textColor="primary"
@@ -519,21 +517,25 @@ const QuotationDetails = () => {
             <Box
               style={{
                 marginLeft: 'auto',
-                maxWidth: 'max-content'
+                maxWidth: 'max-content',
+                marginTop: '-30px'
               }}
             >
               <ShowDoaData status={quotationData.versions[currentVersion].status} doaData={DOAData} />
             </Box>
           )}
-          <Box
-            style={{
-              marginLeft: 'auto',
-              maxWidth: 'max-content'
-            }}
-          >
-            <ShowQuoteStatus isSentToCustomer={sentToCustomer} status={quotationData?.versions[currentVersion]?.status} />
-          </Box>
-
+          {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.versions[currentVersion]?.status)
+            &&
+            <Box
+              style={{
+                marginLeft: 'auto',
+                maxWidth: 'max-content',
+                marginTop: '-30px'
+              }}
+            >
+              <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+            </Box>
+          }
           <div>
             <Steps
               isNextStep={false}
@@ -541,15 +543,15 @@ const QuotationDetails = () => {
               steps={stepList}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
-              isStepEnded={stepNames[currentStep] === 'End'}
+              isStepEnded={[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.versions[currentVersion]?.status)}
               setStepFullScreen={() => setStepFullScreen(true)}
               isPrevStep={prevStep}
               updateStatus={updateProcessStatus}
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
-                      setCustomerAcceptable(true);
-                    }
+                    setCustomerAcceptable(true);
+                  }
                   : null
               }
             />

@@ -129,11 +129,7 @@ const Service = ({ quotationData, setNextStep, renderedFrom, allowedToEdit, vers
     rows?.forEach((parent, i) => {
       parent.index = i + 1;
     });
-    if (rows?.length) {
-      setNextStep(true);
-    } else {
-      setNextStep(false);
-    }
+    setNextStep(true);
     setRowsData(rows);
   };
 
