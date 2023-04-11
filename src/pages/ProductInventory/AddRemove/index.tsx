@@ -182,7 +182,6 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
       errors['customDate'] = `Please selecte valid date`;
     }
 
-    console.log(errors)
     return errors;
   }
 
