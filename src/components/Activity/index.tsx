@@ -7,6 +7,7 @@ import { VscCalendar } from 'react-icons/vsc';
 import { BsBriefcase } from 'react-icons/bs';
 import { GoNote } from 'react-icons/go';
 import { HiOutlineMail } from 'react-icons/hi';
+import BiMailSend from 'react-icons/bi';
 
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import { AiOutlinePaperClip, AiOutlineHistory } from 'react-icons/ai';
@@ -33,6 +34,7 @@ import { useData } from './../../StateProvider/Provider';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CloseIcon from '@material-ui/icons/Close';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
+import MailIcon from '@material-ui/icons/Mail';
 import HtmlTooltip from '../CustomTooltipTitle';
 
 const useStyles = makeStyles(() => ({
@@ -75,7 +77,7 @@ const useStyles = makeStyles(() => ({
 
 const Activity = (props) => {
   const classes = useStyles();
-  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => { } } = props;
+  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => {} } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [type, setType] = useState(null);
@@ -100,7 +102,7 @@ const Activity = (props) => {
   });
   const [showHistory, setShowHistory] = useState(false);
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, user }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -207,6 +209,15 @@ const Activity = (props) => {
     }
   };
 
+  const emailCopy = async (e, text) => {
+    e.stopPropagation();
+    await navigator.clipboard.writeText(text);
+    toastConfig.setToastConfig({
+      type: 'success',
+      message: 'Email copied to clipboard'
+    });
+  };
+
   return (
     <>
       <Box>
@@ -244,11 +255,22 @@ const Activity = (props) => {
                           {data === 'Attachment' && (
                             <Box mr={1}>
                               <HtmlTooltip title={'Add Folder'}>
+                                <IconButton size="small" onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}>
+                                  <CreateNewFolderIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+                                </IconButton>
+                              </HtmlTooltip>
+                            </Box>
+                          )}
+                          {data === 'Email' && (
+                            <Box mr={1}>
+                              <HtmlTooltip title={`${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}@master.equip-t.com`}>
                                 <IconButton
                                   size="small"
-                                  onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}
+                                  onClick={(e) => {
+                                    emailCopy(e, `${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}@master.equip-t.com`);
+                                  }}
                                 >
-                                  <CreateNewFolderIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+                                  <MailIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
                                 </IconButton>
                               </HtmlTooltip>
                             </Box>
