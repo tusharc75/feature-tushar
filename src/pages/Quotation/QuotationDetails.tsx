@@ -50,6 +50,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import NewStepper from 'src/components/Helpers/NewStepper';
 import Steps2, { getIndex } from 'src/components/Steps';
 import ShowDoaData from 'src/components/ShowDoaData';
+import ShowQuoteStatus from 'src/components/ShowQuoteStatus';
 
 const useStyles = makeStyles((theme) => ({}));
 
@@ -469,7 +470,14 @@ const QuotationDetails = () => {
       <Box className={`detail-container-v1`}>
         <Tabs
           className="new-tab-container-v1"
-          style={{ marginBottom: quotationProcessStepsNames[currentStep] === 'DOA' && 0 }}
+          style={{
+            marginBottom:
+              (quotationProcessStepsNames[currentStep] === 'DOA' ||
+                sentToCustomer ||
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ||
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer) &&
+              0
+          }}
           value={tabValue}
           onChange={handleMainTabChange}
           textColor="primary"
@@ -525,29 +533,20 @@ const QuotationDetails = () => {
             <Box
               style={{
                 marginLeft: 'auto',
-                marginBottom: '20px',
                 maxWidth: 'max-content'
               }}
             >
               <ShowDoaData status={quotationData.versions[currentVersion].status} doaData={DOAData} />
             </Box>
           )}
-          {sentToCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcClock size={25} />
-              <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-            </div>
-          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcOk size={25} />
-              <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-            </div>
-          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcCancel size={25} />
-              <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-            </div>
-          ) : null}
+          <Box
+            style={{
+              marginLeft: 'auto',
+              maxWidth: 'max-content'
+            }}
+          >
+            <ShowQuoteStatus isSentToCustomer={sentToCustomer} status={quotationData?.versions[currentVersion]?.status} />
+          </Box>
 
           <div>
             <Steps2

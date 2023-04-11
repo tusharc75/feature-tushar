@@ -195,7 +195,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" mt={1} mb={1}>
+        <Box display="flex" justifyContent="space-between" m={1}>
           <Box display="flex">
             <Button
               color="primary"
@@ -210,7 +210,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
               Add
             </Button>
           </Box>
-          <Box display="flex-end">
+          <Box display="flex-end" ml={1}>
             <Button
               variant="contained"
               size="small"
@@ -261,7 +261,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
             showClone={false}
             fullHeight={true}
             renderedFrom={renderedFrom}
-            onClone={() => { }}
+            onClone={() => {}}
           />
         ) : (
           <CustomAgGridEditable
