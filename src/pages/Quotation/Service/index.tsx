@@ -1,17 +1,8 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import {
-  Grid,
   Box,
   Button,
-  Paper,
-  Typography,
   IconButton,
-  Tab,
-  Tabs,
-  ButtonGroup,
-  Container,
-  InputAdornment,
-  TextField,
   Menu,
   MenuItem
 } from '@material-ui/core';
@@ -19,7 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { quotation, PURCHASE_ORDER_STATUS } from 'src/constants/helpers';
+import { quotation } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
@@ -37,7 +28,7 @@ import { fetch_quotation_service_fields } from 'src/components/Quotation/helper'
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import LeadTimeDialog from './LeadTimeDialog';
 
-const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, version }) => {
+const Product = ({ quotationData, setNextStep, renderedFrom, allowedToEdit, version }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -102,6 +93,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, ver
   }
 
   const fetchQuotationService = () => {
+    setNextStep(false)
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
@@ -112,8 +104,8 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, ver
         let rows = data?.map((item) => {
           let finalObject = prepareDataForGrid(item);
           // finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
-          // finalObject["canDelete"] = permissions?.quotation?.isDelete;
-          // finalObject["allowedToEdit"] = permissions?.quotation?.isUpdate;
+          finalObject["canDelete"] = allowedToEdit;
+          finalObject["allowedToEdit"] = allowedToEdit;
           let res: any = {
             ...finalObject
           };
@@ -121,6 +113,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, ver
         });
         dispatch({ type: 'initialize', data: rows, count: rows.length });
         dispatch({ type: 'loading', loading: false });
+        setNextStep(true)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -129,41 +122,42 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, ver
   };
 
   const ActionsRenderer = (params) => (
-    <>
-      <HtmlTooltip title="Edit">
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setShowServiceDialog(true);
-            setSelectedServiceData(params.data);
+    allowedToEdit ?
+      <>
+        <HtmlTooltip title="Edit">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setShowServiceDialog(true);
+              setSelectedServiceData(params.data);
+            }}
+          >
+            <EditIcon color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+        <HtmlTooltip title="Edit Lead Time">
+          <IconButton
+            size="small"
+            aria-label="Details"
+            onClick={() => {
+              setLeadTimeDialog({ open: true, data: params.data });
+            }}
+          >
+            <DateRangeIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+        <GridDeleteIcon
+          hasDeletePermission={allowedToEdit}
+          ownerId={user?.user?._id}
+          userId={user?.user?._id}
+          onDelete={() => {
+            setShowDeleteConfirmBox(true);
+            setDeleteQuotationService([params.data._id]);
           }}
-        >
-          <EditIcon color="primary" />
-        </IconButton>
-      </HtmlTooltip>
-      <HtmlTooltip title="Edit Lead Time">
-        <IconButton
-          size="small"
-          aria-label="Details"
-          onClick={() => {
-            setLeadTimeDialog({ open: true, data: params.data });
-          }}
-        >
-          <DateRangeIcon fontSize="small" color="primary" />
-        </IconButton>
-      </HtmlTooltip>
-      <GridDeleteIcon
-        hasDeletePermission={permissions?.quotation?.isUpdate}
-        ownerId={user?.user?._id}
-        userId={user?.user?._id}
-        onDelete={() => {
-          setShowDeleteConfirmBox(true);
-          setDeleteQuotationService([params.data._id]);
-        }}
-        entity="rentalManagement"
-      />
-    </>
+          entity="rentalManagement"
+        />
+      </> : null
   );
 
   const openActions = (event) => {
@@ -306,7 +300,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, ver
             showClone={false}
             fullHeight={true}
             renderedFrom={renderedFrom}
-            onClone={() => {}}
+            onClone={() => { }}
           />
         ) : (
           <CustomAgGridEditable
