@@ -150,6 +150,7 @@ const Steps = ({
                         <StepCompleteIcon />
                       </Box>
                     )}
+
                     <Box className={styles.stepIcon}>
                       <Icon colors={i > currentStep ? null : getColorOficon(i) || ['#FAC94B', '#FF9B04']} />
                     </Box>

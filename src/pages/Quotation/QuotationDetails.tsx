@@ -47,10 +47,9 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CachedIcon from '@material-ui/icons/Cached';
 import Steps, { getIndex } from 'src/components/Steps';
 import ShowDoaData from 'src/components/ShowDoaData';
-
+import ShowQuoteStatus from 'src/components/ShowQuoteStatus';
 
 const QuotationDetails = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.quotation.title);
 
@@ -84,7 +83,6 @@ const QuotationDetails = () => {
   const [currVersionId, setCurrVersionId] = useState(null);
   const [sentToCustomer, setSentToCustomer] = useState(false);
   const [versionStatus, setVersionStatus] = useState(QUOTATION_STATUS.acceptByCustomer);
-
 
   const [convertConfirmBox, setConvertConfirmBox] = useState(false);
 
@@ -120,10 +118,10 @@ const QuotationDetails = () => {
   const updateDOASetup = (doasetup) => {
     if (doasetup) {
       setStepList(quotationProcessSteps);
-      setStepNames(quotationProcessSteps?.map((item) => item.name))
+      setStepNames(quotationProcessSteps?.map((item) => item.name));
     } else {
-      setStepList(quotationProcessSteps?.filter((e) => e.name !== "DOA"));
-      setStepNames(quotationProcessSteps?.filter((e) => e.name !== "DOA").map((item) => item.name))
+      setStepList(quotationProcessSteps?.filter((e) => e.name !== 'DOA'));
+      setStepNames(quotationProcessSteps?.filter((e) => e.name !== 'DOA').map((item) => item.name));
     }
   };
 
@@ -191,8 +189,7 @@ const QuotationDetails = () => {
       if (version == 0) {
         let keys = Object.keys(data.versions);
         versionIndex = parseInt(keys[keys.length - 1]);
-      }
-      else {
+      } else {
         versionIndex = version;
       }
       setCurrentVersion(versionIndex);
@@ -202,7 +199,7 @@ const QuotationDetails = () => {
       setSentToCustomer(data.versions[versionIndex]?.status === QUOTATION_STATUS.sentToCustomer);
 
       if (data?.doasetup) {
-        const doaResponse: any = await axiosInstance().get(`doa-request/doaFlow/${data._id}/${data.versions[versionIndex]?._id}`)
+        const doaResponse: any = await axiosInstance().get(`doa-request/doaFlow/${data._id}/${data.versions[versionIndex]?._id}`);
         if (doaResponse?.data?.data) {
           setDOAData(doaResponse?.data?.data?.reverse());
         }
@@ -459,7 +456,14 @@ const QuotationDetails = () => {
       <Box className={`detail-container-v1`}>
         <Tabs
           className="new-tab-container-v1"
-          style={{ marginBottom: stepNames[currentStep] === 'DOA' && 0 }}
+          style={{
+            marginBottom:
+              (stepNames[currentStep] === 'DOA' ||
+                sentToCustomer ||
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ||
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer) &&
+              0
+          }}
           value={tabValue}
           onChange={handleMainTabChange}
           textColor="primary"
@@ -515,29 +519,21 @@ const QuotationDetails = () => {
             <Box
               style={{
                 marginLeft: 'auto',
-                marginBottom: '20px',
                 maxWidth: 'max-content'
               }}
             >
               <ShowDoaData status={quotationData.versions[currentVersion].status} doaData={DOAData} />
             </Box>
           )}
-          {sentToCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcClock size={25} />
-              <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-            </div>
-          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcOk size={25} />
-              <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-            </div>
-          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcCancel size={25} />
-              <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-            </div>
-          ) : null}
+          <Box
+            style={{
+              marginLeft: 'auto',
+              maxWidth: 'max-content'
+            }}
+          >
+            <ShowQuoteStatus isSentToCustomer={sentToCustomer} status={quotationData?.versions[currentVersion]?.status} />
+          </Box>
+
           <div>
             <Steps
               isNextStep={false}
@@ -552,8 +548,8 @@ const QuotationDetails = () => {
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
-                    setCustomerAcceptable(true);
-                  }
+                      setCustomerAcceptable(true);
+                    }
                   : null
               }
             />

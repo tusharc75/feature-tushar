@@ -23,11 +23,11 @@ export const Add: React.FC<svgInterface> = ({ colors, ...others }) => {
       />
       <defs>
         <linearGradient id={hash} x1="4.46745" y1="11.7236" x2="5.7438" y2="19.9674" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#F5BF34" />
-          <stop offset="1" stop-color={colors ? colors[0] : 'currentcolor'} />
+          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
         <linearGradient id={`${hash}1`} x1="12.2087" y1="0.713867" x2="21.6893" y2="2.73805" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#F5BF34" />
+          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
           <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
       </defs>
