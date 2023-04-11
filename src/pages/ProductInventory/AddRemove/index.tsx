@@ -153,7 +153,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
       }
       let maxQty = availableQtyOnRemoveDate !== null ? Math.min(validateQty, availableQtyOnRemoveDate) : validateQty;
       if (parseInt(values.qty) > maxQty) {
-        errors['qty'] = 'qty not more than inventory';
+        errors['qty'] = 'Insufficient Quantity !';
       }
     }
     if (type === 'add') {
@@ -174,12 +174,12 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
 
     if (lockDate) {
       if (!moment(values["customDate"]).isSameOrAfter(moment(lockDate))) {
-        errors['customDate'] = `Please selecte valid date`;
+        errors['customDate'] = `Date entered prior to the locked date`;
       }
     }
 
     if (moment(values["customDate"]).isAfter(moment())) {
-      errors['customDate'] = `Please selecte valid date`;
+      errors['customDate'] = `Please select valid date`;
     }
 
     return errors;

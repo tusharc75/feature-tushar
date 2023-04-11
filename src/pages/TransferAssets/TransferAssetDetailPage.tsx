@@ -92,7 +92,6 @@ const TransferAssetDetailPage = () => {
   }, [id]);
 
   const updateProcessStatus = (step: number) => {
-    console.log(stepNames);
     axiosInstance()
       .put(`${routes.transferAsset.path}/${id}/process-status`, { processStatus: stepNames[step] })
       .catch((error) => {

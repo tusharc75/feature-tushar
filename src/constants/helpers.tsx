@@ -1082,6 +1082,9 @@ export const displayCardDate = (date) => {
 };
 
 export const convertDateInDateTime = (date) => {
+  if (!date) {
+    return date;
+  }
   var newDate = new Date(date);
   var currentDate = new Date();
   newDate.setHours(currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
