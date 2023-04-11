@@ -1004,6 +1004,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                                         }
                                                                                                         : null
                                                                                                 }
+                                                                                                allFields={rentalData.fields}
                                                                                             />
                                                                                         )}
                                                                     </Grid>
