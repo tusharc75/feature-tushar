@@ -6,6 +6,8 @@ import ManageWellMaster from 'src/pages/WellMaster/ManageWellMaster';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
 import ManageWarehouse from 'src/pages/Warehouse/ManageWarehouse';
+import { sidebarResource } from 'src/constants/helpers';
+import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
 
 function Dropdown({
     InfoLabel,
@@ -30,7 +32,8 @@ function Dropdown({
     optionSaveDialog,
     setOptionSaveDialog,
     AddOptionDialog,
-    setFieldValue }) {
+    setFieldValue,
+    allFields = [] }) {
 
     const {
         state: { permissions },
@@ -48,7 +51,9 @@ function Dropdown({
                                 disabled={fieldData?.isUneditable || rest?.disabled}
                                 options={(fieldData && fieldData?.isDependentDropdown) ?
                                     option?.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn]) :
-                                    option?.filter(f => f?.optionLabel)}
+                                    (fieldData && fieldData?.lookupDependentOn) ?
+                                        option?.filter((_f) => _f[fieldData?.lookupDependentOn] === values[fieldData?.lookupDependentOn]) :
+                                        option?.filter(f => f?.optionLabel)}
                                 freeSolo={type === 'dropDown' && !lookup}
                                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                                 getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -115,6 +120,10 @@ function Dropdown({
                                                     }
                                                 } else {
                                                     handleChange(name, val && val.optionValue ? val.optionValue : '');
+                                                    let dependentField = allFields.find(d => d.lookupDependentOn === name)
+                                                    if (dependentField) {
+                                                        handleChange(dependentField.fieldName, '');
+                                                    }
                                                 }
                                             }
                                         }
@@ -174,7 +183,7 @@ function Dropdown({
                         <Box>
                             <HtmlTooltip title={`Add ${name}`} className="formActionButton">
                                 <>
-                                    <IconButton onClick={() => setLookupDialog(true)} size="small" color="primary">
+                                    <IconButton disabled={rest?.disableOnEdit} onClick={() => setLookupDialog(true)} size="small" color="primary">
                                         <AddCircleIcon />
                                     </IconButton>
                                     {lookupDialog && <ManageWellMaster
@@ -190,6 +199,38 @@ function Dropdown({
                                                     optionValue: data._id,
                                                     order: option.length
                                                 }
+                                                tempNewOption[fieldData.lookupDependentOn] = values[fieldData.lookupDependentOn]
+                                                addFieldOption(tempNewOption);
+                                                setOptionsList([tempNewOption, ...option]);
+                                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+
+                                            }
+                                        }}
+                                    />}
+                                </>
+                            </HtmlTooltip>
+                        </Box>)}
+                    {lookup && fieldData?.lookupResource === sidebarResource.wellNumber && permissions?.wellNumber?.isCreate && (
+                        <Box>
+                            <HtmlTooltip title={`Add ${name}`} className="formActionButton">
+                                <>
+                                    <IconButton disabled={rest?.disableOnEdit} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                                        <AddCircleIcon />
+                                    </IconButton>
+                                    {lookupDialog && <ManageWellNumber
+                                        refrenceData={{ wellName: values[fieldData.lookupDependentOn] }}
+                                        isClone={false}
+                                        onClose={() => setLookupDialog(false)}
+                                        onSuccess={(data) => {
+                                            setLookupDialog(false)
+                                            if (data.wellNumber && data._id) {
+                                                let tempNewOption = {
+                                                    default: false,
+                                                    optionLabel: data.wellNumber,
+                                                    optionValue: data._id,
+                                                    order: option.length,
+                                                }
+                                                tempNewOption[fieldData.lookupDependentOn] = values[fieldData.lookupDependentOn]
                                                 addFieldOption(tempNewOption);
                                                 setOptionsList([tempNewOption, ...option]);
                                                 handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
