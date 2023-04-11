@@ -182,6 +182,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
       errors['customDate'] = `Please selecte valid date`;
     }
 
+    console.log(errors)
     return errors;
   }
 
@@ -325,6 +326,8 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                       label="Custom Date"
                       format={dateFormatForInputControl}
                       maxDate={new Date()}
+                      error={touched['customDate'] && Boolean(errors['customDate'])}
+                      helperText={touched['customDate'] && errors['customDate']}
                       onChange={(value) => {
                         var newDate = convertDateInDateTime(value);
                         setFieldValue('customDate', newDate);
