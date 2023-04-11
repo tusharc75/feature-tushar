@@ -27,7 +27,7 @@ const QuantityDialog = ({ handleCloseDialog, handleAddToCart, product, cartQty =
             errors["qty"] = "Please enter valid qty"
         }
         if (parseInt(values.qty) > (product?.availableInventory)) {
-            errors["qty"] = "qty not more than inventory"
+            errors["qty"] = "Insufficient Quantity !"
         }
         return errors;
     }

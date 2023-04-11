@@ -67,13 +67,13 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       width: '100%',
-      height: 'calc(100vh - 290px)',
+      height: 'calc(100vh - 221px)',
       overflowY: 'auto',
       ['@media (max-width:767px)']: {
-        height: 'calc(100vh - 349px)'
+        height: 'calc(100vh - 364px)'
       },
       ['@media (max-width: 600px)']: {
-        height: 'calc(100vh - 299px)'
+        height: 'calc(100vh - 368px)'
       }
     },
     backButton: {
@@ -111,6 +111,12 @@ const useStyles = makeStyles((theme: Theme) =>
       '& > div': {
         alignItems: 'center',
         justifyContent: 'space-between'
+      },
+      '&:first-of-type': {
+        borderRadius: '8px 8px 0 0'
+      },
+      '&:last-of-type': {
+        borderRadius: '0 0 8px 8px'
       }
     },
     badge: {
@@ -142,15 +148,7 @@ const useStyles = makeStyles((theme: Theme) =>
         color: '#000000'
       }
     },
-    mainContainer: {
-      padding: '10px',
-      ['@media (min-width:768px)']: {
-        padding: '17px'
-      },
-      ['@media (min-width:1024px)']: {
-        padding: '25px'
-      }
-    }
+    mainContainer: {}
   })
 );
 
@@ -542,13 +540,15 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   transition: 'background .5s ease',
                   backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                 }}
-                className={`${classes.accordionHeading}  ${Boolean(stepData?.passFailStatus)
-                  ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                    ? classes.green
-                    : ''
-                  } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
-                  : classes.white
-                  }`}
+                className={`${classes.accordionHeading}  ${
+                  Boolean(stepData?.passFailStatus)
+                    ? `${
+                        Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                          ? classes.green
+                          : ''
+                      } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+                    : classes.white
+                }`}
               >
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
                   <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px' }}>
@@ -592,8 +592,8 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                               {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
                                 ? 'Resume'
                                 : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-                                  ? 'Pause'
-                                  : 'Restart'}
+                                ? 'Pause'
+                                : 'Restart'}
                             </Button>
                           </Box>
                         )}
@@ -667,9 +667,9 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                         )
                       ) : null}
                       {stepData?.status &&
-                        ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                        ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                        (isMeTechnician || !isAnyTechnician) ? (
+                      ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                      ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                      (isMeTechnician || !isAnyTechnician) ? (
                         [
                           WORKORDER_SERVICE_STEP_STATUS.passed,
                           WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -818,15 +818,15 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             message={
               addServiceConfirmation.type === 'returnToStepOnFail'
                 ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services
-                  ?.map((e) => e.serviceName)
-                  ?.toString()}. Do you want to continue ?`
+                    ?.map((e) => e.serviceName)
+                    ?.toString()}. Do you want to continue ?`
                 : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                  ? ` Step fail requires Quote Revision. Do you confirm on this?`
-                  : addServiceConfirmation.type === 'jumpStep'
-                    ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                      ?.map((e) => e.serviceName)
-                      ?.toString()} has been added. Do you want to Add ? `
+                ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                : addServiceConfirmation.type === 'jumpStep'
+                ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                    ?.map((e) => e.serviceName)
+                    ?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
@@ -870,7 +870,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             handleClose={() => {
               setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
             }}
-            handleSuccess={() => { }}
+            handleSuccess={() => {}}
           />
         )}
       </Box>

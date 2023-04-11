@@ -113,7 +113,7 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refr
             message: data.message
           });
           setLoading(false);
-          onSuccess();
+          onSuccess(data.data);
         })
         .catch((error) => {
           setLoading(false);
@@ -130,7 +130,7 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refr
           });
           setLoading(false);
           if (refrenceData) {
-            onSuccess()
+            onSuccess(data.data);
           }
           else {
             history.push(`${routes.wellNumberDetail.path}/${data?.data?._id}`);

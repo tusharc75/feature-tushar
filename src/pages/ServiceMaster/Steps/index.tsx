@@ -252,7 +252,25 @@ const Steps = ({ serviceId }) => {
                   </MenuItem>
                 </Menu>
                 <Box ml={1} />
+
                 <ImportExportMenu
+                  permissions={permissions?.packages}
+                  module="packages-products"
+                  api={`${serviceMaster.api}/steps/${serviceId}`}
+                  afterImportCompleted={() => {
+                    fetchStepsData();
+                  }}
+                  isExportAllOrSomeFeature={true}
+                  total={rowCount}
+                  recordsToExport={selectedRecords.length}
+                  ids={
+                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                      : []
+                  }
+                  additionalParams={`serviceId=${serviceId}`}
+                />
+                {/* <ImportExportMenu
                   permissions={permissions?.serviceMaster}
                   module="Service Master Steps"
                   api={`${serviceMaster.api}/steps/${serviceId}`}
@@ -265,7 +283,7 @@ const Steps = ({ serviceId }) => {
                     if (gridApi) gridApi.deselectAll();
                     else fetchStepsData();
                   }}
-                />
+                /> */}
               </Box>
             </Grid>
           </Grid>

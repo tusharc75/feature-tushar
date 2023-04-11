@@ -121,17 +121,17 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
     let errors: any = {};
 
     if (moment(values["receiveDate"]).isBefore(moment(purchaseOrderData?.purchaseOrderDate))) {
-      errors['receiveDate'] = `Please selecte valid date`;
+      errors['receiveDate'] = `Please select valid date`;
     }
 
     if (lockDate) {
       if (!moment(values["receiveDate"]).isSameOrAfter(moment(lockDate))) {
-        errors['receiveDate'] = `Please selecte valid date`;
+        errors['receiveDate'] = `Date entered prior to the locked date`;
       }
     }
     
     if (moment(values["receiveDate"]).isAfter(moment())) {
-      errors['receiveDate'] = `Please selecte valid date`;
+      errors['receiveDate'] = `Please select valid date`;
     }
     return errors;
   }
