@@ -48,6 +48,7 @@ import CachedIcon from '@material-ui/icons/Cached';
 import Steps, { getIndex } from 'src/components/Steps';
 import ShowDoaData from 'src/components/ShowDoaData';
 import ShowQuoteStatus from 'src/components/ShowQuoteStatus';
+import AdditionalCost from './AdditionalCost';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -568,12 +569,12 @@ const QuotationDetails = () => {
                 />
               )}
               {stepNames[currentStep] === 'Services and Consumables' && quotationData && (
-                <Service
-                  quotationData={quotationData}
-                  renderedFrom={`${renderedFrom}_grid-2`}
-                  setNextStep={setNextStep}
-                  allowedToEdit={allowedToEdit}
-                  version={currentVersion}
+                <AdditionalCost 
+                quotationData={quotationData}
+                setNextStep={setNextStep}
+                renderedFrom={renderedFrom}
+                version={currentVersion}
+                allowedToEdit={allowedToEdit}
                 />
               )}
               {stepNames[currentStep] === 'Quote Builder' && quotationData && (
