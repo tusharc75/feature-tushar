@@ -79,7 +79,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) =>
     }
 
     if (parseInt(values?.qty) > validateQty) {
-      errors['qty'] = 'qty not more than inventory';
+      errors['qty'] = 'Insufficient Quantity !';
     }
 
     const serialNumbersList = values['serialNumbers'];
