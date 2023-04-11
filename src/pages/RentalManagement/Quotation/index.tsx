@@ -499,10 +499,11 @@ const Quotation = ({
     <Fragment>
       <Box
         display="flex"
-        mt={1}
-        mb={2}
+        mx={1}
+        my={1}
+        // mb={2}
         sx={{ flexWrap: isMobile ? 'wrap' : 'no-wrap', justifyContent: isMobile ? 'center' : 'space-between' }}
-        style={{ gap: isMobile ? '8px' : '0px' }}
+        style={{ gap: '8px' }}
       >
         <Box display="flex">
           <SendEmail

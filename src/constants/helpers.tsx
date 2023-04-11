@@ -50,16 +50,15 @@ export const termsAndConditionDocumentUploadMaxSize = {
   text: '2 MB'
 };
 
-export const rentalManagementSteps = [
-  'Add Products',
-  'Add Services',
-  // 'Add Consumables',
-  'Add-on',
-  'Quotation',
-  'Serialized Asset',
-  'Loading Ticket',
-  'Receiving Ticket',
-  'Final Slip'
+export const rentalManagementSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Add Services', title: 'Services', icon: 'add' },
+  { name: 'Add-on', title: 'Add-on', icon: 'add' },
+  { name: 'Quotation', title: 'Quotation', icon: 'quote' },
+  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
+  { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
+  { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
 export const demandOrderSteps = ['Add Products'];
@@ -94,6 +93,7 @@ export const quotationProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
   { name: 'Services and Consumables', title: 'Consumables', icon: 'consumable' },
   { name: 'Quote Builder', title: 'Builder', icon: 'quote' },
+  { name: 'DOA', title: 'DOA', icon: 'doa' },
   { name: 'Quote Approval', title: 'Approval', icon: 'approval' },
   { name: 'End', title: 'End', icon: 'end' }
 ];
@@ -933,21 +933,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1082,6 +1082,9 @@ export const displayCardDate = (date) => {
 };
 
 export const convertDateInDateTime = (date) => {
+  if (!date) {
+    return date;
+  }
   var newDate = new Date(date);
   var currentDate = new Date();
   newDate.setHours(currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());

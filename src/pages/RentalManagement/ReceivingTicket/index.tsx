@@ -1102,8 +1102,8 @@ const ReceivingTicket = ({
 
   return (
     <>
-      <Box display="flex" justifyContent="flex-end" pt={1}>
-        <Box display="flex" alignItems="center">
+      <Box display="flex" justifyContent="flex-end" m={1}>
+        <Box display="flex" alignItems="center" gridGap={'8px'}>
           {!isMobile && (
             <Button
               onClick={() => {
@@ -1144,7 +1144,6 @@ const ReceivingTicket = ({
               {downlodingFile ? 'Please wait...' : 'Preview'}
             </Button>
           )}
-          <Box mx={1} />
           {allowedToEdit && (
             <Button
               variant={'outlined'}
@@ -1229,7 +1228,6 @@ const ReceivingTicket = ({
               </Fragment>
             )}
           </Menu>
-          <Box mx={1} />
           <Button
             variant="outlined"
             color="default"
@@ -1521,7 +1519,6 @@ const ReceivingTicket = ({
                 </MenuItem>
               )}
           </Menu>
-          <Box mx={1} />
           {(repairJobCount > 0 || repairOrderCount > 0) && (
             <IconButton onClick={openLinkActions} size="small" color="primary">
               <ExpandMore fontSize="inherit" />
@@ -1576,12 +1573,11 @@ const ReceivingTicket = ({
                   {isMobile && !isTablet ? <AddBoxRoundedIcon /> : 'Process Ticket'}
                 </Button>
               </Tooltip>
-              <Box mx={1} />
             </Fragment>
           )}
         </Box>
       </Box>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           isMobile ? (
             <CustomSwipableList

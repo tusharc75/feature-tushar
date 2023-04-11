@@ -736,9 +736,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="flex-end" pt={1} pb={2}>
-          <Box display="flex" alignItems="center" justifyContent={'flex-end'} paddingX={1} gridColumnGap={8} flex={1}>
-            <Box display="flex" gridColumnGap={5}>
+        <Box display="flex" justifyContent="flex-end" m={1}>
+          <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1}>
+            <Box display="flex" gridGap={'8px'}>
               <Button
                 variant="contained"
                 color="primary"
