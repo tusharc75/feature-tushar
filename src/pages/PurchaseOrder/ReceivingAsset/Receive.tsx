@@ -235,6 +235,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                 getOptionLabel={(option: any) =>
                                                   option ? option?.warehouseName || option?.warehouseID || option?.address : ''
                                                 }
+                                                disabled
                                                 onChange={(_, newValue) => {
                                                   arrayHelpers.replace(index, {
                                                     ...values.seriaizedAsset[index],
