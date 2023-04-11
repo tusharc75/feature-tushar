@@ -1,4 +1,4 @@
-import { Button, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, TextField } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { Form, Formik } from 'formik';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -11,6 +11,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { dateFormat, productInventory } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import InfoIcon from '@material-ui/icons/Info';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 function SettingsDialog({ onClose, warehouse }) {
 
@@ -43,7 +45,7 @@ function SettingsDialog({ onClose, warehouse }) {
 
   const handleSubmit = (values) => {
     axiosInstance()
-      .post(`${productInventory.api}/setting`, { ...values, warehouse: warehouse })
+      .post(`${productInventory.api}/setting`, { lockDate: moment(values.lockDate).format('MM/DD/YYYY'), warehouse: warehouse })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -61,6 +63,9 @@ function SettingsDialog({ onClose, warehouse }) {
     const errors: any = {};
     if (!values['lockDate']) {
       errors['lockDate'] = 'Lock Date is Required';
+    }
+    if (moment(values["lockDate"]).isAfter(moment())) {
+      errors['lockDate'] = `Please select valid date`;
     }
     return errors;
   };
@@ -104,8 +109,8 @@ function SettingsDialog({ onClose, warehouse }) {
                             margin="dense"
                             required
                             maxDate={new Date()}
-                            onChange={(event) => {
-                              setFieldValue('lockDate', moment(event).format('YYYY-MM-DD'));
+                            onChange={(value) => {
+                              setFieldValue('lockDate', value);
                             }}
                             InputLabelProps={{
                               shrink: true
@@ -115,6 +120,13 @@ function SettingsDialog({ onClose, warehouse }) {
                           />
                         </MuiPickersUtilsProvider>
                       </Fragment>
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={6}>
+                      <Box mt={2}>
+                        <HtmlTooltip title="The transactions recorded prior to this date cannot be modified or deleted.">
+                          <InfoIcon />
+                        </HtmlTooltip>
+                      </Box>
                     </Grid>
                   </Grid>
                 </Form>

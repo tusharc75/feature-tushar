@@ -37,7 +37,6 @@ import Service from './Service';
 import QuoteBuilder from './QuoteBuilder';
 import RoadmapViews from './RoadMapViews';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import Steps from 'src/pages/RentalManagement/Steps';
 import contactClass from '../Contact/contact.module.scss';
 import { CircularProgress } from '@material-ui/core';
 import ManualReponseDialog from './ManualRespondDialog';
@@ -46,18 +45,13 @@ import QuotationSummeryDialog from './QuotationSummeryDialog';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CachedIcon from '@material-ui/icons/Cached';
-import { makeStyles } from '@material-ui/core/styles';
-import NewStepper from 'src/components/Helpers/NewStepper';
-import Steps2, { getIndex } from 'src/components/Steps';
+import Steps, { getIndex } from 'src/components/Steps';
 import ShowDoaData from 'src/components/ShowDoaData';
 import ShowQuoteStatus from 'src/components/ShowQuoteStatus';
-
-const useStyles = makeStyles((theme) => ({}));
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.quotation.title);
-  const classes = useStyles();
 
   const { id } = useParams();
   const history = useHistory();
@@ -75,6 +69,7 @@ const QuotationDetails = () => {
   const [quotationFields, setQuotationFields] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [nextStep, setNextStep] = useState(true);
+  const [prevStep, setPrevStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorElAction, setAnchorElAction] = useState(null);
@@ -88,13 +83,11 @@ const QuotationDetails = () => {
   const [currVersionId, setCurrVersionId] = useState(null);
   const [sentToCustomer, setSentToCustomer] = useState(false);
   const [versionStatus, setVersionStatus] = useState(QUOTATION_STATUS.acceptByCustomer);
-  const [processSteps, setProcessSteps] = useState(quotationProcessSteps);
 
   const [convertConfirmBox, setConvertConfirmBox] = useState(false);
 
-  const quotationProcessStepsNames = React.useMemo(() => {
-    return processSteps.map((item) => item.name);
-  }, [processSteps]);
+  const [stepList, setStepList] = useState(quotationProcessSteps);
+  const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -122,23 +115,13 @@ const QuotationDetails = () => {
     setAnchorElAction(null);
   };
 
-  useEffect(() => {
-    if (id) {
-      getRessourceFields();
-      fetchQuotationData();
-    }
-  }, [id]);
-
-  const insert = (arr, index, newItem) => [...arr.slice(0, index), newItem, ...arr.slice(index)];
-
   const updateDOASetup = (doasetup) => {
     if (doasetup) {
-      if (!quotationProcessStepsNames?.includes('DOA')) {
-        setProcessSteps(insert(quotationProcessSteps, 3, { name: 'DOA', title: 'DOA', icon: 'doa' }));
-      }
-      fetchDOAData();
+      setStepList(quotationProcessSteps);
+      setStepNames(quotationProcessSteps?.map((item) => item.name));
     } else {
-      setProcessSteps(quotationProcessSteps);
+      setStepList(quotationProcessSteps?.filter((e) => e.name !== 'DOA'));
+      setStepNames(quotationProcessSteps?.filter((e) => e.name !== 'DOA').map((item) => item.name));
     }
   };
 
@@ -185,6 +168,13 @@ const QuotationDetails = () => {
     }
   };
 
+  useEffect(() => {
+    if (id) {
+      getRessourceFields();
+      fetchQuotationData();
+    }
+  }, [id]);
+
   const fetchQuotationData = async (version: any = 0, loading = true) => {
     setLoading(loading);
     try {
@@ -194,19 +184,25 @@ const QuotationDetails = () => {
 
       setQuotationData(data);
       updateDOASetup(data?.doasetup);
-      let keys = Object.keys(data.versions);
+
+      let versionIndex = 0;
       if (version == 0) {
-        setCurrentVersion(parseInt(keys[keys.length - 1]));
-        setCurrVersionId(data.versions[keys[keys.length - 1]]?._id);
-        setCurrentStep(getIndex(data.versions[keys[keys.length - 1]]?.processStatus, processSteps));
-        setSentToCustomer(data.versions[keys[keys.length - 1]]?.status === QUOTATION_STATUS.sentToCustomer);
-        setVersionStatus(data.versions[keys[keys.length - 1]]?.status);
+        let keys = Object.keys(data.versions);
+        versionIndex = parseInt(keys[keys.length - 1]);
       } else {
-        setCurrentVersion(version);
-        setCurrVersionId(data.versions[version]?._id);
-        setCurrentStep(getIndex(data.versions[version]?.processStatus, processSteps));
-        setVersionStatus(data.versions[version]?.status);
-        setSentToCustomer(data.versions[version]?.status === QUOTATION_STATUS.sentToCustomer);
+        versionIndex = version;
+      }
+      setCurrentVersion(versionIndex);
+      setCurrVersionId(data.versions[versionIndex]?._id);
+      setCurrentStep(getIndex(data.versions[versionIndex]?.processStatus, stepList));
+      setVersionStatus(data.versions[versionIndex]?.status);
+      setSentToCustomer(data.versions[versionIndex]?.status === QUOTATION_STATUS.sentToCustomer);
+
+      if (data?.doasetup) {
+        const doaResponse: any = await axiosInstance().get(`doa-request/doaFlow/${data._id}/${data.versions[versionIndex]?._id}`);
+        if (doaResponse?.data?.data) {
+          setDOAData(doaResponse?.data?.data?.reverse());
+        }
       }
 
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
@@ -221,19 +217,9 @@ const QuotationDetails = () => {
     }
   };
 
-  const fetchDOAData = () => {
-    if (quotationProcessStepsNames?.includes('DOA')) {
-      axiosInstance()
-        .get(`doa-request/doaFlow/${quotationData._id}/${currVersionId}`)
-        .then(({ data: { data } }) => {
-          setDOAData(data.reverse());
-        });
-    }
-  };
-
   const updateProcessStatus = (currStep) => {
     axiosInstance()
-      .put(`${quotation.api}/${id}/process-status/${currVersionId}`, { processStatus: quotationProcessStepsNames[currStep] })
+      .put(`${quotation.api}/${id}/process-status/${currVersionId}`, { processStatus: stepNames[currStep] })
       .then(() => {
         fetchQuotationData(currentVersion, false);
       })
@@ -472,7 +458,7 @@ const QuotationDetails = () => {
           className="new-tab-container-v1"
           style={{
             marginBottom:
-              (quotationProcessStepsNames[currentStep] === 'DOA' ||
+              (stepNames[currentStep] === 'DOA' ||
                 sentToCustomer ||
                 quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ||
                 quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer) &&
@@ -529,7 +515,7 @@ const QuotationDetails = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1} style={{ position: 'relative' }}>
-          {quotationProcessStepsNames[currentStep] === 'DOA' && quotationData.versions && (
+          {stepNames[currentStep] === 'DOA' && quotationData && (
             <Box
               style={{
                 marginLeft: 'auto',
@@ -549,33 +535,26 @@ const QuotationDetails = () => {
           </Box>
 
           <div>
-            <Steps2
+            <Steps
               isNextStep={false}
               nextStep={nextStep}
-              steps={processSteps}
+              steps={stepList}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
-              isStepEnded={quotationProcessStepsNames[currentStep] === 'End'}
+              isStepEnded={stepNames[currentStep] === 'End'}
               setStepFullScreen={() => setStepFullScreen(true)}
-              isPrevStep={
-                !sentToCustomer ||
-                !(
-                  quotationProcessStepsNames[currentStep] === 'DOA' &&
-                  (quotationData.versions[currentVersion].status.includes(QUOTATION_STATUS.sentforDOA) ||
-                    quotationData.versions[currentVersion].status.includes(QUOTATION_STATUS.rejectedbyDOA))
-                )
-              }
+              isPrevStep={prevStep}
               updateStatus={updateProcessStatus}
               handleNext={
-                quotationProcessStepsNames[currentStep] === 'Quote Approval'
+                stepNames[currentStep] === 'Quote Approval'
                   ? () => {
                       setCustomerAcceptable(true);
                     }
                   : null
               }
             />
-            <ContentFullScreen title={quotationProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-              {quotationProcessStepsNames[currentStep] === 'Add Products' && quotationData && (
+            <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+              {stepNames[currentStep] === 'Add Products' && quotationData && (
                 <Productpackage
                   quotationData={quotationData}
                   setNextStep={setNextStep}
@@ -586,64 +565,69 @@ const QuotationDetails = () => {
                   updateDOASetup={updateDOASetup}
                 />
               )}
-              {quotationProcessStepsNames[currentStep] === 'Services and Consumables' && quotationData && (
+              {stepNames[currentStep] === 'Services and Consumables' && quotationData && (
                 <Service
                   quotationData={quotationData}
                   renderedFrom={`${renderedFrom}_grid-2`}
                   setNextStep={setNextStep}
-                  stepFullScreen={stepFullScreen}
+                  allowedToEdit={allowedToEdit}
                   version={currentVersion}
                 />
               )}
-              {quotationProcessStepsNames[currentStep] === 'Quote Builder' && quotationData && (
+              {stepNames[currentStep] === 'Quote Builder' && quotationData && (
                 <QuoteBuilder
                   quotationData={quotationData}
                   setNextStep={setNextStep}
+                  setPrevStep={setPrevStep}
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}
-                  currentStep={quotationProcessStepsNames[currentStep]}
+                  currentStep={stepNames[currentStep]}
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
                 />
               )}
-              {quotationProcessStepsNames[currentStep] === 'DOA' && quotationData && (
+              {stepNames[currentStep] === 'DOA' && quotationData && (
                 <QuoteBuilder
                   quotationData={quotationData}
                   setNextStep={setNextStep}
+                  setPrevStep={setPrevStep}
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}
-                  currentStep={quotationProcessStepsNames[currentStep]}
+                  currentStep={stepNames[currentStep]}
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
                   sentToCustomer={sentToCustomer}
+                  DOAData={DOAData}
                 />
               )}
-              {quotationProcessStepsNames[currentStep] === 'Quote Approval' && quotationData && (
+              {stepNames[currentStep] === 'Quote Approval' && quotationData && (
                 <QuoteBuilder
                   quotationData={quotationData}
                   setNextStep={setNextStep}
+                  setPrevStep={setPrevStep}
                   sentToCustomer={sentToCustomer}
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}
-                  currentStep={quotationProcessStepsNames[currentStep]}
+                  currentStep={stepNames[currentStep]}
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
                 />
               )}
-              {quotationProcessStepsNames[currentStep] === 'End' && quotationData && (
+              {stepNames[currentStep] === 'End' && quotationData && (
                 <QuoteBuilder
                   quotationData={quotationData}
                   setNextStep={setNextStep}
+                  setPrevStep={setPrevStep}
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}
-                  currentStep={quotationProcessStepsNames[currentStep]}
+                  currentStep={stepNames[currentStep]}
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
