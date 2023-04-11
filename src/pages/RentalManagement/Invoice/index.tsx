@@ -4,13 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Grid from '@material-ui/core/Grid/Grid';
 import { Button, Chip, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import {
-  CustomDialogTransition,
-  dateFormat,
-  formatAmountWithCurrency,
-  rentalManagement,
-  RENTAL_STATUS,
-} from '../../../constants/helpers';
+import { CustomDialogTransition, dateFormat, formatAmountWithCurrency, rentalManagement, RENTAL_STATUS } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
@@ -106,12 +100,12 @@ const Invoice = ({
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                    ? row.original?.packageDetail.packageType === 'Product'
-                      ? '(Product)'
-                      : '(Service)'
-                    : row.original.type === 'service'
-                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                      : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                  : ''}
               </p>
             ) : (
               <NoDataCell />
@@ -141,8 +135,9 @@ const Invoice = ({
                     <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original._id}`} target="_blank">
                       {row.original.detail}
                     </a>
-                  ) :
+                  ) : (
                     <p className="text-truncate">{row.original.detail}</p>
+                  )
                 ) : (
                   <p className="text-truncate">{row.original.detail}</p>
                 )}
@@ -286,10 +281,10 @@ const Invoice = ({
             item.type === 'product'
               ? item.productDetail?.productName
               : item.type === 'service'
-                ? item.serviceDetail?.serviceName
-                : item.type === 'package'
-                  ? item.packageDetail?.packageName
-                  : '';
+              ? item.serviceDetail?.serviceName
+              : item.type === 'package'
+              ? item.packageDetail?.packageName
+              : '';
           item.type = item.type;
           combinedData.push(item);
         }
@@ -304,15 +299,24 @@ const Invoice = ({
       const rows = combinedData.filter((e) => e.parentId === null);
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = parent.type === 'Add On' ? parent.detail
-          : parent.type === 'product' ? parent?.productDetail?.productName
-            : parent.type === 'service' ? parent?.serviceDetail?.serviceName
-              : parent.packageDetail?.packageName;
+        parent.detail =
+          parent.type === 'Add On'
+            ? parent.detail
+            : parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent.type === 'service'
+            ? parent?.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName;
         parent.description =
-          parent?.type === 'service' ? parent?.serviceDetail?.serviceDescription || ''
-            : parent?.type === 'product' ? parent?.productDetail?.productDescription || ''
-              : parent?.type === 'package' ? parent?.packageDetail?.packageDescription || ''
-                : parent.type === 'Add On' ? parent.description : '';
+          parent?.type === 'service'
+            ? parent?.serviceDetail?.serviceDescription || ''
+            : parent?.type === 'product'
+            ? parent?.productDetail?.productDescription || ''
+            : parent?.type === 'package'
+            ? parent?.packageDetail?.packageDescription || ''
+            : parent.type === 'Add On'
+            ? parent.description
+            : '';
         parent.qty = parent.qty;
         parent.subRows = generateNestedData(material, inventory, parent);
       });
@@ -347,16 +351,16 @@ const Invoice = ({
         _subRow?.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow?.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow?.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow?.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow?.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow?.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.qty = `${parent.qty * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
       subRows.push(_subRow);
@@ -474,8 +478,8 @@ const Invoice = ({
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between" mt={1} mb={2}>
-        <Box display="flex" alignItems="center">
+      <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" alignItems="center" gridGap={'8px'}>
           {!isOffline && ![RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData.status) && allowedToEdit && (
             <Fragment>
               <Button
@@ -489,7 +493,6 @@ const Invoice = ({
               >
                 Add
               </Button>
-              <Box mx={1} />
             </Fragment>
           )}
           {permissions?.rentalManagement?.isRead && !isMobile && (
@@ -509,7 +512,6 @@ const Invoice = ({
               {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile === 'Preview' && isLoading ? 'Please wait...' : 'Preview'}
             </Button>
           )}
-          <Box mx={1} />
           {permissions?.rentalManagement?.isRead && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -560,7 +562,6 @@ const Invoice = ({
               Detail
             </MenuItem>
           </Menu>
-          <Box mx={1} />
           {permissions?.rentalManagement?.isRead && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -583,17 +584,13 @@ const Invoice = ({
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={'100%'}
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 350px)'}
-            >
+            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 350px)'}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 365px)'}
                 columns={columns}
                 data={rowsData}
-                setWholeRowsCellColor={() => { }}
-                onSelect={() => { }}
+                setWholeRowsCellColor={() => {}}
+                onSelect={() => {}}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}

@@ -50,16 +50,15 @@ export const termsAndConditionDocumentUploadMaxSize = {
   text: '2 MB'
 };
 
-export const rentalManagementSteps = [
-  'Add Products',
-  'Add Services',
-  // 'Add Consumables',
-  'Add-on',
-  'Quotation',
-  'Serialized Asset',
-  'Loading Ticket',
-  'Receiving Ticket',
-  'Final Slip'
+export const rentalManagementSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Add Services', title: 'Services', icon: 'add' },
+  { name: 'Add-on', title: 'Add-on', icon: 'add' },
+  { name: 'Quotation', title: 'Quotation', icon: 'quote' },
+  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
+  { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
+  { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
 export const demandOrderSteps = ['Add Products'];
