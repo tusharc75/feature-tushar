@@ -23,7 +23,6 @@ import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../StateProvider/Provider';
 import CreateProductCategory from '../ProductCategory/CreateProductCategory';
 import CreateProduct from "../../components/Product/CreateProduct";
-import ManageWarehouse from "../Warehouse/ManageWarehouse"
 import ManageAccountDialog from "../Account/ManageAccount";
 
 const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null, isNew = true,
@@ -36,12 +35,10 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [productCategoryOptions, setProductCategoryOptions] = useState([]);
   const [allFields, setAllFields] = useState([]);
-  const [plantsCategoryOptions, setPlantsCategoryOptions] = useState([]);
   const [productDescriptionOptions, setProductDescriptionOptions] = useState([]);
   const [cloneHeading, setCloneHeading] = useState('')
   const [formValues, setFormValues] = useState({});
   const [open, setOpen] = useState({ open: false, isClone: false });
-  const [plantsOpen, setPlantsOpen] = useState({ open: false, isClone: false });
   const [productOpen, setProductOpen] = useState({ open: false, isClone: false });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showAddSupplierAccountDialog, setShowAddSupplierAccountDialog] = useState({ open: false, fieldName: "" });
@@ -63,7 +60,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
         const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData.option;
 
         setProductCategoryOptions(categoryOptions);
-        setPlantsCategoryOptions(plantsOptions);
         setProductDescriptionOptions(productOptions)
 
         const supplierAccountOptions = fieldsDataForUpdate?.find((obj) => obj?.lookupResource === "Supplier Account");
@@ -343,50 +339,30 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                       </Box>
                                     </Grid>
                                   ) : field.fieldName === 'warehouse' ? (
-                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Box display="flex">
-                                        <Box flexGrow={1}>
-                                          <FormTypes
-                                            isNew={Boolean(productInventoryId)}
-                                            {...field}
-                                            disabled={Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
-                                            fieldData={field}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={plantsCategoryOptions}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                            onChange={(e, value) => {
-                                              setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                              if (value.address) {
-                                                setFieldValue("currentLocation", value.address);
-                                              }
-                                            }}
-                                          />
-                                        </Box>
-                                        {permissions?.warehouse?.isCreate &&
-                                          <Box className="ml-1 mt-1">
-                                            <Tooltip title="Add Plants">
-                                              <IconButton
-                                                onClick={() => {
-                                                  setPlantsOpen({ open: true, isClone: false });
-                                                }}
-                                                disabled={Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
-                                                size="small"
-                                              >
-                                                <AddIcon color={Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable ? 'disabled' : 'primary' : field.isUneditable ? 'disabled' : 'primary'} />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Box>}
-                                      </Box>
-                                    </Grid>
+                                    <FormTypes
+                                      isNew={Boolean(productInventoryId)}
+                                      {...field}
+                                      disabled={Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
+                                      fieldData={field}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      onChange={(e, value) => {
+                                        setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                        if (value.address) {
+                                          setFieldValue("currentLocation", value.address);
+                                        }
+                                      }}
+                                    />
                                   ) : field?.lookupResource === "Supplier Account" ? (
                                     <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                       <Box display="flex">
@@ -474,30 +450,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                 optionValue: data._id,
                                 optionLabel: data.name,
                                 order: productCategoryOptions.length,
-                                default: false
-                              },
-                            ];
-                          });
-                        }
-                      }}
-                    />
-                  )}
-                  {plantsOpen?.open && (
-                    <ManageWarehouse
-                      open={plantsOpen?.open}
-                      close={() => setPlantsOpen({ open: false, isClone: false })}
-                      isClone={plantsOpen?.isClone}
-                      onSuccess={({ data }) => {
-                        setPlantsOpen({ open: false, isClone: false });
-                        if (data._id) {
-                          setFieldValue("warehouse", data._id);
-                          setPlantsCategoryOptions((prevState) => {
-                            return [
-                              ...prevState,
-                              {
-                                optionValue: data._id,
-                                optionLabel: data.warehouseName,
-                                order: plantsCategoryOptions.length,
                                 default: false
                               },
                             ];

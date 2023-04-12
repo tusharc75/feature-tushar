@@ -27,7 +27,7 @@ import {
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
-import ManageSerializedAsset from './ManageSerializedAsset';
+import ManageSerializedAsset from '../SerializedAsset/ManageSerializedAsset';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from 'react-router-dom';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
