@@ -13,7 +13,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, setFieldsInAscendingOrder, storageLocation } from "../../constants/helpers";
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
-import { Box, Grid} from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { FaDiceOne } from "react-icons/fa";
@@ -22,7 +22,7 @@ import { useData } from "../../StateProvider/Provider";
 import { isEqual } from 'lodash';
 
 
-const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onClose, onSuccess, referenceData = null }) => {
+const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onClose, onSuccess, referenceData = null, isRedirectTodetailPage = false }) => {
 
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
@@ -72,13 +72,13 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
                 let createValues: any = getObjKeys("", fieldsDataForCreate)
                 if (referenceData?.warehouse) {
                     fieldsDataForCreate?.forEach((e) => {
-                      if (e.fieldName === "warehouse") {
-                        createValues.warehouse = referenceData?.warehouse;
-                        e.disableOnEdit = true
-                        e.isUneditable = true;
-                      }
+                        if (e.fieldName === "warehouse") {
+                            createValues.warehouse = referenceData?.warehouse;
+                            e.disableOnEdit = true
+                            e.isUneditable = true;
+                        }
                     })
-                  }
+                }
                 setInitialData({
                     fields: fieldsDataForCreate,
                     values: createValues
@@ -105,7 +105,7 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
                     message: data.message
                 });
                 setLoading(false);
-                onSuccess()
+                onSuccess(data)
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
@@ -119,11 +119,13 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
                     message: data.message
                 });
                 setLoading(false);
+                onSuccess(data)
+
                 if (referenceData) {
                     onSuccess(data.data);
-                  }else{
+                } else if (isRedirectTodetailPage) {
                     history.push(`${routes.storageLocation.path}/detail/${data?.data?._id}`);
-                  }
+                }
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
