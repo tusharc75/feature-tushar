@@ -180,8 +180,8 @@ const useStyles = makeStyles((theme: Theme) =>
       background: 'white'
     },
     stepDetailsContainerShow: {
-      transform: 'translateX(0)',
-      transition: 'transform 250ms cubic-bezier(0.640, -0.270, 0.335, 1.265)'
+      transform: 'translateX(0)'
+      // transition: 'transform 250ms cubic-bezier(0.640, -0.270, 0.335, 1.265)'
     },
     modalHead: {
       display: 'flex',
