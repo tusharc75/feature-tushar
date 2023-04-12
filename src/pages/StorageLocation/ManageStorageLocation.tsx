@@ -23,7 +23,7 @@ import { isEqual } from 'lodash';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 
-const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onClose, onSuccess }) => {
+const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onClose, onSuccess, isRedirectTodetailPage = false }) => {
 
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
@@ -89,7 +89,7 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
                     message: data.message
                 });
                 setLoading(false);
-                onSuccess()
+                onSuccess(data)
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
@@ -103,7 +103,10 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
                     message: data.message
                 });
                 setLoading(false);
-                history.push(`${routes.storageLocation.path}/detail/${data?.data?._id}`);
+                onSuccess(data)
+                if (isRedirectTodetailPage) {
+                    history.push(`${routes.storageLocation.path}/detail/${data?.data?._id}`);
+                }
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);

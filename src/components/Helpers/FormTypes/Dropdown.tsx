@@ -8,6 +8,7 @@ import { useData } from 'src/StateProvider/Provider';
 import ManageWarehouse from 'src/pages/Warehouse/ManageWarehouse';
 import { sidebarResource } from 'src/constants/helpers';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
+import ManageStorageLocation from 'src/pages/StorageLocation/ManageStorageLocation';
 
 function Dropdown({
     InfoLabel,
@@ -179,7 +180,7 @@ function Dropdown({
                             </HtmlTooltip>
                         </Box>
                     )}
-                    {lookup && fieldData?.lookupResource === "Well Master" && permissions?.wellMaster?.isCreate && (
+                    {lookup && fieldData?.lookupResource === sidebarResource.wellMaster && permissions?.wellMaster?.isCreate && (
                         <Box>
                             <HtmlTooltip title={`Add ${name}`} className="formActionButton">
                                 <>
@@ -199,7 +200,7 @@ function Dropdown({
                                                     optionValue: data._id,
                                                     order: option.length
                                                 }
-                                                tempNewOption[fieldData.lookupDependentOn] = values[fieldData.lookupDependentOn]
+                                                if (fieldData.lookupDependentOn) { tempNewOption[fieldData.lookupDependentOn] = values[fieldData.lookupDependentOn] }
                                                 addFieldOption(tempNewOption);
                                                 setOptionsList([tempNewOption, ...option]);
                                                 handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
@@ -230,7 +231,71 @@ function Dropdown({
                                                     optionValue: data._id,
                                                     order: option.length,
                                                 }
-                                                tempNewOption[fieldData.lookupDependentOn] = values[fieldData.lookupDependentOn]
+                                                if (fieldData.lookupDependentOn) { tempNewOption[fieldData.lookupDependentOn] = values[fieldData.lookupDependentOn] }
+                                                addFieldOption(tempNewOption);
+                                                setOptionsList([tempNewOption, ...option]);
+                                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+
+                                            }
+                                        }}
+                                    />}
+                                </>
+                            </HtmlTooltip>
+                        </Box>)}
+                    {lookup && fieldData?.lookupResource === sidebarResource.warehouse && permissions?.warehouse?.isCreate && (
+                        <Box>
+                            <HtmlTooltip title={`Add ${name}`} className="formActionButton">
+                                <>
+                                    <IconButton disabled={rest?.disableOnEdit} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                                        <AddCircleIcon />
+                                    </IconButton>
+                                    {lookupDialog && <ManageWarehouse
+                                        open={lookupDialog}
+                                        close={() => setLookupDialog(false)}
+                                        isClone={false}
+                                        onSuccess={({ data }) => {
+
+                                            setLookupDialog(false)
+                                            if (data.warehouseName && data._id) {
+                                                let tempNewOption = {
+                                                    default: false,
+                                                    optionLabel: data.warehouseName,
+                                                    optionValue: data._id,
+                                                    order: option.length
+                                                }
+                                                if (fieldData.lookupDependentOn) { tempNewOption[fieldData.lookupDependentOn] = values[fieldData.lookupDependentOn] }
+                                                addFieldOption(tempNewOption);
+                                                setOptionsList([tempNewOption, ...option]);
+                                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+
+                                            }
+                                        }}
+                                    />}
+                                </>
+                            </HtmlTooltip>
+                        </Box>)}
+                    {lookup && fieldData?.lookupResource === sidebarResource.storageLocation && permissions?.warehouse?.isCreate && (
+                        <Box>
+                            <HtmlTooltip title={`Add ${name}`} className="formActionButton">
+                                <>
+                                    <IconButton disabled={rest?.disableOnEdit} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                                        <AddCircleIcon />
+                                    </IconButton>
+                                    {lookupDialog && <ManageStorageLocation
+                                        storageLocationId={null}
+                                        onClose={() => setLookupDialog(false)}
+                                        isClone={false}
+                                        onSuccess={({ data }) => {
+
+                                            setLookupDialog(false)
+                                            if (data.storageLocationName && data._id) {
+                                                let tempNewOption = {
+                                                    default: false,
+                                                    optionLabel: data.storageLocationName,
+                                                    optionValue: data._id,
+                                                    order: option.length
+                                                }
+                                                if (fieldData.lookupDependentOn) { tempNewOption[fieldData.lookupDependentOn] = values[fieldData.lookupDependentOn] }
                                                 addFieldOption(tempNewOption);
                                                 setOptionsList([tempNewOption, ...option]);
                                                 handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
