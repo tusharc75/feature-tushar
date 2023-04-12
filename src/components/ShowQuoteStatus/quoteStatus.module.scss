@@ -9,7 +9,7 @@
   flex-wrap: wrap;
   margin-bottom: 15px;
 }
-.doa {
+.quote {
   font-weight: 600;
   margin-right: 15px;
   font-size: 14px;
@@ -21,39 +21,12 @@
     vertical-align: middle;
   }
 }
-.sendDoa {
+.sendQuote {
   color: #298b88;
 }
-.acceptedDoa {
+.acceptedQuote {
   color: #6ca826;
 }
-.rejectedDoa {
+.rejectedQuote {
   color: #d60f0f;
-}
-.doaUserContainer {
-  --gap: 7px;
-  position: relative;
-  display: flex;
-  margin-left: var(--gap, 5px);
-  align-items: center;
-  gap: 6px;
-  font-weight: 400;
-  color: #3e3e3e;
-  padding-right: var(--gap, 5px);
-  svg {
-    display: block;
-  }
-  &::after {
-    content: '';
-    position: absolute;
-    height: 100%;
-    width: 1px;
-    background-color: #737373;
-    right: 0;
-  }
-  &:last-of-type {
-    &::after {
-      content: unset;
-    }
-  }
 }

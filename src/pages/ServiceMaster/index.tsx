@@ -293,6 +293,25 @@ const ServiceMaster = () => {
             title={routes.serviceMaster.title}
             extraImportExportLinks={[
               {
+                title: 'Step Template',
+                api: `${serviceMaster.api}/steps/unknown/template`,
+                type: 'download'
+              },
+              {
+                title: 'Step Export',
+                api: `${serviceMaster.api}/steps/unknown/template?export=true${
+                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                    : ''
+                }`,
+                type: 'export'
+              },
+              {
+                title: 'Step Import',
+                api: `${serviceMaster.api}/steps/unknown/import`,
+                type: 'import'
+              },
+              {
                 title: 'Consumable Template',
                 api: `${serviceMaster.api}/product/unknown/template`,
                 type: 'download'

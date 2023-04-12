@@ -2,9 +2,7 @@ import { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, IconButton, Typography } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { isMobile } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -19,6 +17,7 @@ import { genrateCustomTableColumns } from 'src/constants/columns';
 const QuoteBuilder = ({
   quotationData,
   setNextStep,
+  setPrevStep,
   sentToCustomer = false,
   stepFullScreen,
   fetchQuotationData,
@@ -26,12 +25,12 @@ const QuoteBuilder = ({
   currentStep,
   versionData,
   allowedToEdit,
-  renderedFrom
+  renderedFrom,
+  DOAData = []
 }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
+
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -48,18 +47,8 @@ const QuoteBuilder = ({
   }, [versionData]);
 
   useEffect(() => {
-    if (currentStep === 'Quote Approval' && rowsData && !sentToCustomer) {
-      setNextStep(false);
-    } else if (
-      currentStep === 'DOA' &&
-      (quotationData.versions[version].status.includes(QUOTATION_STATUS.sentforDOA) ||
-        quotationData.versions[version].status.includes(QUOTATION_STATUS.rejectedbyDOA))
-    ) {
-      setNextStep(false);
-    } else {
-      setNextStep(true);
-    }
-  }, [currentStep, sentToCustomer, rowsData]);
+    handleCheckNextPrev()
+  }, [sentToCustomer, DOAData]);
 
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
@@ -104,26 +93,26 @@ const QuoteBuilder = ({
                 <span>({row.original?.subRows?.length})</span>
               </Box>
             ) : null}
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(
-                    `${
-                      row.original.type === 'serializedAsset'
+            {['product', 'service', 'package', 'serializedAsset']?.includes(row.original.type) &&
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(
+                      `${row.original.type === 'serializedAsset'
                         ? routes.serializedAssetDetail.path
                         : row.original.type === 'product'
-                        ? routes.productDetail.path
-                        : row.original.type === 'package'
-                        ? routes.packagesDetail.path
-                        : routes.serviceMasterDetail.path
-                    }/${row.original.materialId}`
-                  );
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
+                          ? routes.productDetail.path
+                          : row.original.type === 'package'
+                            ? routes.packagesDetail.path
+                            : routes.serviceMasterDetail.path
+                      }/${row.original.materialId}`
+                    );
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>}
           </div>
         )
       },
@@ -145,69 +134,98 @@ const QuoteBuilder = ({
   };
 
   const fetchProductInventory = async () => {
+
     setNextStep(false);
+    setPrevStep(false);
+
     var data: any = [];
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionData._id}`);
-    const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}/${versionData._id}`);
+    const additionalCostResponce = await axiosInstance().get(`${quotation.api}/additionalcost/${quotationData._id}/${versionData._id}`);
 
     data = response?.data?.data;
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.subRows = generateNestedData(data.material, parent);
     });
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(false);
-    } else {
-      setNextStep(true);
-    }
-    let serviceRows = [];
-    if (serviceResponse?.data?.data?.length) {
-      serviceRows = serviceResponse?.data?.data?.map((item) => {
+
+    let cost = [];
+    if (additionalCostResponce?.data?.data?.length) {
+      cost = additionalCostResponce?.data?.data?.map((item, index) => {
         let finalObject = prepareDataForGrid(item);
-        finalObject['detail'] = item?.serviceName;
+        finalObject['srno'] = rows?.length + (index + 1);
+        finalObject['detail'] = item?.detail;
+        finalObject['description'] = item?.description;
         finalObject['qtyDisplay'] = item?.qty;
-        finalObject['leadTime'] =
-          Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
+        finalObject['leadTime'] = Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
         finalObject['parentId'] = null;
         finalObject['isValid'] = true;
         finalObject['hideSelection'] = false;
-        finalObject['assetQty'] = 0;
-        finalObject['type'] = 'Service';
+        finalObject['type'] = item?.costType || 'Manual Entry';
         let res: any = {
           ...finalObject
         };
         return res;
       });
     }
-    setRowsData([...rows, ...serviceRows]);
+    setRowsData([...rows, ...cost]);
+    handleCheckNextPrev()
   };
+
+  const handleCheckNextPrev = () => {
+    if (currentStep === "Quote Builder") {
+      setNextStep(true);
+      setPrevStep(true);
+    }
+    else if (currentStep === 'DOA') {
+      if (DOAData?.length === 0) {
+        setNextStep(false);
+        setPrevStep(true);
+      }
+      else if (DOAData?.filter((e) => e.status === "approve")?.length === DOAData?.length) {
+        setPrevStep(false);
+        setNextStep(true);
+      }
+      else {
+        setPrevStep(false);
+        setNextStep(false);
+      }
+    }
+    else if (currentStep === 'Quote Approval') {
+      if (sentToCustomer) {
+        setNextStep(true);
+        setPrevStep(false);
+      }
+      else {
+        setNextStep(false);
+        setPrevStep(true);
+      }
+    }
+  }
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.srno = parent.srno + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -297,9 +315,13 @@ const QuoteBuilder = ({
             </Button>
           </Box>
         )}
-        {currentStep === 'DOA' && !quotationData.versions[version].status.includes('DOA') && (
+        {currentStep === 'DOA' && DOAData?.length === 0 && (
           <Box display="flex">
-            <Button variant="contained" size="small" color="primary" disabled={sentToCustomer} onClick={handleSendForDOA}>
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              onClick={handleSendForDOA}>
               Send for DOA
             </Button>
           </Box>
@@ -312,7 +334,7 @@ const QuoteBuilder = ({
             columns={columns}
             data={rowsData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={() => {}}
+            onSelect={() => { }}
             hideSelection={true}
             hideAction={true}
             childrenProperty="subRows"

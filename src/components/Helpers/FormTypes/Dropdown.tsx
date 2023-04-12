@@ -2,11 +2,11 @@ import { Box, Grid, IconButton, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import React from 'react';
-import ManageWellMaster from 'src/pages/WellMaster/ManageWellMaster';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
 import ManageWarehouse from 'src/pages/Warehouse/ManageWarehouse';
 import { sidebarResource } from 'src/constants/helpers';
+import ManageWellMaster from 'src/pages/WellMaster/ManageWellMaster';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
 import ManageStorageLocation from 'src/pages/StorageLocation/ManageStorageLocation';
 
@@ -36,44 +36,41 @@ function Dropdown({
     setFieldValue,
     allFields = [] }) {
 
-    const {
-        state: { permissions },
-    }: any = useData();
+    const { state: { permissions } }: any = useData();
+
     const [lookupDialog, setLookupDialog] = React.useState(false);
 
-    return (
-        <>
-            <Grid key={fieldData?.lookupResource} item xs={12} sm={12} md={12}>
-                <Box display="flex">
-                    <Box flexGrow={1}>
-                        <InfoLabel info={fieldData?.tooltipMessage} isTooltip={fieldData?.isTooltip} warningTooltip={fieldData?.isWarningTooltip} warningMessage={fieldData?.warningTooltipMessage} doNotShowInfoTooltip={fieldData?.doNotShowInfoTooltip}>
-                            <Autocomplete
-                                {...rest}
-                                disabled={fieldData?.isUneditable || rest?.disabled}
-                                options={(fieldData && fieldData?.isDependentDropdown) ?
-                                    option?.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn]) :
-                                    (fieldData && fieldData?.lookupDependentOn) ?
-                                        option?.filter((_f) => _f[fieldData?.lookupDependentOn] === values[fieldData?.lookupDependentOn]) :
-                                        option?.filter(f => f?.optionLabel)}
-                                freeSolo={type === 'dropDown' && !lookup}
-                                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                                getOptionSelected={(option: any, val) => option.optionValue === val}
-                                value={
-                                    option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''
-                                }
-                                onChange={
-                                    onChange
-                                        ? onChange
-                                        : (e, val) => {
-                                            if (setFieldValue) {
-                                                if (!lookup) {
-                                                    if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
-                                                        const newOption = {
-                                                            order: option.length,
-                                                            default: false,
-                                                            optionLabel: val,
-                                                            optionValue: val
-                                                        };
+    return (<Grid key={fieldData?.lookupResource} item xs={12} sm={12} md={12}>
+        <Box display="flex">
+            <Box flexGrow={1}>
+                <InfoLabel info={fieldData?.tooltipMessage} isTooltip={fieldData?.isTooltip} warningTooltip={fieldData?.isWarningTooltip} warningMessage={fieldData?.warningTooltipMessage} doNotShowInfoTooltip={fieldData?.doNotShowInfoTooltip}>
+                    <Autocomplete
+                        {...rest}
+                        disabled={fieldData?.isUneditable || rest?.disabled}
+                        options={(fieldData && fieldData?.isDependentDropdown) ?
+                            option?.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn]) :
+                            (fieldData && fieldData?.lookupDependentOn) ?
+                                option?.filter((_f) => _f[fieldData?.lookupDependentOn] === values[fieldData?.lookupDependentOn]) :
+                                option?.filter(f => f?.optionLabel)}
+                        freeSolo={type === 'dropDown' && !lookup}
+                        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                        value={
+                            option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''
+                        }
+                        onChange={
+                            onChange
+                                ? onChange
+                                : (e, val) => {
+                                    if (setFieldValue) {
+                                        if (!lookup) {
+                                            if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
+                                                const newOption = {
+                                                    order: option.length,
+                                                    default: false,
+                                                    optionLabel: val,
+                                                    optionValue: val
+                                                };
 
                                                         if (!option?.find((o) => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
                                                             addFieldOption(newOption);
@@ -300,16 +297,13 @@ function Dropdown({
                                                 setOptionsList([tempNewOption, ...option]);
                                                 handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
 
-                                            }
-                                        }}
-                                    />}
-                                </>
-                            </HtmlTooltip>
-                        </Box>)}
+                            }
+                        }}
+                    />}
+                </Box>)}
+        </Box>
+    </Grid>
 
-                </Box>
-            </Grid>
-        </>
     )
 }
 

@@ -633,8 +633,8 @@ const LoadingTicket = ({
 
   return (
     <>
-      <Box display="flex" justifyContent="flex-end" pt={1}>
-        <Box display="flex" alignItems="center">
+      <Box display="flex" justifyContent="flex-end" m={1}>
+        <Box display="flex" alignItems="center" gridGap={'8px'} flexWrap={'wrap'}>
           {!isMobile && (
             <Button
               onClick={() => {
@@ -674,7 +674,6 @@ const LoadingTicket = ({
               {downlodingFile ? 'Please wait...' : 'Preview'}
             </Button>
           )}
-          <Box mx={1} />
           {allowedToEdit && (
             <Button
               variant={'outlined'}
@@ -724,7 +723,6 @@ const LoadingTicket = ({
           </Menu>
           {(allowedToEdit || isProcessor) && (
             <Fragment>
-              <Box mx={1} />
               <Button
                 variant="outlined"
                 color="default"
@@ -825,7 +823,6 @@ const LoadingTicket = ({
                     </MenuItem>
                   )}
               </Menu>
-              <Box mx={1} />
               {selectedRecords.length &&
               selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
                 selectedRecords?.length ? (
@@ -846,7 +843,6 @@ const LoadingTicket = ({
                       {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : 'Remove Loading Ticket'}
                     </Button>
                   </Tooltip>
-                  <Box mx={1} />
                 </Fragment>
               ) : null}
               {showProcessDeliveryTicket && !isOffline && (
@@ -863,14 +859,13 @@ const LoadingTicket = ({
                       {isMobile && !isTablet ? <AddBoxRoundedIcon /> : 'Process Loading Ticket'}
                     </Button>
                   </Tooltip>
-                  <Box mx={1} />
                 </Fragment>
               )}
             </Fragment>
           )}
         </Box>
       </Box>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
