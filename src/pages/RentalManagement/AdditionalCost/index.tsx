@@ -126,7 +126,6 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
       data.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.qtyDisplay = parent.qty;
         parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       });
 
