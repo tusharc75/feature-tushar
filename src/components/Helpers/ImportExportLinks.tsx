@@ -266,6 +266,7 @@ export default function ImportExportLinks({
         {imptExptDnldMenuDta.action === 'download' && (
           <MenuItem
             onClick={() => {
+              downloadTemplate();
               handleCloseMenu();
             }}
           >
