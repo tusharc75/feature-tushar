@@ -67,9 +67,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     const [shippingAddress, setShippingAddress] = useState([]);
     const [cloneHeading, setCloneHeading] = useState('');
 
-    const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false);
-    const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
-
     const [showAddressDialog, setShowAddressDialog] = useState(false);
     const [addressType, setAddressType] = useState('');
 
@@ -201,9 +198,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             }
             var statusOptions = []
             fieldData?.forEach((e: any) => {
-                if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
-                    setOptionsPlantsEntity(e?.fieldData?.option);
-                }
                 if (e?.fieldData?.fieldName === 'status') {
                     statusOptions = e.fieldData.option;
                 }
@@ -907,106 +901,46 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                         </Box>
                                                                                     </Box>
                                                                                 )
-                                                                                    : (field.fieldName === "plant" || field.fieldName === "warehouse") ? (
-                                                                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                                                                            <Grid container spacing={1}>
-                                                                                                <Grid item xs={permissions?.warehouse?.isCreate ? 11 : 11}
-                                                                                                    sm={permissions?.warehouse?.isCreate ? 11 : 11}
-                                                                                                    md={permissions?.warehouse?.isCreate ? 11 : 11}
-                                                                                                >
-                                                                                                    <FormTypes
-                                                                                                        {...field}
-                                                                                                        disabled={rentalDetails && rentalDetails?.productInventory?.length ? true : false}
-                                                                                                        values={values}
-                                                                                                        fieldData={field}
-                                                                                                        errors={errors}
-                                                                                                        touched={touched}
-                                                                                                        label={field.fieldLabel}
-                                                                                                        name={field.fieldName}
-                                                                                                        type={field.type}
-                                                                                                        options={optionsPlantsEntity}
-                                                                                                        setFieldValue={(name, value) => {
-                                                                                                            setFieldValue(name, value)
-                                                                                                        }}
-                                                                                                        required={field.required}
-                                                                                                        fullWidth
-                                                                                                        isTooltip={field?.isTooltip || false}
-                                                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                                                        size="small"
-                                                                                                    />
-                                                                                                </Grid>
-                                                                                                {permissions?.warehouse?.isCreate && (
-                                                                                                    <Grid item xs={1} sm={1} md={1} >
-                                                                                                        <Tooltip
-                                                                                                            title="Create Plant"
-                                                                                                            className="mt-1"
-                                                                                                        >
-                                                                                                            <IconButton
-                                                                                                                onClick={() => {
-                                                                                                                    setShowAddWarehouseDialog(true);
-                                                                                                                }}
-                                                                                                                disabled={rentalDetails && rentalDetails?.productInventory?.length}
-                                                                                                                size="small"
-                                                                                                            >
-                                                                                                                <AddIcon color={rentalDetails && rentalDetails?.productInventory?.length ? "disabled" : "primary"} />
-                                                                                                            </IconButton>
-                                                                                                        </Tooltip>
-                                                                                                    </Grid>
-                                                                                                )}
-                                                                                                {field?.tooltipMessage ? (
-                                                                                                    <Grid item xs={1} sm={1} md={1}>
-                                                                                                        <Tooltip
-                                                                                                            className="mt-2"
-                                                                                                            title={
-                                                                                                                field?.tooltipMessage ?? ""
-                                                                                                            }
-                                                                                                        >
-                                                                                                            <InfoIcon color="disabled" />
-                                                                                                        </Tooltip>
-                                                                                                    </Grid>
-                                                                                                ) : null}
-                                                                                            </Grid>
-                                                                                        </Grid>
-                                                                                    )
-                                                                                        : (
-                                                                                            <FormTypes
-                                                                                                rentalManagementId={rentalManagementId}
-                                                                                                {...field}
-                                                                                                fieldData={field}
-                                                                                                disabled={
-                                                                                                    field.fieldName === "currency" ? rentalDetails && rentalDetails?.material?.length ? true : false :
-                                                                                                        field.fieldName === "warehouse" ? rentalDetails && rentalDetails?.productInventory?.length ? true : false :
-                                                                                                            (rentalManagementId && field.disableOnEdit && !isClone)}
-                                                                                                values={values}
-                                                                                                errors={errors}
-                                                                                                touched={touched}
-                                                                                                label={field.fieldLabel}
-                                                                                                name={field.fieldName}
-                                                                                                type={field.type}
-                                                                                                options={field.option}
-                                                                                                setFieldValue={(name, value) => {
-                                                                                                    handleValuesChange({ [name]: value })
-                                                                                                    setFieldValue(name, value)
-                                                                                                }}
-                                                                                                required={field.required}
-                                                                                                fullWidth
-                                                                                                isTooltip={field?.isTooltip || false}
-                                                                                                tooltipMessage={field?.tooltipMessage}
-                                                                                                size="small"
-                                                                                                imageOrFileUploadCompletePercentage={
-                                                                                                    ["imageUpload", "fileUpload"].some(
-                                                                                                        (s) => s === field.type
-                                                                                                    )
-                                                                                                        ? (completePercentage) => {
-                                                                                                            setUploadingImageOrFileProgress(
-                                                                                                                completePercentage
-                                                                                                            );
-                                                                                                        }
-                                                                                                        : null
-                                                                                                }
-                                                                                                allFields={rentalData.fields}
-                                                                                            />
-                                                                                        )}
+
+                                                                                    : (
+                                                                                        <FormTypes
+                                                                                            rentalManagementId={rentalManagementId}
+                                                                                            {...field}
+                                                                                            fieldData={field}
+                                                                                            disabled={
+                                                                                                field.fieldName === "currency" ? rentalDetails && rentalDetails?.material?.length ? true : false :
+                                                                                                    field.fieldName === "warehouse" ? rentalDetails && rentalDetails?.productInventory?.length ? true : false :
+                                                                                                        (rentalManagementId && field.disableOnEdit && !isClone)}
+                                                                                            values={values}
+                                                                                            errors={errors}
+                                                                                            touched={touched}
+                                                                                            label={field.fieldLabel}
+                                                                                            name={field.fieldName}
+                                                                                            type={field.type}
+                                                                                            options={field.option}
+                                                                                            setFieldValue={(name, value) => {
+                                                                                                handleValuesChange({ [name]: value })
+                                                                                                setFieldValue(name, value)
+                                                                                            }}
+                                                                                            required={field.required}
+                                                                                            fullWidth
+                                                                                            isTooltip={field?.isTooltip || false}
+                                                                                            tooltipMessage={field?.tooltipMessage}
+                                                                                            size="small"
+                                                                                            imageOrFileUploadCompletePercentage={
+                                                                                                ["imageUpload", "fileUpload"].some(
+                                                                                                    (s) => s === field.type
+                                                                                                )
+                                                                                                    ? (completePercentage) => {
+                                                                                                        setUploadingImageOrFileProgress(
+                                                                                                            completePercentage
+                                                                                                        );
+                                                                                                    }
+                                                                                                    : null
+                                                                                            }
+                                                                                            allFields={rentalData.fields}
+                                                                                        />
+                                                                                    )}
                                                                     </Grid>
                                                                 ))}
                                                             </Grid>
@@ -1128,30 +1062,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                         isAccountFieldDisable={true}
                                     />
                                 )}
-                                {showAddWarehouseDialog &&
-                                    <ManageWarehouse
-                                        open={showAddWarehouseDialog}
-                                        close={() => setShowAddWarehouseDialog(false)}
-                                        isClone={false}
-                                        onSuccess={({ data }) => {
-                                            if (data._id) {
-                                                setShowAddWarehouseDialog(false)
-                                                setOptionsPlantsEntity((prevState) => {
-                                                    return [
-                                                        ...prevState,
-                                                        {
-                                                            optionValue: data._id,
-                                                            optionLabel: data.warehouseName,
-                                                            order: optionsPlantsEntity.length,
-                                                            default: false
-                                                        },
-                                                    ];
-                                                });
-                                                setFieldValue("warehouse", data._id);
-                                            }
-                                        }}
-                                    />}
-
                                 {showAddressDialog &&
                                     <ManageAddressDialog
                                         onClose={() => {
