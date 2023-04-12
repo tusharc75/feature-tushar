@@ -229,6 +229,14 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
       }`;
+      parent.description =
+      parent.type === 'service'
+        ? parent?.serviceDetail?.serviceDescription || ''
+        : parent.type === 'product'
+        ? parent?.productDetail?.productDescription || ''
+        : parent.type === 'package'
+        ? parent?.packageDetail?.packageDescription || ''
+        : '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -258,6 +266,14 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
       }`;
+      _subRow.description =
+      _subRow.type === 'service'
+        ? _subRow?.serviceDetail?.serviceDescription || ''
+        : _subRow.type === 'product'
+        ? _subRow?.productDetail?.productDescription || ''
+        : _subRow.type === 'package'
+        ? _subRow?.packageDetail?.packageDescription || ''
+        : '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
