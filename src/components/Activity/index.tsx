@@ -263,11 +263,11 @@ const Activity = (props) => {
                           )}
                           {data === 'Email' && (
                             <Box mr={1}>
-                              <HtmlTooltip title={`${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}@master.equip-t.com`}>
+                              <HtmlTooltip title={`support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}@master.equip-t.com`}>
                                 <IconButton
                                   size="small"
                                   onClick={(e) => {
-                                    emailCopy(e, `${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}@master.equip-t.com`);
+                                    emailCopy(e, `support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}@master.equip-t.com`);
                                   }}
                                 >
                                   <MailIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
