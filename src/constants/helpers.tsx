@@ -74,7 +74,7 @@ export const jobProcessSteps: stepInterface[] = [
 
 export const salesOrderProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Services and Consumables', title: 'Consumables', icon: 'consumable' },
+  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
@@ -91,7 +91,7 @@ export const subleaseSteps: stepInterface[] = [
 
 export const quotationProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Services and Consumables', title: 'Consumables', icon: 'consumable' },
+  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
   { name: 'Quote Builder', title: 'Builder', icon: 'quote' },
   { name: 'DOA', title: 'DOA', icon: 'doa' },
   { name: 'Quote Approval', title: 'Approval', icon: 'approval' },

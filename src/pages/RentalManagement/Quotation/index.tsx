@@ -330,7 +330,7 @@ const Quotation = ({
     const response = await axiosInstance().get(
       `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
     );
-    const additionalCost = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`);
+    const additionalCost = await axiosInstance().get(`${quotation.api}/additionalcost/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`);
     const additionalCostData = additionalCost?.data?.data?.map((e) => {
       const detail = e?.description;
       return {

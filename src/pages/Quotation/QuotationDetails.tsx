@@ -33,7 +33,6 @@ import {
   FcApproval
 } from 'react-icons/all';
 import { camelCase } from 'lodash';
-import Service from './Service';
 import QuoteBuilder from './QuoteBuilder';
 import RoadmapViews from './RoadMapViews';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -183,6 +182,12 @@ const QuotationDetails = () => {
       const response: any = await axiosInstance().get(`${quotation.api}/${id}`);
       data = response?.data?.data;
 
+      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if ([QUOTATION_STATUS.converted].includes(data.status)) {
+        isAllowedToEdit = false;
+      }
+      setAllowedToEdit(isAllowedToEdit && permissions?.quotation?.isUpdate);
+
       setQuotationData(data);
 
       var tempStepList = quotationProcessSteps;
@@ -212,11 +217,7 @@ const QuotationDetails = () => {
         }
       }
 
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if ([QUOTATION_STATUS.converted].includes(data.status)) {
-        isAllowedToEdit = false;
-      }
-      setAllowedToEdit(isAllowedToEdit && permissions?.quotation?.isUpdate);
+
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -568,13 +569,13 @@ const QuotationDetails = () => {
                   updateDOASetup={updateDOASetup}
                 />
               )}
-              {stepNames[currentStep] === 'Services and Consumables' && quotationData && (
-                <AdditionalCost 
-                quotationData={quotationData}
-                setNextStep={setNextStep}
-                renderedFrom={renderedFrom}
-                version={currentVersion}
-                allowedToEdit={allowedToEdit}
+              {stepNames[currentStep] === 'Manual Entry' && quotationData && (
+                <AdditionalCost
+                  quotationData={quotationData}
+                  setNextStep={setNextStep}
+                  renderedFrom={renderedFrom}
+                  version={currentVersion}
+                  allowedToEdit={allowedToEdit}
                 />
               )}
               {stepNames[currentStep] === 'Quote Builder' && quotationData && (

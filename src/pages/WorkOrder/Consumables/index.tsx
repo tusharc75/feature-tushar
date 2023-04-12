@@ -54,24 +54,24 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
   };
 
   const columns = [
-    { field: 'product', headerName: 'Product', show: true, cellRenderer: 'nameRenderer' },
-    { field: 'service', headerName: 'Service', show: true, cellRenderer: 'nameRenderer' },
-    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'product', headerName: 'Product', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+    { field: 'service', headerName: 'Service', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+    { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'type', headerName: 'Type', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'consumed', headerName: 'Consumed', show: true, cellRenderer: 'checkboxRenderer' }
+    { field: 'consumed', headerName: 'Consumed', show: true, disabled: true, cellRenderer: 'checkboxRenderer' }
   ];
 
   const NameRenderer = (params) => {
     return (
       <>
-        <a className="link text-truncate" 
-        href={ 
-          params?.column?.colId === 'product'
-           ? 
-          `${routes?.productDetail.path}/${params?.data?.productId}` 
-          : 
-          `${routes?.serviceMasterDetail.path}/${params?.data?.serviceId}` }
-          >
+        <a className="link text-truncate"
+          href={
+            params?.column?.colId === 'product'
+              ?
+              `${routes?.productDetail.path}/${params?.data?.productId}`
+              :
+              `${routes?.serviceMasterDetail.path}/${params?.data?.serviceId}`}
+        >
           {params?.value}
         </a>
       </>

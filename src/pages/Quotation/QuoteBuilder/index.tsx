@@ -2,9 +2,7 @@ import { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, IconButton, Typography } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { isMobile } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -95,25 +93,26 @@ const QuoteBuilder = ({
                 <span>({row.original?.subRows?.length})</span>
               </Box>
             ) : null}
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(
-                    `${row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === 'product'
-                        ? routes.productDetail.path
-                        : row.original.type === 'package'
-                          ? routes.packagesDetail.path
-                          : routes.serviceMasterDetail.path
-                    }/${row.original.materialId}`
-                  );
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
+            {['product', 'service', 'package', 'serializedAsset']?.includes(row.original.type) &&
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(
+                      `${row.original.type === 'serializedAsset'
+                        ? routes.serializedAssetDetail.path
+                        : row.original.type === 'product'
+                          ? routes.productDetail.path
+                          : row.original.type === 'package'
+                            ? routes.packagesDetail.path
+                            : routes.serviceMasterDetail.path
+                      }/${row.original.materialId}`
+                    );
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>}
           </div>
         )
       },
@@ -126,6 +125,14 @@ const QuoteBuilder = ({
             .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
             .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
           return <>{total}</>;
+        }
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       }
     ];
@@ -141,7 +148,7 @@ const QuoteBuilder = ({
 
     var data: any = [];
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionData._id}`);
-    const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}/${versionData._id}`);
+    const additionalCostResponce = await axiosInstance().get(`${quotation.api}/additionalcost/${quotationData._id}/${versionData._id}`);
 
     data = response?.data?.data;
     const rows = data.material.filter((e) => e.parentId === null);
@@ -155,29 +162,40 @@ const QuoteBuilder = ({
             ? parent.serviceDetail?.serviceName
             : parent.packageDetail?.packageName
         }`;
+        parent.description =
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceDescription || ''
+          : parent.type === 'product'
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.subRows = generateNestedData(data.material, parent);
     });
-    let serviceRows = [];
-    if (serviceResponse?.data?.data?.length) {
-      serviceRows = serviceResponse?.data?.data?.map((item) => {
+
+    let cost = [];
+    if (additionalCostResponce?.data?.data?.length) {
+      cost = additionalCostResponce?.data?.data?.map((item, index) => {
         let finalObject = prepareDataForGrid(item);
-        finalObject['detail'] = item?.serviceName;
+        finalObject['srno'] = rows?.length + (index + 1);
+        finalObject['detail'] = item?.detail;
+        finalObject['description'] = item?.description;
         finalObject['qtyDisplay'] = item?.qty;
         finalObject['leadTime'] = Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
         finalObject['parentId'] = null;
         finalObject['isValid'] = true;
         finalObject['hideSelection'] = false;
-        finalObject['type'] = 'Service';
+        finalObject['type'] = item?.costType || 'Manual Entry';
         let res: any = {
           ...finalObject
         };
         return res;
       });
     }
-    setRowsData([...rows, ...serviceRows]);
+    setRowsData([...rows, ...cost]);
     handleCheckNextPrev()
   };
 
@@ -224,6 +242,14 @@ const QuoteBuilder = ({
             ? _subRow.serviceDetail?.serviceName
             : _subRow.packageDetail?.packageName
         }`;
+        _subRow.description =
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;

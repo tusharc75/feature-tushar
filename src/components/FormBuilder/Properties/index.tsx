@@ -84,6 +84,7 @@ const LookupResource = [
   { name: 'Service Order', value: 'Service Order' },
   { name: 'Employee Master', value: 'Employee Master' },
   { name: 'Competency Master', value: 'Competency Master' },
+  { name: 'Storage Location', value: 'Storage Location' },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField }) => {

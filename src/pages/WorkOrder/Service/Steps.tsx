@@ -50,15 +50,13 @@ const TimerComponent = ({ stepData, updateTime = true }) => {
         display: 'flex',
         flexWrap: 'wrap',
         alignItems: 'center',
-        border: '1px solid rgba(0, 0, 0, 0.23)',
-        backgroundColor: 'transparent',
-        padding: '2px 7px',
-        borderRadius: '8px',
-        marginRight: '8px'
+        fontWeight: 500,
+        fontSize: '14px',
+        lineHeight: '10px',
+        color: '#8B8B8B'
       }}
     >
-      <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
-      {time}
+      <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />({time})
     </Box>
   );
 };
@@ -551,11 +549,12 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                 }`}
               >
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
-                  <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px' }}>
+                  <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px', alignItems: 'center' }}>
                     <Box>
                       <Chip
                         color="primary"
-                        label={referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
+                        // label={referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
+                        label={referencType === 'workOrderTechnician' ? step?.order : `${step?.order || index + 1}`}
                       />
                     </Box>
                     <Box ml={1}>
@@ -565,7 +564,17 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                     </Box>
                   </Box>
                   {step?.isAllowToPerform && (
-                    <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto', display: 'flex' }}>
+                    <Box
+                      sx={{
+                        justifyContent: 'flex-end',
+                        paddingLeft: '10px',
+                        paddingTop: '10px',
+                        marginLeft: 'auto',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}
+                      gridGap={'8px'}
+                    >
                       {stepData?.startDate && (
                         <TimerComponent stepData={stepData} updateTime={stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? true : false} />
                       )}
@@ -575,53 +584,47 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                         WORKORDER_SERVICE_STEP_STATUS.needReperform
                       ].includes(stepData?.status) &&
                         (isMeTechnician || !isAnyTechnician) && (
-                          <Box mr={1}>
-                            <Button
-                              variant="outlined"
-                              color="secondary"
-                              size="small"
-                              disabled={!allowedToEdit}
-                              onClick={(e) => {
-                                if ([WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) {
-                                  handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
-                                } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
-                                  handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.pause, stepData);
-                                }
-                              }}
-                            >
-                              {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
-                                ? 'Resume'
-                                : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-                                ? 'Pause'
-                                : 'Restart'}
-                            </Button>
-                          </Box>
-                        )}
-                      {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
-                        <Box ml={1}>
                           <Button
                             variant="outlined"
                             color="secondary"
                             size="small"
                             disabled={!allowedToEdit}
                             onClick={(e) => {
-                              e.stopPropagation();
-                              if (selectedService.status === WORKORDER_SERVICE_STATUS.pending) {
-                                updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
+                              if ([WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) {
+                                handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
+                              } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+                                handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.pause, stepData);
                               }
-                              handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, step._id);
                             }}
                           >
-                            Start
+                            {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
+                              ? 'Resume'
+                              : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+                              ? 'Pause'
+                              : 'Restart'}
                           </Button>
-                        </Box>
+                        )}
+                      {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          size="small"
+                          disabled={!allowedToEdit}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (selectedService.status === WORKORDER_SERVICE_STATUS.pending) {
+                              updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
+                            }
+                            handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, step._id);
+                          }}
+                        >
+                          Start
+                        </Button>
                       ) : stepData?.passFailStatus ? (
-                        <Box ml={1}>
-                          <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
-                        </Box>
+                        <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
                       ) : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && isStepValid && (isMeTechnician || !isAnyTechnician) ? (
                         step?.isPassFail ? (
-                          <Box display="inline-flex" ml={1}>
+                          <>
                             <Button
                               variant="outlined"
                               color="secondary"
@@ -634,7 +637,6 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                             >
                               Pass
                             </Button>
-                            <Box marginX={1} />
                             <Button
                               variant="outlined"
                               color="secondary"
@@ -648,9 +650,9 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                             >
                               Fail
                             </Button>
-                          </Box>
+                          </>
                         ) : (
-                          <Box display="inline-flex">
+                          <>
                             <Button
                               variant="outlined"
                               color="secondary"
@@ -663,7 +665,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                             >
                               Complete
                             </Button>
-                          </Box>
+                          </>
                         )
                       ) : null}
                       {stepData?.status &&
