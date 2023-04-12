@@ -248,7 +248,7 @@ export default function ImportExportLinks({
         {permissions?.isCreate && imptExptDnldMenuDta.action === 'import' && (
           <MenuItem>
             <label htmlFor="importFromExcel" className="cursor-pointer">
-              {title !== '' ? `Import ${title}` : `Import from Excel`}
+              {title !== '' ? `${title} Import ` : `Import from Excel`}
             </label>
           </MenuItem>
         )}
@@ -259,13 +259,14 @@ export default function ImportExportLinks({
               handleCloseMenu();
             }}
           >
-            {title !== '' ? `Export ${title}` : `Export to Excel`}
-            {recordsToExport === 0 ? 'All' : `(${recordsToExport})`}
+            {title !== '' ? `${title} Export` : `Export to Excel`}
+            {recordsToExport === 0 ? ' (All)' : ` (${recordsToExport})`}
           </MenuItem>
         )}
         {imptExptDnldMenuDta.action === 'download' && (
           <MenuItem
             onClick={() => {
+              downloadTemplate();
               handleCloseMenu();
             }}
           >

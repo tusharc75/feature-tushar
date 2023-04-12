@@ -16,7 +16,6 @@ import {
   setFieldsInAscendingOrder,
   yupSchema,
   repairJobProcessSteps,
-  REPAIR_JOB_STATUS,
   generateUniqueIdOnly
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -28,14 +27,9 @@ import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from "react-icons/fa";
 import moment from 'moment';
 import { useData } from "../../../StateProvider/Provider";
-import AddIcon from "@material-ui/icons/AddCircle";
-import InfoIcon from "@material-ui/icons/Info";
-import ManageWarehouse from '../../Warehouse/ManageWarehouse';
 import { isEqual } from 'lodash';
 
 const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSuccess, referenceType = null, referenceData = null }) => {
-
-  const initialRender = useRef(true)
 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -51,11 +45,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [allFields, setAllFields] = useState([]);
   const [title, setTitle] = useState("");
-  const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
-
-  const [disablePlantIfAssetAdded, setDisablePlantIfAssetAdded] = useState(true)
-
-  const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false);
 
   const ref = useRef(null);
 
@@ -67,15 +56,11 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
       const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-      const plantsOptions = data.find((obj) => ["plant", "warehouse"].indexOf(obj?.fieldData.fieldName) > -1)?.fieldData?.option ?? [];
-      setOptionsPlantsEntity(plantsOptions);
-
       if (repairJobId) {
         axiosInstance().get(`${repairJob.api}/` + repairJobId).then(({ data: { data } }) => {
           if (isClone) {
             const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
             setTitle(`Clone - ${repairJobName}`)
-            setDisablePlantIfAssetAdded(false);
             rest.repairJobName = `RJ_${generateUniqueIdOnly()}`;
             rest.status = `New`;
             setInitialData({
@@ -85,21 +70,24 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
             setAllFields(fieldsDataForCreate);
             setLoading(false);
           } else {
-            setTitle(`Editing - [${data.repairJobName}]`)
-            setInitialData({
-              fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
-            });
-            setAllFields(fieldsDataForUpdate);
             axiosInstance().get(`${repairJob.api}/${repairJobId}/assets`)
-              .then(({ data: { data } }) => {
-                if (data.length) {
-                  setDisablePlantIfAssetAdded(true);
+              .then(({ data: { data: assetData } }) => {
+                if (assetData.length) {
+                  fieldsDataForUpdate?.forEach((e) => {
+                    if (e.fieldName === "warehouse") {
+                      e.disableOnEdit = true;
+                      e.isUneditable = true;
+                    }
+                  })
                 }
-                else {
-                  setDisablePlantIfAssetAdded(false);
-                }
+                setTitle(`Editing - [${data.repairJobName}]`)
+                setInitialData({
+                  fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
+                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
+                });
+                setAllFields(fieldsDataForUpdate);
               }).catch((error) => {
+                toastConfig.setToastConfig(error);
               });
             setLoading(false);
           }
@@ -107,13 +95,11 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
           toastConfig.setToastConfig(error);
         });
       } else {
-        setTitle('Create Repair Job')
-        setDisablePlantIfAssetAdded(false);
+        setTitle(`Create ${routes.repairJob.title}`)
         let initialData = { ...getObjKeys('', fieldsDataForCreate), repairJobName: `RJ_${generateUniqueIdOnly()}` };
         if (fieldsDataForCreate?.some((e) => e.fieldName === "expectedCompletionDate")) {
           initialData["expectedCompletionDate"] = null;
         }
-        
         if (referenceType === "Rental Job") {
           initialData["warehouse"] = referenceData?.warehouse
           initialData["rentalJob"] = referenceData?._id
@@ -127,7 +113,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
         if (referenceType === "Product Inventory") {
           initialData["warehouse"] = referenceData?.warehouse
         }
-
         setAllFields(fieldsDataForCreate);
         setInitialData({
           fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -329,75 +314,14 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         minDate={values["startDate"]}
-                                      /> : (field.fieldName === "plant" || field.fieldName === "warehouse") ? (
-                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                          <Grid container spacing={1}>
-                                            <Grid item xs={permissions?.warehouse?.isCreate ? 11 : 11}
-                                              sm={permissions?.warehouse?.isCreate ? 11 : 11}
-                                              md={permissions?.warehouse?.isCreate ? 11 : 11}
-                                            >
-                                              <FormTypes
-                                                repairJobId={repairJobId}
-                                                {...field}
-                                                fieldData={field}
-                                                disabled={disablePlantIfAssetAdded || (!repairJobId && field.disableOnEdit)}
-                                                values={values}
-                                                errors={errors}
-                                                touched={touched}
-                                                label={field.fieldLabel}
-                                                name={field.fieldName}
-                                                type={field.type}
-                                                options={optionsPlantsEntity}
-                                                setFieldValue={(name, value) => {
-                                                  setFieldValue(name, value);
-                                                }}
-                                                required={field.required}
-                                                fullWidth
-                                                isTooltip={field?.isTooltip || false}
-                                                tooltipMessage={field?.tooltipMessage}
-                                                size="small"
-                                              />
-                                            </Grid>
-                                            {permissions?.warehouse?.isCreate && (
-                                              <Grid item xs={1} sm={1} md={1} >
-                                                <Tooltip
-
-                                                  title="Create Plant"
-                                                  className="mt-1"
-                                                >
-                                                  <IconButton
-                                                    onClick={() => {
-                                                      setShowAddWarehouseDialog(true);
-                                                    }}
-                                                    disabled={disablePlantIfAssetAdded || (!repairJobId && field.disableOnEdit)}
-                                                    size="small"
-                                                  >
-                                                    <AddIcon color={disablePlantIfAssetAdded || (!repairJobId && field.disableOnEdit) ? "disabled" : "primary"} />
-                                                  </IconButton>
-                                                </Tooltip>
-                                              </Grid>
-                                            )}
-                                            {field?.tooltipMessage ? (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip
-                                                  className="mt-2"
-                                                  title={
-                                                    field?.tooltipMessage ?? ""
-                                                  }
-                                                >
-                                                  <InfoIcon color="disabled" />
-                                                </Tooltip>
-                                              </Grid>
-                                            ) : null}
-                                          </Grid>
-                                        </Grid>
-                                      ) : <FormTypes
-                                        repairJobId={repairJobId}
+                                      /> :
+                                      <FormTypes
                                         {...field}
-                                        disabled={(!repairJobId && field.disableOnEdit) || (field.fieldName === "repairJobName")}
                                         values={values}
                                         errors={errors}
+                                        disabled={(Boolean(repairJob) && field.disableOnEdit && !isClone)}
                                         fieldData={field}
+                                        allFields={allFields}
                                         touched={touched}
                                         label={field.fieldLabel}
                                         name={field.fieldName}
@@ -419,7 +343,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                                             : null
                                         }
                                       />}
-
                                 </Grid>
                               )}
                             </Grid>
@@ -428,29 +351,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                       )
                     );
                   })}
-                {showAddWarehouseDialog &&
-                  <ManageWarehouse
-                    open={showAddWarehouseDialog}
-                    close={() => setShowAddWarehouseDialog(false)}
-                    isClone={false}
-                    onSuccess={({ data }) => {
-                      if (data._id) {
-                        setShowAddWarehouseDialog(false)
-                        setOptionsPlantsEntity((prevState) => {
-                          return [
-                            ...prevState,
-                            {
-                              optionValue: data._id,
-                              optionLabel: data.warehouseName,
-                              order: optionsPlantsEntity.length,
-                              default: false
-                            },
-                          ];
-                        });
-                        setFieldValue("plant", data._id);
-                      }
-                    }}
-                  />}
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
@@ -479,9 +379,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                 disabled={submitting}
                 onClick={(e) => {
                   submitForm();
-                  // e.preventDefault();
-                  // handleScroll(errors);
-                  // handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
                 }}
               >
                 Save
@@ -495,7 +392,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                   setShowConfirmDialog(false);
                   handleScroll(errors);
                   submitForm();
-                  // handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
                 }}
                 onClose={() => {
                   setShowConfirmDialog(false);
@@ -509,7 +405,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
       </Formik>
     )}
   </Dialog>
-
   );
 };
 
