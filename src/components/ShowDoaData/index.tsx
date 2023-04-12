@@ -21,7 +21,10 @@ export interface User {
 }
 
 const ShowDoaData: React.FC<doaDataInterface> = ({ status, doaData, className, ...others }) => {
-  return (
+  return doaData?.length > 0 ||
+    status.includes(QUOTATION_STATUS.acceptedbyDOA) ||
+    status.includes(QUOTATION_STATUS.sentforDOA) ||
+    status.includes(QUOTATION_STATUS.rejectedbyDOA) ? (
     <div {...others} className={`${className} ${styles.mainContainer}`}>
       {status.includes(QUOTATION_STATUS.sentforDOA) && (
         <div className={`${styles.doa} ${styles.sendDoa}`}>
@@ -79,7 +82,7 @@ const ShowDoaData: React.FC<doaDataInterface> = ({ status, doaData, className, .
           </>
         ))}
     </div>
-  );
+  ) : null;
 };
 
 export default ShowDoaData;

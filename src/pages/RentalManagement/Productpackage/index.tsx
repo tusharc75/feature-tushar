@@ -105,12 +105,12 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -259,22 +259,23 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service'
-        ? parent.serviceDetail
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.packageDetail?.packageName
-        }`;
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -298,22 +299,23 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'service'
-        ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === 'package'
+      _subRow.detail = `${
+        _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === 'package'
           ? _subRow.packageDetail?.packageName
           : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : ''
-        } `;
+          ? _subRow.productDetail?.productName
+          : ''
+      } `;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -540,130 +542,123 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
   return (
     <Fragment>
-      <Grid container spacing={2}>
-        {allowedToEdit && (
-          <Grid item xs={12} md={12} sm={12}>
-            <Box display="flex" justifyContent="space-between" mt={1} mb={1}>
-              <Box display="flex">
-                {permissions?.product?.isRead && (
-                  <Button
-                    size="small"
-                    disabled={isOffline}
-                    variant={'contained'}
-                    color="primary"
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
-                    }}
-                  >
-                    {isMobile && !isTablet ? 'Product' : `Add Products`}
-                  </Button>
-                )}
-                <Box mx={isMobile ? 0.5 : 1} />
-                {permissions?.packages?.isRead && (
-                  <Button
-                    color="primary"
-                    size="small"
-                    variant="contained"
-                    disabled={isOffline}
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                    }}
-                  >
-                    {isMobile && !isTablet ? 'Package' : `Add Product ${routes.packages.title}`}
-                  </Button>
-                )}
-              </Box>
-              <Box display="flex">
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
-                  id="demo-positioned-button"
-                  onClick={handleClick}
-                  disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                  endIcon={<BiChevronDown />}
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  open={open}
-                  onClose={handleClose}
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right'
+      {allowedToEdit && (
+        <Box display="flex" justifyContent="space-between" m={1}>
+          <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+            {permissions?.product?.isRead && (
+              <Button
+                size="small"
+                disabled={isOffline}
+                variant={'contained'}
+                color="primary"
+                onClick={() => {
+                  setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
+                }}
+              >
+                {isMobile && !isTablet ? 'Product' : `Add Products`}
+              </Button>
+            )}
+            {permissions?.packages?.isRead && (
+              <Button
+                color="primary"
+                size="small"
+                variant="contained"
+                disabled={isOffline}
+                onClick={() => {
+                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+                }}
+              >
+                {isMobile && !isTablet ? 'Package' : `Add Product ${routes.packages.title}`}
+              </Button>
+            )}
+          </Box>
+          <Box display="flex" ml={1}>
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              id="demo-positioned-button"
+              onClick={handleClick}
+              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+              endIcon={<BiChevronDown />}
+            >
+              Actions
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              open={open}
+              onClose={handleClose}
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right'
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right'
+              }}
+            >
+              <HtmlTooltip
+                title={
+                  Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                    ? 'Bulk edit selected records'
+                    : 'Select records to edit'
+                }
+              >
+                <MenuItem
+                  onClick={() => {
+                    setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
+                    setIsBulkEdit(true);
+                    handleClose();
                   }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right'
+                >
+                  Bulk Edit
+                </MenuItem>
+              </HtmlTooltip>
+              <HtmlTooltip
+                title={
+                  Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                    ? 'Delete selected records'
+                    : 'Select records to delete'
+                }
+              >
+                <MenuItem
+                  disabled={isDeleting}
+                  onClick={() => {
+                    handleDeleteMultiple();
+                    handleClose();
                   }}
                 >
-                  <HtmlTooltip
-                    title={
-                      Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
-                        ? 'Bulk edit selected records'
-                        : 'Select records to edit'
-                    }
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
-                        setIsBulkEdit(true);
-                        handleClose();
-                      }}
-                    >
-                      Bulk Edit
-                    </MenuItem>
-                  </HtmlTooltip>
-                  <HtmlTooltip
-                    title={
-                      Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
-                        ? 'Delete selected records'
-                        : 'Select records to delete'
-                    }
-                  >
-                    <MenuItem
-                      disabled={isDeleting}
-                      onClick={() => {
-                        handleDeleteMultiple();
-                        handleClose();
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </HtmlTooltip>
-                </Menu>
-              </Box>
-            </Box>
-          </Grid>
-        )}
-        <Grid item xs={12} md={12} sm={12}>
-          {columns && rowsData ? (
-            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
-              <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-                columns={columns}
-                data={rowsData}
-                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-                onSelect={setSelectedProducts}
-                childrenProperty="subRows"
-                uniqueKey="_id"
-                hideSelection={isOffline || !allowedToEdit}
-                hideAction={isOffline || !allowedToEdit}
-                renderedFrom="rental_management_product_package"
-                isClientSideGrid={true}
-                onSaveEdit={onSaveInlineEdit}
-              />
-            </Box>
-          ) : (
-            <Box p={2} height={500} bgcolor="white">
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </Grid>
-      </Grid>
+                  Delete
+                </MenuItem>
+              </HtmlTooltip>
+            </Menu>
+          </Box>
+        </Box>
+      )}
+      {columns && rowsData ? (
+        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+            columns={columns}
+            data={rowsData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+            onSelect={setSelectedProducts}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            hideSelection={isOffline || !allowedToEdit}
+            hideAction={isOffline || !allowedToEdit}
+            renderedFrom="rental_management_product_package"
+            isClientSideGrid={true}
+            onSaveEdit={onSaveInlineEdit}
+          />
+        </Box>
+      ) : (
+        <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
       {deleteData && (
         <ConfirmationDialog
           open={true}
