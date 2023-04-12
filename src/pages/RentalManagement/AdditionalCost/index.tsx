@@ -223,23 +223,11 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     setAnchorEl(null);
   };
 
-  const handleSaveData = async (rows: any) => {
-    rows.forEach((element) => {
-      delete element.srno;
-      delete element.isValid;
-      delete element.qtyDisplay;
-    });
-    handleUpdateCost(rows)
-  };
-
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
-    handleSaveData(rows);
+    handleUpdateCost(rows)
   };
 
   return (
