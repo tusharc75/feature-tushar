@@ -14,6 +14,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import moment from 'moment';
 import { dateTimeFormat } from 'src/constants/helpers';
 import axios from 'axios';
+import mimeDb from 'mime-db';
 
 const fileIcons = [
   {
@@ -59,11 +60,17 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
 
   // GET ATTACHMENT ICON
   const getFileIconSrc = (file) => {
-    if (file) {
-      let extension = file?.substring(file?.lastIndexOf('.'))?.toLowerCase();
-      let data = fileIcons?.find((o) => o?.extensions?.indexOf(extension) >= 0);
+    if (file.contentType) {
+      let extension = `.${mimeDb[file.contentType].extensions[0]}`;
+      let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+      console.log(data);
+      if (data && data?.source) return data.source;
+    } else if (file) {
+      let extension = file.substring(file.lastIndexOf('.')).toLowerCase();
+      let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
       if (data && data?.source) return data.source;
     }
+    return '';
   };
 
   // VIEW ATTACHMENT
@@ -194,15 +201,18 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
               return (
                 <Grid item key={i} sm={3} xs={3} md={3} xl={3} style={{ maxWidth: '150px' }}>
                   <Paper className={emailStyles.fileContainer}>
-                    <img src={getFileIconSrc(attachment?.contentType ? attachment?.contentType :
-                      attachment.url ? attachment.url : attachment)} className={emailStyles.file} alt="attchment" />
+                    <img
+                      src={getFileIconSrc(attachment?.contentType ? attachment?.contentType : attachment.url ? attachment.url : attachment)}
+                      className={emailStyles.file}
+                      alt="attchment"
+                    />
                     <Typography noWrap variant="body2">
                       {attachment
                         ? attachment?.name
                           ? attachment?.name
                           : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                            ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                            : attachment.substring(attachment.lastIndexOf('/') + 1)
+                          ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                          : attachment.substring(attachment.lastIndexOf('/') + 1)
                         : 'attachment'}
                     </Typography>
                     {attachment?.date && <Typography variant="body2">{moment(attachment?.date)?.format(dateTimeFormat)}</Typography>}
@@ -214,8 +224,8 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             ? attachment?.name
                               ? attachment?.name
                               : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                                ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                                : attachment?.substring(attachment.lastIndexOf('/') + 1)
+                              ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                              : attachment?.substring(attachment.lastIndexOf('/') + 1)
                             : 'attachment'
                         }
                       >
@@ -223,8 +233,8 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                           ? attachment?.name
                             ? attachment?.name
                             : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                              ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                              : attachment?.substring(attachment.lastIndexOf('/') + 1)
+                            ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                            : attachment?.substring(attachment.lastIndexOf('/') + 1)
                           : 'attachment'}
                       </Typography>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
