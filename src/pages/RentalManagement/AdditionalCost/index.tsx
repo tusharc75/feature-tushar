@@ -17,7 +17,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { calculateRowsField, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { BiChevronDown } from 'react-icons/bi';
-import { flattenArray } from 'src/constants/columns';
+import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
 
 const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, currencySymbol, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -48,7 +48,8 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     setNextStep(false);
     const fields = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
     setAllFields(fields)
-    const column: any = [
+    const newColumns = genrateCustomTableColumns(fields, rentalManagementData?.currency, renderedFrom);
+    let column: any = [
       {
         accessor: 'srno',
         Header: 'Index',
@@ -60,47 +61,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
         }
       },
     ];
-    fields.forEach(element => {
-      if (element.type === 'currencyAmount') {
-        element.displayCurrency.forEach((_currency) => {
-          let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-          let fieldLabel = element.fieldLabel + ' ' + _currency;
-          column.push({
-            accessor: fieldName,
-            Header: fieldLabel,
-            width: 200,
-            editable: Boolean(element?.isColumnEditable),
-            Cell: ({ row }) =>
-              row.original[fieldName] ? (
-                <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-              ) : (
-                <NoDataCell />
-              ),
-            Footer: (info) => {
-              const total = info?.rows
-                ?.filter((f) => f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                .reduce((sum, row) => row.values[fieldName] + sum, 0);
-              return (
-                <>
-                  {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
-                </>
-              );
-            }
-          });
-        });
-      } else {
-        let fieldName = element.fieldName;
-        let fieldLabel = element.fieldLabel;
-        column.push({
-          accessor: fieldName,
-          Header: fieldLabel,
-          width: 200,
-          editable: Boolean(element?.isColumnEditable),
-          Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-        });
-      }
-    });
-
+    column = [...column, ...newColumns];
     const isPriceRequired = fields.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
 
