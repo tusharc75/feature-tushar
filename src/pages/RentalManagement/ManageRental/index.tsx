@@ -26,7 +26,6 @@ import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageContactDialog from "../../Contact/ManageContact";
-import ManageWarehouse from '../../Warehouse/ManageWarehouse';
 import ManageAddressDialog from "src/components/Address/ManageAddressDialog";
 
 const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManagementData = null, onClose, onSuccess, open, referenceData = null, isDisableCustomerAccount = false }) => {

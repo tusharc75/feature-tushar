@@ -36,7 +36,6 @@ import AddIcon from '@material-ui/icons/AddCircle';
 import InfoIcon from '@material-ui/icons/Info';
 import ManageAccountDialog from '../../Account/ManageAccount';
 import ManageContactDialog from '../../Contact/ManageContact';
-import ManageWarehouse from 'src/pages/Warehouse/ManageWarehouse';
 
 const ManageRepairOrder = ({
   isClone = false,
@@ -76,10 +75,6 @@ const ManageRepairOrder = ({
   const [newAddedAccountId, setNewAddedAccountId] = useState(null);
 
   const [cloneHeading, setCloneHeading] = useState('');
-
-  const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
-  const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false);
-  const [disablePlantIfAssetAdded, setDisablePlantIfAssetAdded] = useState(true);
 
   const updateAccountDropdown = (data) => {
     const entityFields = repairOrderInitialData.fields;
@@ -168,8 +163,6 @@ const ManageRepairOrder = ({
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-      const plantsOptions = fieldData.find((obj) => ['plant', 'warehouse'].indexOf(obj?.fieldData.fieldName) > -1)?.fieldData?.option ?? [];
-      setOptionsPlantsEntity(plantsOptions);
       if (repairOrderId) {
         try {
           let data;
@@ -178,7 +171,6 @@ const ManageRepairOrder = ({
           setRepairOrderData(data);
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, repairOrderNumber, updatedBy, ...rest } = data;
-            setDisablePlantIfAssetAdded(false);
             rest.status = 'New';
             rest.repairOrderNumber = `RO_${generateUniqueIdOnly()}`;
             setCloneHeading(repairOrderNumber);
@@ -219,7 +211,6 @@ const ManageRepairOrder = ({
             initialData['type'] = REPAIR_ORDER_TYPE.external;
           }
         }
-        setDisablePlantIfAssetAdded(false);
         setRepairOrderInitialData({
           fields: fieldsDataForCreate?.filter((e) => !["rentalJob"]?.includes(e.fieldName)),
           initialValues: initialData
@@ -658,65 +649,6 @@ const ManageRepairOrder = ({
                                         size="small"
                                         minDate={values['startDate']}
                                       />
-                                    ) : field.fieldName === 'plant' || field.fieldName === 'warehouse' ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                        <Grid container spacing={1}>
-                                          <Grid
-                                            item
-                                            xs={permissions?.warehouse?.isCreate ? 11 : 11}
-                                            sm={permissions?.warehouse?.isCreate ? 11 : 11}
-                                            md={permissions?.warehouse?.isCreate ? 11 : 11}
-                                          >
-                                            <FormTypes
-                                              repairOrderId={repairOrderId}
-                                              {...field}
-                                              fieldData={field}
-                                              disabled={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit) || !isEditable}
-                                              values={values}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              options={optionsPlantsEntity}
-                                              setFieldValue={(name, value) => {
-                                                setFieldValue(name, value);
-                                              }}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={field?.isTooltip || false}
-                                              tooltipMessage={field?.tooltipMessage}
-                                              size="small"
-                                            />
-                                          </Grid>
-                                          {permissions?.warehouse?.isCreate && (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title="Create Plant" className="mt-1">
-                                                <IconButton
-                                                  onClick={() => {
-                                                    setShowAddWarehouseDialog(true);
-                                                  }}
-                                                  disabled={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit)}
-                                                  size="small"
-                                                >
-                                                  <AddIcon
-                                                    color={
-                                                      disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit) ? 'disabled' : 'primary'
-                                                    }
-                                                  />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Grid>
-                                          )}
-                                          {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip className="mt-2" title={field?.tooltipMessage ?? ''}>
-                                                <InfoIcon color="disabled" />
-                                              </Tooltip>
-                                            </Grid>
-                                          ) : null}
-                                        </Grid>
-                                      </Grid>
                                     ) : field.fieldName === 'type' ? (
                                       <FormTypes
                                         repairOrderId={repairOrderId}
@@ -789,10 +721,10 @@ const ManageRepairOrder = ({
                                       />
                                     ) : (
                                       <FormTypes
-                                        repairOrderId={repairOrderId}
                                         {...field}
                                         fieldData={field}
-                                        disabled={(repairOrderId && field.disableOnEdit) || field.fieldName === 'repairOrderNumber'}
+                                        allFields={repairOrderInitialData?.fields}
+                                        disabled={(Boolean(repairOrderId) && field.disableOnEdit && !isClone) || field.isUneditable}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
@@ -846,9 +778,7 @@ const ManageRepairOrder = ({
                   variant="contained"
                   color="primary"
                   disabled={
-                    // loading || Object.keys(errors).length > 0 ? true : false
                     uploadingImageOrFileProgress > 0 ||
-                    // isFieldNotTouched(repairOrderInitialData, values) ||
                     loading
                   }
                   onClick={(e) => {
@@ -915,30 +845,6 @@ const ManageRepairOrder = ({
                   owner={ownerData}
                   account={customerAccount}
                   isAccountFieldDisable={true}
-                />
-              )}
-              {showAddWarehouseDialog && (
-                <ManageWarehouse
-                  open={showAddWarehouseDialog}
-                  close={() => setShowAddWarehouseDialog(false)}
-                  isClone={false}
-                  onSuccess={({ data }) => {
-                    if (data._id) {
-                      setShowAddWarehouseDialog(false);
-                      setOptionsPlantsEntity((prevState) => {
-                        return [
-                          ...prevState,
-                          {
-                            optionValue: data._id,
-                            optionLabel: data.warehouseName,
-                            order: optionsPlantsEntity?.length,
-                            default: false
-                          }
-                        ];
-                      });
-                      setFieldValue('warehouse', data._id);
-                    }
-                  }}
                 />
               )}
             </>

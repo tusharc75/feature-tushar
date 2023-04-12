@@ -260,7 +260,7 @@ export default function ImportExportLinks({
             }}
           >
             {title !== '' ? `${title} Export` : `Export to Excel`}
-            {recordsToExport === 0 ? '(All)' : `(${recordsToExport})`}
+            {recordsToExport === 0 ? ' (All)' : ` (${recordsToExport})`}
           </MenuItem>
         )}
         {imptExptDnldMenuDta.action === 'download' && (

@@ -181,7 +181,7 @@ function Dropdown({
                 <Box>
                     <HtmlTooltip title={`Add ${name}`} className="formActionButton">
                         <>
-                            <IconButton disabled={rest?.disableOnEdit} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                            <IconButton disabled={fieldData?.isUneditable || rest?.disabled} onClick={() => setLookupDialog(true)} size="small" color="primary">
                                 <AddCircleIcon />
                             </IconButton>
                             {lookupDialog && <ManageWellMaster
@@ -212,7 +212,7 @@ function Dropdown({
                 <Box>
                     <HtmlTooltip title={`Add ${name}`} className="formActionButton">
                         <>
-                            <IconButton disabled={rest?.disableOnEdit} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                            <IconButton disabled={fieldData?.isUneditable || rest?.disabled} onClick={() => setLookupDialog(true)} size="small" color="primary">
                                 <AddCircleIcon />
                             </IconButton>
                             {lookupDialog && <ManageWellNumber
@@ -243,7 +243,7 @@ function Dropdown({
                 <Box>
                     <HtmlTooltip title={`Add ${name}`} className="formActionButton">
                         <>
-                            <IconButton disabled={rest?.disableOnEdit} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                            <IconButton disabled={fieldData?.isUneditable || rest?.disabled} onClick={() => setLookupDialog(true)} size="small" color="primary">
                                 <AddCircleIcon />
                             </IconButton>
                             {lookupDialog && <ManageWarehouse
@@ -275,7 +275,7 @@ function Dropdown({
                 <Box>
                     <HtmlTooltip title={`Add ${name}`} className="formActionButton">
                         <>
-                            <IconButton disabled={rest?.disableOnEdit} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                            <IconButton disabled={fieldData?.isUneditable || rest?.disabled} onClick={() => setLookupDialog(true)} size="small" color="primary">
                                 <AddCircleIcon />
                             </IconButton>
                             {lookupDialog && <ManageStorageLocation

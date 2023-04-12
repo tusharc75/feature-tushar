@@ -34,7 +34,6 @@ import AddIcon from '@material-ui/icons/AddCircle';
 import InfoIcon from '@material-ui/icons/Info';
 import ManageAccountDialog from '../../Account/ManageAccount';
 import ManageContactDialog from '../../Contact/ManageContact';
-import ManageWarehouse from 'src/pages/Warehouse/ManageWarehouse';
 
 const ManageProductionOrder = ({
   isClone = false,
@@ -71,8 +70,6 @@ const ManageProductionOrder = ({
 
   const [cloneHeading, setCloneHeading] = useState('');
 
-  const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
-  const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false);
   const [disablePlantIfAssetAdded, setDisablePlantIfAssetAdded] = useState(true);
 
   const updateAccountDropdown = (data) => {
@@ -162,8 +159,6 @@ const ManageProductionOrder = ({
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-      const plantsOptions = fieldData.find((obj) => ['plant', 'warehouse'].indexOf(obj?.fieldData.fieldName) > -1)?.fieldData?.option ?? [];
-      setOptionsPlantsEntity(plantsOptions);
       if (productionOrderId) {
         try {
           let data;
@@ -538,71 +533,13 @@ const ManageProductionOrder = ({
                                         onCollabOwnerMultiselectOpen(values['owner']);
                                       }}
                                     />
-                                  ) : field.fieldName === 'plant' || field.fieldName === 'warehouse' ? (
-                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions?.warehouse?.isCreate ? 11 : 11}
-                                          sm={permissions?.warehouse?.isCreate ? 11 : 11}
-                                          md={permissions?.warehouse?.isCreate ? 11 : 11}
-                                        >
-                                          <FormTypes
-                                            productionOrderId={productionOrderId}
-                                            {...field}
-                                            fieldData={field}
-                                            disabled={disablePlantIfAssetAdded || (productionOrderId && field.disableOnEdit)}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={optionsPlantsEntity}
-                                            setFieldValue={(name, value) => {
-                                              setFieldValue(name, value);
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                          />
-                                        </Grid>
-                                        {permissions?.warehouse?.isCreate && (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title="Create Plant" className="mt-1">
-                                              <IconButton
-                                                onClick={() => {
-                                                  setShowAddWarehouseDialog(true);
-                                                }}
-                                                disabled={disablePlantIfAssetAdded || (productionOrderId && field.disableOnEdit)}
-                                                size="small"
-                                              >
-                                                <AddIcon
-                                                  color={
-                                                    disablePlantIfAssetAdded || (productionOrderId && field.disableOnEdit) ? 'disabled' : 'primary'
-                                                  }
-                                                />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Grid>
-                                        )}
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip className="mt-2" title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    </Grid>
                                   ) : (
                                     <FormTypes
                                       productionOrderId={productionOrderId}
                                       {...field}
                                       fieldData={field}
-                                      disabled={(productionOrderId && field.disableOnEdit) || field.fieldName === 'productionOrderNumber'}
+                                      allFields={productionOrderInitialData?.fields}
+                                      disabled={(productionOrderId && field.disableOnEdit)}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -721,30 +658,6 @@ const ManageProductionOrder = ({
                   owner={ownerData}
                   account={customerAccount}
                   isAccountFieldDisable={true}
-                />
-              )}
-              {showAddWarehouseDialog && (
-                <ManageWarehouse
-                  open={showAddWarehouseDialog}
-                  close={() => setShowAddWarehouseDialog(false)}
-                  isClone={false}
-                  onSuccess={({ data }) => {
-                    if (data._id) {
-                      setShowAddWarehouseDialog(false);
-                      setOptionsPlantsEntity((prevState) => {
-                        return [
-                          ...prevState,
-                          {
-                            optionValue: data._id,
-                            optionLabel: data.warehouseName,
-                            order: optionsPlantsEntity?.length,
-                            default: false
-                          }
-                        ];
-                      });
-                      setFieldValue('warehouse', data._id);
-                    }
-                  }}
                 />
               )}
             </>
