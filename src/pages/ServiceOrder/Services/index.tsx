@@ -166,7 +166,7 @@ const Services = ({
       Cell: ({ row }) => {
         return allowedToEdit ? (
           (!row.original.canDelete) ? (
-            <HtmlTooltip title={'Asset is already assigned'}>
+            <HtmlTooltip title={'Technician is already assigned'}>
               <span>
                 <IconButton size="small" aria-label="Details" disabled={true}>
                   <DeleteIcon fontSize="small" color={'disabled'} />
@@ -465,7 +465,6 @@ const Services = ({
                   }}
                   onClose={handleClose}
                 >
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
                     <MenuItem
                       disabled={isDeleting}
                       onClick={() => {
@@ -475,8 +474,6 @@ const Services = ({
                     >
                       Delete
                     </MenuItem>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
                     <MenuItem
                       onClick={() => {
                         setOpenBulkEdit({ open: true, data: selectedProducts });
@@ -485,7 +482,6 @@ const Services = ({
                     >
                       Bulk Edit
                     </MenuItem>
-                  </HtmlTooltip>
                 </Menu>
               </Box>
             </Box>
