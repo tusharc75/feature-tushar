@@ -63,7 +63,6 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
     if (file.contentType) {
       let extension = `.${mimeDb[file.contentType].extensions[0]}`;
       let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
-      console.log(data);
       if (data && data?.source) return data.source;
     } else if (file) {
       let extension = file.substring(file.lastIndexOf('.')).toLowerCase();
