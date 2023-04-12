@@ -18,28 +18,36 @@ import { GrBusinessService } from 'react-icons/all';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import LeadTimeDialog from './LeadTimeDialog';
+import DateRangeIcon from '@material-ui/icons/DateRange';
 
 const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, allowedToEdit }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
-  const [columns, setColumns] = useState([]);
+
+  const versionId = quotationData?.versions[version]?._id || null;
+
+  const [columns, setColumns] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [showCostDialog, setShowCostDialog] = useState(false);
   const [selectedCostData, setSelectedCostData] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const versionId = quotationData?.versions[version]?._id || null;
   const [rowsData, setRowsData] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [allFields, setAllFields] = useState([]);
   const [deleteRecords, setDeleteRecords] = useState(null);
+  const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
     fetchFields();
-  }, []);
+    fetchData()
+  }, [quotationData, allowedToEdit]);
 
   const fetchFields = async () => {
+    setColumns(null)
     var data = [];
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.quotationCost}`);
     data = response?.data?.data;
@@ -82,6 +90,17 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
                 <EditIcon color="primary" />
               </IconButton>
             </HtmlTooltip>
+            <HtmlTooltip title="Edit Lead Time">
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  setLeadTimeDialog({ open: true, data: row.original });
+                }}
+              >
+                <DateRangeIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
             <GridDeleteIcon
               hasDeletePermission={permissions?.quotation?.isUpdate}
               ownerId={user?.user?._id}
@@ -96,21 +115,17 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
         )
     });
     setColumns(column);
-    fetchAdditionalCost()
   };
 
-  const fetchAdditionalCost = async () => {
+  const fetchData = async () => {
     try {
+      setNextStep(false);
       const response = await axiosInstance().get(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}`);
       let rows = response?.data?.data;
       rows?.forEach((parent, i) => {
         parent.index = i + 1;
-      }); 
-      if (rows?.length) {
-        setNextStep(true);
-      } else {
-        setNextStep(false);
-      }
+      });
+      setNextStep(true);
       setRowsData(rows);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -120,13 +135,13 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
   const handleAddCost = (rows) => {
     axiosInstance()
       .post(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/add`, { additionalCost: rows })
-      .then(({data}) => {
-        fetchAdditionalCost();
+      .then(({ data }) => {
+        fetchData();
         setShowCostDialog(false);
         toastConfig.setToastConfig({
-            open: true,
-            type: "success",
-            message: data.message,
+          open: true,
+          type: "success",
+          message: data.message,
         });
       })
       .catch((error) => {
@@ -136,19 +151,19 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
 
   const handleUpdateCost = (rows) => {
     rows.forEach((element) => {
-        delete element.index;
-        delete element.isValid;
-        delete element.hideSelection;
-      });
+      delete element.index;
+      delete element.isValid;
+      delete element.hideSelection;
+    });
     axiosInstance()
       .put(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/update`, { additionalCost: rows })
-      .then(({data}) => {
-        fetchAdditionalCost();
+      .then(({ data }) => {
+        fetchData();
         setShowCostDialog(false);
         toastConfig.setToastConfig({
-            open: true,
-            type: "success",
-            message: data.message,
+          open: true,
+          type: "success",
+          message: data.message,
         });
       })
       .catch((error) => {
@@ -159,13 +174,13 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
   const handleDeleteCost = () => {
     axiosInstance()
       .post(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/delete`, { ids: deleteRecords })
-      .then(({data}) => {
-        fetchAdditionalCost();
+      .then(({ data }) => {
+        fetchData();
         setShowDeleteConfirmBox(false)
         toastConfig.setToastConfig({
-            open: true,
-            type: "success",
-            message: data.message,
+          open: true,
+          type: "success",
+          message: data.message,
         });
       })
       .catch((error) => {
@@ -188,7 +203,6 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
     setAnchorEl(null);
   };
 
-
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
@@ -202,7 +216,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
               setSelectedCostData(null);
             }}
           >
-            {isMobile ? <GrBusinessService size={20} /> : 'Add Cost'}
+            {isMobile ? <GrBusinessService size={20} /> : 'Add'}
           </Button>
         </Box>
         <div className="d-flex gap-2">
@@ -286,6 +300,20 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
           message={`Are you sure you want to delete  ? `}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDeleteCost}
+        />
+      )}
+      {leadTimeDialog.open && (
+        <LeadTimeDialog
+          quotationId={quotationData._id}
+          data={leadTimeDialog?.data}
+          versionId={versionId}
+          onClose={() => {
+            setLeadTimeDialog({ open: false, data: null });
+          }}
+          handleSucess={() => {
+            setLeadTimeDialog({ open: false, data: null });
+            fetchData();
+          }}
         />
       )}
     </Fragment>

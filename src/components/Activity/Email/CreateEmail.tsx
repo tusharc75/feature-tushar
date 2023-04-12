@@ -338,21 +338,6 @@ export const CreateEmail = ({
     setQuoteBuilderOtherAttachments(quoteBuilderOtherAttachments.filter((o) => o?.name !== name));
   };
 
-  const handleDownloadFile = (file) => {
-    const linkSource = `data:${file.contentType};base64,${file.base64}`;
-    const link = document.createElement('a');
-    link.href = linkSource;
-    link.setAttribute('download', `${file.name}`);
-    document.body.appendChild(link);
-    link.click();
-  };
-
-  const getFileIconSrc = (file) => {
-    let extension = isQuoteBuilder ? file : file.substring(file.lastIndexOf('.')).toLowerCase();
-    let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
-    if (data && data?.source) return data.source;
-  };
-
   const classes = useStyles();
 
   const renderQuotesOtherFileThumbnails = (

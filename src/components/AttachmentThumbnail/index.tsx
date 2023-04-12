@@ -60,11 +60,12 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
   // GET ATTACHMENT ICON
   const getFileIconSrc = (file) => {
     if (file) {
-      let extension = file.substring(file.lastIndexOf('.')).toLowerCase();
-      let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+      let extension = file?.substring(file?.lastIndexOf('.'))?.toLowerCase();
+      let data = fileIcons?.find((o) => o?.extensions?.indexOf(extension) >= 0);
       if (data && data?.source) return data.source;
     }
   };
+
   // VIEW ATTACHMENT
   const viewPdf = (event, file) => {
     if (event) {
@@ -191,83 +192,82 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
           <>
             {attachments.map((attachment, i) => {
               return (
-                <>
-                  <Grid item key={i} sm={3} xs={3} md={3} xl={3} style={{ maxWidth: '150px' }}>
-                    <Paper className={emailStyles.fileContainer}>
-                      <img src={getFileIconSrc(attachment.url ? attachment.url : attachment)} className={emailStyles.file} alt="attchment" />
-                      <Typography noWrap variant="body2">
+                <Grid item key={i} sm={3} xs={3} md={3} xl={3} style={{ maxWidth: '150px' }}>
+                  <Paper className={emailStyles.fileContainer}>
+                    <img src={getFileIconSrc(attachment?.contentType ? attachment?.contentType :
+                      attachment.url ? attachment.url : attachment)} className={emailStyles.file} alt="attchment" />
+                    <Typography noWrap variant="body2">
+                      {attachment
+                        ? attachment?.name
+                          ? attachment?.name
+                          : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                            ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                            : attachment.substring(attachment.lastIndexOf('/') + 1)
+                        : 'attachment'}
+                    </Typography>
+                    {attachment?.date && <Typography variant="body2">{moment(attachment?.date)?.format(dateTimeFormat)}</Typography>}
+                    <div className={emailStyles.fileOverlay}>
+                      <Typography
+                        variant="subtitle2"
+                        title={
+                          attachment
+                            ? attachment?.name
+                              ? attachment?.name
+                              : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                                ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                                : attachment?.substring(attachment.lastIndexOf('/') + 1)
+                            : 'attachment'
+                        }
+                      >
                         {attachment
                           ? attachment?.name
                             ? attachment?.name
                             : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                            ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                            : attachment.substring(attachment.lastIndexOf('/') + 1)
-                          : 'attachment'}
-                      </Typography>
-                      {attachment?.date && <Typography variant="body2">{moment(attachment?.date)?.format(dateTimeFormat)}</Typography>}
-                      <div className={emailStyles.fileOverlay}>
-                        <Typography
-                          variant="subtitle2"
-                          title={
-                            attachment
-                              ? attachment?.name
-                                ? attachment?.name
-                                : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                                ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                                : attachment?.substring(attachment.lastIndexOf('/') + 1)
-                              : 'attachment'
-                          }
-                        >
-                          {attachment
-                            ? attachment?.name
-                              ? attachment?.name
-                              : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
                               ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
                               : attachment?.substring(attachment.lastIndexOf('/') + 1)
-                            : 'attachment'}
-                        </Typography>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Tooltip title="Download" placement="top">
-                            <IconButton size={'small'} onClick={(event) => downloadFile(event, attachment)} style={{ paddingBottom: '1px' }}>
-                              {<GetAppIcon />}
+                          : 'attachment'}
+                      </Typography>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Tooltip title="Download" placement="top">
+                          <IconButton size={'small'} onClick={(event) => downloadFile(event, attachment)} style={{ paddingBottom: '1px' }}>
+                            {<GetAppIcon />}
+                          </IconButton>
+                        </Tooltip>
+                        {_.endsWith(attachment?.url, '.pdf') && (
+                          <Tooltip title="Preview" placement="top">
+                            <IconButton
+                              size={'small'}
+                              onClick={(e) => {
+                                viewPdf(e, attachment.url);
+                              }}
+                            >
+                              <PreviewIcon color="primary" />
                             </IconButton>
                           </Tooltip>
-                          {_.endsWith(attachment?.url, '.pdf') && (
-                            <Tooltip title="Preview" placement="top">
-                              <IconButton
-                                size={'small'}
-                                onClick={(e) => {
-                                  viewPdf(e, attachment.url);
-                                }}
-                              >
-                                <PreviewIcon color="primary" />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                          {canEdit && permissions.attachment.isDelete ? (
-                            <Tooltip title="Delete" placement="top">
-                              <IconButton
-                                size={'small'}
-                                onClick={() => {
-                                  setShowConfirmationDialog(true);
-                                  setAttachemnetToDelete(attachment);
-                                }}
-                              >
-                                {<DeleteIcon color="error" />}
-                              </IconButton>
-                            </Tooltip>
-                          ) : (
-                            <Tooltip className="cursor-stop" title={"You don't have permissions to delete attachment"}>
-                              <IconButton size={'small'}>
-                                <DeleteIcon color="disabled" />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                        </div>
+                        )}
+                        {canEdit && permissions.attachment.isDelete ? (
+                          <Tooltip title="Delete" placement="top">
+                            <IconButton
+                              size={'small'}
+                              onClick={() => {
+                                setShowConfirmationDialog(true);
+                                setAttachemnetToDelete(attachment);
+                              }}
+                            >
+                              {<DeleteIcon color="error" />}
+                            </IconButton>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip className="cursor-stop" title={"You don't have permissions to delete attachment"}>
+                            <IconButton size={'small'}>
+                              <DeleteIcon color="disabled" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
                       </div>
-                    </Paper>
-                  </Grid>
-                </>
+                    </div>
+                  </Paper>
+                </Grid>
               );
             })}
           </>
