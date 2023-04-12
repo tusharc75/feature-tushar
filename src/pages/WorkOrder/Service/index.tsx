@@ -11,7 +11,7 @@ import {
   WORKORDER_SERVICE_STEP_STATUS,
   WORK_ORDER_STATUS
 } from 'src/constants/helpers';
-import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, useMediaQuery } from '@material-ui/core';
+import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, Tooltip, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -41,6 +41,8 @@ import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import { reverse } from 'lodash';
 import AttachmentDialog from './AttachmentDialog';
+
+import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -351,12 +353,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderLeftWidth: '1px',
         borderRightWidth: '1px',
         borderStyle: 'solid',
-        backgroundColor:
-          quotationData?.status === QUOTATION_STATUS.acceptByCustomer
-            ? '#E9FFE8'
-            : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-            ? '#FFE9EA'
-            : 'white',
         cursor: 'pointer',
         borderTopWidth: index !== 0 && !mobScreen ? 0 : 1
       };
@@ -368,12 +364,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderLeftWidth: '1px',
         borderRightWidth: '1px',
         borderStyle: 'solid',
-        backgroundColor:
-          quotationData?.status === QUOTATION_STATUS.acceptByCustomer
-            ? '#E9FFE8'
-            : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-            ? '#FFE9EA'
-            : 'white',
         cursor: 'pointer'
       };
     } else if (!data?.clickable) {
@@ -383,12 +373,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderRightWidth: '1px',
         borderStyle: 'solid',
         borderColor: 'rgba(25, 24, 24, 0.19)',
-        backgroundColor:
-          data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
-            ? '#E9FFE8'
-            : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
-            ? '#FFE9EA'
-            : 'white',
         cursor: allowedToEdit ? 'pointer' : 'not-allowed',
         pointerEvents: 'none',
         opacity: '.5',
@@ -403,14 +387,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderLeftWidth: '1px',
         borderRightWidth: '1px',
         borderStyle: 'solid',
-        backgroundColor:
-          data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
-            ? '#E9FFE8'
-            : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
-            ? '#FFE9EA'
-            : 'white',
         cursor: 'pointer'
-        // boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
       };
     } else {
       return {
@@ -418,12 +395,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderLeftWidth: '1px',
         borderRightWidth: '1px',
         borderStyle: 'solid',
-        backgroundColor:
-          data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
-            ? '#E9FFE8'
-            : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
-            ? '#FFE9EA'
-            : 'white',
         borderColor: 'rgb(224, 224, 224)',
         cursor: 'pointer',
         borderTopWidth: index !== 0 && !mobScreen ? 0 : 1
@@ -640,10 +611,23 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             )}
                                           </Box>
                                         )}
+                                        {/* PassFail */}
+                                        <>
+                                          {data?.type === 'service' && data?.serviceStatus && (
+                                            <Box ml={1}>
+                                              <RenderStatusIcon stepStatus={data?.serviceStatus} />
+                                            </Box>
+                                          )}
+                                          {data?.type === 'quotation' && quotationData && (
+                                            <Box ml={1}>
+                                              <RenderStatusIcon stepStatus={quotationData?.status} />
+                                            </Box>
+                                          )}
+                                        </>
                                         {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
                                           <Box ml={1}>
                                             <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                              <PeopleIcon />
+                                              <PeopleIcon style={{ color: '#0A6461', maxWidth: '15px' }} />
                                             </HtmlTooltip>
                                           </Box>
                                         )}
@@ -651,36 +635,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
 
                                       {/* Chips */}
                                       <Box style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', flexBasis: '100%', gap: '8px' }}>
-                                        {data?.type === 'service' && data?.serviceStatus && (
-                                          <Box ml={1}>
-                                            <Chip
-                                              label={data?.serviceStatus}
-                                              variant="outlined"
-                                              // color={data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed ? 'default' : 'primary'}
-                                              style={{
-                                                borderColor:
-                                                  data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                    ? '#E1FCE3'
-                                                    : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                    ? '#fabebe'
-                                                    : '#FFF5DD',
-                                                color:
-                                                  data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                    ? '#048E0A'
-                                                    : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                    ? '#fa0202'
-                                                    : '#FF8C21',
-                                                background:
-                                                  data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                    ? '#E1FCE3'
-                                                    : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                    ? '#fabebe'
-                                                    : '#FFF5DD',
-                                                fontWeight: 700
-                                              }}
-                                            />
-                                          </Box>
-                                        )}
                                         {data?.type === 'service' && (
                                           <Box ml={1}>
                                             <Chip
@@ -1005,17 +959,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               >
                 Complete
               </MenuItem>
-              {/* <MenuItem
-                disabled={
-                  disableCompleteFail || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(selectedService?.status)
-                }
-                onClick={() => {
-                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.failed);
-                  setAnchorEl(null);
-                }}
-              >
-                Fail
-              </MenuItem> */}
+
               <MenuItem
                 disabled={!allowedToEdit || selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
                 onClick={() => {
@@ -1160,3 +1104,24 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
 };
 
 export default Service;
+
+const RenderStatusIcon = ({ stepStatus }: { stepStatus: string }) => {
+  return (
+    <>
+      {stepStatus === WORKORDER_SERVICE_STEP_STATUS.passed && (
+        <HtmlTooltip title={stepStatus}>
+          <Box style={{ color: '#059825' }}>
+            <AiFillCheckCircle style={{ display: 'block' }} />
+          </Box>
+        </HtmlTooltip>
+      )}
+      {stepStatus === WORKORDER_SERVICE_STEP_STATUS.failed && (
+        <HtmlTooltip title={stepStatus}>
+          <Box style={{ color: '#F26969' }}>
+            <AiFillExclamationCircle style={{ display: 'block' }} />
+          </Box>
+        </HtmlTooltip>
+      )}
+    </>
+  );
+};
