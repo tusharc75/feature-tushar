@@ -14,6 +14,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import moment from 'moment';
 import { dateTimeFormat } from 'src/constants/helpers';
 import axios from 'axios';
+import mimeDb from 'mime-db';
 
 const fileIcons = [
   {
@@ -59,11 +60,17 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
 
   // GET ATTACHMENT ICON
   const getFileIconSrc = (file) => {
-    if (file) {
+    if (file.contentType) {
+      let extension = `.${mimeDb[file.contentType].extensions[0]}`;
+      let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+      console.log(data);
+      if (data && data?.source) return data.source;
+    } else if (file) {
       let extension = file.substring(file.lastIndexOf('.')).toLowerCase();
       let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
       if (data && data?.source) return data.source;
     }
+    return '';
   };
   // VIEW ATTACHMENT
   const viewPdf = (event, file) => {
