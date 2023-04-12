@@ -11,7 +11,7 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS
 } from 'src/constants/helpers';
-import { Box, IconButton, Grid, Typography, Chip } from '@material-ui/core';
+import { Box, IconButton, Grid, Typography, Chip, ClickAwayListener } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -26,6 +26,10 @@ import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import AttachmentDialog from './AttachmentDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { AiOutlineClose } from 'react-icons/ai';
+import { MdKeyboardArrowDown } from 'react-icons/md';
+import moment from 'moment';
+import { dateFormat } from 'src/constants/helpers';
 
 const TimerComponent = ({ stepData, updateTime = true }) => {
   const [time, setTime] = useState(null);
@@ -146,7 +150,117 @@ const useStyles = makeStyles((theme: Theme) =>
         color: '#000000'
       }
     },
-    mainContainer: {}
+    stepButtons: {
+      borderRadius: '14px !important',
+      padding: '2px 14px'
+    },
+    passButton: {
+      border: '1px solid #4bae4f !important'
+    },
+    failButton: {
+      border: '1px solid #FF8F87 !important'
+    },
+    stepTags: {
+      minHeight: '26px',
+      paddingInline: '5px'
+    },
+    mainContainer: {},
+
+    stepDetailsContainer: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      right: 0,
+      transform: 'translateX(100%)',
+      width: 'min(350px, calc(100vw - 65px))',
+      boxShadow: '0px 4.4207px 34.2857px rgba(0, 0, 0, 0.06)',
+      borderRadius: '8px',
+      transition: 'transform 500ms cubic-bezier(0.640, -0.270, 0.335, 1.265)',
+      zIndex: 5,
+      background: 'white'
+    },
+    stepDetailsContainerShow: {
+      transform: 'translateX(0)',
+      transition: 'transform 250ms cubic-bezier(0.640, -0.270, 0.335, 1.265)'
+    },
+    modalHead: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      padding: '25px 25px 18px',
+      alignItems: 'center',
+      '& h6': {
+        fontWeight: 600,
+        fontSize: '16px',
+        lineHeight: '16px',
+        color: '#3A3A3A',
+        '& span': {
+          background: '#163340',
+          color: 'white',
+          fontWeight: 600,
+          width: '19px',
+          height: '19px',
+          fontSize: '12px',
+          borderRadius: '100vmax',
+          display: 'inline-grid',
+          placeItems: 'center',
+          marginRight: '14px'
+        }
+      }
+    },
+    modalCloseButton: {
+      color: '#000',
+      padding: '9px',
+      fontSize: '16px',
+      position: 'absolute',
+      right: '18px',
+      top: '18px'
+    },
+    sectionContainer: {
+      padding: '0 25px 18px',
+      marginTop: '15px'
+    },
+    sectionHead: {
+      fontWeight: 600,
+      fontSize: '16px',
+      lineHeight: '1.6',
+      color: '#5B5B5B',
+      '& span': {
+        background: '#DBDBDBE5',
+        color: '#5B5B5B',
+        fontWeight: 600,
+        width: '19px',
+        height: '19px',
+        fontSize: '16px',
+        borderRadius: '3px',
+        display: 'inline-grid',
+        placeItems: 'center',
+        marginRight: '6px',
+        verticalAlign: 'text-top'
+      }
+    },
+    sectionRow: {
+      '& > div': {
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        marginBlock: '11px',
+        gap: '23px'
+      }
+    },
+    sectionColTItle: {
+      flexBasis: '65px',
+      fontWeight: 500,
+      fontSize: '12px',
+      lineHeight: '1.5',
+      color: '#8A8A8A'
+    },
+    sectionColDetail: {
+      fontWeight: 400,
+      fontSize: '12px',
+      lineHeight: 1.5,
+      color: '#5B5B5B',
+      textTransform: 'capitalize'
+    }
   })
 );
 
@@ -162,6 +276,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
+  const [detailsModalData, setDetailsModalData] = useState(null);
   const {
     state: {
       user: { user }
@@ -512,11 +627,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
 
   return serviceDetails ? (
     serviceDetails?.steps?.length ? (
-      <Box
-        className={classes.mainContainer}
-        sx={{ position: 'relative', overflow: 'hidden' }}
-        style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }}
-      >
+      <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }} style={{ backgroundColor: 'white' }}>
         <div className={classes.root}>
           {serviceDetails?.steps?.map((step, index) => {
             const { stepData, isStepValid } = getFields(step);
@@ -538,15 +649,12 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   transition: 'background .5s ease',
                   backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                 }}
-                className={`${classes.accordionHeading}  ${
-                  Boolean(stepData?.passFailStatus)
-                    ? `${
-                        Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                          ? classes.green
-                          : ''
-                      } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
-                    : classes.white
-                }`}
+                onClick={() => {
+                  if (stepData.status) {
+                    setDetailsModalData({ number: step?.order || index + 1, ...step, ...stepData });
+                  }
+                }}
+                className={`${classes.accordionHeading}  ${classes.white}`}
               >
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
                   <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px', alignItems: 'center' }}>
@@ -578,6 +686,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                       {stepData?.startDate && (
                         <TimerComponent stepData={stepData} updateTime={stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? true : false} />
                       )}
+
                       {[
                         WORKORDER_SERVICE_STEP_STATUS.start,
                         WORKORDER_SERVICE_STEP_STATUS.pause,
@@ -586,6 +695,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                         (isMeTechnician || !isAnyTechnician) && (
                           <Button
                             variant="outlined"
+                            className={classes.stepButtons}
                             color="secondary"
                             size="small"
                             disabled={!allowedToEdit}
@@ -608,6 +718,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                         <Button
                           variant="outlined"
                           color="secondary"
+                          className={classes.stepButtons}
                           size="small"
                           disabled={!allowedToEdit}
                           onClick={(e) => {
@@ -621,15 +732,15 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                           Start
                         </Button>
                       ) : stepData?.passFailStatus ? (
-                        <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
+                        <RenderPassFailChip status={stepData?.passFailStatus} className={classes.stepTags} />
                       ) : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && isStepValid && (isMeTechnician || !isAnyTechnician) ? (
                         step?.isPassFail ? (
                           <>
                             <Button
                               variant="outlined"
-                              color="secondary"
                               disabled={!allowedToEdit}
                               size="small"
+                              className={`${classes.stepButtons} ${classes.passButton}`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step);
@@ -639,8 +750,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                             </Button>
                             <Button
                               variant="outlined"
-                              color="secondary"
-                              className={'btn-red-v1'}
+                              className={`${classes.stepButtons} ${classes.failButton}`}
                               disabled={!allowedToEdit}
                               size="small"
                               onClick={(e) => {
@@ -658,6 +768,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                               color="secondary"
                               size="small"
                               disabled={!allowedToEdit}
+                              className={classes.stepButtons}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
@@ -678,40 +789,36 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                           WORKORDER_SERVICE_STEP_STATUS.completed
                         ]?.includes(stepData?.passFailStatus) ? (
                           <>
-                            <Box marginX={1} />
-                            <Box>
-                              <Button
-                                variant="outlined"
-                                color="inherit"
-                                size="small"
-                                disabled={!allowedToEdit}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleStartEnd('reopen', step._id);
-                                }}
-                              >
-                                Re-open
-                              </Button>
-                            </Box>
+                            <Button
+                              variant="outlined"
+                              color="inherit"
+                              size="small"
+                              disabled={!allowedToEdit}
+                              className={classes.stepButtons}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStartEnd('reopen', step._id);
+                              }}
+                            >
+                              Re-open
+                            </Button>
                           </>
                         ) : step?.fields?.length ? (
                           <>
-                            <Box marginX={1} />
-                            <Box>
-                              <Button
-                                variant="outlined"
-                                color="inherit"
-                                size="small"
-                                disabled={!allowedToEdit}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedStep(step);
-                                  setStepState(stepData);
-                                }}
-                              >
-                                Enter Value
-                              </Button>
-                            </Box>
+                            <Button
+                              variant="outlined"
+                              color="inherit"
+                              size="small"
+                              className={classes.stepButtons}
+                              disabled={!allowedToEdit}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedStep(step);
+                                setStepState(stepData);
+                              }}
+                            >
+                              Enter Value
+                            </Button>
                           </>
                         ) : null
                       ) : null}
@@ -749,7 +856,8 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                       <Box ml={1}>
                         <IconButton
                           aria-label="close"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setViewStep({ open: true, step: step });
                           }}
                           size="small"
@@ -779,6 +887,102 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                 </Button>
               </Grid>
             </Box>
+          )}
+        </div>
+        <div className={`${classes.stepDetailsContainer} ${detailsModalData ? classes.stepDetailsContainerShow : ''}`}>
+          {detailsModalData && (
+            <ClickAwayListener onClickAway={() => setDetailsModalData(null)}>
+              <div>
+                <div className={classes.modalHead}>
+                  <h6>
+                    <span>{detailsModalData.number}</span>
+                    {detailsModalData.stepName}
+                  </h6>
+                  <IconButton className={classes.modalCloseButton} onClick={() => setDetailsModalData(null)}>
+                    <AiOutlineClose />
+                  </IconButton>
+                </div>
+                <div style={{ overflowY: 'auto' }}>
+                  <div className={classes.sectionContainer}>
+                    <h6 className={classes.sectionHead}>
+                      <span>
+                        <MdKeyboardArrowDown />
+                      </span>
+                      Details
+                    </h6>
+                    <div className={classes.sectionRow}>
+                      {detailsModalData.status ? (
+                        <div>
+                          <p className={classes.sectionColTItle}>Status:</p>
+                          <p className={classes.sectionColDetail}>
+                            {detailsModalData.status === 'pause'
+                              ? 'Paused'
+                              : detailsModalData.status === 'start'
+                              ? 'Started'
+                              : detailsModalData.status}
+                          </p>
+                        </div>
+                      ) : null}
+                      {detailsModalData.startDate ? (
+                        <div>
+                          <p className={classes.sectionColTItle}>Start Date:</p>
+                          <p className={classes.sectionColDetail}>{moment(detailsModalData.startDate).format(dateFormat)}</p>
+                        </div>
+                      ) : null}
+
+                      {detailsModalData.endDate ? (
+                        <div>
+                          <p className={classes.sectionColTItle}>End Date:</p>
+                          <p className={classes.sectionColDetail}>{moment(detailsModalData.endDate).format(dateFormat)}</p>
+                        </div>
+                      ) : null}
+                      {detailsModalData.pauseDate ? (
+                        <div>
+                          <p className={classes.sectionColTItle}>Pause Date:</p>
+                          <p className={classes.sectionColDetail}>{moment(detailsModalData.pauseDate).format(dateFormat)}</p>
+                        </div>
+                      ) : null}
+                      {detailsModalData.passFailStatus ? (
+                        <div>
+                          <p className={classes.sectionColTItle}>Pass-Fail Status :</p>
+                          <p className={classes.sectionColDetail}>
+                            <RenderPassFailChip status={detailsModalData.passFailStatus} className={classes.stepTags} />
+                          </p>
+                        </div>
+                      ) : null}
+                      {detailsModalData.duration ? (
+                        <div>
+                          <p className={classes.sectionColTItle}>Duration:</p>
+                          <p className={classes.sectionColDetail}>{convertMsToTime(detailsModalData.duration)}</p>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className={classes.sectionContainer}>
+                    <h6 className={classes.sectionHead}>
+                      <span>
+                        <MdKeyboardArrowDown />
+                      </span>
+                      People
+                    </h6>
+                    <div className={classes.sectionRow}>
+                      {detailsModalData.startedBy && (
+                        <div>
+                          <p className={classes.sectionColTItle}>Started By:</p>
+                          <p className={classes.sectionColDetail}>{detailsModalData.startedBy?.optionLabel}</p>
+                        </div>
+                      )}
+                      {detailsModalData.endedBy && (
+                        <div>
+                          <p className={classes.sectionColTItle}>Ended By:</p>
+                          <p className={classes.sectionColDetail}>{detailsModalData.endedBy?.optionLabel}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ClickAwayListener>
           )}
         </div>
         {Boolean(selectedStep) ? (
@@ -911,3 +1115,19 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
 };
 
 export default Service;
+
+const RenderPassFailChip = ({ status, className = '', ...others }) => {
+  return (
+    <Chip
+      className={className}
+      label={status}
+      variant="outlined"
+      {...others}
+      style={{
+        border: 0,
+        background: status === WORKORDER_SERVICE_STEP_STATUS.passed ? '#E1FCE3' : '#FAD9D4',
+        color: status === WORKORDER_SERVICE_STEP_STATUS.passed ? '#048E0A' : '#D13925'
+      }}
+    />
+  );
+};
