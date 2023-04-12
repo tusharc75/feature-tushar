@@ -217,6 +217,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   };
 
   const getTitle = () => {
+    if (isBulkedit) {
+      return 'Bulk Edit';
+    }
     if (rowData) {
       let editTitle = `Edit ${showSaveAndNext ? `-${rowData.srno}` : ''} -${rowData.detail}`;
       if (rowData.subRows && rowData.subRows?.length > 0) {
@@ -224,7 +227,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       }
       return editTitle;
     } else {
-      return 'Bulk Edit';
+      return 'Edit';
     }
   };
 
@@ -494,8 +497,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             field.fieldName === 'pricingMethod' && priceConditionList && values['pricingCondition']
                                               ? priceMethodList
                                               : field.fieldName === 'pricingCondition' && values['pricingMethod']
-                                              ? priceConditionList
-                                              : field.option
+                                                ? priceConditionList
+                                                : field.option
                                           }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
