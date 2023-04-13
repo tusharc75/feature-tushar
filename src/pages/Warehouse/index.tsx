@@ -530,7 +530,7 @@ const Warehouse = () => {
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -567,7 +567,6 @@ const Warehouse = () => {
             onOk={handleDelete}
           />
         )}
-
         {open?.open && (
           <ManageWarehouse
             addressResource={addressResource}
