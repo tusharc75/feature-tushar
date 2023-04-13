@@ -332,7 +332,12 @@ const SalesOrderDetails = () => {
               />
             )}
             {currentStep === 1 && salesOrderData && (
-              <AdditionalCost salesOrderData={salesOrderData} setNextStep={setNextStep} renderedFrom={`${renderedFrom}_grid-2`} />
+              <AdditionalCost 
+                salesOrderData={salesOrderData} 
+                setNextStep={setNextStep} 
+                renderedFrom={`${renderedFrom}_grid-2`} 
+                allowedToEdit={allowedToEdit}
+                />
             )}
             {currentStep === 2 && salesOrderData && (
               <Invoice
