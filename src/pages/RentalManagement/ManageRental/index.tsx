@@ -526,6 +526,12 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                             handleValuesChange({
                                                                                                 [field.fieldName]: value && value.optionValue ? value.optionValue : ""
                                                                                             })
+                                                                                            let dependentField = rentalData?.fields.filter(d => d.lookupDependentOn === "customerAccount")
+                                                                                            if (dependentField && dependentField.length) {
+                                                                                                dependentField.forEach((val: any) => {
+                                                                                                    setFieldValue(val.fieldName, '');
+                                                                                                })
+                                                                                            }
                                                                                         }}
                                                                                     />
                                                                                 </Grid>

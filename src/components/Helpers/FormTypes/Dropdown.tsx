@@ -118,9 +118,11 @@ function Dropdown({
                                             }
                                         } else {
                                             handleChange(name, val && val.optionValue ? val.optionValue : '');
-                                            let dependentField = allFields.find(d => d.lookupDependentOn === name)
-                                            if (dependentField) {
-                                                handleChange(dependentField.fieldName, '');
+                                            let dependentField = allFields.filter(d => d.lookupDependentOn === name)
+                                            if (dependentField && dependentField.length) {
+                                                dependentField.forEach((val: any) => {
+                                                    handleChange(val.fieldName, '');
+                                                })
                                             }
                                         }
                                     }
