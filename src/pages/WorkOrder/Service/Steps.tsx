@@ -116,10 +116,10 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       '&:first-of-type': {
         borderRadius: '8px 8px 0 0'
-      },
-      '&:last-of-type': {
-        borderRadius: '0 0 8px 8px'
       }
+      // '&:last-of-type': {
+      //   borderRadius: '0 0 8px 8px'
+      // }
     },
     badge: {
       backgroundColor: 'var(--primary)',
@@ -194,16 +194,17 @@ const useStyles = makeStyles((theme: Theme) =>
         lineHeight: '16px',
         color: '#3A3A3A',
         '& span': {
-          background: '#163340',
           color: 'white',
-          fontWeight: 600,
-          width: '19px',
-          height: '19px',
-          fontSize: '12px',
-          borderRadius: '100vmax',
+          minWidth: '25px',
+          minHeight: '23px',
           display: 'inline-grid',
+          fontSize: '11px',
+          background: '#163340',
+          fontWeight: 600,
           placeItems: 'center',
-          marginRight: '14px'
+          marginRight: '14px',
+          borderRadius: '100vmax',
+          padding: '3px 8px'
         }
       }
     },
@@ -651,7 +652,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                 }}
                 onClick={() => {
                   if (stepData.status) {
-                    setDetailsModalData({ number: step?.order || index + 1, ...step, ...stepData });
+                    setDetailsModalData({ number: `${selectedService?.order}.${step?.order || index + 1}`, ...step, ...stepData });
                   }
                 }}
                 className={`${classes.accordionHeading}  ${classes.white}`}
@@ -661,8 +662,8 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                     <Box>
                       <Chip
                         color="primary"
-                        // label={referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
-                        label={referencType === 'workOrderTechnician' ? step?.order : `${step?.order || index + 1}`}
+                        label={referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
+                        // label={referencType === 'workOrderTechnician' ? step?.order : `${step?.order || index + 1}`}
                       />
                     </Box>
                     <Box ml={1}>
@@ -700,6 +701,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                             size="small"
                             disabled={!allowedToEdit}
                             onClick={(e) => {
+                              e.stopPropagation();
                               if ([WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) {
                                 handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
                               } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
@@ -836,7 +838,8 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                       <HtmlTooltip title="Upload Document">
                         <IconButton
                           aria-label="close"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setAttchmentsDialog({
                               open: true,
                               uniqueServiceId: selectedService.uniqueId,
@@ -880,6 +883,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   color="primary"
                   size="small"
                   onClick={(e) => {
+                    e.stopPropagation();
                     setOpenCompleteDialog(true);
                   }}
                 >
@@ -891,98 +895,98 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
         </div>
         <div className={`${classes.stepDetailsContainer} ${detailsModalData ? classes.stepDetailsContainerShow : ''}`}>
           {detailsModalData && (
-            <ClickAwayListener onClickAway={() => setDetailsModalData(null)}>
-              <div>
-                <div className={classes.modalHead}>
-                  <h6>
-                    <span>{detailsModalData.number}</span>
-                    {detailsModalData.stepName}
+            <>
+              <div className={classes.modalHead}>
+                <h6>
+                  <span>{detailsModalData.number}</span>
+                  {detailsModalData.stepName}
+                </h6>
+                <IconButton
+                  className={classes.modalCloseButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDetailsModalData(null);
+                  }}
+                >
+                  <AiOutlineClose />
+                </IconButton>
+              </div>
+              <div style={{ overflowY: 'auto' }}>
+                <div className={classes.sectionContainer}>
+                  <h6 className={classes.sectionHead}>
+                    <span>
+                      <MdKeyboardArrowDown />
+                    </span>
+                    Details
                   </h6>
-                  <IconButton className={classes.modalCloseButton} onClick={() => setDetailsModalData(null)}>
-                    <AiOutlineClose />
-                  </IconButton>
-                </div>
-                <div style={{ overflowY: 'auto' }}>
-                  <div className={classes.sectionContainer}>
-                    <h6 className={classes.sectionHead}>
-                      <span>
-                        <MdKeyboardArrowDown />
-                      </span>
-                      Details
-                    </h6>
-                    <div className={classes.sectionRow}>
-                      {detailsModalData.status ? (
-                        <div>
-                          <p className={classes.sectionColTItle}>Status:</p>
-                          <p className={classes.sectionColDetail}>
-                            {detailsModalData.status === 'pause'
-                              ? 'Paused'
-                              : detailsModalData.status === 'start'
-                              ? 'Started'
-                              : detailsModalData.status}
-                          </p>
-                        </div>
-                      ) : null}
-                      {detailsModalData.startDate ? (
-                        <div>
-                          <p className={classes.sectionColTItle}>Start Date:</p>
-                          <p className={classes.sectionColDetail}>{moment(detailsModalData.startDate).format(dateFormat)}</p>
-                        </div>
-                      ) : null}
+                  <div className={classes.sectionRow}>
+                    {detailsModalData.status ? (
+                      <div>
+                        <p className={classes.sectionColTItle}>Status:</p>
+                        <p className={classes.sectionColDetail}>
+                          {detailsModalData.status === 'pause' ? 'Paused' : detailsModalData.status === 'start' ? 'Started' : detailsModalData.status}
+                        </p>
+                      </div>
+                    ) : null}
+                    {detailsModalData.startDate ? (
+                      <div>
+                        <p className={classes.sectionColTItle}>Start Date:</p>
+                        <p className={classes.sectionColDetail}>{moment(detailsModalData.startDate).format(dateFormat)}</p>
+                      </div>
+                    ) : null}
 
-                      {detailsModalData.endDate ? (
-                        <div>
-                          <p className={classes.sectionColTItle}>End Date:</p>
-                          <p className={classes.sectionColDetail}>{moment(detailsModalData.endDate).format(dateFormat)}</p>
-                        </div>
-                      ) : null}
-                      {detailsModalData.pauseDate ? (
-                        <div>
-                          <p className={classes.sectionColTItle}>Pause Date:</p>
-                          <p className={classes.sectionColDetail}>{moment(detailsModalData.pauseDate).format(dateFormat)}</p>
-                        </div>
-                      ) : null}
-                      {detailsModalData.passFailStatus ? (
-                        <div>
-                          <p className={classes.sectionColTItle}>Pass-Fail Status :</p>
-                          <p className={classes.sectionColDetail}>
-                            <RenderPassFailChip status={detailsModalData.passFailStatus} className={classes.stepTags} />
-                          </p>
-                        </div>
-                      ) : null}
-                      {detailsModalData.duration ? (
-                        <div>
-                          <p className={classes.sectionColTItle}>Duration:</p>
-                          <p className={classes.sectionColDetail}>{convertMsToTime(detailsModalData.duration)}</p>
-                        </div>
-                      ) : null}
-                    </div>
+                    {detailsModalData.endDate ? (
+                      <div>
+                        <p className={classes.sectionColTItle}>End Date:</p>
+                        <p className={classes.sectionColDetail}>{moment(detailsModalData.endDate).format(dateFormat)}</p>
+                      </div>
+                    ) : null}
+                    {detailsModalData.pauseDate ? (
+                      <div>
+                        <p className={classes.sectionColTItle}>Pause Date:</p>
+                        <p className={classes.sectionColDetail}>{moment(detailsModalData.pauseDate).format(dateFormat)}</p>
+                      </div>
+                    ) : null}
+                    {detailsModalData.passFailStatus ? (
+                      <div>
+                        <p className={classes.sectionColTItle}>Pass-Fail Status :</p>
+                        <p className={classes.sectionColDetail}>
+                          <RenderPassFailChip status={detailsModalData.passFailStatus} className={classes.stepTags} />
+                        </p>
+                      </div>
+                    ) : null}
+                    {detailsModalData.duration ? (
+                      <div>
+                        <p className={classes.sectionColTItle}>Duration:</p>
+                        <p className={classes.sectionColDetail}>{convertMsToTime(detailsModalData.duration)}</p>
+                      </div>
+                    ) : null}
                   </div>
-                  <div className={classes.sectionContainer}>
-                    <h6 className={classes.sectionHead}>
-                      <span>
-                        <MdKeyboardArrowDown />
-                      </span>
-                      People
-                    </h6>
-                    <div className={classes.sectionRow}>
-                      {detailsModalData.startedBy && (
-                        <div>
-                          <p className={classes.sectionColTItle}>Started By:</p>
-                          <p className={classes.sectionColDetail}>{detailsModalData.startedBy?.optionLabel}</p>
-                        </div>
-                      )}
-                      {detailsModalData.endedBy && (
-                        <div>
-                          <p className={classes.sectionColTItle}>Ended By:</p>
-                          <p className={classes.sectionColDetail}>{detailsModalData.endedBy?.optionLabel}</p>
-                        </div>
-                      )}
-                    </div>
+                </div>
+                <div className={classes.sectionContainer}>
+                  <h6 className={classes.sectionHead}>
+                    <span>
+                      <MdKeyboardArrowDown />
+                    </span>
+                    People
+                  </h6>
+                  <div className={classes.sectionRow}>
+                    {detailsModalData.startedBy && (
+                      <div>
+                        <p className={classes.sectionColTItle}>Started By:</p>
+                        <p className={classes.sectionColDetail}>{detailsModalData.startedBy?.optionLabel}</p>
+                      </div>
+                    )}
+                    {detailsModalData.endedBy && (
+                      <div>
+                        <p className={classes.sectionColTItle}>Ended By:</p>
+                        <p className={classes.sectionColDetail}>{detailsModalData.endedBy?.optionLabel}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </ClickAwayListener>
+            </>
           )}
         </div>
         {Boolean(selectedStep) ? (
@@ -1084,7 +1088,14 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
       <>
         <Box p={2} height={500} bgcolor="rgba(242, 243, 247, 0.6)" textAlign="center">
           {referencType !== 'workOrderTechnician' && (
-            <Button variant="contained" color="primary" onClick={() => setAssignSteps(true)}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={(e) => {
+                e.stopPropagation();
+                setAssignSteps(true);
+              }}
+            >
               Add Step
             </Button>
           )}
@@ -1125,8 +1136,8 @@ const RenderPassFailChip = ({ status, className = '', ...others }) => {
       {...others}
       style={{
         border: 0,
-        background: status === WORKORDER_SERVICE_STEP_STATUS.passed ? '#E1FCE3' : '#FAD9D4',
-        color: status === WORKORDER_SERVICE_STEP_STATUS.passed ? '#048E0A' : '#D13925'
+        background: status === WORKORDER_SERVICE_STEP_STATUS.passed ? '#e1fce3' : '#FAD9D4',
+        color: status === WORKORDER_SERVICE_STEP_STATUS.passed ? '#048e0a' : '#D13925'
       }}
     />
   );
