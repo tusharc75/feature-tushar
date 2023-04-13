@@ -22,6 +22,7 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { flattenArray } from 'src/constants/columns';
 
 interface Props {
   renderedFrom: string;
@@ -54,7 +55,6 @@ const ServiceMaster = (props: Props) => {
   }: any = useData();
 
   useEffect(() => {
-    // fetchGridColumns()
     getServiceMasterColumns()
     fetchData();
   }, [selectedEntity, id]);
@@ -63,12 +63,11 @@ const ServiceMaster = (props: Props) => {
     axiosInstance()
       .get(`/field?resource=${serviceMaster.resource}`)
       .then(({ data: { data } }) => {
-        // setServiceColumns(data)
         fetchGridColumns(data)
       });
   }
 
-  const fetchGridColumns = (serViceColumns: any) => {
+  const fetchGridColumns = (serviceColumns: any) => {
     const columns: any = [
       {
         accessor: 'order',
@@ -80,6 +79,7 @@ const ServiceMaster = (props: Props) => {
       {
         accessor: 'type',
         Header: 'Type',
+        width: 100,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -109,45 +109,33 @@ const ServiceMaster = (props: Props) => {
       {
         accessor: 'description',
         Header: 'Description',
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{row.original?.serviceDescription || row.original?.productDetail?.productDescription || <NoDataCell />}</p>
           </div>
         )
       },
-      // {
-      //   accessor: 'serviceType',
-      //   Header: 'Service Type',
-      //   sticky: isMobile ? 'none' : 'left',
-      //   Cell: ({ row }) => (
-      //     <div style={{ display: 'flex', alignItems: 'center' }}>
-      //       <p>{row.original?.serviceType || <NoDataCell />}</p>
-      //     </div>
-      //   )
-      // },
-      // {
-      //   accessor: 'preWork',
-      //   Header: 'Pre Work',
-      //   width: 70,
-      //   sticky: isMobile ? 'none' : 'left',
-      //   Cell: ({ row }) => <p className="text-truncate">{row.original?.preWork || <NoDataCell />}</p>
-      // }
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        width: 100,
+        editable: true,
+        Cell: ({ row }) => <p className="text-truncate">{row.original?.qty || <NoDataCell />}</p>
+      }
     ];
-    if (serViceColumns && serViceColumns.some(column => column?.fieldData?.fieldName === "preWork")) {
+
+    if (serviceColumns && serviceColumns?.some(column => column?.fieldData?.fieldName === "preWork")) {
       columns.push({
         accessor: 'preWork',
         Header: 'Pre Work',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original?.preWork || <NoDataCell />}</p>
       })
     }
-    if (serViceColumns && serViceColumns.some(column => column?.fieldData?.fieldName === "serviceType")) {
+    if (serviceColumns && serviceColumns?.some(column => column?.fieldData?.fieldName === "serviceType")) {
       columns.push({
         accessor: 'serviceType',
         Header: 'Service Type',
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{row.original?.serviceType || <NoDataCell />}</p>
@@ -243,6 +231,7 @@ const ServiceMaster = (props: Props) => {
         parent.index = i + 1;
         parent.detail = parent?.serviceName;
         parent.type = 'Service';
+        parent.qty = 1;
         parent.preWork = parent?.preWork ? 'Yes' : 'No';
         parent.subRows = consumableData?.filter((c) => c?.uniqueId === parent?._id)?.map((c, idx) => {
           c.order = (i + 1) + '.' + `${idx + 1}`;
@@ -377,6 +366,30 @@ const ServiceMaster = (props: Props) => {
       });
   };
 
+  const handleSaveData = (data: any) => {
+    axiosInstance()
+      .put(`${routes.product.path}/${id}/service-master/consumables`, data)
+      .then(({ data }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    if (updatedData.type === "Product") {
+      const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
+      let rows: any = [{ ...rowData, ...updatedData }];
+      handleSaveData({ _id: rows[0]._id, qty: rows[0].qty });
+    }
+  };
+
   return (
     <Fragment>
       {permissions?.product?.isUpdate && (
@@ -469,6 +482,7 @@ const ServiceMaster = (props: Props) => {
           onSelect={setSelectedRecords}
           childrenProperty="subRows"
           uniqueKey="_id"
+          onSaveEdit={onSaveInlineEdit}
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
         />

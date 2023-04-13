@@ -9,7 +9,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { productionOrder } from '../../../constants/helpers';
+import { RESOURCE_LABEL, productionOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
@@ -21,6 +21,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import { flattenArray } from 'src/constants/columns';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -384,6 +385,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             </Menu>
           </Box>
           <Box display="flex">
+            <PreviewDownload resource={RESOURCE_LABEL.demandOrder} referenceId={productionOrderData?._id} columns={columns} />
+            <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
               variant={isMobile ? 'text' : 'outlined'}

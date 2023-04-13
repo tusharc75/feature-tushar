@@ -1,74 +1,117 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField } from '@material-ui/core';
-import { Autocomplete, Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { rentalManagement } from '../../../constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, DateRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
-import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
-import CustomAgGridEditable from '../../../components/AgGridComponents/CustomAgGridEditable';
+import DeleteIcon from '@material-ui/icons/Delete';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import { prepareDataForGrid } from '../../../constants/helpers';
-import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from '../../../constants/columns';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
+import { calculateRowsField, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import { BiChevronDown } from 'react-icons/bi';
+import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
 
-const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allowedToEdit }) => {
+const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
 
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
+  const [columns, setColumns] = useState(null);
+  const [rowsData, setRowsData] = useState(null);
   const [showCostDialog, setShowCostDialog] = useState(false);
   const [selectedCostData, setSelectedCostData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
 
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [isRateRequired, setIsRateRequired] = useState(false);
+  const [allFields, setAllFields] = useState([]);
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
 
   useEffect(() => {
     fetchFields();
   }, []);
+
   const fetchFields = async () => {
     setNextStep(false);
     const fields = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
-    let rendererNames = [];
-    genrateColoum(fields, columns, rendererNames, false, renderedFrom);
-    columns?.forEach((ele) => {
-      if (ele.field === 'costType') {
-        ele.cellRenderer = 'costTypeRenderer';
-      }
-    });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      commonRenderer: CommonRenderer,
-      costTypeRenderer: CostTypeRenderer,
-      actionsRenderer: ActionsRenderer,
-      ...tempFrameworkComponent
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
-    //column array 2 to last element
-    const tempColumns = columns.slice(2);
+    if (!allowedToEdit) {
+      fields?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
+    }
+    setAllFields(fields)
+    const newColumns = genrateCustomTableColumns(fields, rentalManagementData?.currency, renderedFrom);
+    let column: any = [
+      {
+        accessor: 'srno',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+    ];
+    column = [...column, ...newColumns];
+    const isPriceRequired = fields.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    setIsRateRequired(isPriceRequired);
 
-    setColumns([...columns]);
+    column.push({
+      accessor: 'action',
+      Header: '',
+      minWidth: 50,
+      width: 50,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) =>
+        !isOffline && (
+          <Fragment>
+            <HtmlTooltip title="Edit">
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                onClick={() => {
+                  setShowCostDialog(true);
+                  setSelectedCostData(row?.original);
+                }}
+              >
+                <EditIcon color="primary" fontSize='small' />
+              </IconButton>
+            </HtmlTooltip>
+            {permissions?.rentalManagement?.isUpdate && allowedToEdit ? (
+              <HtmlTooltip title="Delete" >
+                <IconButton size="small" aria-label="Delete" onClick={() => {
+                  setDeleteData([row?.original?._id]);
+                }}>
+                  <DeleteIcon color="error" fontSize='small' />
+                </IconButton>
+              </HtmlTooltip>
+            ) : (
+              <HtmlTooltip className="cursor-stop" title={`You do not have permission to delete rentalManagement`}>
+                <IconButton size="small" aria-label="Delete">
+                  <DeleteIcon fontSize='small' />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+          </Fragment>
+        )
+    });
+
+    setColumns(column);
     fetchAdditionalCost();
     setNextStep(false);
   };
@@ -76,10 +119,6 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
   const fetchAdditionalCost = async () => {
     setNextStep(false);
     try {
-      dispatch({ type: 'loading', loading: true });
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
       var data: any = [];
       if (isOffline) {
         data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
@@ -88,70 +127,18 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
         const response = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
         data = response?.data?.data;
       }
-      let rows = data?.map((item) => {
-        let res: any = {
-          ...prepareDataForGrid(item)
-        };
-        res['canDelete'] = permissions?.rentalManagement?.isUpdate && allowedToEdit;
-        res['allowedToEdit'] = permissions?.rentalManagement?.isUpdate && allowedToEdit;
-        res['isChecked'] = false;
-        return res;
+
+      data.forEach((parent, i) => {
+        parent.srno = i + 1;
+        parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       });
+
+      setRowsData(data);
       setNextStep(true);
-      dispatch({ type: 'initialize', data: rows, count: rows.length });
-      dispatch({ type: 'loading', loading: false });
     } catch (error) {
-      dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
     }
   };
-
-  const ActionsRenderer = (params) =>
-    !isOffline && (
-      <Fragment>
-        <HtmlTooltip title="Edit">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowCostDialog(true);
-              setSelectedCostData(params.data);
-            }}
-          >
-            <EditIcon color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-        <GridDeleteIcon
-          hasDeletePermission={permissions?.rentalManagement?.isUpdate && allowedToEdit}
-          ownerId={user?.user?._id}
-          userId={user?.user?._id}
-          onDelete={() => {
-            setDeleteData([params.data._id]);
-          }}
-          entity="rentalManagement"
-        />
-      </Fragment>
-    );
-
-  const CostTypeRenderer = (params) =>
-    params?.value ? (
-      allowedToEdit ? (
-        <a
-          className="link"
-          title={params.value}
-          onClick={() => {
-            setShowCostDialog(true);
-            setSelectedCostData(params.data);
-          }}
-        >
-          {params.value}
-        </a>
-      ) : (
-        params.value
-      )
-    ) : (
-      <NoDataCell />
-    );
 
   const handleAddCost = (rows) => {
     axiosInstance()
@@ -192,6 +179,21 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
       });
   };
 
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    let rows: any = [{ ...rowData, ...updatedData }];
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    handleUpdateCost(rows)
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
@@ -210,98 +212,66 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
               Add
             </Button>
           </Box>
-          <Box display="flex-end" ml={1}>
+          <Box display="flex" ml={1}>
             <Button
-              variant="contained"
+              variant={'outlined'}
+              color="primary"
               size="small"
-              disabled={isOffline || selectedRecords.length === 0}
-              onClick={() => {
-                setDeleteData(selectedRecords?.map(({ _id }: any) => _id));
-              }}
+              onClick={handleClick}
+              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+              endIcon={<BiChevronDown />}
             >
-              Delete
+              Actions
             </Button>
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              onClose={handleClose}
+            >
+              <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+                <MenuItem
+                  disabled={isDeleting}
+                  onClick={() => {
+                    setDeleteData(selectedProducts?.map(({ _id }: any) => _id));
+                    handleClose()
+                  }}
+                >
+                  Delete
+                </MenuItem>
+              </HtmlTooltip>
+            </Menu>
           </Box>
         </Box>
       )}
-      {columns && frameWorkComponent ? (
-        isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={allowedToEdit}
-            allowSwipe={true}
-            permissions={permissions.rentalManagement}
-            primaryField={columns?.find((d) => d.field)}
-            onClick={(data) => {
-              if (allowedToEdit) {
-                setShowCostDialog(true);
-                setSelectedCostData(data);
-              }
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(data) => {
-              setShowCostDialog(true);
-              setSelectedCostData(data);
-            }}
-            extraParamsToCheckDelete={true}
-            onDelete={(data) => {
-              setDeleteData([data._id]);
-            }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            chips={[
-              {
-                label: `Description: `,
-                field: 'description'
-              }
-            ]}
-            onCreate={null}
-            showClone={false}
-            fullHeight={true}
-            renderedFrom={renderedFrom}
-            onClone={() => {}}
-          />
-        ) : (
-          <CustomAgGridEditable
+      {columns && rowsData ? (
+        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={allowedToEdit}
-            actionWidth={150}
-            allowSelection={allowedToEdit}
+            data={rowsData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+            onSelect={setSelectedProducts}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            hideSelection={isOffline || !allowedToEdit}
+            hideAction={isOffline || !allowedToEdit}
+            renderedFrom="rental_management_sevices_1"
+            onSaveEdit={onSaveInlineEdit}
             isClientSideGrid={true}
-            loading={loading}
-            onCellValueChanged={(row) => {
-              const newData = { ...row.data };
-              const currency = rentalManagementData?.currency?.toLowerCase();
-              newData[`price_${currency}`] = parseFloat(newData[`price_${currency}`]);
-              newData[`finalPrice_${currency}`] = parseFloat(newData[`price_${currency}`]);
-
-              delete newData.allowedToEdit;
-              delete newData.canDelete;
-              delete newData.id;
-              delete newData.isChecked;
-              handleUpdateCost([newData]);
-            }}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchAdditionalCost}
-            isFooter={true}
-            currency={rentalManagementData?.currency?.toLowerCase()}
+            hideExpander={true}
           />
-        )
-      ) : (
-        <Box p={2} height={500} bgcolor="white">
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      )}
+      )
+        : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       {showCostDialog && (
         <AdditionalCostDialog
           onClose={() => {
