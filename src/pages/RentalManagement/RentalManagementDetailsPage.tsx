@@ -685,6 +685,8 @@ const RentalManagementDetailsPage = () => {
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
                   renderedFrom={`${renderedFrom}_grid-2`}
+                  stepFullScreen={stepFullScreen}
+                  currencySymbol={currencySymbol}
                   allowedToEdit={
                     [
                       QUOTATION_STATUS.acceptByCustomer,
