@@ -345,6 +345,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                       disabled={Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
                                       fieldData={field}
                                       values={values}
+                                      hidelookupAddButton={true}
                                       errors={errors}
                                       touched={touched}
                                       label={field.fieldLabel}

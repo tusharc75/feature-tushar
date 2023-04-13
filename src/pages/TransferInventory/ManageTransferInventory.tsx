@@ -55,12 +55,10 @@ const ManageTransferInventory: FC<Props> = (props) => {
   const { isClone = false, transferInventoryId = null, onClose, onSuccess, number = '', transferFromDisable, transferToDisable } = props;
 
   const toastConfig = useContext(CustomToastContext);
-  const initialRender = useRef(true);
   const [isSubmitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formValues, setFormValues] = useState(null);
 
   const [plantsFromOptions, setPlantsFromOptions] = useState([]);
   const [plantToOptions, setPlantToOptions] = useState([]);
@@ -204,13 +202,6 @@ const ManageTransferInventory: FC<Props> = (props) => {
     >
       {initialData.fields.length ? (
         <Formik
-          innerRef={(ref) => {
-            if (ref) {
-              setFormValues(ref.values);
-            } else {
-              setFormValues(null);
-            }
-          }}
           initialValues={initialData.values}
           validationSchema={yupSchema(allFields)}
           onSubmit={handleSubmit}
@@ -271,6 +262,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                             (field.fieldName === 'transferFromPlant' && transferFromDisable) ||
                                             (field.fieldName === 'transfertoPlant' && transferToDisable)
                                           }
+                                          hidelookupAddButton={true}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -289,12 +281,10 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                           }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
-
                                             if (plantFields.includes(field.fieldName)) {
                                               if (name.includes('transferFromPlant') && value === values?.transfertoPlant) {
                                                 setFieldValue('transfertoPlant', '');
                                               }
-
                                               if (name.includes('transfertoPlant') && value === values?.transferFromPlant) {
                                                 setFieldValue('transferFromPlant', '');
                                               }
