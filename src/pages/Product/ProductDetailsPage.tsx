@@ -48,6 +48,7 @@ interface TabPanelProps {
   index: any;
   value: any;
 }
+const minHeight = '250px';
 
 const ProductDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -398,7 +399,7 @@ const ProductDetailsPage = () => {
                         </IconButton>
                       </Box>
                     </Box>
-                    <Box className="formdata-v1">
+                    <Box className="formdata-v1" style={{ minHeight }}>
                       {productInventoryData?.filter((d) => d.inventory)?.length ? (
                         <>
                           <Box display="flex" justifyContent="space-between">
@@ -415,7 +416,7 @@ const ProductDetailsPage = () => {
                             ))}
                         </>
                       ) : (
-                        <Box textAlign="center" padding={2} minHeight={100}>
+                        <Box textAlign="center" padding={2} minHeight={10}>
                           <Typography>No {routes.productInventory.title} Found</Typography>
                         </Box>
                       )}
@@ -466,7 +467,7 @@ const ProductDetailsPage = () => {
                       )}
                     </Box>
 
-                    <Box className="formdata-v1">
+                    <Box className="formdata-v1" style={{ minHeight }}>
                       {loading || loadingWarehouse ? (
                         [1, 2].map((i) => (
                           <BoxWithBorder
@@ -597,12 +598,12 @@ const ProductDetailsPage = () => {
               ) : null}
               {permissions?.productInventory?.isRead && (
                 <Grid item xs={12} sm={6} md={4} xl={3}>
-                  <CostDetails product={id} productData={productData} />
+                  <CostDetails product={id} productData={productData} minHeight={minHeight} />
                 </Grid>
               )}
               {permissions?.leadTimeMaster?.isRead && (
                 <Grid item xs={12} sm={6} md={4} xl={3}>
-                  <LeadTimeMaster Id={id} type={'product'} />
+                  <LeadTimeMaster Id={id} type={'product'} minHeight={minHeight} />
                 </Grid>
               )}
             </Grid>
