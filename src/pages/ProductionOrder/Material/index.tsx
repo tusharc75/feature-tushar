@@ -386,6 +386,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           </Box>
           <Box display="flex">
             <PreviewDownload resource={RESOURCE_LABEL.demandOrder} referenceId={productionOrderData?._id} columns={columns} />
+            <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
               variant={isMobile ? 'text' : 'outlined'}
