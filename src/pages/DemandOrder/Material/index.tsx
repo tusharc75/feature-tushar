@@ -19,6 +19,8 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { RESOURCE_LABEL } from 'src/constants/helpers';
 
 const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -350,6 +352,8 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
             </Menu>
           </Box>
           <Box display="flex">
+            <PreviewDownload resource={RESOURCE_LABEL.demandOrder} referenceId={salesOrderData?._id} columns={columns} />
+            <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
               variant={isMobile ? 'text' : 'outlined'}
