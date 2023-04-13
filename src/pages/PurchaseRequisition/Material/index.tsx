@@ -20,12 +20,14 @@ import MaterialDialog from './materialDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE } from 'src/constants/helpers';
+import { CHILD_RESOURCE, RESOURCE_LABEL } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
-
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
   const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
@@ -67,7 +69,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
           return <>{qtyTotal}</>;
         };
       }
-    })
+    });
     let coloum: any = [
       {
         accessor: 'index',
@@ -97,11 +99,13 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {allowedToEdit ?
+            {allowedToEdit ? (
               <p
                 onClick={() => {
                   setMaterialEdit({
-                    open: true, data: row.original, bulkedit: false,
+                    open: true,
+                    data: row.original,
+                    bulkedit: false,
                     showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
@@ -110,8 +114,10 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
               >
                 {row.original?.detail}
               </p>
-              : <p className="text-truncate">{row.original?.detail}</p>}
-            <Box ml={1} >
+            ) : (
+              <p className="text-truncate">{row.original?.detail}</p>
+            )}
+            <Box ml={1}>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -132,7 +138,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       },
       {
         accessor: 'description',
-        Header: "Description",
+        Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
@@ -148,25 +154,26 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) => allowedToEdit && (
-        <Grid container spacing={1}>
-          <IconButton
-            size="small"
-            aria-label="Details"
-            onClick={() => {
-              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-              setDeleteData(obj);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </Grid>
-      )
-    })
+      Cell: ({ row }) =>
+        allowedToEdit && (
+          <Grid container spacing={1}>
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                setDeleteData(obj);
+              }}
+            >
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+          </Grid>
+        )
+    });
     if (!allowedToEdit) {
       coloum?.forEach((e: any) => {
         e.editable = false;
-      })
+      });
     }
     setColumns(coloum);
     fetchData();
@@ -176,13 +183,11 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
     var data: any = [];
     const response = await axiosInstance().get(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`);
     data = response?.data?.data;
-    let rows = data.material.filter((e) => e.parentId === null)
+    let rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === 'product' ? parent.productDetail?.productName :
-       parent.serviceDetail?.serviceName;
-      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription :
-       parent?.serviceDetail?.serviceDescription
+      parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.serviceDetail?.serviceName;
+      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
     });
@@ -243,9 +248,13 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
         });
         if (saveAndNext) {
           const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-          setMaterialEdit({ open: true, data: rowsData[rowIndex + 1], bulkedit: false, showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
-        }
-        else {
+          setMaterialEdit({
+            open: true,
+            data: rowsData[rowIndex + 1],
+            bulkedit: false,
+            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+          });
+        } else {
           setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
         }
       })
@@ -304,16 +313,10 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
 
   return (
     <Fragment>
-      {allowedToEdit &&
+      {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" m={1}>
           <Box display="flex" alignItems="center">
-            <Button
-              variant={'outlined'}
-              color="primary"
-              size="small"
-              startIcon={<AddIcon />}
-              onClick={openAddActions}
-              aria-controls="add-menu">
+            <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
               {'Add'}
               <ExpandMore fontSize="small" />
             </Button>
@@ -348,6 +351,9 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
             </Menu>
           </Box>
           <Box display="flex">
+            <PreviewDownload resource={RESOURCE_LABEL.purchaseRequisition} referenceId={purchaseRequisitionData?._id} columns={columns} />
+            <Box ml={1} />
+
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
               variant={isMobile ? 'text' : 'outlined'}
@@ -380,13 +386,15 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection).map((rec: any) => {
-                    const obj: any = {};
-                    obj.id = rec._id;
-                    obj.type = rec?.type;
-                    obj.materialId = rec?.materialId;
-                    return obj;
-                  });
+                  const dataToDelete = selectedRecords
+                    ?.filter((e) => !e.hideSelection)
+                    .map((rec: any) => {
+                      const obj: any = {};
+                      obj.id = rec._id;
+                      obj.type = rec?.type;
+                      obj.materialId = rec?.materialId;
+                      return obj;
+                    });
                   setDeleteData(dataToDelete);
                   closeActions();
                 }}
@@ -396,7 +404,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
             </Menu>
           </Box>
         </Box>
-      }
+      )}
       {columns && rowsData ? (
         <Box p="6px" zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -457,7 +465,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       )}
       {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={"purchaseRequisition"}
+          reference={'purchaseRequisition'}
           referenceId={purchaseRequisitionData?._id}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           ids={[]}
