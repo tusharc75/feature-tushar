@@ -162,7 +162,8 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     stepTags: {
       minHeight: '26px',
-      paddingInline: '5px'
+      paddingInline: '5px',
+      fontWeight: 500
     },
     mainContainer: {},
 
