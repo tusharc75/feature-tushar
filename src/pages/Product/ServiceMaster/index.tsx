@@ -22,6 +22,7 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { flattenArray } from 'src/constants/columns';
 
 interface Props {
   renderedFrom: string;
@@ -365,6 +366,30 @@ const ServiceMaster = (props: Props) => {
       });
   };
 
+  const handleSaveData = (data: any) => {
+    axiosInstance()
+      .put(`${routes.product.path}/${id}/service-master/consumables`, data)
+      .then(({ data }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    if (updatedData.type === "Product") {
+      const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
+      let rows: any = [{ ...rowData, ...updatedData }];
+      handleSaveData({ _id: rows[0]._id, qty: rows[0].qty });
+    }
+  };
+
   return (
     <Fragment>
       {permissions?.product?.isUpdate && (
@@ -457,6 +482,7 @@ const ServiceMaster = (props: Props) => {
           onSelect={setSelectedRecords}
           childrenProperty="subRows"
           uniqueKey="_id"
+          onSaveEdit={onSaveInlineEdit}
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
         />

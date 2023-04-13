@@ -4,7 +4,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { formatAmountWithCurrency, rentalManagement } from '../../../constants/helpers';
+import { rentalManagement } from '../../../constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AdditionalCostDialog from './AdditionalCostDialog';
@@ -13,13 +13,12 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { calculateRowsField, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { BiChevronDown } from 'react-icons/bi';
 import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
 
-const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, currencySymbol, allowedToEdit }) => {
+const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -47,6 +46,11 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   const fetchFields = async () => {
     setNextStep(false);
     const fields = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
+    if (!allowedToEdit) {
+      fields?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
+    }
     setAllFields(fields)
     const newColumns = genrateCustomTableColumns(fields, rentalManagementData?.currency, renderedFrom);
     let column: any = [
