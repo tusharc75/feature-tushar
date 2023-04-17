@@ -1,21 +1,18 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import { Box, Grid, Button, Menu, MenuItem, Link } from '@material-ui/core';
-import { getLocalStorageArrayData, prepareDataForGrid, serviceMaster } from '../../../constants/helpers';
+import { getLocalStorageArrayData, serviceMaster } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
-import { Delete, ExpandMore } from '@material-ui/icons';
+import { ExpandMore } from '@material-ui/icons';
 import { IconButton, Tooltip } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
-import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
+import { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 import AssignProductDialog from '../../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
-import { flattenArray } from 'src/constants/columns';
 import { isMobile } from 'react-device-detect';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -23,7 +20,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 function Product({ id }) {
-  const renderedFrom = `${camelCase(routes?.product.title)}_product`;
+
+  const renderedFrom = `${camelCase(routes?.serviceMaster.title)}_product`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
@@ -36,21 +34,11 @@ function Product({ id }) {
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
   const [isDeleting, setIsDeleting] = useState(false);
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
-  const { getColumnData } = useColumns();
 
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
   const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [dataRows, setDataRows] = useState([]);
-
-  // const { dataRows, rowCount, loading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
-
-  const defaultColumns = [
-    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
-  ];
 
   const openActions = (event) => {
     setAnchorActionEl(event.currentTarget);
@@ -66,42 +54,28 @@ function Product({ id }) {
 
   useEffect(() => {
     if (id) {
-      fetchBOMData();
+      fetchData();
     }
   }, []);
 
-  const fetchBOMData = () => {
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+  const fetchData = () => {
     axiosInstance()
       .get(`${serviceMaster.api}/product/${id}`)
       .then(({ data: { data } }) => {
         setDataRows(data);
         setParts([...data]);
-        dispatch({ type: 'loading', loading: false });
       })
       .catch((err) => {
-        dispatch({ type: 'loading', loading: false });
       });
   };
 
   const fetchGridColumns = () => {
+
     const column: any = [
-      {
-        accessor: 'qty',
-        Header: 'Qty',
-        editable: true,
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
-      },
       {
         accessor: 'productName',
         Header: 'Product Name',
         minWidth: 100,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <Link
             className="link"
@@ -111,6 +85,14 @@ function Product({ id }) {
             {row.original?.productDetail?.productName || <NoDataCell />}
           </Link>
         )
+      },
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        editable: permissions?.serviceMaster?.isUpdate ? true : false,
+        width: 70,
+        minWidth: 70,
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
       {
         accessor: 'productCategory',
@@ -132,13 +114,13 @@ function Product({ id }) {
     column.push({
       accessor: 'action',
       Header: 'Action',
-      width: 100,
+      width: 50,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'end' }}>
-          {permissions?.product?.isUpdate && (
+          {permissions?.serviceMaster?.isUpdate && (
             <HtmlTooltip title="Delete">
               <IconButton
                 size="small"
@@ -157,6 +139,7 @@ function Product({ id }) {
     setColumns([...column]);
   };
 
+
   const handleRemove = () => {
     setIsDeleting(true);
     const { data } = showConfirmBox;
@@ -169,7 +152,7 @@ function Product({ id }) {
           .then(() => {
             setIsDeleting(false);
             setShowConfirmBox({ open: false, data: null });
-            fetchBOMData();
+            fetchData();
           })
           .catch((err) => {
             setToastConfig(err);
@@ -185,7 +168,7 @@ function Product({ id }) {
         .then(() => {
           setIsDeleting(false);
           setShowConfirmBox({ open: false, data: null });
-          fetchBOMData();
+          fetchData();
         })
         .catch((err) => {
           setToastConfig(err);
@@ -195,7 +178,6 @@ function Product({ id }) {
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    console.log(inputField, updatedData, 'inputField, updatedData');
     const dToUpdate = {
       ...inputField,
       service: updatedData?.service,
@@ -204,7 +186,7 @@ function Product({ id }) {
     axiosInstance()
       .put(`${serviceMaster.api}/product/${id}/qty`, dToUpdate)
       .then((e) => {
-        fetchBOMData();
+        fetchData();
       })
       .catch((err) => {
         setToastConfig(err);
@@ -230,17 +212,6 @@ function Product({ id }) {
             </Grid>
             <Grid item xs={6} md={6} sm={6}>
               <Box display={'flex'} justifyContent={'flex-end'}>
-                {/* <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  disabled={selectedRecords?.length === 0}
-                  onClick={() => {
-                    setShowConfirmBox({ open: true, data: selectedRecords });
-                  }}
-                >
-                  Delete
-                </Button> */}
                 <Button
                   variant="outlined"
                   color="default"
@@ -280,7 +251,7 @@ function Product({ id }) {
                   module="packages-products"
                   api={`${serviceMaster.api}/product/${id}`}
                   afterImportCompleted={() => {
-                    fetchBOMData();
+                    fetchData();
                   }}
                   isExportAllOrSomeFeature={true}
                   total={selectedRecords.length}
@@ -292,28 +263,6 @@ function Product({ id }) {
                   }
                   additionalParams={`serviceId=${id}`}
                 />
-                {/* <ImportExportLinks
-                  permissions={permissions?.serviceMaster}
-                  module="Service Master Steps"
-                  api={`${serviceMaster.api}/product/${id}`}
-                  afterImportCompleted={() => {
-                    fetchBOMData();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                  ids={
-                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                      : []
-                  }
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll();
-                    else fetchBOMData();
-                  }}
-                  isDropDownIconShow={true}
-                  isBackgroundWhite={true}
-                /> */}
               </Box>
             </Grid>
           </Grid>
@@ -331,35 +280,13 @@ function Product({ id }) {
           onSaveEdit={onSaveInlineEdit}
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
+          hideExpander={true}
         />
       ) : (
         <Box p={2} height={500} bgcolor="white">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      {/* {columns && frameWorkComponent ? (
-        <CustomAgGrid
-          allowSelection={permissions?.serviceMaster?.isUpdate}
-          allowAction={permissions?.serviceMaster?.isUpdate}
-          columns={columns}
-          dataRows={dataRows}
-          isClientSideGrid={true}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          loading={loading}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchBOMData}
-        />
-      ) : (
-        <Box p={2} height={500} bgcolor="white">
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )} */}
       {showConfirmBox.open && (
         <ConfirmationDialogRaw
           open={true}
@@ -380,7 +307,7 @@ function Product({ id }) {
           reference={'serviceMaster'}
           renderedFrom={`${renderedFrom}_grid-sub-1`}
           onSuccess={() => {
-            fetchBOMData();
+            fetchData();
             setOpenAssignProductDialog(false);
           }}
           serialized={false}

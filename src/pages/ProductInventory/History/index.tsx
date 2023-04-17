@@ -163,6 +163,10 @@ const History = ({ product, warehouse }) => {
         <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
           {params.value}
         </Link>
+      ) : params.data.referenceType === 'Work Order' ? (
+        <Link className="link" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`}>
+          {params.value}
+        </Link>
       ) : (
         params.value
       )
