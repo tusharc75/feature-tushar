@@ -12,37 +12,36 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const CostDetails = ({ product, productData }) => {
-
+const CostDetails = ({ product, productData, minHeight = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const [loading, setLoading] = useState(false)
-  const [listPrice, setListPrice] = useState(0)
+  const [loading, setLoading] = useState(false);
+  const [listPrice, setListPrice] = useState(0);
   const [costList, setCostList] = useState(null);
 
   useEffect(() => {
     if (productData?.listPrice) {
-      setListPrice(productData?.listPrice)
+      setListPrice(productData?.listPrice);
     }
   }, [product, productData]);
 
   useEffect(() => {
-    fetchData()
+    fetchData();
   }, [product, productData]);
 
   const fetchData = () => {
-    setLoading(true)
+    setLoading(true);
     axiosInstance()
       .get(`product/${product}/cost`)
       .then(async ({ data: { data } }) => {
         setCostList(data);
-        setLoading(false)
+        setLoading(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setLoading(false)
+        setLoading(false);
       });
-  }
+  };
 
   return (
     <Box className={`single-form-v1`}>
@@ -54,21 +53,19 @@ const CostDetails = ({ product, productData }) => {
           </IconButton>
         </HtmlTooltip>
       </Box>
-      <Box className="formdata-v1">
-        {!loading ?
+      <Box className="formdata-v1" style={{ minHeight }}>
+        {!loading ? (
           <Box>
-            {costList?.map((data) => (
-              (data?.warehouse === 'All' || data?.totalQty) ?
-                <Accordion defaultExpanded={data?.warehouse === 'All' ? true : false}  >
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1a-content"
-                    id="panel1a-header"
-                  >
-                    <Typography variant='subtitle2'>{data?.warehouse === 'All' ? `${data?.warehouse} ${routes.warehouse.title}` : data?.warehouse}</Typography>
+            {costList?.map((data) =>
+              data?.warehouse === 'All' || data?.totalQty ? (
+                <Accordion defaultExpanded={data?.warehouse === 'All' ? true : false}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+                    <Typography variant="subtitle2">
+                      {data?.warehouse === 'All' ? `${data?.warehouse} ${routes.warehouse.title}` : data?.warehouse}
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <Box style={{ width: "100%" }}>
+                    <Box style={{ width: '100%' }}>
                       <Box display="flex" justifyContent="space-between">
                         <Typography className="table-head-v1">List Price</Typography>
                         <Typography className="table-data-v1" style={{ borderTopWidth: '1px' }}>
@@ -87,11 +84,12 @@ const CostDetails = ({ product, productData }) => {
                       </Box>
                     </Box>
                   </AccordionDetails>
-                </Accordion> : null
-            ))}
+                </Accordion>
+              ) : null
+            )}
           </Box>
-          :
-          ([1, 2].map((i) => (
+        ) : (
+          [1, 2].map((i) => (
             <BoxWithBorder
               key={i}
               style={{
@@ -105,7 +103,7 @@ const CostDetails = ({ product, productData }) => {
               </Box>
             </BoxWithBorder>
           ))
-          )}
+        )}
       </Box>
     </Box>
   );
