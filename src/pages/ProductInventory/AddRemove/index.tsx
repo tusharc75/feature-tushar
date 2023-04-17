@@ -7,7 +7,6 @@ import {
   Divider,
   List,
   ListItem,
-  ListItemAvatar,
   ListItemText,
   TextField,
   Typography
@@ -37,6 +36,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
   const [availableQtyOnRemoveDate, setAvailableQtyOnRemoveDate] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [lockDate, setLockDate] = useState(null);
+  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
 
   const {
     state: { user }
@@ -77,6 +77,18 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
       });
   };
 
+  const getStorageLocation = () => {
+    axiosInstance()
+      .get('/sa-formbuilder/lookup?lookupResource=Storage Location')
+      .then(({ data: { data } }) => {
+        setStorageLocationOptions(data['Storage Location'].filter(_storageLocation => _storageLocation.warehouse === warehouse));
+      });
+  };
+
+  useEffect(() => {
+    getStorageLocation();
+  }, [warehouse])
+
   const handleSubmit = (values) => {
     let data: any;
     setLoading(true);
@@ -92,6 +104,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
               serialNumber: values['serialNumbers']
             })),
         warehouse: warehouse,
+        storagelocation: values.storagelocation,
         receiveDate: values.customDate,
         comment: values.comment
       };
@@ -118,6 +131,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
             ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: [] }))
             : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: serialNumberIds.map((item) => item?._id) })),
         warehouse: warehouse,
+        storagelocation: values.storagelocation,
         customDate: moment(values.customDate).format('MM/DD/YYYY'),
         comment: values.comment
       };
@@ -162,6 +176,10 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
       }
     }
 
+    const storagelocation = values['storagelocation'];
+    if (user?.user?.brandPolicy?.storageLocation && !storagelocation) {
+      errors['storagelocation'] = 'Please select Storage Location';
+    }
     // find duplicates serial numbers
     const serialNumbersList = values['serialNumbers'];
     const duplicates = serialNumbersList.filter((item, index) => serialNumbersList.indexOf(item) != index);
@@ -246,7 +264,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
         </Box>
       ) : (
         <Formik
-          initialValues={{ qty: 1, price: 0, comment: '', serialNumbers: [], customDate: new Date() }}
+          initialValues={{ qty: 1, price: 0, storagelocation: null, comment: '', serialNumbers: [], customDate: new Date() }}
           onSubmit={handleSubmit}
           validateOnMount
           validate={validate}
@@ -309,6 +327,47 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                       />
                     </Box>
                   ) : null}
+                  {
+                    user?.user?.brandPolicy?.storageLocation &&
+                    <Box m={1}>
+                      <Autocomplete
+                        disableClearable
+                        options={storageLocationOptions}
+                        getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                        value={storageLocationOptions.filter((data) => data.optionValue === values['storagelocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storagelocation'])[0] : ''}
+                        onChange={(e, val) => {
+                          setFieldValue('storagelocation', val?.optionValue);
+                        }}
+                        renderInput={(params) =>
+                          isMobile && !isTablet ? (
+                            <TextField
+                              {...params}
+                              margin="dense"
+                              name="storagelocation"
+                              label="Storage Location"
+                              variant="standard"
+                              fullWidth
+                              error={touched['storagelocation'] && Boolean(errors['storagelocation'])}
+                              helperText={touched['storagelocation'] && errors['storagelocation']}
+                              className={isMobile ? 'serchBox' : ''}
+                            />
+                          ) : (
+                            <TextField
+                              {...params}
+                              margin="dense"
+                              name="storagelocation"
+                              label="Storage Location"
+                              variant="outlined"
+                              fullWidth
+                              error={touched['storagelocation'] && Boolean(errors['storagelocation'])}
+                              helperText={touched['storagelocation'] && errors['storagelocation']}
+                            />
+                          )
+                        }
+                      />
+                    </Box>
+                  }
                   <Box m={1}>
                     <KeyboardDatePicker
                       {...(lockDate ? { minDate: lockDate } : {})}
