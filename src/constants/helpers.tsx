@@ -2418,3 +2418,18 @@ export const TOOLTIP_MESSAGE = {
   edit: "You don't have permissions to edit",
   remove: "You don't have permissions to remove"
 };
+
+export const getNestedlookupDependentOn = (fields, fieldName) => {
+  const result: any = []
+  const checkNested = (fields, fieldName, result) => {
+      const filterFields: any = fields.filter(d => d.lookupDependentOn === fieldName)
+      if (filterFields?.length) {
+          filterFields?.forEach((ele: any) => {
+              result.push({ fieldName: ele.fieldName, value: ele?.type === 'multiSelect' ? [] : '' })
+              checkNested(fields, ele.fieldName, result);
+          })
+      }
+  }
+  checkNested(fields, fieldName, result);
+  return result;
+}

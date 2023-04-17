@@ -5,7 +5,7 @@ import React, { Fragment } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
 import ManageWarehouse from 'src/pages/Warehouse/ManageWarehouse';
-import { sidebarResource } from 'src/constants/helpers';
+import { getNestedlookupDependentOn, sidebarResource } from 'src/constants/helpers';
 import ManageWellMaster from 'src/pages/WellMaster/ManageWellMaster';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
 import ManageStorageLocation from 'src/pages/StorageLocation/ManageStorageLocation';
@@ -55,9 +55,7 @@ function Dropdown({
                         freeSolo={type === 'dropDown' && !lookup}
                         getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                         getOptionSelected={(option: any, val) => option.optionValue === val}
-                        value={
-                            option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''
-                        }
+                        value={option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''}
                         onChange={
                             onChange
                                 ? onChange
@@ -118,12 +116,10 @@ function Dropdown({
                                             }
                                         } else {
                                             handleChange(name, val && val.optionValue ? val.optionValue : '');
-                                            let dependentField = allFields.filter(d => d.lookupDependentOn === name)
-                                            if (dependentField && dependentField.length) {
-                                                dependentField.forEach((val: any) => {
-                                                    handleChange(val.fieldName, '');
-                                                })
-                                            }
+                                            const fieldChange: any = getNestedlookupDependentOn(allFields, name);
+                                            fieldChange?.forEach((val: any) => {
+                                                setFieldValue(val.fieldName, val.value);
+                                            })
                                         }
                                     }
                                 }
