@@ -33,8 +33,10 @@ const WorkOrder = ({
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
-  }: any = useData();
+    state: {
+      user: { user }
+    }
+  } = useData();
   const [selectedProducts, setSelectedProducts] = useState([]);
 
   const [columns, setColumns] = useState(null);
@@ -106,7 +108,7 @@ const WorkOrder = ({
                 {`(${row.original?.subRows?.length})`}
               </Box>
             ) : null}
-            {row.original.type === 'service' && (
+            {user?.brandPolicy?.repairOrderQuotation && row.original.type === 'service' && (
               <Box ml={1}>
                 {row?.original?.preWork ? (
                   <HtmlTooltip title="Pre Work Service">

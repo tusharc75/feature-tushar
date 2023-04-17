@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import { Box } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
@@ -7,7 +7,7 @@ import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { convertDateInDateTime, dateFormatForInputControl, deliveryTicket, DELIVERY_TICKET_STATUS } from 'src/constants/helpers';
+import { convertDateInDateTime, dateFormatForInputControl, deliveryTicket, DELIVERY_TICKET_STATUS, productInventory } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -16,12 +16,47 @@ import axiosInstance from 'src/axios/axiosInstance';
 import moment from 'moment';
 
 
-const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess }) => {
+const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess, transferInventoryData }) => {
 
     const toastConfig = useContext(CustomToastContext);
 
     const [lockDate, setLockDate] = useState(null);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        fetchSettingsData();
+    }, []);
+
+    const fetchSettingsData = async () => {
+        var fromLockDate = null;
+        var toLockDate = null;
+        if (transferInventoryData?.transferFromPlant?.optionValue) {
+            const { data: { data: transferFromPlant } } = await axiosInstance().get(`${productInventory.api}/setting?warehouse=${transferInventoryData?.transferFromPlant?.optionValue}`);
+            if (transferFromPlant?.lockDate) {
+                fromLockDate = transferFromPlant?.lockDate;
+            }
+        }
+        if (transferInventoryData?.transfertoPlant?.optionValue) {
+            const { data: { data: transferToPlant } } = await axiosInstance().get(`${productInventory.api}/setting?warehouse=${transferInventoryData?.transfertoPlant?.optionValue}`);
+            if (transferToPlant?.lockDate) {
+                toLockDate = transferToPlant?.lockDate;
+            }
+        }
+        if (fromLockDate && toLockDate) {
+            if (moment(fromLockDate).diff(moment(toLockDate), 'days') > 0) {
+                setLockDate(fromLockDate)
+            }
+            else {
+                setLockDate(toLockDate)
+            }
+        }
+        else if (fromLockDate) {
+            setLockDate(fromLockDate)
+        }
+        else if (toLockDate) {
+            setLockDate(toLockDate)
+        }
+    };
 
     const handleSubmit = (values) => {
         setLoading(true);
@@ -109,6 +144,8 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess }) => {
                                             var newDate = convertDateInDateTime(value);
                                             setFieldValue('receiveDate', newDate);
                                         }}
+                                        error={touched['receiveDate'] && Boolean(errors['receiveDate'])}
+                                        helperText={touched['receiveDate'] && errors['receiveDate']}
                                     />
                                 </Box>
                             </CustomDialogContent>
