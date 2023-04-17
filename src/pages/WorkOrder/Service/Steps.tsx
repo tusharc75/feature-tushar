@@ -29,7 +29,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AiOutlineClose } from 'react-icons/ai';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import moment from 'moment';
-import { dateFormat } from 'src/constants/helpers';
+import { dateFormat, dateTimeFormat } from 'src/constants/helpers';
 
 const TimerComponent = ({ stepData, updateTime = true }) => {
   const [time, setTime] = useState(null);
@@ -194,6 +194,9 @@ const useStyles = makeStyles((theme: Theme) =>
         fontSize: '16px',
         lineHeight: '16px',
         color: '#3A3A3A',
+        marginRight: '32px',
+        display: 'flex',
+        alignItems: 'center',
         '& span': {
           color: 'white',
           minWidth: '25px',
@@ -250,7 +253,7 @@ const useStyles = makeStyles((theme: Theme) =>
       }
     },
     sectionColTItle: {
-      flexBasis: '65px',
+      flexBasis: '125px',
       fontWeight: 500,
       fontSize: '12px',
       lineHeight: '1.5',
@@ -653,7 +656,11 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                 }}
                 onClick={() => {
                   if (stepData.status) {
-                    setDetailsModalData({ number: `${selectedService?.order}.${step?.order || index + 1}`, ...step, ...stepData });
+                    setDetailsModalData({
+                      number: referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`,
+                      ...step,
+                      ...stepData
+                    });
                   }
                 }}
                 className={`${classes.accordionHeading}  ${classes.white}`}
@@ -912,7 +919,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   <AiOutlineClose />
                 </IconButton>
               </div>
-              <div style={{ overflowY: 'auto' }}>
+              <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 300px)' }}>
                 <div className={classes.sectionContainer}>
                   <h6 className={classes.sectionHead}>
                     <span>
@@ -921,36 +928,31 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                     Details
                   </h6>
                   <div className={classes.sectionRow}>
-                    {detailsModalData.status ? (
-                      <div>
-                        <p className={classes.sectionColTItle}>Status:</p>
-                        <p className={classes.sectionColDetail}>
-                          {detailsModalData.status === 'pause' ? 'Paused' : detailsModalData.status === 'start' ? 'Started' : detailsModalData.status}
-                        </p>
-                      </div>
-                    ) : null}
-                    {detailsModalData.startDate ? (
-                      <div>
-                        <p className={classes.sectionColTItle}>Start Date:</p>
-                        <p className={classes.sectionColDetail}>{moment(detailsModalData.startDate).format(dateFormat)}</p>
-                      </div>
-                    ) : null}
-
-                    {detailsModalData.endDate ? (
-                      <div>
-                        <p className={classes.sectionColTItle}>End Date:</p>
-                        <p className={classes.sectionColDetail}>{moment(detailsModalData.endDate).format(dateFormat)}</p>
-                      </div>
-                    ) : null}
-                    {detailsModalData.pauseDate ? (
-                      <div>
-                        <p className={classes.sectionColTItle}>Pause Date:</p>
-                        <p className={classes.sectionColDetail}>{moment(detailsModalData.pauseDate).format(dateFormat)}</p>
-                      </div>
-                    ) : null}
+                    {detailsModalData.fields
+                      ? detailsModalData.fields.map((field) => {
+                          const value = detailsModalData[field.fieldName] || '--';
+                          const isDate = value ? moment(value, moment.ISO_8601, true).isValid() : false;
+                          return (
+                            <div>
+                              <p className={classes.sectionColTItle}>{field.fieldLabel} :</p>
+                              <p className={classes.sectionColDetail}>{isDate ? moment(value).format(dateFormat) : value}</p>
+                            </div>
+                          );
+                        })
+                      : null}
+                  </div>
+                </div>
+                <div className={classes.sectionContainer}>
+                  <h6 className={classes.sectionHead}>
+                    <span>
+                      <MdKeyboardArrowDown />
+                    </span>
+                    Extra
+                  </h6>
+                  <div className={classes.sectionRow}>
                     {detailsModalData.passFailStatus ? (
                       <div>
-                        <p className={classes.sectionColTItle}>Pass-Fail Status :</p>
+                        <p className={classes.sectionColTItle}>Status :</p>
                         <p className={classes.sectionColDetail}>
                           <RenderPassFailChip status={detailsModalData.passFailStatus} className={classes.stepTags} />
                         </p>
@@ -962,16 +964,6 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                         <p className={classes.sectionColDetail}>{convertMsToTime(detailsModalData.duration)}</p>
                       </div>
                     ) : null}
-                  </div>
-                </div>
-                <div className={classes.sectionContainer}>
-                  <h6 className={classes.sectionHead}>
-                    <span>
-                      <MdKeyboardArrowDown />
-                    </span>
-                    People
-                  </h6>
-                  <div className={classes.sectionRow}>
                     {detailsModalData.startedBy && (
                       <div>
                         <p className={classes.sectionColTItle}>Started By:</p>
@@ -984,6 +976,19 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                         <p className={classes.sectionColDetail}>{detailsModalData.endedBy?.optionLabel}</p>
                       </div>
                     )}
+                    {detailsModalData.startDate ? (
+                      <div>
+                        <p className={classes.sectionColTItle}>Start Date:</p>
+                        <p className={classes.sectionColDetail}>{moment(detailsModalData.startDate).format(dateTimeFormat)}</p>
+                      </div>
+                    ) : null}
+
+                    {detailsModalData.endDate ? (
+                      <div>
+                        <p className={classes.sectionColTItle}>End Date:</p>
+                        <p className={classes.sectionColDetail}>{moment(detailsModalData.endDate).format(dateTimeFormat)}</p>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>
