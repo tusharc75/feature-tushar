@@ -679,6 +679,7 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                                                                                         setFieldValue("pickupFromAddress", "");
                                                                                     }
                                                                                 }}
+                                                                                hidelookupAddButton={true}
                                                                                 required={field.required}
                                                                                 fullWidth
                                                                                 isTooltip={field?.isTooltip || false}
@@ -708,6 +709,7 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                                                                                             setFieldValue("deliveryToAddress", "");
                                                                                         }
                                                                                     }}
+                                                                                    hidelookupAddButton={true}
                                                                                     required={field.required}
                                                                                     fullWidth
                                                                                     isTooltip={field?.isTooltip || false}
