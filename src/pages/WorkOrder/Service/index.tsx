@@ -374,7 +374,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderStyle: 'solid',
         borderColor: 'rgba(25, 24, 24, 0.19)',
         cursor: allowedToEdit ? 'pointer' : 'not-allowed',
-        pointerEvents: 'none',
+        // pointerEvents: 'none',
         opacity: '.5',
         borderTopWidth: index !== 0 && !mobScreen ? 0 : 1
       };
