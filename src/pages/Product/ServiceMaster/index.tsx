@@ -130,10 +130,10 @@ const ServiceMaster = (props: Props) => {
         Cell: ({ row }) => <p className="text-truncate">{row.original?.qty || <NoDataCell />}</p>
       },
       {
-        accessor: 'step',
+        accessor: 'stepName',
         Header: 'Step Name',
-        width: 70,
-        Cell: ({ row }) => <p className="text-truncate">{row.original?.step || <NoDataCell />}</p>
+        width: 100,
+        Cell: ({ row }) => row.original?.stepName ? <p title={row.original?.stepName} className="text-truncate">{row.original?.stepName}</p> : <NoDataCell />
       }
     ];
 
@@ -156,6 +156,7 @@ const ServiceMaster = (props: Props) => {
         )
       });
     }
+
     columns.push({
       accessor: 'action',
       Header: 'Action',
@@ -257,7 +258,7 @@ const ServiceMaster = (props: Props) => {
           ?.filter((c) => c?.uniqueId === parent?._id)
           ?.map((c, idx) => {
             const stepData = parent?.steps?.find((s) => s?._id === c?.stepId);
-            c.step = stepData?.stepName;
+            c.stepName = stepData?.stepName;
             c.order = i + 1 + '.' + `${idx + 1}`;
             c.detail = c?.productDetail?.productName;
             c.type = 'Product';
@@ -576,13 +577,11 @@ const ServiceMaster = (props: Props) => {
       )}
       {assignStepsToConsumablesDialog.open && (
         <AssignStepDialog
-          open={assignStepsToConsumablesDialog.open}
           handleCloseDialog={() => {
             setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null, steps: null });
             setAssignStepsToConsumablesDialog({ open: false, consumables: null, service: null, steps: null });
           }}
           consumables={assignStepsToConsumablesDialog.consumables}
-          // service={assignStepsToConsumablesDialog.service}
           steps={assignStepsToConsumablesDialog.steps}
           loading={isAssigning}
           onSuccess={(d: any) => {

@@ -10,15 +10,12 @@ import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { CommonRenderer, CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { camelCase, capitalize } from 'lodash';
-import { Link } from 'react-router-dom';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { Button } from '@material-ui/core';
-import { isMobile, isTablet } from 'react-device-detect';
-import ConsumablesDialog from './ConsumablesDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 const Consumables = ({ workOrderId, allowedToEdit }) => {
+  
   let renderedFrom = camelCase(routes?.workOrder.title + '_consumables');
   const toastConfig = useContext(CustomToastContext);
 
@@ -58,7 +55,7 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
     { field: 'service', headerName: 'Service', show: true, disabled: true, cellRenderer: 'nameRenderer' },
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'type', headerName: 'Type', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'consumed', headerName: 'Consumed', show: true, disabled: true, cellRenderer: 'checkboxRenderer' }
+    { field: 'consumedQty', headerName: 'Consumed Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' }
   ];
 
   const NameRenderer = (params) => {
@@ -155,17 +152,6 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
           }}
           serialized={false}
         />
-        // <ConsumablesDialog
-        //   onSuccess={() => {
-        //     setConsumablesDialog(false);
-        //     fetchRecords();
-        //   }}
-        //   handleClose={() => {
-        //     setConsumablesDialog(false);
-        //   }}
-        //   workOrderId={workOrderId}
-        //   from={'consumable'}
-        // />
       )}
     </>
   );

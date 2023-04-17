@@ -1046,7 +1046,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
             setConsumablesDialog(false);
           }}
           workOrderId={workOrderId}
-          from={'service'}
         />
       )}
       {logsDialog && (
