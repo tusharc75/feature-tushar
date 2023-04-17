@@ -13,6 +13,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import { CheckboxRenderer, CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import ConsumablesQtyDialog from './ConsumablesQtyDialog';
 
 let searchTimeout;
 
@@ -28,6 +29,7 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId = null, from })
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
+  const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false)
   const [columns, setColumns] = useState([]);
 
   const defaultColumns = [
@@ -209,7 +211,7 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId = null, from })
               <Box className={styles.filter_side_header} component="div">
                 <Button
                   disabled={selectedRecords.length === 0}
-                  onClick={handleSubmit}
+                  onClick={() => setOpenConsumablesQtyDialog(true)}
                   color="primary"
                   size="small"
                   variant="contained"
@@ -247,6 +249,13 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId = null, from })
           </Box>
         )}
       </CustomDialogContent>
+      {openConsumablesQtyDialog && 
+      <ConsumablesQtyDialog 
+        onClose={()=>setOpenConsumablesQtyDialog(false)}
+        onSuccess={() => setOpenConsumablesQtyDialog(false)}
+        selectedRecords={selectedRecords}
+      />
+      }
     </Dialog>
   );
 };
