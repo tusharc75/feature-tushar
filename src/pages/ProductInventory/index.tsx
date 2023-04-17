@@ -56,6 +56,8 @@ const InventoryProduct = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
   const [plantId, setPlantId] = useState(null);
   const [plantOptions, setPlantOptions] = useState([]);
+  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
+  const [storageLocationId, setStorageLocationId] = useState(null);
   const [frameworkComponents, setFrameworkComponents] = useState({});
   const [columns, setColumns] = useState(null);
 
@@ -106,14 +108,15 @@ const InventoryProduct = () => {
     searchTimeout = setTimeout(() => {
       fetchProductInventory();
     }, millisec);
-  }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, fromProductMaster]);
+  }, [plantId, storageLocationId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, fromProductMaster]);
 
   const getPlants = () => {
     axiosInstance()
-      .get(`/warehouse`)
+      .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Storage Location')
       .then(({ data: { data } }) => {
-        setPlantOptions([{ warehouseName: 'All', _id: 'All' }, ...data]);
-        if (plantId === null && data?.length) {
+        setPlantOptions([{ optionLabel: 'All', optionValue: 'All' }, ...data.Warehouse]);
+        setStorageLocationOptions(data['Storage Location']);
+        if (plantId === null && data?.Warehouse.length) {
           setPlantId('All');
         }
       });
@@ -225,9 +228,9 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-            .filter((d) => d._id !== 'All')
-            .map((d) => d._id)
-            .toString()
+          .filter((d) => d.optionValue !== 'All')
+          .map((d) => d.optionValue)
+          .toString()
         : plantId;
 
     let deepFilter = '';
@@ -236,6 +239,10 @@ const InventoryProduct = () => {
       deepFilter = deepFilter + `&page=${page}&limit=${limit}`;
     } else {
       deepFilter = `&wareHouse=${tempPlantId}`;
+    }
+
+    if (storageLocationId) {
+      deepFilter = `${deepFilter}&storagelocation=${storageLocationId}`
     }
 
     let filterById = [];
@@ -331,10 +338,10 @@ const InventoryProduct = () => {
             !permissions?.productInventory?.isUpdate
               ? TOOLTIP_MESSAGE.remove
               : params?.data?.plantId === 'All'
-              ? 'Select Plant'
-              : !params?.data?.availableInventory
-              ? 'Inventory not available'
-              : 'Remove'
+                ? 'Select Plant'
+                : !params?.data?.availableInventory
+                  ? 'Inventory not available'
+                  : 'Remove'
           }
         >
           <span>
@@ -509,13 +516,14 @@ const InventoryProduct = () => {
               <Autocomplete
                 style={{ width: '250px' }}
                 options={plantOptions}
-                getOptionLabel={(option: any) => option.warehouseName}
+                getOptionLabel={(option: any) => option.optionLabel}
                 disableClearable
-                getOptionSelected={(option: any, val) => option._id === val}
-                value={plantOptions.filter((data) => data._id === plantId).length ? plantOptions.filter((data) => data._id === plantId)[0] : ''}
+                getOptionSelected={(option: any, val) => option.optionValue === val}
+                value={plantOptions.filter((data) => data.optionValue === plantId).length ? plantOptions.filter((data) => data.optionValue === plantId)[0] : ''}
                 onChange={(e, val) => {
                   if (val !== null) {
-                    setPlantId(val && val._id ? val._id : '');
+                    setPlantId(val && val.optionValue ? val.optionValue : '');
+                    setStorageLocationId(null)
                   }
                 }}
                 renderInput={(params) =>
@@ -534,6 +542,34 @@ const InventoryProduct = () => {
                   )
                 }
               />
+
+              {user?.user?.brandPolicy?.storageLocation &&
+                <Autocomplete
+                  style={{ width: '250px' }}
+                  options={storageLocationOptions.filter(item => item.warehouse === plantId)}
+                  getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  value={storageLocationOptions.filter((data) => data.optionValue === storageLocationId).length ? storageLocationOptions.filter((data) => data.optionValue === storageLocationId)[0] : ''}
+                  onChange={(e, val) => {
+                    setStorageLocationId(val?.optionValue);
+                  }}
+                  renderInput={(params) =>
+                    isMobile && !isTablet ? (
+                      <TextField
+                        {...params}
+                        margin="dense"
+                        name="storagelocation"
+                        placeholder="Storage Location"
+                        variant="standard"
+                        fullWidth
+                        className={isMobile ? 'serchBox' : ''}
+                      />
+                    ) : (
+                      <TextField {...params} margin="dense" name="storagelocation" label="Storage Location" variant="outlined" fullWidth />
+                    )
+                  }
+                />
+              }
               {fromProductMaster?.product && (
                 <Chip
                   className="ml-3"
@@ -689,9 +725,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d._id !== 'All')
-                    .map((d) => d._id)
-                    .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
                 : plantId
             }
           />
@@ -707,9 +743,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d._id !== 'All')
-                    .map((d) => d._id)
-                    .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
                 : plantId
             }
             productName={showHistory.productName}
@@ -724,9 +760,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d._id !== 'All')
-                    .map((d) => d._id)
-                    .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
                 : plantId
             }
           />
@@ -746,7 +782,7 @@ const InventoryProduct = () => {
         )}
         {settingDialogOpen && <SettingsDialog warehouse={plantId} onClose={() => setSettingDialogOpen(false)} />}
       </div>
-    </Fragment>
+    </Fragment >
   );
 };
 
