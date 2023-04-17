@@ -920,28 +920,30 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                 </IconButton>
               </div>
               <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 300px)' }}>
-                <div className={classes.sectionContainer}>
-                  <h6 className={classes.sectionHead}>
-                    <span>
-                      <MdKeyboardArrowDown />
-                    </span>
-                    Details
-                  </h6>
-                  <div className={classes.sectionRow}>
-                    {detailsModalData.fields
-                      ? detailsModalData.fields.map((field) => {
-                          const value = detailsModalData[field.fieldName] || '--';
-                          const isDate = value ? moment(value, moment.ISO_8601, true).isValid() : false;
-                          return (
-                            <div>
-                              <p className={classes.sectionColTItle}>{field.fieldLabel} :</p>
-                              <p className={classes.sectionColDetail}>{isDate ? moment(value).format(dateFormat) : value}</p>
-                            </div>
-                          );
-                        })
-                      : null}
+                {detailsModalData.fields?.length > 0 ? (
+                  <div className={classes.sectionContainer}>
+                    <h6 className={classes.sectionHead}>
+                      <span>
+                        <MdKeyboardArrowDown />
+                      </span>
+                      Details
+                    </h6>
+                    <div className={classes.sectionRow}>
+                      {detailsModalData.fields
+                        ? detailsModalData.fields.map((field) => {
+                            const value = detailsModalData[field.fieldName] || '--';
+                            const isDate = value ? moment(value, moment.ISO_8601, true).isValid() : false;
+                            return (
+                              <div>
+                                <p className={classes.sectionColTItle}>{field.fieldLabel} :</p>
+                                <p className={classes.sectionColDetail}>{isDate ? moment(value).format(dateFormat) : value}</p>
+                              </div>
+                            );
+                          })
+                        : null}
+                    </div>
                   </div>
-                </div>
+                ) : null}
                 <div className={classes.sectionContainer}>
                   <h6 className={classes.sectionHead}>
                     <span>
