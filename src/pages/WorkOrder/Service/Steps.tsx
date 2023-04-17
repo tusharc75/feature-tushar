@@ -685,7 +685,6 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                       }}
                       gridGap={'8px'}
                     >
-                      {console.log(user?.brandPolicy?.workOrderTimer)}
                       {stepData?.startDate && user?.brandPolicy?.workOrderTimer && (
                         <TimerComponent stepData={stepData} updateTime={stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? true : false} />
                       )}
