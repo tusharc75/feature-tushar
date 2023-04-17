@@ -11,7 +11,7 @@ import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
 import {
     CustomDialogTransition, customerAccount, customerContact, getCollaboratorDropdownDataSource, getObjKeys, getObjKeysWithValues,
-    getOwnerDropdownDataSource, isFieldNotTouched, rentalManagement, setFieldsInAscendingOrder, yupSchema, generateUniqueIdOnly, RENTAL_STATUS
+    getOwnerDropdownDataSource, rentalManagement, setFieldsInAscendingOrder, yupSchema, generateUniqueIdOnly, RENTAL_STATUS, getNestedlookupDependentOn
 } from "../../../constants/helpers";
 import axiosInstance from '../../../axios/axiosInstance'
 import Dialog from "@material-ui/core/Dialog";
@@ -36,7 +36,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     const { isOffline, offlineFieldsData, offlineGridData } = useContext(CustomOfflineContext);
 
     const [loading, setLoading] = useState(false);
-    
+
     const [rentalData, setRentalData] = useState({ fields: [], initialValues: {} });
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -347,21 +347,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             setBillingAddress([])
         }
     };
-
-    const getNestedlookupDependentOn = (fields, fieldName) => {
-        const result: any = []
-        const checkNested = (fields, fieldName, result) => {
-            const filterFields: any = fields.filter(d => d.lookupDependentOn === fieldName)
-            if (filterFields?.length) {
-                filterFields?.forEach((ele: any) => {
-                    result.push({ fieldName: ele.fieldName, value: ele?.type === 'multiSelect' ? [] : '' })
-                    checkNested(fields, ele.fieldName, result);
-                })
-            }
-        }
-        checkNested(fields, fieldName, result);
-        return result;
-    }
 
     function validate(values) {
         const errors = {};
