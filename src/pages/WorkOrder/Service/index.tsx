@@ -376,6 +376,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         cursor: allowedToEdit ? 'pointer' : 'not-allowed',
         // pointerEvents: 'none',
         opacity: '.5',
+        filter: 'grayscale(1)',
         borderTopWidth: index !== 0 && !mobScreen ? 0 : 1
       };
     }
