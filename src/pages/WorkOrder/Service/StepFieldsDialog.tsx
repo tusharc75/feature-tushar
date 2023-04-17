@@ -14,8 +14,24 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
-const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrderId, stepData, referencType, allowedToEdit, selectedService = null }) => {
+const StepFieldsDialog = ({
+  handleClose,
+  handleSubmit,
+  fieldData,
+  step,
+  workOrderId,
+  stepData,
+  referencType,
+  allowedToEdit,
+  selectedService = null
+}) => {
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
 
   const [isEditing, setEditing] = React.useState(true);
   const [viewStep, setViewStep] = React.useState(false);
@@ -24,15 +40,22 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrde
   const steps = selectedService?.steps || [];
 
   const RenderStepData = () => {
-
-    const [time, setTime] = React.useState(convertMsToTime(
-      stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ?
-        (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime()) : (stepData?.duration || 0)));
+    const [time, setTime] = React.useState(
+      user?.brandPolicy?.workOrderTimer
+        ? convertMsToTime(
+            stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+              ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
+              : stepData?.duration || 0
+          )
+        : null
+    );
 
     React.useEffect(() => {
-      if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+      if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && user?.brandPolicy?.workOrderTimer) {
         const interval = setInterval(() => {
-          setTime(convertMsToTime((stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())));
+          setTime(
+            convertMsToTime((stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime()))
+          );
         }, 1000);
         return () => {
           clearInterval(interval);
@@ -56,7 +79,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrde
             <Typography variant="caption"> {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
           </Grid>
         ) : null}
-        {stepData?.startDate &&
+        {stepData?.startDate && user?.brandPolicy?.workOrderTimer && (
           <Grid item style={{ flexGrow: 1 }}>
             <Box
               style={{
@@ -66,21 +89,23 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrde
                 border: '1px solid rgba(0, 0, 0, 0.23)',
                 backgroundColor: 'transparent',
                 padding: '2px 7px',
-                borderRadius: '8px'
+                borderRadius: '8px',
+                maxWidth: 'max-content'
               }}
             >
               <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
               {time}
             </Box>
           </Grid>
-        }
+        )}
       </Grid>
     );
   };
 
   const handleUpdateStep = (values: any) => {
-    values.order = step?.order
-    axiosInstance().put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/update-step`, values)
+    values.order = step?.order;
+    axiosInstance()
+      .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/update-step`, values)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -88,7 +113,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrde
           message: data.message
         });
         setViewStep(false);
-        handleClose()
+        handleClose();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -117,7 +142,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrde
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <>
               <div className={styles.content}>
-                {fieldData?.fields?.length ?
+                {fieldData?.fields?.length ? (
                   !isEditing ? (
                     <Details
                       containerPadding={'0px'}
@@ -193,12 +218,14 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrde
                           );
                         })}
                     </Form>
-                  ) :
+                  )
+                ) : (
                   <div className={styles.centerText}>
                     <Typography variant={'body1'} style={{ color: 'var(--new_theme_color)' }}>
                       No Fields...
                     </Typography>
-                  </div>}
+                  </div>
+                )}
                 <Box mt={2} className={styles.dates}>
                   <RenderStepData />
                 </Box>
@@ -210,7 +237,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrde
                   justifyContent: 'space-between'
                 }}
               >
-                {allowedToEdit ?
+                {allowedToEdit ? (
                   <IconButton
                     aria-label="close"
                     onClick={() => {
@@ -220,7 +247,10 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrde
                     color="inherit"
                   >
                     <SettingsIcon color="inherit" />
-                  </IconButton> : <div />}
+                  </IconButton>
+                ) : (
+                  <div />
+                )}
                 <div
                   style={{
                     display: 'flex',
@@ -268,11 +298,11 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrde
             setViewStep(false);
           }}
           handleSucess={(data) => {
-            handleUpdateStep(data)
+            handleUpdateStep(data);
           }}
           stepId={''}
           stepData={step}
-          notEditable={referencType === "workOrderTechnician" ? true : step?.customStep === true ? false : true}
+          notEditable={referencType === 'workOrderTechnician' ? true : step?.customStep === true ? false : true}
           steps={steps}
           reference={'workOrder'}
           workOrderId={workOrderId}
