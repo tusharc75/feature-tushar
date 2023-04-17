@@ -3,9 +3,7 @@ import { useHistory, Link } from 'react-router-dom';
 import { Grid, Box, IconButton, Button } from '@material-ui/core';
 import { Info } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
@@ -24,7 +22,6 @@ import {
 } from 'src/constants/helpers';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
-import { uniq, map, groupBy } from 'lodash';
 import { AiFillFilePdf } from 'react-icons/ai';
 import ReceiveDialog from './ReceiveDialog';
 
@@ -419,6 +416,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
             fetchProducts();
           }}
           selectedRecords={selectedRecords}
+          transferInventoryData={transferInventoryData}
         />
       )}
     </Fragment>

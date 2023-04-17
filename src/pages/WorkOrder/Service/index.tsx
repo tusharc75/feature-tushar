@@ -594,7 +594,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                         </Box>
 
                                         {/* Icons */}
-                                        {data?.type === 'service' && (
+                                        {user?.brandPolicy?.repairOrderQuotation && data?.type === 'service' && (
                                           <Box ml={1}>
                                             {data?.preWork ? (
                                               <HtmlTooltip title="Pre Work Service">
@@ -670,7 +670,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                           </Box>
                                         )}
 
-                                        <RenderTotalTime stepTimes={stepTimes} />
+                                        {user?.brandPolicy?.workOrderTimer && <RenderTotalTime stepTimes={stepTimes} />}
                                       </Box>
                                     </>
                                   )}
@@ -821,7 +821,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                     </>
                                   )}
                                   <Box display={'flex'} style={{ gap: '10px', flexWrap: 'wrap' }}>
-                                    {data?.type === 'service' &&
+                                    {user?.brandPolicy?.repairOrderQuotation &&
+                                      data?.type === 'service' &&
                                       (data?.preWork ? (
                                         <HtmlTooltip title="Pre Work Service">
                                           <span>
