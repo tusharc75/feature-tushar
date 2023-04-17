@@ -51,7 +51,6 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
                     <Autocomplete
                       value={steps?.find((step) => step._id === selectedSteps[item._id]) || null}
                       onChange={(event, newValue) => {
-                        console.log(newValue);
                         handleChange(item._id, newValue?._id);
                       }}
                       options={steps}
