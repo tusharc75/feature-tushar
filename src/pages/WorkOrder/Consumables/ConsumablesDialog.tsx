@@ -1,25 +1,22 @@
 import { useState, useEffect, useContext, useReducer } from 'react';
-import { Box, Button, ButtonGroup, CircularProgress, Dialog, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid, getLocalStorageArrayData, serviceMaster, workOrder } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, workOrder } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import styles from 'src/pages/Leads/Header.module.scss';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import routes from 'src/components/Helpers/Routes';
-import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import { CheckboxRenderer, CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import ConsumablesQtyDialog from './ConsumablesQtyDialog';
 
 let searchTimeout;
 
-const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId = null, from }) => {
+const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId }) => {
 
-  const renderedFrom = `${from === "service" ? routes.serviceMaster.title : routes.product.title}_consumable`;
+  const renderedFrom = `workOrder_consumable`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const { state: { selectedEntity } }: any = useData();
@@ -31,11 +28,6 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId = null, from })
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false)
   const [columns, setColumns] = useState([]);
-
-  const defaultColumns = [
-    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
-  ];
-  const { getColumnData } = useColumns();
 
   useEffect(() => {
     localStorage.removeItem(localStorageSelectedRecords);
@@ -53,42 +45,16 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId = null, from })
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
-    if (from === "service") {
-      setFrameWorkComponent({
-        commonRenderer: CommonRenderer,
-        checkboxRenderer: CheckboxRenderer,
-      });
-      setColumns([
-        { field: "product", headerName: "Product", show: true, cellRenderer: "commonRenderer" },
-        { field: "service", headerName: "Service", show: true, cellRenderer: "commonRenderer" },
-        { field: "qty", headerName: "Qty", show: true, cellRenderer: "commonRenderer" },
-        { field: "consumed", headerName: "Consumed", show: true, cellRenderer: "checkboxRenderer" },
-      ])
-
-    }
-    else {
-      axiosInstance().get("/field?resource=Product&view=true").then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packages.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...defaultColumns, ...columns]);
-      });
-    }
-
+    setFrameWorkComponent({
+      commonRenderer: CommonRenderer,
+      checkboxRenderer: CheckboxRenderer,
+    });
+    setColumns([
+      { field: "product", headerName: "Product", show: true, cellRenderer: "commonRenderer" },
+      { field: "service", headerName: "Service", show: true, cellRenderer: "commonRenderer" },
+      { field: "qty", headerName: "Qty", show: true, cellRenderer: "commonRenderer" },
+      { field: "consumedQty", headerName: "Consumed Qty", show: true, cellRenderer: "commonRenderer" },
+    ])
   };
 
   const fetchData = () => {
@@ -96,96 +62,22 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId = null, from })
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    if (from === "service") {
-      axiosInstance().get(`${workOrder.api}/${workOrderId}/consumable`).then(({ data: { data } }) => {
-        let rows = data.map((u) => {
-          let res: any = {
-            ...prepareDataForGrid(u),
-          };
-          res.hideSelection = u?.consumed
-          return res;
-        });
-        dispatch({ type: "initialize", data: rows, count: rows.length });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-    else {
-      axiosInstance()
-        .get(`${routes.workOrder.path}/${workOrderId}`)
-        .then(({ data: { data } }) => {
-          axiosInstance()
-            .get(`/product/${data?.product?.optionValue}/bom`)
-            .then(({ data: { data } }) => {
-              data = data.map((o: any) => {
-                let finalObject = {
-                  ...o,
-                  ...o?.childProductDetail,
-                };
-                return prepareDataForGrid(finalObject)
-              });
-              const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-              dispatch({
-                type: 'selection',
-                selectedRecords: savedRecords
-              });
-              dispatch({ type: 'initialize', data: data, count: data.count });
-              setTimeout(() => {
-                dispatch({ type: 'loading', loading: false });
-              }, gridLoadingTimeout);
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
-
-
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (from === "service") {
-      axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/mark-consumed`,
-        {
-          "ids": selectedRecords.map(d => d._id)
-        }).then(({ data }) => {
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-    else {
-      let tempData = selectedRecords.map(d => {
-        return {
-          "product": d._id,
-          "qty": d.qty
-        }
-      })
-      axiosInstance().post(`${workOrder.api}/${workOrderId}/consumable`, tempData).then(({ data }) => {
-        onSuccess();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
+    axiosInstance().get(`${workOrder.api}/${workOrderId}/consumable`).then(({ data: { data } }) => {
+      let rows = data.map((u) => {
+        let res: any = {
+          ...prepareDataForGrid(u),
+        };
+        res.hideSelection = u?.qty - u?.consumedQty === 0 ? true : false
+        return res;
+      });
+      dispatch({ type: "initialize", data: rows, count: rows.length });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
@@ -216,7 +108,7 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId = null, from })
                   size="small"
                   variant="contained"
                 >
-                  {from === "service" ? 'Consume ' : 'Add '}  {selectedRecords.length > 0
+                  {'Consume '}  {selectedRecords.length > 0
                     ? '(' + selectedRecords.length + ')'
                     : ''}
                 </Button>
@@ -249,12 +141,16 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId = null, from })
           </Box>
         )}
       </CustomDialogContent>
-      {openConsumablesQtyDialog && 
-      <ConsumablesQtyDialog 
-        onClose={()=>setOpenConsumablesQtyDialog(false)}
-        onSuccess={() => setOpenConsumablesQtyDialog(false)}
-        selectedRecords={selectedRecords}
-      />
+      {openConsumablesQtyDialog &&
+        <ConsumablesQtyDialog
+          workOrderId={workOrderId}
+          onClose={() => setOpenConsumablesQtyDialog(false)}
+          onSuccess={() => {
+            fetchData()
+            setOpenConsumablesQtyDialog(false)
+          }}
+          selectedRecords={selectedRecords}
+        />
       }
     </Dialog>
   );

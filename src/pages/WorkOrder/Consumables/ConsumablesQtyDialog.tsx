@@ -13,12 +13,15 @@ import {
   makeStyles
 } from '@material-ui/core';
 import { FieldArray, Form, Formik } from 'formik';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { workOrder } from 'src/constants/helpers';
 
 const useClasses = makeStyles(() => ({
   tableContainer: {
@@ -26,8 +29,11 @@ const useClasses = makeStyles(() => ({
   }
 }));
 
-const ConsumablesQtyDialog = ({ onClose, onSuccess, selectedRecords }) => {
+const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords }) => {
+
   const classes = useClasses();
+  const toastConfig = useContext(CustomToastContext);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -35,17 +41,40 @@ const ConsumablesQtyDialog = ({ onClose, onSuccess, selectedRecords }) => {
     let errors: any = {};
     if (values?.length > 0) {
       values.map((d) => {
-        let tempProduct = selectedRecords.find((u) => u._id === d.id);
+        let tempProduct = selectedRecords.find((u) => u._id === d._id);
         let qty = tempProduct.qty;
-        if (tempProduct && d.receivingQty > qty) {
-          errors.receivingQty = 'should be greater';
+        if (tempProduct && d.consumedQty > qty) {
+          errors.consumedQty = 'Consume Qty cannot exceed Qty.';
         }
       });
     }
     return errors;
   };
 
-  const handleSubmit = (values) => {};
+  const handleSubmit = (values) => {
+    const data: any = []
+    values?.products?.forEach((e) => {
+      if (parseInt(e?.consumedQty)) {
+        data.push({ _id: e?._id, product: e?.materialId, qty: parseInt(e?.consumedQty) })
+      }
+    })
+    if (data?.length) {
+      setIsSubmitting(true)
+      axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/consumable-consume`, data).then(({ data }) => {
+        onSuccess();
+        setIsSubmitting(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+        .catch((error) => {
+          setIsSubmitting(false)
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
 
   return (
     <Dialog
@@ -60,7 +89,7 @@ const ConsumablesQtyDialog = ({ onClose, onSuccess, selectedRecords }) => {
       }}
     >
       <CustomDialogHeader
-        title={'Consumables Quantity'}
+        title={'Products/Consumables'}
         onClose={onClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
@@ -70,83 +99,84 @@ const ConsumablesQtyDialog = ({ onClose, onSuccess, selectedRecords }) => {
       />
       <Formik
         initialValues={{
-          selectedProducts: selectedRecords?.map((item) => ({
-            id: item?._id,
+          products: selectedRecords?.map((item) => ({
+            _id: item?._id,
+            materialId: item?.materialId,
             product: item?.product,
-            qty: item.qty,
-            receivingQty: 0
+            qty: item.qty - (item?.consumedQty || 0),
+            consumedQty: 0
           }))
         }}
         enableReinitialize={true}
-        onSubmit={() => {}}
+        onSubmit={() => { }}
       >
         {({ values, setFieldValue, errors }) => (
           <>
             <CustomDialogContent>
-              {values?.selectedProducts && values?.selectedProducts?.length ? (
+              {values?.products && values?.products?.length ? (
                 <Box p={2}>
                   <Form>
                     <FieldArray
-                      name="selectedProducts"
+                      name="products"
                       render={(arrayHelpers) => (
-                          <TableContainer className={classes.tableContainer} component={Paper}>
-                            <Table aria-label="customized table">
-                              <TableHead>
-                                <TableRow>
-                                  <TableCell>Sr.No.</TableCell>
-                                  <TableCell align="left">Product</TableCell>
-                                  <TableCell align="left">{'Qty'}</TableCell>
-                                  <TableCell align="left">{'Receiving Qty'}</TableCell>
+                        <TableContainer className={classes.tableContainer} component={Paper}>
+                          <Table aria-label="customized table">
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>Index</TableCell>
+                                <TableCell align="left">Product</TableCell>
+                                <TableCell align="left">{'Qty'}</TableCell>
+                                <TableCell align="left">{'Consume Qty'}</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {values?.products?.map((value: any, index) => (
+                                <TableRow key={value._id}>
+                                  <TableCell component="th" scope="row">
+                                    {index + 1}
+                                  </TableCell>
+                                  <TableCell align="left">{value['product']}</TableCell>
+                                  <TableCell align="left">
+                                    <TextField
+                                      fullWidth
+                                      size="small"
+                                      variant="outlined"
+                                      placeholder={'qty'}
+                                      autoComplete="off"
+                                      name={'qty'}
+                                      disabled={true}
+                                      type="number"
+                                      value={value['qty']}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="left">
+                                    <TextField
+                                      fullWidth
+                                      size="small"
+                                      variant="outlined"
+                                      placeholder={'Consume Qty'}
+                                      autoComplete="off"
+                                      name={'consumedQty'}
+                                      type="number"
+                                      required
+                                      value={value['consumedQty']}
+                                      error={validate([value])?.consumedQty}
+                                      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(/[^0-9]/g, '');
+                                        arrayHelpers.replace(index, {
+                                          ...values.products[index],
+                                          consumedQty: value
+                                        });
+                                      }}
+                                      helperText={validate([value])?.consumedQty ? 'Consume Qty cannot exceed Qty.' : ''}
+                                    />
+                                  </TableCell>
                                 </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                {values?.selectedProducts?.map((value: any, index) => (
-                                  <TableRow key={value.id}>
-                                    <TableCell component="th" scope="row">
-                                      {index + 1}
-                                    </TableCell>
-                                    <TableCell align="left">{value['product']}</TableCell>
-                                    <TableCell align="left">
-                                      <TextField
-                                        fullWidth
-                                        size="small"
-                                        variant="outlined"
-                                        placeholder={'qty'}
-                                        autoComplete="off"
-                                        name={'qty'}
-                                        disabled={true}
-                                        type="number"
-                                        value={value['qty']}
-                                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                      />
-                                    </TableCell>
-                                    <TableCell align="left">
-                                      <TextField
-                                        fullWidth
-                                        size="small"
-                                        variant="outlined"
-                                        placeholder={'qty'}
-                                        autoComplete="off"
-                                        name={'receivingQty'}
-                                        type="number"
-                                        value={value['receivingQty']}
-                                        error={validate([value])?.receivingQty}
-                                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                        onChange={(e) => {
-                                          const value = e.target.value.replace(/[^0-9]/g, '');
-                                          arrayHelpers.replace(index, {
-                                            ...values.selectedProducts[index],
-                                            receivingQty: value
-                                          });
-                                        }}
-                                        helperText={validate([value])?.receivingQty ? 'Receiving quantity is more than actual quantity' : ''}
-                                      />
-                                    </TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          </TableContainer>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
                       )}
                     />
                   </Form>
@@ -158,12 +188,17 @@ const ConsumablesQtyDialog = ({ onClose, onSuccess, selectedRecords }) => {
               )}
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button variant="outlined" disabled={isSubmitting} size="small" color="primary" onClick={onClose}>
+              <Button
+                variant="outlined"
+                disabled={isSubmitting}
+                size="small"
+                color="primary"
+                onClick={onClose}>
                 Cancel
               </Button>
               <Button
                 onClick={() => {
-                  if (!validate(values.selectedProducts).receivingQty) {
+                  if (!validate(values.products).consumedQty) {
                     handleSubmit(values);
                   }
                 }}
