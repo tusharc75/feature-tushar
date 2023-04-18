@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Box, Typography, Paper, TextField, Card, CardContent, CircularProgress } from '@material-ui/core';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
-import { startCase } from 'lodash';
+import { upperCase, lowerCase } from 'lodash';
 
 import axiosInstance from 'src/axios/axiosInstance';
 import VirtualizedList from 'src/components/VirtualizedList';
@@ -115,11 +115,11 @@ const AssetStats = () => {
           selectedAssets.length > 0 &&
           !loadingStats &&
           Object.keys(assetStats).map((stat: any) => (
-            <Grid key={stat} item xs={12} sm={4} md={3}>
+             <Grid key={stat} item xs={12} sm={4} md={3}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
-                    {startCase(stat)}
+                    {`${upperCase(stat?.substring(0,1))}${lowerCase(stat.substring(1,stat?.length))}`}
                   </Typography>
                   <Box display='flex' alignItems='flex-end'>
                     <Typography variant="h5" component="h2">
@@ -130,7 +130,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-          ))}
+        ))}
       </Grid>
     </Box>
   );
