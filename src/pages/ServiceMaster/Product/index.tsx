@@ -61,13 +61,13 @@ function Product({ id }) {
     axiosInstance()
       .get(`${serviceMaster.api}/product/${id}`)
       .then(({ data: { data } }) => {
-        setDataRows(data);
+        setDataRows(data?.map((e) => ({ ...e, ...(e?.productDetail || {}) })));
         setParts([...data]);
       })
       .catch((err) => {});
   };
 
-  const fetchGridColumns = () => {
+  const fetchGridColumns = async () => {
     const column: any = [
       {
         accessor: 'qty',
@@ -76,55 +76,53 @@ function Product({ id }) {
         width: 70,
         minWidth: 70,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
-      },
-      {
-        accessor: 'productName',
-        Header: 'Product Name',
-        minWidth: 100,
-        Cell: ({ row }) => (
-          <Link
-            className="link"
-            title={row.original?.productDetail?.productName}
-            href={`${routes.productDetail.path}/${row.original?.productDetail?._id}`}
-          >
-            {row.original?.productDetail?.productName || <NoDataCell />}
-          </Link>
-        )
-      },
-      {
-        accessor: 'productNumber',
-        Header: 'Product Number',
-        Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{row.original?.productDetail?.productNumber || <NoDataCell />}</p>
-          </div>
-        )
-      },
-      {
-        accessor: 'productDescription',
-        Header: 'Product Description',
-        Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{row.original?.productDetail?.productDescription || <NoDataCell />}</p>
-          </div>
-        )
-      },
-      {
-        accessor: 'productCategory',
-        Header: 'Product Category',
-        Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{row.original?.productDetail?.productCategory?.optionLabel || <NoDataCell />}</p>
-          </div>
-        )
-      },
-      {
-        accessor: 'serializedProduct',
-        Header: 'Serialized Product',
-        width: 70,
-        Cell: ({ row }) => <p className="text-truncate">{row.original?.serializedProduct ? 'Yes' : 'No' || <NoDataCell />}</p>
       }
     ];
+    const productResult = await axiosInstance().get('/field?resource=Product');
+    // const productFields = productResult?.data?.data?.filter((e) =>
+    //   ['productName', 'productNumber', 'productDescription', 'productCategory', 'serializedProduct'].includes(e?.fieldData?.fieldName)
+    // );
+
+    productResult?.data?.data
+      ?.filter((e) =>
+        ['productName', 'productNumber', 'productDescription', 'productCategory', 'serializedProduct'].includes(e?.fieldData?.fieldName)
+      )
+      ?.map((field) => {
+        if (field?.fieldData?.fieldName === 'productCategory') {
+          column.push({
+            accessor: field?.fieldData?.fieldName,
+            Header: field?.fieldData?.fieldLabel,
+            width: 100,
+            Cell: ({ row }) => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <p>{row.original?.productDetail[field?.fieldData?.fieldName]?.optionLabel || <NoDataCell />}</p>
+              </div>
+            )
+          });
+        } else if (field?.fieldData?.fieldName === 'serializedProduct') {
+          column.push({
+            accessor: field?.fieldData?.fieldName,
+            Header: field?.fieldData?.fieldLabel,
+            width: 100,
+            Cell: ({ row }) => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <p>{row.original?.productDetail[field?.fieldData?.fieldName] ? 'Yes' : 'No' || <NoDataCell />}</p>
+              </div>
+            )
+          });
+        } else {
+          column.push({
+            accessor: field?.fieldData?.fieldName,
+            Header: field?.fieldData?.fieldLabel,
+            width: 100,
+            Cell: ({ row }) => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <p>{row.original?.productDetail[field?.fieldData?.fieldName] || <NoDataCell />}</p>
+              </div>
+            )
+          });
+        }
+      });
 
     column.push({
       accessor: 'action',
@@ -151,6 +149,7 @@ function Product({ id }) {
         </div>
       )
     });
+    console.log(column);
     setColumns([...column]);
   };
 
