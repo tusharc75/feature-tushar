@@ -44,7 +44,7 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
         let tempProduct = selectedRecords.find((u) => u._id === d._id);
         let qty = tempProduct.qty;
         if (tempProduct && d.consumedQty > qty) {
-          errors.consumedQty = 'Consume Qty cannot exceed Qty.';
+          errors.consumedQty = 'Consume Qty is limited to Qty.';
         }
       });
     }
@@ -174,7 +174,7 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
                                           consumedQty: value
                                         });
                                       }}
-                                      helperText={validate([value])?.consumedQty ? 'Consume Qty cannot exceed Qty.' : ''}
+                                      helperText={validate([value])?.consumedQty ? 'Consume Qty is limited to Qty.' : ''}
                                     />
                                   </TableCell>
                                 </TableRow>
