@@ -138,7 +138,7 @@ const ForgetPassword = () => {
                                     }}
                                     validationSchema={emailValidationSchema}
                                     onSubmit={handleSubmit}>
-                                    {({ submitForm }) => (
+                                    {({ submitForm, values, touched, errors, setFieldValue }) => (
                                         <Form className={classes.form}>
                                             <TextField
                                                 name='email'
@@ -147,6 +147,12 @@ const ForgetPassword = () => {
                                                 label='Email'
                                                 variant='outlined'
                                                 style={{ width: 260 }}
+                                                value={values["email"]}
+                                                error={touched['email'] && Boolean(errors['email'])}
+                                                helperText={touched['email'] && errors['email']}
+                                                onChange={(e) => {
+                                                    setFieldValue('email', e.target.value);
+                                                }}
                                             />
                                             <Box textAlign="right" className="p-2">
                                                 <MuiLink component={Link} to="/login">
