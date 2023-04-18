@@ -46,6 +46,8 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     customDate: new Date()
   })
   const [loadingInitialData, setLoadingInitialData] = useState(false)
+  const [currentInventory, setCurrentInventory] = useState(null)
+  const [selectedStorageLocation, setSelectedStorageLocation] = useState(null)
 
   const {
     state: { user }
@@ -100,14 +102,19 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
               }
             )
           })
+          setSelectedStorageLocation(storageLocationOption[0]?.optionValue)
+        } else {
+          setSelectedStorageLocation(storageLocationId)
         }
         setLoadingInitialData(false)
       });
   };
 
   useEffect(() => {
-    setLoadingInitialData(true)
-    getStorageLocation();
+    if (user?.user?.brandPolicy?.storageLocation) {
+      setLoadingInitialData(true)
+      getStorageLocation();
+    }
   }, [warehouse])
 
   const handleSubmit = (values) => {
@@ -266,6 +273,27 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     e.target.value = null;
   };
 
+  const getInventory = () => {
+    let api = `${productInventory.api}/inventory-at-date?date=${new Date()}&warehouse=${warehouse}&product=${product[0]._id}`;
+    if (selectedStorageLocation) {
+      api = `${api}&storagelocation=${selectedStorageLocation}`
+    }
+    if (product?.length === 1) {
+      axiosInstance()
+        .get(api)
+        .then(({ data: { data } }) => {
+          setCurrentInventory(data);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  }
+
+  useEffect(() => {
+    getInventory()
+  }, [selectedStorageLocation])
+
   return (
     <Dialog
       fullWidth
@@ -309,7 +337,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                       <List style={{ padding: 0 }}>
                         <ListItem key={product[0]?._id}>
                           {product?.length === 1 ? (
-                            <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${product[0]?.availableInventory}`} />
+                            <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${currentInventory}`} />
                           ) : (
                             <ListItemText primary={`${product?.length} Products`} />
                           )}
@@ -361,6 +389,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                             value={storageLocationOptions.filter((data) => data.optionValue === values['storagelocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storagelocation'])[0] : ''}
                             onChange={(e, val) => {
                               setFieldValue('storagelocation', val?.optionValue);
+                              setSelectedStorageLocation(val?.optionValue)
                             }}
                             renderInput={(params) =>
                               isMobile && !isTablet ? (
