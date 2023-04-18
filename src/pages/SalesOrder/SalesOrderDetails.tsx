@@ -31,6 +31,7 @@ import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps2, { getIndex } from 'src/components/Steps';
+import Process from './Process';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -136,6 +137,7 @@ const SalesOrderDetails = () => {
       data = response?.data?.data;
 
       setCurrentStep(getIndex(data?.processStatus, salesOrderProcessSteps));
+
       setHeadingLabel(data.salesOrderNo);
       setCustomizedRoutes([routes.salesOrder, { title: `${data.salesOrderNo}` }]);
       setSalesOrderData(data);
@@ -332,14 +334,17 @@ const SalesOrderDetails = () => {
               />
             )}
             {currentStep === 1 && salesOrderData && (
-              <AdditionalCost 
-                salesOrderData={salesOrderData} 
-                setNextStep={setNextStep} 
-                renderedFrom={`${renderedFrom}_grid-2`} 
+              <AdditionalCost
+                salesOrderData={salesOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-2`}
                 allowedToEdit={allowedToEdit}
-                />
+              />
             )}
             {currentStep === 2 && salesOrderData && (
+              <Process salesOrderData={salesOrderData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
+            )}
+            {currentStep === 3 && salesOrderData && (
               <Invoice
                 salesOrderData={salesOrderData}
                 setNextStep={setNextStep}
