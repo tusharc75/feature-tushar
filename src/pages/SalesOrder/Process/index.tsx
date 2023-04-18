@@ -4,104 +4,28 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
-import { salesOrder } from '../../../constants/helpers';
-
+import { salesOrder, sidebarResource } from '../../../constants/helpers';
 import { isMobile } from 'react-device-detect';
 import { startCase } from 'lodash';
+import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
+import { genrateCustomTableColumns } from 'src/constants/columns';
+import routes from 'src/components/Helpers/Routes';
 
 const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
+
   const toastConfig = useContext(CustomToastContext);
+  const renderedFrom = `${routes.salesOrder.title}_Process`
 
   const [columns, setColumns] = useState([]);
   const [rowsData, setRowsData] = useState(null);
-  const [material, setMaterial] = useState([]);
-  const [selectedProducts, setSelectedProducts] = useState([]);
 
-  const fetchMaterialData = async () => {
-    setNextStep(false);
-    var data: any = [];
-    const response = await axiosInstance().get(`${salesOrder.api}/material/${salesOrderData._id}`);
-    data = response?.data?.data;
-    if (Object.keys(data?.material[0]?.procurement).length === 0) {
-      getProcure();
-      return;
-    }
-    setMaterial(JSON.parse(JSON.stringify(data.material)));
-    const rows = data.material.filter((e) => e.parentId === null);
-    rows.forEach((parent, i) => {
-      parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
-      parent.description =
-        parent.type === 'product'
-          ? parent?.productDetail?.productDescription
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription
-          : parent?.serviceDetail?.serviceDescription;
-      parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
-      parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      parent.qty = parent.qty;
-      parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
-      parent.procurementName = parent?.procurement?.optionLabel;
-      parent.subRows = generateNestedData(data.material, parent);
-    });
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(true);
-    } else {
-      setNextStep(true);
-    }
-    setRowsData(rows);
-  };
+  useEffect(() => {
+    fetchFields();
+  }, []);
 
-  const generateNestedData = (material, parent) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
-    subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-        _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
-      _subRow.description =
-        _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow?.serviceDetail?.serviceDescription;
-      _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
-      _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      _subRow.qty = `${parent.qty * _subRow.qty} `;
-      _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
-      _subRow.procurementName = _subRow?.procurement?.optionLabel;
-      _subRow.subRows = generateNestedData(material, _subRow);
-    });
-    if (subRows.length === 0 && parent.type === 'package') {
-      parent.isValid = false;
-    }
-    if (parent.type === 'package') {
-      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
-    }
-    return subRows;
-  };
-
-  const getProcure = async () => {
-    try {
-      const response = await axiosInstance().put(`sales-order/procure-material/${salesOrderData._id}`);
-      if (response) {
-        fetchMaterialData();
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  };
-
-  const createColumns = () => {
+  const fetchFields = async () => {
+    var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
+    const newColumns = genrateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
     let coloum: any = [
       {
         accessor: 'index',
@@ -124,29 +48,48 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
         )
       },
       {
-        accessor: 'procurementName',
-        Header: 'Procurement',
-        minWidth: 300,
-        width: 300,
-        Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>{<p title={row.original?.procurementName}>{row.original?.procurementName}</p>}</div>
-        )
+        accessor: 'detail',
+        Header: 'Detail',
+        width: 200,
+        Cell: ({ row }) => <p title={row.original?.detail}>{row.original?.detail}</p>
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => <p title={row.original?.description}>{row.original?.description}</p>
       },
       {
         accessor: 'procurementType',
         Header: 'Procurement Type',
-        minWidth: 300,
-        width: 300,
+        width: 200,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>{<p title={row.original?.procurementType}>{row.original?.procurementType}</p>}</div>
         )
       },
       {
-        accessor: 'detail',
-        Header: 'Detail',
-        minWidth: 300,
-        width: 300,
-        Cell: ({ row }) => <div style={{ display: 'flex', alignItems: 'center' }}>{<p title={row.original?.detail}>{row.original?.detail}</p>}</div>
+        accessor: 'procurementName',
+        Header: 'Procurement',
+        width: 200,
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {row.original?.procurementType === sidebarResource.purchaseRequisition ? (
+              <a className="link text-truncate" href={`${routes.purchaseRequisitionDetail.path}/${row.original.procurementId}`} target="_blank">
+                {row.original.procurementName}
+              </a>
+            ) : row.original?.procurementType === sidebarResource.demandOrder ? (
+              <a className="link text-truncate" href={`${routes.demandOrderDetail.path}/${row.original.procurementId}`} target="_blank">
+                {row.original.procurementName}
+              </a>
+            ) : row.original?.procurementType === sidebarResource.productionOrder ? (
+              <a className="link text-truncate" href={`${routes.productionOrderDetail.path}/${row.original.procurementId}`} target="_blank">
+                {row.original.procurementName}
+              </a>
+            ) : (
+              row.original.procurementName
+            )}
+          </div>
+        )
       },
       {
         accessor: 'leadTime',
@@ -160,13 +103,82 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
         }
       }
     ];
+    coloum = [...coloum, ...newColumns]
     setColumns(coloum);
-    fetchMaterialData();
+    fetchData();
   };
 
-  useEffect(() => {
-    createColumns();
-  }, []);
+  const fetchData = async () => {
+    setNextStep(false);
+    var material: any = [];
+    const response = await axiosInstance().get(`${salesOrder.api}/material/${salesOrderData._id}`);
+    material = response?.data?.data?.material;
+    if (!material?.find((e) => e?.procurement?.optionLabel)) {
+      generateProcurement();
+      return;
+    }
+    const rows = material.filter((e) => e.parentId === null);
+    rows.forEach((parent, i) => {
+      parent.index = i + 1;
+      parent.detail = `${parent.type === 'product'
+        ? parent.productDetail?.productName
+        : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        }`;
+      parent.description =
+        parent.type === 'product'
+          ? parent?.productDetail?.productDescription
+          : parent.type === 'package'
+            ? parent?.packageDetail?.packageDescription
+            : parent?.serviceDetail?.serviceDescription;
+      parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
+      parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      parent.qty = parent.qty;
+      parent.isValid = true;
+      parent.procurementName = parent?.procurement?.optionLabel;
+      parent.procurementId = parent?.procurement?.optionValue;
+      parent.subRows = generateNestedData(material, parent);
+    });
+    setNextStep(true);
+    setRowsData(rows);
+  };
+
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.detail = `${_subRow.type === 'product'
+        ? _subRow.productDetail?.productName
+        : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+        }`;
+      _subRow.description =
+        _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDescription
+          : _subRow.type === 'package'
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.serviceDetail?.serviceDescription;
+      _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
+      _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      _subRow.qty = `${parent.qty * _subRow.qty} `;
+      _subRow.isValid = true;
+      _subRow.procurementName = _subRow?.procurement?.optionLabel;
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+    return subRows;
+  };
+
+  const generateProcurement = async () => {
+    try {
+      const response = await axiosInstance().put(`${salesOrder.api}/material-procurement/${salesOrderData._id}`);
+      if (response) {
+        fetchData();
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   return (
     <div>
@@ -177,12 +189,12 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={setSelectedProducts}
+              onSelect={() => { }}
               childrenProperty="subRows"
               uniqueKey="_id"
               renderedFrom="sales_order_product_package"
               isClientSideGrid={true}
+              hideSelection={true}
             />
           </Box>
         </>
