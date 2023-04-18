@@ -411,3 +411,68 @@ export const ReceivingTicket: React.FC<svgInterface> = ({ colors, ...others }) =
     </svg>
   );
 };
+
+export const ManualEntry: React.FC<svgInterface> = ({ colors, ...others }) => {
+  const hash = getHash();
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" {...others} viewBox="0 0 512 512" fill="none">
+      <path
+        d="M118.4 427.201C118.4 433.601 123.2 438.401 129.6 438.401H395.2V424.001H123.2C120 422.401 118.4 424.001 118.4 427.201Z"
+        fill={`url(#${hash})`}
+      />
+      <path
+        d="M403.2 475.2H128C100.8 475.2 78.4 452.8 78.4 425.6C80 403.2 99.2 384 121.6 384H432V446.4C432 462.4 419.2 475.2 403.2 475.2ZM121.6 409.6C112 409.6 104 417.6 104 427.2C104 440 115.2 451.2 128 451.2H403.2C404.8 451.2 406.4 449.6 406.4 448V411.2H121.6V409.6Z"
+        fill={`url(#${hash}2)`}
+      />
+      <path
+        d="M396.8 36.8008H129.6C102.4 36.8008 80 59.2008 80 86.4008V392.001C89.6 379.201 105.6 371.201 123.2 371.201H432V72.0008C432 52.8008 416 36.8008 396.8 36.8008ZM203.2 124.801C203.2 120.001 208 115.201 212.8 115.201H358.4C363.2 115.201 368 120.001 368 124.801V147.201C368 152.001 363.2 156.801 358.4 156.801H212.8C208 156.801 203.2 152.001 203.2 147.201V124.801ZM368 268.801H256V243.201H368V268.801ZM368 212.801H203.2V187.201H368V212.801Z"
+        fill={`url(#${hash}3)`}
+      />
+      <defs>
+        <linearGradient id={hash} x1="159.487" y1="423.373" x2="160.684" y2="449.243" gradientUnits="userSpaceOnUse">
+          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+        </linearGradient>
+        <linearGradient id={`${hash}2`} x1="130.887" y1="384" x2="163.853" y2="534.094" gradientUnits="userSpaceOnUse">
+          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+        </linearGradient>
+        <linearGradient id={`${hash}3`} x1="132.25" y1="36.8008" x2="435.149" y2="389.295" gradientUnits="userSpaceOnUse">
+          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
+
+export const Process: React.FC<svgInterface> = ({ colors, ...others }) => {
+  const hash = getHash();
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" {...others} viewBox="0 0 512 512" fill="none">
+      <g clip-path="url(#clip0_3021_33005)">
+        <path
+          d="M121 256C121 330.399 181.601 391 256 391C330.399 391 391 330.399 391 256C391 181.601 330.399 121 256 121C181.601 121 121 181.601 121 256ZM326.499 236.499L241 322.301L185.501 266.5L206.5 245.501L241 279.699L305.501 215.5L326.499 236.499Z"
+          fill={`url(#${hash})`}
+        />
+        <path
+          d="M256 512C396.7 512 512 396.7 512 256H452C452 363.401 363.401 451 256 451C148.599 451 61 363.401 61 256C61 148.599 148.599 61 256 61C299.801 61 340.3 75.399 372.7 100L349.9 122.8L455.799 143.8L434.801 37.899L415.601 57.099C371.8 22 316.3 0 256 0C115.3 0 0 115.3 0 256C0 396.7 115.3 512 256 512Z"
+          fill={`url(#${hash}2)`}
+        />
+      </g>
+      <defs>
+        <linearGradient id={hash} x1="161.078" y1="121" x2="391" y2="391" gradientUnits="userSpaceOnUse">
+          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+        </linearGradient>
+        <linearGradient id={`${hash}2`} x1="76" y1="-5.7295e-06" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+        </linearGradient>
+        <clipPath id="clip0_3021_33005">
+          <rect width="512" height="512" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
