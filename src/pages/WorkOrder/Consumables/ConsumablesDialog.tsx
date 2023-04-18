@@ -14,7 +14,7 @@ import ConsumablesQtyDialog from './ConsumablesQtyDialog';
 
 let searchTimeout;
 
-const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId }) => {
+const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqueId, stepId, serviceName }) => {
 
   const renderedFrom = `workOrder_consumable`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -62,7 +62,11 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId }) => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    axiosInstance().get(`${workOrder.api}/${workOrderId}/consumable`).then(({ data: { data } }) => {
+    var query = `?service=${service}&uniqueId=${uniqueId}`
+    if (stepId) {
+      query = query + `&stepId=${stepId}`
+    }
+    axiosInstance().get(`${workOrder.api}/${workOrderId}/consumable${query}`).then(({ data: { data } }) => {
       let rows = data.map((u) => {
         let res: any = {
           ...prepareDataForGrid(u),
@@ -89,7 +93,7 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId }) => {
       onClose={handleClose}
       aria-labelledby="consume-dialog">
       <CustomDialogHeader
-        title={`Products/Consumables`}
+        title={`${serviceName} - Products/Consumables`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
@@ -150,6 +154,10 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId }) => {
             setOpenConsumablesQtyDialog(false)
           }}
           selectedRecords={selectedRecords}
+          service={service}
+          uniqueId={uniqueId}
+          stepId={stepId}
+          serviceName={serviceName}
         />
       }
     </Dialog>

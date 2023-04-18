@@ -29,7 +29,7 @@ const useClasses = makeStyles(() => ({
   }
 }));
 
-const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords }) => {
+const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords, service, uniqueId, stepId, serviceName }) => {
 
   const classes = useClasses();
   const toastConfig = useContext(CustomToastContext);
@@ -52,13 +52,18 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
   };
 
   const handleSubmit = (values) => {
-    const data: any = []
+    const data: any = {}
+    data.service = service;
+    data.uniqueId = uniqueId;
+    data.stepId = stepId;
+    const products: any = []
     values?.products?.forEach((e) => {
       if (parseInt(e?.consumedQty)) {
-        data.push({ _id: e?._id, product: e?.materialId, qty: parseInt(e?.consumedQty) })
+        products.push({ _id: e?._id, product: e?.materialId, qty: parseInt(e?.consumedQty) })
       }
     })
-    if (data?.length) {
+    data.products = products;
+    if (products?.length) {
       setIsSubmitting(true)
       axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/consumable-consume`, data).then(({ data }) => {
         onSuccess();
@@ -89,7 +94,7 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
       }}
     >
       <CustomDialogHeader
-        title={'Products/Consumables'}
+        title={`${serviceName} - Products/Consumables`}
         onClose={onClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
