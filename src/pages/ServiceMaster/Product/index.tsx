@@ -20,7 +20,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 function Product({ id }) {
-
   const renderedFrom = `${camelCase(routes?.serviceMaster.title)}_product`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -65,13 +64,19 @@ function Product({ id }) {
         setDataRows(data);
         setParts([...data]);
       })
-      .catch((err) => {
-      });
+      .catch((err) => {});
   };
 
   const fetchGridColumns = () => {
-
     const column: any = [
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        editable: permissions?.serviceMaster?.isUpdate ? true : false,
+        width: 70,
+        minWidth: 70,
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
+      },
       {
         accessor: 'productName',
         Header: 'Product Name',
@@ -87,16 +92,26 @@ function Product({ id }) {
         )
       },
       {
-        accessor: 'qty',
-        Header: 'Qty',
-        editable: permissions?.serviceMaster?.isUpdate ? true : false,
-        width: 70,
-        minWidth: 70,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
+        accessor: 'productNumber',
+        Header: 'Product Number',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p>{row.original?.productDetail?.productNumber || <NoDataCell />}</p>
+          </div>
+        )
+      },
+      {
+        accessor: 'productDescription',
+        Header: 'Product Description',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p>{row.original?.productDetail?.productDescription || <NoDataCell />}</p>
+          </div>
+        )
       },
       {
         accessor: 'productCategory',
-        Header: 'Category',
+        Header: 'Product Category',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{row.original?.productDetail?.productCategory?.optionLabel || <NoDataCell />}</p>
@@ -105,7 +120,7 @@ function Product({ id }) {
       },
       {
         accessor: 'serializedProduct',
-        Header: 'Serialized',
+        Header: 'Serialized Product',
         width: 70,
         Cell: ({ row }) => <p className="text-truncate">{row.original?.serializedProduct ? 'Yes' : 'No' || <NoDataCell />}</p>
       }
@@ -138,7 +153,6 @@ function Product({ id }) {
     });
     setColumns([...column]);
   };
-
 
   const handleRemove = () => {
     setIsDeleting(true);
