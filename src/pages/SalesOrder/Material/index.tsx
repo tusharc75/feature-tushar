@@ -52,11 +52,13 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   useEffect(() => {
     fetchFields();
   }, []);
-
+  // console.log(allFields);
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
+
     const newColumns = genrateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+
     let coloum: any = [
       {
         accessor: 'index',
