@@ -4,7 +4,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import LeadTimeAddDialog from './CustomLeadTimeDialog';
 
-const LeadTimeMaster = ({ Id, type, className = '' }) => {
+const LeadTimeMaster = ({ Id, type, className = '', minHeight = null }) => {
   const [loadingPLT, setLoadingPLT] = useState(false);
   const [leadTimeData, setLeadTimeData] = useState(null);
   const [leadTimeDialogOpen, setLeadTimeDialogOpen] = useState(false);
@@ -72,7 +72,7 @@ const LeadTimeMaster = ({ Id, type, className = '' }) => {
             <AddCircleOutlineIcon fontSize="small" />
           </IconButton>
         </Box>
-        <Box className="formdata-v1">
+        <Box className="formdata-v1" style={{ minHeight }}>
           {leadTimeData?.steps?.length ? (
             <Box width={'100%'}>
               <Grid container>

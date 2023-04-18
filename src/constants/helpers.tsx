@@ -75,6 +75,7 @@ export const jobProcessSteps: stepInterface[] = [
 export const salesOrderProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
   { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
+  { name: 'Process', title: 'Process', icon: 'add' },
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
@@ -432,6 +433,7 @@ export const CHILD_RESOURCE = {
   repairJobAsset: 'Repair Job Asset',
   invoiceProduct: 'Invoice Product',
   salesOrderProduct: 'Sales Order Product',
+  salesOrderProcess: 'Sales Order Process',
   salesOrderCost: 'Sales Order Cost',
   subleaseProduct: 'Sublease Product',
   quotationProduct: 'Quotation Product',
@@ -933,21 +935,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -2417,4 +2419,19 @@ export const TOOLTIP_MESSAGE = {
   add: "You don't have permissions to add",
   edit: "You don't have permissions to edit",
   remove: "You don't have permissions to remove"
+};
+
+export const getNestedlookupDependentOn = (fields, fieldName) => {
+  const result: any = [];
+  const checkNested = (fields, fieldName, result) => {
+    const filterFields: any = fields.filter((d) => d.lookupDependentOn === fieldName);
+    if (filterFields?.length) {
+      filterFields?.forEach((ele: any) => {
+        result.push({ fieldName: ele.fieldName, value: ele?.type === 'multiSelect' ? [] : '' });
+        checkNested(fields, ele.fieldName, result);
+      });
+    }
+  };
+  checkNested(fields, fieldName, result);
+  return result;
 };

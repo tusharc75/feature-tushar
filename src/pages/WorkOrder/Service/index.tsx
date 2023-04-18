@@ -109,7 +109,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [serviceDialog, setServiceDialog] = useState({ open: false, uniqueId: null, preWork: null });
   const [arrangeView, setArrangeView] = useState(false);
-  const [consumablesDialog, setConsumablesDialog] = useState(false);
+  const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
   const [logsDialog, setLogsDialog] = useState(false);
   const [isColapsed, setIsColapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
@@ -374,8 +374,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderStyle: 'solid',
         borderColor: 'rgba(25, 24, 24, 0.19)',
         cursor: allowedToEdit ? 'pointer' : 'not-allowed',
-        pointerEvents: 'none',
+        // pointerEvents: 'none',
         opacity: '.5',
+        filter: 'grayscale(1)',
         borderTopWidth: index !== 0 && !mobScreen ? 0 : 1
       };
     }
@@ -670,7 +671,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                           </Box>
                                         )}
 
-                                        <RenderTotalTime stepTimes={stepTimes} />
+                                        {user?.brandPolicy?.workOrderTimer && <RenderTotalTime stepTimes={stepTimes} />}
                                       </Box>
                                     </>
                                   )}
@@ -821,7 +822,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                     </>
                                   )}
                                   <Box display={'flex'} style={{ gap: '10px', flexWrap: 'wrap' }}>
-                                    {user?.brandPolicy?.repairOrderQuotation && data?.type === 'service' &&
+                                    {user?.brandPolicy?.repairOrderQuotation &&
+                                      data?.type === 'service' &&
                                       (data?.preWork ? (
                                         <HtmlTooltip title="Pre Work Service">
                                           <span>
@@ -942,7 +944,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  setConsumablesDialog(true);
+                  setConsumablesDialog({
+                    open: true,
+                    uniqueId: selectedService.uniqueId,
+                    service: selectedService._id,
+                    stepId: null,
+                    serviceName: selectedService.serviceName,
+                  });
                   setAnchorEl(null);
                 }}
               >
@@ -1034,17 +1042,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           loading={false}
         />
       )}
-      {consumablesDialog && (
+      {consumablesDialog.open && (
         <ConsumablesDialog
           onSuccess={() => {
-            setConsumablesDialog(false);
+            setConsumablesDialog({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
             fetchRepairOrderData();
           }}
           handleClose={() => {
-            setConsumablesDialog(false);
+            setConsumablesDialog({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
           }}
           workOrderId={workOrderId}
-          from={'service'}
+          service={consumablesDialog.service}
+          uniqueId={consumablesDialog.uniqueId}
+          stepId={consumablesDialog.stepId}
+          serviceName={consumablesDialog.serviceName}
         />
       )}
       {logsDialog && (

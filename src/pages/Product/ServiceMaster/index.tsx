@@ -23,6 +23,7 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { flattenArray } from 'src/constants/columns';
+import AssignStepDialog from './AssignStepDialog/Index';
 
 interface Props {
   renderedFrom: string;
@@ -30,7 +31,6 @@ interface Props {
 }
 
 const ServiceMaster = (props: Props) => {
-
   const { renderedFrom, id } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -48,14 +48,21 @@ const ServiceMaster = (props: Props) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [dataRows, setDataRows] = useState([]);
 
-  const [assignProductDialog, setAssignProductDialog] = useState({ open: false, products: null, service: null, uniqueId: null });
+  const [assignProductDialog, setAssignProductDialog] = useState({ open: false, products: null, service: null, uniqueId: null, steps: null });
+
+  const [assignStepsToConsumablesDialog, setAssignStepsToConsumablesDialog] = useState({
+    open: false,
+    consumables: null,
+    service: null,
+    steps: null
+  });
 
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
 
   useEffect(() => {
-    getServiceMasterColumns()
+    getServiceMasterColumns();
     fetchData();
   }, [selectedEntity, id]);
 
@@ -63,9 +70,9 @@ const ServiceMaster = (props: Props) => {
     axiosInstance()
       .get(`/field?resource=${serviceMaster.resource}`)
       .then(({ data: { data } }) => {
-        fetchGridColumns(data)
+        fetchGridColumns(data);
       });
-  }
+  };
 
   const fetchGridColumns = (serviceColumns: any) => {
     const columns: any = [
@@ -121,18 +128,24 @@ const ServiceMaster = (props: Props) => {
         width: 100,
         editable: true,
         Cell: ({ row }) => <p className="text-truncate">{row.original?.qty || <NoDataCell />}</p>
+      },
+      {
+        accessor: 'stepName',
+        Header: 'Step Name',
+        width: 100,
+        Cell: ({ row }) => row.original?.stepName ? <p title={row.original?.stepName} className="text-truncate">{row.original?.stepName}</p> : <NoDataCell />
       }
     ];
 
-    if (serviceColumns && serviceColumns?.some(column => column?.fieldData?.fieldName === "preWork")) {
+    if (serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'preWork')) {
       columns.push({
         accessor: 'preWork',
         Header: 'Pre Work',
         width: 70,
         Cell: ({ row }) => <p className="text-truncate">{row.original?.preWork || <NoDataCell />}</p>
-      })
+      });
     }
-    if (serviceColumns && serviceColumns?.some(column => column?.fieldData?.fieldName === "serviceType")) {
+    if (serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'serviceType')) {
       columns.push({
         accessor: 'serviceType',
         Header: 'Service Type',
@@ -141,8 +154,9 @@ const ServiceMaster = (props: Props) => {
             <p>{row.original?.serviceType || <NoDataCell />}</p>
           </div>
         )
-      })
+      });
     }
+
     columns.push({
       accessor: 'action',
       Header: 'Action',
@@ -160,14 +174,21 @@ const ServiceMaster = (props: Props) => {
                 color="primary"
                 onClick={() => {
                   const subProduct = row.original?.subRows?.map((item) => item?.product);
-                  setAssignProductDialog({ open: true, products: subProduct || [], service: row.original?.serviceId, uniqueId: row.original?._id });
+                  setAssignProductDialog({
+                    open: true,
+                    products: subProduct || [],
+                    service: row.original?.serviceId,
+                    uniqueId: row.original?._id,
+                    steps: row.original?.steps || []
+                  });
                 }}
               >
                 <AddCircleOutlineIcon />
               </IconButton>
             </HtmlTooltip>
           )}
-          {permissions?.product?.isUpdate && row.original?.type === 'Service' &&
+          {permissions?.product?.isUpdate &&
+            row.original?.type === 'Service' &&
             (row.original?.default ? (
               <HtmlTooltip title={'Remove Default'}>
                 <IconButton
@@ -233,12 +254,16 @@ const ServiceMaster = (props: Props) => {
         parent.type = 'Service';
         parent.qty = 1;
         parent.preWork = parent?.preWork ? 'Yes' : 'No';
-        parent.subRows = consumableData?.filter((c) => c?.uniqueId === parent?._id)?.map((c, idx) => {
-          c.order = (i + 1) + '.' + `${idx + 1}`;
-          c.detail = c?.productDetail?.productName;
-          c.type = 'Product';
-          return c;
-        });
+        parent.subRows = consumableData
+          ?.filter((c) => c?.uniqueId === parent?._id)
+          ?.map((c, idx) => {
+            const stepData = parent?.steps?.find((s) => s?._id === c?.stepId);
+            c.stepName = stepData?.stepName;
+            c.order = i + 1 + '.' + `${idx + 1}`;
+            c.detail = c?.productDetail?.productName;
+            c.type = 'Product';
+            return c;
+          });
       });
       setDataRows([...serviceData]);
     } catch (e) {
@@ -352,7 +377,8 @@ const ServiceMaster = (props: Props) => {
     axiosInstance()
       .post(`${routes.product.path}/${id}/service-master/consumables`, data)
       .then(({ data }) => {
-        setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null });
+        setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null, steps: null });
+        setAssignStepsToConsumablesDialog({ open: false, consumables: null, service: null, steps: null });
         fetchData();
         toastConfig.setToastConfig({
           open: true,
@@ -361,7 +387,8 @@ const ServiceMaster = (props: Props) => {
         });
       })
       .catch((error) => {
-        setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null });
+        setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null, steps: null });
+        setAssignStepsToConsumablesDialog({ open: false, consumables: null, service: null, steps: null });
         toastConfig.setToastConfig(error);
       });
   };
@@ -383,7 +410,7 @@ const ServiceMaster = (props: Props) => {
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    if (updatedData.type === "Product") {
+    if (updatedData.type === 'Product') {
       const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
       let rows: any = [{ ...rowData, ...updatedData }];
       handleSaveData({ _id: rows[0]._id, qty: rows[0].qty });
@@ -529,14 +556,39 @@ const ServiceMaster = (props: Props) => {
         <AssignProductDialog
           productsDialogOpen={assignProductDialog.open}
           productId={id}
-          handleCloseDialog={() => setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null })}
+          handleCloseDialog={() => setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null, steps: null })}
           assignedProducts={assignProductDialog.products}
           reference={'productService'}
           renderedFrom={`${renderedFrom}_grid-sub-1`}
           onSuccess={(d: any) => {
+            setAssignStepsToConsumablesDialog({ open: true, consumables: d, service: assignProductDialog.service, steps: assignProductDialog.steps });
+            // const data = d?.map((d) => {
+            //   return {
+            //     product: d?.id,
+            //     qty: Number(d.qty),
+            //     service: assignProductDialog.service,
+            //     uniqueId: assignProductDialog.uniqueId
+            //   };
+            // });
+            // handleAssignConsumable(data);
+          }}
+          serialized={false}
+        />
+      )}
+      {assignStepsToConsumablesDialog.open && (
+        <AssignStepDialog
+          handleCloseDialog={() => {
+            setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null, steps: null });
+            setAssignStepsToConsumablesDialog({ open: false, consumables: null, service: null, steps: null });
+          }}
+          consumables={assignStepsToConsumablesDialog.consumables}
+          steps={assignStepsToConsumablesDialog.steps}
+          loading={isAssigning}
+          onSuccess={(d: any) => {
             const data = d?.map((d) => {
               return {
                 product: d?.id,
+                stepId: d?.stepId,
                 qty: Number(d.qty),
                 service: assignProductDialog.service,
                 uniqueId: assignProductDialog.uniqueId
@@ -544,7 +596,6 @@ const ServiceMaster = (props: Props) => {
             });
             handleAssignConsumable(data);
           }}
-          serialized={false}
         />
       )}
     </Fragment>

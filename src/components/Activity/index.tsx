@@ -77,7 +77,7 @@ const useStyles = makeStyles(() => ({
 
 const Activity = (props) => {
   const classes = useStyles();
-  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => {} } = props;
+  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => { } } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [type, setType] = useState(null);
@@ -261,13 +261,13 @@ const Activity = (props) => {
                               </HtmlTooltip>
                             </Box>
                           )}
-                          {data === 'Email' && (
+                          {data === 'Email' && user?.user?.brandPolicy?.inboundEmail !== "" && (
                             <Box mr={1}>
-                              <HtmlTooltip title={`support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}@master.equip-t.com`}>
+                              <HtmlTooltip title={`support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`}>
                                 <IconButton
                                   size="small"
                                   onClick={(e) => {
-                                    emailCopy(e, `support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}@master.equip-t.com`);
+                                    emailCopy(e, `support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`);
                                   }}
                                 >
                                   <MailIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />

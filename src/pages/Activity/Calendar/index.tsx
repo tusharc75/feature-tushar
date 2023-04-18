@@ -77,12 +77,6 @@ const BigCalendar = () => {
     }
   }, [type, referenceId]);
 
-  const joinTime = (date: any, time: any) => {
-    const d = new Date(date).toISOString().split('T')[0];
-    const t = new Date(time).toISOString().split('T')[1];
-    return new Date(`${d}T${t}`);
-  };
-
   const fetchBoard = useCallback(() => {
     GetBoard('', JSON.stringify(filter))
       .then(({ data }) => {
@@ -90,9 +84,10 @@ const BigCalendar = () => {
         const newData = allActivities.map((d) => ({
           ...d,
           title: d.name,
-          start: d.hasOwnProperty('startTime') ? joinTime(d.startDate, d.startTime) : new Date(d.startDate),
-
-          end: d.hasOwnProperty('endTime') ? joinTime(d.endDate, d.endTime) : new Date(d.dueDate)
+          start: d.startDate,
+          end: d.dueDate,
+          allDay: true,
+          type: d.type
         }));
         setActivities(newData);
       })
