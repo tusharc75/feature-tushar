@@ -46,15 +46,13 @@ const useStyles = makeStyles(() => ({
     width: 'calc(100vw + 14px)'
   },
   block: {
-    background: '#f0f0f0',
     borderRadius: '4px',
     minHeight: 'calc(100vh - 33.5vh)',
     height: '100%'
   },
   activitybox: {
     cursor: 'pointer',
-    display: 'flex',
-    flexDirection: 'column',
+    background: 'white',
     position: 'relative',
     margin: '0px 6px 14px',
     borderRadius: '4px',
@@ -90,6 +88,15 @@ const useStyles = makeStyles(() => ({
     backgroundColor: '#FAFDFF',
     padding: '15px',
     marginTop: '34px'
+  },
+  inputs: {
+    boxShadow: '0px 4.74053px 23.7026px rgba(0, 0, 0, 0.06)'
+  },
+  fixedTopHead: {
+    position: 'sticky',
+    zIndex: 4,
+    top: '0px',
+    background: '#FAFDFF'
   }
 }));
 
@@ -197,59 +204,65 @@ const WorkOrderTechnician = () => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6} md={3}>
               {workOrderOptions && (
-                <Autocomplete
-                  options={workOrderOptions}
-                  fullWidth
-                  getOptionLabel={(option: any) => option.optionLabel}
-                  getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                  value={selectedWorkOrder}
-                  onChange={(event, newValue) => {
-                    setSelectedWorkOrder(newValue);
-                  }}
-                  size="small"
-                  renderInput={(params) => <TextField {...params} label={`Select Work Order`} variant="outlined" />}
-                />
+                <Box className={classes.inputs}>
+                  <Autocomplete
+                    options={workOrderOptions}
+                    fullWidth
+                    getOptionLabel={(option: any) => option.optionLabel}
+                    getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                    value={selectedWorkOrder}
+                    onChange={(event, newValue) => {
+                      setSelectedWorkOrder(newValue);
+                    }}
+                    size="small"
+                    renderInput={(params) => <TextField {...params} label={`Select Work Order`} variant="outlined" />}
+                  />
+                </Box>
               )}
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               {repairOrderOptions && (
-                <Autocomplete
-                  options={repairOrderOptions}
-                  fullWidth
-                  getOptionLabel={(option: any) => option.optionLabel}
-                  getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                  value={selectedRepairOrder}
-                  onChange={(event, newValue) => {
-                    setSelectedRepairOrder(newValue);
-                  }}
-                  size="small"
-                  renderInput={(params) => <TextField {...params} label={`Select Repair Order`} variant="outlined" />}
-                />
+                <Box className={classes.inputs}>
+                  <Autocomplete
+                    options={repairOrderOptions}
+                    fullWidth
+                    getOptionLabel={(option: any) => option.optionLabel}
+                    getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                    value={selectedRepairOrder}
+                    onChange={(event, newValue) => {
+                      setSelectedRepairOrder(newValue);
+                    }}
+                    size="small"
+                    renderInput={(params) => <TextField {...params} label={`Select Repair Order`} variant="outlined" />}
+                  />
+                </Box>
               )}
             </Grid>
             <Grid item xs={12} sm={6} md={5}>
-              <Autocomplete
-                fullWidth
-                multiple
-                options={Object.keys(WORKORDER_TECHNICIAN_SERVICE_STATUS)?.map((key) => key) || []}
-                disableCloseOnSelect
-                getOptionLabel={(option) => WORKORDER_TECHNICIAN_SERVICE_STATUS[option]}
-                renderOption={(option: any, { selected }: any) => (
-                  <React.Fragment>
-                    <Checkbox disabled={['pending', 'inProgress']?.includes(option)} checked={servicesToKeep?.includes(option)} />
-                    {WORKORDER_TECHNICIAN_SERVICE_STATUS[option]}
-                  </React.Fragment>
-                )}
-                size="small"
-                renderInput={(params) => <TextField {...params} label="Services Show" placeholder="Services" variant="outlined" />}
-                value={servicesToKeep}
-                onChange={(event: any, newValue: any) => {
-                  if (!newValue.includes('pending') || !newValue.includes('inProgress')) {
-                    return;
-                  }
-                  setServicesToKeep(newValue);
-                }}
-              />
+              <Box className={classes.inputs}>
+                <Autocomplete
+                  fullWidth
+                  multiple
+                  options={Object.keys(WORKORDER_TECHNICIAN_SERVICE_STATUS)?.map((key) => key) || []}
+                  disableCloseOnSelect
+                  getOptionLabel={(option) => WORKORDER_TECHNICIAN_SERVICE_STATUS[option]}
+                  renderOption={(option: any, { selected }: any) => (
+                    <React.Fragment>
+                      <Checkbox disabled={['pending', 'inProgress']?.includes(option)} checked={servicesToKeep?.includes(option)} />
+                      {WORKORDER_TECHNICIAN_SERVICE_STATUS[option]}
+                    </React.Fragment>
+                  )}
+                  size="small"
+                  renderInput={(params) => <TextField {...params} label="Services Show" placeholder="Services" variant="outlined" />}
+                  value={servicesToKeep}
+                  onChange={(event: any, newValue: any) => {
+                    if (!newValue.includes('pending') || !newValue.includes('inProgress')) {
+                      return;
+                    }
+                    setServicesToKeep(newValue);
+                  }}
+                />
+              </Box>
             </Grid>
           </Grid>
 
@@ -269,7 +282,7 @@ const WorkOrderTechnician = () => {
                 return (
                   <Grid item md={3} xs={12} sm={4} style={{ paddingTop: '0px' }} key={i} className={classes.mediumDevice}>
                     <div className={classes.block}>
-                      <Box p={1} className="fixedBoardHeader">
+                      <Box p={1} className={classes.fixedTopHead}>
                         <Typography variant="subtitle2" style={{ width: '50%' }}>
                           {WORKORDER_SERVICE_STATUS[key]}
                           {' (' + serviceData?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key]).length + ')'}
