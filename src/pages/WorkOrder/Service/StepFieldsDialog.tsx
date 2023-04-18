@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { Dialog, Box, Grid, Button, Typography, IconButton } from '@material-ui/core';
+import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { Form, Formik } from 'formik';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
@@ -15,6 +16,64 @@ import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import { RenderPassFailChip } from './Steps';
+import { MdKeyboardArrowDown } from 'react-icons/md';
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    stepTags: {
+      minHeight: '26px',
+      paddingInline: '5px',
+      fontWeight: 500
+    },
+    sectionContainer: {
+      padding: '0 25px 18px',
+      marginTop: '20px'
+    },
+    sectionHead: {
+      fontWeight: 600,
+      fontSize: '16px',
+      lineHeight: '1.6',
+      color: '#5B5B5B',
+      '& span': {
+        background: '#DBDBDBE5',
+        color: '#5B5B5B',
+        fontWeight: 600,
+        width: '19px',
+        height: '19px',
+        fontSize: '16px',
+        borderRadius: '3px',
+        display: 'inline-grid',
+        placeItems: 'center',
+        marginRight: '6px',
+        verticalAlign: 'text-top'
+      }
+    },
+    sectionRow: {
+      '& > div': {
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        marginBlock: '11px',
+        gap: '23px'
+      }
+    },
+    sectionColTItle: {
+      flexBasis: '125px',
+      fontWeight: 500,
+      fontSize: '12px',
+      lineHeight: '1.5',
+      color: '#8A8A8A'
+    },
+    sectionColDetail: {
+      fontWeight: 400,
+      fontSize: '12px',
+      lineHeight: 1.5,
+      color: '#5B5B5B',
+      textTransform: 'capitalize'
+    }
+  })
+);
 
 const StepFieldsDialog = ({
   handleClose,
@@ -25,7 +84,8 @@ const StepFieldsDialog = ({
   stepData,
   referencType,
   allowedToEdit,
-  selectedService = null
+  selectedService = null,
+  eidtable = true
 }) => {
   const {
     state: {
@@ -33,13 +93,14 @@ const StepFieldsDialog = ({
     }
   } = useData();
 
-  const [isEditing, setEditing] = React.useState(true);
+  const [isEditing, setEditing] = React.useState(eidtable);
   const [viewStep, setViewStep] = React.useState(false);
   const toastConfig = useContext(CustomToastContext);
 
   const steps = selectedService?.steps || [];
 
   const RenderStepData = () => {
+    const classes = useStyles();
     const [time, setTime] = React.useState(
       user?.brandPolicy?.workOrderTimer
         ? convertMsToTime(
@@ -64,41 +125,57 @@ const StepFieldsDialog = ({
     }, [stepData]);
 
     return (
-      <Grid container spacing={2} alignItems="center">
-        {stepData?.startDate ? (
-          <Grid item style={{ paddingRight: '20px', flexGrow: 1 }}>
-            <Typography variant="caption">Clock In</Typography>
-            <Typography variant="body2"> {stepData?.startedBy?.optionLabel}</Typography>
-            <Typography variant="caption"> {moment(stepData?.startDate).format(dateTimeFormat)}</Typography>
-          </Grid>
-        ) : null}
-        {stepData?.endDate ? (
-          <Grid item style={{ paddingRight: '20px', flexGrow: 1 }}>
-            <Typography variant="caption">Clock Out</Typography>
-            <Typography variant="body2"> {stepData?.endedBy?.optionLabel}</Typography>
-            <Typography variant="caption"> {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
-          </Grid>
-        ) : null}
-        {stepData?.startDate && user?.brandPolicy?.workOrderTimer && (
-          <Grid item style={{ flexGrow: 1 }}>
-            <Box
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                border: '1px solid rgba(0, 0, 0, 0.23)',
-                backgroundColor: 'transparent',
-                padding: '2px 7px',
-                borderRadius: '8px',
-                maxWidth: 'max-content'
-              }}
-            >
-              <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
-              {time}
-            </Box>
-          </Grid>
-        )}
-      </Grid>
+      <div className={classes.sectionContainer}>
+        <h6 className={classes.sectionHead}>
+          <span>
+            <MdKeyboardArrowDown />
+          </span>
+          Extra Details
+        </h6>
+        <div className={classes.sectionRow}>
+          {stepData.passFailStatus ? (
+            <div>
+              <p className={classes.sectionColTItle}>Status :</p>
+              <p className={classes.sectionColDetail}>
+                <RenderPassFailChip status={stepData.passFailStatus} className={classes.stepTags} />
+              </p>
+            </div>
+          ) : null}
+          {stepData.duration ? (
+            <div>
+              <p className={classes.sectionColTItle}>Duration:</p>
+              <p className={classes.sectionColDetail} style={{ display: 'flex', alignItems: 'center' }}>
+                <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />({time})
+              </p>
+            </div>
+          ) : null}
+          {stepData.startedBy && (
+            <div>
+              <p className={classes.sectionColTItle}>Started By:</p>
+              <p className={classes.sectionColDetail}>{stepData.startedBy?.optionLabel}</p>
+            </div>
+          )}
+          {stepData.endedBy && (
+            <div>
+              <p className={classes.sectionColTItle}>Ended By:</p>
+              <p className={classes.sectionColDetail}>{stepData.endedBy?.optionLabel}</p>
+            </div>
+          )}
+          {stepData.startDate ? (
+            <div>
+              <p className={classes.sectionColTItle}>Start Date:</p>
+              <p className={classes.sectionColDetail}>{moment(stepData.startDate).format(dateTimeFormat)}</p>
+            </div>
+          ) : null}
+
+          {stepData.endDate ? (
+            <div>
+              <p className={classes.sectionColTItle}>End Date:</p>
+              <p className={classes.sectionColDetail}>{moment(stepData.endDate).format(dateTimeFormat)}</p>
+            </div>
+          ) : null}
+        </div>
+      </div>
     );
   };
 

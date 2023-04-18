@@ -23,10 +23,7 @@ import CompleteDialog from './CompleteDialog';
 import { useData } from 'src/StateProvider/Provider';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import AttachmentDialog from './AttachmentDialog';
-import { AiOutlineClose } from 'react-icons/ai';
-import { MdKeyboardArrowDown } from 'react-icons/md';
-import moment from 'moment';
-import { dateFormat, dateTimeFormat } from 'src/constants/helpers';
+
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 
@@ -164,107 +161,7 @@ const useStyles = makeStyles((theme: Theme) =>
       paddingInline: '5px',
       fontWeight: 500
     },
-    mainContainer: {},
-
-    stepDetailsContainer: {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      right: 0,
-      transform: 'translateX(100%)',
-      width: 'min(350px, calc(100vw - 65px))',
-      boxShadow: '0px 4.4207px 34.2857px rgba(0, 0, 0, 0.06)',
-      borderRadius: '8px',
-      transition: 'transform 500ms cubic-bezier(0.640, -0.270, 0.335, 1.265)',
-      zIndex: 5,
-      background: 'white'
-    },
-    stepDetailsContainerShow: {
-      transform: 'translateX(0)'
-      // transition: 'transform 250ms cubic-bezier(0.640, -0.270, 0.335, 1.265)'
-    },
-    modalHead: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      padding: '25px 25px 18px',
-      alignItems: 'center',
-      '& h6': {
-        fontWeight: 600,
-        fontSize: '16px',
-        lineHeight: '16px',
-        color: '#3A3A3A',
-        marginRight: '32px',
-        display: 'flex',
-        alignItems: 'center',
-        '& span': {
-          color: 'white',
-          minWidth: '25px',
-          minHeight: '23px',
-          display: 'inline-grid',
-          fontSize: '11px',
-          background: '#163340',
-          fontWeight: 600,
-          placeItems: 'center',
-          marginRight: '14px',
-          borderRadius: '100vmax',
-          padding: '3px 8px'
-        }
-      }
-    },
-    modalCloseButton: {
-      color: '#000',
-      padding: '9px',
-      fontSize: '16px',
-      position: 'absolute',
-      right: '18px',
-      top: '18px'
-    },
-    sectionContainer: {
-      padding: '0 25px 18px',
-      marginTop: '15px'
-    },
-    sectionHead: {
-      fontWeight: 600,
-      fontSize: '16px',
-      lineHeight: '1.6',
-      color: '#5B5B5B',
-      '& span': {
-        background: '#DBDBDBE5',
-        color: '#5B5B5B',
-        fontWeight: 600,
-        width: '19px',
-        height: '19px',
-        fontSize: '16px',
-        borderRadius: '3px',
-        display: 'inline-grid',
-        placeItems: 'center',
-        marginRight: '6px',
-        verticalAlign: 'text-top'
-      }
-    },
-    sectionRow: {
-      '& > div': {
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        marginBlock: '11px',
-        gap: '23px'
-      }
-    },
-    sectionColTItle: {
-      flexBasis: '125px',
-      fontWeight: 500,
-      fontSize: '12px',
-      lineHeight: '1.5',
-      color: '#8A8A8A'
-    },
-    sectionColDetail: {
-      fontWeight: 400,
-      fontSize: '12px',
-      lineHeight: 1.5,
-      color: '#5B5B5B',
-      textTransform: 'capitalize'
-    }
+    mainContainer: {}
   })
 );
 
@@ -279,7 +176,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
-  const [detailsModalData, setDetailsModalData] = useState(null);
+
   const {
     state: {
       user: { user }
@@ -291,6 +188,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedStep, setSelectedStep] = useState(null);
   const [fieldDialog, setFieldDialog] = useState(false);
+  const [isFieldDialogEditable, setIsFieldDialogEditable] = useState(true);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
 
   useEffect(() => {
@@ -668,14 +566,14 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   transition: 'background .5s ease',
                   backgroundColor: selectedStep?._id === step._id && fieldDialog ? '#ecfdf7' : ''
                 }}
-                onClick={() => {
-                  // if (stepData.status) {
-                  //   setDetailsModalData({
-                  //     number: referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`,
-                  //     ...step,
-                  //     ...stepData
-                  //   });
-                  // }
+                onClick={(e) => {
+                  if (stepData.status) {
+                    e.stopPropagation();
+                    setSelectedStep(step);
+                    setFieldDialog(true);
+                    setStepState(stepData);
+                    setIsFieldDialogEditable(false);
+                  }
                 }}
                 className={`${classes.accordionHeading}  ${classes.white}`}
               >
@@ -732,8 +630,8 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                             {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
                               ? 'Resume'
                               : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-                                ? 'Pause'
-                                : 'Restart'}
+                              ? 'Pause'
+                              : 'Restart'}
                           </Button>
                         )}
                       {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
@@ -802,9 +700,9 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                         )
                       ) : null}
                       {stepData?.status &&
-                        ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                        ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                        (isMeTechnician || !isAnyTechnician) ? (
+                      ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                      ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                      (isMeTechnician || !isAnyTechnician) ? (
                         [
                           WORKORDER_SERVICE_STEP_STATUS.passed,
                           WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -837,6 +735,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                                 e.stopPropagation();
                                 setSelectedStep(step);
                                 setFieldDialog(true);
+                                setIsFieldDialogEditable(true);
                                 setStepState(stepData);
                               }}
                             >
@@ -898,14 +797,14 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                     uniqueId: selectedService.uniqueId,
                     service: selectedService._id,
                     stepId: selectedStep?._id,
-                    serviceName: `${selectedService.serviceName} - ${selectedStep.stepName}`,
+                    serviceName: `${selectedService.serviceName} - ${selectedStep.stepName}`
                   });
                   setAnchorEl(null);
                 }}
               >
                 Consume Products
               </MenuItem>
-              {referencType !== 'workOrderTechnician' &&
+              {referencType !== 'workOrderTechnician' && (
                 <MenuItem
                   onClick={(e) => {
                     e.stopPropagation();
@@ -915,7 +814,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                 >
                   Setting
                 </MenuItem>
-              }
+              )}
             </Menu>
           )}
           {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) && (
@@ -936,102 +835,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             </Box>
           )}
         </div>
-        <div className={`${classes.stepDetailsContainer} ${detailsModalData ? classes.stepDetailsContainerShow : ''}`}>
-          {detailsModalData && (
-            <>
-              <div className={classes.modalHead}>
-                <h6>
-                  <span>{detailsModalData.number}</span>
-                  {detailsModalData.stepName}
-                </h6>
-                <IconButton
-                  className={classes.modalCloseButton}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDetailsModalData(null);
-                  }}
-                >
-                  <AiOutlineClose />
-                </IconButton>
-              </div>
-              <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 300px)' }}>
-                {detailsModalData.fields?.length > 0 ? (
-                  <div className={classes.sectionContainer}>
-                    <h6 className={classes.sectionHead}>
-                      <span>
-                        <MdKeyboardArrowDown />
-                      </span>
-                      Details
-                    </h6>
-                    <div className={classes.sectionRow}>
-                      {detailsModalData.fields
-                        ? detailsModalData.fields.map((field) => {
-                          const value = detailsModalData[field.fieldName] || '--';
-                          const isDate = value ? moment(value, moment.ISO_8601, true).isValid() : false;
-                          return (
-                            <div>
-                              <p className={classes.sectionColTItle}>{field.fieldLabel} :</p>
-                              <p className={classes.sectionColDetail}>{isDate ? moment(value).format(dateFormat) : value}</p>
-                            </div>
-                          );
-                        })
-                        : null}
-                    </div>
-                  </div>
-                ) : null}
-                <div className={classes.sectionContainer}>
-                  <h6 className={classes.sectionHead}>
-                    <span>
-                      <MdKeyboardArrowDown />
-                    </span>
-                    Extra
-                  </h6>
-                  <div className={classes.sectionRow}>
-                    {detailsModalData.passFailStatus ? (
-                      <div>
-                        <p className={classes.sectionColTItle}>Status :</p>
-                        <p className={classes.sectionColDetail}>
-                          <RenderPassFailChip status={detailsModalData.passFailStatus} className={classes.stepTags} />
-                        </p>
-                      </div>
-                    ) : null}
-                    {detailsModalData.duration ? (
-                      <div>
-                        <p className={classes.sectionColTItle}>Duration:</p>
-                        <p className={classes.sectionColDetail}>{convertMsToTime(detailsModalData.duration)}</p>
-                      </div>
-                    ) : null}
-                    {detailsModalData.startedBy && (
-                      <div>
-                        <p className={classes.sectionColTItle}>Started By:</p>
-                        <p className={classes.sectionColDetail}>{detailsModalData.startedBy?.optionLabel}</p>
-                      </div>
-                    )}
-                    {detailsModalData.endedBy && (
-                      <div>
-                        <p className={classes.sectionColTItle}>Ended By:</p>
-                        <p className={classes.sectionColDetail}>{detailsModalData.endedBy?.optionLabel}</p>
-                      </div>
-                    )}
-                    {detailsModalData.startDate ? (
-                      <div>
-                        <p className={classes.sectionColTItle}>Start Date:</p>
-                        <p className={classes.sectionColDetail}>{moment(detailsModalData.startDate).format(dateTimeFormat)}</p>
-                      </div>
-                    ) : null}
 
-                    {detailsModalData.endDate ? (
-                      <div>
-                        <p className={classes.sectionColTItle}>End Date:</p>
-                        <p className={classes.sectionColDetail}>{moment(detailsModalData.endDate).format(dateTimeFormat)}</p>
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
         {fieldDialog && (
           <StepFieldsDialog
             workOrderId={workOrderId}
@@ -1047,6 +851,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             allowedToEdit={allowedToEdit}
             step={selectedStep}
             stepData={stepState}
+            eidtable={isFieldDialogEditable}
           />
         )}
         {openCompleteDialog && (
@@ -1072,15 +877,15 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             message={
               addServiceConfirmation.type === 'returnToStepOnFail'
                 ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services
-                  ?.map((e) => e.serviceName)
-                  ?.toString()}. Do you want to continue ?`
+                    ?.map((e) => e.serviceName)
+                    ?.toString()}. Do you want to continue ?`
                 : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                  ? ` Step fail requires Quote Revision. Do you confirm on this?`
-                  : addServiceConfirmation.type === 'jumpStep'
-                    ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                      ?.map((e) => e.serviceName)
-                      ?.toString()} has been added. Do you want to Add ? `
+                ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                : addServiceConfirmation.type === 'jumpStep'
+                ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                    ?.map((e) => e.serviceName)
+                    ?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
@@ -1124,7 +929,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             handleClose={() => {
               setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
             }}
-            handleSuccess={() => { }}
+            handleSuccess={() => {}}
           />
         )}
         {consumablesDialog.open && (
@@ -1186,7 +991,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
 
 export default Service;
 
-const RenderPassFailChip = ({ status, className = '', ...others }) => {
+export const RenderPassFailChip = ({ status, className = '', ...others }) => {
   return (
     <Chip
       className={className}
@@ -1195,10 +1000,16 @@ const RenderPassFailChip = ({ status, className = '', ...others }) => {
       {...others}
       style={{
         border: 0,
-        background: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status) ? '#e1fce3' :
-          WORKORDER_SERVICE_STEP_STATUS.skipped === status ? '#D3D3D3' : '#FAD9D4',
-        color: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status) ? '#048e0a' :
-          WORKORDER_SERVICE_STEP_STATUS.skipped === status ? 'inherit' : '#D13925'
+        background: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
+          ? '#e1fce3'
+          : WORKORDER_SERVICE_STEP_STATUS.skipped === status
+          ? '#D3D3D3'
+          : '#FAD9D4',
+        color: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
+          ? '#048e0a'
+          : WORKORDER_SERVICE_STEP_STATUS.skipped === status
+          ? 'inherit'
+          : '#D13925'
       }}
     />
   );
