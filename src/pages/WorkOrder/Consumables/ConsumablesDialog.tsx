@@ -50,10 +50,11 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
       checkboxRenderer: CheckboxRenderer,
     });
     setColumns([
-      { field: "product", headerName: "Product", show: true, cellRenderer: "commonRenderer" },
-      { field: "service", headerName: "Service", show: true, cellRenderer: "commonRenderer" },
-      { field: "qty", headerName: "Qty", show: true, cellRenderer: "commonRenderer" },
-      { field: "consumedQty", headerName: "Consumed Qty", show: true, cellRenderer: "commonRenderer" },
+      { field: "product", headerName: "Product", show: true, disabled: true, cellRenderer: "commonRenderer" },
+      { field: "service", headerName: "Service", show: true, disabled: true, cellRenderer: "commonRenderer" },
+      { field: 'stepName', headerName: 'Step Name', show: true, cellRenderer: 'commonRenderer' },
+      { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer" },
+      { field: "consumedQty", headerName: "Consumed Qty", show: true, disabled: true, cellRenderer: "commonRenderer" },
     ])
   };
 

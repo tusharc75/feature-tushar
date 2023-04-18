@@ -15,7 +15,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 const Consumables = ({ workOrderId, allowedToEdit }) => {
-  
+
   let renderedFrom = camelCase(routes?.workOrder.title + '_consumables');
   const toastConfig = useContext(CustomToastContext);
 
@@ -53,6 +53,7 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
   const columns = [
     { field: 'product', headerName: 'Product', show: true, disabled: true, cellRenderer: 'nameRenderer' },
     { field: 'service', headerName: 'Service', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+    { field: 'stepName', headerName: 'Step Name', show: true, cellRenderer: 'commonRenderer' },
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'type', headerName: 'Type', show: true, cellRenderer: 'commonRenderer' },
     { field: 'consumedQty', headerName: 'Consumed Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' }
