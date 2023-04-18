@@ -18,7 +18,9 @@ import {
   Approval,
   End,
   StartSublease,
-  ReceivingTicket
+  ReceivingTicket,
+  ManualEntry,
+  Process
 } from './svgIcon';
 import StepCompleteIcon from './StepCompleteIcon';
 export interface stepIconInterface {
@@ -39,7 +41,9 @@ export interface stepIconInterface {
     | 'approval'
     | 'end'
     | 'startSublease'
-    | 'receivingTicket';
+    | 'receivingTicket'
+    | 'manualEntry'
+    | 'process';
 }
 
 export const getIcon = (name: string) => {
@@ -94,6 +98,12 @@ export const getIcon = (name: string) => {
       break;
     case name === 'receivingTicket':
       return ReceivingTicket;
+      break;
+    case name === 'manualEntry':
+      return ManualEntry;
+      break;
+    case name === 'process':
+      return Process;
       break;
     default:
       return SerializedAsset;

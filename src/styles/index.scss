@@ -3376,3 +3376,9 @@ body {
     }
   }
 }
+.max-image {
+  img {
+    max-width: 700px !important;
+    width: 100%;
+  }
+}
