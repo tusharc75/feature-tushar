@@ -71,6 +71,10 @@ const useStyles = makeStyles((theme: Theme) =>
       lineHeight: 1.5,
       color: '#5B5B5B',
       textTransform: 'capitalize'
+    },
+    centerText: {
+      textAlign: 'center',
+      marginBlock: '30px'
     }
   })
 );
@@ -87,6 +91,7 @@ const StepFieldsDialog = ({
   selectedService = null,
   eidtable = true
 }) => {
+  const classes = useStyles();
   const {
     state: {
       user: { user }
@@ -100,7 +105,6 @@ const StepFieldsDialog = ({
   const steps = selectedService?.steps || [];
 
   const RenderStepData = () => {
-    const classes = useStyles();
     const [time, setTime] = React.useState(
       user?.brandPolicy?.workOrderTimer
         ? convertMsToTime(
@@ -297,7 +301,7 @@ const StepFieldsDialog = ({
                     </Form>
                   )
                 ) : (
-                  <div className={styles.centerText}>
+                  <div className={classes.centerText}>
                     <Typography variant={'body1'} style={{ color: 'var(--new_theme_color)' }}>
                       No Fields...
                     </Typography>
