@@ -89,7 +89,6 @@ const PasswordSetup = () => {
 
   const validateForm = (values) => {
     const errors: any = {};
-
     if (!values.password) {
       errors.password = 'Required field';
     }
@@ -131,12 +130,13 @@ const PasswordSetup = () => {
               <Formik
                 initialValues={{
                   email,
-                  password: "",
+                  password: '',
+                  confirmPassword: '',
                 }}
                 validate={validateForm}
                 onSubmit={handleSubmit}
               >
-                {({ submitForm }) => (
+                {({ submitForm, values, touched, errors, setFieldValue }) => (
                   <Form className={classes.form}>
                     <TextField
                       name="email"
@@ -145,6 +145,12 @@ const PasswordSetup = () => {
                       disabled
                       variant="outlined"
                       required
+                      value={values["email"]}
+                      error={touched['email'] && Boolean(errors['email'])}
+                      helperText={touched['email'] && errors['email']}
+                      onChange={(e) => {
+                        setFieldValue('email', e.target.value);
+                      }}
                     />
                     <br />
                     <TextField
@@ -153,6 +159,12 @@ const PasswordSetup = () => {
                       name="password"
                       variant="outlined"
                       required
+                      value={values["password"]}
+                      error={touched['password'] && Boolean(errors['password'])}
+                      helperText={touched['password'] && errors['password']}
+                      onChange={(e) => {
+                        setFieldValue('password', e.target.value);
+                      }}
                     />
                     <br />
                     <TextField
@@ -161,6 +173,12 @@ const PasswordSetup = () => {
                       name='confirmPassword'
                       variant='outlined'
                       required
+                      value={values["confirmPassword"]}
+                      error={touched['confirmPassword'] && Boolean(errors['confirmPassword'])}
+                      helperText={touched['confirmPassword'] && errors['confirmPassword']}
+                      onChange={(e) => {
+                        setFieldValue('confirmPassword', e.target.value);
+                      }}
                     />
                     <br />
                     <Button

@@ -448,6 +448,7 @@ export const ViewEmail = ({
                                         </Typography>
                                       </Box>
                                       <div
+                                        className="max-image"
                                         dangerouslySetInnerHTML={{
                                           __html: initialValues.content || initialValues.message
                                         }}
@@ -493,6 +494,7 @@ export const ViewEmail = ({
                                             </Typography>
                                           </Box>
                                           <div
+                                            className="max-image"
                                             dangerouslySetInnerHTML={{
                                               __html: incomingMail.message
                                             }}
