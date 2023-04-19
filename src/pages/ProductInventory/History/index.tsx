@@ -48,20 +48,6 @@ const History = ({ product, warehouse }) => {
       finalObject.serialNumber = u?.serialNumber?.map((e) => e.serialNumber)?.toString();
       return finalObject;
     });
-
-    // var qty = 0;
-    // rows
-    //   ?.slice()
-    //   .reverse()
-    //   .forEach(function (item) {
-    //     if (item.type === 'Credit') {
-    //       qty = qty + item?.qty;
-    //     } else {
-    //       qty = qty - item?.qty;
-    //     }
-    //     item.finalInventory = qty;
-    //   });
-
     dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
     setTimeout(() => {
       dispatch({ type: 'loading', loading: false });
@@ -122,6 +108,7 @@ const History = ({ product, warehouse }) => {
     { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'finalAvgPrice', headerName: 'Final Average Price', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
     { field: 'warehouse', headerName: 'Plant', show: true, cellRenderer: 'commonRenderer' },
+    user?.user?.brandPolicy?.storageLocation && { field: 'storageLocation', headerName: 'Storage Location', show: true, cellRenderer: 'commonRenderer' },
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
     { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'commonRenderer' },

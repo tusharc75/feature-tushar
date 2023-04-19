@@ -1,5 +1,5 @@
 .tabContainerPos {
-  --button-size: 36px;
+  --button-size: 30px;
   overflow: hidden;
   .tabContainer {
     display: flex;
@@ -15,7 +15,7 @@
     transition: 0.3s;
     display: block;
     border: 0;
-    color: var(--new_theme_color);
+    color: #000000;
     border-radius: 5px;
     flex-shrink: 0;
 
@@ -28,7 +28,7 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 30px;
+      font-size: 24px;
     }
   }
   .TabContents {

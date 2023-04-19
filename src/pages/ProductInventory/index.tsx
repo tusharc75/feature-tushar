@@ -242,7 +242,7 @@ const InventoryProduct = () => {
     }
 
     if (storageLocationId) {
-      deepFilter = `${deepFilter}&storagelocation=${storageLocationId}`
+      deepFilter = `${deepFilter}&storageLocation=${storageLocationId}`
     }
 
     let filterById = [];
@@ -542,7 +542,6 @@ const InventoryProduct = () => {
                   )
                 }
               />
-
               {user?.user?.brandPolicy?.storageLocation &&
                 <Autocomplete
                   style={{ width: '250px' }}
@@ -558,14 +557,14 @@ const InventoryProduct = () => {
                       <TextField
                         {...params}
                         margin="dense"
-                        name="storagelocation"
+                        name="storageLocation"
                         placeholder="Storage Location"
                         variant="standard"
                         fullWidth
                         className={isMobile ? 'serchBox' : ''}
                       />
                     ) : (
-                      <TextField {...params} margin="dense" name="storagelocation" label="Storage Location" variant="outlined" fullWidth />
+                      <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
                     )
                   }
                 />

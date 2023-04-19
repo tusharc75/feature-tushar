@@ -86,7 +86,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
         product: product.productId,
         qty: parseInt(values.qty),
         serialNumber: serialNumberIds?.map((item) => item?._id),
-        storagelocation: user?.user?.brandPolicy?.storageLocation ? values['storagelocation'] : null,
+        storageLocation: user?.user?.brandPolicy?.storageLocation ? values['storageLocation'] : null,
       }
     ];
     setLoading(true);
@@ -116,8 +116,8 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
       errors['serialNumbers'] = `Please select serial numbers same as quantity`;
     }
 
-    if (user?.user?.brandPolicy?.storageLocation && !values['storagelocation']) {
-      errors['storagelocation'] = `Storage Location is required`;
+    if (user?.user?.brandPolicy?.storageLocation && !values['storageLocation']) {
+      errors['storageLocation'] = `Storage Location is required`;
     }
 
 
@@ -148,7 +148,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
       aria-labelledby="assign-roles-dialog"
     >
       <MuiPickersUtilsProvider utils={DateUtils}>
-        <Formik initialValues={{ qty: 1, rejectDate: new Date(), comment: '', storagelocation: null, }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+        <Formik initialValues={{ qty: 1, rejectDate: new Date(), comment: '', storageLocation: null, }} onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <CustomDialogHeader
@@ -243,20 +243,20 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                       options={storageLocationOptions}
                       getOptionLabel={(option: any) => option ? option.optionLabel : ''}
                       getOptionSelected={(option: any, val) => option.optionValue === val}
-                      value={storageLocationOptions.filter((data) => data.optionValue === values['storagelocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storagelocation'])[0] : ''}
+                      value={storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0] : ''}
                       onChange={(e, val) => {
-                        setFieldValue('storagelocation', val?.optionValue);
+                        setFieldValue('storageLocation', val?.optionValue);
                       }}
                       renderInput={(params) =>
                         <TextField
                           {...params}
                           variant="outlined"
-                          name="storagelocation"
+                          name="storageLocation"
                           label="Storage Location"
                           margin="dense"
                           required
-                          error={touched['storagelocation'] && Boolean(errors['storagelocation'])}
-                          helperText={touched['storagelocation'] && errors['storagelocation']}
+                          error={touched['storageLocation'] && Boolean(errors['storageLocation'])}
+                          helperText={touched['storageLocation'] && errors['storageLocation']}
                         />
                       }
                     />

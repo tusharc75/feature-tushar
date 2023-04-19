@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
 import { Box, Button, Grid, IconButton, Tooltip } from '@material-ui/core';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -34,21 +34,15 @@ import InfoIcon from '@material-ui/icons/Info';
 import ManageAccountDialog from '../Account/ManageAccount';
 import ManageContactDialog from '../Contact/ManageContact';
 import ManageAddressDialog from 'src/components/Address/ManageAddressDialog';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { isEqual } from 'lodash';
 
-const ManageJobDialog = ({
-  isClone,
-  jobId,
-  jobData = null,
-  onClose,
-  onSuccess,
-  open,
-  referenceData = null,
-  isDisableCustomerAccount = false
-}) => {
+const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, open, referenceData = null, isDisableCustomerAccount = false }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState({ fields: [], initialValues: {} });
+  // const [data, setData] = useState({ fields: [], initialValues: {} });
+  const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
@@ -117,22 +111,22 @@ const ManageJobDialog = ({
   };
 
   useEffect(() => {
-    const ownerCollabOptions = data.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
+    const ownerCollabOptions = initialData.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
     if (ownerCollabOptions.length > 0) {
       setOwnerCollaboratorData(ownerCollabOptions[0].option);
       setOwnerData(ownerCollabOptions[0].option);
       setCollaboratorData(ownerCollabOptions[0].option);
     }
-    let customerAccountOptions = data.fields.find((d) => d.fieldName === 'customerAccount');
+    let customerAccountOptions = initialData.fields.find((d) => d.fieldName === 'customerAccount');
     if (customerAccountOptions) {
       setAccountData(customerAccountOptions.option);
     }
-    let customerContactOptions = data.fields.find((d) => d.fieldName === 'customerContact');
+    let customerContactOptions = initialData.fields.find((d) => d.fieldName === 'customerContact');
     if (customerContactOptions) {
       setContactData(customerContactOptions.option);
     }
-    const customerContactDropdownData = data.fields.find((d) => d.fieldName === 'customerContact');
-    const billingAddressDropdownData = data.fields.find((d) => d.fieldName === 'billingAddress' || d.fieldName === 'shippingAddress');
+    const customerContactDropdownData = initialData.fields.find((d) => d.fieldName === 'customerContact');
+    const billingAddressDropdownData = initialData.fields.find((d) => d.fieldName === 'billingAddress' || d.fieldName === 'shippingAddress');
     if (billingAddressDropdownData) {
       setAddressData(billingAddressDropdownData.option);
       setBillingAddress(billingAddressDropdownData.option);
@@ -141,13 +135,11 @@ const ManageJobDialog = ({
     if (customerContactDropdownData) {
       setCustomerContactMainDataSource(customerContactDropdownData.option);
       if (jobId) {
-        setCustomerContactDataSource(
-          customerContactDropdownData?.option.filter((d) => d.parentAccount === jobData?.customerAccount.optionValue)
-        );
+        setCustomerContactDataSource(customerContactDropdownData?.option.filter((d) => d.parentAccount === jobData?.customerAccount.optionValue));
       }
     }
-    setFormsData(setFieldsInAscendingOrder(data.fields));
-  }, [data.fields]);
+    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+  }, [initialData.fields]);
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData));
@@ -190,17 +182,17 @@ const ManageJobDialog = ({
             rest['status'] = 'New';
             rest['jobNumber'] = `JOB_${generateUniqueIdOnly()}`;
             setCloneHeading(jobNumber);
-            setData({
+            setInitialData({
               fields: fieldsDataForCreate,
-              initialValues: getObjKeysWithValues(rest, fieldsDataForCreate)
+              values: getObjKeysWithValues(rest, fieldsDataForCreate)
             });
             setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
             setLoading(false);
           } else {
             setJobDetails(data);
-            setData({
+            setInitialData({
               fields: fieldsDataForUpdate,
-              initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataForUpdate)
             });
             setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
             setLoading(false);
@@ -216,9 +208,9 @@ const ManageJobDialog = ({
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'jobNumber')) {
           initialData['jobNumber'] = `JOB_${generateUniqueIdOnly()}`;
         }
-        setData({
+        setInitialData({
           fields: fieldsDataForCreate,
-          initialValues: initialData
+          values: initialData
         });
         setFormValues(initialData);
         setLoading(false);
@@ -228,20 +220,7 @@ const ManageJobDialog = ({
     }
   };
 
-  const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
-    if (Object.keys(errors).length) {
-      data.fields.forEach((input) => {
-        if (input.required || values[input.fieldName]) {
-          setTouched(input.fieldName, true);
-        }
-      });
-      setErrors({ ...errors });
-    } else {
-      handleUpdateJob(values);
-    }
-  };
-
-  const handleUpdateJob = (values) => {
+  const handleSubmit = (values) => {
     setLoading(true);
     if (jobId && isClone === false) {
       values._id = jobId;
@@ -269,20 +248,14 @@ const ManageJobDialog = ({
             type: 'success',
             message: message
           });
-          onSuccess(data);
+          history.push(`${routes.jobDetail.path}/${data?._id}`);
+          setLoading(false);
         })
         .catch((error) => {
           setLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
-  };
-
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
   };
 
   const handleScroll = (errors) => {
@@ -335,53 +308,31 @@ const ManageJobDialog = ({
         }}
         open={open}
       >
-        <CustomDialogHeader
-          title={
-            !jobId
-              ? `Create ${routes.job.title}`
-              : `${isClone ? `Clone - ${cloneHeading}` : `Update ${jobData?.jobNumber}`}`
-          }
-          onClose={(e, reason) => {
-            if (isFieldNotTouched(data, formValues)) onClose();
-            else setShowConfirmDialog(true);
-          }}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen((prevState) => !prevState);
-          }}
-          showManimizeMaximize={true}
-        />
-        {!data.fields.length ? (
-          <>
-            <CustomDialogContent>
-              <Skeleton width="100%" height="70px" />
-              <Grid container spacing={2}>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                  <Grid key={i} item xs={12} sm={6} md={6}>
-                    <Skeleton width="100%" height="60px" />
-                  </Grid>
-                ))}
-              </Grid>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <Button variant="outlined" size="small" color="primary" disabled>
-                Cancel
-              </Button>
-              <Button variant="contained" size="small" color="primary" disabled>
-                Submit
-              </Button>
-            </CustomDialogFooter>
-          </>
-        ) : (
+        {initialData?.fields?.length ? (
           <Formik
-            initialValues={data.initialValues}
-            validationSchema={yupSchema(data.fields)}
+            initialValues={initialData.values}
+            validationSchema={yupSchema(initialData.fields)}
             validateOnMount
             validate={validate}
-            onSubmit={() => {}}
+            onSubmit={handleSubmit}
           >
-            {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
-              <>
+            {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues, submitForm }) => (
+              <Fragment>
+                <CustomDialogHeader
+                  title={!jobId ? `Create ${routes.job.title}` : `${isClone ? `Clone - ${cloneHeading}` : `Update ${jobData?.jobNumber}`}`}
+                  onClose={(e, reason) => {
+                    if (isEqual(initialData.values, values)) {
+                      onClose();
+                    } else {
+                      setShowConfirmDialog(true);
+                    }
+                  }}
+                  isMinimized={!fullScreen}
+                  onMinimizeMaximize={() => {
+                    setFullScreen((prevState) => !prevState);
+                  }}
+                  showManimizeMaximize={true}
+                />
                 <CustomDialogContent>
                   <Form>
                     {formsData &&
@@ -425,18 +376,15 @@ const ManageJobDialog = ({
                                               doNotShowInfoTooltip={true}
                                               onChange={(e, value) => {
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                                if (data?.fields?.some((e) => e.fieldName === 'customerContact')) {
+                                                if (initialData?.fields?.some((e) => e.fieldName === 'customerContact')) {
                                                   setFieldValue('customerContact', '');
                                                 }
-                                                if (data?.fields?.some((e) => e.fieldName === 'billingAddress')) {
+                                                if (initialData?.fields?.some((e) => e.fieldName === 'billingAddress')) {
                                                   setFieldValue('billingAddress', '');
                                                 }
-                                                if (data?.fields?.some((e) => e.fieldName === 'shippingAddress')) {
+                                                if (initialData?.fields?.some((e) => e.fieldName === 'shippingAddress')) {
                                                   setFieldValue('shippingAddress', '');
                                                 }
-                                                handleValuesChange({
-                                                  [field.fieldName]: value && value.optionValue ? value.optionValue : ''
-                                                });
                                               }}
                                             />
                                           </Grid>
@@ -450,9 +398,7 @@ const ManageJobDialog = ({
                                                   disabled={!isClone ? jobId && field.disableOnEdit : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon
-                                                    color={isClone ? 'primary' : jobId && field.disableOnEdit ? 'disabled' : 'primary'}
-                                                  />
+                                                  <AddIcon color={isClone ? 'primary' : jobId && field.disableOnEdit ? 'disabled' : 'primary'} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -486,7 +432,6 @@ const ManageJobDialog = ({
                                               options={customerContactDataSource}
                                               doNotShowInfoTooltip={true}
                                               setFieldValue={(name, value) => {
-                                                handleValuesChange({ [name]: value });
                                                 setFieldValue(name, value);
                                               }}
                                               disabled={!isClone ? jobId && field.disableOnEdit : false}
@@ -511,9 +456,7 @@ const ManageJobDialog = ({
                                                   disabled={!isClone ? jobId && field.disableOnEdit : false}
                                                   size="small"
                                                 >
-                                                  <AddIcon
-                                                    color={isClone ? 'primary' : jobId && field.disableOnEdit ? 'disabled' : 'primary'}
-                                                  />
+                                                  <AddIcon color={isClone ? 'primary' : jobId && field.disableOnEdit ? 'disabled' : 'primary'} />
                                                 </IconButton>
                                               </Tooltip>
                                             </Grid>
@@ -540,7 +483,6 @@ const ManageJobDialog = ({
                                           options={ownerData}
                                           onChange={(e, val) => {
                                             setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                            handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : '' });
 
                                             if (val && val.optionValue !== user?.user?._id) {
                                               const checkOwnerAddedInCollaborator = values['collaborator'].find(
@@ -551,9 +493,6 @@ const ManageJobDialog = ({
                                                   ...values['collaborator'],
                                                   collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
                                                 ]);
-                                                handleValuesChange({
-                                                  collaborator: collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                                });
                                               }
                                             }
                                           }}
@@ -581,7 +520,6 @@ const ManageJobDialog = ({
                                           type={field.type}
                                           options={collaboratorData}
                                           setFieldValue={(name, value) => {
-                                            handleValuesChange({ [name]: value });
                                             setFieldValue(name, value);
                                           }}
                                           required={field.required}
@@ -693,7 +631,6 @@ const ManageJobDialog = ({
                                           type={field.type}
                                           options={field.option}
                                           setFieldValue={(name, value) => {
-                                            handleValuesChange({ [name]: value });
                                             setFieldValue(name, value);
                                           }}
                                           required={field.required}
@@ -727,8 +664,11 @@ const ManageJobDialog = ({
                     color="primary"
                     size="small"
                     onClick={() => {
-                      if (isFieldNotTouched(data, values)) onClose();
-                      else setShowConfirmDialog(true);
+                      if (isEqual(initialData.values, values)) {
+                        onClose();
+                      }else{
+                        setShowConfirmDialog(true);
+                      }
                     }}
                   >
                     Cancel
@@ -737,14 +677,11 @@ const ManageJobDialog = ({
                     loading={loading}
                     variant="contained"
                     color="primary"
-                    disabled={
-                      uploadingImageOrFileProgress > 0 ||
-                      loading
-                    }
+                    disabled={uploadingImageOrFileProgress > 0 || loading}
                     onClick={(e) => {
                       e.preventDefault();
                       handleScroll(errors);
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                      submitForm();
                     }}
                   >
                     Save
@@ -756,8 +693,7 @@ const ManageJobDialog = ({
                     onSave={() => {
                       setShowConfirmDialog(false);
                       handleScroll(errors);
-
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                      submitForm();
                     }}
                     close={() => setShowConfirmDialog(false)}
                     onClose={() => {
@@ -872,9 +808,13 @@ const ManageJobDialog = ({
                     }}
                   />
                 )}
-              </>
+              </Fragment>
             )}
           </Formik>
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
       </Dialog>
     </>

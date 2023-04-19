@@ -62,7 +62,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
           product: element.productId,
           serializedProduct: element.serializedProduct,
           warehouse: element?.warehouse?._id,
-          storagelocation: user?.user?.brandPolicy?.storageLocation ? values.storagelocation : null,
+          storageLocation: user?.user?.brandPolicy?.storageLocation ? values.storageLocation : null,
           inventoryQuantity: parseInt(element?.inventoryQuantity),
           assetQuantity: parseInt(element?.assetQuantity),
           serialNumber: element?.serialNumber,
@@ -137,7 +137,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
   const validateStorageLocation = (values) => {
     let errors: any = {};
     if (user?.user?.brandPolicy?.storageLocation && !values) {
-      errors['storagelocation'] = `Storage Location is required`;
+      errors['storageLocation'] = `Storage Location is required`;
     }
     return errors;
   }
@@ -227,7 +227,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
         <Formik
           initialValues={{
             receiveDate: new Date(),
-            storagelocation: null,
+            storageLocation: null,
             seriaizedAsset: productList.map((d) => ({
               _id: d._id,
               product: d.productName,
@@ -485,20 +485,20 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                 options={storageLocationOptions}
                                 getOptionLabel={(option: any) => option ? option.optionLabel : ''}
                                 getOptionSelected={(option: any, val) => option.optionValue === val}
-                                value={storageLocationOptions.filter((data) => data.optionValue === values['storagelocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storagelocation'])[0] : ''}
+                                value={storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0] : ''}
                                 onChange={(e, val) => {
-                                  setFieldValue('storagelocation', val?.optionValue);
+                                  setFieldValue('storageLocation', val?.optionValue);
                                 }}
                                 renderInput={(params) =>
                                   <TextField
                                     {...params}
                                     variant="outlined"
-                                    name="storagelocation"
+                                    name="storageLocation"
                                     label="Storage Location"
                                     margin="dense"
                                     required
-                                    error={Boolean(validateStorageLocation(values['storagelocation'])?.storagelocation)}
-                                    helperText={validateStorageLocation(values['storagelocation'])?.storagelocation}
+                                    error={Boolean(validateStorageLocation(values['storageLocation'])?.storageLocation)}
+                                    helperText={validateStorageLocation(values['storageLocation'])?.storageLocation}
                                   />
                                 }
                               />
@@ -553,7 +553,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                       !validate(values.seriaizedAsset).assetQuantity &&
                       !validate(values.seriaizedAsset).serialNumber &&
                       !validateDate(values)?.receiveDate &&
-                      !validateStorageLocation(values.storagelocation).storagelocation
+                      !validateStorageLocation(values.storageLocation).storageLocation
                     ) {
                       handleCreateSerializedAsset(values);
                     }
