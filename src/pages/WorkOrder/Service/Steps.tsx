@@ -619,27 +619,28 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                             WORKORDER_SERVICE_STEP_STATUS.needReperform
                           ].includes(stepData?.status) &&
                             (isMeTechnician || !isAnyTechnician) && (
-                              <Button
-                                variant="outlined"
-                                className={classes.stepButtons}
-                                color="secondary"
-                                size="small"
-                                disabled={!allowedToEdit}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if ([WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) {
-                                    handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
-                                  } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
-                                    handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.pause, stepData);
-                                  }
-                                }}
-                              >
-                                {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
-                                  ? 'Resume'
-                                  : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-                                    ? 'Pause'
-                                    : 'Restart'}
-                              </Button>
+                              stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && !user?.brandPolicy?.workOrderTimer ? null :
+                                <Button
+                                  variant="outlined"
+                                  className={classes.stepButtons}
+                                  color="secondary"
+                                  size="small"
+                                  disabled={!allowedToEdit}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if ([WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) {
+                                      handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
+                                    } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+                                      handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.pause, stepData);
+                                    }
+                                  }}
+                                >
+                                  {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
+                                    ? 'Resume'
+                                    : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+                                      ? 'Pause'
+                                      : 'Restart'}
+                                </Button>
                             )}
                           {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
                             <Button
@@ -756,19 +757,18 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                     </Box>
                   </Box>
                   <Box display={'flex'} alignItems={'center'} gridGap={8}>
-                    {stepData.status &&
+                    {stepData?.status &&
                       <IconButton
                         aria-label="info"
                         size="small"
+                        color="primary"
                         disabled={stepData?.status ? false : true}
                         onClick={(e) => {
-                          if (stepData.status) {
-                            e.stopPropagation();
-                            setSelectedStep(step);
-                            setFieldDialog(true);
-                            setStepState(stepData);
-                            setIsFieldDialogEditable(false);
-                          }
+                          e.stopPropagation();
+                          setSelectedStep(step);
+                          setFieldDialog(true);
+                          setStepState(stepData);
+                          setIsFieldDialogEditable(false);
                         }}
                       >
                         <InfoIcon fontSize="inherit" />
@@ -806,7 +806,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   setAnchorEl(null);
                 }}
               >
-                Upload Document
+                Upload Documents
               </MenuItem>
               <MenuItem
                 onClick={(e) => {
@@ -831,7 +831,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                     setViewStep({ open: true, step: selectedStep });
                   }}
                 >
-                  Setting
+                  Settings
                 </MenuItem>
               )}
             </Menu>

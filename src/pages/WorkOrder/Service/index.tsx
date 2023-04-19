@@ -53,7 +53,7 @@ const getTotalTime = (stepTimes: any) => {
       totalTimes += new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime();
     }
   });
-  stepTimes.forEach((item) => {});
+  stepTimes.forEach((item) => { });
   return { shouldTimerRun, totalTimes };
 };
 
@@ -220,7 +220,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       setServiceSteps(services);
       if (
         services.filter((e) => e.type === 'service' && e.status === WORKORDER_SERVICE_STATUS.completed)?.length ===
-          services.filter((e) => e.type === 'service')?.length &&
+        services.filter((e) => e.type === 'service')?.length &&
         workOrderData?.status !== WORK_ORDER_STATUS.completed
       ) {
         fetchWorkOrderData();
@@ -646,20 +646,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? '#E1FCE3'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                    ? '#fabebe'
-                                                    : '#FFF5DD',
+                                                      ? '#fabebe'
+                                                      : '#FFF5DD',
                                                 color:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? '#048E0A'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                    ? '#fa0202'
-                                                    : '#FF8C21',
+                                                      ? '#fa0202'
+                                                      : '#FF8C21',
                                                 background:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? '#E1FCE3'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                    ? '#fabebe'
-                                                    : '#FFF5DD',
+                                                      ? '#fabebe'
+                                                      : '#FFF5DD',
                                                 fontWeight: 700
                                               }}
                                             />
@@ -735,7 +735,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 <>
                   {selectedService?.type === 'service' ? (
                     allowedToEdit ||
-                    (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
+                      (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
                       <Steps
                         workOrderId={workOrderId}
                         selectedService={selectedService}
@@ -901,20 +901,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                         data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                           ? '#E1FCE3'
                                                           : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fabebe'
-                                                          : '#FFF5DD',
+                                                            ? '#fabebe'
+                                                            : '#FFF5DD',
                                                       color:
                                                         data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                           ? '#048E0A'
                                                           : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fa0202'
-                                                          : '#FF8C21',
+                                                            ? '#fa0202'
+                                                            : '#FF8C21',
                                                       background:
                                                         data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                           ? '#E1FCE3'
                                                           : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fabebe'
-                                                          : '#FFF5DD',
+                                                            ? '#fabebe'
+                                                            : '#FFF5DD',
                                                       fontWeight: 700
                                                     }}
                                                   />
@@ -1033,7 +1033,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   setAnchorEl(null);
                 }}
               >
-                Upload Document
+                Upload Documents
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -1200,7 +1200,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           handleClose={() => {
             setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
           }}
-          handleSuccess={() => {}}
+          handleSuccess={() => { }}
         />
       )}
     </Box>
