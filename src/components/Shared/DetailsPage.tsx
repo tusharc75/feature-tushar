@@ -337,6 +337,26 @@ const Details = (props: DetailProps) => {
             {value}
           </Typography>
         </Box>
+      ) : fieldData.type === 'signature' ? (
+        <Box display="flex" alignItems="center">
+          <Box position="relative" sx={{
+            width: 50,
+            height: 50,
+            borderRadius: '8px',
+            marginRight: '10px',
+            padding: '5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          >
+            {value ? (
+              <img src={value} style={{ maxWidth: 50, maxHeight: 50, width: '100%', height: 'auto' }} alt="Signature" />
+            ) : (
+              '-'
+            )}
+          </Box>
+        </Box>
       ) : (
         <Typography title={value === '-' ? '' : value} className={classes.fieldText} variant="body2">
           {fieldData.type === 'url' || fieldData.type === 'email' ? (
