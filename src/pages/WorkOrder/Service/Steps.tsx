@@ -23,6 +23,7 @@ import CompleteDialog from './CompleteDialog';
 import { useData } from 'src/StateProvider/Provider';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import AttachmentDialog from './AttachmentDialog';
+import InfoIcon from '@material-ui/icons/Info';
 
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
@@ -193,6 +194,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
 
   useEffect(() => {
+    setServiceDetails(null);
     fetchServiceData();
   }, [selectedService]);
 
@@ -567,27 +569,27 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   transition: 'background .5s ease',
                   backgroundColor: selectedStep?._id === step._id && fieldDialog ? '#ecfdf7' : ''
                 }}
-                onClick={(e) => {
-                  if (stepData.status) {
-                    e.stopPropagation();
-                    setSelectedStep(step);
-                    setFieldDialog(true);
-                    setStepState(stepData);
-                    setIsFieldDialogEditable(false);
-                  }
-                }}
                 className={`${classes.accordionHeading}  ${classes.white}`}
               >
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
-                  <Box style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', flexBasis: 'calc(100% - 40px)' }}>
-                    <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap' }} gridGap={'8px'}>
+                  <Box
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      flexBasis: 'calc(100% - 70px)'
+                    }}
+                    gridGap={'8px'}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center' }} gridGap={'8px'}>
                       <Box>
                         <Chip
                           color="primary"
                           label={referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
                         />
                       </Box>
-                      <Box ml={1}>
+                      <Box>
                         <Typography className={classes.heading} style={{ fontWeight: '600' }}>
                           {step.stepName}
                         </Typography>
@@ -598,8 +600,6 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                         <Box
                           sx={{
                             justifyContent: mobScreen ? 'flex-start' : 'flex-end',
-                            paddingLeft: '10px',
-                            paddingTop: '10px',
                             marginLeft: mobScreen ? '0' : 'auto',
                             display: 'flex',
                             alignItems: 'center',
@@ -637,8 +637,8 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                                 {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
                                   ? 'Resume'
                                   : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-                                  ? 'Pause'
-                                  : 'Restart'}
+                                    ? 'Pause'
+                                    : 'Restart'}
                               </Button>
                             )}
                           {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
@@ -707,9 +707,9 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                             )
                           ) : null}
                           {stepData?.status &&
-                          ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                          ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                          (isMeTechnician || !isAnyTechnician) ? (
+                            ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                            ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                            (isMeTechnician || !isAnyTechnician) ? (
                             [
                               WORKORDER_SERVICE_STEP_STATUS.passed,
                               WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -755,29 +755,37 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                       )}
                     </Box>
                   </Box>
-
-                  <Box
-                    sx={{
-                      justifyContent: 'flex-end',
-                      display: 'flex',
-                      alignItems: 'center',
-                      paddingTop: '10px'
-                    }}
-                  >
-                    <Box ml={1}>
+                  <Box display={'flex'} alignItems={'center'} gridGap={8}>
+                    {stepData.status &&
                       <IconButton
+                        aria-label="info"
                         size="small"
-                        color="primary"
-                        aria-label="delete"
-                        disabled={!allowedToEdit}
-                        onClick={(event) => {
-                          handleOpenMenu(event);
-                          setSelectedStep(step);
+                        disabled={stepData?.status ? false : true}
+                        onClick={(e) => {
+                          if (stepData.status) {
+                            e.stopPropagation();
+                            setSelectedStep(step);
+                            setFieldDialog(true);
+                            setStepState(stepData);
+                            setIsFieldDialogEditable(false);
+                          }
                         }}
                       >
-                        <MoreHorizIcon />
+                        <InfoIcon fontSize="inherit" />
                       </IconButton>
-                    </Box>
+                    }
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      aria-label="delete"
+                      disabled={!allowedToEdit}
+                      onClick={(event) => {
+                        handleOpenMenu(event);
+                        setSelectedStep(step);
+                      }}
+                    >
+                      <MoreHorizIcon />
+                    </IconButton>
                   </Box>
                 </Box>
               </Box>
@@ -888,15 +896,15 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             message={
               addServiceConfirmation.type === 'returnToStepOnFail'
                 ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services
-                    ?.map((e) => e.serviceName)
-                    ?.toString()}. Do you want to continue ?`
+                  ?.map((e) => e.serviceName)
+                  ?.toString()}. Do you want to continue ?`
                 : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                ? ` Step fail requires Quote Revision. Do you confirm on this?`
-                : addServiceConfirmation.type === 'jumpStep'
-                ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                    ?.map((e) => e.serviceName)
-                    ?.toString()} has been added. Do you want to Add ? `
+                  ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                  : addServiceConfirmation.type === 'jumpStep'
+                    ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                      ?.map((e) => e.serviceName)
+                      ?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
@@ -940,7 +948,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             handleClose={() => {
               setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
             }}
-            handleSuccess={() => {}}
+            handleSuccess={() => { }}
           />
         )}
         {consumablesDialog.open && (
@@ -1014,13 +1022,13 @@ export const RenderPassFailChip = ({ status, className = '', ...others }) => {
         background: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
           ? '#e1fce3'
           : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-          ? '#D3D3D3'
-          : '#FAD9D4',
+            ? '#D3D3D3'
+            : '#FAD9D4',
         color: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
           ? '#048e0a'
           : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-          ? 'inherit'
-          : '#D13925'
+            ? 'inherit'
+            : '#D13925'
       }}
     />
   );
