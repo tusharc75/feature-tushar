@@ -23,6 +23,7 @@ import CompleteDialog from './CompleteDialog';
 import { useData } from 'src/StateProvider/Provider';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import AttachmentDialog from './AttachmentDialog';
+import InfoIcon from '@material-ui/icons/Info';
 
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
@@ -193,6 +194,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
 
   useEffect(() => {
+    setServiceDetails(null);
     fetchServiceData();
   }, [selectedService]);
 
@@ -567,27 +569,27 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   transition: 'background .5s ease',
                   backgroundColor: selectedStep?._id === step._id && fieldDialog ? '#ecfdf7' : ''
                 }}
-                onClick={(e) => {
-                  if (stepData.status) {
-                    e.stopPropagation();
-                    setSelectedStep(step);
-                    setFieldDialog(true);
-                    setStepState(stepData);
-                    setIsFieldDialogEditable(false);
-                  }
-                }}
                 className={`${classes.accordionHeading}  ${classes.white}`}
               >
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
-                  <Box style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', flexBasis: 'calc(100% - 40px)' }}>
-                    <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap' }} gridGap={'8px'}>
+                  <Box
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      flexBasis: 'calc(100% - 70px)'
+                    }}
+                    gridGap={'8px'}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center' }} gridGap={'8px'}>
                       <Box>
                         <Chip
                           color="primary"
                           label={referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
                         />
                       </Box>
-                      <Box ml={1}>
+                      <Box>
                         <Typography className={classes.heading} style={{ fontWeight: '600' }}>
                           {step.stepName}
                         </Typography>
@@ -598,8 +600,6 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                         <Box
                           sx={{
                             justifyContent: mobScreen ? 'flex-start' : 'flex-end',
-                            paddingLeft: '10px',
-                            paddingTop: '10px',
                             marginLeft: mobScreen ? '0' : 'auto',
                             display: 'flex',
                             alignItems: 'center',
@@ -755,28 +755,35 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                       )}
                     </Box>
                   </Box>
-
-                  <Box
-                    sx={{
-                      justifyContent: 'flex-end',
-                      display: 'flex',
-                      alignItems: 'center',
-                      paddingTop: '10px'
-                    }}
-                  >
-                    <Box ml={1}>
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        aria-label="delete"
-                        onClick={(event) => {
-                          handleOpenMenu(event);
+                  <Box display={'flex'} alignItems={'center'} gridGap={8}>
+                    <IconButton
+                      aria-label="info"
+                      size="small"
+                      disabled={stepData?.status ? false : true}
+                      onClick={(e) => {
+                        if (stepData.status) {
+                          e.stopPropagation();
                           setSelectedStep(step);
-                        }}
-                      >
-                        <MoreHorizIcon />
-                      </IconButton>
-                    </Box>
+                          setFieldDialog(true);
+                          setStepState(stepData);
+                          setIsFieldDialogEditable(false);
+                        }
+                      }}
+                    >
+                      <InfoIcon fontSize="inherit" />
+                    </IconButton>
+
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      aria-label="delete"
+                      onClick={(event) => {
+                        handleOpenMenu(event);
+                        setSelectedStep(step);
+                      }}
+                    >
+                      <MoreHorizIcon />
+                    </IconButton>
                   </Box>
                 </Box>
               </Box>

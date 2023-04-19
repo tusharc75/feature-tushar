@@ -498,18 +498,20 @@ const WorkOrderTechnician = () => {
               </Box>
             }
           ></CustomDialogHeader>
-          <Steps
-            workOrderId={selectedService?.workOrderId}
-            selectedService={selectedService}
-            allowedToEdit={selectedService?.status === WORKORDER_TECHNICIAN_SERVICE_STATUS.backlog ? false : true}
-            setDisableCompleteFail={() => {}}
-            fetchService={fetchWorkOrderTechnician}
-            referencType={'workOrderTechnician'}
-            handelClose={() => {
-              setServiceOpen(false);
-              setSelectedService(null);
-            }}
-          />
+          <Box p={2}>
+            <Steps
+              workOrderId={selectedService?.workOrderId}
+              selectedService={selectedService}
+              allowedToEdit={selectedService?.status === WORKORDER_TECHNICIAN_SERVICE_STATUS.backlog ? false : true}
+              setDisableCompleteFail={() => {}}
+              fetchService={fetchWorkOrderTechnician}
+              referencType={'workOrderTechnician'}
+              handelClose={() => {
+                setServiceOpen(false);
+                setSelectedService(null);
+              }}
+            />
+          </Box>
         </Dialog>
       )}
     </Box>
