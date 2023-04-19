@@ -56,7 +56,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
     }
   }, [])
 
-  const handleReject = (values, rejectDate, storagelocation) => {
+  const handleReject = (values, rejectDate, storageLocation) => {
     setIsSubmitting(true);
     const data = [];
     values?.forEach((element) => {
@@ -68,7 +68,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
           qty: parseInt(element?.rejectQuantity),
           comment: element?.comment === '' ? 'Rejected' : element?.comment,
           serialNumber: [],
-          storagelocation: user?.user?.brandPolicy?.storageLocation ? storagelocation : null,
+          storageLocation: user?.user?.brandPolicy?.storageLocation ? storageLocation : null,
         });
       }
     });
@@ -109,7 +109,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
   const validateStorageLocation = (values) => {
     let errors: any = {};
     if (user?.user?.brandPolicy?.storageLocation && !values) {
-      errors['storagelocation'] = `Storage Location is required`;
+      errors['storageLocation'] = `Storage Location is required`;
     }
     return errors;
   }
@@ -158,7 +158,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
         <Formik
           initialValues={{
             rejectDate: new Date(),
-            storagelocation: null,
+            storageLocation: null,
             products: productList.map((d) => ({
               _id: d._id,
               product: d.productName,
@@ -290,20 +290,20 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                 options={storageLocationOptions}
                                 getOptionLabel={(option: any) => option ? option.optionLabel : ''}
                                 getOptionSelected={(option: any, val) => option.optionValue === val}
-                                value={storageLocationOptions.filter((data) => data.optionValue === values['storagelocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storagelocation'])[0] : ''}
+                                value={storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0] : ''}
                                 onChange={(e, val) => {
-                                  setFieldValue('storagelocation', val?.optionValue);
+                                  setFieldValue('storageLocation', val?.optionValue);
                                 }}
                                 renderInput={(params) =>
                                   <TextField
                                     {...params}
                                     variant="outlined"
-                                    name="storagelocation"
+                                    name="storageLocation"
                                     label="Storage Location"
                                     margin="dense"
                                     required
-                                    error={Boolean(validateStorageLocation(values['storagelocation'])?.storagelocation)}
-                                    helperText={validateStorageLocation(values['storagelocation'])?.storagelocation}
+                                    error={Boolean(validateStorageLocation(values['storageLocation'])?.storageLocation)}
+                                    helperText={validateStorageLocation(values['storageLocation'])?.storageLocation}
                                   />
                                 }
                               />
@@ -351,8 +351,8 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                 </Button>
                 <Button
                   onClick={() => {
-                    if (!validate(values.products).rejectQuantity && !validateDate(values)?.rejectDate && !validateStorageLocation(values.storagelocation).storagelocation) {
-                      handleReject(values.products, values.rejectDate, values.storagelocation);
+                    if (!validate(values.products).rejectQuantity && !validateDate(values)?.rejectDate && !validateStorageLocation(values.storageLocation).storageLocation) {
+                      handleReject(values.products, values.rejectDate, values.storageLocation);
                     }
                   }}
                   size="small"
