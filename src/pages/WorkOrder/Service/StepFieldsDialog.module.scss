@@ -2,43 +2,39 @@
   --sidebar-width: 440px;
   --spacing: 12px;
 
-  @media all and (min-width: 768px) and (max-width: 857px) {
-    --sidebar-width: 340px;
-  }
-
-  @media all and (max-width: 507px) {
-    --sidebar-width: 340px;
-  }
-
-  @media all and (max-width: 387px) {
-    --sidebar-width: 278px;
-  }
-
   position: absolute;
   top: 0;
   bottom: 0;
   right: calc(var(--sidebar-width) * -1);
   z-index: 2;
-  width: var(--sidebar-width);
+  width: Min(var(--sidebar-width), 100%);
   transition: right 0.5s;
   background-color: white;
   // box-shadow: var(--ds-shadow-overlay, 0 2px 4px 0 rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(9, 30, 66, 0.08));
   box-shadow: 0px 5.64929px 70.6161px rgba(0, 0, 0, 0.1);
   // border-radius: 8.47393px;
   overflow: hidden;
+  right: 0;
+  transform: translateX(100%);
+  border-radius: 8px;
 
   &.active {
-    right: 0px;
+    animation-name: showSidebar;
+    animation-fill-mode: forwards;
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
   }
 
   .headersection {
     display: flex;
-    color: white;
+    color: #3a3a3a;
+    border-bottom: 1px solid hsl(0deg, 0%, 88%);
+    font-weight: 600;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     padding: var(--spacing, 10px);
-    background-color: var(--primary-light);
+    background-color: white;
     position: sticky;
     top: 0;
     z-index: 5;
@@ -50,9 +46,10 @@
     padding: 8px;
     align-items: center;
     justify-content: flex-end;
-    background: hsl(0deg, 0%, 88%);
+    border-top: 1px solid hsl(0deg, 0%, 88%);
+    background-color: white;
 
-    &>*:not(:first-child) {
+    & > *:not(:first-child) {
       margin-left: 8px;
     }
 
@@ -70,15 +67,6 @@
 
   .formHead {
     position: relative;
-
-    // &::after {
-    //   content: '';
-    //   position: absolute;
-    //   height: 1px;
-    //   width: 100%;
-    //   background-color: lightgray;
-    //   bottom: 0;
-    // }
     h2 {
       font-size: 0.8rem;
       color: inherit;
@@ -87,14 +75,6 @@
 
   .dates {
     position: relative;
-    // &::before {
-    //   content: '';
-    //   position: absolute;
-    //   top: 0;
-    //   width: 100%;
-    //   height: 1px;
-    //   background-color: lightgray;
-    // }
   }
 
   .centerText {
@@ -112,5 +92,10 @@
     left: 10px;
     right: 10px;
   }
+}
 
+@keyframes showSidebar {
+  100% {
+    transform: translateX(0);
+  }
 }
