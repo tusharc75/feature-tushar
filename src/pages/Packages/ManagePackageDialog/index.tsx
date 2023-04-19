@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, Fragment } from "react";
 import { Formik, Form } from "formik";
 import { Box, Button, Grid } from "@material-ui/core";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -9,236 +9,109 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, getCollaboratorDropdownDataSource, getObjKeys, getObjKeysWithValues, getOwnerDropdownDataSource, isFieldNotTouched, packages, setFieldsInAscendingOrder, yupSchema } from "../../../constants/helpers";
+import { CustomDialogTransition, getObjKeys, getObjKeysWithValues, packages, setFieldsInAscendingOrder, sidebarResource, yupSchema } from "../../../constants/helpers";
 import axiosInstance from '../../../axios/axiosInstance'
 import Dialog from "@material-ui/core/Dialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
-import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
 import { useHistory } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
-import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import { FaDiceOne } from "react-icons/fa";
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
+import { isEqual } from "lodash";
 
 const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) => {
 
     const history = useHistory()
     const toastConfig = useContext(CustomToastContext);
-    const { isOffline, offlineFieldsData, offlineGridData } = useContext(CustomOfflineContext);
 
-    const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [packageData, setPackageData] = useState({ fields: [], initialValues: {} });
-    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
+    const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formsData, setFormsData] = useState([]);
-    const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
-    const [ownerData, setOwnerData] = useState([]);
     const [packageName, setPackageName] = useState("");
-    const [collaboratorData, setCollaboratorData] = useState([]);
-    const {
-        state: { user },
-    }: any = useData();
-    const [formValues, setFormValues] = useState({})
+    const { state: { user } }: any = useData();
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
-
-        const ownerCollabOptions = packageData.fields.filter(
-            (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
-        );
-        if (ownerCollabOptions.length > 0) {
-            setOwnerCollaboratorData(ownerCollabOptions[0].option);
-            setOwnerData(ownerCollabOptions[0].option);
-            setCollaboratorData(ownerCollabOptions[0].option);
-        }
-
-        setFormsData(setFieldsInAscendingOrder(packageData.fields));
-    }, [packageData.fields]);
-
-    const onOwnerDropdownOpen = (selectedCollaborator) => {
-        setOwnerData(
-            getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData)
-        );
-    };
-
-    const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
-        setCollaboratorData(
-            getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData)
-        );
-    };
+        setFormsData(setFieldsInAscendingOrder(initialData.fields));
+    }, [initialData.fields]);
 
     useEffect(() => {
-        setLoading(true);
         fetchFields();
-
     }, [packageId]);
 
     const fetchFields = async () => {
         try {
             let fieldData;
-
-            if (navigator.onLine) {
-                const response: any = await axiosInstance().get("/field?resource=Packages");
-                fieldData = response?.data?.data;
-            }
-            else {
-                fieldData = offlineFieldsData?.package || [];
-            }
-
+            const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.packages}`);
+            fieldData = response?.data?.data;
             const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
             if (packageId) {
-
                 try {
                     let data;
-
-                    if (!isOffline) {
-                        const response: any = await axiosInstance().get(`${packages.api}/` + packageId);
-                        data = response?.data?.data;
-                    } else {
-                        data = offlineGridData?.packages?.find(d => d._id === packageId)
-                    }
-
+                    const response: any = await axiosInstance().get(`${packages.api}/${packageId}`);
+                    data = response?.data?.data;
                     if (isClone) {
                         const { _id, brand, createdBy, entity, packageName, history, updatedBy, ...rest } = data
                         setPackageName(packageName)
-                        setPackageData({
+                        setInitialData({
                             fields: fieldsDataForCreate,
-                            initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
+                            values: getObjKeysWithValues(rest, fieldsDataForCreate),
                         });
-                        setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate))
-                        setLoading(false)
                     } else {
-                        setPackageData({
+                        setInitialData({
                             fields: fieldsDataForUpdate,
-                            initialValues: getObjKeysWithValues(data, fieldsDataForUpdate),
+                            values: getObjKeysWithValues(data, fieldsDataForUpdate),
                         });
-                        setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate))
-                        setLoading(false)
                     }
-
                 } catch (error) {
                     toastConfig.setToastConfig(error);
                 }
             }
             else {
                 let initialData = getObjKeys("", fieldsDataForCreate);
-                setPackageData({
+                setInitialData({
                     fields: fieldsDataForCreate,
-                    initialValues: initialData,
+                    values: initialData,
                 });
-                setFormValues(initialData)
-                setLoading(false)
             }
-
         } catch (error) {
             toastConfig.setToastConfig(error);
         }
     }
 
-    const handleSubmit = async (
-        errors,
-        setTouched,
-        values,
-        setValues,
-        setErrors
-    ) => {
-        if (Object.keys(errors).length) {
-            packageData.fields.forEach((input) => {
-                if (input.required || values[input.fieldName]) {
-                    setTouched(input.fieldName, true);
-                }
-            });
-            setErrors({ ...errors });
-        } else {
-            handleUpdatePackage(values)
-        }
-    };
-
-    const handleUpdatePackage = (values) => {
+    const handleSubmit = (values) => {
         setSubmitting(true);
         if (packageId && isClone === false) {
             values._id = packageId
-
-            if (!isOffline) {
-                axiosInstance().put(`${packages.api}`, values).then(({ data }) => {
-                    setSubmitting(false);
-                    onSuccess()
-                    toastConfig.setToastConfig({
-                        open: true,
-                        type: "success",
-                        message: data.message,
-                    });
-                }).catch((error) => {
-                    setSubmitting(false);
-                    toastConfig.setToastConfig(error);
-                });
-            } else {
-                let storedData = {};
-
-                if (localStorage.getItem("offlineDataToSave")) {
-                    storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
-                }
-
-                const dataToSave = {
-                    api: packages.api,
-                    method: "put",
-                    values: values
-                };
-
-                if (!storedData["package"]) {
-                    storedData["package"] = [];
-                }
-                storedData["package"].push(dataToSave)
-
-                localStorage.setItem("offlineDataToSave", JSON.stringify(storedData));
-
+            axiosInstance().put(`${packages.api}`, values).then(({ data }) => {
                 setSubmitting(false);
+                onSuccess()
                 toastConfig.setToastConfig({
                     open: true,
-                    type: "info",
-                    message: "Updates are in offline state, it will be affected once you will be in network",
+                    type: "success",
+                    message: data.message,
                 });
-                onSuccess();
-            }
+            }).catch((error) => {
+                setSubmitting(false);
+                toastConfig.setToastConfig(error);
+            });
         }
         else {
-            if (!isOffline) {
-                axiosInstance().post(`${packages.api}`, values).then(({ data: { data, message } }) => {
-                    history.push(`${routes.packagesDetail.path}/${data._id}`)
-                    setSubmitting(false);
-                    onSuccess(data)
-                    toastConfig.setToastConfig({
-                        open: true,
-                        type: "success",
-                        message: message,
-                    });
-                }).catch((error) => {
-                    setSubmitting(false);
-                    toastConfig.setToastConfig(error);
+            axiosInstance().post(`${packages.api}`, values).then(({ data: { data, message } }) => {
+                history.push(`${routes.packagesDetail.path}/${data._id}`)
+                setSubmitting(false);
+                onSuccess(data)
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: message,
                 });
-            }
-            else {
-                let storedData = {};
-
-                if (localStorage.getItem("offlineDataToSave")) {
-                    storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
-                }
-
-                const dataToSave = {
-                    api: packages.api,
-                    method: "post",
-                    values: values
-                };
-
-                if (!storedData["package"]) {
-                    storedData["package"] = [];
-                }
-                storedData["package"].push(dataToSave)
-
-                localStorage.setItem("offlineDataToSave", JSON.stringify(storedData));
-                onSuccess();
-            }
+            }).catch((error) => {
+                setSubmitting(false);
+                toastConfig.setToastConfig(error);
+            });
         }
     };
 
@@ -248,7 +121,6 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
             const input = document.querySelector(
                 `input[name=${err[0]}]`,
             );
-
             input.scrollIntoView({
                 behavior: 'smooth',
                 block: 'center',
@@ -257,307 +129,135 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
         }
     }
 
-    const handleValuesChange = (data) => {
-        setFormValues((prevState) => ({
-            ...prevState,
-            ...data
-        }))
-    }
-    return (
-        <>
-            <Dialog
-                maxWidth="md"
-                fullWidth
-                fullScreen={fullScreen || (isMobile || isTablet)}
-                TransitionComponent={CustomDialogTransition}
-                aria-labelledby="customized-dialog-title"
-                onClose={(e, reason) => {
-                    if (reason !== 'backdropClick') {
-                        setShowConfirmDialog(true)
-                    }
-                }}
-                open={open}
+    return (<Dialog
+        maxWidth="md"
+        fullWidth
+        fullScreen={fullScreen || (isMobile || isTablet)}
+        TransitionComponent={CustomDialogTransition}
+        aria-labelledby="customized-dialog-title"
+        onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+                setShowConfirmDialog(true)
+            }
+        }}
+        open={open}
+    >
+        {formsData && formsData?.length ?
+            <Formik
+                initialValues={initialData.values}
+                validationSchema={yupSchema(initialData.fields)}
+                validateOnMount
+                onSubmit={handleSubmit}
             >
-                <CustomDialogHeader
-                    title={
-                        !packageId
-                            ? "Create Package"
-                            : `${isClone ? `Clone - ${packageName}` : "Editing"}`
-                    }
-                    onClose={(e, reason) => {
-                        if (isFieldNotTouched(packageData, formValues)) onClose()
-                        else setShowConfirmDialog(true)
-                    }}
-                    isMinimized={!fullScreen}
-                    onMinimizeMaximize={() => {
-                        setFullScreen(prevState => !prevState)
-                    }}
-                    showManimizeMaximize={true}
-                />
-                {loading || !packageData.fields.length ? (
-                    <>
+                {({ values, errors, touched, setFieldValue, handleSubmit }) => (
+                    <Fragment>
+                        <CustomDialogHeader
+                            title={
+                                !packageId
+                                    ? "Create Package"
+                                    : `${isClone ? `Clone - ${packageName}` : "Edit"}`
+                            }
+                            onClose={(e, reason) => {
+                                if (isEqual(initialData.values, values)) onClose()
+                                else setShowConfirmDialog(true)
+                            }}
+                            isMinimized={!fullScreen}
+                            onMinimizeMaximize={() => {
+                                setFullScreen(prevState => !prevState)
+                            }}
+                            showManimizeMaximize={true}
+                        />
                         <CustomDialogContent>
-                            <Skeleton width="100%" height="70px" />
-                            <Grid container spacing={2}>
-                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                                    <Grid key={i} item xs={12} sm={6} md={6}>
-                                        <Skeleton width="100%" height="60px" />
-                                    </Grid>
+                            <Form autoComplete="off" autoCorrect="off" noValidate >
+                                {formsData.map((form, i) => (
+                                    <div key={i}>
+                                        <div className={"detail-box-content"}>
+                                            <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                            <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                                        </div>
+                                        <Box marginY={2}>
+                                            <Grid spacing={3} container>
+                                                {form.sectionFields.map((field, index2) => (
+                                                    <Grid key={index2} item xs={12} sm={6} md={6}>
+                                                        <FormTypes
+                                                            isNew={Boolean(packageId)}
+                                                            {...field}
+                                                            fieldData={field}
+                                                            disabled={(Boolean(packageId) && field.disableOnEdit && !isClone)}
+                                                            values={values}
+                                                            errors={errors}
+                                                            touched={touched}
+                                                            label={field.fieldLabel}
+                                                            name={field.fieldName}
+                                                            type={field.type}
+                                                            options={field.option}
+                                                            setFieldValue={(name, value) => {
+                                                                setFieldValue(name, value)
+                                                            }}
+                                                            required={field.required}
+                                                            fullWidth
+                                                            isTooltip={field?.isTooltip || false}
+                                                            tooltipMessage={field?.tooltipMessage}
+                                                            size="small"
+                                                        />
+                                                    </Grid>
+                                                ))}
+                                            </Grid>
+                                        </Box>
+                                    </div>
                                 ))}
-                            </Grid>
+                            </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button variant="outlined" size="small" color="primary" disabled
+                            <Button
+                                disabled={submitting}
+                                type="button"
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                onClick={() => {
+                                    if (isEqual(initialData.values, values)) onClose()
+                                    else setShowConfirmDialog(true)
+                                }}
                             >
                                 Cancel
                             </Button>
-                            <Button variant="contained" size="small" color="primary" disabled>
-                                Submit
-                            </Button>
+                            <CustomButton
+                                loading={submitting}
+                                variant="contained"
+                                color="primary"
+                                disabled={submitting}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleScroll(errors)
+                                    handleSubmit();
+                                }}
+                            >
+                                Save
+                            </CustomButton>
                         </CustomDialogFooter>
-                    </>
-                ) : (
-                    <Formik
-                        initialValues={packageData.initialValues}
-                        validationSchema={yupSchema(packageData.fields)}
-                        validateOnMount
-                        onSubmit={() => { }}
-                    >
-                        {({
-                            values,
-                            errors,
-                            touched,
-                            setFieldValue,
-                            setFieldTouched,
-                            setErrors,
-                            setValues,
-                        }) => (
-                            <>
-                                <CustomDialogContent>
-                                    <Form>
-                                        {formsData &&
-                                            formsData.map((form, i) => {
-                                                return (
-                                                    form.name && (
-                                                        <div key={i}>
-                                                            <h2 className="form-label-style">{form.name}</h2>
-                                                            <Box marginY={2}>
-                                                                <Grid spacing={3} container>
-                                                                    {form.sectionFields.map((field) => (
-                                                                        <Grid
-                                                                            key={field.fieldName}
-                                                                            item
-                                                                            xs={12}
-                                                                            sm={6}
-                                                                            md={6}
-                                                                        >
-                                                                            {field.fieldName === "owner" ? (
-                                                                                <FormTypes
-                                                                                    packageId={packageId}
-                                                                                    {...field}
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={ownerData}
-                                                                                    onChange={(e, val) => {
-                                                                                        setFieldValue(
-                                                                                            field.fieldName,
-                                                                                            val && val.optionValue
-                                                                                                ? val.optionValue
-                                                                                                : ""
-                                                                                        );
-                                                                                        handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
-
-                                                                                        if (
-                                                                                            val &&
-                                                                                            val.optionValue !== user?.user?._id
-                                                                                        ) {
-                                                                                            const checkOwnerAddedInCollaborator =
-                                                                                                values["collaborator"].find(
-                                                                                                    (d) =>
-                                                                                                        d?.optionValue ===
-                                                                                                        user?.user?._id
-                                                                                                );
-                                                                                            if (
-                                                                                                !checkOwnerAddedInCollaborator
-                                                                                            ) {
-                                                                                                setFieldValue("collaborator", [
-                                                                                                    ...values["collaborator"],
-                                                                                                    collaboratorData.find(
-                                                                                                        (d) =>
-                                                                                                            d?.optionValue ===
-                                                                                                            user?.user?._id
-                                                                                                    ).optionValue,
-                                                                                                ]);
-                                                                                                handleValuesChange({
-                                                                                                    collaborator: collaboratorData.find(
-                                                                                                        (d) =>
-                                                                                                            d?.optionValue ===
-                                                                                                            user?.user?._id
-                                                                                                    ).optionValue
-                                                                                                })
-                                                                                            }
-                                                                                        }
-                                                                                    }}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={field?.isTooltip || false}
-                                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                                    size="small"
-                                                                                    disabled={(!packageId && field.disableOnEdit)}
-                                                                                    onOpen={() => {
-                                                                                        onOwnerDropdownOpen(
-                                                                                            values["collaborator"]
-                                                                                        );
-                                                                                    }}
-                                                                                />
-                                                                            ) : field.fieldName === "collaborator" ? (
-                                                                                <FormTypes
-                                                                                    packageId={packageId}
-                                                                                    {...field}
-                                                                                    disabled={!packageId && field.disableOnEdit}
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={collaboratorData}
-                                                                                    setFieldValue={(name, value) => {
-                                                                                        handleValuesChange({ [name]: value })
-                                                                                        setFieldValue(name, value)
-                                                                                    }}
-
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={field?.isTooltip || false}
-                                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                                    size="small"
-                                                                                    onOpen={() => {
-                                                                                        onCollabOwnerMultiselectOpen(
-                                                                                            values["owner"]
-                                                                                        );
-                                                                                    }}
-                                                                                />
-                                                                            ) : (
-                                                                                <FormTypes
-                                                                                    packageId={packageId}
-                                                                                    {...field}
-                                                                                    disabled={(!packageId && field.disableOnEdit)}
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={field.option}
-                                                                                    setFieldValue={(name, value) => {
-                                                                                        handleValuesChange({ [name]: value })
-                                                                                        setFieldValue(name, value)
-                                                                                    }}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={field?.isTooltip || false}
-                                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                                    size="small"
-                                                                                    imageOrFileUploadCompletePercentage={
-                                                                                        ["imageUpload", "fileUpload"].some(
-                                                                                            (s) => s === field.type
-                                                                                        )
-                                                                                            ? (completePercentage) => {
-                                                                                                setUploadingImageOrFileProgress(
-                                                                                                    completePercentage
-                                                                                                );
-                                                                                            }
-                                                                                            : null
-                                                                                    }
-                                                                                />
-                                                                            )}
-                                                                        </Grid>
-                                                                    ))}
-                                                                </Grid>
-                                                            </Box>
-                                                        </div>
-                                                    )
-                                                );
-                                            })}
-                                    </Form>
-                                </CustomDialogContent>
-
-                                <CustomDialogFooter>
-                                    <Button
-                                        disabled={submitting}
-                                        type="button"
-                                        variant="outlined"
-                                        color="primary"
-                                        size="small"
-                                        onClick={() => {
-                                            if (isFieldNotTouched(packageData, values)) onClose()
-                                            else setShowConfirmDialog(true)
-                                        }}
-                                    >
-                                        Cancel
-                                    </Button>
-
-                                    <CustomButton
-                                        loading={submitting}
-                                        variant="contained"
-                                        color="primary"
-                                        disabled={
-                                            // loading || Object.keys(errors).length > 0 ? true : false
-                                            uploadingImageOrFileProgress > 0 ||
-                                            // isFieldNotTouched(packageData, values) ||
-                                            submitting
-                                        }
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            handleScroll(errors)
-                                            handleSubmit(
-                                                errors,
-                                                setFieldTouched,
-                                                values,
-                                                setValues,
-                                                setErrors
-                                            );
-                                        }}
-                                    >
-                                        Save
-                                    </CustomButton>
-                                </CustomDialogFooter>
-                                {
-                                    showConfirmDialog ?
-                                        <ConfirmCancelDialog
-                                            close={() => setShowConfirmDialog(false)}
-                                            open={showConfirmDialog}
-                                            onSave={() => {
-                                                setShowConfirmDialog(false)
-                                                handleScroll(errors)
-
-                                                handleSubmit(
-                                                    errors,
-                                                    setFieldTouched,
-                                                    values,
-                                                    setValues,
-                                                    setErrors
-                                                );
-                                            }}
-                                            onClose={() => {
-                                                setShowConfirmDialog(false)
-                                                onClose()
-                                            }}
-                                        /> : null
-                                }
-
-                            </>
-                        )}
-                    </Formik>
+                        {showConfirmDialog &&
+                            <ConfirmCancelDialog
+                                close={() => setShowConfirmDialog(false)}
+                                open={showConfirmDialog}
+                                onSave={() => {
+                                    setShowConfirmDialog(false)
+                                    handleScroll(errors)
+                                    handleSubmit();
+                                }}
+                                onClose={() => {
+                                    setShowConfirmDialog(false)
+                                    onClose()
+                                }}
+                            />
+                        }
+                    </Fragment>
                 )}
-            </Dialog>
-
-        </>
+            </Formik> :
+            <Box p={2} height={500} bgcolor="white">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>}
+    </Dialog>
     );
 
 }

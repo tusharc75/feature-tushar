@@ -169,11 +169,8 @@ export default function ManageUpdateEmailAndPassword({
                 {({
                     values,
                     setFieldValue,
-                    setFieldError,
-                    setFieldTouched,
-                    submitForm,
+                    setErrors,
                     errors,
-                    setErrors
                 }) => (
                     <>
                         <CustomDialogContent>
@@ -198,6 +195,8 @@ export default function ManageUpdateEmailAndPassword({
                                                                 InputProps={{
                                                                     endAdornment: (<PasswordEndAdornment fieldName="oldPassword" />)
                                                                 }}
+                                                                error={Boolean(errors['oldPassword'])}
+                                                                helperText={errors['oldPassword']}
                                                             />
                                                         </Grid>
 
@@ -215,6 +214,8 @@ export default function ManageUpdateEmailAndPassword({
                                                                 InputProps={{
                                                                     endAdornment: (<PasswordEndAdornment fieldName="newPassword" />)
                                                                 }}
+                                                                error={Boolean(errors['newPassword'])}
+                                                                helperText={errors['newPassword']}
                                                             />
                                                         </Grid>
                                                         <Grid item sm={10}>
@@ -233,6 +234,8 @@ export default function ManageUpdateEmailAndPassword({
                                                                 InputProps={{
                                                                     endAdornment: (<PasswordEndAdornment fieldName="confirmPassword" />)
                                                                 }}
+                                                                error={Boolean(errors['confirmPassword'])}
+                                                                helperText={errors['confirmPassword']}
                                                             />
                                                         </Grid>
                                                     </>
@@ -274,6 +277,7 @@ export default function ManageUpdateEmailAndPassword({
                                 onClick={() => {
                                     if (isUpdatePassword) {
                                         let errors = validateForm(values)
+                                        setErrors(errors)
                                         if (Object.keys(errors).length === 0) {
                                             handleSubmit(values)
                                         }

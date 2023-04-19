@@ -19,7 +19,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash'
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { FaSuitcase, SiStatuspage, FaWarehouse, GiAutoRepair, GrStatusInfo, BsFillPersonFill, GiCargoShip, FaShippingFast, RiSpaceShipFill } from "react-icons/all"
 import ProductionOrderHeader from './ProductionOrderHeader';
 import HtmlTooltip from "src/components/CustomTooltipTitle";
@@ -66,7 +65,6 @@ const ProductionOrder = () => {
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
     const [frameworkComponents, setFrameworkComponents] = useState({});
-    const { isOffline } = useContext(CustomOfflineContext);
     const [columns, setColumns] = useState([]);
 
     const { getColumnData } = useColumns();
@@ -84,10 +82,6 @@ const ProductionOrder = () => {
         data.forEach(o => {
             let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productionOrderDetail.path)
             if (currentColumn !== null) {
-                if (isOffline) {
-                    currentColumn.columnData["filter"] = false
-                    currentColumn.columnData["sortable"] = false
-                }
                 columns = [...columns, currentColumn?.columnData]
                 if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
                     rendererNames.push(currentColumn?.rendererName)

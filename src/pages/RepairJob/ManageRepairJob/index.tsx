@@ -16,18 +16,19 @@ import {
   setFieldsInAscendingOrder,
   yupSchema,
   repairJobProcessSteps,
-  generateUniqueIdOnly
+  generateUniqueIdOnly,
+  sidebarResource
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from "react-icons/fa";
 import moment from 'moment';
 import { useData } from "../../../StateProvider/Provider";
 import { isEqual } from 'lodash';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 
 const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSuccess, referenceType = null, referenceData = null }) => {
 
@@ -36,21 +37,23 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
   const { state: { permissions, user, selectedEntity } }: any = useData();
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
+  const [formsData, setFormsData] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [allFields, setAllFields] = useState([]);
   const [title, setTitle] = useState("");
 
-  const ref = useRef(null);
+  useEffect(() => {
+    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+  }, [initialData.fields]);
 
   useEffect(() => {
     setLoading(true);
-    axiosInstance().get('/field?resource=Repair Job').then(({ data: { data } }) => {
+    axiosInstance().get(`/field?resource=${sidebarResource.repairJob}`).then(({ data: { data } }) => {
+
       data = data.filter((obj) => obj?.fieldData?.fieldName !== "rentalJob");
 
       const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -64,10 +67,9 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
             rest.repairJobName = `RJ_${generateUniqueIdOnly()}`;
             rest.status = `New`;
             setInitialData({
-              fields: setFieldsInAscendingOrder(fieldsDataForCreate),
+              fields: fieldsDataForCreate,
               values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }
             });
-            setAllFields(fieldsDataForCreate);
             setLoading(false);
           } else {
             axiosInstance().get(`${repairJob.api}/${repairJobId}/assets`)
@@ -82,10 +84,9 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                 }
                 setTitle(`Editing - [${data.repairJobName}]`)
                 setInitialData({
-                  fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
+                  fields: fieldsDataForUpdate,
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
                 });
-                setAllFields(fieldsDataForUpdate);
               }).catch((error) => {
                 toastConfig.setToastConfig(error);
               });
@@ -113,9 +114,8 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
         if (referenceType === "Product Inventory") {
           initialData["warehouse"] = referenceData?.warehouse
         }
-        setAllFields(fieldsDataForCreate);
         setInitialData({
-          fields: setFieldsInAscendingOrder(fieldsDataForCreate),
+          fields: fieldsDataForCreate,
           values: initialData
         });
         setLoading(false);
@@ -127,10 +127,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
   }, [repairJobId]);
 
   const handleSubmit = (values) => {
-    handleUpdateRepairJorepairJob(values);
-  };
-
-  const handleUpdateRepairJorepairJob = (values) => {
     setSubmitting(true);
     if (repairJobId && isClone === false) {
       values._id = repairJobId;
@@ -208,44 +204,22 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
     }}
     open={true}
   >
-    {loading || !initialData.fields.length ? (
-      <>
-        <CustomDialogContent>
-          <Skeleton width="100%" height="70px" />
-          <Grid container spacing={2}>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-              <Grid key={i} item xs={12} sm={6} md={6}>
-                <Skeleton width="100%" height="60px" />
-              </Grid>
-            ))}
-          </Grid>
-        </CustomDialogContent>
-        <CustomDialogFooter>
-          <Button variant="outlined" size="small" color="primary" disabled>
-            Cancel
-          </Button>
-          <Button variant="contained" size="small" color="primary" disabled>
-            Submit
-          </Button>
-        </CustomDialogFooter>
-      </>
-    ) : (
+    {formsData && formsData?.length ?
       <Formik
-        innerRef={ref}
         initialValues={initialData.values}
-        validationSchema={yupSchema(allFields)}
+        validationSchema={yupSchema(initialData.fields)}
         validateOnMount
         onSubmit={handleSubmit}>
-        {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues, submitForm }) => (
+        {({ values, errors, touched, setFieldValue, submitForm }) => (
           <>
             <CustomDialogHeader
               title={title}
               onClose={(e, reason) => {
-                if (!isEqual(ref.current.values, initialData.values)) {
-                  setShowConfirmDialog(true)
+                if (isEqual(values, initialData.values)) {
+                  onClose()
                 }
                 else {
-                  onClose()
+                  setShowConfirmDialog(true)
                 }
               }}
               isMinimized={!fullScreen}
@@ -256,101 +230,99 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
             />
             <CustomDialogContent>
               <Form>
-                {initialData.fields.length > 0 &&
-                  initialData.fields.map((form, i) => {
-                    return (
-                      form.name && (
-                        <div key={i}>
-                          <div className={"detail-box-content"}>
-                            <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-                            <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
-                          </div>
-                          <Box marginY={2}>
-                            <Grid spacing={3} container>
-                              {form.sectionFields.map((field) =>
-                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                  {field.fieldName === "startDate"
-                                    ? <FormTypes
-                                      repairJobId={repairJobId}
-                                      {...field}
-                                      disabled={(!repairJobId && field.disableOnEdit)}
-                                      values={values}
-                                      fieldData={field}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      minDate={new Date()}
-                                      maxDate={values["expectedCompletionDate"] ? moment(values["expectedCompletionDate"]) : moment().add(5, "years")}
-                                    /> : field.fieldName === "expectedCompletionDate"
-                                      ? <FormTypes
-                                        repairJobId={repairJobId}
-                                        {...field}
-                                        disabled={(!repairJobId && field.disableOnEdit)}
-                                        values={values}
-                                        fieldData={field}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        minDate={values["startDate"]}
-                                      /> :
-                                      <FormTypes
-                                        {...field}
-                                        values={values}
-                                        errors={errors}
-                                        disabled={(Boolean(repairJob) && field.disableOnEdit && !isClone)}
-                                        fieldData={field}
-                                        allFields={allFields}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
-                                            : null
+                {formsData.map((form, i) => {
+                  return (form.name && (
+                    <div key={i}>
+                      <div className={"detail-box-content"}>
+                        <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                        <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                      </div>
+                      <Box marginY={2}>
+                        <Grid spacing={3} container>
+                          {form.sectionFields.map((field) =>
+                            <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                              {field.fieldName === "startDate"
+                                ? <FormTypes
+                                  repairJobId={repairJobId}
+                                  {...field}
+                                  disabled={(!repairJobId && field.disableOnEdit)}
+                                  values={values}
+                                  fieldData={field}
+                                  errors={errors}
+                                  touched={touched}
+                                  label={field.fieldLabel}
+                                  name={field.fieldName}
+                                  type={field.type}
+                                  options={field.option}
+                                  setFieldValue={(name, value) => {
+                                    setFieldValue(name, value);
+                                  }}
+                                  required={field.required}
+                                  fullWidth
+                                  isTooltip={field?.isTooltip || false}
+                                  tooltipMessage={field?.tooltipMessage}
+                                  size="small"
+                                  minDate={new Date()}
+                                  maxDate={values["expectedCompletionDate"] ? moment(values["expectedCompletionDate"]) : moment().add(5, "years")}
+                                /> : field.fieldName === "expectedCompletionDate"
+                                  ? <FormTypes
+                                    repairJobId={repairJobId}
+                                    {...field}
+                                    disabled={(!repairJobId && field.disableOnEdit)}
+                                    values={values}
+                                    fieldData={field}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    minDate={values["startDate"]}
+                                  /> :
+                                  <FormTypes
+                                    {...field}
+                                    values={values}
+                                    errors={errors}
+                                    disabled={(Boolean(repairJob) && field.disableOnEdit && !isClone)}
+                                    fieldData={field}
+                                    allFields={initialData.fields}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    imageOrFileUploadCompletePercentage={
+                                      ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                        ? (completePercentage) => {
+                                          setUploadingImageOrFileProgress(completePercentage);
                                         }
-                                      />}
-                                </Grid>
-                              )}
+                                        : null
+                                    }
+                                  />}
                             </Grid>
-                          </Box>
-                        </div>
-                      )
-                    );
-                  })}
+                          )}
+                        </Grid>
+                      </Box>
+                    </div>
+                  )
+                  );
+                })}
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
@@ -361,11 +333,11 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                 color="primary"
                 size="small"
                 onClick={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true)
+                  if (isEqual(values, initialData.values)) {
+                    onClose()
                   }
                   else {
-                    onClose()
+                    setShowConfirmDialog(true)
                   }
                 }}
               >
@@ -384,7 +356,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                 Save
               </CustomButton>
             </CustomDialogFooter>
-            {showConfirmDialog ? (
+            {showConfirmDialog && (
               <ConfirmCancelDialog
                 close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
@@ -398,12 +370,13 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                   onClose();
                 }}
               />
-            ) : null}
-
+            )}
           </>
         )}
       </Formik>
-    )}
+      : <Box p={2} height={500} bgcolor="white">
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>}
   </Dialog>
   );
 };

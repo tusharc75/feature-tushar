@@ -19,7 +19,6 @@ import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import Skeleton from "@material-ui/lab/Skeleton/Skeleton";
 import { useHistory } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
-import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { FaDiceOne } from "react-icons/fa";
 import moment from "moment";
 import AddIcon from "@material-ui/icons/AddCircle";
