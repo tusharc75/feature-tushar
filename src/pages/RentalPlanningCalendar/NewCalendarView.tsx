@@ -1,9 +1,7 @@
 import React, { useEffect, useCallback, useMemo, useState, useContext } from 'react'
 import { useHistory } from 'react-router-dom';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar'
-import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import './calendarView.scss'
-import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import moment from 'moment';
 import { Grid, Checkbox, TextField, Box } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -48,9 +46,36 @@ const planningResource = [
         start: 'createDate',
         end: 'estimateDeliveryDate'
     },
+    {
+        resource: 'purchaseOrder',
+        path: routes.purchaseOrderDetail.path,
+        title: 'purchaseOrderNumber',
+        start: 'purchaseOrderDate',
+        end: 'deliveryDate'
+    },
+    {
+        resource: 'repairJob',
+        path: routes.repairJobDetail.path,
+        title: 'repairJobName',
+        start: 'startDate',
+        end: 'expectedCompletionDate'
+    },
+    {
+        resource: 'sublease',
+        path: routes.subleaseDetail.path,
+        title: 'subleaseName',
+        start: 'estimateStartDate',
+        end: 'estimateEndDate'
+    },
+    {
+        resource: 'projectSales',
+        path: routes.projectSalesDetail.path,
+        title: 'projectName',
+        start: 'startDate',
+        end: 'endDate'
+    },
 ]
 
-const DragAndDropCalendar = withDragAndDrop(Calendar as any)
 const localizer = momentLocalizer(moment);
 
 const formats = {
@@ -101,7 +126,7 @@ function CalendarView() {
     }
 
     const getMatchedResource = (value: string) => {
-        const resource = planningResource.filter((_resource) => sidebarResource[_resource.resource] === value)[0]
+        const resource = planningResource.filter((_resource) => _resource.resource === value)[0]
 
         return resource;
     }
@@ -154,7 +179,7 @@ function CalendarView() {
         let query = `${api}?date=${date}`
 
         if (resource) {
-            query = `${query}&resource=${resource}`
+            query = `${query}&resource=${sidebarResource[resource]}`
         }
 
         if (selectedWarehouse.length > 0) {
@@ -197,39 +222,11 @@ function CalendarView() {
             .get(queryString)
             .then(({ data: { data } }) => {
                 const createdData = createDataForCalendar(data?.data || [])
-                // setStaticEvents(createdData)
                 setEvents(createdData);
 
             })
             .catch((err) => { });
     }
-
-    // const updateData = (event, start, end) => {
-    //     let route = ''
-    //     if (event.type === sidebarResource.rentalManagement) {
-    //         route = 'change-rental-date'
-    //     } else if (event.type === sidebarResource.planning) {
-    //         route = 'change-planning-date'
-    //     }
-    //     axiosInstance()
-    //         .put(`/rental-planning-calendar/${route}`, {
-    //             _id: event.id,
-    //             startDate: start.toISOString(),
-    //             endDate: end.toISOString()
-    //         })
-    //         .then(({ data }) => {
-    //             toastConfig.setToastConfig({
-    //                 open: true,
-    //                 type: 'success',
-    //                 message: data.message
-    //             });
-    //             fetchData()
-    //         })
-    //         .catch((error) => {
-    //             toastConfig.setToastConfig(error);
-    //             fetchData()
-    //         });
-    // }
 
     useEffect(() => {
         if (resource) {
@@ -250,20 +247,6 @@ function CalendarView() {
             }
         }
     }, [filterToKeep])
-
-    const moveEvent = ({ event, start, end }) => {
-        // const filterEvents = staticEvents.filter(ev => ev.id !== event.id)
-        // const existing = staticEvents.find((ev) => ev.id === event.id) ?? {}
-        // setEvents([...filterEvents, { ...existing, start, end }])
-        // updateData(event, start, end)
-    }
-
-    const resizeEvent = ({ event, start, end }) => {
-    // const filterEvents = staticEvents.filter(ev => ev.id !== event.id)
-    // const existing = staticEvents.find((ev) => ev.id === event.id) ?? {}
-    // setEvents([...filterEvents, { ...existing, start, end }])
-    // updateData(event, start, end)
-    }
 
     const onView = useCallback(
         (view) => {
@@ -304,9 +287,9 @@ function CalendarView() {
                         getOptionLabel={(option) => RESOURCE_LABEL[option] ?? ''}
                         style={{ width: "350px" }}
                         disableClearable
-                        value={getMatchedResource(resource)?.resource}
+                        value={resource}
                         onChange={(event, newValue) => {
-                            setResource(sidebarResource[newValue])
+                            setResource(newValue)
                         }}
                         size="small"
                         renderInput={(params) =>
@@ -394,17 +377,14 @@ function CalendarView() {
                 </Grid>
             </Box>
         </Box>
-        <DragAndDropCalendar
+        <Calendar
             style={{ height: "calc(100vh - 260px)" }}
             defaultDate={defaultDate}
             defaultView={'day'}
             events={events}
             formats={formats}
             localizer={localizer}
-            onEventDrop={moveEvent}
-            onEventResize={resizeEvent}
             popup={true}
-            resizable
             views={{ month: true, week: true, day: true }}
             onView={onView}
             view={view}
