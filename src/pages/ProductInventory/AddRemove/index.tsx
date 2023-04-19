@@ -40,7 +40,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
   const [initialData, setInitialData] = useState({
     qty: 1,
     price: 0,
-    storagelocation: storageLocationId,
+    storageLocation: storageLocationId,
     comment: '',
     serialNumbers: [],
     customDate: new Date()
@@ -98,7 +98,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
           setInitialData((preVal) => {
             return (
               {
-                ...preVal, storagelocation: storageLocationOption[0]?.optionValue
+                ...preVal, storageLocation: storageLocationOption[0]?.optionValue
               }
             )
           })
@@ -132,7 +132,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
               serialNumber: values['serialNumbers']
             })),
         warehouse: warehouse,
-        storagelocation: values.storagelocation,
+        storageLocation: values.storageLocation,
         receiveDate: values.customDate,
         comment: values.comment
       };
@@ -159,7 +159,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
             ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: [] }))
             : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: serialNumberIds.map((item) => item?._id) })),
         warehouse: warehouse,
-        storagelocation: values.storagelocation,
+        storageLocation: values.storageLocation,
         customDate: moment(values.customDate).format('MM/DD/YYYY'),
         comment: values.comment
       };
@@ -187,7 +187,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
       errors['qty'] = 'Please enter valid qty';
     }
     if (type === 'remove') {
-      var validateQty = product[0]?.availableInventory;
+      var validateQty = currentInventory;
       if (product?.length > 1) {
         validateQty = product?.reduce(function (min, obj) {
           return obj.availableInventory < min ? obj.availableInventory : min;
@@ -204,9 +204,9 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
       }
     }
 
-    const storagelocation = values['storagelocation'];
-    if (user?.user?.brandPolicy?.storageLocation && !storagelocation) {
-      errors['storagelocation'] = 'Please select Storage Location';
+    const storageLocation = values['storageLocation'];
+    if (user?.user?.brandPolicy?.storageLocation && !storageLocation) {
+      errors['storageLocation'] = 'Please select Storage Location';
     }
     // find duplicates serial numbers
     const serialNumbersList = values['serialNumbers'];
@@ -276,7 +276,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
   const getInventory = () => {
     let api = `${productInventory.api}/inventory-at-date?date=${new Date()}&warehouse=${warehouse}&product=${product[0]._id}`;
     if (selectedStorageLocation) {
-      api = `${api}&storagelocation=${selectedStorageLocation}`
+      api = `${api}&storageLocation=${selectedStorageLocation}`
     }
     if (product?.length === 1) {
       axiosInstance()
@@ -386,9 +386,9 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                             options={storageLocationOptions}
                             getOptionLabel={(option: any) => option ? option.optionLabel : ''}
                             getOptionSelected={(option: any, val) => option.optionValue === val}
-                            value={storageLocationOptions.filter((data) => data.optionValue === values['storagelocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storagelocation'])[0] : ''}
+                            value={storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0] : ''}
                             onChange={(e, val) => {
-                              setFieldValue('storagelocation', val?.optionValue);
+                              setFieldValue('storageLocation', val?.optionValue);
                               setSelectedStorageLocation(val?.optionValue)
                             }}
                             renderInput={(params) =>
@@ -396,26 +396,26 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                                 <TextField
                                   {...params}
                                   margin="dense"
-                                  name="storagelocation"
+                                  name="storageLocation"
                                   label="Storage Location"
                                   variant="standard"
                                   fullWidth
                                   required
-                                  error={touched['storagelocation'] && Boolean(errors['storagelocation'])}
-                                  helperText={touched['storagelocation'] && errors['storagelocation']}
+                                  error={touched['storageLocation'] && Boolean(errors['storageLocation'])}
+                                  helperText={touched['storageLocation'] && errors['storageLocation']}
                                   className={isMobile ? 'serchBox' : ''}
                                 />
                               ) : (
                                 <TextField
                                   {...params}
                                   margin="dense"
-                                  name="storagelocation"
+                                  name="storageLocation"
                                   label="Storage Location"
                                   variant="outlined"
                                   fullWidth
                                   required
-                                  error={touched['storagelocation'] && Boolean(errors['storagelocation'])}
-                                  helperText={touched['storagelocation'] && errors['storagelocation']}
+                                  error={touched['storageLocation'] && Boolean(errors['storageLocation'])}
+                                  helperText={touched['storageLocation'] && errors['storageLocation']}
                                 />
                               )
                             }
@@ -446,8 +446,11 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                             if (type === 'remove' && product.length === 1) {
                               var date = moment(newDate);
                               if (date.isValid()) {
-                                axiosInstance()
-                                  .get(`${productInventory.api}/inventory-at-date?date=${newDate}&warehouse=${warehouse}&product=${product[0]._id}&storagelocation=${values['storagelocation']}`)
+                                var api = `${productInventory.api}/inventory-at-date?date=${newDate}&warehouse=${warehouse}&product=${product[0]._id}`;
+                                if (values['storageLocation']) {
+                                  api = api + `&storageLocation=${values['storageLocation']}`
+                                }
+                                axiosInstance().get(api)
                                   .then(({ data: { data } }) => {
                                     setAvailableQtyOnRemoveDate(data);
                                   })
