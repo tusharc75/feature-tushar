@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Box, Button, Popover, FormControl, FormGroup, Divider, FormControlLabel, Tooltip, Switch, IconButton } from '@material-ui/core';
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { CustomOfflineContext } from '../../../../StateProvider/OfflineContext/OfflineContext';
 import axiosInstance from '../../../../axios/axiosInstance';
 import { useData } from '../../../../StateProvider/Provider';
 import { disabledColumns, getSortedColumns } from '../../../../constants/columns';
