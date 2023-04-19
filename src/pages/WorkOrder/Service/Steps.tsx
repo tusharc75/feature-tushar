@@ -11,7 +11,7 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS
 } from 'src/constants/helpers';
-import { Box, IconButton, Grid, Typography, Chip, Menu, MenuItem, ClickAwayListener } from '@material-ui/core';
+import { Box, IconButton, Grid, Typography, Chip, Menu, MenuItem, ClickAwayListener, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -23,6 +23,7 @@ import CompleteDialog from './CompleteDialog';
 import { useData } from 'src/StateProvider/Provider';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import AttachmentDialog from './AttachmentDialog';
+import InfoIcon from '@material-ui/icons/Info';
 
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
@@ -176,6 +177,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
+  const mobScreen = useMediaQuery('(max-width:768px)');
 
   const {
     state: {
@@ -192,6 +194,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
 
   useEffect(() => {
+    setServiceDetails(null);
     fetchServiceData();
   }, [selectedService]);
 
@@ -566,207 +569,223 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   transition: 'background .5s ease',
                   backgroundColor: selectedStep?._id === step._id && fieldDialog ? '#ecfdf7' : ''
                 }}
-                onClick={(e) => {
-                  if (stepData.status) {
-                    e.stopPropagation();
-                    setSelectedStep(step);
-                    setFieldDialog(true);
-                    setStepState(stepData);
-                    setIsFieldDialogEditable(false);
-                  }
-                }}
                 className={`${classes.accordionHeading}  ${classes.white}`}
               >
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
-                  <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px', alignItems: 'center' }}>
-                    <Box>
-                      <Chip
-                        color="primary"
-                        label={referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
-                      />
+                <Box sx={{ display: 'flex', flexWrap: 'wrap' }} gridGap={'8px'}>
+                  <Box
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      flexBasis: 'calc(100% - 70px)'
+                    }}
+                    gridGap={'8px'}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center' }} gridGap={'8px'}>
+                      <Box>
+                        <Chip
+                          color="primary"
+                          label={referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
+                        />
+                      </Box>
+                      <Box>
+                        <Typography className={classes.heading} style={{ fontWeight: '600' }}>
+                          {step.stepName}
+                        </Typography>
+                      </Box>
                     </Box>
-                    <Box ml={1}>
-                      <Typography className={classes.heading} style={{ fontWeight: '600' }}>
-                        {step.stepName}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  {step?.isAllowToPerform && (
-                    <Box
-                      sx={{
-                        justifyContent: 'flex-end',
-                        paddingLeft: '10px',
-                        paddingTop: '10px',
-                        marginLeft: 'auto',
-                        display: 'flex',
-                        alignItems: 'center'
-                      }}
-                      gridGap={'8px'}
-                    >
-                      {stepData?.startDate && user?.brandPolicy?.workOrderTimer && (
-                        <TimerComponent stepData={stepData} updateTime={stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? true : false} />
-                      )}
-                      {[
-                        WORKORDER_SERVICE_STEP_STATUS.start,
-                        WORKORDER_SERVICE_STEP_STATUS.pause,
-                        WORKORDER_SERVICE_STEP_STATUS.needReperform
-                      ].includes(stepData?.status) &&
-                        (isMeTechnician || !isAnyTechnician) && (
-                          <Button
-                            variant="outlined"
-                            className={classes.stepButtons}
-                            color="secondary"
-                            size="small"
-                            disabled={!allowedToEdit}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if ([WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) {
-                                handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
-                              } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
-                                handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.pause, stepData);
-                              }
-                            }}
-                          >
-                            {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
-                              ? 'Resume'
-                              : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-                              ? 'Pause'
-                              : 'Restart'}
-                          </Button>
-                        )}
-                      {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
-                        <Button
-                          variant="outlined"
-                          color="secondary"
-                          className={classes.stepButtons}
-                          size="small"
-                          disabled={!allowedToEdit}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (selectedService.status === WORKORDER_SERVICE_STATUS.pending) {
-                              updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
-                            }
-                            handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, step._id);
+                    <Box style={{ display: 'flex', alignItems: 'center', flexBasis: mobScreen ? '100%' : 'unset', flexWrap: 'wrap' }}>
+                      {step?.isAllowToPerform && (
+                        <Box
+                          sx={{
+                            justifyContent: mobScreen ? 'flex-start' : 'flex-end',
+                            marginLeft: mobScreen ? '0' : 'auto',
+                            display: 'flex',
+                            alignItems: 'center',
+                            flexWrap: 'wrap'
                           }}
+                          gridGap={'8px'}
                         >
-                          Start
-                        </Button>
-                      ) : stepData?.passFailStatus ? (
-                        <RenderPassFailChip status={stepData?.passFailStatus} className={classes.stepTags} />
-                      ) : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && isStepValid && (isMeTechnician || !isAnyTechnician) ? (
-                        step?.isPassFail ? (
-                          <>
-                            <Button
-                              variant="outlined"
-                              disabled={!allowedToEdit}
-                              size="small"
-                              className={`${classes.stepButtons} ${classes.passButton}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step);
-                              }}
-                            >
-                              Pass
-                            </Button>
-                            <Button
-                              variant="outlined"
-                              className={`${classes.stepButtons} ${classes.failButton}`}
-                              disabled={!allowedToEdit}
-                              size="small"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step);
-                              }}
-                            >
-                              Fail
-                            </Button>
-                          </>
-                        ) : (
-                          <>
+                          {stepData?.startDate && user?.brandPolicy?.workOrderTimer && (
+                            <TimerComponent
+                              stepData={stepData}
+                              updateTime={stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? true : false}
+                            />
+                          )}
+                          {[
+                            WORKORDER_SERVICE_STEP_STATUS.start,
+                            WORKORDER_SERVICE_STEP_STATUS.pause,
+                            WORKORDER_SERVICE_STEP_STATUS.needReperform
+                          ].includes(stepData?.status) &&
+                            (isMeTechnician || !isAnyTechnician) && (
+                              stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && !user?.brandPolicy?.workOrderTimer ? null :
+                                <Button
+                                  variant="outlined"
+                                  className={classes.stepButtons}
+                                  color="secondary"
+                                  size="small"
+                                  disabled={!allowedToEdit}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if ([WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) {
+                                      handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
+                                    } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+                                      handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.pause, stepData);
+                                    }
+                                  }}
+                                >
+                                  {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
+                                    ? 'Resume'
+                                    : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+                                      ? 'Pause'
+                                      : 'Restart'}
+                                </Button>
+                            )}
+                          {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
                             <Button
                               variant="outlined"
                               color="secondary"
-                              size="small"
-                              disabled={!allowedToEdit}
                               className={classes.stepButtons}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
-                              }}
-                            >
-                              Complete
-                            </Button>
-                          </>
-                        )
-                      ) : null}
-                      {stepData?.status &&
-                      ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                      ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                      (isMeTechnician || !isAnyTechnician) ? (
-                        [
-                          WORKORDER_SERVICE_STEP_STATUS.passed,
-                          WORKORDER_SERVICE_STEP_STATUS.failed,
-                          WORKORDER_SERVICE_STEP_STATUS.completed
-                        ]?.includes(stepData?.passFailStatus) ? (
-                          <>
-                            <Button
-                              variant="outlined"
-                              color="inherit"
                               size="small"
-                              disabled={!allowedToEdit}
-                              className={classes.stepButtons}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleStartEnd('reopen', step._id);
-                              }}
-                            >
-                              Re-open
-                            </Button>
-                          </>
-                        ) : step?.fields?.length ? (
-                          <>
-                            <Button
-                              variant="outlined"
-                              color="inherit"
-                              size="small"
-                              className={classes.stepButtons}
                               disabled={!allowedToEdit}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSelectedStep(step);
-                                setFieldDialog(true);
-                                setIsFieldDialogEditable(true);
-                                setStepState(stepData);
+                                if (selectedService.status === WORKORDER_SERVICE_STATUS.pending) {
+                                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
+                                }
+                                handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, step._id);
                               }}
                             >
-                              Enter Value
+                              Start
                             </Button>
-                          </>
-                        ) : null
-                      ) : null}
+                          ) : stepData?.passFailStatus ? (
+                            <RenderPassFailChip status={stepData?.passFailStatus} className={classes.stepTags} />
+                          ) : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && isStepValid && (isMeTechnician || !isAnyTechnician) ? (
+                            step?.isPassFail ? (
+                              <>
+                                <Button
+                                  variant="outlined"
+                                  disabled={!allowedToEdit}
+                                  size="small"
+                                  className={`${classes.stepButtons} ${classes.passButton}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step);
+                                  }}
+                                >
+                                  Pass
+                                </Button>
+                                <Button
+                                  variant="outlined"
+                                  className={`${classes.stepButtons} ${classes.failButton}`}
+                                  disabled={!allowedToEdit}
+                                  size="small"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step);
+                                  }}
+                                >
+                                  Fail
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <Button
+                                  variant="outlined"
+                                  color="secondary"
+                                  size="small"
+                                  disabled={!allowedToEdit}
+                                  className={classes.stepButtons}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
+                                  }}
+                                >
+                                  Complete
+                                </Button>
+                              </>
+                            )
+                          ) : null}
+                          {stepData?.status &&
+                            ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                            ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                            (isMeTechnician || !isAnyTechnician) ? (
+                            [
+                              WORKORDER_SERVICE_STEP_STATUS.passed,
+                              WORKORDER_SERVICE_STEP_STATUS.failed,
+                              WORKORDER_SERVICE_STEP_STATUS.completed
+                            ]?.includes(stepData?.passFailStatus) ? (
+                              <>
+                                <Button
+                                  variant="outlined"
+                                  color="inherit"
+                                  size="small"
+                                  disabled={!allowedToEdit}
+                                  className={classes.stepButtons}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleStartEnd('reopen', step._id);
+                                  }}
+                                >
+                                  Re-open
+                                </Button>
+                              </>
+                            ) : step?.fields?.length ? (
+                              <>
+                                <Button
+                                  variant="outlined"
+                                  color="inherit"
+                                  size="small"
+                                  className={classes.stepButtons}
+                                  disabled={!allowedToEdit}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedStep(step);
+                                    setFieldDialog(true);
+                                    setIsFieldDialogEditable(true);
+                                    setStepState(stepData);
+                                  }}
+                                >
+                                  Enter Value
+                                </Button>
+                              </>
+                            ) : null
+                          ) : null}
+                        </Box>
+                      )}
                     </Box>
-                  )}
-                  <Box
-                    sx={{
-                      justifyContent: 'flex-end',
-                      display: 'flex',
-                      alignItems: 'center',
-                      paddingTop: '10px'
-                    }}
-                  >
-                    <Box ml={1}>
+                  </Box>
+                  <Box display={'flex'} alignItems={'center'} gridGap={8}>
+                    {stepData?.status &&
                       <IconButton
+                        aria-label="info"
                         size="small"
                         color="primary"
-                        aria-label="delete"
-                        onClick={(event) => {
-                          handleOpenMenu(event);
+                        disabled={stepData?.status ? false : true}
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setSelectedStep(step);
+                          setFieldDialog(true);
+                          setStepState(stepData);
+                          setIsFieldDialogEditable(false);
                         }}
                       >
-                        <MoreHorizIcon />
+                        <InfoIcon fontSize="inherit" />
                       </IconButton>
-                    </Box>
+                    }
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      aria-label="delete"
+                      disabled={!allowedToEdit}
+                      onClick={(event) => {
+                        handleOpenMenu(event);
+                        setSelectedStep(step);
+                      }}
+                    >
+                      <MoreHorizIcon />
+                    </IconButton>
                   </Box>
                 </Box>
               </Box>
@@ -787,7 +806,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   setAnchorEl(null);
                 }}
               >
-                Upload Document
+                Upload Documents
               </MenuItem>
               <MenuItem
                 onClick={(e) => {
@@ -812,7 +831,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                     setViewStep({ open: true, step: selectedStep });
                   }}
                 >
-                  Setting
+                  Settings
                 </MenuItem>
               )}
             </Menu>
@@ -877,15 +896,15 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             message={
               addServiceConfirmation.type === 'returnToStepOnFail'
                 ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services
-                    ?.map((e) => e.serviceName)
-                    ?.toString()}. Do you want to continue ?`
+                  ?.map((e) => e.serviceName)
+                  ?.toString()}. Do you want to continue ?`
                 : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                ? ` Step fail requires Quote Revision. Do you confirm on this?`
-                : addServiceConfirmation.type === 'jumpStep'
-                ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                    ?.map((e) => e.serviceName)
-                    ?.toString()} has been added. Do you want to Add ? `
+                  ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                  : addServiceConfirmation.type === 'jumpStep'
+                    ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                      ?.map((e) => e.serviceName)
+                      ?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
@@ -929,7 +948,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
             handleClose={() => {
               setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
             }}
-            handleSuccess={() => {}}
+            handleSuccess={() => { }}
           />
         )}
         {consumablesDialog.open && (
@@ -1003,13 +1022,13 @@ export const RenderPassFailChip = ({ status, className = '', ...others }) => {
         background: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
           ? '#e1fce3'
           : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-          ? '#D3D3D3'
-          : '#FAD9D4',
+            ? '#D3D3D3'
+            : '#FAD9D4',
         color: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
           ? '#048e0a'
           : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-          ? 'inherit'
-          : '#D13925'
+            ? 'inherit'
+            : '#D13925'
       }}
     />
   );

@@ -307,16 +307,11 @@ const WorkOrderTechnician = () => {
                       {WORKORDER_TECHNICIAN_SERVICE_STATUS[option]}
                     </React.Fragment>
                   )}
-                  // backlog
-                  // pending
-                  // inProgress
-                  // completed
                   size="small"
                   renderInput={(params) => <TextField {...params} label="Show Services" placeholder="Services" variant="outlined" />}
                   value={servicesToKeep}
                   renderTags={(value, getTagProps) =>
                     value.map((option, index) => {
-                      console.log(option);
                       return (
                         <Chip
                           style={
@@ -328,7 +323,7 @@ const WorkOrderTechnician = () => {
                               fontWeight: 600
                             } as React.CSSProperties
                           }
-                          label={option}
+                          label={WORKORDER_TECHNICIAN_SERVICE_STATUS[option]}
                           deleteIcon={<CloseIcon style={{ color: '#000000', width: '14px' }} />}
                           {...getTagProps({ index })}
                         />
@@ -503,18 +498,20 @@ const WorkOrderTechnician = () => {
               </Box>
             }
           ></CustomDialogHeader>
-          <Steps
-            workOrderId={selectedService?.workOrderId}
-            selectedService={selectedService}
-            allowedToEdit={selectedService?.status === WORKORDER_TECHNICIAN_SERVICE_STATUS.backlog ? false : true}
-            setDisableCompleteFail={() => {}}
-            fetchService={fetchWorkOrderTechnician}
-            referencType={'workOrderTechnician'}
-            handelClose={() => {
-              setServiceOpen(false);
-              setSelectedService(null);
-            }}
-          />
+          <Box p={2}>
+            <Steps
+              workOrderId={selectedService?.workOrderId}
+              selectedService={selectedService}
+              allowedToEdit={selectedService?.status === WORKORDER_TECHNICIAN_SERVICE_STATUS.backlog ? false : true}
+              setDisableCompleteFail={() => {}}
+              fetchService={fetchWorkOrderTechnician}
+              referencType={'workOrderTechnician'}
+              handelClose={() => {
+                setServiceOpen(false);
+                setSelectedService(null);
+              }}
+            />
+          </Box>
         </Dialog>
       )}
     </Box>

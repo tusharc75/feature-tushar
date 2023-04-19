@@ -300,9 +300,17 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       {openAddNewAssets && (
         <AddSerializedAsset
           addSerializedAsset={(newRecordsToAdd) => {
+            console.log(newRecordsToAdd);
             setIsAdding(true);
             axiosInstance()
-              .put(`${transferAsset.api}/add-asset/${transferAssetData?._id}`, { assets: newRecordsToAdd.map((m) => m._id ?? m.id) })
+              .put(`${transferAsset.api}/add-asset/${transferAssetData?._id}`, {
+                assets: newRecordsToAdd.map((m) => {
+                  return {
+                    _id: m._id ?? m.id,
+                    currentStatus: m?.status
+                  };
+                })
+              })
               .then(({ data }) => {
                 setAddSerializedAssetDialog(false);
                 updateTransferStatus('In Progress');

@@ -1,9 +1,10 @@
 .tabContainerPos {
-  --button-size: 36px;
+  --button-size: 30px;
   overflow: hidden;
   .tabContainer {
     display: flex;
     align-items: center;
+    gap: 10px;
   }
   .button {
     background-color: transparent;
@@ -13,8 +14,8 @@
     cursor: pointer;
     transition: 0.3s;
     display: block;
-    border: 1px solid var(--new_theme_color);
-    color: var(--new_theme_color);
+    border: 0;
+    color: #000000;
     border-radius: 5px;
     flex-shrink: 0;
 
@@ -27,6 +28,7 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      font-size: 24px;
     }
   }
   .TabContents {
@@ -47,10 +49,13 @@
       display: flex;
       white-space: nowrap;
       transition: 0.3s;
-      gap: 10px;
+      min-width: 100%;
     }
   }
   .singleTab {
     height: 100%;
+    min-width: 100%;
+    padding-left: 5px;
+    padding-right: 5px;
   }
 }

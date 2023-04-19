@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Grid, Chip, IconButton } from '@material-ui/core';
-import { Link } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -18,7 +17,6 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import PackageHeader from './PackageHeader';
 import ManagePackageDialog from './ManagePackageDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
 import ProductListDialog from './ProductListDialog';
@@ -72,7 +70,7 @@ const PackageList = () => {
 
     const fetchGridColumns = async () => {
         let data;
-        const response = await axiosInstance().get(`/field?resource=Packages&entity=${selectedEntity}&view=true`);
+        const response = await axiosInstance().get(`/field?resource=${sidebarResource.packages}&entity=${selectedEntity}&view=true`);
         data = response?.data?.data;
         let columns = [];
         let rendererNames = [];
@@ -98,17 +96,6 @@ const PackageList = () => {
         });
         setColumns([...columns]);
     };
-
-    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-    if (columnState) {
-        columns.forEach((item) => {
-            columnState.forEach((d) => {
-                if (d.colId === item.field) {
-                    item.show = !d.hide;
-                }
-            });
-        });
-    }
 
     useEffect(() => {
         let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -254,11 +241,9 @@ const PackageList = () => {
     const fetchPackages = async () => {
         dispatch({ type: 'loading', loading: true });
         const queryString = getQueryString();
-
         if (gridApi) {
             gridApi.setRowData([]);
         }
-
         try {
             let data, count;
             const response: any = await axiosInstance().get(`${packages.api}${queryString}`);
@@ -395,8 +380,6 @@ const PackageList = () => {
                         </Grid>
                     </Grid>
                 </Grid>
-
-                {/* Tables Begins Here */}
                 <CustomContainer>
                     <div className="header-panel">
                         <PackageHeader

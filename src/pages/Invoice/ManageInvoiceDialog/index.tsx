@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
 import { Box, Button, Grid, IconButton, Tooltip } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -17,7 +17,6 @@ import {
   getObjKeys,
   getObjKeysWithValues,
   getOwnerDropdownDataSource,
-  isFieldNotTouched,
   invoice,
   setFieldsInAscendingOrder,
   yupSchema,
@@ -26,23 +25,22 @@ import {
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { FaDiceOne } from 'react-icons/fa';
-import moment from 'moment';
 import AddIcon from '@material-ui/icons/AddCircle';
 import InfoIcon from '@material-ui/icons/Info';
 import ManageAccountDialog from '../../Account/ManageAccount';
 import ManageContactDialog from '../../Contact/ManageContact';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { isEqual } from 'lodash';
 
 const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, onSuccess, open }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
-  const [invoiceFormData, setInvoiceFormData] = useState({ fields: [], initialValues: {} });
+  const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
@@ -52,7 +50,6 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [contactData, setContactData] = useState([]);
@@ -62,7 +59,6 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
   const [accountData, setAccountData] = useState([]);
   const [customerContactMainDataSource, setCustomerContactMainDataSource] = useState([]);
   const [customerContactDataSource, setCustomerContactDataSource] = useState([]);
-  const [newAddedAccountId, setNewAddedAccountId] = useState(null);
 
   const [invoiceDetails, setinvoiceDetails] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('');
@@ -72,7 +68,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
   const [countrySellToMainData, setCountrySellToMainData] = useState([]);
 
   const updateAccountDropdown = (data) => {
-    const entityFields = invoiceFormData.fields;
+    const entityFields = initialData.fields;
     const customerAccountNameFieldIndex = entityFields.findIndex((d) => d.fieldName === 'customerAccount');
     if (customerAccountNameFieldIndex > -1) {
       entityFields[customerAccountNameFieldIndex].option = [
@@ -89,7 +85,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
   };
 
   const updateContactDropdown = (data) => {
-    const entityFields = invoiceFormData.fields;
+    const entityFields = initialData.fields;
     const customerContactNameFieldIndex = entityFields.findIndex((d) => d.fieldName === 'customerContact');
     if (customerContactNameFieldIndex > -1) {
       const newCustomer = {
@@ -106,27 +102,27 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
   };
 
   useEffect(() => {
-    const ownerCollabOptions = invoiceFormData.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
+    const ownerCollabOptions = initialData.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
     if (ownerCollabOptions.length > 0) {
       setOwnerCollaboratorData(ownerCollabOptions[0].option);
       setOwnerData(ownerCollabOptions[0].option);
       setCollaboratorData(ownerCollabOptions[0].option);
     }
-    let customerAccountOptions = invoiceFormData.fields.find((d) => d.fieldName === 'customerAccount');
+    let customerAccountOptions = initialData.fields.find((d) => d.fieldName === 'customerAccount');
     if (customerAccountOptions) {
       setAccountData(customerAccountOptions.option);
     }
-    let customerContactOptions = invoiceFormData.fields.find((d) => d.fieldName === 'customerContact');
+    let customerContactOptions = initialData.fields.find((d) => d.fieldName === 'customerContact');
     if (customerContactOptions) {
       setContactData(customerContactOptions.option);
     }
-    const customerContactDropdownData = invoiceFormData.fields.find((d) => d.fieldName === 'customerContact');
-    const countryBillToDropdownData = invoiceFormData.fields.find((d) => d.fieldName === 'billingAddress');
+    const customerContactDropdownData = initialData.fields.find((d) => d.fieldName === 'customerContact');
+    const countryBillToDropdownData = initialData.fields.find((d) => d.fieldName === 'billingAddress');
     if (countryBillToDropdownData) {
       setCountryBillToMainData(countryBillToDropdownData.option);
       setCountryBillToDropDown(countryBillToDropdownData.option);
     }
-    const countrySellToDropdownData = invoiceFormData.fields.find((d) => d.fieldName === 'shippingAddress');
+    const countrySellToDropdownData = initialData.fields.find((d) => d.fieldName === 'shippingAddress');
     if (countryBillToDropdownData) {
       setCountrySellToMainData(countrySellToDropdownData.option);
       setCountrySellToDropDown(countrySellToDropdownData.option);
@@ -137,8 +133,8 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
         setCustomerContactDataSource(customerContactDropdownData.option.filter((d) => d.parentAccount === invoiceData?.customerAccount.optionValue));
       }
     }
-    setFormsData(setFieldsInAscendingOrder(invoiceFormData.fields));
-  }, [invoiceFormData.fields]);
+    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+  }, [initialData.fields]);
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData));
@@ -153,6 +149,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchFields();
   }, [invoiceId]);
 
@@ -176,19 +173,17 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             rest.status = 'New';
             rest.invoiceNumber = `IN_${generateUniqueIdOnly()}`;
             setCloneHeading(invoiceNumber);
-            setInvoiceFormData({
+            setInitialData({
               fields: fieldsDataForCreate,
-              initialValues: getObjKeysWithValues(rest, fieldsDataForCreate)
+              values: getObjKeysWithValues(rest, fieldsDataForCreate)
             });
-            setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
             setLoading(false);
           } else {
             setinvoiceDetails(data);
-            setInvoiceFormData({
+            setInitialData({
               fields: fieldsDataForUpdate,
-              initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataForUpdate)
             });
-            setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
             setLoading(false);
           }
         } catch (error) {
@@ -197,11 +192,10 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate), currency: user.user?.brandCurrency || '' };
         initialData['invoiceNumber'] = `IN_${generateUniqueIdOnly()}`;
-        setInvoiceFormData({
+        setInitialData({
           fields: fieldsDataForCreate,
-          initialValues: initialData
+          values: initialData
         });
-        setFormValues(initialData);
         setLoading(false);
       }
     } catch (error) {
@@ -209,33 +203,20 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
     }
   };
 
-  const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
-    if (Object.keys(errors).length) {
-      invoiceFormData.fields.forEach((input) => {
-        if (input.required || values[input.fieldName]) {
-          setTouched(input.fieldName, true);
-        }
-      });
-      setErrors({ ...errors });
-    } else {
-      handleUpdateInvoice(values);
-    }
-  };
-
-  const handleUpdateInvoice = (values) => {
+  const handleSubmit = (values) => {
     setLoading(true);
     if (invoiceId && isClone === false) {
       values._id = invoiceId;
       axiosInstance()
         .put(`${invoice.api}`, values)
         .then(({ data }) => {
-          setLoading(false);
-          onSuccess();
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: data.message
           });
+          onSuccess();
+          setLoading(false);
         })
         .catch((error) => {
           setLoading(false);
@@ -245,14 +226,13 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
       axiosInstance()
         .post(`${invoice.api}`, values)
         .then(({ data: { data, message } }) => {
-          history.push(`${routes.invoiceDetail.path}/${data._id}`);
-          setLoading(false);
-          onSuccess(data);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: message
           });
+          history.push(`${routes.invoiceDetail.path}/${data?._id}`);
+          setLoading(false);
         })
         .catch((error) => {
           setLoading(false);
@@ -291,12 +271,10 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
     }
   };
 
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
+  function validate(values) {
+    const errors = {};
+    return errors;
+  }
 
   return (
     <>
@@ -313,51 +291,35 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
         }}
         open={open}
       >
-        <CustomDialogHeader
-          title={!invoiceId ? `Create ${routes.invoice.title}` : `${isClone ? `Clone - ${cloneHeading}` : `Update ${invoiceData?.invoiceNumber}`}`}
-          onClose={(e, reason) => {
-            if (isFieldNotTouched(invoiceFormData, formValues)) onClose();
-            else setShowConfirmDialog(true);
-          }}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen((prevState) => !prevState);
-          }}
-          showManimizeMaximize={true}
-        />
-        {!invoiceFormData.fields.length ? (
-          <>
-            <CustomDialogContent>
-              <Skeleton width="100%" height="70px" />
-              <Grid container spacing={2}>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                  <Grid key={i} item xs={12} sm={6} md={6}>
-                    <Skeleton width="100%" height="60px" />
-                  </Grid>
-                ))}
-              </Grid>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <Button variant="outlined" size="small" color="primary" disabled>
-                Cancel
-              </Button>
-              <Button variant="contained" size="small" color="primary" disabled>
-                Submit
-              </Button>
-            </CustomDialogFooter>
-          </>
-        ) : (
+        {initialData?.fields?.length ? (
           <Formik
-            initialValues={invoiceFormData.initialValues}
-            validationSchema={yupSchema(invoiceFormData.fields)}
-            // validateOnMount
-            // validate={validate}
-            onSubmit={() => {}}
+            initialValues={initialData.values}
+            validationSchema={yupSchema(initialData.fields)}
+            validateOnMount
+            validate={validate}
+            onSubmit={handleSubmit}
           >
-            {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
-              <>
+            {({ values, errors, touched, setFieldValue, submitForm }) => (
+              <Fragment>
+                <CustomDialogHeader
+                  title={
+                    !invoiceId ? `Create ${routes.invoice.title}` : `${isClone ? `Clone - ${cloneHeading}` : `Update ${invoiceData?.invoiceNumber}`}`
+                  }
+                  onClose={(e, reason) => {
+                    if (isEqual(initialData.values, values)) {
+                      onClose();
+                    } else {
+                      setShowConfirmDialog(true);
+                    }
+                  }}
+                  isMinimized={!fullScreen}
+                  onMinimizeMaximize={() => {
+                    setFullScreen((prevState) => !prevState);
+                  }}
+                  showManimizeMaximize={true}
+                />
                 <CustomDialogContent>
-                  <Form>
+                  <Form autoComplete="off" autoCorrect="off" noValidate>
                     {formsData &&
                       formsData.map((form, i) => {
                         return (
@@ -401,10 +363,6 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                                                 setFieldValue('customerContact', '');
                                                 setFieldValue('billingAddress', '');
                                                 setFieldValue('shippingAddress', '');
-                                                handleValuesChange({
-                                                  [field.fieldName]: value && value.optionValue ? value.optionValue : '',
-                                                  customerContact: ''
-                                                });
                                               }}
                                             />
                                           </Grid>
@@ -451,7 +409,6 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                                               options={customerContactDataSource}
                                               doNotShowInfoTooltip={true}
                                               setFieldValue={(name, value) => {
-                                                handleValuesChange({ [name]: value });
                                                 setFieldValue(name, value);
                                               }}
                                               disabled={!isClone ? invoiceId && field.disableOnEdit : false}
@@ -460,10 +417,6 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                                               isTooltip={false}
                                               size="small"
                                               onOpen={() => onCustomerContactDropdownOpen(values['customerAccount'])}
-                                              // onChange={(e, value) => {
-                                              //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-
-                                              // }}
                                             />
                                           </Grid>
                                           {permissions.customerContact?.isCreate && (
@@ -502,8 +455,6 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                                           options={ownerData}
                                           onChange={(e, val) => {
                                             setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                            handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : '' });
-
                                             if (val && val.optionValue !== user?.user?._id) {
                                               const checkOwnerAddedInCollaborator = values['collaborator'].find(
                                                 (d) => d?.optionValue === user?.user?._id
@@ -513,9 +464,6 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                                                   ...values['collaborator'],
                                                   collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
                                                 ]);
-                                                handleValuesChange({
-                                                  collaborator: collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                                });
                                               }
                                             }
                                           }}
@@ -542,7 +490,6 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                                           type={field.type}
                                           options={collaboratorData}
                                           setFieldValue={(name, value) => {
-                                            handleValuesChange({ [name]: value });
                                             setFieldValue(name, value);
                                           }}
                                           required={field.required}
@@ -620,7 +567,6 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                                           type={field.type}
                                           options={field.option}
                                           setFieldValue={(name, value) => {
-                                            handleValuesChange({ [name]: value });
                                             setFieldValue(name, value);
                                           }}
                                           required={field.required}
@@ -654,8 +600,11 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                     color="primary"
                     size="small"
                     onClick={() => {
-                      if (isFieldNotTouched(invoiceFormData, values)) onClose();
-                      else setShowConfirmDialog(true);
+                      if (isEqual(initialData.values, values)) {
+                        onClose();
+                      }else{
+                        setShowConfirmDialog(true);
+                      }
                     }}
                   >
                     Cancel
@@ -665,15 +614,13 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                     variant="contained"
                     color="primary"
                     disabled={
-                      // loading || Object.keys(errors).length > 0 ? true : false
                       uploadingImageOrFileProgress > 0 ||
-                      // isFieldNotTouched(invoiceData, values) ||
                       loading
                     }
                     onClick={(e) => {
                       e.preventDefault();
-                      //   handleScroll(errors);
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                      handleScroll(errors);
+                      submitForm();
                     }}
                   >
                     Save
@@ -685,8 +632,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                     onSave={() => {
                       setShowConfirmDialog(false);
                       handleScroll(errors);
-
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                      submitForm();
                     }}
                     onClose={() => {
                       setShowConfirmDialog(false);
@@ -705,7 +651,6 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                     accountApi={customerAccount.accountApi}
                     isGetAccountData={true}
                     onGetAddedAccount={({ data }) => {
-                      setNewAddedAccountId(data._id);
                       updateAccountDropdown(data);
 
                       setFieldValue('customerAccount', data._id);
@@ -736,9 +681,13 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                     isAccountFieldDisable={true}
                   />
                 )}
-              </>
+              </Fragment>
             )}
           </Formik>
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
       </Dialog>
     </>

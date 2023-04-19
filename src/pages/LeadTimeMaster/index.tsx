@@ -29,7 +29,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { SiStatuspage, BiTimer } from 'react-icons/all';
 import DeleteIcon from '@material-ui/icons/Delete';
 
@@ -76,7 +75,6 @@ const LeadTimeMaster = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const [frameworkComponents, setFrameworkComponents] = useState({});
-  const { isOffline } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState([]);
   const pageTitle = camelCase(`${routes.leadTimeMaster.title}`);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -98,10 +96,6 @@ const LeadTimeMaster = () => {
     data.forEach((o) => {
       let currentColumn = getColumnData(pageTitle, o?.fieldData, routes.leadTimeMasterDetail.path);
       if (currentColumn !== null) {
-        if (isOffline) {
-          currentColumn.columnData['filter'] = false;
-          currentColumn.columnData['sortable'] = false;
-        }
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
           rendererNames.push(currentColumn?.rendererName);
