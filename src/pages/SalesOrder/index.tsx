@@ -549,7 +549,7 @@ const SalesOrder = () => {
             onOk={handleDeleteSalesOrder}
           />
         ) : null}
-        {singleSalesOrderDelete.show ? (
+        {singleSalesOrderDelete.show && (
           <ConfirmationDialog
             open={singleSalesOrderDelete.show}
             message={`Are you sure you want to delete Sales Order: ${singleSalesOrderDelete.salesOrderName}?`}
@@ -562,7 +562,7 @@ const SalesOrder = () => {
             }
             onOk={handleSingleDeleteSalesOrder}
           />
-        ) : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+        )}
       </CustomContainer>
       {showManageSalesOrderDialog.open && (
         <ManageSalesOrderDialog
