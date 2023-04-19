@@ -114,26 +114,24 @@ const StepFieldsDialog = ({
   const steps = selectedService?.steps || [];
 
   const RenderStepData = () => {
-    const [time, setTime] = React.useState(
-      user?.brandPolicy?.workOrderTimer
-        ? convertMsToTime(
-          stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-            ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
-            : stepData?.duration || 0
-        )
-        : null
+    const [time, setTime] = React.useState(user?.brandPolicy?.workOrderTimer ? convertMsToTime(
+      stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+        ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
+        : stepData?.duration || 0) : 0
     );
 
     React.useEffect(() => {
-      if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && user?.brandPolicy?.workOrderTimer) {
-        const interval = setInterval(() => {
-          setTime(
-            convertMsToTime((stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime()))
-          );
-        }, 1000);
-        return () => {
-          clearInterval(interval);
-        };
+      if (user?.brandPolicy?.workOrderTimer) {
+        if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+          const interval = setInterval(() => {
+            setTime(
+              convertMsToTime((stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime()))
+            );
+          }, 1000);
+          return () => {
+            clearInterval(interval);
+          };
+        }
       }
     }, [stepData]);
 
@@ -162,7 +160,7 @@ const StepFieldsDialog = ({
                 </p>
               </div>
             ) : null}
-            {stepData.duration && user?.brandPolicy?.workOrderTimer ? (
+            {user?.brandPolicy?.workOrderTimer ? (
               <div>
                 <p className={classes.sectionColTItle}>Duration:</p>
                 <p className={classes.sectionColDetail} style={{ display: 'flex', alignItems: 'center' }}>
