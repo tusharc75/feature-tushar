@@ -131,7 +131,7 @@ const DemandOrderDetails = () => {
             {salesOrderData ? (
               <>
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (
-                  <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                  <Button  className="btn-outline-v1" variant="contained"  size="small" onClick={handleOpenUpdateDialog}>
                     Edit
                   </Button>
                 )}

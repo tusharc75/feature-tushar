@@ -23,6 +23,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const [lockDate, setLockDate] = useState(null);
+  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
 
   useEffect(() => {
     fetchSettingsData();
@@ -41,7 +42,21 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
       });
   };
 
-  const handleReject = (values, rejectDate) => {
+  const getStorageLocation = () => {
+    axiosInstance()
+      .get('/sa-formbuilder/lookup?lookupResource=Storage Location')
+      .then(({ data: { data } }) => {
+        setStorageLocationOptions(data['Storage Location'].filter(_storageLocation => _storageLocation.warehouse === purchaseOrderData?.warehouse?.optionValue));
+      });
+  };
+
+  useEffect(() => {
+    if (user?.user?.brandPolicy?.storageLocation) {
+      getStorageLocation();
+    }
+  }, [])
+
+  const handleReject = (values, rejectDate, storagelocation) => {
     setIsSubmitting(true);
     const data = [];
     values?.forEach((element) => {
@@ -52,7 +67,8 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
           serializedProduct: element.serializedProduct,
           qty: parseInt(element?.rejectQuantity),
           comment: element?.comment === '' ? 'Rejected' : element?.comment,
-          serialNumber: []
+          serialNumber: [],
+          storagelocation: user?.user?.brandPolicy?.storageLocation ? storagelocation : null,
         });
       }
     });
@@ -90,9 +106,17 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
     return errors;
   };
 
+  const validateStorageLocation = (values) => {
+    let errors: any = {};
+    if (user?.user?.brandPolicy?.storageLocation && !values) {
+      errors['storagelocation'] = `Storage Location is required`;
+    }
+    return errors;
+  }
+
   const validateDate = (values) => {
     let errors: any = {};
-    
+
     if (moment(values["rejectDate"]).isBefore(moment(purchaseOrderData?.purchaseOrderDate))) {
       errors['rejectDate'] = `Please select valid date`;
     }
@@ -134,6 +158,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
         <Formik
           initialValues={{
             rejectDate: new Date(),
+            storagelocation: null,
             products: productList.map((d) => ({
               _id: d._id,
               product: d.productName,
@@ -256,7 +281,34 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                         </Grid>
                       </Grid>
                       <Box pt={2}>
-                        <Grid container>
+                        <Grid container spacing={2}>
+                          {
+                            (user?.user?.brandPolicy?.storageLocation && storageLocationOptions) &&
+                            <Grid item xs={12} md={6}>
+                              <Autocomplete
+                                disableClearable
+                                options={storageLocationOptions}
+                                getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                                getOptionSelected={(option: any, val) => option.optionValue === val}
+                                value={storageLocationOptions.filter((data) => data.optionValue === values['storagelocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storagelocation'])[0] : ''}
+                                onChange={(e, val) => {
+                                  setFieldValue('storagelocation', val?.optionValue);
+                                }}
+                                renderInput={(params) =>
+                                  <TextField
+                                    {...params}
+                                    variant="outlined"
+                                    name="storagelocation"
+                                    label="Storage Location"
+                                    margin="dense"
+                                    required
+                                    error={Boolean(validateStorageLocation(values['storagelocation'])?.storagelocation)}
+                                    helperText={validateStorageLocation(values['storagelocation'])?.storagelocation}
+                                  />
+                                }
+                              />
+                            </Grid>
+                          }
                           <Grid item xs={12} md={6}>
                             <KeyboardDatePicker
                               fullWidth
@@ -299,8 +351,8 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                 </Button>
                 <Button
                   onClick={() => {
-                    if (!validate(values.products).rejectQuantity && !validateDate(values)?.rejectDate) {
-                      handleReject(values.products, values.rejectDate);
+                    if (!validate(values.products).rejectQuantity && !validateDate(values)?.rejectDate && !validateStorageLocation(values.storagelocation).storagelocation) {
+                      handleReject(values.products, values.rejectDate, values.storagelocation);
                     }
                   }}
                   size="small"

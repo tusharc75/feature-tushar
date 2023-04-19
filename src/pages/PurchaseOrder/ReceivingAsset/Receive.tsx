@@ -26,6 +26,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
   const [defaultWareHouse, setDefaultWareHouse] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lockDate, setLockDate] = useState(null);
+  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
@@ -61,6 +62,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
           product: element.productId,
           serializedProduct: element.serializedProduct,
           warehouse: element?.warehouse?._id,
+          storagelocation: user?.user?.brandPolicy?.storageLocation ? values.storagelocation : null,
           inventoryQuantity: parseInt(element?.inventoryQuantity),
           assetQuantity: parseInt(element?.assetQuantity),
           serialNumber: element?.serialNumber,
@@ -90,6 +92,21 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
     }
   };
 
+  const getStorageLocation = () => {
+    axiosInstance()
+      .get('/sa-formbuilder/lookup?lookupResource=Storage Location')
+      .then(({ data: { data } }) => {
+        const storageLocationOption = data['Storage Location'].filter(_storageLocation => _storageLocation.warehouse === defaultWareHouse._id);
+        setStorageLocationOptions(storageLocationOption);
+      });
+  };
+
+  useEffect(() => {
+    if (user?.user?.brandPolicy?.storageLocation && defaultWareHouse) {
+      getStorageLocation();
+    }
+  }, [defaultWareHouse])
+
   const validate = (values) => {
     let errors: any = {};
     if (values.length > 0) {
@@ -117,6 +134,14 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
     return errors;
   };
 
+  const validateStorageLocation = (values) => {
+    let errors: any = {};
+    if (user?.user?.brandPolicy?.storageLocation && !values) {
+      errors['storagelocation'] = `Storage Location is required`;
+    }
+    return errors;
+  }
+
   const validateDate = (values) => {
     let errors: any = {};
 
@@ -129,7 +154,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
         errors['receiveDate'] = `Date entered prior to the locked date`;
       }
     }
-    
+
     if (moment(values["receiveDate"]).isAfter(moment())) {
       errors['receiveDate'] = `Please select valid date`;
     }
@@ -202,6 +227,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
         <Formik
           initialValues={{
             receiveDate: new Date(),
+            storagelocation: null,
             seriaizedAsset: productList.map((d) => ({
               _id: d._id,
               product: d.productName,
@@ -450,13 +476,41 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                         </Grid>
                       </Grid>
                       <Box pt={2}>
-                        <Grid container>
+                        <Grid container spacing={2}>
+                          {
+                            (user?.user?.brandPolicy?.storageLocation && storageLocationOptions) &&
+                            <Grid item xs={12} md={6}>
+                              <Autocomplete
+                                disableClearable
+                                options={storageLocationOptions}
+                                getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                                getOptionSelected={(option: any, val) => option.optionValue === val}
+                                value={storageLocationOptions.filter((data) => data.optionValue === values['storagelocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storagelocation'])[0] : ''}
+                                onChange={(e, val) => {
+                                  setFieldValue('storagelocation', val?.optionValue);
+                                }}
+                                renderInput={(params) =>
+                                  <TextField
+                                    {...params}
+                                    variant="outlined"
+                                    name="storagelocation"
+                                    label="Storage Location"
+                                    margin="dense"
+                                    required
+                                    error={Boolean(validateStorageLocation(values['storagelocation'])?.storagelocation)}
+                                    helperText={validateStorageLocation(values['storagelocation'])?.storagelocation}
+                                  />
+                                }
+                              />
+                            </Grid>
+                          }
                           <Grid item xs={12} md={6}>
                             <KeyboardDatePicker
                               fullWidth
                               label="Received Date"
                               variant="inline"
                               inputVariant="outlined"
+                              required
                               autoOk
                               size="small"
                               margin="dense"
@@ -498,7 +552,8 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                       !validate(values.seriaizedAsset).warehouse &&
                       !validate(values.seriaizedAsset).assetQuantity &&
                       !validate(values.seriaizedAsset).serialNumber &&
-                      !validateDate(values)?.receiveDate
+                      !validateDate(values)?.receiveDate &&
+                      !validateStorageLocation(values.storagelocation).storagelocation
                     ) {
                       handleCreateSerializedAsset(values);
                     }

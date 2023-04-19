@@ -1,11 +1,9 @@
 import React from 'react';
 import { Grid, Box, Typography, Paper, TextField, Card, CardContent, CircularProgress } from '@material-ui/core';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
-import { startCase } from 'lodash';
-
 import axiosInstance from 'src/axios/axiosInstance';
 import VirtualizedList from 'src/components/VirtualizedList';
-import { msToHour } from 'src/constants/helpers';
+import moment from 'moment';
 
 const AssetStats = () => {
   const [selectedAssets, setSelectedAssets] = React.useState([]);
@@ -114,23 +112,94 @@ const AssetStats = () => {
         {assetStats &&
           selectedAssets.length > 0 &&
           !loadingStats &&
-          Object.keys(assetStats).map((stat: any) => (
-            <Grid key={stat} item xs={12} sm={4} md={3}>
-              <Card>
-                <CardContent>
-                  <Typography color="textSecondary" gutterBottom>
-                    {startCase(stat)}
-                  </Typography>
-                  <Box display='flex' alignItems='flex-end'>
-                    <Typography variant="h5" component="h2">
-                      {assetStats[stat] ? (stat?.includes('totalUtilization') ? msToHour(assetStats[stat]) : assetStats[stat]) : 0}
-                    </Typography>
-                    {stat?.includes('totalUtilization') &&<Box ml={1}><Typography variant="body1">Hours</Typography></Box>}
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+          <>
+          <Grid item xs={12} sm={4} md={3}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Total no of repair job
+              </Typography>
+              <Box display='flex' alignItems='flex-end'>
+                <Typography variant="h5" component="h2">
+                  {assetStats['totalNoOfRentalJob'] ??  0}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+          <Grid item xs={12} sm={4} md={3}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                No. of jobs after last repair
+              </Typography>
+              <Box display='flex' alignItems='flex-end'>
+                <Typography variant="h5" component="h2">
+                {assetStats['noOfJobFromLastRepair'] ??  0}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+          <Grid item xs={12} sm={4} md={3}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                No. of days after repair
+              </Typography>
+              <Box display='flex' alignItems='flex-end'>
+                <Typography variant="h5" component="h2">
+                  {assetStats['noOfDaysAfterRepair'] ??  0}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+          <Grid item xs={12} sm={4} md={3}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Use time after last repair
+              </Typography>
+              <Box display='flex' alignItems='flex-end'>
+                <Typography variant="h5" component="h2">
+                {assetStats['useTimeFromLastRepair'] ??  0}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+          <Grid item xs={12} sm={4} md={3}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                 Total repair
+              </Typography>
+              <Box display='flex' alignItems='flex-end'>
+                <Typography variant="h5" component="h2">
+                {assetStats['totalRepair'] ??  0}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+          <Grid item xs={12} sm={4} md={3}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                Total utilization
+              </Typography>
+              <Box display='flex' alignItems='flex-end'>
+                <Typography variant="h5" component="h2">
+                  {assetStats['totalUtilization'] ?  moment.duration(assetStats['totalUtilization']).hours() : 0}
+                </Typography>
+                <Box ml={1}><Typography variant="body1">Hours</Typography></Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        </>
+          }
       </Grid>
     </Box>
   );
