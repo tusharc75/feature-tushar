@@ -11,6 +11,7 @@ import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridCompone
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CheckboxRenderer, CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import ConsumablesQtyDialog from './ConsumablesQtyDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 let searchTimeout;
 
@@ -28,6 +29,7 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false)
   const [columns, setColumns] = useState([]);
+  const [consumablesDialog, setConsumablesDialog] = useState(false);
 
   useEffect(() => {
     localStorage.removeItem(localStorageSelectedRecords);
@@ -85,6 +87,30 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
       });
   };
 
+  const handleSubmit = async (rows) => {
+
+    const data: any = []
+    rows?.forEach((e) => {
+      if (parseInt(e.qty)) {
+        data.push({ product: e._id, qty: parseInt(e.qty), service, uniqueId, stepId })
+      }
+    })
+
+    axiosInstance().post(`${workOrder.api}/${workOrderId}/consumable`, data)
+      .then(({ data }) => {
+        fetchData();
+        setConsumablesDialog(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Dialog
       fullWidth
@@ -103,6 +129,9 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={6} className="d-flex align-items-center gap-1">
+              <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
+                Add Products/Consumables
+              </Button>
             </Grid>
             <Grid item xs={6} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
@@ -161,6 +190,20 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
           serviceName={serviceName}
         />
       }
+      {consumablesDialog && (
+        <AssignProductDialog
+          productsDialogOpen={consumablesDialog}
+          productId={workOrderId}
+          reference={'workOrder'}
+          handleCloseDialog={() => setConsumablesDialog(false)}
+          assignedProducts={dataRows?.map((d) => d?.materialId) || []}
+          renderedFrom={'workOrder_consumables'}
+          onSuccess={(rows) => {
+            handleSubmit(rows)
+          }}
+          serialized={false}
+        />
+      )}
     </Dialog>
   );
 };
