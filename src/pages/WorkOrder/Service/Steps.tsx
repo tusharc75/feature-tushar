@@ -579,7 +579,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                 className={`${classes.accordionHeading}  ${classes.white}`}
               >
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
-                  <Box style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Box style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', flexBasis: 'calc(100% - 40px)' }}>
                     <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px', alignItems: 'center' }}>
                       <Box>
                         <Chip
@@ -593,16 +593,17 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                         </Typography>
                       </Box>
                     </Box>
-                    <Box style={{ display: 'flex', alignItems: 'center', flexBasis: mobScreen ? '100%' : 'unset' }}>
+                    <Box style={{ display: 'flex', alignItems: 'center', flexBasis: mobScreen ? '100%' : 'unset', flexWrap: 'wrap' }}>
                       {step?.isAllowToPerform && (
                         <Box
                           sx={{
-                            justifyContent: 'flex-end',
+                            justifyContent: mobScreen ? 'flex-start' : 'flex-end',
                             paddingLeft: '10px',
                             paddingTop: '10px',
                             marginLeft: mobScreen ? '0' : 'auto',
                             display: 'flex',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            flexWrap: 'wrap'
                           }}
                           gridGap={'8px'}
                         >
