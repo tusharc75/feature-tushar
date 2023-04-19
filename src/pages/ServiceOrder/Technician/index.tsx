@@ -28,7 +28,9 @@ const Technician = ({
     renderedFrom,
     stepFullScreen,
     allowedToEdit,
-    fromInvoice = false
+    fromInvoice = false,
+    statusOptions=[],
+    updateStatus=null
 }: any) => {
 
     const toastConfig = useContext(CustomToastContext);
@@ -43,12 +45,21 @@ const Technician = ({
     const [rowsData, setRowsData] = useState(null);
 
     useEffect(() => {
+        if (
+          statusOptions.findIndex((d) => d.optionLabel === 'Ready to Invoice') > statusOptions.findIndex((d) => d.optionLabel === serviceOrderData?.status)
+        ) {
+            updateStatus('Ready to Invoice');
+        }
+      }, []);
+    
+
+    useEffect(() => {
         fetchFields();
     }, [allowedToEdit]);
 
     useEffect(() => {
         fetchData();
-    }, [columns]);
+    }, [columns, serviceOrderData]);
 
     const fetchFields = async () => {
         var data = await fetch_service_order_detail_fields(serviceOrderData?.currency);
@@ -167,6 +178,7 @@ const Technician = ({
                         : parent?.packageDetail?.packageName;
             parent.competency = parent.type === 'service' ? parent?.serviceDetail?.competency?.map((e) => e?.optionLabel)?.toString() : null
             parent.serviceCompetency = parent.type === 'service' ? parent?.serviceDetail?.competency || [] : []
+            parent.status = serviceOrderData?.status;
             parent.subRows = generateNestedData(data, technician, parent);
         });
 
