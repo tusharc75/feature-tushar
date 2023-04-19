@@ -53,6 +53,9 @@ const CreateZip = (props) => {
 
   function validate(values) {
     const errors = {};
+    if (!values['zipCode']) {
+      errors['zipCode'] = 'Required field'
+    }
     return errors;
   }
 
@@ -93,10 +96,14 @@ const CreateZip = (props) => {
                     size="small"
                     label="Zip Code"
                     name="zipCode"
+                    required
                     variant="outlined"
                     onChange={(e) => {
                       setFieldValue('zipCode', e.target.value);
                     }}
+                    value={values['zipCode']}
+                    error={touched['zipCode'] && Boolean(errors['zipCode'])}
+                    helperText={touched['zipCode'] && errors['zipCode']}
                   />
                 </Form>
               </CustomDialogContent>

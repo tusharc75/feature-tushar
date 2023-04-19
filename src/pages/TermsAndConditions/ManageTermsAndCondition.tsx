@@ -264,6 +264,8 @@ const TermsAndCondition = ({
                                 e.target.value.trimStart()
                               )
                             }
+                            error={touched["TACName"] && Boolean(errors["TACName"])}
+                            helperText={touched["TACName"] && errors["TACName"]}
                           />
                           <Grid container spacing={1}>
                             <Grid item xs={12} sm={3}>
