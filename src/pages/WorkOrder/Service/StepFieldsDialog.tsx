@@ -9,7 +9,7 @@ import { dateTimeFormat } from 'src/constants/helpers';
 import moment from 'moment';
 import styles from './StepFieldsDialog.module.scss';
 import CloseIcon from '@material-ui/icons/Close';
-import Details from 'src/components/Shared/DetailsPage';
+import DetailsPage from 'src/components/Shared/DetailsPage';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import SettingsIcon from '@material-ui/icons/Settings';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
@@ -117,10 +117,10 @@ const StepFieldsDialog = ({
     const [time, setTime] = React.useState(
       user?.brandPolicy?.workOrderTimer
         ? convertMsToTime(
-            stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-              ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
-              : stepData?.duration || 0
-          )
+          stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+            ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
+            : stepData?.duration || 0
+        )
         : null
     );
 
@@ -243,7 +243,7 @@ const StepFieldsDialog = ({
               <div className={styles.content}>
                 {fieldData?.fields?.length ? (
                   !isEditing ? (
-                    <Details
+                    <DetailsPage
                       containerPadding={'0px'}
                       gridSize={12}
                       data={fieldData.values}
@@ -362,9 +362,10 @@ const StepFieldsDialog = ({
                         Close
                       </Button>
                       <Box ml={1} />
-                      <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
-                        Edit
-                      </Button>
+                      {allowedToEdit &&
+                        <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
+                          Edit
+                        </Button>}
                     </>
                   ) : (
                     <>

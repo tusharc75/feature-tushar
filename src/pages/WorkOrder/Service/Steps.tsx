@@ -769,6 +769,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                         size="small"
                         color="primary"
                         aria-label="delete"
+                        disabled={!allowedToEdit}
                         onClick={(event) => {
                           handleOpenMenu(event);
                           setSelectedStep(step);
