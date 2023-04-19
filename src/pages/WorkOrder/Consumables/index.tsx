@@ -10,17 +10,13 @@ import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { CommonRenderer, CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { camelCase, capitalize } from 'lodash';
-import { Button } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 const Consumables = ({ workOrderId, allowedToEdit }) => {
 
-  let renderedFrom = camelCase(routes?.workOrder.title + '_consumables');
-  const toastConfig = useContext(CustomToastContext);
+  let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
   const [gridApi, setGridApi] = useState(null);
-  const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
   const {
@@ -82,79 +78,34 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
     nameRenderer: NameRenderer,
   };
 
-  const handleSubmit = async (selectedRecords) => {
-    let tempData = selectedRecords.map((d) => {
-      return {
-        product: d._id,
-        qty: d.qty
-      };
-    });
-    axiosInstance()
-      .post(`${workOrder.api}/${workOrderId}/consumable`, tempData)
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  return (
-    <>
-      <Box p={1}>
-        {allowedToEdit && (
-          <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
-            Add Products/Consumables
-          </Button>
-        )}
-      </Box>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={12} sm={12}>
-          {columns ? (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={false}
-              loading={loading}
-              isClientSideGrid={true}
-              allowSelection={false}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchRecords}
-            />
-          ) : (
-            <Box p={2} height={500} bgcolor="white">
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </Grid>
-      </Grid>
-      {consumablesDialog && (
-        <AssignProductDialog
-          productsDialogOpen={consumablesDialog}
-          productId={workOrderId}
-          reference={'workOrder'}
-          handleCloseDialog={() => setConsumablesDialog(false)}
-          assignedProducts={dataRows?.map((d) => d?.materialId) || []}
+  return (<Grid container spacing={2}>
+    <Grid item xs={12} md={12} sm={12}>
+      {columns ? (
+        <CustomAgGrid
+          columns={columns}
+          dataRows={dataRows}
+          frameworkComponents={frameworkComponents}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          allowAction={false}
+          loading={loading}
+          isClientSideGrid={true}
+          allowSelection={false}
           renderedFrom={renderedFrom}
-          onSuccess={() => {
-            fetchRecords();
-            setConsumablesDialog(false);
-          }}
-          serialized={false}
+          refreshGrid={fetchRecords}
         />
+      ) : (
+        <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
       )}
-    </>
+    </Grid>
+  </Grid>
+
   );
 };
 
