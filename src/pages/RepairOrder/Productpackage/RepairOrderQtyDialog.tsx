@@ -14,7 +14,6 @@ import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
-import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/helper';
 
 interface EditDialogProps {
@@ -47,7 +46,6 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = (
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const ref = useRef(null);
-  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchData()

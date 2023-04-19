@@ -557,7 +557,8 @@ const ServiceMaster = (props: Props) => {
           productsDialogOpen={assignProductDialog.open}
           productId={id}
           handleCloseDialog={() => setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null, steps: null })}
-          assignedProducts={assignProductDialog.products}
+          //assignedProducts={assignProductDialog.products}
+          assignedProducts={[]}
           reference={'productService'}
           renderedFrom={`${renderedFrom}_grid-sub-1`}
           onSuccess={(d: any) => {

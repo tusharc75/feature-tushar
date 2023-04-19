@@ -405,7 +405,14 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
           addSerializedAsset={(newRecordsToAdd) => {
             setIsAdding(true);
             axiosInstance()
-              .post(`${repairJob.api}/${repairJobData._id}/assets`, { ids: newRecordsToAdd.map((m) => m._id ?? m.id) })
+              .post(`${repairJob.api}/${repairJobData._id}/assets`, {
+                assets: newRecordsToAdd.map((m) => {
+                  return {
+                    _id: m._id ?? m.id,
+                    currentStatus: m?.status
+                  };
+                })
+              })
               .then(({ data }) => {
                 setAddSerializedAssetDialog(false);
                 if (repairJobData.status === REPAIR_JOB_STATUS.new) {

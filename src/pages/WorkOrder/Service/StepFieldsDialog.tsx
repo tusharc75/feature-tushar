@@ -145,7 +145,7 @@ const StepFieldsDialog = ({
               </p>
             </div>
           ) : null}
-          {stepData.duration ? (
+          {stepData.duration && user?.brandPolicy?.workOrderTimer ? (
             <div>
               <p className={classes.sectionColTItle}>Duration:</p>
               <p className={classes.sectionColDetail} style={{ display: 'flex', alignItems: 'center' }}>
