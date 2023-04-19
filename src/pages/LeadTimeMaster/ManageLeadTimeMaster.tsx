@@ -1,6 +1,6 @@
-import { useState, useEffect, useContext, useRef } from 'react';
+import { useState, useEffect, useContext, useRef, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, CircularProgress, Grid, IconButton, TextField, Tooltip, Typography } from '@material-ui/core';
+import { Box, Button, CircularProgress, Grid, IconButton, TextField, Typography } from '@material-ui/core';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import FormTypes from '../../components/Helpers/FormTypes';
@@ -20,21 +20,20 @@ import {
 import axiosInstance from '../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
-import { useHistory } from 'react-router-dom';
 import { FaDiceOne } from 'react-icons/fa';
-import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import { Autocomplete } from '@material-ui/lab';
 import React from 'react';
 import routes from 'src/components/Helpers/Routes';
+import { useHistory } from 'react-router-dom'
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-
+  const history = useHistory()
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -107,14 +106,15 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
       values.leadTimeDays = totalDays || 0;
       axiosInstance()
         .post(`${leadTimeMaster.api}`, values)
-        .then(({ data }) => {
+        .then(({ data: { data, message} }) => {
           onClose();
           setSubmitting(false);
+          history.push(`${routes.leadTimeMasterDetail.path}/${data?._id}`)
           onSuccess();
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: data.message
+            message: message
           });
         })
         .catch((error) => {
@@ -192,38 +192,23 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
       }}
       open={true}
     >
-      {loading || !initialData.fields.length ? (
-        <>
-          <CustomDialogContent>
-            <Skeleton width="100%" height="70px" />
-            <Grid container spacing={2}>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                <Grid key={i} item xs={12} sm={6} md={6}>
-                  <Skeleton width="100%" height="60px" />
-                </Grid>
-              ))}
-            </Grid>
-          </CustomDialogContent>
-          <CustomDialogFooter>
-            <Button variant="outlined" size="small" color="primary" disabled>
-              Cancel
-            </Button>
-            <Button variant="contained" size="small" color="primary" disabled>
-              Submit
-            </Button>
-          </CustomDialogFooter>
-        </>
-      ) : (
-        <Formik innerRef={ref} initialValues={initialData.values} validationSchema={yupSchema(allFields)} validateOnMount onSubmit={handleSubmit}>
-          {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues, submitForm }) => (
-            <>
-              <CustomDialogHeader
+      {initialData?.fields?.length ? (
+        <Formik
+          innerRef={ref} 
+          initialValues={initialData.values} 
+          validationSchema={yupSchema(allFields)} 
+          validateOnMount 
+          onSubmit={handleSubmit}
+        >
+          {({ values, errors, touched, setFieldValue, submitForm }) => (
+            <Fragment>
+               <CustomDialogHeader
                 title={title}
                 onClose={(e, reason) => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
+                  if (isEqual(initialData.values, values)) {
                     onClose();
+                  } else {
+                    setShowConfirmDialog(true);
                   }
                 }}
                 isMinimized={!fullScreen}
@@ -232,7 +217,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                 }}
                 showManimizeMaximize={true}
               />
-              <CustomDialogContent>
+               <CustomDialogContent>
                 <Form>
                   {initialData.fields.length > 0 &&
                     initialData.fields.map((form, i) => {
@@ -398,11 +383,9 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                   startIcon={submitting && <CircularProgress size={20} color="inherit" />}
                   disabled={submitting}
                   onClick={(e) => {
-                    // onClose();
                     e.preventDefault();
                     handleScroll(errors);
                     submitForm();
-                    // handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
                   }}
                 >
                   Save
@@ -416,7 +399,6 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                     setShowConfirmDialog(false);
                     handleScroll(errors);
                     submitForm();
-                    // handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
                   }}
                   onClose={() => {
                     setShowConfirmDialog(false);
@@ -424,9 +406,13 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                   }}
                 />
               ) : null}
-            </>
+            </Fragment>
           )}
         </Formik>
+      ): (
+        <Box p={2} height={500} bgcolor="white">
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>
       )}
     </Dialog>
   );
