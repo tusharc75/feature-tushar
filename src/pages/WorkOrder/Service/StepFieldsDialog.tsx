@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Dialog, Box, Grid, Button, Typography, IconButton } from '@material-ui/core';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { Form, Formik } from 'formik';
@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme: Theme) =>
       fontWeight: 500
     },
     sectionContainer: {
-      padding: '0 25px 18px',
+      padding: '0 15px 18px',
       marginTop: '20px'
     },
     sectionHead: {
@@ -46,10 +46,12 @@ const useStyles = makeStyles((theme: Theme) =>
         display: 'inline-grid',
         placeItems: 'center',
         marginRight: '6px',
-        verticalAlign: 'text-top'
+        verticalAlign: 'text-top',
+        cursor: 'pointer'
       }
     },
     sectionRow: {
+      overflow: 'hidden',
       '& > div': {
         display: 'flex',
         alignItems: 'center',
@@ -75,6 +77,10 @@ const useStyles = makeStyles((theme: Theme) =>
     centerText: {
       textAlign: 'center',
       marginBlock: '30px'
+    },
+    transition: {
+      overflow: 'hidden',
+      transition: 'height .3s'
     }
   })
 );
@@ -101,6 +107,9 @@ const StepFieldsDialog = ({
   const [isEditing, setEditing] = React.useState(eidtable);
   const [viewStep, setViewStep] = React.useState(false);
   const toastConfig = useContext(CustomToastContext);
+  const containerRef = React.useRef(null);
+  const [height, setHeight] = React.useState(0);
+  const [isVisible, setIsVisible] = React.useState(true);
 
   const steps = selectedService?.steps || [];
 
@@ -128,56 +137,65 @@ const StepFieldsDialog = ({
       }
     }, [stepData]);
 
+    useEffect(() => {
+      if (containerRef.current) {
+        const target = containerRef.current as HTMLDialogElement;
+        setHeight(isVisible ? target.clientHeight : 0);
+      }
+    }, []);
+
     return (
       <div className={classes.sectionContainer}>
-        <h6 className={classes.sectionHead}>
-          <span>
+        <h6 className={classes.sectionHead} onClick={() => setIsVisible((prev) => !prev)}>
+          <span style={{ transform: isVisible ? 'rotate(180deg)' : 'rotate(0)' }}>
             <MdKeyboardArrowDown />
           </span>
           Extra Details
         </h6>
-        <div className={classes.sectionRow}>
-          {stepData.passFailStatus ? (
-            <div>
-              <p className={classes.sectionColTItle}>Status :</p>
-              <p className={classes.sectionColDetail}>
-                <RenderPassFailChip status={stepData.passFailStatus} className={classes.stepTags} />
-              </p>
-            </div>
-          ) : null}
-          {stepData.duration && user?.brandPolicy?.workOrderTimer ? (
-            <div>
-              <p className={classes.sectionColTItle}>Duration:</p>
-              <p className={classes.sectionColDetail} style={{ display: 'flex', alignItems: 'center' }}>
-                <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />({time})
-              </p>
-            </div>
-          ) : null}
-          {stepData.startedBy && (
-            <div>
-              <p className={classes.sectionColTItle}>Started By:</p>
-              <p className={classes.sectionColDetail}>{stepData.startedBy?.optionLabel}</p>
-            </div>
-          )}
-          {stepData.endedBy && (
-            <div>
-              <p className={classes.sectionColTItle}>Ended By:</p>
-              <p className={classes.sectionColDetail}>{stepData.endedBy?.optionLabel}</p>
-            </div>
-          )}
-          {stepData.startDate ? (
-            <div>
-              <p className={classes.sectionColTItle}>Start Date:</p>
-              <p className={classes.sectionColDetail}>{moment(stepData.startDate).format(dateTimeFormat)}</p>
-            </div>
-          ) : null}
+        <div className={classes.transition} style={{ height: height }}>
+          <div className={classes.sectionRow} ref={containerRef}>
+            {stepData.passFailStatus ? (
+              <div>
+                <p className={classes.sectionColTItle}>Status :</p>
+                <p className={classes.sectionColDetail}>
+                  <RenderPassFailChip status={stepData.passFailStatus} className={classes.stepTags} />
+                </p>
+              </div>
+            ) : null}
+            {stepData.duration && user?.brandPolicy?.workOrderTimer ? (
+              <div>
+                <p className={classes.sectionColTItle}>Duration:</p>
+                <p className={classes.sectionColDetail} style={{ display: 'flex', alignItems: 'center' }}>
+                  <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />({time})
+                </p>
+              </div>
+            ) : null}
+            {stepData.startedBy && (
+              <div>
+                <p className={classes.sectionColTItle}>Started By:</p>
+                <p className={classes.sectionColDetail}>{stepData.startedBy?.optionLabel}</p>
+              </div>
+            )}
+            {stepData.endedBy && (
+              <div>
+                <p className={classes.sectionColTItle}>Ended By:</p>
+                <p className={classes.sectionColDetail}>{stepData.endedBy?.optionLabel}</p>
+              </div>
+            )}
+            {stepData.startDate ? (
+              <div>
+                <p className={classes.sectionColTItle}>Start Date:</p>
+                <p className={classes.sectionColDetail}>{moment(stepData.startDate).format(dateTimeFormat)}</p>
+              </div>
+            ) : null}
 
-          {stepData.endDate ? (
-            <div>
-              <p className={classes.sectionColTItle}>End Date:</p>
-              <p className={classes.sectionColDetail}>{moment(stepData.endDate).format(dateTimeFormat)}</p>
-            </div>
-          ) : null}
+            {stepData.endDate ? (
+              <div>
+                <p className={classes.sectionColTItle}>End Date:</p>
+                <p className={classes.sectionColDetail}>{moment(stepData.endDate).format(dateTimeFormat)}</p>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     );

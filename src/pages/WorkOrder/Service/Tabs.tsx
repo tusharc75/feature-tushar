@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styles from './Tabs.module.scss';
-import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
+// import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
+import ArrowBackIosRoundedIcon from '@material-ui/icons/ArrowBackIosRounded';
+import ArrowForwardIosRoundedIcon from '@material-ui/icons/ArrowForwardIosRounded';
 
 let childrenCount = 0;
 
@@ -62,7 +64,7 @@ export const Tabs = ({ children }) => {
     <div className={styles.tabContainerPos}>
       <div className={styles.tabContainer}>
         <button title="previous" className={`${styles.button} ${styles.prevButton}`} onClick={scrollPrev} disabled={prevButtonDisabled}>
-          <MdArrowBackIos />
+          <ArrowBackIosRoundedIcon />
         </button>
         <div className={styles.TabContents}>
           <div className={styles.tabs} ref={sliderRef}>
@@ -74,7 +76,7 @@ export const Tabs = ({ children }) => {
           </div>
         </div>
         <button title="next" className={`${styles.button} ${styles.nextButton}`} onClick={scrollNext} disabled={nextButtonDisabled}>
-          <MdArrowForwardIos />
+          <ArrowForwardIosRoundedIcon />
         </button>
       </div>
     </div>
