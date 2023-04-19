@@ -17,7 +17,6 @@ import {
   getObjKeys,
   getObjKeysWithValues,
   getOwnerDropdownDataSource,
-  isFieldNotTouched,
   salesOrder,
   setFieldsInAscendingOrder,
   yupSchema,
@@ -41,7 +40,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
-  const [salesData, setSalesData] = useState({ fields: [], initialValues: {} });
+  const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
@@ -69,7 +68,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
   const [countrySellToMainData, setCountrySellToMainData] = useState([]);
 
   const updateAccountDropdown = (data) => {
-    const entityFields = salesData.fields;
+    const entityFields = initialData.fields;
     const customerAccountNameFieldIndex = entityFields.findIndex((d) => d.fieldName === 'customerAccount');
     if (customerAccountNameFieldIndex > -1) {
       entityFields[customerAccountNameFieldIndex].option = [
@@ -86,7 +85,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
   };
 
   const updateContactDropdown = (data) => {
-    const entityFields = salesData.fields;
+    const entityFields = initialData.fields;
     const customerContactNameFieldIndex = entityFields.findIndex((d) => d.fieldName === 'customerContact');
     if (customerContactNameFieldIndex > -1) {
       const newCustomer = {
@@ -103,27 +102,27 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
   };
 
   useEffect(() => {
-    const ownerCollabOptions = salesData.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
+    const ownerCollabOptions = initialData.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
     if (ownerCollabOptions.length > 0) {
       setOwnerCollaboratorData(ownerCollabOptions[0].option);
       setOwnerData(ownerCollabOptions[0].option);
       setCollaboratorData(ownerCollabOptions[0].option);
     }
-    let customerAccountOptions = salesData.fields.find((d) => d.fieldName === 'customerAccount');
+    let customerAccountOptions = initialData.fields.find((d) => d.fieldName === 'customerAccount');
     if (customerAccountOptions) {
       setAccountData(customerAccountOptions.option);
     }
-    let customerContactOptions = salesData.fields.find((d) => d.fieldName === 'customerContact');
+    let customerContactOptions = initialData.fields.find((d) => d.fieldName === 'customerContact');
     if (customerContactOptions) {
       setContactData(customerContactOptions.option);
     }
-    const customerContactDropdownData = salesData.fields.find((d) => d.fieldName === 'customerContact');
-    const countryBillToDropdownData = salesData.fields.find((d) => d.fieldName === 'billingAddress');
+    const customerContactDropdownData = initialData.fields.find((d) => d.fieldName === 'customerContact');
+    const countryBillToDropdownData = initialData.fields.find((d) => d.fieldName === 'billingAddress');
     if (countryBillToDropdownData) {
       setCountryBillToMainData(countryBillToDropdownData.option);
       setCountryBillToDropDown(countryBillToDropdownData.option);
     }
-    const countrySellToDropdownData = salesData.fields.find((d) => d.fieldName === 'shippingAddress');
+    const countrySellToDropdownData = initialData.fields.find((d) => d.fieldName === 'shippingAddress');
     if (countryBillToDropdownData) {
       setCountrySellToMainData(countrySellToDropdownData.option);
       setCountrySellToDropDown(countrySellToDropdownData.option);
@@ -136,8 +135,8 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
         );
       }
     }
-    setFormsData(setFieldsInAscendingOrder(salesData.fields));
-  }, [salesData.fields]);
+    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+  }, [initialData.fields]);
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData));
@@ -176,16 +175,16 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
             rest.status = 'New';
             rest.salesOrderNo = `SO_${generateUniqueIdOnly()}`;
             setCloneHeading(salesOrderNo);
-            setSalesData({
+            setInitialData({
               fields: fieldsDataForCreate,
-              initialValues: getObjKeysWithValues(rest, fieldsDataForCreate)
+              values: getObjKeysWithValues(rest, fieldsDataForCreate)
             });
             setLoading(false);
           } else {
             setSalesDetails(data);
-            setSalesData({
+            setInitialData({
               fields: fieldsDataForUpdate,
-              initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataForUpdate)
             });
             setLoading(false);
           }
@@ -195,9 +194,9 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate), currency: user.user?.brandCurrency || '' };
         initialData['salesOrderNo'] = `SO_${generateUniqueIdOnly()}`;
-        setSalesData({
+        setInitialData({
           fields: fieldsDataForCreate,
-          initialValues: initialData
+          values: initialData
         });
         setLoading(false);
       }
@@ -294,10 +293,10 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
       }}
       open={open}
     >
-      {salesData?.fields?.length ? (
+      {initialData?.fields?.length ? (
         <Formik
-          initialValues={salesData.initialValues}
-          validationSchema={yupSchema(salesData.fields)}
+          initialValues={initialData.values}
+          validationSchema={yupSchema(initialData.fields)}
           validateOnMount
           validate={validate}
           onSubmit={handleSubmit}
@@ -311,7 +310,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                     : `${isClone ? `Clone - ${cloneHeading}` : `Update ${salesOrderData?.salesOrderNo}`}`
                 }
                 onClose={(e, reason) => {
-                  if (isEqual(salesData.initialValues, values)) {
+                  if (isEqual(initialData.values, values)) {
                     onClose();
                   } else {
                     setShowConfirmDialog(true);
@@ -605,8 +604,11 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                   color="primary"
                   size="small"
                   onClick={() => {
-                    if (isFieldNotTouched(salesData, values)) onClose();
-                    else setShowConfirmDialog(true);
+                    if (isEqual(initialData.values, values)) {
+                      onClose();
+                    }else{
+                      setShowConfirmDialog(true);
+                    }
                   }}
                 >
                   Cancel
