@@ -11,7 +11,9 @@ import {
   ListItemAvatar,
   ListItemText,
   Menu,
-  MenuItem
+  MenuItem,
+  ListItemIcon,
+  Button
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -27,11 +29,13 @@ import routes from '../Helpers/Routes';
 import CreateProjectSales from '../../pages/ProjectSales/CreateProjectSales';
 import { MoreVert } from '@material-ui/icons';
 import AssignProjectSalesDialog from '../AssignRolesDialog/AssignProjectSalesDialog';
-import { HiExternalLink } from 'react-icons/hi';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 const Accordion = withStyles({
   root: {
-    border: '1px solid rgba(0, 0, 0, .125)',
+    border: '0px',
+    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.06)',
+
     '&:not(:last-child)': {
       borderBottom: 0
     },
@@ -39,7 +43,8 @@ const Accordion = withStyles({
       display: 'none'
     },
     '&$expanded': {
-      margin: 'auto'
+      margin: 'auto',
+      boxShadow: '0px 17.7266px 35.4532px rgba(0, 0, 0, 0.03)'
     }
   },
   expanded: {}
@@ -47,18 +52,19 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
   root: {
-    backgroundColor: 'white',
-    borderBottom: '1px solid #f1ece8',
-    background: '#ffffff',
-    fontWeight: 'bold',
-    padding: '0px',
+    backgroundColor: '#FFFFFF',
+    padding: '0 8px',
+    minHeight: 48,
+    borderRadius: '3.54532px',
     '&$expanded': {
-      minHeight: 46
+      minHeight: 48,
+      backgroundColor: '#EFFBF9',
+      borderRadius: '3.54532px 3.54532px 0px 0px'
     }
   },
   content: {
     '&$expanded': {
-      margin: '15px 0'
+      margin: '12px 0'
     }
   },
   expanded: {}
@@ -66,18 +72,42 @@ const AccordionSummary = withStyles({
 
 const AccordionDetails = withStyles((theme) => ({
   root: {
-    padding: theme.spacing(1),
-    display: 'block'
+    display: 'block',
+    padding: theme.spacing(2),
+    border: '1px solid #ececec',
+    borderRadius: '0px 0px 6px 6px'
   }
 }))(MuiAccordionDetails);
 
-function DisplayData({ key, label, value, icon }) {
+function DisplayData({ key, label, value, icon, highlightsHead = false }) {
   return (
     <div style={{ flexGrow: 1 }}>
-      <List>
-        <ListItem key={key}>
-          <ListItemAvatar>{icon}</ListItemAvatar>
-          <ListItemText primary={value ? value : '-'} secondary={label} />
+      <List style={{ padding: 0 }}>
+        <ListItem key={key} style={{ alignItems: 'flex-start', paddingInline: '0' }}>
+          <ListItemIcon style={{ minWidth: '24px', marginTop: 11 }}>{icon}</ListItemIcon>
+          <ListItemText
+            primary={
+              highlightsHead ? (
+                <span
+                  style={{
+                    background: '#EFFBF9',
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    display: 'inline-block',
+                    color: '#298B88',
+                    fontWeight: 600
+                  }}
+                >
+                  {value ? value : '-'}
+                </span>
+              ) : value ? (
+                value
+              ) : (
+                '-'
+              )
+            }
+            secondary={label}
+          />
         </ListItem>
       </List>
     </div>
@@ -136,17 +166,16 @@ export default function ProjectInAccordion({
   };
   return (
     <>
-      <Accordion expanded={expandProject} className="omsAccordian accordProject">
+      <Accordion expanded={expandProject} className="omsAccordian" onChange={() => setExpandProject(!expandProject)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container className="pos_rel">
-            <div className="clicker_div" onClick={() => setExpandProject(!expandProject)}></div>
             <Grid item xs={8}>
               <Box display="flex">
                 <Box>
                   <IconButton size="small">{expandProject === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
                 </Box>
                 <Box padding="5px">
-                  <Typography variant="subtitle2">
+                  <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
                     {routes.projectSales.title} ({projectSales?.length || 0})
                   </Typography>
                 </Box>
@@ -155,7 +184,15 @@ export default function ProjectInAccordion({
             <Grid item xs={4} container justify="flex-end">
               {isAllowedToEdit && (
                 <>
-                  <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleOpenMenu}>
+                  <IconButton
+                    aria-haspopup="true"
+                    color="primary"
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenMenu(e);
+                    }}
+                  >
                     <MoreVert />
                   </IconButton>
                   <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
@@ -184,29 +221,22 @@ export default function ProjectInAccordion({
           </Grid>
         </AccordionSummary>
         <AccordionDetails>
-          <>
+          <Box>
             {expandProject && (
               <>
                 {projectSales && projectSales.length ? (
                   <Grid container spacing={1}>
                     {projectSales.map((obj, index) => (
                       <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
-                        <Card className="detailCard">
-                          <CardContent className="detailListing custom_card_style_for_contact_details">
-                            {/* <div className="cardStyle"> </div> */}
+                        <Card className="detailCard  card-v1" variant="outlined">
+                          <CardContent className="card-link">
                             <Grid item xs={12}>
                               <Grid container className="detailCardHeader">
                                 <Grid item xs={12} sm={12}>
                                   {
-                                    // obj.entity === selectedEntity ?
-                                    <Link className="link" to={`${routes.projectSalesDetail.path}/${obj._id}`}>
+                                    <Link to={`${routes.projectSalesDetail.path}/${obj._id}`}>
                                       <Typography className="detailName">{obj.projectName}</Typography>
                                     </Link>
-                                    // : <span className="d-flex gap-2 align-items-center">
-                                    //     <Typography className="detailName">{obj.projectName}</Typography> <Tooltip title={`${obj.projectName} belongs to different entity`}>
-                                    //         <InfoOutlinedIcon fontSize="small" />
-                                    //     </Tooltip>
-                                    // </span>
                                   }
                                 </Grid>
                               </Grid>
@@ -218,6 +248,7 @@ export default function ProjectInAccordion({
                                       label="Status"
                                       value={obj.projectStatus ? 'Active' : 'Inactive'}
                                       icon={<BsClockHistory size={15} />}
+                                      highlightsHead={true}
                                     />
                                   }
                                 </Grid>
@@ -238,32 +269,26 @@ export default function ProjectInAccordion({
                 )}
               </>
             )}
-          </>
-        </AccordionDetails>
-        {/* <Box margin={1} className="btn-view gap-1" onClick={() => { }} p={1} display="flex" justifyContent="center" alignItems="center">
-                <FaEye /> View All &#8599;
-            </Box>
-            <Box margin={1} /> */}
-        {projectSales && projectSales.length ? (
-          <Box
-            margin={1}
-            className="btn-view gap-1"
-            onClick={() =>
-              history.push(`/project-sales`, {
-                accountId: accountId,
-                accountName: accountName,
-                resource: `${resource}`
-              })
-            }
-            p={1}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <span>View All</span>
-            <HiExternalLink size={20} />
+            {projectSales && projectSales.length ? (
+              <Box mt={2}>
+                <Button
+                  className="accordion-outlined-button"
+                  onClick={() =>
+                    history.push(`/project-sales`, {
+                      accountId: accountId,
+                      accountName: accountName,
+                      resource: `${resource}`
+                    })
+                  }
+                  startIcon={<VisibilityIcon />}
+                  variant="outlined"
+                >
+                  <span>View All</span>
+                </Button>
+              </Box>
+            ) : null}
           </Box>
-        ) : null}
+        </AccordionDetails>
       </Accordion>
 
       {showCreateProjectSalesDialog && (

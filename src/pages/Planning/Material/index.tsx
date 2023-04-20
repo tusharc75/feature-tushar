@@ -232,6 +232,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, parent);
     });
+    console.log(rows);
     setRowsData(rows);
     setSelectedRecords([]);
   };
