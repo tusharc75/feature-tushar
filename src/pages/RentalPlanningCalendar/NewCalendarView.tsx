@@ -272,6 +272,8 @@ function CalendarView() {
                     estimateStartDate: day.startDate,
                     estimateEndDate: day.endDate
                 })
+            } else if (view === 'agenda') {
+                console.log('hello', document.getElementsByClassName('rbc-agenda-view'))
             }
         } else {
             setRenderCount(renderCount + 1)
@@ -385,7 +387,11 @@ function CalendarView() {
             formats={formats}
             localizer={localizer}
             popup={true}
-            views={{ month: true, week: true, day: true }}
+            messages={{
+                agenda: 'List',
+            }}
+            selectable
+            views={{ month: true, week: true, day: true, agenda: true }}
             onView={onView}
             view={view}
             eventPropGetter={(obj: any) => {
@@ -423,7 +429,7 @@ function CalendarView() {
                 history.push(`${path}/${event.id}`);
             }}
         />
-    </div>
+    </div >
     )
 }
 
