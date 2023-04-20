@@ -195,7 +195,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
   const selectedServiceRef = React.useRef(null);
 
   useEffect(() => {
-    if (!selectedServiceRef.current || selectedServiceRef.current !== selectedService._id) {
+    if ((!selectedServiceRef.current || selectedServiceRef.current !== selectedService._id) && selectedService._id) {
       selectedServiceRef.current = selectedService._id;
       setServiceDetails(null);
     }
