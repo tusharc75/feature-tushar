@@ -2,7 +2,7 @@ import { Grid } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
-import CalendarView from './CalendarView';
+import CalendarView from './NewCalendarView';
 
 const RentalPlanningCalendar = () => {
 
