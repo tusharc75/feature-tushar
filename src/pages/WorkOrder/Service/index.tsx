@@ -1047,7 +1047,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   setAnchorEl(null);
                 }}
               >
-                Consume Products
+                Add/Consume Products
               </MenuItem>
               <MenuItem
                 disabled={

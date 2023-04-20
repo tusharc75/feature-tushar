@@ -25,7 +25,7 @@ import { FaDiceOne } from "react-icons/fa";
 import { useData } from "../../../StateProvider/Provider";
 import { isEqual } from 'lodash';
 
-const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuccess, }) => {
+const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuccess, refrenceData = null }) => {
 
     const initialRender = useRef(true)
 

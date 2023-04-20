@@ -220,7 +220,7 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { ids: [id] });
       if (data.totalUtilization) {
-        data.totalUtilization = moment.duration(data.totalUtilization).hours();
+        data.totalUtilization = moment.duration(data.totalUtilization).asHours();
         if (data.totalUtilization) {
           data.totalUtilization = `${data.totalUtilization} hours`;
         }
