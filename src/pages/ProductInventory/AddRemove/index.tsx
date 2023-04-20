@@ -28,7 +28,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 
-const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, storageLocationId = null }) => {
+const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, storageLocation = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
@@ -37,14 +37,16 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
   const toastConfig = useContext(CustomToastContext);
   const [lockDate, setLockDate] = useState(null);
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
+  
   const [initialData, setInitialData] = useState({
     qty: 1,
     price: 0,
-    storageLocation: storageLocationId,
+    storageLocation: storageLocation,
     comment: '',
     serialNumbers: [],
     customDate: new Date()
   })
+
   const [loadingInitialData, setLoadingInitialData] = useState(false)
   const [currentInventory, setCurrentInventory] = useState(null)
   const [selectedStorageLocation, setSelectedStorageLocation] = useState(null)
@@ -94,7 +96,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
       .then(({ data: { data } }) => {
         const storageLocationOption = data['Storage Location'].filter(_storageLocation => _storageLocation.warehouse === warehouse);
         setStorageLocationOptions(storageLocationOption);
-        if (!storageLocationId) {
+        if (!storageLocation) {
           setInitialData((preVal) => {
             return (
               {
@@ -104,7 +106,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
           })
           setSelectedStorageLocation(storageLocationOption[0]?.optionValue)
         } else {
-          setSelectedStorageLocation(storageLocationId)
+          setSelectedStorageLocation(storageLocation)
         }
         setLoadingInitialData(false)
       });
@@ -186,26 +188,24 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     if (values.qty <= 0) {
       errors['qty'] = 'Please enter valid qty';
     }
+
     if (type === 'remove') {
-      var validateQty = currentInventory;
-      if (product?.length > 1) {
-        validateQty = product?.reduce(function (min, obj) {
-          return obj.availableInventory < min ? obj.availableInventory : min;
-        }, Infinity);
-      }
-      let maxQty = availableQtyOnRemoveDate !== null ? Math.min(validateQty, availableQtyOnRemoveDate) : validateQty;
-      if (parseInt(values.qty) > maxQty) {
-        errors['qty'] = 'Insufficient Quantity !';
+      if (product?.length === 1) {
+        var validateQty = currentInventory;
+        let maxQty = availableQtyOnRemoveDate !== null ? Math.min(validateQty, availableQtyOnRemoveDate) : validateQty;
+        if (parseInt(values.qty) > maxQty) {
+          errors['qty'] = 'Insufficient Quantity !';
+        }
       }
     }
+
     if (type === 'add') {
       if (parseFloat(values.price) <= 0) {
         errors['price'] = 'Please enter valid price';
       }
     }
 
-    const storageLocation = values['storageLocation'];
-    if (user?.user?.brandPolicy?.storageLocation && !storageLocation) {
+    if (user?.user?.brandPolicy?.storageLocation && !values['storageLocation']) {
       errors['storageLocation'] = 'Please select Storage Location';
     }
     // find duplicates serial numbers
@@ -378,8 +378,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                           />
                         </Box>
                       ) : null}
-                      {
-                        user?.user?.brandPolicy?.storageLocation &&
+                      {user?.user?.brandPolicy?.storageLocation &&
                         <Box m={1}>
                           <Autocomplete
                             disableClearable

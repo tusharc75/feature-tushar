@@ -725,9 +725,6 @@ const RentalManagementViews = (props) => {
               <HtmlTooltip arrow placement="top" title={<>Consume Products</>}>
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   Consume Products
-                  {/* {item.ticketName}
-                  <br />
-                  {item.ticketType} Ticket */}
                 </div>
               </HtmlTooltip>
             )
