@@ -149,7 +149,6 @@ function Product({ id }) {
         </div>
       )
     });
-    console.log(column);
     setColumns([...column]);
   };
 
