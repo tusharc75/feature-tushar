@@ -35,6 +35,7 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
   const [title, setTitle] = useState('');
   const [showAddAddresstDialog, setShowAddAddresstDialog] = useState(false);
   const [addressDataSource, setAddressDataSource] = useState([]);
+  const [formsData, setFormsData] = useState([]);
 
   const ref = useRef(null);
 
@@ -58,14 +59,14 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
                 const { _id, brand, createdBy, fleetNumber, updatedBy, ...rest } = data;
                 setTitle(`Clone - ${fleetNumber}`);
                 setInitialData({
-                  fields: setFieldsInAscendingOrder(fieldsDataForCreate),
+                  fields: fieldsDataForCreate,
                   values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }
                 });
                 setLoading(false);
               } else {
                 setTitle(`Editing - ${data.fleetNumber}`);
                 setInitialData({
-                  fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
+                  fields: fieldsDataForUpdate,
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
                 });
                 setLoading(false);
@@ -78,7 +79,7 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
           setTitle('Create Fleet Master');
           let initialData = { ...getObjKeys('', fieldsDataForCreate) };
           setInitialData({
-            fields: setFieldsInAscendingOrder(fieldsDataForCreate),
+            fields: fieldsDataForCreate,
             values: initialData
           });
           setLoading(false);
@@ -88,6 +89,10 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
         toastConfig.setToastConfig(error);
       });
   }, [id]);
+
+  useEffect(() => {
+    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+  }, [initialData.fields])
 
   const handleSubmit = (values) => {
     setSubmitting(true);
@@ -185,8 +190,8 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {initialData.fields.length > 0 &&
-                    initialData.fields.map((form, i) => {
+                  {formsData &&
+                    formsData.map((form, i) => {
                       return (
                         form.name && (
                           <div key={i}>
@@ -209,6 +214,7 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
                                           >
                                             <FormTypes
                                               {...field}
+                                              disabled={Boolean(id) && field.disableOnEdit && !isClone}
                                               values={values}
                                               errors={errors}
                                               touched={touched}
@@ -226,7 +232,7 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
                                               size="small"
                                             />
                                           </Grid>
-                                          {permissions?.projectSales?.isCreate && (
+                                          {permissions?.fleetMaster?.isCreate && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip title="Add Address" className="mt-1">
                                                 <IconButton

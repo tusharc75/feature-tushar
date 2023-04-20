@@ -119,7 +119,7 @@ const FormTypes = (props) => {
         />
       )}
     />
-  ) : fieldData?.type === 'decimal' ? (
+  ) : fieldData?.type === 'decimal'    ? (
     <TextField
       style={{ paddingRight: 1 }}
       variant="outlined"

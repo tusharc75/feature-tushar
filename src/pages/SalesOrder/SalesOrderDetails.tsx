@@ -26,12 +26,13 @@ import LoadingTicket from './LoadingTicket';
 import Invoice from './Invoice';
 import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { GrStatusInfo } from 'react-icons/all';
+import { GrStatusInfo, RiFlowChart } from 'react-icons/all';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps2, { getIndex } from 'src/components/Steps';
 import Process from './Process';
+import SalesOrderView from './View';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -301,6 +302,15 @@ const SalesOrderDetails = () => {
             }
             {...a11yProps(1)}
           />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+              </div>
+            }
+            {...a11yProps(2)}
+          />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -355,6 +365,9 @@ const SalesOrderDetails = () => {
               />
             )}
           </ContentFullScreen>
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          {salesOrderData && <SalesOrderView salesOrderData={salesOrderData} />}
         </TabPanel>
       </Box>
       {showConfirmBox && (

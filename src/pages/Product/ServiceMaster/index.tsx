@@ -133,7 +133,14 @@ const ServiceMaster = (props: Props) => {
         accessor: 'stepName',
         Header: 'Step Name',
         width: 100,
-        Cell: ({ row }) => row.original?.stepName ? <p title={row.original?.stepName} className="text-truncate">{row.original?.stepName}</p> : <NoDataCell />
+        Cell: ({ row }) =>
+          row.original?.stepName ? (
+            <p title={row.original?.stepName} className="text-truncate">
+              {row.original?.stepName}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
       }
     ];
 
@@ -460,9 +467,10 @@ const ServiceMaster = (props: Props) => {
                 Delete
               </MenuItem>
               <MenuItem
+                disabled={selectedRecords?.filter((p) => p.type === 'Service')?.length > 0 ? false : true}
                 onClick={() => {
                   handleUpdate({
-                    ids: selectedRecords?.filter((p) => p.type !== 'Product')?.map((d) => d._id),
+                    ids: selectedRecords?.filter((p) => p.type === 'Service')?.map((d) => d._id),
                     default: true
                   });
                   closeActions();
@@ -471,9 +479,10 @@ const ServiceMaster = (props: Props) => {
                 Set Default
               </MenuItem>
               <MenuItem
+                disabled={selectedRecords?.filter((p) => p.type === 'Service')?.length > 0 ? false : true}
                 onClick={() => {
                   handleUpdate({
-                    ids: selectedRecords?.filter((p) => p.type !== 'Product')?.map((d) => d._id),
+                    ids: selectedRecords?.filter((p) => p.type === 'Service')?.map((d) => d._id),
                     default: false
                   });
                   closeActions();

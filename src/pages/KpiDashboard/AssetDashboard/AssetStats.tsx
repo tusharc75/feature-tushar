@@ -191,7 +191,7 @@ const AssetStats = () => {
               </Typography>
               <Box display='flex' alignItems='flex-end'>
                 <Typography variant="h5" component="h2">
-                  {assetStats['totalUtilization'] ?  moment.duration(assetStats['totalUtilization']).hours() : 0}
+                  {assetStats['totalUtilization'] ?  moment.duration(assetStats['totalUtilization']).asHours() : 0}
                 </Typography>
                 <Box ml={1}><Typography variant="body1">Hours</Typography></Box>
               </Box>
