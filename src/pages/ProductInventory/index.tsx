@@ -777,7 +777,7 @@ const InventoryProduct = () => {
             product={inventory.product}
             type={inventory.type}
             warehouse={plantId}
-            storageLocationId={storageLocationId}
+            storageLocation={storageLocationId}
           />
         )}
         {settingDialogOpen && <SettingsDialog warehouse={plantId} onClose={() => setSettingDialogOpen(false)} />}

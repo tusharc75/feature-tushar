@@ -300,7 +300,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       {openAddNewAssets && (
         <AddSerializedAsset
           addSerializedAsset={(newRecordsToAdd) => {
-            console.log(newRecordsToAdd);
             setIsAdding(true);
             axiosInstance()
               .put(`${transferAsset.api}/add-asset/${transferAssetData?._id}`, {

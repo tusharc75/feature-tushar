@@ -7,7 +7,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { productInventory } from 'src/constants/helpers';
+import { productInventory, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
 import { dateFormatForInputControl } from '../../../constants/helpers';
@@ -33,6 +33,12 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
     fetchData();
     fetchSettingsData();
   }, []);
+
+  useEffect(() => {
+    if (user?.user?.brandPolicy?.storageLocation) {
+      getStorageLocation();
+    }
+  }, [])
 
   const fetchSettingsData = () => {
     axiosInstance()
@@ -65,17 +71,13 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
 
   const getStorageLocation = () => {
     axiosInstance()
-      .get('/sa-formbuilder/lookup?lookupResource=Storage Location')
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
-        setStorageLocationOptions(data['Storage Location'].filter(_storageLocation => _storageLocation.warehouse === warehouse));
+        if (data[sidebarResource.storageLocation]) {
+          setStorageLocationOptions(data[sidebarResource.storageLocation].filter(e => e.warehouse === warehouse));
+        }
       });
   };
-
-  useEffect(() => {
-    if (user?.user?.brandPolicy?.storageLocation) {
-      getStorageLocation();
-    }
-  }, [])
 
   const handleSubmit = (values) => {
     const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers']?.indexOf(item?.serialNumber) > -1);
