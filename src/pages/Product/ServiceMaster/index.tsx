@@ -133,7 +133,14 @@ const ServiceMaster = (props: Props) => {
         accessor: 'stepName',
         Header: 'Step Name',
         width: 100,
-        Cell: ({ row }) => row.original?.stepName ? <p title={row.original?.stepName} className="text-truncate">{row.original?.stepName}</p> : <NoDataCell />
+        Cell: ({ row }) =>
+          row.original?.stepName ? (
+            <p title={row.original?.stepName} className="text-truncate">
+              {row.original?.stepName}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
       }
     ];
 
