@@ -1,0 +1,45 @@
+.rbc-time-content,
+.rbc-time-header-gutter {
+    display: none !important;
+}
+
+.rbc-time-header {
+    height: calc(100vh - 100px);
+
+    .rbc-time-header-content {
+        border-left: none;
+    }
+}
+
+.rbc-agenda-view {
+    .rbc-agenda-table {
+        thead {
+            tr {
+                th:nth-of-type(2) {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    .rbc-agenda-content {
+        .rbc-agenda-table {
+            tbody {
+                tr {
+                    .rbc-agenda-time-cell {
+                        display: none;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+// .rbc-allday-cell {
+//     min-height: calc(100vh - 200px);
+// }
+
+// .rbc-time-header-cell {
+//     height: 300px;
+// }
