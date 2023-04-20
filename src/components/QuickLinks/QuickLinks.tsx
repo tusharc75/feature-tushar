@@ -1,37 +1,64 @@
-import React from 'react'
-import { Grid, Icon, Paper, Typography } from '@material-ui/core'
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Box, Grid, Icon, Paper, Typography } from '@material-ui/core';
+import { Link } from 'react-router-dom';
 export interface IQuickLinks {
-    label: string,
-    show: boolean
-    count?: number,
-    onClick?: Function,
-    to?: string,
-    icon?: any,
-    class: string
+  label: string;
+  show: boolean;
+  count?: number;
+  onClick?: Function;
+  to?: string;
+  icon?: any;
+  class: string;
 }
 
-export default function QuickLinks({ quickLinks, title = "Quick Links" }) {
-    return quickLinks && Array.isArray(quickLinks) ? <div id="detailQuickLinks" data-testid="quick-link" className="d-flex flex-column gap-2 px-3 pt-2 pb-3 bg-white">
-        <Typography data-testid="title" variant="h6" className="mb-1">{title}</Typography>
-        <Grid container spacing={1}>
-            {
-                quickLinks.map((k, index) => {
-                    return <React.Fragment key={index}>
-                        <Grid item xs={6} sm={4} md={3} lg={3}>
-                            <Paper className={`quickLinks ${k.class}`} onClick={k.onClick}>
-                                {k.to ? <>
-                                    <Link key={index} to={k.to}
-                                        className={`link`}>{k.label} {k.count != null ? `(${k.count})` : null}</Link>
-                                </> :
-                                    <>
-                                        <Icon>{k.icon}</Icon>
-                                        <Typography key={index}>{k.label} {k.count != null ? `(${k.count})` : null}</Typography>
-                                    </>}</Paper>
-                        </Grid>
-                    </React.Fragment>
-                })
-            }
-        </Grid>
-    </div> : <Typography color="error">Quick Links are passed in incorrect format</Typography>
+const quickLinkColorPalette = ['#F2F9FF', '#FFFCF0', '#FFEEEE', '#F1FEED', '#FFF0E5', '#F3F2FF'];
+
+const getColor = (index: number) => {
+  return quickLinkColorPalette[index % quickLinkColorPalette.length];
+};
+
+export default function QuickLinks({ quickLinks, title = 'Quick Links' }) {
+  return quickLinks && Array.isArray(quickLinks) ? (
+    <>
+      <div className="single-form-v1">
+        <div className="form-head-v1">
+          <h3 className="form-label-style-v1">{title}</h3>
+        </div>
+        <div className="formdata-v1 ">
+          <Grid container spacing={2}>
+            {quickLinks.map((k, index) => {
+              return (
+                <Grid item xs={12} lg={2}>
+                  <Box
+                    py={3}
+                    px={1}
+                    style={{ backgroundColor: getColor(index), borderRadius: 11, cursor: 'pointer' }}
+                    onClick={k.onClick}
+                    key={index}
+                  >
+                    {k.to ? (
+                      <>
+                        <Link key={index} to={k.to} className={`link`}>
+                          {k.label} {k.count != null ? `(${k.count})` : null}
+                        </Link>
+                      </>
+                    ) : (
+                      <div style={{ textAlign: 'center' }}>
+                        <Box mb={1}>{k.icon}</Box>
+                        <Typography key={index} style={{ color: '#1D1D1D', fontWeight: 600 }}>
+                          {k.label} {k.count != null ? `(${k.count})` : null}
+                        </Typography>
+                      </div>
+                    )}
+                  </Box>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </div>
+      </div>
+    </>
+  ) : (
+    <Typography color="error">Quick Links are passed in incorrect format</Typography>
+  );
 }

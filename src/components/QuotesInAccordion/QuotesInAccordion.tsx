@@ -13,7 +13,9 @@ import {
   ListItemText,
   Tooltip,
   MenuItem,
-  Menu
+  Menu,
+  ListItemIcon,
+  Button
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -35,10 +37,13 @@ import { formatAmountWithCurrency, opportunity } from '../../constants/helpers';
 import AssignQuoteDialog from './AssignQuoteDialog';
 import routes from '../Helpers/Routes';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 const Accordion = withStyles({
   root: {
-    border: '1px solid rgba(0, 0, 0, .125)',
+    border: '0px',
+    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.06)',
+
     '&:not(:last-child)': {
       borderBottom: 0
     },
@@ -46,7 +51,8 @@ const Accordion = withStyles({
       display: 'none'
     },
     '&$expanded': {
-      margin: 'auto'
+      margin: 'auto',
+      boxShadow: '0px 17.7266px 35.4532px rgba(0, 0, 0, 0.03)'
     }
   },
   expanded: {}
@@ -54,13 +60,14 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
   root: {
-    backgroundColor: 'white',
-    borderBottom: '1px solid #f1ece8',
-    background: '#ffffff',
-    fontWeight: 'bold',
-    padding: '0px',
+    backgroundColor: '#FFFFFF',
+    padding: '0 8px',
+    minHeight: 48,
+    borderRadius: '3.54532px',
     '&$expanded': {
-      minHeight: 46
+      minHeight: 48,
+      backgroundColor: '#EFFBF9',
+      borderRadius: '3.54532px 3.54532px 0px 0px'
     }
   },
   content: {
@@ -73,18 +80,42 @@ const AccordionSummary = withStyles({
 
 const AccordionDetails = withStyles((theme) => ({
   root: {
-    padding: theme.spacing(1),
-    display: 'block'
+    display: 'block',
+    padding: theme.spacing(2),
+    border: '1px solid #ececec',
+    borderRadius: '0px 0px 6px 6px'
   }
 }))(MuiAccordionDetails);
 
-function DisplayData({ key, label, value, icon }) {
+function DisplayData({ key, label, value, icon, highlightsHead = false }) {
   return (
     <div style={{ flexGrow: 1 }}>
-      <List>
-        <ListItem key={key}>
-          <ListItemAvatar>{icon}</ListItemAvatar>
-          <ListItemText primary={value ? value : '-'} secondary={label} />
+      <List style={{ padding: 0 }}>
+        <ListItem key={key} style={{ alignItems: 'flex-start', paddingInline: '0' }}>
+          <ListItemIcon style={{ minWidth: '24px', marginTop: 11 }}>{icon}</ListItemIcon>
+          <ListItemText
+            primary={
+              highlightsHead ? (
+                <span
+                  style={{
+                    background: '#EFFBF9',
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    display: 'inline-block',
+                    color: '#298B88',
+                    fontWeight: 600
+                  }}
+                >
+                  {value ? value : '-'}
+                </span>
+              ) : value ? (
+                value
+              ) : (
+                '-'
+              )
+            }
+            secondary={label}
+          />
         </ListItem>
       </List>
     </div>
@@ -237,21 +268,31 @@ export default function QuotesInAccordion({
   };
   return (
     <>
-      <Accordion expanded={expandQuote} className="omsAccordian accordQuotes" onChange={() => setExpandQuote(!expandQuote)}>
+      <Accordion expanded={expandQuote} className="omsAccordian" onChange={() => setExpandQuote(!expandQuote)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container>
             <Grid item xs={8} alignItems="center">
               <Box component="div" display="flex" alignItems="center" flexGrow={1}>
                 <IconButton size="small">{expandQuote === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
                 <Box padding="5px">
-                  <Typography variant="subtitle2">Quotes ({quotes?.length || 0})</Typography>
+                  <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
+                    Quotes ({quotes?.length || 0})
+                  </Typography>
                 </Box>
               </Box>
             </Grid>
             <Grid item xs={4} container justify="flex-end" alignItems="center">
               {isAllowedToUpdate && (
                 <>
-                  <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleOpenMenu}>
+                  <IconButton
+                    aria-haspopup="true"
+                    color="primary"
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenMenu(e);
+                    }}
+                  >
                     <MoreVert />
                   </IconButton>
                   <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
@@ -281,47 +322,40 @@ export default function QuotesInAccordion({
             </Grid>
           </Grid>
         </AccordionSummary>
-        <Box margin={0.5} />
         <AccordionDetails>
-          <>
+          <Box>
             {expandQuote && (
               <>
                 {quotes && quotes?.length ? (
                   <Grid container spacing={1}>
                     {quotes.map((obj, index) => (
                       <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
-                        <Card className="detailCard">
-                          <CardContent className="detailListing custom_card_style_for_contact_details">
+                        <Card className="detailCard  card-v1" variant="outlined">
+                          <CardContent className="card-link">
                             {/* <div style={{ width: '5px', backgroundColor: 'var(--secondary)', marginBottom: '10px', borderRadius: '5px' }}> </div> */}
+                            {!isQuotePrivate(obj) ? (
+                              quoteNameWithRedirect(obj)
+                            ) : obj?.privateAccess === true ? (
+                              [...obj.collaborator, obj.owner].includes(user.user?._id) ? (
+                                quoteNameWithRedirect(obj)
+                              ) : (
+                                <span className="d-flex gap-2 align-items-center">
+                                  <Typography className="detailName">{obj.quoteName}</Typography>{' '}
+                                  <Tooltip title={`${obj.quoteName} is a Private Quote`}>
+                                    <InfoOutlinedIcon fontSize="small" />
+                                  </Tooltip>
+                                </span>
+                              )
+                            ) : (
+                              quoteNameWithRedirect(obj)
+                            )}
+                            <Typography
+                              className="amount text-truncate"
+                              title={formatAmountWithCurrency(obj['currency'], obj?.estimatedAmount).fullFormatAmount}
+                            >
+                              {formatAmountWithCurrency(obj['currency'], obj?.estimatedAmount).fullFormatAmount}
+                            </Typography>
                             <Grid item xs={12}>
-                              <Grid container className="detailCardHeader">
-                                <Grid item xs={7} sm={8}>
-                                  {!isQuotePrivate(obj) ? (
-                                    quoteNameWithRedirect(obj)
-                                  ) : obj?.privateAccess === true ? (
-                                    [...obj.collaborator, obj.owner].includes(user.user?._id) ? (
-                                      quoteNameWithRedirect(obj)
-                                    ) : (
-                                      <span className="d-flex gap-2 align-items-center">
-                                        <Typography className="detailName">{obj.quoteName}</Typography>{' '}
-                                        <Tooltip title={`${obj.quoteName} is a Private Quote`}>
-                                          <InfoOutlinedIcon fontSize="small" />
-                                        </Tooltip>
-                                      </span>
-                                    )
-                                  ) : (
-                                    quoteNameWithRedirect(obj)
-                                  )}
-                                </Grid>
-                                <Grid item xs={5} sm={4}>
-                                  <Typography
-                                    className="amount text-truncate"
-                                    title={formatAmountWithCurrency(obj['currency'], obj?.estimatedAmount).fullFormatAmount}
-                                  >
-                                    {formatAmountWithCurrency(obj['currency'], obj?.estimatedAmount).fullFormatAmount}
-                                  </Typography>
-                                </Grid>
-                              </Grid>
                               <Grid container>
                                 <Grid item xs={12} sm={6} md={6} className="buttonClass">
                                   {obj.expiryDate ? (
@@ -330,6 +364,7 @@ export default function QuotesInAccordion({
                                       label="Expiry Date"
                                       value={displayDate(obj.expiryDate)}
                                       icon={<IoCalendarOutline size={15} />}
+                                      highlightsHead={true}
                                     />
                                   ) : (
                                     ''
@@ -363,27 +398,20 @@ export default function QuotesInAccordion({
                 )}
               </>
             )}
-          </>
-        </AccordionDetails>
-
-        {/* <Box margin={1} className="btn-view gap-1" onClick={() => { }} p={1} display="flex" justifyContent="center" alignItems="center">
-                <FaEye /> View All &#8599;
-            </Box>
-            <Box margin={1} /> */}
-        {quotes && quotes?.length ? (
-          <Box
-            margin={1}
-            className="btn-view gap-1"
-            onClick={() => handleViewAll(resourceName)}
-            p={1}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <span>View All</span>
-            <HiExternalLink size={20} />
+            {quotes && quotes?.length ? (
+              <Box mt={2}>
+                <Button
+                  className="accordion-outlined-button"
+                  onClick={() => handleViewAll(resourceName)}
+                  startIcon={<VisibilityIcon />}
+                  variant="outlined"
+                >
+                  <span>View All</span>
+                </Button>
+              </Box>
+            ) : null}
           </Box>
-        ) : null}
+        </AccordionDetails>
       </Accordion>
 
       {showCreateDialog && (
