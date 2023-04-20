@@ -1,12 +1,15 @@
-import { Box, Button, Dialog, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField, Typography } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, TextField, Typography } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import React, { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
+import { isMobile, isTablet } from "react-device-detect";
 
 function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSuccess }) {
+
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [selectedSteps, setSelectedSteps] = useState({});
 
   const handleSave = () => {
@@ -17,13 +20,13 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
           consumableWithSteps.push({
             ...item,
             stepId: step._id,
-            qty: step.qty < 1 ? 1 : step.qty
+            qty: !step.qty ? 1 : step.qty
           });
         });
       } else {
         consumableWithSteps.push({
           ...item,
-          qty: item?.qty < 1 ? 1 : item?.qty
+          qty: !item?.qty ? 1 : item?.qty
         });
       }
     });
@@ -31,45 +34,58 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
   };
 
   return (
-    <Dialog fullWidth maxWidth="sm" fullScreen={false} open={true} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
-      <CustomDialogHeader title={`Assign Consumables to Step`} showManimizeMaximize={false} showRequiredLabel={true} onClose={handleCloseDialog} />
+    <Dialog fullWidth maxWidth="sm" fullScreen={fullScreen} open={true} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+      <CustomDialogHeader
+        title={`Assign Consumables to Step`}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={true}
+        showRequiredLabel={true}
+        onClose={handleCloseDialog} />
       <CustomDialogContent>
-        <div className="header-panel">
-          {consumables?.length &&
-            consumables?.map((item, index) => {
-              return (
-                <Box key={index} p={2} mb={2} border={1} borderColor="grey.300">
-                  <Typography variant="subtitle1">{item.productName}</Typography>
-                  <Box mt={1}>
-                    <Autocomplete
-                      multiple
-                      value={selectedSteps[item?._id]}
-                      onChange={(event, newValue) => {
-                        setSelectedSteps({ ...selectedSteps, [item?._id]: newValue });
-                      }}
-                      options={steps}
-                      getOptionLabel={(option) => option.stepName}
-                      renderInput={(params) => <TextField {...params} label="Step Name" margin="dense" variant="outlined" />}
-                    />
-                  </Box>
-                  <Box mt={1}>
-                    <Grid container spacing={1}>
-                      {selectedSteps[item._id]?.map((step, index) => {
-                        return (
-                          <Grid item xs={6} key={index}>
+        {consumables?.length &&
+          consumables?.map((item, index) => {
+            return (
+              <Box key={index} p={2} mb={2} border={1} borderColor="grey.300">
+                <Typography variant="subtitle1">{item.productName}</Typography>
+                <Box mt={1}>
+                  <Autocomplete
+                    multiple
+                    value={selectedSteps[item?._id]}
+                    onChange={(event, newValue) => {
+                      setSelectedSteps({ ...selectedSteps, [item?._id]: newValue });
+                    }}
+                    options={steps}
+                    getOptionLabel={(option) => option.stepName}
+                    renderInput={(params) => <TextField {...params} label="Step Name" margin="dense" variant="outlined" />}
+                  />
+                </Box>
+                <Box mt={2}>
+                  <Grid container spacing={2}>
+                    {selectedSteps[item._id]?.map((step, index) => {
+                      return (
+                        <Grid item xs={6} key={index}>
+                          <Box>
                             <TextField
+                              margin="dense"
                               type="number"
+                              required
+                              fullWidth
                               variant="outlined"
-                              size="small"
-                              label={step?.stepName || ''}
+                              label={`Qty - ${step?.stepName}`}
+                              placeholder={`Qty - ${step?.stepName}`}
+                              name={`${index}_${step?.stepName}`}
                               value={step.qty ?? item?.qty}
+                              onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                               onChange={(e) => {
                                 const value = e.target.value;
                                 const newSteps = selectedSteps[item._id]?.map((s) => {
                                   if (s?.stepName === step?.stepName) {
                                     return {
                                       ...s,
-                                      qty: Number(value) < 0 ? 1 : Number(value)
+                                      qty: !Number(value) ? 1 : Number(value)
                                     };
                                   }
                                   return s;
@@ -77,15 +93,15 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
                                 setSelectedSteps({ ...selectedSteps, [item._id]: newSteps });
                               }}
                             />
-                          </Grid>
-                        );
-                      })}
-                    </Grid>
-                  </Box>
+                          </Box>
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
                 </Box>
-              );
-            })}
-        </div>
+              </Box>
+            );
+          })}
       </CustomDialogContent>
       <CustomDialogFooter>
         <Button type="button" variant="outlined" color="primary" size="small" onClick={handleCloseDialog}>
