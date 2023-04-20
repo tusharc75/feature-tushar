@@ -147,12 +147,17 @@ function PlanningView() {
         endDate: moment().endOf('month').format('MM/DD/YYYY')
     })
     const [week, setWeek] = useState({
-        startDate: moment().startOf('month').format('MM/DD/YYYY'),
-        endDate: moment().endOf('month').format('MM/DD/YYYY')
+        startDate: moment().startOf('week').format('MM/DD/YYYY'),
+        endDate: moment().endOf('week').format('MM/DD/YYYY')
     })
     const [day, setDay] = useState({
-        startDate: moment().startOf('month').format('MM/DD/YYYY'),
-        endDate: moment().endOf('month').format('MM/DD/YYYY')
+        startDate: moment().startOf('day').format('MM/DD/YYYY'),
+        endDate: moment().endOf('day').format('MM/DD/YYYY')
+    })
+
+    const [agenda, setAgenda] = useState({
+        startDate: moment().startOf('day').format('MM/DD/YYYY'),
+        endDate: moment().add(1, 'months').format('MM/DD/YYYY')
     })
 
 
@@ -175,6 +180,11 @@ function PlanningView() {
             })
         } else if (view === 'day') {
             setDay({
+                startDate: dateRange.estimateStartDate,
+                endDate: dateRange.estimateEndDate,
+            })
+        } else if (view === 'agenda') {
+            setAgenda({
                 startDate: dateRange.estimateStartDate,
                 endDate: dateRange.estimateEndDate,
             })
@@ -282,6 +292,29 @@ function PlanningView() {
         [setView]
     );
 
+    const clickableEventInListView = () => {
+
+        const header = document.getElementsByClassName('rbc-header')[2];
+        if (header) {
+            header.innerHTML = selectedResource.title
+        }
+
+        const element: any = document.getElementsByClassName('rbc-agenda-event-cell');
+        for (let i = 0; i < element?.length; i++) {
+            element[i].onclick = () => {
+                const event = events.filter(event => event.title === element[i].innerText)[0]
+                const path = selectedResource.path
+                history.push(`${path}/${event.id}`);
+            }
+        }
+    }
+
+    useEffect(() => {
+        if (view === 'agenda') {
+            clickableEventInListView()
+        }
+    }, [events])
+
     useEffect(() => {
         if (renderCount !== 0) {
             if (view === 'month') {
@@ -300,6 +333,10 @@ function PlanningView() {
                     estimateEndDate: day.endDate
                 })
             } else if (view === 'agenda') {
+                setDateRange({
+                    estimateStartDate: agenda.startDate,
+                    estimateEndDate: agenda.endDate
+                })
             }
         } else {
             setRenderCount(renderCount + 1)
@@ -423,7 +460,6 @@ function PlanningView() {
                         messages={{
                             agenda: 'List',
                         }}
-                        selectable
                         views={{ month: true, week: true, day: true, agenda: true }}
                         onView={onView}
                         view={view}
@@ -454,6 +490,11 @@ function PlanningView() {
                                 setDateRange({
                                     estimateStartDate: moment(date).format('MM/DD/YYYY'),
                                     estimateEndDate: moment(date).format('MM/DD/YYYY')
+                                });
+                            } else if (view === 'agenda') {
+                                setDateRange({
+                                    estimateStartDate: moment(date).format('MM/DD/YYYY'),
+                                    estimateEndDate: moment(date).add(1, 'months').format('MM/DD/YYYY')
                                 });
                             }
                         }}
