@@ -46,6 +46,7 @@ import { flattenArray } from 'src/constants/columns';
 import { calculateRowsField } from '../RentalManagment/helper';
 
 const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSave }) => {
+
   const [fullScreen, setFullScreen] = useState(true);
   const [displayRows, setDisplayRows] = useState([]);
   const [constColummns, setConstColummns] = useState([]);
@@ -53,13 +54,14 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
   const [touched, setTouched] = useState<any>({});
   const [error, setError] = useState<any>({});
 
+
   useEffect(() => {
     generateColumnField();
   }, []);
 
   useEffect(() => {
     generateRows();
-    setError(yupSchemaForBulkEdit(fields, flatRows));
+    setError(yupSchemaForBulkEdit(constColummns, flatRows));
   }, [flatRows]);
 
   const generateColumnField = () => {
@@ -174,7 +176,6 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
   };
 
   const updateData = async (row, inputField, value) => {
-
     let temflatRows = flatRows
     let tempIndex = temflatRows.findIndex((obj) => obj._id === row._id);
     flatRows[tempIndex][inputField] = value
@@ -189,6 +190,7 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
     });
     setFlatRows(temflatRows)
   };
+
 
   return (
     <Dialog
@@ -260,10 +262,7 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
                               {...cell.getCellProps()}
                               className={`td ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}`}
                             >
-                              {cell.column.id === 'expander' ||
-                                cell.column.id === 'detail' ||
-                                cell.column.id === 'type' ||
-                                cell.column.id === 'srno' ? (
+                              {['expander', 'detail', 'type', 'srno']?.includes(cell.column.id) ? (
                                 <div className="full-height-cell">{cell.render('Cell')}</div>
                               ) : (
                                 <FormTypes

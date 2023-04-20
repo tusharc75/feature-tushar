@@ -354,7 +354,6 @@ const WorkOrderTechnician = () => {
                 return servicesToKeep.includes(key);
               })
               ?.map((key, i) => {
-                console.log(key);
                 return (
                   <Grid item md={3} xs={12} sm={4} style={{ paddingTop: '0px' }} key={i} className={`${classes.mediumDevice} ${classes.columns}`}>
                     <div

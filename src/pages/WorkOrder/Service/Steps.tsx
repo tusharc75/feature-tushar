@@ -825,7 +825,7 @@ const Service = ({ workOrderId, selectedService, allowedToEdit, setDisableComple
                   setAnchorEl(null);
                 }}
               >
-                Consume Products
+                Add/Consume Products
               </MenuItem>
               {referencType !== 'workOrderTechnician' && (
                 <MenuItem

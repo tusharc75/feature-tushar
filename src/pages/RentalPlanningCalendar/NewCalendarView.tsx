@@ -9,6 +9,7 @@ import { Autocomplete } from '@material-ui/lab';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { sidebarResource, RESOURCE_LABEL } from 'src/constants/helpers';
+import { isArray } from 'lodash';
 
 const planningResource = [
     {
@@ -116,6 +117,11 @@ function CalendarView() {
         endDate: moment().endOf('month').format('MM/DD/YYYY')
     })
 
+    const [agenda, setAgenda] = useState({
+        startDate: moment().startOf('month').format('MM/DD/YYYY'),
+        endDate: moment().endOf('month').format('MM/DD/YYYY')
+    })
+
     const [renderCount, setRenderCount] = useState(0)
     const defaultDate = useMemo(() => moment().toDate(), [])
 
@@ -144,6 +150,11 @@ function CalendarView() {
             })
         } else if (view === 'day') {
             setDay({
+                startDate: dateRange.estimateStartDate,
+                endDate: dateRange.estimateEndDate,
+            })
+        } else if (view === 'agenda') {
+            setAgenda({
                 startDate: dateRange.estimateStartDate,
                 endDate: dateRange.estimateEndDate,
             })
@@ -255,6 +266,29 @@ function CalendarView() {
         [setView]
     );
 
+    const clickableEventInListView = () => {
+
+        const header = document.getElementsByClassName('rbc-header')[2];
+        if (header) {
+            header.innerHTML = RESOURCE_LABEL[resource]
+        }
+
+        const element: any = document.getElementsByClassName('rbc-agenda-event-cell');
+        for (let i = 0; i < element?.length; i++) {
+            element[i].onclick = () => {
+                const event = events.filter(event => event.title === element[i].innerText)[0]
+                const path = getMatchedResource(event.type).path
+                history.push(`${path}/${event.id}`);
+            }
+        }
+    }
+
+    useEffect(() => {
+        if (view === 'agenda') {
+            clickableEventInListView()
+        }
+    }, [events])
+
     useEffect(() => {
         if (renderCount !== 0) {
             if (view === 'month') {
@@ -271,6 +305,11 @@ function CalendarView() {
                 setDateRange({
                     estimateStartDate: day.startDate,
                     estimateEndDate: day.endDate
+                })
+            } else if (view === 'agenda') {
+                setDateRange({
+                    estimateStartDate: agenda.startDate,
+                    estimateEndDate: agenda.endDate
                 })
             }
         } else {
@@ -385,7 +424,10 @@ function CalendarView() {
             formats={formats}
             localizer={localizer}
             popup={true}
-            views={{ month: true, week: true, day: true }}
+            messages={{
+                agenda: 'List',
+            }}
+            views={{ month: true, week: true, day: true, agenda: true }}
             onView={onView}
             view={view}
             eventPropGetter={(obj: any) => {
@@ -416,6 +458,11 @@ function CalendarView() {
                         estimateStartDate: moment(date).format('MM/DD/YYYY'),
                         estimateEndDate: moment(date).format('MM/DD/YYYY')
                     });
+                } else if (view === 'agenda') {
+                    setDateRange({
+                        estimateStartDate: moment(date).format('MM/DD/YYYY'),
+                        estimateEndDate: moment(date).add(1, 'months').format('MM/DD/YYYY')
+                    });
                 }
             }}
             onSelectEvent={(event: any) => {
@@ -423,7 +470,7 @@ function CalendarView() {
                 history.push(`${path}/${event.id}`);
             }}
         />
-    </div>
+    </div >
     )
 }
 

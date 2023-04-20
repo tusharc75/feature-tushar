@@ -307,7 +307,8 @@ export const sidebarResource = {
   fleetReceiver: 'Fleet Receiver',
   storageLocation: 'Storage Location',
   transactionLock: 'Transaction Lock',
-  wellNumber: 'Well Number'
+  wellNumber: 'Well Number',
+  planningView: 'Planning View'
 };
 
 export const primaryFields = {

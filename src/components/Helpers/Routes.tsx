@@ -910,6 +910,12 @@ const routes = {
     title: storedRoutes && storedRoutes.wellNumber && storedRoutes.wellNumber.title ? storedRoutes.wellNumber?.title : RESOURCE_LABEL.wellNumber,
     path: '/well-number/detail'
   },
+  planningView: {
+    title: storedRoutes && storedRoutes.planningView && storedRoutes.planningView.title
+      ? storedRoutes.planningView?.title
+      : 'Planning View',
+    path: '/planning-view'
+  },
 };
 
 export default routes;

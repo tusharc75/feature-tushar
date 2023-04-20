@@ -185,6 +185,7 @@ function Dropdown({
                                         <AddCircleIcon />
                                     </IconButton>
                                     {lookupDialog && <ManageWellMaster
+                                        refrenceData={{ customerAccount: values[fieldData.lookupDependentOn] }}
                                         isClone={false}
                                         wellMasterId={null}
                                         onClose={() => setLookupDialog(false)}
@@ -195,13 +196,19 @@ function Dropdown({
                                                     default: false,
                                                     optionLabel: data.wellName,
                                                     optionValue: data._id,
-                                                    order: option.length
+                                                    order: option.length,
+                                                    customerAccount: data?.customerAccount,
                                                 }
-                                                if (fieldData.lookupDependentOn) { tempNewOption[fieldData.lookupDependentOn] = values[fieldData.lookupDependentOn] }
                                                 addFieldOption(tempNewOption);
                                                 setOptionsList([tempNewOption, ...option]);
-                                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-
+                                                if (fieldData.lookupDependentOn) {
+                                                    if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
+                                                        handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                                    }
+                                                }
+                                                else {
+                                                    handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                                }
                                             }
                                         }}
                                     />}
@@ -215,27 +222,34 @@ function Dropdown({
                                     <IconButton disabled={fieldData?.isUneditable || rest?.disabled} onClick={() => setLookupDialog(true)} size="small" color="primary">
                                         <AddCircleIcon />
                                     </IconButton>
-                                    {lookupDialog && <ManageWellNumber
-                                        refrenceData={{ wellName: values[fieldData.lookupDependentOn] }}
-                                        isClone={false}
-                                        onClose={() => setLookupDialog(false)}
-                                        onSuccess={(data) => {
-                                            setLookupDialog(false)
-                                            if (data.wellNumber && data._id) {
-                                                let tempNewOption = {
-                                                    default: false,
-                                                    optionLabel: data.wellNumber,
-                                                    optionValue: data._id,
-                                                    order: option.length,
+                                    {lookupDialog &&
+                                        <ManageWellNumber
+                                            refrenceData={{ wellName: values[fieldData.lookupDependentOn] }}
+                                            isClone={false}
+                                            onClose={() => setLookupDialog(false)}
+                                            onSuccess={(data) => {
+                                                setLookupDialog(false)
+                                                if (data.wellNumber && data._id) {
+                                                    let tempNewOption = {
+                                                        default: false,
+                                                        optionLabel: data.wellNumber,
+                                                        optionValue: data._id,
+                                                        order: option.length,
+                                                        wellName: data.wellName
+                                                    }
+                                                    addFieldOption(tempNewOption);
+                                                    setOptionsList([tempNewOption, ...option]);
+                                                    if (fieldData.lookupDependentOn) {
+                                                        if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
+                                                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                                        }
+                                                    }
+                                                    else {
+                                                        handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                                    }
                                                 }
-                                                if (fieldData.lookupDependentOn) { tempNewOption[fieldData.lookupDependentOn] = values[fieldData.lookupDependentOn] }
-                                                addFieldOption(tempNewOption);
-                                                setOptionsList([tempNewOption, ...option]);
-                                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-
-                                            }
-                                        }}
-                                    />}
+                                            }}
+                                        />}
                                 </>
                             </HtmlTooltip>
                         </Box>)}
@@ -246,28 +260,26 @@ function Dropdown({
                                     <IconButton disabled={fieldData?.isUneditable || rest?.disabled} onClick={() => setLookupDialog(true)} size="small" color="primary">
                                         <AddCircleIcon />
                                     </IconButton>
-                                    {lookupDialog && <ManageWarehouse
-                                        open={lookupDialog}
-                                        close={() => setLookupDialog(false)}
-                                        isClone={false}
-                                        onSuccess={({ data }) => {
-
-                                            setLookupDialog(false)
-                                            if (data.warehouseName && data._id) {
-                                                let tempNewOption = {
-                                                    default: false,
-                                                    optionLabel: data.warehouseName,
-                                                    optionValue: data._id,
-                                                    order: option.length
+                                    {lookupDialog &&
+                                        <ManageWarehouse
+                                            open={lookupDialog}
+                                            close={() => setLookupDialog(false)}
+                                            isClone={false}
+                                            onSuccess={({ data }) => {
+                                                setLookupDialog(false)
+                                                if (data.warehouseName && data._id) {
+                                                    let tempNewOption = {
+                                                        default: false,
+                                                        optionLabel: data.warehouseName,
+                                                        optionValue: data._id,
+                                                        order: option.length
+                                                    }
+                                                    addFieldOption(tempNewOption);
+                                                    setOptionsList([tempNewOption, ...option]);
+                                                    handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                                                 }
-                                                if (fieldData.lookupDependentOn) { tempNewOption[fieldData.lookupDependentOn] = values[fieldData.lookupDependentOn] }
-                                                addFieldOption(tempNewOption);
-                                                setOptionsList([tempNewOption, ...option]);
-                                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-
-                                            }
-                                        }}
-                                    />}
+                                            }}
+                                        />}
                                 </>
                             </HtmlTooltip>
                         </Box>)}
@@ -283,20 +295,18 @@ function Dropdown({
                                         onClose={() => setLookupDialog(false)}
                                         isClone={false}
                                         onSuccess={({ data }) => {
-
                                             setLookupDialog(false)
                                             if (data.storageLocationName && data._id) {
                                                 let tempNewOption = {
                                                     default: false,
                                                     optionLabel: data.storageLocationName,
                                                     optionValue: data._id,
-                                                    order: option.length
+                                                    order: option.length,
+                                                    warehouse: data.warehouse
                                                 }
-                                                if (fieldData.lookupDependentOn) { tempNewOption[fieldData.lookupDependentOn] = values[fieldData.lookupDependentOn] }
                                                 addFieldOption(tempNewOption);
                                                 setOptionsList([tempNewOption, ...option]);
                                                 handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-
                                             }
                                         }}
                                     />}
