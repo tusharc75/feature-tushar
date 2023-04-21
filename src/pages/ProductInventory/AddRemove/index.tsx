@@ -23,10 +23,11 @@ import { read, utils, writeFile } from 'xlsx';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { capitalize } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
-import { convertDateInDateTime, dateFormatForInputControl, productInventory } from '../../../constants/helpers';
+import { convertDateInDateTime, dateFormatForInputControl, productInventory, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, storageLocation = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -37,7 +38,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
   const toastConfig = useContext(CustomToastContext);
   const [lockDate, setLockDate] = useState(null);
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
-  
+
   const [initialData, setInitialData] = useState({
     qty: 1,
     price: 0,
@@ -91,22 +92,19 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
   };
 
   const getStorageLocation = () => {
+    setLoadingInitialData(true)
     axiosInstance()
-      .get('/sa-formbuilder/lookup?lookupResource=Storage Location')
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
-        const storageLocationOption = data['Storage Location'].filter(_storageLocation => _storageLocation.warehouse === warehouse);
-        setStorageLocationOptions(storageLocationOption);
-        if (!storageLocation) {
-          setInitialData((preVal) => {
-            return (
-              {
-                ...preVal, storageLocation: storageLocationOption[0]?.optionValue
-              }
-            )
-          })
-          setSelectedStorageLocation(storageLocationOption[0]?.optionValue)
-        } else {
-          setSelectedStorageLocation(storageLocation)
+        if (data[sidebarResource.storageLocation]) {
+          const storageLocationOption = data[sidebarResource.storageLocation]?.filter(e => e.warehouse === warehouse);
+          setStorageLocationOptions(storageLocationOption);
+          if (!storageLocation) {
+            setInitialData((preVal) => { return ({ ...preVal, storageLocation: storageLocationOption[0]?.optionValue }) })
+            setSelectedStorageLocation(storageLocationOption[0]?.optionValue)
+          } else {
+            setSelectedStorageLocation(storageLocation)
+          }
         }
         setLoadingInitialData(false)
       });
@@ -114,7 +112,6 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
 
   useEffect(() => {
     if (user?.user?.brandPolicy?.storageLocation) {
-      setLoadingInitialData(true)
       getStorageLocation();
     }
   }, [warehouse])
@@ -273,8 +270,8 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     e.target.value = null;
   };
 
-  const getInventory = () => {
-    let api = `${productInventory.api}/inventory-at-date?date=${new Date()}&warehouse=${warehouse}&product=${product[0]._id}`;
+  const getCurrentInventory = () => {
+    let api = `${productInventory.api}/current-inventory?warehouse=${warehouse}&product=${product[0]._id}`;
     if (selectedStorageLocation) {
       api = `${api}&storageLocation=${selectedStorageLocation}`
     }
@@ -291,7 +288,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
   }
 
   useEffect(() => {
-    getInventory()
+    getCurrentInventory()
   }, [selectedStorageLocation])
 
   return (
@@ -307,270 +304,250 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
       }}
       aria-labelledby="assign-roles-dialog"
     >
-      {loadingData ? (
-        <Box p={5} display="flex" justifyContent="center" alignItems="center">
-          <CircularProgress color="inherit" />
-        </Box>
-      ) : (
-        <>
-          {(initialData && !loadingInitialData) &&
-            <Formik
-              initialValues={initialData}
-              onSubmit={handleSubmit}
-              validateOnMount
-              validate={validate}
-            >
-              {({ submitForm, touched, errors, setFieldValue, values }) => (
-                <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <MuiPickersUtilsProvider utils={DateUtils}>
-                    <CustomDialogHeader
-                      title={`${capitalize(type)} Inventory`}
-                      showRequiredLabel={true}
-                      onClose={handleClose}
-                      isMinimized={!fullScreen}
-                      onMinimizeMaximize={() => {
-                        setFullScreen((prevState) => !prevState);
-                      }}
-                      showManimizeMaximize={true}
-                    />
-                    <CustomDialogContent>
-                      <List style={{ padding: 0 }}>
-                        <ListItem key={product[0]?._id}>
-                          {product?.length === 1 ? (
-                            <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${currentInventory}`} />
-                          ) : (
-                            <ListItemText primary={`${product?.length} Products`} />
-                          )}
-                          <TextField
-                            margin="dense"
-                            type="number"
-                            label="Qty"
-                            name="qty"
-                            required
-                            variant="outlined"
-                            value={values['qty']}
-                            error={touched['qty'] && Boolean(errors['qty'])}
-                            helperText={touched['qty'] && errors['qty']}
-                            onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                            onChange={(e) => {
-                              setFieldValue('qty', e.target.value);
-                            }}
-                          />
-                        </ListItem>
-                      </List>
-                      {type === 'add' ? (
-                        <Box m={1}>
-                          <TextField
-                            margin="dense"
-                            type="number"
-                            label="Price"
-                            name="price"
-                            required
-                            fullWidth
-                            variant="outlined"
-                            value={values['price']}
-                            error={touched['price'] && Boolean(errors['price'])}
-                            helperText={touched['price'] && errors['price']}
-                            onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                            onChange={(e) => {
-                              setFieldValue('price', e.target.value);
-                            }}
-                          />
-                        </Box>
-                      ) : null}
-                      {user?.user?.brandPolicy?.storageLocation &&
-                        <Box m={1}>
-                          <Autocomplete
-                            disableClearable
-                            options={storageLocationOptions}
-                            getOptionLabel={(option: any) => option ? option.optionLabel : ''}
-                            getOptionSelected={(option: any, val) => option.optionValue === val}
-                            value={storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0] : ''}
-                            onChange={(e, val) => {
-                              setFieldValue('storageLocation', val?.optionValue);
-                              setSelectedStorageLocation(val?.optionValue)
-                            }}
-                            renderInput={(params) =>
-                              isMobile && !isTablet ? (
-                                <TextField
-                                  {...params}
-                                  margin="dense"
-                                  name="storageLocation"
-                                  label="Storage Location"
-                                  variant="standard"
-                                  fullWidth
-                                  required
-                                  error={touched['storageLocation'] && Boolean(errors['storageLocation'])}
-                                  helperText={touched['storageLocation'] && errors['storageLocation']}
-                                  className={isMobile ? 'serchBox' : ''}
-                                />
-                              ) : (
-                                <TextField
-                                  {...params}
-                                  margin="dense"
-                                  name="storageLocation"
-                                  label="Storage Location"
-                                  variant="outlined"
-                                  fullWidth
-                                  required
-                                  error={touched['storageLocation'] && Boolean(errors['storageLocation'])}
-                                  helperText={touched['storageLocation'] && errors['storageLocation']}
-                                />
-                              )
-                            }
-                          />
-                        </Box>
-                      }
-                      <Box m={1}>
-                        <KeyboardDatePicker
-                          {...(lockDate ? { minDate: lockDate } : {})}
-                          fullWidth
-                          size="small"
-                          margin="dense"
-                          autoOk
-                          required
-                          variant="inline"
-                          inputVariant="outlined"
-                          value={values.customDate}
-                          name="customDate"
-                          placeholder={type === 'add' ? 'Receive Date' : 'Remove Date'}
-                          label="Custom Date"
-                          format={dateFormatForInputControl}
-                          maxDate={new Date()}
-                          error={touched['customDate'] && Boolean(errors['customDate'])}
-                          helperText={touched['customDate'] && errors['customDate']}
-                          onChange={(value) => {
-                            var newDate = convertDateInDateTime(value);
-                            setFieldValue('customDate', newDate);
-                            if (type === 'remove' && product.length === 1) {
-                              var date = moment(newDate);
-                              if (date.isValid()) {
-                                var api = `${productInventory.api}/inventory-at-date?date=${newDate}&warehouse=${warehouse}&product=${product[0]._id}`;
-                                if (values['storageLocation']) {
-                                  api = api + `&storageLocation=${values['storageLocation']}`
-                                }
-                                axiosInstance().get(api)
-                                  .then(({ data: { data } }) => {
-                                    setAvailableQtyOnRemoveDate(data);
-                                  })
-                                  .catch((err) => {
-                                    toastConfig.setToastConfig(err);
-                                  });
-                              }
-                            }
-                          }}
-                        />
-                        {availableQtyOnRemoveDate || availableQtyOnRemoveDate === 0 ? (
-                          <Typography variant="caption">{`Inventory on custom date : ${availableQtyOnRemoveDate}`}</Typography>
-                        ) : null}
-                      </Box>
-                      <Box m={1}>
-                        <TextField
-                          margin="dense"
-                          type="text"
-                          label="Comment"
-                          name="comment"
-                          fullWidth
-                          multiline
-                          rows={2}
-                          variant="outlined"
-                          value={values['comment']}
-                          error={touched['comment'] && Boolean(errors['comment'])}
-                          helperText={touched['comment'] && errors['comment']}
-                          onChange={(e) => {
-                            setFieldValue('comment', e.target.value);
-                          }}
-                        />
-                      </Box>
-                      {product?.length === 1 && product[0]?.serializedProduct && (
-                        <Fragment>
-                          <Box my={2} mx={1}>
-                            <Divider />
-                          </Box>
-                          <Box m={1}>
-                            {type === 'add' && (
-                              <Box mb={1} display="flex" justifyContent="flex-end">
-                                <Box mr={2}>
-                                  <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => handleExport(values)}>
-                                    Export
-                                  </Typography>
-                                </Box>
-                                <Box mr={1}>
-                                  <input
-                                    accept="json"
-                                    style={{ display: 'none' }}
-                                    onChange={handleImport(setFieldValue)}
-                                    id="import-file"
-                                    multiple={false}
-                                    type="file"
-                                  />
-                                  <label htmlFor="import-file">
-                                    <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
-                                      Import
-                                    </Typography>
-                                  </label>
-                                </Box>
-                              </Box>
-                            )}
-                            <Autocomplete
-                              size="small"
-                              options={type === 'add' ? [] : serialNumbers.map((item: any) => item?.serialNumber)}
-                              freeSolo={type === 'add'}
-                              multiple={true}
-                              disableCloseOnSelect
-                              value={values['serialNumbers']}
-                              onChange={(_, val) => {
-                                if (type === 'remove') {
-                                  setFieldValue('serialNumbers', val);
-                                } else {
-                                  setFieldValue(
-                                    'serialNumbers',
-                                    val.map((item: string) => item.toUpperCase())
-                                  );
-                                }
-                              }}
-                              getOptionSelected={(item, current) => item === current}
-                              getOptionLabel={(option) => option}
-                              renderInput={(props) => (
-                                <TextField
-                                  {...props}
-                                  placeholder={type === 'add' ? 'Enter serial number and press enter' : ''}
-                                  variant="outlined"
-                                  name="serialNumbers"
-                                  label={type === 'add' ? 'Serial Numbers' : 'Select Serial Numbers'}
-                                  error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
-                                  helperText={touched['serialNumbers'] && errors['serialNumbers']}
-                                />
-                              )}
-                            />
-                          </Box>
-                        </Fragment>
+      {!loadingData && !loadingInitialData ?
+        initialData &&
+        <Formik
+          initialValues={initialData}
+          onSubmit={handleSubmit}
+          validateOnMount
+          validate={validate}
+        >
+          {({ submitForm, touched, errors, setFieldValue, values }) => (
+            <Form autoComplete="off" autoCorrect="off" noValidate>
+              <MuiPickersUtilsProvider utils={DateUtils}>
+                <CustomDialogHeader
+                  title={`${capitalize(type)} Inventory`}
+                  showRequiredLabel={true}
+                  onClose={handleClose}
+                  isMinimized={!fullScreen}
+                  onMinimizeMaximize={() => {
+                    setFullScreen((prevState) => !prevState);
+                  }}
+                  showManimizeMaximize={true}
+                />
+                <CustomDialogContent>
+                  <List style={{ padding: 0 }}>
+                    <ListItem key={product[0]?._id}>
+                      {product?.length === 1 ? (
+                        <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${currentInventory}`} />
+                      ) : (
+                        <ListItemText primary={`${product?.length} Products`} />
                       )}
-                    </CustomDialogContent>
-                    <CustomDialogFooter>
-                      <Button
-                        color="primary"
-                        size="small"
-                        onClick={handleClose}>
-                        Cancel
-                      </Button>
-                      <CustomButton
-                        loading={loading}
-                        disabled={loading}
-                        variant="contained"
-                        color="primary"
-                        type="submit"
-                        onClick={submitForm}>
-                        {capitalize(type)}
-                      </CustomButton>
-                    </CustomDialogFooter>
-                  </MuiPickersUtilsProvider>
-                </Form>
-              )}
-            </Formik>
-          }
-        </>
-      )}
+                      <TextField
+                        margin="dense"
+                        type="number"
+                        label="Qty"
+                        name="qty"
+                        required
+                        variant="outlined"
+                        value={values['qty']}
+                        error={touched['qty'] && Boolean(errors['qty'])}
+                        helperText={touched['qty'] && errors['qty']}
+                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                        onChange={(e) => {
+                          setFieldValue('qty', e.target.value);
+                        }}
+                      />
+                    </ListItem>
+                  </List>
+                  {type === 'add' ? (
+                    <Box m={1}>
+                      <TextField
+                        margin="dense"
+                        type="number"
+                        label="Price"
+                        name="price"
+                        required
+                        fullWidth
+                        variant="outlined"
+                        value={values['price']}
+                        error={touched['price'] && Boolean(errors['price'])}
+                        helperText={touched['price'] && errors['price']}
+                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                        onChange={(e) => {
+                          setFieldValue('price', e.target.value);
+                        }}
+                      />
+                    </Box>
+                  ) : null}
+                  {user?.user?.brandPolicy?.storageLocation &&
+                    <Box m={1}>
+                      <Autocomplete
+                        disableClearable
+                        options={storageLocationOptions}
+                        getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                        value={storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0] : ''}
+                        onChange={(e, val) => {
+                          setFieldValue('storageLocation', val?.optionValue);
+                          setSelectedStorageLocation(val?.optionValue)
+                        }}
+                        renderInput={(params) =>
+                          <TextField
+                            {...params}
+                            margin="dense"
+                            name="storageLocation"
+                            label="Storage Location"
+                            variant="outlined"
+                            fullWidth
+                            required
+                            error={touched['storageLocation'] && Boolean(errors['storageLocation'])}
+                            helperText={touched['storageLocation'] && errors['storageLocation']}
+                          />
+                        }
+                      />
+                    </Box>
+                  }
+                  <Box m={1}>
+                    <KeyboardDatePicker
+                      {...(lockDate ? { minDate: lockDate } : {})}
+                      fullWidth
+                      size="small"
+                      margin="dense"
+                      autoOk
+                      required
+                      variant="inline"
+                      inputVariant="outlined"
+                      value={values.customDate}
+                      name="customDate"
+                      placeholder={type === 'add' ? 'Receive Date' : 'Remove Date'}
+                      label="Custom Date"
+                      format={dateFormatForInputControl}
+                      maxDate={new Date()}
+                      error={touched['customDate'] && Boolean(errors['customDate'])}
+                      helperText={touched['customDate'] && errors['customDate']}
+                      onChange={(value) => {
+                        var newDate = convertDateInDateTime(value);
+                        setFieldValue('customDate', newDate);
+                        if (type === 'remove' && product.length === 1) {
+                          var date = moment(newDate);
+                          if (date.isValid()) {
+                            var api = `${productInventory.api}/inventory-at-date?date=${newDate}&warehouse=${warehouse}&product=${product[0]._id}`;
+                            if (values['storageLocation']) {
+                              api = api + `&storageLocation=${values['storageLocation']}`
+                            }
+                            axiosInstance().get(api)
+                              .then(({ data: { data } }) => {
+                                setAvailableQtyOnRemoveDate(data);
+                              })
+                              .catch((err) => {
+                                toastConfig.setToastConfig(err);
+                              });
+                          }
+                        }
+                      }}
+                    />
+                    {availableQtyOnRemoveDate || availableQtyOnRemoveDate === 0 ? (
+                      <Typography variant="caption">{`Inventory on custom date : ${availableQtyOnRemoveDate}`}</Typography>
+                    ) : null}
+                  </Box>
+                  <Box m={1}>
+                    <TextField
+                      margin="dense"
+                      type="text"
+                      label="Comment"
+                      name="comment"
+                      fullWidth
+                      multiline
+                      rows={2}
+                      variant="outlined"
+                      value={values['comment']}
+                      error={touched['comment'] && Boolean(errors['comment'])}
+                      helperText={touched['comment'] && errors['comment']}
+                      onChange={(e) => {
+                        setFieldValue('comment', e.target.value);
+                      }}
+                    />
+                  </Box>
+                  {product?.length === 1 && product[0]?.serializedProduct && (
+                    <Fragment>
+                      <Box my={2} mx={1}>
+                        <Divider />
+                      </Box>
+                      <Box m={1}>
+                        {type === 'add' && (
+                          <Box mb={1} display="flex" justifyContent="flex-end">
+                            <Box mr={2}>
+                              <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => handleExport(values)}>
+                                Export
+                              </Typography>
+                            </Box>
+                            <Box mr={1}>
+                              <input
+                                accept="json"
+                                style={{ display: 'none' }}
+                                onChange={handleImport(setFieldValue)}
+                                id="import-file"
+                                multiple={false}
+                                type="file"
+                              />
+                              <label htmlFor="import-file">
+                                <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
+                                  Import
+                                </Typography>
+                              </label>
+                            </Box>
+                          </Box>
+                        )}
+                        <Autocomplete
+                          size="small"
+                          options={type === 'add' ? [] : serialNumbers.map((item: any) => item?.serialNumber)}
+                          freeSolo={type === 'add'}
+                          multiple={true}
+                          disableCloseOnSelect
+                          value={values['serialNumbers']}
+                          onChange={(_, val) => {
+                            if (type === 'remove') {
+                              setFieldValue('serialNumbers', val);
+                            } else {
+                              setFieldValue(
+                                'serialNumbers',
+                                val.map((item: string) => item.toUpperCase())
+                              );
+                            }
+                          }}
+                          getOptionSelected={(item, current) => item === current}
+                          getOptionLabel={(option) => option}
+                          renderInput={(props) => (
+                            <TextField
+                              {...props}
+                              placeholder={type === 'add' ? 'Enter serial number and press enter' : ''}
+                              variant="outlined"
+                              name="serialNumbers"
+                              label={type === 'add' ? 'Serial Numbers' : 'Select Serial Numbers'}
+                              error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
+                              helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                            />
+                          )}
+                        />
+                      </Box>
+                    </Fragment>
+                  )}
+                </CustomDialogContent>
+                <CustomDialogFooter>
+                  <Button
+                    color="primary"
+                    size="small"
+                    onClick={handleClose}>
+                    Cancel
+                  </Button>
+                  <CustomButton
+                    loading={loading}
+                    disabled={loading}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={submitForm}>
+                    {capitalize(type)}
+                  </CustomButton>
+                </CustomDialogFooter>
+              </MuiPickersUtilsProvider>
+            </Form>
+          )}
+        </Formik>
+        : <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
     </Dialog >
   );
 };

@@ -98,7 +98,7 @@ const RentalManagementDetailsPage = () => {
   const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
 
   const [rentalSteps, setRentalSteps] = useState(
-    user?.role?.selectedEntity?.policy?.isQuotationRentalManagement
+    user?.user?.brandPolicy?.rentalQuotation
       ? rentalManagementSteps
       : rentalManagementSteps?.filter((e) => !['Quotation', 'Add Services'].includes(e.name))
   );
@@ -156,7 +156,7 @@ const RentalManagementDetailsPage = () => {
   }, [id]);
 
   const checkProgressiveBilling = () => {
-    if (user?.role?.selectedEntity?.policy?.isProgressiveBillingRentalManagement) {
+    if (user?.user?.brandPolicy?.rentalProgressiveBilling) {
       axiosInstance()
         .get(
           `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`

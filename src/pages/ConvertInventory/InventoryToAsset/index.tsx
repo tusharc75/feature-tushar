@@ -7,16 +7,33 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { convertInventory, productInventory } from '../../../constants/helpers';
+import { convertInventory, productInventory, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
+import { useData } from 'src/StateProvider/Provider';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) => {
+const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, storageLocation = null }) => {
+
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
   const toastConfig = useContext(CustomToastContext);
+
+  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
+  const [selectedStorageLocation, setSelectedStorageLocation] = useState(null)
+  const [currentInventory, setCurrentInventory] = useState(null)
+  const [loadingInitialData, setLoadingInitialData] = useState(false)
+  const [initialData, setInitialData] = useState({
+    qty: 1,
+    comment: '',
+    storageLocation: storageLocation
+  })
+
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     if (product.length === 1) {
@@ -40,6 +57,52 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) =>
       });
   };
 
+  useEffect(() => {
+    if (user?.user?.brandPolicy?.storageLocation) {
+      getStorageLocation();
+    }
+  }, [warehouse])
+
+  const getStorageLocation = () => {
+    setLoadingInitialData(true)
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
+      .then(({ data: { data } }) => {
+        if (data[sidebarResource.storageLocation]) {
+          const storageLocationOption = data[sidebarResource.storageLocation]?.filter(e => e.warehouse === warehouse);
+          setStorageLocationOptions(storageLocationOption);
+          if (!storageLocation) {
+            setInitialData((preVal) => { return ({ ...preVal, storageLocation: storageLocationOption[0]?.optionValue }) })
+            setSelectedStorageLocation(storageLocationOption[0]?.optionValue)
+          } else {
+            setSelectedStorageLocation(storageLocation)
+          }
+        }
+        setLoadingInitialData(false)
+      });
+  };
+
+  const getCurrentInventory = () => {
+    let api = `${productInventory.api}/current-inventory?warehouse=${warehouse}&product=${product[0]._id}`;
+    if (selectedStorageLocation) {
+      api = `${api}&storageLocation=${selectedStorageLocation}`
+    }
+    if (product?.length === 1) {
+      axiosInstance()
+        .get(api)
+        .then(({ data: { data } }) => {
+          setCurrentInventory(data);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  }
+
+  useEffect(() => {
+    getCurrentInventory()
+  }, [selectedStorageLocation])
+
   const handleSubmit = (values) => {
     const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers'].indexOf(item?.serialNumber) > -1);
     const data = {
@@ -47,7 +110,8 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) =>
         return { id: e.id, productCategory: e.productCategoryId, serialNumberIds: product > 1 ? [] : serialNumberIds.map((item) => item?._id) };
       }),
       qty: parseInt(values.qty),
-      warehouse: warehouse
+      warehouse: warehouse,
+      storageLocation: values?.storageLocation ? values?.storageLocation : null
     };
     setLoading(true);
     axiosInstance()
@@ -69,17 +133,20 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) =>
 
   function validate(values) {
     const errors = {};
+
     if (values.qty <= 0) {
       errors['qty'] = 'Please enter valid qty';
     }
 
-    var validateQty = product[0]?.availableInventory;
-    if (product?.length > 1) {
-      validateQty = product?.reduce(function (min, obj) { return obj.availableInventory < min ? obj.availableInventory : min; }, Infinity);
+    if (product?.length === 1) {
+      var validateQty = currentInventory;
+      if (parseInt(values?.qty) > validateQty) {
+        errors['qty'] = 'Insufficient Quantity !';
+      }
     }
 
-    if (parseInt(values?.qty) > validateQty) {
-      errors['qty'] = 'Insufficient Quantity !';
+    if (user?.user?.brandPolicy?.storageLocation && !values['storageLocation']) {
+      errors['storageLocation'] = 'Please select Storage Location';
     }
 
     const serialNumbersList = values['serialNumbers'];
@@ -103,85 +170,122 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) =>
       }}
       aria-labelledby="assign-roles-dialog"
     >
-      <Formik initialValues={{ qty: 1, comment: '' }} onSubmit={handleSubmit} validateOnMount validate={validate}>
-        {({ submitForm, touched, errors, setFieldValue, values }) => (
-          <Form autoComplete="off" autoCorrect="off" noValidate>
-            <CustomDialogHeader
-              title={`Convert Inventory`}
-              showRequiredLabel={true}
-              onClose={handleClose}
-              isMinimized={!fullScreen}
-              onMinimizeMaximize={() => {
-                setFullScreen((prevState) => !prevState);
-              }}
-              showManimizeMaximize={true}
-            />
-            <CustomDialogContent>
-              <List style={{ padding: 0 }}>
-                <ListItem key={product[0]?._id}>
-                  {product?.length === 1 ? (
-                    <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${product[0]?.availableInventory}`} />
-                  ) : (
-                    <ListItemText primary={`${product?.length} Products`} />
-                  )}
-                  <TextField
-                    margin="dense"
-                    type="number"
-                    label="Qty"
-                    name="qty"
-                    variant="outlined"
-                    value={values['qty']}
-                    error={touched['qty'] && Boolean(errors['qty'])}
-                    helperText={touched['qty'] && errors['qty']}
-                    onChange={(e) => {
-                      setFieldValue('qty', e.target.value);
-                    }}
-                  />
-                </ListItem>
-              </List>
-              {product?.length === 1 ?
-                <Fragment>
-                  <Box my={2} mx={1}>
-                    <Divider />
-                  </Box>
+      {!loadingInitialData ?
+        <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
+          {({ submitForm, touched, errors, setFieldValue, values }) => (
+            <Form autoComplete="off" autoCorrect="off" noValidate>
+              <CustomDialogHeader
+                title={`Convert Inventory`}
+                showRequiredLabel={true}
+                onClose={handleClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              />
+              <CustomDialogContent>
+                <List style={{ padding: 0 }}>
+                  <ListItem key={product[0]?._id}>
+                    {product?.length === 1 ? (
+                      <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${currentInventory}`} />
+                    ) : (
+                      <ListItemText primary={`${product?.length} Products`} />
+                    )}
+                    <TextField
+                      margin="dense"
+                      type="number"
+                      label="Qty"
+                      name="qty"
+                      variant="outlined"
+                      value={values['qty']}
+                      error={touched['qty'] && Boolean(errors['qty'])}
+                      helperText={touched['qty'] && errors['qty']}
+                      onChange={(e) => {
+                        setFieldValue('qty', e.target.value);
+                      }}
+                    />
+                  </ListItem>
+                </List>
+                {user?.user?.brandPolicy?.storageLocation &&
                   <Box m={1}>
                     <Autocomplete
-                      size="small"
-                      options={serialNumbers.map((item: any) => item?.serialNumber)}
-                      freeSolo={false}
-                      multiple={true}
-                      disableCloseOnSelect
-                      value={values['serialNumbers']}
-                      onChange={(_, val) => {
-                        setFieldValue('serialNumbers', val);
+                      disableClearable
+                      options={storageLocationOptions}
+                      getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      value={storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0] : ''}
+                      onChange={(e, val) => {
+                        setFieldValue('storageLocation', val?.optionValue);
+                        setSelectedStorageLocation(val?.optionValue)
                       }}
-                      getOptionSelected={(item, current) => item === current}
-                      getOptionLabel={(option) => option}
-                      renderInput={(props) => (
+                      renderInput={(params) =>
                         <TextField
-                          {...props}
-                          placeholder={''}
+                          {...params}
+                          margin="dense"
+                          name="storageLocation"
+                          label="Storage Location"
                           variant="outlined"
-                          name="serialNumbers"
-                          label={'Select Serial Numbers'}
-                          error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
-                          helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                          fullWidth
+                          required
+                          error={touched['storageLocation'] && Boolean(errors['storageLocation'])}
+                          helperText={touched['storageLocation'] && errors['storageLocation']}
                         />
-                      )}
+                      }
                     />
                   </Box>
-                </Fragment>
-                : null
-              }
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
-                Convert
-              </CustomButton>
-            </CustomDialogFooter>
-          </Form>
-        )}
-      </Formik>
+                }
+                {product?.length === 1 ? (
+                  <Fragment>
+                    <Box my={2} mx={1}>
+                      <Divider />
+                    </Box>
+                    <Box m={1}>
+                      <Autocomplete
+                        size="small"
+                        options={serialNumbers.map((item: any) => item?.serialNumber)}
+                        freeSolo={false}
+                        multiple={true}
+                        disableCloseOnSelect
+                        value={values['serialNumbers']}
+                        onChange={(_, val) => {
+                          setFieldValue('serialNumbers', val);
+                        }}
+                        getOptionSelected={(item, current) => item === current}
+                        getOptionLabel={(option) => option}
+                        renderInput={(props) => (
+                          <TextField
+                            {...props}
+                            placeholder={''}
+                            variant="outlined"
+                            name="serialNumbers"
+                            label={'Select Serial Numbers'}
+                            error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
+                            helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                          />
+                        )}
+                      />
+                    </Box>
+                  </Fragment>
+                ) : null}
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <Button
+                  color="primary"
+                  size="small"
+                  onClick={handleClose}>
+                  Cancel
+                </Button>
+                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                  Convert
+                </CustomButton>
+              </CustomDialogFooter>
+            </Form>
+          )}
+        </Formik> :
+        <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
     </Dialog>
   );
 };
