@@ -277,7 +277,24 @@ const ReportFilters = (props: FiltersProps) => {
   }, [betweenDate, statusPeriodDate]);
 
   const handleDuration = (timeFrameTemp, field, isStatus = false) => {
+    
     switch (timeFrameTemp) {
+      case 'custom':
+        setStatusTimeFrame('custom');
+        isStatus
+          ? setStatusPeriodDate((prevState) => ({
+              ...prevState,
+              [`from_statusPeriod`]: '',
+              [`to_statusPeriod`]: ''
+            }))
+          : setBetweenDate((prevState) => ({
+              ...prevState,
+              [`from_${field.fieldName}`]: '',
+              [`to_${field.fieldName}`]: ''
+            }));
+
+        break;
+
       case '1-month':
         setStatusTimeFrame('1-month');
         isStatus
@@ -339,6 +356,7 @@ const ReportFilters = (props: FiltersProps) => {
         break;
 
       default:
+        setStatusTimeFrame('custom');
         break;
     }
   };

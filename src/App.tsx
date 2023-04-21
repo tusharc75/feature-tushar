@@ -206,6 +206,7 @@ import TransactionLockDetail from './pages/TransactionLock/TransactionLockDetail
 import DOAApprovalQuotation from './pages/DOA/DOAApprovalQuotation';
 import WellNumber from './pages/WellNumber';
 import WellNumberDetail from './pages/WellNumber/WellNumberDetail';
+import PlanningView from './pages/PlanningView';
 
 var notificationInterval: any = null;
 
@@ -1012,6 +1013,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.wellNumberDetail.path}/:id`}>
               <WellNumberDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.planningView.path}`}>
+              <PlanningView />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
