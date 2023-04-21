@@ -21,27 +21,17 @@ import routes from 'src/components/Helpers/Routes';
 let searchTimeout;
 
 const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqueId, stepId, serviceName }) => {
-  const renderedFrom = `workOrder_consumable`;
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-  const {
-    state: { selectedEntity }
-  }: any = useData();
+  const renderedFrom = `workOrder_consumable`;
 
   const toastConfig = useContext(CustomToastContext);
-  // const [gridApi, setGridApi] = useState(null);
-  // const [state, dispatch] = useReducer(reducer, intialState);
-  // const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  // const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
   const [columns, setColumns] = useState([]);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [dataRows, setDataRows] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    localStorage.removeItem(localStorageSelectedRecords);
     fetchGridColumns();
   }, []);
 
@@ -58,44 +48,47 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
         accessor: 'product',
         Header: 'Product',
         width: 300,
-        minWidth: 200,
         Cell: ({ row }) => (
-          <Link href={`${routes.productDetail.path}/${row?.original?.productId}`} className="">
-            {row?.original?.product || <NoDataCell />}
-          </Link>
+          row?.original?.product ?
+            <p className="text-truncate" title={row?.original?.product}>
+              <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.productId}`} target="_blank">
+                {row.original.product}
+              </a>
+            </p>
+            : <NoDataCell />
         )
       },
       {
         accessor: 'service',
         Header: 'Service',
         width: 300,
-        minWidth: 150,
         Cell: ({ row }) => (
-          <Link href={`${routes.serviceMasterDetail.path}/${row.original.serviceId}`} className="">
-            {row?.original?.service || <NoDataCell />}
-          </Link>
+          row?.original?.service ?
+            <p className="text-truncate" title={row?.original?.service}>
+              <a className="link text-truncate" href={`${routes.serviceMasterDetail.path}/${row.original.serviceId}`} target="_blank">
+                {row.original.service}
+              </a>
+            </p>
+            : <NoDataCell />
         )
       },
       {
         accessor: 'stepName',
         Header: 'Step Name',
-        width: 100,
-        minWidth: 100,
+        width: 300,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.stepName || <NoDataCell />}</p>
       },
       {
         accessor: 'qty',
         Header: 'Qty',
         editable: true,
-        width: 100,
-        minWidth: 100,
+        width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
       {
         accessor: 'consumedQty',
         Header: 'Consumed Qty',
-        width: 100,
-        minWidth: 100,
+        width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
       },
       {
@@ -106,7 +99,7 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
         disableFilters: true,
         canDrag: false,
         Cell: ({ row }: any) => (
-          <div style={{ display: 'flex', justifyContent: 'end' }}>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
             {!row?.original?.consumedQty && (
               <HtmlTooltip title="Delete">
                 <IconButton
@@ -114,7 +107,6 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
                   aria-label="Delete"
                   onClick={() => {
                     handleDelete([row.original]);
-                    // setShowConfirmBox({ open: true, data: [row.original] });
                   }}
                 >
                   <DeleteIcon color="error" />
@@ -143,7 +135,6 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
           res.hideSelection = u?.qty - u?.consumedQty === 0 ? true : false;
           return res;
         });
-        console.log(data);
         setDataRows(rows);
       })
       .catch((error) => {
@@ -158,7 +149,6 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
         data.push({ product: e._id, qty: parseInt(e.qty), service, uniqueId, stepId });
       }
     });
-
     axiosInstance()
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
@@ -177,7 +167,6 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
 
   const handleDelete = async (rows) => {
     const ids = rows.map((e) => e._id);
-
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/consumable/remove`, {
         ids: ids || []
@@ -211,14 +200,13 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
       });
       return;
     }
-    axiosInstance()
-      .put(`${workOrder.api}/${workOrderId}/consumable/update-qty`, [
-        {
-          product: updatedData?.productId,
-          ...inputField,
-          _id: updatedData._id
-        }
-      ])
+    axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/update-qty`, [
+      {
+        product: updatedData?.productId,
+        ...inputField,
+        _id: updatedData._id
+      }
+    ])
       .then(({ data }) => {
         fetchData();
         toastConfig.setToastConfig({
@@ -251,13 +239,13 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
             <Grid item xs={6} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
                 <Button
-                  disabled={selectedRecords.length === 0}
+                  disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
                   onClick={() => setOpenConsumablesQtyDialog(true)}
                   color="primary"
                   size="small"
                   variant="contained"
                 >
-                  {'Consume '} {selectedRecords.length > 0 ? '(' + selectedRecords.length + ')' : ''}
+                  {'Consume '} {selectedRecords?.filter((e) => !e?.hideSelection).length > 0 ? '(' + selectedRecords?.filter((e) => !e?.hideSelection).length + ')' : ''}
                 </Button>
               </Box>
             </Grid>
@@ -265,7 +253,7 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
         </div>
         {columns && dataRows ? (
           <CustomReactTable
-            height={'calc(100vh - 345px)'}
+            height={'calc(100vh - 150px)'}
             columns={columns}
             data={dataRows}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
@@ -291,7 +279,7 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
             fetchData();
             setOpenConsumablesQtyDialog(false);
           }}
-          selectedRecords={selectedRecords}
+          selectedRecords={selectedRecords?.filter((e) => !e?.hideSelection)}
           service={service}
           uniqueId={uniqueId}
           stepId={stepId}
