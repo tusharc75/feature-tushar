@@ -9,7 +9,14 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage, convertInventory, sidebarResource } from 'src/constants/helpers';
+import {
+  isObjectEmpty,
+  gridLoadingTimeout,
+  getLocalStorageArrayData,
+  removeLocalStorage,
+  convertInventory,
+  sidebarResource
+} from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import { prepareDataForGrid } from 'src/constants/helpers';
@@ -29,7 +36,8 @@ const ConvertInventory = () => {
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
   const [warehouseId, setWarehouseId] = useState(null);
   const [storageLocationId, setStorageLocationId] = useState(null);
@@ -80,7 +88,6 @@ const ConvertInventory = () => {
     fetchGridColumns();
   }, []);
 
-
   useEffect(() => {
     if (warehouseId) {
       fetchProductInventory();
@@ -116,13 +123,18 @@ const ConvertInventory = () => {
   };
 
   const fetchProductInventory = () => {
+    if (!warehouseId || !storageLocationId) {
+      dispatch({ type: 'initialize', data: [], count: 0 });
+      return;
+    }
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
     if (warehouseId) {
       const queryString = getQueryString();
-      axiosInstance().get(`${convertInventory.api}${queryString}`)
+      axiosInstance()
+        .get(`${convertInventory.api}${queryString}`)
         .then(({ data }) => {
           let rows = data.data?.map((u) => {
             let finalObject = prepareDataForGrid(u);
@@ -150,7 +162,6 @@ const ConvertInventory = () => {
   };
 
   const getQueryString = () => {
-
     let deepFilter = '';
     deepFilter = `?warehouse=${warehouseId}`;
     deepFilter = deepFilter + `&page=${page}&limit=${limit}`;
@@ -181,7 +192,6 @@ const ConvertInventory = () => {
     }
     return `${deepFilter}&filterType=and`;
   };
-
 
   const ActionsRenderer = (params) => (
     <>
@@ -240,9 +250,10 @@ const ConvertInventory = () => {
                 getOptionLabel={(option: any) => option.optionLabel}
                 disableClearable
                 getOptionSelected={(option: any, val) => option.optionValue === val}
-                value={warehouseOptions.filter((data) => data.optionValue === warehouseId).length
-                  ? warehouseOptions.filter((data) => data.optionValue === warehouseId)[0]
-                  : ''
+                value={
+                  warehouseOptions.filter((data) => data.optionValue === warehouseId).length
+                    ? warehouseOptions.filter((data) => data.optionValue === warehouseId)[0]
+                    : ''
                 }
                 onChange={(e, val) => {
                   if (val !== null) {
@@ -250,9 +261,7 @@ const ConvertInventory = () => {
                     setStorageLocationId(null);
                   }
                 }}
-                renderInput={(params) =>
-                  <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />
-                }
+                renderInput={(params) => <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />}
               />
               {user?.user?.brandPolicy?.storageLocation && (
                 <Autocomplete
@@ -268,9 +277,9 @@ const ConvertInventory = () => {
                   onChange={(e, val) => {
                     setStorageLocationId(val?.optionValue);
                   }}
-                  renderInput={(params) =>
+                  renderInput={(params) => (
                     <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
-                  }
+                  )}
                 />
               )}
             </Grid>

@@ -13,7 +13,6 @@ import { camelCase, capitalize } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const Consumables = ({ workOrderId, allowedToEdit }) => {
-
   let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
   const [gridApi, setGridApi] = useState(null);
@@ -58,13 +57,13 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
   const NameRenderer = (params) => {
     return (
       <>
-        <a className="link text-truncate"
+        <a
+          className="link text-truncate"
           href={
             params?.column?.colId === 'product'
-              ?
-              `${routes?.productDetail.path}/${params?.data?.productId}`
-              :
-              `${routes?.serviceMasterDetail.path}/${params?.data?.serviceId}`}
+              ? `${routes?.productDetail.path}/${params?.data?.productId}`
+              : `${routes?.serviceMasterDetail.path}/${params?.data?.serviceId}`
+          }
         >
           {params?.value}
         </a>
@@ -75,37 +74,37 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
   const frameworkComponents = {
     commonRenderer: CommonRenderer,
     checkboxRenderer: CheckboxRenderer,
-    nameRenderer: NameRenderer,
+    nameRenderer: NameRenderer
   };
 
-  return (<Grid container spacing={2}>
-    <Grid item xs={12} md={12} sm={12}>
-      {columns ? (
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={false}
-          loading={loading}
-          isClientSideGrid={true}
-          allowSelection={false}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchRecords}
-        />
-      ) : (
-        <Box p={2} height={500} bgcolor="white">
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+  return (
+    <Grid container spacing={2}>
+      <Grid item xs={12} md={12} sm={12}>
+        {columns ? (
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={false}
+            loading={loading}
+            isClientSideGrid={true}
+            allowSelection={false}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchRecords}
+          />
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </Grid>
     </Grid>
-  </Grid>
-
   );
 };
 
