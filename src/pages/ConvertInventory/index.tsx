@@ -37,6 +37,8 @@ const ConvertInventory = () => {
   const [frameworkComponents, setFrameworkComponents] = useState({});
   const [columns, setColumns] = useState([]);
   const [inventory, setInventory] = useState({ open: false, product: [] });
+  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
+  const [storageLocationId, setStorageLocationId] = useState(null);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -63,16 +65,17 @@ const ConvertInventory = () => {
   }, [selectedEntity]);
 
   useEffect(() => {
-    fetchProductInventory();
-  }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+    plantId && storageLocationId && fetchProductInventory();
+  }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
 
   const getPlants = () => {
     axiosInstance()
-      .get(`/warehouse`)
+      .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Storage Location')
       .then(({ data: { data } }) => {
-        setPlantOptions([...data]);
-        if (plantId === null && data?.length) {
-          setPlantId(data[0]._id);
+        setPlantOptions([...data.Warehouse]);
+        setStorageLocationOptions(data['Storage Location']);
+        if (plantId === null && data?.Warehouse.length) {
+          setPlantId([...data.Warehouse][0].optionValue);
         }
       });
   };
@@ -149,6 +152,10 @@ const ConvertInventory = () => {
       deepFilter = deepFilter + `&page=${page}&limit=${limit}`;
     } else {
       deepFilter = `&wareHouse=${tempPlantId}`;
+    }
+
+    if (storageLocationId) {
+      deepFilter = `${deepFilter}&storageLocation=${storageLocationId}`;
     }
 
     if (!isObjectEmpty(filters)) {
@@ -236,13 +243,17 @@ const ConvertInventory = () => {
               <Autocomplete
                 style={{ width: '250px' }}
                 options={plantOptions}
-                getOptionLabel={(option: any) => option.warehouseName}
+                getOptionLabel={(option: any) => option.optionLabel}
                 disableClearable
-                getOptionSelected={(option: any, val) => option._id === val}
-                value={plantOptions.filter((data) => data._id === plantId).length ? plantOptions.filter((data) => data._id === plantId)[0] : ''}
+                getOptionSelected={(option: any, val) => option.optionValue === val}
+                value={
+                  plantOptions.filter((data) => data.optionValue === plantId).length
+                    ? plantOptions.filter((data) => data.optionValue === plantId)[0]
+                    : ''
+                }
                 onChange={(e, val) => {
                   if (val !== null) {
-                    setPlantId(val && val._id ? val._id : '');
+                    setPlantId(val && val.optionValue ? val.optionValue : '');
                   }
                 }}
                 renderInput={(params) =>
@@ -261,6 +272,37 @@ const ConvertInventory = () => {
                   )
                 }
               />
+              {user?.user?.brandPolicy?.storageLocation && (
+                <Autocomplete
+                  style={{ width: '250px' }}
+                  options={storageLocationOptions.filter((item) => item.warehouse === plantId)}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  value={
+                    storageLocationOptions.filter((data) => data.optionValue === storageLocationId).length
+                      ? storageLocationOptions.filter((data) => data.optionValue === storageLocationId)[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setStorageLocationId(val?.optionValue);
+                  }}
+                  renderInput={(params) =>
+                    isMobile && !isTablet ? (
+                      <TextField
+                        {...params}
+                        margin="dense"
+                        name="storageLocation"
+                        placeholder="Storage Location"
+                        variant="standard"
+                        fullWidth
+                        className={isMobile ? 'serchBox' : ''}
+                      />
+                    ) : (
+                      <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
+                    )
+                  }
+                />
+              )}
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -356,6 +398,7 @@ const ConvertInventory = () => {
             }}
             product={inventory.product}
             warehouse={plantId}
+            storageLocationId={storageLocationId}
           />
         )}
       </div>

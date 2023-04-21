@@ -11,8 +11,7 @@ import { convertInventory, productInventory } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
 
-const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) => {
-
+const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, storageLocationId = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
@@ -47,7 +46,8 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) =>
         return { id: e.id, productCategory: e.productCategoryId, serialNumberIds: product > 1 ? [] : serialNumberIds.map((item) => item?._id) };
       }),
       qty: parseInt(values.qty),
-      warehouse: warehouse
+      warehouse: warehouse,
+      storageLocation: storageLocationId
     };
     setLoading(true);
     axiosInstance()
@@ -75,7 +75,9 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) =>
 
     var validateQty = product[0]?.availableInventory;
     if (product?.length > 1) {
-      validateQty = product?.reduce(function (min, obj) { return obj.availableInventory < min ? obj.availableInventory : min; }, Infinity);
+      validateQty = product?.reduce(function (min, obj) {
+        return obj.availableInventory < min ? obj.availableInventory : min;
+      }, Infinity);
     }
 
     if (parseInt(values?.qty) > validateQty) {
@@ -139,7 +141,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) =>
                   />
                 </ListItem>
               </List>
-              {product?.length === 1 ?
+              {product?.length === 1 ? (
                 <Fragment>
                   <Box my={2} mx={1}>
                     <Divider />
@@ -171,8 +173,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) =>
                     />
                   </Box>
                 </Fragment>
-                : null
-              }
+              ) : null}
             </CustomDialogContent>
             <CustomDialogFooter>
               <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
