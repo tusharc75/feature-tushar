@@ -339,6 +339,7 @@ const ReportFilters = (props: FiltersProps) => {
         break;
 
       default:
+        setStatusTimeFrame('custom');
         break;
     }
   };
