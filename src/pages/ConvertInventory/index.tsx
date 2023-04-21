@@ -65,7 +65,7 @@ const ConvertInventory = () => {
   }, [selectedEntity]);
 
   useEffect(() => {
-    plantId && storageLocationId && fetchProductInventory();
+    fetchProductInventory();
   }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
 
   const getPlants = () => {
@@ -109,6 +109,10 @@ const ConvertInventory = () => {
   };
 
   const fetchProductInventory = () => {
+    if (!plantId || !storageLocationId) {
+      dispatch({ type: 'initialize', data: [], count: 0 });
+      return;
+    }
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
