@@ -5,10 +5,9 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { isMobile, isTablet } from "react-device-detect";
+import { isMobile, isTablet } from 'react-device-detect';
 
 function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSuccess }) {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [selectedSteps, setSelectedSteps] = useState({});
 
@@ -39,11 +38,12 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
         title={`Assign Consumables to Step`}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
-          setFullScreen(prevState => !prevState)
+          setFullScreen((prevState) => !prevState);
         }}
         showManimizeMaximize={true}
         showRequiredLabel={true}
-        onClose={handleCloseDialog} />
+        onClose={handleCloseDialog}
+      />
       <CustomDialogContent>
         {consumables?.length &&
           consumables?.map((item, index) => {
@@ -54,7 +54,13 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
                   <Autocomplete
                     multiple
                     value={selectedSteps[item?._id]}
-                    onChange={(event, newValue) => {
+                    onChange={(event, newValue: any) => {
+                      newValue = newValue?.map((step) => {
+                        return {
+                          ...step,
+                          qty: item?.qty || 1
+                        };
+                      });
                       setSelectedSteps({ ...selectedSteps, [item?._id]: newValue });
                     }}
                     options={steps}
@@ -77,7 +83,7 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
                               label={`Qty - ${step?.stepName}`}
                               placeholder={`Qty - ${step?.stepName}`}
                               name={`${index}_${step?.stepName}`}
-                              value={step.qty ?? item?.qty}
+                              value={step.qty}
                               onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                               onChange={(e) => {
                                 const value = e.target.value;
