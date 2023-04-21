@@ -33,6 +33,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PreviewIcon from '@material-ui/icons/Visibility';
 import _ from 'lodash';
+import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutlined';
+import FolderIcon from '@material-ui/icons/Folder';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -152,6 +154,9 @@ export default function Attachment() {
   const [resourceOptions, setResourceOptions] = useState([]);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, data: null, top: null, bottom: null });
 
+  //   InsertDriveFileOutlinedIcon
+  // FolderIcon
+
   const column: any = [
     {
       accessor: 'type',
@@ -160,7 +165,21 @@ export default function Attachment() {
       width: 70,
       canDrag: false,
       sticky: isMobile ? 'none' : 'left',
-      Cell: ({ row }) => <>{row.original?.type === 'folder' ? 'Folder' : 'File'}</>
+      Cell: ({ row }) => (
+        <p style={{ display: 'flex', alignItems: 'center', color: '#3B4F60' }}>
+          {row.original?.type === 'folder' ? (
+            <>
+              <FolderIcon style={{ paddingRight: 5 }} />
+              Folder
+            </>
+          ) : (
+            <>
+              <InsertDriveFileOutlinedIcon style={{ paddingRight: 5 }} />
+              File
+            </>
+          )}
+        </p>
+      )
     },
     {
       id: 'name',
