@@ -21,20 +21,14 @@ const ColCard: React.FC<singleColCardInterface> = ({ data }) => {
         <span>Service Name: </span>
         {data.serviceName || '--'}
       </Typography>
-      <Typography className={styles.cardDetails}>
-        <span>Type: </span>
-        {data.type || '--'}
-      </Typography>
+
       <Typography className={styles.cardDetails}>
         <span>Technician: </span>
         {data.assignedUser || '--'}
       </Typography>
+
       <Typography className={styles.cardDetails}>
-        <span>Status: </span>
-        <Chip label={data.status || '--'} className={styles.chip} />
-      </Typography>
-      <Typography className={styles.cardDetails}>
-        <span>Created at: </span>
+        <span>Due Date: </span>
         {moment(data.createDate).format(dateTimeFormat)}
       </Typography>
       <Box className={styles.passFail}>
