@@ -10,6 +10,7 @@ import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import useColumns from 'src/constants/useColumns';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 function ListView({ resourceList }) {
 
@@ -19,18 +20,14 @@ function ListView({ resourceList }) {
     }: any = useData();
     const { getColumnData } = useColumns();
 
-    const history = useHistory();
-
     const [gridApi, setGridApi] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState({});
     const [state, dispatch] = useReducer(reducer, intialState);
     const [renderedFrom, setRenderedFrom] = useState('')
-    const [localStorageSelectedRecords, setLocalStorageSelectedRecords] = useState('')
     const [selectedResource, setSelectedResource] = useState(null);
     const [columns, setColumns] = useState([])
 
-    const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting, showFilteredRecordsOnly, appendRows } =
-        state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting, appendRows } = state;
 
     const fetchGridColumns = async () => {
         axiosInstance()
@@ -39,7 +36,7 @@ function ListView({ resourceList }) {
                 let columns = [];
                 let rendererNames = [];
                 data.forEach((o) => {
-                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes[selectedResource.key].path);
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, selectedResource.path);
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData];
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -60,10 +57,19 @@ function ListView({ resourceList }) {
     useEffect(() => {
         if (selectedResource) {
             setRenderedFrom(`${routes[selectedResource.key].title}`)
-            setLocalStorageSelectedRecords(`${routes[selectedResource.key].title}_selected`)
             fetchGridColumns();
         }
+        else {
+            setColumns([])
+        }
     }, [selectedResource]);
+
+    useEffect(() => {
+        if (selectedResource) {
+            fetchData()
+        }
+    }, [selectedResource, page, filters, limit, sorting])
+
 
     const replaceFieldName = (field) => {
         switch (field) {
@@ -96,16 +102,9 @@ function ListView({ resourceList }) {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
-
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
         }
-
-        if (showFilteredRecordsOnly) {
-            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
-        }
-
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
             Object.keys(filters).forEach((field) => {
@@ -116,11 +115,9 @@ function ListView({ resourceList }) {
             });
             deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
         }
-
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
         }
-
         return deepFilter;
     };
 
@@ -138,16 +135,6 @@ function ListView({ resourceList }) {
             let rows = data.map((u) => {
                 let finalObject: any = prepareDataForGrid(u, user);
                 finalObject['isChecked'] = false;
-                // finalObject['owerCollaboratorInitialsOrImages'] = [];
-                // if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-                // finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
-                //     if (f.initials) {
-                //         f.initials = f.initials
-                //             .split(' ')
-                //             .map((i) => i[0])
-                //             .join('');
-                //     }
-                // });
                 return finalObject;
             });
             if (appendRows) {
@@ -164,60 +151,50 @@ function ListView({ resourceList }) {
         }
     }
 
-    useEffect(() => {
-        if (selectedResource) {
-            fetchData()
-        }
-    }, [selectedResource, page, filters, limit, sorting, showFilteredRecordsOnly])
-
-    return (
-        <>
-            <div>
-                <Box display="flex" flexDirection='column'>
-                    <Box ml={1}>
-                        <Autocomplete
-                            options={resourceList}
-                            getOptionLabel={(option) => option && option?.title || ''}
-                            style={{ width: "350px" }}
-                            value={selectedResource}
-                            onChange={(event, newValue) => {
-                                setSelectedResource(newValue)
-                            }}
-                            size="small"
-                            renderInput={(params) =>
-                                <TextField
-                                    {...params}
-                                    label="Select Resource"
-                                    size="small"
-                                    variant="outlined"
-                                />
-                            }
-                        />
-                    </Box>
-                    {Object.keys(frameWorkComponent).length > 0 ? (
-                        <CustomAgGrid
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameWorkComponent}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            allowAction={false}
-                            loading={loading}
-                            renderedFrom={renderedFrom}
-                            refreshGrid={fetchData}
-                            showOnlyShowFilteredRecordSwitch={true}
-                        />
-                    )
-                        : null}
-                </Box>
-
-            </div >
-        </>
-    )
+    return (<Box display="flex" flexDirection='column'>
+        <Box ml={1}>
+            <Autocomplete
+                options={resourceList}
+                getOptionLabel={(option) => option && option?.title || ''}
+                style={{ width: "350px" }}
+                value={selectedResource}
+                onChange={(event, newValue) => {
+                    setSelectedResource(newValue)
+                }}
+                size="small"
+                renderInput={(params) =>
+                    <TextField
+                        {...params}
+                        label="Select Resource"
+                        size="small"
+                        variant="outlined"
+                    />
+                }
+            />
+        </Box>
+        {Object.keys(frameWorkComponent).length > 0 && columns?.length ? (
+            <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                allowAction={false}
+                loading={loading}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchData}
+                showFilters={true}
+                allowSelection={false}
+                resource={selectedResource?.resource}
+                showOnlyShowFilteredRecordSwitch={false}
+            />
+        )
+            : null}
+    </Box>)
 }
 
 export default ListView;
