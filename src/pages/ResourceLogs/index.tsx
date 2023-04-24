@@ -82,32 +82,34 @@ const ResourceLogs = () => {
         const queryString = getQueryString()
         axiosInstance().get(`/log?${queryString}`).then(({ data: { data: { data, count } } }) => {
             let rows = data?.map((u) => {
-                var changes = [];
-                u?.changes?.forEach((e) => {
-                    if (e?.fieldLabel) {
-                        var oldValue = e?.oldValue;
-                        var newValue = e?.newValue;
-                        if (e?.type === "date") {
-                            if (oldValue && moment(oldValue)?.isValid) {
-                                oldValue = moment(oldValue).format(dateFormat)
+                if (Array.isArray(u?.changes)) {
+                    var changes = [];
+                    u?.changes?.forEach((e) => {
+                        if (e?.fieldLabel) {
+                            var oldValue = e?.oldValue;
+                            var newValue = e?.newValue;
+                            if (e?.type === "date") {
+                                if (oldValue && moment(oldValue)?.isValid) {
+                                    oldValue = moment(oldValue).format(dateFormat)
+                                }
+                                if (newValue && moment(newValue)?.isValid) {
+                                    newValue = moment(newValue).format(dateFormat)
+                                }
                             }
-                            if (newValue && moment(newValue)?.isValid) {
-                                newValue = moment(newValue).format(dateFormat)
+                            else if (e?.type === "dropDown" && e?.lookup) {
+                                oldValue = oldValue?.label;
+                                newValue = newValue?.label;
+                            }
+                            if (oldValue && newValue) {
+                                changes.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`)
+                            }
+                            else {
+                                changes.push(`${e.fieldLabel} changed to ${newValue}`)
                             }
                         }
-                        else if (e?.type === "dropDown" && e?.lookup) {
-                            oldValue = oldValue?.label;
-                            newValue = newValue?.label;
-                        }
-                        if (oldValue && newValue) {
-                            changes.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`)
-                        }
-                        else {
-                            changes.push(`${e.fieldLabel} changed to ${newValue}`)
-                        }
-                    }
-                })
-                u.changeString = changes?.toString();
+                    })
+                    u.changeString = changes?.toString();
+                }
                 u.key = selectedResource?.key;
                 return u;
             });

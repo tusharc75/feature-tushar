@@ -9,13 +9,16 @@ import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { camelCase } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { IconButton } from '@material-ui/core';
+import { Button, IconButton } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import ConsumablesQtyDialog from './ConsumablesQtyDialog';
 
-const Consumables = ({ workOrderId, allowedToEdit }) => {
+const Consumables = ({ workOrderId, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
+
   let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
   const toastConfig = useContext(CustomToastContext);
@@ -23,81 +26,64 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
+  const [consumablesDialog, setConsumablesDialog] = useState(false);
+  const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
+
 
   useEffect(() => {
     fetchColumns();
-    fetchRecords();
+    fetchData();
   }, [allowedToEdit]);
 
-  const fetchRecords = async () => {
-    const response = await axiosInstance().get(`${workOrder.api}/${workOrderId}/consumable`);
-    const data = response?.data?.data;
-    let rows = data.map((u) => {
-      let finalObject: any = prepareDataForGrid(u, user);
-      finalObject.type = finalObject.type === 'Service' ? 'Soft' : 'Hard';
-      return finalObject;
-    });
-    setDataRows(rows);
-  };
-
-  const fetchColumns = async () => {
+  const fetchColumns = () => {
     const column: any = [
       {
         accessor: 'product',
         Header: 'Product',
         width: 300,
-        Cell: ({ row }) =>
-          row?.original?.product ? (
+        Cell: ({ row }) => (
+          row?.original?.product ?
             <p className="text-truncate" title={row?.original?.product}>
               <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.productId}`} target="_blank">
                 {row.original.product}
               </a>
             </p>
-          ) : (
-            <NoDataCell />
-          )
+            : <NoDataCell />
+        )
       },
       {
         accessor: 'service',
         Header: 'Service',
         width: 300,
-        Cell: ({ row }) =>
-          row?.original?.service ? (
+        Cell: ({ row }) => (
+          row?.original?.service ?
             <p className="text-truncate" title={row?.original?.service}>
               <a className="link text-truncate" href={`${routes.serviceMasterDetail.path}/${row.original.serviceId}`} target="_blank">
                 {row.original.service}
               </a>
             </p>
-          ) : (
-            <NoDataCell />
-          )
+            : <NoDataCell />
+        )
       },
       {
         accessor: 'stepName',
         Header: 'Step Name',
-        width: 100,
-        minWidth: 100,
+        width: 300,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.stepName || <NoDataCell />}</p>
       },
       {
         accessor: 'qty',
         Header: 'Qty',
-        editable: allowedToEdit ? true : false,
-        width: 100,
-        minWidth: 100,
+        editable: allowedToEdit,
+        width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
       {
         accessor: 'consumedQty',
         Header: 'Consumed Qty',
-        width: 100,
-        minWidth: 100,
+        width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
       },
-
       {
         accessor: 'action',
         Header: 'Action',
@@ -106,18 +92,17 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
         disableFilters: true,
         canDrag: false,
         Cell: ({ row }: any) => (
-          <div style={{ display: 'flex', justifyContent: 'end' }}>
-            {!row?.original?.consumedQty && (
-              <HtmlTooltip style={{ cursor: 'pointer' }} title={!allowedToEdit ? 'Not Allowed to delete' : 'Delete'}>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            {!row?.original?.consumedQty && allowedToEdit && (
+              <HtmlTooltip title="Delete">
                 <IconButton
-                  disabled={!allowedToEdit}
                   size="small"
                   aria-label="Delete"
                   onClick={() => {
                     handleDelete([row.original]);
                   }}
                 >
-                  <DeleteIcon color={!allowedToEdit ? 'disabled' : 'error'} />
+                  <DeleteIcon color="error" />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -128,15 +113,62 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
     setColumns(column);
   };
 
+  const fetchData = () => {
+    var query = ``;
+    if (service && uniqueId) {
+      query = query + `?service=${service}&uniqueId=${uniqueId}`;
+    }
+    if (stepId) {
+      query = query + `&stepId=${stepId}`;
+    }
+    axiosInstance()
+      .get(`${workOrder.api}/${workOrderId}/consumable${query}`)
+      .then(({ data: { data } }) => {
+        let rows = data.map((u) => {
+          let res: any = {
+            ...prepareDataForGrid(u)
+          };
+          res.hideSelection = u?.qty - u?.consumedQty === 0 ? true : false;
+          return res;
+        });
+        setDataRows(rows);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleSubmit = async (rows) => {
+    const data: any = [];
+    rows?.forEach((e) => {
+      if (parseInt(e.qty)) {
+        data.push({ product: e._id, qty: parseInt(e.qty), service, uniqueId, stepId });
+      }
+    });
+    axiosInstance()
+      .post(`${workOrder.api}/${workOrderId}/consumable`, data)
+      .then(({ data }) => {
+        fetchData();
+        setConsumablesDialog(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handleDelete = async (rows) => {
     const ids = rows.map((e) => e._id);
-
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/consumable/remove`, {
         ids: ids || []
       })
       .then(({ data }) => {
-        fetchRecords();
+        fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -164,6 +196,7 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
       });
       return;
     }
+    inputField.qty = parseInt(inputField.qty);
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/consumable/update-qty`, [
         {
@@ -173,7 +206,7 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
         }
       ])
       .then(({ data }) => {
-        fetchRecords();
+        fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -185,7 +218,33 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
       });
   };
 
-  return (
+  return (<>
+    {allowedToEdit &&
+      <Box display="flex" justifyContent="space-between" mb={2}>
+        <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+          {isCreate &&
+            <Button
+              variant={'contained'}
+              color="primary"
+              size="small"
+              onClick={() => setConsumablesDialog(true)}>
+              Add Products/Consumables
+            </Button>
+          }
+        </Box>
+        <Box display="flex" ml={1}>
+          <Button
+            disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
+            onClick={() => setOpenConsumablesQtyDialog(true)}
+            color="primary"
+            size="small"
+            variant="contained"
+          >
+            {'Consume '} {selectedRecords?.filter((e) => !e?.hideSelection).length > 0 ? '(' + selectedRecords?.filter((e) => !e?.hideSelection).length + ')' : ''}
+          </Button>
+        </Box>
+      </Box>
+    }
     <Grid container spacing={2}>
       <Grid item xs={12} md={12} sm={12}>
         {columns && dataRows ? (
@@ -208,7 +267,37 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
           </Box>
         )}
       </Grid>
+      {consumablesDialog && (
+        <AssignProductDialog
+          productsDialogOpen={consumablesDialog}
+          productId={workOrderId}
+          reference={'workOrder'}
+          handleCloseDialog={() => setConsumablesDialog(false)}
+          assignedProducts={dataRows?.map((d) => d?.materialId) || []}
+          renderedFrom={'workOrder_consumables'}
+          onSuccess={(rows) => {
+            handleSubmit(rows);
+          }}
+          serialized={false}
+        />
+      )}
+      {openConsumablesQtyDialog && (
+        <ConsumablesQtyDialog
+          workOrderId={workOrderId}
+          onClose={() => setOpenConsumablesQtyDialog(false)}
+          onSuccess={() => {
+            fetchData();
+            setOpenConsumablesQtyDialog(false);
+          }}
+          selectedRecords={selectedRecords?.filter((e) => !e?.hideSelection)}
+          service={service}
+          uniqueId={uniqueId}
+          stepId={stepId}
+          serviceName={serviceName}
+        />
+      )}
     </Grid>
+  </>
   );
 };
 
