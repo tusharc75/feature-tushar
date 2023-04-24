@@ -250,16 +250,16 @@ const Leads = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterLeads=${selectedType}`;
-
-    if (isExport) {
-      deepFilter = `filterLeads=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
-
+    if (isExport) {
+      deepFilter = `?`;
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
-
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
