@@ -231,7 +231,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
               product: d.productName,
               productId: d.productId,
               warehouse: defaultWareHouse || '',
-              storageLocation: null,
+              storageLocation: purchaseOrderData?.storageLocation || null,
               inventoryQuantity: d.qty - (d.actualReceived || 0) - (d.rejectQuantity || 0),
               assetQuantity: 0,
               serializedProduct: d.serializedProduct || false,

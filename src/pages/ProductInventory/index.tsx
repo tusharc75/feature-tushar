@@ -747,6 +747,7 @@ const InventoryProduct = () => {
                   .toString()
                 : plantId
             }
+            storageLocation={storageLocationId}
             productName={showHistory.productName}
           />
         )}
