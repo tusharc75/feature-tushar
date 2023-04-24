@@ -127,7 +127,7 @@ const WorkOrderSupervisor = () => {
         };
       });
 
-      dispatch({ type: 'initialize', data: { Completed: completed, Pending: pending, 'In-Progress': inProgress }, count: count });
+      dispatch({ type: 'initialize', data: { Pending: pending, 'In-Progress': inProgress, Completed: completed }, count: count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
