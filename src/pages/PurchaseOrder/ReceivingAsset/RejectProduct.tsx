@@ -150,7 +150,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
       aria-labelledby="assign-roles-dialog"
     >
       <MuiPickersUtilsProvider utils={DateUtils}>
-        <Formik initialValues={{ qty: 1, rejectDate: new Date(), comment: '', storageLocation: null, }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+        <Formik initialValues={{ qty: 1, rejectDate: new Date(), comment: '', storageLocation: purchaseOrderData?.storageLocation?.optionValue || null, }} onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <CustomDialogHeader

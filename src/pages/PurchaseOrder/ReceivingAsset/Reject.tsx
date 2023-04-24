@@ -161,7 +161,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
             rejectDate: new Date(),
             products: productList.map((d) => ({
               _id: d._id,
-              storageLocation: null,
+              storageLocation: purchaseOrderData?.storageLocation || null,
               product: d.productName,
               productId: d.productId,
               rejectQuantity: 0,

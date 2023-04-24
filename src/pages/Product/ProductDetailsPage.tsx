@@ -296,7 +296,7 @@ const ProductDetailsPage = () => {
           )}
 
           {permissions?.serviceMaster && (
-            <Tab className={'tabLayout'} value={2} label={<div className="d-flex align-items-center tab-font">Services</div>} {...a11yProps(2)} />
+            <Tab className={'tabLayout'} value={2} label={<div className="d-flex align-items-center tab-font">Services/Consumables</div>} {...a11yProps(2)} />
           )}
 
           {permissions?.serviceMaster && (

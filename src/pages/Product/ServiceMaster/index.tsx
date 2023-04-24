@@ -419,8 +419,9 @@ const ServiceMaster = (props: Props) => {
   const onSaveInlineEdit = async (inputField, updatedData) => {
     if (updatedData.type === 'Product') {
       const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-      let rows: any = [{ ...rowData, ...updatedData }];
-      handleSaveData({ _id: rows[0]._id, qty: rows[0].qty });
+      if (rowData) {
+        handleSaveData({ _id: rowData._id, qty: parseInt(rowData?.qty) });
+      }
     }
   };
 
