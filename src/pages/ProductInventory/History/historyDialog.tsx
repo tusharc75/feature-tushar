@@ -10,7 +10,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import History from './index';
 import CalendarView from './CalendarView';
 
-const HistoryDialog = ({ close, product, warehouse, productName }) => {
+const HistoryDialog = ({ close, product, warehouse, storageLocation, productName }) => {
   const [currentView, setCurrentView] = useState('list');
 
   return (
@@ -37,7 +37,11 @@ const HistoryDialog = ({ close, product, warehouse, productName }) => {
           </Box>
         </Box>
         {currentView === 'list' ? (
-          <History product={product} warehouse={warehouse} />
+          <History
+            product={product}
+            warehouse={warehouse}
+            storageLocation={storageLocation}
+          />
         ) : (
           <div>
             <CalendarView product={product} warehouse={warehouse} />

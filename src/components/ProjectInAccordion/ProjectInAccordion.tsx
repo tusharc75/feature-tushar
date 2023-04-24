@@ -101,12 +101,12 @@ function DisplayData({ key, label, value, icon, highlightsHead = false }) {
                   {value ? value : '-'}
                 </span>
               ) : value ? (
-                value
+                <span style={{ fontSize: '15px' }}>{value}</span>
               ) : (
                 '-'
               )
             }
-            secondary={label}
+            secondary={<span style={{ fontSize: '14px' }}>{label}</span>}
           />
         </ListItem>
       </List>
@@ -231,15 +231,10 @@ export default function ProjectInAccordion({
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
                             <Grid item xs={12}>
-                              <Grid container className="detailCardHeader">
-                                <Grid item xs={12} sm={12}>
-                                  {
-                                    <Link to={`${routes.projectSalesDetail.path}/${obj._id}`}>
-                                      <Typography className="detailName">{obj.projectName}</Typography>
-                                    </Link>
-                                  }
-                                </Grid>
-                              </Grid>
+                              <Link to={`${routes.projectSalesDetail.path}/${obj._id}`}>
+                                <Typography className="detailName">{obj.projectName}</Typography>
+                              </Link>
+
                               <Grid container>
                                 <Grid item xs={12} sm={6} md={6} className="buttonClass">
                                   {

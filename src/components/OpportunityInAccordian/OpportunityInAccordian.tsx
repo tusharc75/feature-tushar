@@ -108,12 +108,12 @@ function DisplayData({ key, label, value, icon, highlightsHead = false }) {
                   {value ? value : '-'}
                 </span>
               ) : value ? (
-                value
+                <span style={{ fontSize: '15px' }}>{value}</span>
               ) : (
                 '-'
               )
             }
-            secondary={label}
+            secondary={<span style={{ fontSize: '14px' }}>{label}</span>}
           />
         </ListItem>
       </List>
@@ -310,6 +310,7 @@ export default function OpportunityInAccordian({
                                   </Tooltip>
                                 </span>
                               )}
+
                               <Typography
                                 className="amount text-truncate"
                                 title={formatAmountWithCurrency(obj?.currency, obj?.estimatedAmount)?.fullFormatAmount}
