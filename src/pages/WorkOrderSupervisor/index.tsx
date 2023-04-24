@@ -196,8 +196,6 @@ const WorkOrderSupervisor = () => {
     });
   }
 
-  console.log({ dataRows });
-
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <Fragment>
