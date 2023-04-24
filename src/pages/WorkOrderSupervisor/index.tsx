@@ -1,4 +1,4 @@
-import { Box, Button, Grid, TextField } from '@material-ui/core';
+import { Box, Button, Grid, TextField, Typography } from '@material-ui/core';
 import React, { Fragment, useEffect, useState, useReducer, useContext } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
@@ -20,16 +20,18 @@ import moment from 'moment';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { dateFormatForInputControl } from '../../constants/helpers';
 import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import styles from './index.module.scss';
+import RenderColumns from './RenderColumns';
 
 const WorkOrderSupervisor = () => {
-
   const renderedFrom = camelCase(routes?.workOrderSupervisor?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const [gridApi, setGridApi] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
   const [selectedRepairOrder, setSelectedRepairOrder] = useState(null);
@@ -39,6 +41,13 @@ const WorkOrderSupervisor = () => {
 
   const [timeFrame, setTimeFrame] = React.useState<any>('1-year');
   const [globalFilters, setGlobalFilters] = useState({ from: new Date(moment().subtract(1, 'year').calendar()), to: new Date() });
+
+  useEffect(() => {
+    let timeout = setTimeout(fetchData, 600);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [selectedUser, selectedWorkOrder, selectedRepairOrder, timeFrame, globalFilters.from, globalFilters.to]);
 
   React.useEffect(() => {
     switch (timeFrame) {
@@ -92,18 +101,36 @@ const WorkOrderSupervisor = () => {
       let response = await axiosInstance().get(`${workOrderSupervisor.api}${queryString}`);
       data = response?.data?.data;
       count = response?.data?.count;
-      data = data?.map((u) => {
+
+      const completed = [];
+      const pending = [];
+      const inProgress = [];
+      data = data?.forEach((u) => {
         let finalObject = prepareDataForGrid(u);
         finalObject['user'] = u?.assignedUsers[0]?.optionLabel;
         finalObject['workOrder'] = u?.workOrderDetail?.workOrderNumber;
         finalObject['serviceName'] = u?.service?.optionLabel;
-        finalObject['assignedUser'] = u?.assignedUsers?.map((e) => e?.optionLabel)?.toString()
+        finalObject['assignedUser'] = u?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
+        finalObject['createDate'] = u?.workOrderDetail?.createDate;
+
+        if (u.status === 'Pending') {
+          pending.push(finalObject);
+        }
+        if (u.status === 'Completed') {
+          completed.push(finalObject);
+        }
+        if (u.status === 'In-Progress') {
+          inProgress.push(finalObject);
+        }
         return {
           ...finalObject
         };
       });
-      dispatch({ type: 'initialize', data: data, count: count });
-      setTimeout(() => { dispatch({ type: 'loading', loading: false }); }, gridLoadingTimeout);
+
+      dispatch({ type: 'initialize', data: { Completed: completed, Pending: pending, 'In-Progress': inProgress }, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
@@ -142,17 +169,13 @@ const WorkOrderSupervisor = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     if (globalFilters) {
-      deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format("YYYY/MM/DD")}&to=${moment(globalFilters.to).format("YYYY/MM/DD")}`
+      deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
     }
     return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
 
-  const handleShow = () => {
-    fetchData();
-  };
-
   const frameworkComponents = {
-    commonRenderer: CommonRenderer,
+    commonRenderer: CommonRenderer
   };
 
   const columns = [
@@ -173,6 +196,8 @@ const WorkOrderSupervisor = () => {
     });
   }
 
+  console.log({ dataRows });
+
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <Fragment>
@@ -180,182 +205,178 @@ const WorkOrderSupervisor = () => {
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[routes.workOrderSupervisor]} />
           </Grid>
-          <Grid item md={8} sm={1} xs={2}>
-            {/* <ImportExportLinks
-              permissions={permissions?.workOrderSupervisor}
-              module="product inventory"
-              api={'workordersupervisor'}
-              afterImportCompleted={() => {
-                fetchWorkOrderSuperVisorData();
-              }}
-              isExportAllOrSomeFeature={true}
-              total={10}
-              recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)].length}
-              ids={
-                [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-                  ? [...getLocalStorageArrayData(localStorageSelectedRecords)].map((obj) => obj._id)
-                  : []
-              }
-              onExportToExcelSuccess={() => {
-                if (gridApi) gridApi.deselectAll();
-                else fetchWorkOrderSuperVisorData();
-              }}
-              additionalParams={getQueryString(true)}
-            /> */}
-          </Grid>
         </Grid>
         <div className="main-container">
           <div className="header-panel">
-            <Grid container>
-              <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center gap-1">
-                <Autocomplete
-                  style={{ width: '200px' }}
-                  options={usersData}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => { return option.optionValue === val.optionValue }}
-                  value={usersData.filter((data) => data.optionValue === selectedUser).length ? usersData.filter((data) => data.optionValue === selectedUser)[0] : ''}
-                  onChange={(e, val) => {
-                    setSelectedUser(val && val.optionValue ? val.optionValue : '');
-                  }}
-                  renderInput={(params) =>
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="user"
-                      placeholder="Technician"
-                      label="Technician"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  }
-                />
-                <Autocomplete
-                  style={{ width: '200px' }}
-                  options={workOrderData}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => {
-                    return option.optionValue === val.optionValue;
-                  }}
-                  value={workOrderData.filter((data) => data.optionValue === selectedWorkOrder).length ? workOrderData.filter((data) => data.optionValue === selectedWorkOrder)[0] : ''}
-                  onChange={(e, val) => {
-                    setSelectedWorkOrder(val && val.optionValue ? val.optionValue : '');
-                  }}
-                  renderInput={(params) =>
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="workOrder"
-                      placeholder="Work Order"
-                      label="Work Order"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  }
-                />
-                <Autocomplete
-                  style={{ width: '200px' }}
-                  options={repairOrderData}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => {
-                    return option.optionValue === val.optionValue;
-                  }}
-                  value={repairOrderData.filter((data) => data.optionValue === selectedRepairOrder).length ? repairOrderData.filter((data) => data.optionValue === selectedRepairOrder)[0] : ''}
-                  onChange={(e, val) => {
-                    setSelectedRepairOrder(val && val.optionValue ? val.optionValue : '');
-                  }}
-                  renderInput={(params) =>
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="repairOrder"
-                      placeholder="Repair Order"
-                      label="Repair Order"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  }
-                />
-                <FormControl style={{ width: '150px' }} size="medium" margin="dense" variant="outlined">
-                  <InputLabel id="duration">Select Duration</InputLabel>
-                  <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
-                    <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                    <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                    <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                    <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                    <MenuItem value={'custom'}>Custom</MenuItem>
-                  </Select>
-                </FormControl>
-                <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom'}
-                  inputVariant="outlined"
-                  variant="inline"
-                  style={{ width: '150px' }}
-                  size="small"
-                  disableFuture
-                  openTo="year"
-                  format={dateFormatForInputControl}
-                  maxDate={globalFilters.to}
-                  label="From"
-                  views={['year', 'month', 'date']}
-                  value={globalFilters.from}
-                  onChange={(date) => {
-                    setGlobalFilters({ ...globalFilters, from: date });
-                  }}
-                />
-                <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom'}
-                  inputVariant="outlined"
-                  variant="inline"
-                  style={{ width: '150px' }}
-                  size="small"
-                  minDate={globalFilters.from}
-                  disableFuture
-                  openTo="year"
-                  format={dateFormatForInputControl}
-                  label="To"
-                  views={['year', 'month', 'date']}
-                  value={globalFilters.to}
-                  onChange={(date) => {
-                    setGlobalFilters({ ...globalFilters, to: date });
-                  }}
-                />
-                <Button
-                  onClick={handleShow}
-                  style={{
-                    marginLeft: '1rem',
-                  }}
-                  variant={'contained'}
-                  size="small"
-                  color="primary"
-                >
-                  Show
-                </Button>
-              </Grid>
-            </Grid>
+            <Box flexWrap={'wrap'} className="d-flex align-items-center gap-1">
+              <Autocomplete
+                style={{ width: '200px' }}
+                options={usersData}
+                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                getOptionSelected={(option: any, val) => {
+                  return option.optionValue === val.optionValue;
+                }}
+                value={
+                  usersData.filter((data) => data.optionValue === selectedUser).length
+                    ? usersData.filter((data) => data.optionValue === selectedUser)[0]
+                    : ''
+                }
+                onChange={(e, val) => {
+                  setSelectedUser(val && val.optionValue ? val.optionValue : '');
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} margin="dense" name="user" placeholder="Technician" label="Technician" variant="outlined" fullWidth />
+                )}
+              />
+              <Autocomplete
+                style={{ width: '200px' }}
+                options={workOrderData}
+                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                getOptionSelected={(option: any, val) => {
+                  return option.optionValue === val.optionValue;
+                }}
+                value={
+                  workOrderData.filter((data) => data.optionValue === selectedWorkOrder).length
+                    ? workOrderData.filter((data) => data.optionValue === selectedWorkOrder)[0]
+                    : ''
+                }
+                onChange={(e, val) => {
+                  setSelectedWorkOrder(val && val.optionValue ? val.optionValue : '');
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} margin="dense" name="workOrder" placeholder="Work Order" label="Work Order" variant="outlined" fullWidth />
+                )}
+              />
+              <Autocomplete
+                style={{ width: '200px' }}
+                options={repairOrderData}
+                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                getOptionSelected={(option: any, val) => {
+                  return option.optionValue === val.optionValue;
+                }}
+                value={
+                  repairOrderData.filter((data) => data.optionValue === selectedRepairOrder).length
+                    ? repairOrderData.filter((data) => data.optionValue === selectedRepairOrder)[0]
+                    : ''
+                }
+                onChange={(e, val) => {
+                  setSelectedRepairOrder(val && val.optionValue ? val.optionValue : '');
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    margin="dense"
+                    name="repairOrder"
+                    placeholder="Repair Order"
+                    label="Repair Order"
+                    variant="outlined"
+                    fullWidth
+                  />
+                )}
+              />
+              <FormControl style={{ width: '150px' }} size="medium" margin="dense" variant="outlined">
+                <InputLabel id="duration">Select Duration</InputLabel>
+                <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
+                  <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                  <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                  <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                  <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                  <MenuItem value={'custom'}>Custom</MenuItem>
+                </Select>
+              </FormControl>
+              <KeyboardDatePicker
+                disabled={timeFrame !== 'custom'}
+                inputVariant="outlined"
+                variant="inline"
+                style={{ width: '150px' }}
+                size="small"
+                disableFuture
+                openTo="year"
+                format={dateFormatForInputControl}
+                maxDate={globalFilters.to}
+                label="From"
+                views={['year', 'month', 'date']}
+                value={globalFilters.from}
+                onChange={(date) => {
+                  setGlobalFilters({ ...globalFilters, from: date });
+                }}
+              />
+              <KeyboardDatePicker
+                disabled={timeFrame !== 'custom'}
+                inputVariant="outlined"
+                variant="inline"
+                style={{ width: '150px' }}
+                size="small"
+                minDate={globalFilters.from}
+                disableFuture
+                openTo="year"
+                format={dateFormatForInputControl}
+                label="To"
+                views={['year', 'month', 'date']}
+                value={globalFilters.to}
+                onChange={(date) => {
+                  setGlobalFilters({ ...globalFilters, to: date });
+                }}
+              />
+            </Box>
           </div>
           {columns ? (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={150}
-              allowAction={false}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              showOnlyShowFilteredRecordSwitch={true}
-            />)
-            : (
-              <Box p={2} height={500} bgcolor="white">
-                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Box>
-            )}
+            // <CustomAgGrid
+            //   columns={columns}
+            //   dataRows={dataRows}
+            //   frameworkComponents={frameworkComponents}
+            //   setGridApi={setGridApi}
+            //   dispatch={dispatch}
+            //   rowCount={rowCount}
+            //   limit={limit}
+            //   pageSizes={pageSizes}
+            //   page={page}
+            //   actionWidth={150}
+            //   allowAction={false}
+            //   loading={loading}
+            //   renderedFrom={renderedFrom}
+            //   refreshGrid={fetchData}
+            //   showOnlyShowFilteredRecordSwitch={true}
+            // />
+            <Box className={styles.container}>
+              <Grid container spacing={3}>
+                {Object.keys(dataRows).map((col) => {
+                  return (
+                    <Grid
+                      item
+                      xs={12}
+                      sm={6}
+                      md={4}
+                      className={styles.singleCol}
+                      style={
+                        {
+                          '--bg': col === 'Completed' ? '#31AC1D' : col === 'In-Progress' ? '#F16A9A' : '#F8A300',
+                          '--border': col === 'Completed' ? '#F1FEED' : col === 'In-Progress' ? '#FFF3FA' : '#FFFEEF',
+                          '--color': col === 'Completed' ? '#31AC1D' : col === 'In-Progress' ? '#F16A9A' : '#F8A300'
+                        } as React.CSSProperties
+                      }
+                    >
+                      <Typography className={styles.colTitle}>
+                        <span></span>
+                        {col} ({loading ? '--' : dataRows[col].length})
+                      </Typography>
+                      {loading ? (
+                        <Box p={2} height={500} bgcolor="white">
+                          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                        </Box>
+                      ) : (
+                        <RenderColumns colData={dataRows[col]} />
+                      )}
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Box>
+          ) : (
+            <Box p={2} height={500} bgcolor="white">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
         </div>
       </Fragment>
     </MuiPickersUtilsProvider>
