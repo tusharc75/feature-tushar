@@ -1,4 +1,3 @@
-import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Grid, Box, Button, Menu, MenuItem, Chip, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -8,7 +7,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { repairOrder, REPAIR_ORDER_TYPE, workOrder, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS } from '../../../constants/helpers';
+import { repairOrder, REPAIR_ORDER_TYPE, workOrder, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { Delete, ExpandMore } from '@material-ui/icons';
@@ -18,6 +17,10 @@ import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { capitalize, sortBy } from 'lodash';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -29,7 +32,7 @@ const WorkOrder = ({
   allowedToDelete,
   isPostWorkService,
   setCurrentStep,
-  createNewVersionQuote
+  createNewVersionQuote,
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -50,7 +53,9 @@ const WorkOrder = ({
   const [arrangeView, setArrangeView] = useState(false);
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedAssets, setSelectedAssets] = useState([]);
+  const [isUpdating, setUpdating] = useState(false);
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
+  const [updateDialog, setUpdateDialog] = useState({ open: false, data: null});
 
   useEffect(() => {
     fetchFields();
@@ -66,7 +71,11 @@ const WorkOrder = ({
   }, [selectedProducts]);
 
   const fetchFields = async () => {
-    const coloum: any = [
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderService}`);
+    var data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, repairOrderData?.currency || 'USD');
+    const newColumns = genrateCustomTableColumns(data, repairOrderData?.currency || 'USD');
+    let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
@@ -88,21 +97,40 @@ const WorkOrder = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <a
-              className="link text-truncate"
-              target="_blank"
-              href={`${
-                row.original.type === 'service'
-                  ? routes.serviceMasterDetail.path
-                  : row.original.type === 'product'
-                  ? routes.productDetail.path
-                  : row.original.type === 'serializedAsset'
-                  ? routes.serializedAssetDetail.path
-                  : routes.packagesDetail.path
-              }/${row.original.materialId}`}
-            >
-              {row.original.detail}
-            </a>
+            { row.original.type === 'service' ? (
+              <p
+                onClick={() => {
+                  setUpdateDialog({
+                    open: true,
+                    data: row.original,
+                  });
+                }}
+                className="link text-truncate"
+                title={row.original?.detail}
+              >
+                {row.original?.detail}
+              </p>
+            ) : (
+              <p className="text-truncate">{row.original?.detail}</p>
+            )}
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'serializedAsset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
             {row.original?.subRows?.length ? (
               <Box ml={1} className="d-flex align-items-center">
                 {`(${row.original?.subRows?.length})`}
@@ -207,8 +235,8 @@ const WorkOrder = ({
         Cell: ({ row }) => (row.original['qty'] ? <p> {row?.original?.qty}</p> : <NoDataCell />)
       }
     ];
-    setColumns([
-      ...coloum,
+    coloum = [...coloum, ...newColumns];
+    coloum.push(
       {
         accessor: 'action',
         Header: 'Action',
@@ -264,7 +292,8 @@ const WorkOrder = ({
           ) : null;
         }
       }
-    ]);
+    );
+    setColumns(coloum);
   };
 
   const handleWorkOrderDelete = (ids) => {
@@ -521,6 +550,34 @@ const WorkOrder = ({
       });
   };
 
+  const handleSaveData = async (rows: any) => {
+    setUpdating(true);
+    rows.forEach((element) => {
+      delete element.index;
+      delete element.detail;
+      delete element.isValid;
+      delete element.hideSelection;
+    });
+    const workOrderId = rows[0]?.workOrder?._id;
+    axiosInstance()
+      .put(`${repairOrder.api}/${repairOrderData._id}/work-order/${workOrderId}`, { material: rows })
+      .then(({ data }) => {
+        setUpdating(false);
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setUpdateDialog({ open: false, data: null});
+      })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+
   return (
     <Fragment>
       <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
@@ -689,6 +746,18 @@ const WorkOrder = ({
               handleClose={() => setArrangeView(false)}
               handleSubmit={(data) => handleArrangeUpdate(data, selectedServices[0]?.workOrder?._id)}
               loading={false}
+            />
+          )}
+          {updateDialog.open && (
+            <UpdateWorkOrderDialog
+              onClose={() => {
+                setUpdateDialog({ open: false, data: null});
+              }}
+              materialData={updateDialog.data}
+       
+              handleUpdate={handleSaveData}
+              loadingEdit={isUpdating}
+              repairOrderData={repairOrderData}
             />
           )}
         </Grid>
