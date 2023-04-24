@@ -39,20 +39,20 @@
 }
 .singleCol {
   position: relative;
-  //   &::after {
-  //     content: '';
-  //     position: absolute;
-  //     right: 0;
-  //     top: 0;
-  //     bottom: 0;
-  //     width: 1px;
-  //     background-color: #e7e7e7;
-  //   }
-  //   &:last-of-type {
-  //     &::after {
-  //       content: unset;
-  //     }
-  //   }
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: #e7e7e7;
+  }
+  &:last-of-type {
+    &::after {
+      content: unset;
+    }
+  }
 }
 .colTitle {
   position: sticky;
@@ -63,7 +63,7 @@
   background-color: var(--section-bg);
   padding: 14px 13px;
   z-index: 5;
-  margin-inline: -12px !important;
+  margin-inline: -11px !important;
 
   span {
     width: 20px;
