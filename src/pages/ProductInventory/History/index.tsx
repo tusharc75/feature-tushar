@@ -17,7 +17,7 @@ import { Autorenew } from '@material-ui/icons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
-const History = ({ product, warehouse }) => {
+const History = ({ product, warehouse, storageLocation }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
@@ -60,6 +60,9 @@ const History = ({ product, warehouse }) => {
 
     if (warehouse) {
       deepFilter = `${deepFilter}&warehouse=${warehouse}`
+    }
+    if (storageLocation) {
+      deepFilter = `${deepFilter}&storageLocation=${storageLocation}`
     }
 
     let filterById = [];
@@ -107,11 +110,11 @@ const History = ({ product, warehouse }) => {
     { field: 'price', headerName: 'Price', show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'finalAvgPrice', headerName: 'Final Average Price', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
-    { field: 'warehouse', headerName: 'Plant', show: true, cellRenderer: 'commonRenderer' },
-    user?.user?.brandPolicy?.storageLocation && { field: 'storageLocation', headerName: 'Storage Location', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'warehouse', headerName: 'Plant', show: true, cellRenderer: 'warehouseRenderer' },
+    user?.user?.brandPolicy?.storageLocation && { field: 'storageLocation', headerName: 'Storage Location', show: true, cellRenderer: 'storageLocationRenderer' },
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'userRenderer' },
     { field: 'purchaseOrderRejectedDate', headerName: 'Purchase Order Rejected Date', filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' },
     { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
   ];
@@ -119,6 +122,33 @@ const History = ({ product, warehouse }) => {
   const CreditDebitRenderer = (params: any) => (
     <span>{params?.value ? params?.data?.type === 'Debit' ? `-${params?.value}` : params?.value : <NoDataCell />}</span>
   );
+
+  const WarehouseRenderer = (params) =>
+    params?.value ? (
+      <Link className="link" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`}>
+        {params.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    );
+
+  const StorageLocationRenderer = (params) =>
+    params?.value ? (
+      <Link className="link" title={params.value} to={`${routes.storageLocationDetail.path}/${params.data.storageLocationId}`}>
+        {params.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    );
+
+  const UserRenderer = (params) =>
+    params?.value ? (
+      <Link className="link" title={params.value} to={`${routes.userDetail.path}/${params.data.userId}`}>
+        {params.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    );
 
   const ReferenceRenderer = (params) =>
     params?.value ? (
@@ -201,6 +231,9 @@ const History = ({ product, warehouse }) => {
 
   const frameworkComponents = {
     referenceRenderer: ReferenceRenderer,
+    warehouseRenderer: WarehouseRenderer,
+    storageLocationRenderer: StorageLocationRenderer,
+    userRenderer: UserRenderer,
     creditDebitRenderer: CreditDebitRenderer,
     commonRenderer: CommonRenderer,
     dateTimeRenderer: DateTimeRenderer,
