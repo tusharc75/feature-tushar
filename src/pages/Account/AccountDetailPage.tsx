@@ -81,12 +81,12 @@ function DisplayData({ label, value, icon, highlightsHead = false }) {
                   {value ? value : '-'}
                 </span>
               ) : value ? (
-                value
+                <span style={{ fontSize: '15px' }}>{value}</span>
               ) : (
                 '-'
               )
             }
-            secondary={label}
+            secondary={<span style={{ fontSize: '14px' }}>{label}</span>}
           />
         </ListItem>
       </List>
@@ -1054,60 +1054,59 @@ export default function AccountDetailPage(props) {
                               {relatedContactsLoading ? (
                                 <CommonSkeleton lenArray={[...Array(4).keys()]} />
                               ) : (
-                                <Grid container spacing={1}>
-                                  <Grid item xs={12} sm={12} md={6} lg={4}>
-                                    <Card className="detailCard card-v1" variant="outlined">
-                                      <CardContent className="card-link">
-                                        <Box>
-                                          {accountData?.staticData?.lead?.entity === selectedEntity ? (
-                                            <Link className="link f_size" to={`/lead/detail/${accountData?.staticData?.lead?._id}`}>
-                                              <Typography component={'span'} className="detailName">
-                                                {accountData?.staticData?.lead?.concatedName || ''}
-                                              </Typography>
-                                            </Link>
-                                          ) : hasAccessToEntity(accountData?.staticData?.lead?.entity) ? (
-                                            <Link
-                                              className="link f_size"
-                                              onClick={() => {
-                                                handleEntityChange(accountData?.staticData?.lead?.entity);
-                                                history.push(`/lead/detail/${accountData?.staticData?.lead?._id}`);
-                                              }}
-                                            >
-                                              <Typography component={'span'} className="detailName">
-                                                {accountData?.staticData?.lead?.concatedName || ''}
-                                              </Typography>
-                                            </Link>
-                                          ) : (
-                                            <span>{accountData?.staticData?.lead?.concatedName || ''}</span>
-                                          )}
-                                          <Typography
-                                            component={'span'}
-                                            style={{
-                                              display: 'inline-block',
-                                              backgroundColor: '#298B88',
-                                              color: 'white',
-                                              marginLeft: 31,
-                                              padding: '4px 11px',
-                                              borderRadius: '6px',
-                                              fontSize: '12px',
-                                              fontWeight: '600'
+                                <Grid item xs={12} sm={12} md={6} lg={4}>
+                                  <Card className="detailCard card-v1" variant="outlined">
+                                    <CardContent className="card-link">
+                                      <Box>
+                                        {accountData?.staticData?.lead?.entity === selectedEntity ? (
+                                          <Link className="link f_size" to={`/lead/detail/${accountData?.staticData?.lead?._id}`}>
+                                            <Typography component={'span'} className="detailName">
+                                              {accountData?.staticData?.lead?.concatedName || ''}
+                                            </Typography>
+                                          </Link>
+                                        ) : hasAccessToEntity(accountData?.staticData?.lead?.entity) ? (
+                                          <Link
+                                            className="link f_size"
+                                            onClick={() => {
+                                              handleEntityChange(accountData?.staticData?.lead?.entity);
+                                              history.push(`/lead/detail/${accountData?.staticData?.lead?._id}`);
                                             }}
                                           >
-                                            Related Lead
-                                          </Typography>
-                                        </Box>
-                                        <Grid container>
-                                          <Grid item xs={12} sm={6}>
-                                            <DisplayData
-                                              label="Title"
-                                              value={accountData?.staticData?.lead?.title || '-'}
-                                              icon={<BsPerson size={15} />}
-                                            />
-                                          </Grid>
+                                            <Typography component={'span'} className="detailName">
+                                              {accountData?.staticData?.lead?.concatedName || ''}
+                                            </Typography>
+                                          </Link>
+                                        ) : (
+                                          <span className="detailName">{accountData?.staticData?.lead?.concatedName || ''}</span>
+                                        )}
+                                        <Typography
+                                          component={'span'}
+                                          style={{
+                                            display: 'inline-block',
+                                            backgroundColor: '#298B88',
+                                            color: 'white',
+                                            marginLeft: 31,
+                                            padding: '4px 11px',
+                                            borderRadius: '6px',
+                                            fontSize: '12px',
+                                            fontWeight: '600',
+                                            marginBottom: 8
+                                          }}
+                                        >
+                                          Related Lead
+                                        </Typography>
+                                      </Box>
+                                      <Grid container>
+                                        <Grid item xs={12} sm={6}>
+                                          <DisplayData
+                                            label="Title"
+                                            value={accountData?.staticData?.lead?.title || '-'}
+                                            icon={<BsPerson size={15} />}
+                                          />
                                         </Grid>
-                                      </CardContent>
-                                    </Card>
-                                  </Grid>
+                                      </Grid>
+                                    </CardContent>
+                                  </Card>
                                 </Grid>
                               )}
                             </>
