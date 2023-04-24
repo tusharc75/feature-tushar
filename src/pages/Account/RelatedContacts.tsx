@@ -33,12 +33,12 @@ function DisplayData({ key, label, value, icon, highlightsHead = false }) {
                   {value ? value : '-'}
                 </span>
               ) : value ? (
-                value
+                <span style={{ fontSize: '15px' }}>{value}</span>
               ) : (
                 '-'
               )
             }
-            secondary={label}
+            secondary={<span style={{ fontSize: '14px' }}>{label}</span>}
           />
         </ListItem>
       </List>
@@ -75,8 +75,9 @@ function RelatedContacts({ contacts, accountId, accountName, contactApi, contact
                 </Grid>
               );
             })}
+            {children}
           </Grid>
-          {children && <Box mt={1}>{children}</Box>}
+          {/* {children && <Box mt={1}>{children}</Box>} */}
           <Box mt={2}>
             <Button
               className="accordion-outlined-button"
