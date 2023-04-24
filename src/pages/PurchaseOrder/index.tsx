@@ -171,9 +171,12 @@ const PurchaseOrder = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterPurchaseOrders=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterPurchaseOrders=${selectedType}`;
+      deepFilter = `?`;
     }
     let filterById = [];
     if (plantId && plantId !== '') {
@@ -533,7 +536,7 @@ const PurchaseOrder = () => {
                     <MenuItem
                       disabled={
                         permissions?.purchaseOrder?.isDelete &&
-                        selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
+                          selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
                           ? false
                           : true
                       }
