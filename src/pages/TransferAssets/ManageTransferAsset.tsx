@@ -23,6 +23,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
 import ManageAccountDialog from '../Account/ManageAccount/index';
 import { FaDiceOne } from "react-icons/fa";
+import { isEqual } from 'lodash';
 
 interface Props {
   isClone?: boolean;
@@ -218,13 +219,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
     }
   };
 
-  const isFieldNotTouched = (initialData, values) => {
-    return (
-      Object.values(simplifyValues(initialData.values, initialData?.fields[0]?.sectionFields || [])).toString() ===
-      Object.values(simplifyValues(values, initialData?.fields[0]?.sectionFields || [])).toString()
-    );
-  };
-
   const validate = (values) => {
     const errors = {};
     if (values?.transferType === "Internal") {
@@ -275,7 +269,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                     : 'Create ' + routes.transferAsset.title
                 }
                 onClose={() => {
-                  if (isFieldNotTouched(initialData, values)) onClose();
+                  if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
                 isMinimized={!fullScreen}
@@ -657,7 +651,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                   color="primary"
                   disabled={isSubmitting}
                   onClick={() => {
-                    if (isFieldNotTouched(initialData, values)) onClose();
+                    if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >

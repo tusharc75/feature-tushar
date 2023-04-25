@@ -371,9 +371,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
-              onEdit={(data) => {}}
+              onEdit={(data) => { }}
               extraParamsToCheckDelete={true}
-              onDelete={(data) => {}}
+              onDelete={(data) => { }}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -391,7 +391,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={(data) => {}}
+              onClone={(data) => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -426,7 +426,8 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           isAdding={isAdding}
           submit={handleSave}
           close={closeDialog}
-          plantId={transferInventoryData?.transferFromPlant?.optionValue}
+          warehouse={transferInventoryData?.transferFromPlant?.optionValue}
+          storageLocation={transferInventoryData?.transferFromStorageLocation?.optionValue || null}
           renderedFrom={`${renderedFrom}_sub-1`}
           ignoreIds={dataRows?.map((e) => e.productId)}
         />

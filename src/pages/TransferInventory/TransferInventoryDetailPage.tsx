@@ -338,9 +338,6 @@ const TransferInventoryDetailPage = () => {
       )}
       {openUpdateDialog && (
         <ManageTransferInventory
-          transferFromDisable={currentStep > 0 || transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.inProgress}
-          transferToDisable={currentStep >= 1}
-          number={transferInventoryData?.transferNumber}
           isClone={false}
           transferInventoryId={id}
           onClose={() => {
