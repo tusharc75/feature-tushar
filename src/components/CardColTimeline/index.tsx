@@ -97,7 +97,13 @@ const CardColTimeline: React.FC<cardColInterface> = ({
 
 export default CardColTimeline;
 
-export function groupBy({ objectArray, property, sortBy = [] }) {
+interface groupByinterface {
+  objectArray: any[];
+  property: string;
+  sortBy?: string[];
+}
+
+export function groupBy({ objectArray, property, sortBy = [] }: groupByinterface) {
   objectArray.sort((a, b) => sortBy.indexOf(a[property]) - sortBy.indexOf(b[property]));
   return objectArray.reduce((acc, obj) => {
     const key = obj[property];
