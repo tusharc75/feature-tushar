@@ -12,16 +12,18 @@ import {
   TextField,
   makeStyles
 } from '@material-ui/core';
+import { Autocomplete } from '@material-ui/lab';
 import { FieldArray, Form, Formik } from 'formik';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { workOrder } from 'src/constants/helpers';
+import { sidebarResource, workOrder } from 'src/constants/helpers';
 
 const useClasses = makeStyles(() => ({
   tableContainer: {
@@ -34,13 +36,21 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
   const classes = useClasses();
   const toastConfig = useContext(CustomToastContext);
 
+  const {
+    state: { user }
+  }: any = useData();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
 
   const validate = (values) => {
     let errors: any = {};
     if (values?.length > 0) {
       values.map((d) => {
+        if (user?.user?.brandPolicy?.storageLocation && !d.storageLocation) {
+          errors.storageLocation = 'Storage Location is required .';
+        }
         let tempProduct = selectedRecords.find((u) => u._id === d._id);
         let qty = tempProduct.qty;
         if (tempProduct && d.consumedQty > qty) {
@@ -59,7 +69,12 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
     const products: any = []
     values?.products?.forEach((e) => {
       if (parseInt(e?.consumedQty)) {
-        products.push({ _id: e?._id, product: e?.materialId, qty: parseInt(e?.consumedQty) })
+        products.push({
+          _id: e?._id,
+          product: e?.materialId,
+          qty: parseInt(e?.consumedQty),
+          storageLocation: user?.user?.brandPolicy?.storageLocation ? e?.storageLocation : null
+        })
       }
     })
     data.products = products;
@@ -80,6 +95,24 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
         });
     }
   };
+
+  const getStorageLocation = () => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
+      .then(({ data: { data } }) => {
+        if (data[sidebarResource.storageLocation]) {
+          // const storageLocationOption = data[sidebarResource.storageLocation]?.filter(e => e.warehouse === warehouse);
+          // setStorageLocationOptions(storageLocationOption);
+          setStorageLocationOptions(data[sidebarResource.storageLocation]);
+        }
+      });
+  };
+
+  useEffect(() => {
+    if (user?.user?.brandPolicy?.storageLocation) {
+      getStorageLocation();
+    }
+  }, [])
 
   return (
     <Dialog
@@ -109,7 +142,8 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
             materialId: item?.materialId,
             product: item?.product,
             qty: item.qty - (item?.consumedQty || 0),
-            consumedQty: 0
+            consumedQty: 0,
+            storageLocation: null
           }))
         }}
         enableReinitialize={true}
@@ -130,6 +164,9 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
                               <TableRow>
                                 <TableCell>Index</TableCell>
                                 <TableCell align="left">Product</TableCell>
+                                {user?.user?.brandPolicy?.storageLocation &&
+                                  <TableCell align="left">Storage Location</TableCell>
+                                }
                                 <TableCell align="left">{'Qty'}</TableCell>
                                 <TableCell align="left">{'Consume Qty'}</TableCell>
                               </TableRow>
@@ -141,6 +178,37 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
                                     {index + 1}
                                   </TableCell>
                                   <TableCell align="left">{value['product']}</TableCell>
+                                  {
+                                    user?.user?.brandPolicy?.storageLocation &&
+                                    <TableCell align="left">
+                                      <Autocomplete
+                                        disableClearable
+                                        options={storageLocationOptions}
+                                        getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                                        value={storageLocationOptions.filter((data) => data.optionValue === value['storageLocation']).length ? storageLocationOptions.filter((data) => data.optionValue === value['storageLocation'])[0] : ''}
+                                        onChange={(e, val) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values.products[index],
+                                            storageLocation: val?.optionValue
+                                          });
+                                        }}
+                                        renderInput={(params) =>
+                                          <TextField
+                                            {...params}
+                                            style={{ minWidth: '200px' }}
+                                            margin="dense"
+                                            name="storageLocation"
+                                            variant="outlined"
+                                            fullWidth
+                                            required
+                                            error={validate([value])?.storageLocation}
+                                            helperText={validate([value])?.storageLocation ? 'Storage Location is required' : ''}
+                                          />
+                                        }
+                                      />
+                                    </TableCell>
+                                  }
                                   <TableCell align="left">
                                     <TextField
                                       fullWidth
@@ -203,7 +271,7 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
               </Button>
               <Button
                 onClick={() => {
-                  if (!validate(values.products).consumedQty) {
+                  if (!validate(values.products).consumedQty && (user?.user?.brandPolicy?.storageLocation && !validate(values.products).storageLocation)) {
                     handleSubmit(values);
                   }
                 }}
