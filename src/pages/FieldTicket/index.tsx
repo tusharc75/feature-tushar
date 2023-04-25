@@ -277,7 +277,6 @@ const FieldTicket = () => {
               else fetchFieldTicketData();
             }}
             additionalParams={getQueryString(true)}
-            onlyExport={true}
           />
         </Grid>
       </Grid>
