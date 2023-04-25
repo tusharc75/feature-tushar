@@ -28,8 +28,6 @@ import HideWhenOffline from 'src/components/HideWhenOffline';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
-import { AddOutlined } from '@material-ui/icons';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 

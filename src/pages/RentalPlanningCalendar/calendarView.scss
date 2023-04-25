@@ -11,36 +11,6 @@
     }
 }
 
-.rbc-agenda-view {
-    .rbc-agenda-table {
-        thead {
-            tr {
-                th:nth-of-type(2) {
-                    display: none;
-                }
-            }
-        }
-    }
-
-    .rbc-agenda-content {
-        .rbc-agenda-table {
-            tbody {
-                tr {
-                    .rbc-agenda-time-cell {
-                        display: none;
-                    }
-                    .rbc-agenda-event-cell {
-                        cursor: pointer;
-                    }
-                }
-            }
-        }
-    }
-    .rbc-agenda-empty{
-        display: none;
-    }
-}
-
 
 // .rbc-allday-cell {
 //     min-height: calc(100vh - 200px);

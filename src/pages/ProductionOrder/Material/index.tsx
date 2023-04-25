@@ -9,7 +9,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { RESOURCE_LABEL, productionOrder } from '../../../constants/helpers';
+import { CHILD_RESOURCE, RESOURCE_LABEL, productionOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
@@ -20,8 +20,9 @@ import Add from '@material-ui/icons/Add';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import { flattenArray } from 'src/constants/columns';
+import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
 import PreviewDownload from 'src/components/PreviewDownload';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -46,8 +47,16 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   }, [productionOrderData]);
 
   const fetchFields = async () => {
-    setColumns(null);
-    const coloum: any = [
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
+    var data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
+    setAllFields(JSON.parse(JSON.stringify(data)));
+    const newColumns = genrateCustomTableColumns(data,  productionOrderData?.currency || 'USD', renderedFrom);
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
+    }
+    let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
@@ -128,24 +137,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           </div>
         )
       },
-      {
-        accessor: 'qty',
-        Header: 'Qty',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
-        },
-        editable: true
-      },
-      {
-        accessor: 'unit',
-        Header: 'Unit',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['unit'] ? <p className="text-truncate">{row.original.unit}</p> : <NoDataCell />;
-        }
-      }
     ];
+    coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
       Header: '',
@@ -171,16 +164,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           </HtmlTooltip>
         </>
       )
-    });
-    coloum.forEach((element) => {
-      if (element.accessor === 'qty') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
     });
     setColumns(coloum);
     fetchData();

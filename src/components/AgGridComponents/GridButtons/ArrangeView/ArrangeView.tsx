@@ -11,6 +11,7 @@ import ReportArrangeView from '../../ReportArrangeView';
 import { BiFilterAlt } from 'react-icons/bi';
 // import { BsArrowLeftRight } from 'react-icons/bs';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 let timeout;
 
@@ -79,7 +80,7 @@ const ArrangeView = ({
 
   return (
     <>
-      <Tooltip title="Arrange View" placement="top">
+      <HtmlTooltip title="Arrange View" placement="top">
         <IconButton
           {...otherProps}
           style={{
@@ -100,7 +101,7 @@ const ArrangeView = ({
         >
           <SwapHorizIcon />
         </IconButton>
-      </Tooltip>
+      </HtmlTooltip>
       {openColumnSelection && (
         <>
           {renderedFrom?.includes('report') && reportSave ? (

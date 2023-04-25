@@ -446,7 +446,10 @@ export const CHILD_RESOURCE = {
   purchaseRequisition: 'Purchase Requisition Detail',
   serviceOrderAddon: 'Service Order Addon',
   fieldTicketCost: 'Field Ticket Cost',
-  jobDetail: 'Job Detail'
+  jobDetail: 'Job Detail',
+  workOrderService: 'Work Order Service',
+  demandOrderDetail: 'Demand Order Detail',
+  productionOrderDetail: 'Production Order Detail'
 };
 
 export const sidebarResourceObjectFromValues = () => {

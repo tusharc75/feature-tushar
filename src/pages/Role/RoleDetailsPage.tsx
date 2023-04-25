@@ -92,8 +92,6 @@ const RoleDetailsPage = () => {
     isRentalReopen: false,
     isPricingPurchaseOrder: false,
     isQuoteAskSupplierPrice: false,
-    isQuotationRentalManagement: false,
-    isProgressiveBillingRentalManagement: false,
     isProductInventorySettings: false
   });
 
@@ -116,16 +114,6 @@ const RoleDetailsPage = () => {
       resource: 'Rental Management',
       fieldLabel: 'Pricing Information',
       fieldName: 'isPricingRentalManagement'
-    },
-    {
-      resource: 'Rental Management',
-      fieldLabel: 'Quotation Information',
-      fieldName: 'isQuotationRentalManagement'
-    },
-    {
-      resource: 'Rental Management',
-      fieldLabel: 'Progressive Billing',
-      fieldName: 'isProgressiveBillingRentalManagement'
     },
     {
       resource: 'Rental Management',
@@ -224,8 +212,6 @@ const RoleDetailsPage = () => {
         isPricingSublease: e.target.checked,
         isRentalReopen: e.target.checked,
         isQuoteAskSupplierPrice: e.target.checked,
-        isQuotationRentalManagement: e.target.checked,
-        isProgressiveBillingRentalManagement: e.target.checked,
         isProductInventorySettings: e.target.checked
       });
     }

@@ -36,6 +36,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import MailIcon from '@material-ui/icons/Mail';
 import HtmlTooltip from '../CustomTooltipTitle';
+import { isEmpty } from 'lodash';
 
 const useStyles = makeStyles(() => ({
   activityBox: {
@@ -261,7 +262,7 @@ const Activity = (props) => {
                               </HtmlTooltip>
                             </Box>
                           )}
-                          {data === 'Email' && user?.user?.brandPolicy?.inboundEmail !== "" && (
+                          {data === 'Email' && user?.user?.brandPolicy?.inboundEmail && isEmpty(user?.user?.brandPolicy?.inboundEmail) && (
                             <Box mr={1}>
                               <HtmlTooltip title={`support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`}>
                                 <IconButton

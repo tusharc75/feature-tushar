@@ -320,7 +320,7 @@ const WorkOrderDetails = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Services
               </div>
             }
             {...a11yProps(1)}
@@ -367,7 +367,18 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
-          <Consumables allowedToEdit={allowedToEdit && !completed} workOrderId={id} />
+          {workOrderData &&
+            <Consumables
+              allowedToEdit={allowedToEdit && !completed}
+              isCreate={false}
+              workOrderId={id}
+              warehouse={workOrderData?.warehouse?.optionValue}
+              service={null}
+              uniqueId={null}
+              stepId={null}
+              serviceName={null}
+            />
+          }
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
           <Box>

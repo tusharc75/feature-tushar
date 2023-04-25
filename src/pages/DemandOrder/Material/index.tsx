@@ -20,7 +20,8 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { RESOURCE_LABEL } from 'src/constants/helpers';
+import { CHILD_RESOURCE, RESOURCE_LABEL } from 'src/constants/helpers';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -45,9 +46,11 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
   }, []);
 
   const fetchFields = async () => {
-    var data = fieldsToShow || [];
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.demandOrderDetail}`);
+    var data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, salesOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = genrateCustomTableColumns(data, '', '');
+    const newColumns = genrateCustomTableColumns(data,  salesOrderData?.currency || 'USD', renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -480,52 +483,5 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
     </Fragment>
   );
 };
-
-const fieldsToShow = [
-  {
-    _id: '630dbe1e9ec41861052354a3',
-    fieldLabel: 'Qty',
-    type: 'decimal',
-    option: [],
-    required: false,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 2,
-    decimalPlaces: 2,
-    sectionName: 'Quantity Information',
-    fieldName: 'qty',
-    resource: 'Sales Order Product',
-    brand: '630dbe1e9ec418610523529c',
-    createdBy: {
-      user: '61b84437885fdf02d9104cb0',
-      date: '2022-08-30T07:37:02.237Z'
-    }
-  },
-  {
-    _id: '630dbe1e9ec41861052354a4',
-    fieldLabel: 'Unit',
-    type: 'dropDown',
-    option: [
-      {
-        optionLabel: 'Option 1',
-        optionValue: 'Option 1'
-      }
-    ],
-    required: false,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 1,
-    sectionName: 'Quantity Information',
-    fieldName: 'unit',
-    resource: 'Sales Order Product',
-    brand: '630dbe1e9ec418610523529c',
-    createdBy: {
-      user: '61b84437885fdf02d9104cb0',
-      date: '2022-08-30T07:37:02.237Z'
-    }
-  }
-];
 
 export default Material;
