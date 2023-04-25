@@ -3,6 +3,7 @@ import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
 import {
+  CHILD_RESOURCE,
   CustomDialogTransition,
   getObjKeys,
   getObjKeysWithValues,
@@ -13,10 +14,11 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { CURReplaceByCurrencySingle, autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { orderBy, uniq, map } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FaDiceOne } from 'react-icons/fa';
+import axiosInstance from 'src/axios/axiosInstance';
 
 const DemandOrderQtyDialog = ({ onClose, materialData, salesOrderData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -31,10 +33,11 @@ const DemandOrderQtyDialog = ({ onClose, materialData, salesOrderData, handleUpd
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    var data = fieldData
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.demandOrderDetail}`);
+    var data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, salesOrderData?.currency || 'USD');
     if (bulkEdit) {
       data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
-
       setInitialData({
         fields: data,
         values: getObjKeys("", data),
@@ -47,10 +50,10 @@ const DemandOrderQtyDialog = ({ onClose, materialData, salesOrderData, handleUpd
         values: getObjKeysWithValues(materialData, data)
       });
     }
-    EvaluteproductFields(data);
+    EvaluteFields(data);
   };
 
-  const EvaluteproductFields = (fields) => {
+  const EvaluteFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
     const customData = sections.map((name) => {
       let sectionFields = fields.filter((field) => field.sectionName === name);
@@ -231,120 +234,5 @@ const DemandOrderQtyDialog = ({ onClose, materialData, salesOrderData, handleUpd
     </>
   );
 };
-
-const fieldData = [
-  {
-    _id: '630dbe1e9ec418610523533e',
-    fieldLabel: 'Qty',
-    type: 'decimal',
-    option: [],
-    required: true,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 1,
-    decimalPlaces: 2,
-    sectionName: 'Quantity Information',
-    fieldName: 'qty',
-    resource: 'Rental Management Product',
-    defaultValue: '',
-    disableOnEdit: false,
-    hiddenField: false,
-    isDefaultValue: false,
-    isDropdown: false,
-    isWarningTooltip: false,
-    lookup: false,
-    lookupResource: '',
-    warningTooltipMessage: '',
-    brand: '630dbe1e9ec418610523529c',
-    createdBy: {
-      user: '61b84437885fdf02d9104cb0',
-      date: '2022-08-30T07:37:02.237Z'
-    },
-    roleType: 0,
-    entityWiseLookup: false,
-    isColumnEditable: true,
-    isMinMaxValue: false,
-    isSystemGenerate: false,
-    maxValue: 0,
-    maxValueServiceAdd: '',
-    minValue: 0,
-    minValueServiceAdd: ''
-  },
-  {
-    _id: '630dbe1e9ec418610523533f',
-    fieldLabel: 'Unit',
-    type: 'dropDown',
-    option: [
-      {
-        optionLabel: 'Piece',
-        optionValue: 'Piece',
-        order: 1,
-        default: false
-      },
-      {
-        optionLabel: 'One Well Pad',
-        optionValue: 'One Well Pad',
-        order: 2,
-        default: false
-      },
-      {
-        optionLabel: 'Two Well Pad',
-        optionValue: 'Two Well Pad',
-        order: 3,
-        default: false
-      },
-      {
-        optionLabel: 'Three Well Pad',
-        optionValue: 'Three Well Pad',
-        order: 4,
-        default: false
-      },
-      {
-        optionLabel: 'Four Well Pad',
-        optionValue: 'Four Well Pad',
-        order: 5,
-        default: false
-      },
-      {
-        optionLabel: 'Five Well Pad',
-        optionValue: 'Five Well Pad',
-        order: 6,
-        default: false
-      },
-      {
-        optionLabel: 'Six Well Pad',
-        optionValue: 'Six Well Pad',
-        order: 7,
-        default: false
-      }
-    ],
-    required: true,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 2,
-    hiddenField: false,
-    isDefaultValue: false,
-    disableOnEdit: false,
-    addManualOptionInExcel: false,
-    addAdditionalOption: false,
-    lookup: false,
-    lookupResource: '',
-    isDropdown: false,
-    isWarningTooltip: false,
-    warningTooltipMessage: '',
-    defaultValue: '',
-    sectionName: 'Quantity Information',
-    fieldName: 'unit',
-    resource: 'Rental Management Product',
-    brand: '630dbe1e9ec418610523529c',
-    createdBy: {
-      user: '61b84437885fdf02d9104cb0',
-      date: '2022-08-30T07:37:02.237Z'
-    },
-    roleType: 0
-  }
-];
 
 export default DemandOrderQtyDialog;
