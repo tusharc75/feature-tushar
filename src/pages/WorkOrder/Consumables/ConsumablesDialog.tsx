@@ -8,7 +8,7 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId, service, uniqu
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="consume-dialog">
       <CustomDialogHeader
-        title={`${serviceName} - Products/Consumables`}
+        title={serviceName ? `${serviceName} - Products/Consumables` : 'Products/Consumables'}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
