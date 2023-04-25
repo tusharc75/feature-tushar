@@ -24,7 +24,6 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
   const [treeList, setTreeList] = useState([]);
   const [loadingRoadmap, setLoadingRoadmap] = useState(false);
   
- 
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
   }, [filter.view, refresh]);
@@ -48,8 +47,6 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
       });
   };
   
-  
-  
   const fetchRoadmap = async () => {
     setLoadingRoadmap(true);
     await axiosInstance()
@@ -63,7 +60,6 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
         setLoadingRoadmap(false);
       });
   };
-
 
   let height = window.innerHeight / 2;
   const today = new Date();
@@ -134,7 +130,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
                 <ActivityList
                   fetchRoadmap={fetchRoadmap}
                   activity={selectedRecords?.length === 1? activity.filter((item)=>{
-                    return selectedRecords[0]?.competency.includes(item?.competency[0]?.optionLabel)
+                    return selectedRecords[0]?.competency? (selectedRecords[0]?.competency.includes(item?.competency[0]?.optionLabel)):item
                   }):activity}
                   treeList={treeList}
                   expanded={expanded}
@@ -154,7 +150,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
                   <CalendarList
                     fetchRoadmap={fetchRoadmap}
                     activity={selectedRecords?.length === 1? activity.filter((item)=>{
-                      return selectedRecords[0]?.competency.includes(item?.competency[0]?.optionLabel)
+                      return selectedRecords[0]?.competency? (selectedRecords[0]?.competency.includes(item?.competency[0]?.optionLabel)):item
                     }):activity}
                     expanded={expanded}
                     selected={selected}
