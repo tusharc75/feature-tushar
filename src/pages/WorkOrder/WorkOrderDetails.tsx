@@ -374,7 +374,7 @@ const WorkOrderDetails = () => {
             service={null}
             uniqueId={null}
             stepId={null}
-            serviceName={``}
+            serviceName={null}
           />
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
