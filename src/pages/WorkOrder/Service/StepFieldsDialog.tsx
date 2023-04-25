@@ -233,8 +233,23 @@ const StepFieldsDialog = ({
 
   }
 
-  const handleAddField = (field) => {
-    console.log('field', field)
+  const handleAddField = (field: any) => {
+    field.sectionName = sectionName;
+    axiosInstance()
+      .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/${step?._id}/add-field`, field)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        handleCloseAddField();
+        handleClose()
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        handleClose()
+      });
   }
 
 
