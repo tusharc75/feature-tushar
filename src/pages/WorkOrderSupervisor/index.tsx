@@ -203,8 +203,6 @@ const WorkOrderSupervisor = () => {
     });
   }
 
-  console.log(dataRows);
-
   const cardDataRows: datarowInterface[] = [
     { accessor: 'serviceName', title: 'Service Name', type: 'text' },
     { accessor: 'assignedUser', title: 'Technician', type: 'text' },

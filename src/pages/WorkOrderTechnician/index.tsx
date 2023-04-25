@@ -367,7 +367,6 @@ const WorkOrderTechnician = () => {
             </IconButton>
           </Box>
         </Box>
-        {console.log({ serviceData, servicesToKeep })}
         {cardData && (
           <CardColTimeline
             mt={3}
