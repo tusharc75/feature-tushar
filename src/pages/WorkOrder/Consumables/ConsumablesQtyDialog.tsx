@@ -31,7 +31,7 @@ const useClasses = makeStyles(() => ({
   }
 }));
 
-const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords, service, uniqueId, stepId, serviceName }) => {
+const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords, serviceName }) => {
 
   const classes = useClasses();
   const toastConfig = useContext(CustomToastContext);
@@ -63,9 +63,6 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
 
   const handleSubmit = (values) => {
     const data: any = {}
-    data.service = service;
-    data.uniqueId = uniqueId;
-    data.stepId = stepId;
     const products: any = []
     values?.products?.forEach((e) => {
       if (parseInt(e?.consumedQty)) {
@@ -127,7 +124,7 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
       }}
     >
       <CustomDialogHeader
-        title={`${serviceName} - Products/Consumables`}
+        title={serviceName ? `${serviceName} - Products/Consumables` : 'Products/Consumables'}
         onClose={onClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {

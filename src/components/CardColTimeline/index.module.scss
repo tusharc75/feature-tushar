@@ -102,3 +102,9 @@
     margin-right: 3px;
   }
 }
+.cardDetailsLink {
+  color: var(--link);
+  &:hover {
+    text-decoration: underline;
+  }
+}

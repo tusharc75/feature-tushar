@@ -111,6 +111,7 @@ const WorkOrderSupervisor = () => {
         finalObject['serviceName'] = u?.service?.optionLabel;
         finalObject['assignedUser'] = u?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
         finalObject['createDate'] = u?.workOrderDetail?.createDate;
+        finalObject['workOrderId'] = u?.workOrderDetail?._id;
 
         if (u.status === 'Pending') {
           pending.push(finalObject);
@@ -204,9 +205,10 @@ const WorkOrderSupervisor = () => {
   }
 
   const cardDataRows: datarowInterface[] = [
+    { accessor: 'workOrder', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?.workOrderId}` },
     { accessor: 'serviceName', title: 'Service Name', type: 'text' },
     { accessor: 'assignedUser', title: 'Technician', type: 'text' },
-    { accessor: 'createDate', title: 'Due Date', type: 'dateTime' }
+    { accessor: 'createDate', title: 'Due Date', type: 'date' }
   ];
 
   return (
@@ -356,7 +358,6 @@ const WorkOrderSupervisor = () => {
                 cardDataRows={cardDataRows}
                 passFailStatus={true}
                 passFailAccessor="serviceStatus"
-                cardTitleAccessor="workOrder"
                 px={2}
               />
             </>

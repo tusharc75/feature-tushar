@@ -290,9 +290,6 @@ const Consumables = ({ workOrderId, isCreate, allowedToEdit, service, uniqueId, 
             setOpenConsumablesQtyDialog(false);
           }}
           selectedRecords={selectedRecords?.filter((e) => !e?.hideSelection)}
-          service={service}
-          uniqueId={uniqueId}
-          stepId={stepId}
           serviceName={serviceName}
         />
       )}
