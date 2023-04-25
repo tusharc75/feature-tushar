@@ -380,6 +380,7 @@ const WorkOrderTechnician = () => {
             md={4}
             lg={3}
             xl={3}
+            px={2}
             cardOnClick={(e, data) => {
               let tempServiceData = data?.service;
               tempServiceData['uniqueId'] = data?._id;

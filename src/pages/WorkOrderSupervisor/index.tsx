@@ -357,6 +357,7 @@ const WorkOrderSupervisor = () => {
                 passFailStatus={true}
                 passFailAccessor="serviceStatus"
                 cardTitleAccessor="workOrder"
+                px={2}
               />
             </>
           ) : (
