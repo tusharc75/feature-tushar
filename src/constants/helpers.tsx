@@ -448,7 +448,8 @@ export const CHILD_RESOURCE = {
   fieldTicketCost: 'Field Ticket Cost',
   jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
-  demandOrderDetail: 'Demand Order Detail'
+  demandOrderDetail: 'Demand Order Detail',
+  productionOrderDetail: 'Production Order Detail'
 };
 
 export const sidebarResourceObjectFromValues = () => {
