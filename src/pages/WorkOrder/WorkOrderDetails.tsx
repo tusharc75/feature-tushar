@@ -367,15 +367,18 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
-          <Consumables
-            allowedToEdit={allowedToEdit && !completed}
-            isCreate={false}
-            workOrderId={id}
-            service={null}
-            uniqueId={null}
-            stepId={null}
-            serviceName={null}
-          />
+          {workOrderData &&
+            <Consumables
+              allowedToEdit={allowedToEdit && !completed}
+              isCreate={false}
+              workOrderId={id}
+              warehouse={workOrderData?.warehouse?.optionValue}
+              service={null}
+              uniqueId={null}
+              stepId={null}
+              serviceName={null}
+            />
+          }
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
           <Box>
