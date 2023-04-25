@@ -7,8 +7,9 @@ import moment from 'moment';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import TimerComponent, { getFieldsWithOtherDetails } from './TimerComponent';
+import { Link } from 'react-router-dom';
 
-const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, passFailStatus, passFailAccessor, cardTitleAccessor }) => {
+const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, passFailStatus, passFailAccessor }) => {
   return (
     <Box
       className={styles.singleCard}
@@ -19,15 +20,38 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
         }
       }}
     >
-      <Typography component={'h5'} className={styles.cardTitle}>
-        {data[cardTitleAccessor]}
-      </Typography>
       {cardDataRows.map((item) => {
+        if (item.type === 'title') {
+          return (
+            <Typography component={'h5'} className={styles.cardTitle}>
+              {data[item.accessor] || '--'}
+            </Typography>
+          );
+        }
+        if (item.type === 'linkTitle') {
+          return (
+            <Typography component={'h5'} className={styles.cardTitle}>
+              <Link className={styles.cardDetailsLink} to={() => item.link(data)}>
+                {data[item.accessor] || '--'}
+              </Link>
+            </Typography>
+          );
+        }
         if (item.type === 'text') {
           return (
             <Typography className={styles.cardDetails}>
               <span>{item.title}: </span>
               {data[item.accessor] || '--'}
+            </Typography>
+          );
+        }
+        if (item.type === 'link') {
+          return (
+            <Typography className={styles.cardDetails}>
+              <span>{item.title}: </span>
+              <Link className={styles.cardDetailsLink} to={() => item.link(data)}>
+                {data[item.accessor] || '--'}
+              </Link>
             </Typography>
           );
         }

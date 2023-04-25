@@ -14,147 +14,151 @@ import {
   Tooltip,
   Typography
 } from '@material-ui/core';
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
-import {
-  convertMsToTime,
-  CustomDialogTransition,
-  QUOTATION_STATUS,
-  REPAIR_ORDER_TYPE,
-  WORKORDER_SERVICE_STATUS,
-  WORKORDER_SERVICE_STEP_STATUS
-} from 'src/constants/helpers';
+
 import Steps from '../WorkOrder/Service/Steps';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import FilterListIcon from '@material-ui/icons/FilterList';
 import React from 'react';
 import { useData } from 'src/StateProvider/Provider';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import CloseIcon from '@material-ui/icons/Close';
+import { CustomDialogTransition } from 'src/constants/helpers';
+
+// import {
+//   convertMsToTime,
+//   CustomDialogTransition,
+//   QUOTATION_STATUS,
+//   REPAIR_ORDER_TYPE,
+//   WORKORDER_SERVICE_STATUS,
+//   WORKORDER_SERVICE_STEP_STATUS
+// } from 'src/constants/helpers';
+// import AccessTimeIcon from '@material-ui/icons/AccessTime';
+// import CustomContainer from 'src/components/CustomContainer';
+// import FilterListIcon from '@material-ui/icons/FilterList';
+// import HtmlTooltip from 'src/components/CustomTooltipTitle';
+// import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 
 import CardColTimeline, { datarowInterface, groupBy } from 'src/components/CardColTimeline';
 
 const useStyles = makeStyles(() => ({
-  activityMainBlock: {
-    marginTop: '20Px',
-    height: 'calc(100vh - 28vh)',
-    overflow: 'auto'
-  },
   '.MuiGrid-spacing-xs-1': {
     width: 'calc(100vw + 14px)'
   },
-  block: {
-    borderRadius: '4px',
-    minHeight: 'calc(100vh - 33.5vh)',
-    height: '100%'
-  },
-  columns: {
-    position: 'relative',
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      right: 0,
-      top: 0,
-      bottom: 0,
-      width: 1,
-      backgroundColor: '#E7E7E7'
-    },
-    '&:last-of-type': {
-      '&::after': {
-        content: 'unset'
-      }
-    }
-  },
-  mediumDevice: {
-    ['@media (min-width:600px)']: {
-      flexGrow: '0',
-      maxWidth: '50%',
-      flexBasis: '50%'
-    },
-    ['@media (min-width:900px)']: {
-      flexGrow: '0',
-      maxWidth: '33.333333%',
-      flexBasis: '33.333333%'
-    },
-    ['@media (min-width:1200px)']: {
-      flexGrow: '0',
-      maxWidth: '25%',
-      flexBasis: '25%'
-    }
-  },
-  taskContainer: {
-    backgroundColor: '#FAFDFF',
-    padding: '15px',
-    marginTop: '34px'
-  },
+
   inputs: {
     boxShadow: '0px 4.74053px 23.7026px rgba(0, 0, 0, 0.06)'
-  },
-  fixedTopHead: {
-    position: 'sticky',
-    zIndex: 4,
-    top: '0px',
-    background: '#FAFDFF'
-  },
-  activitybox: {
-    cursor: 'pointer',
-    background: 'white',
-    position: 'relative',
-    margin: '0px 6px 14px',
-    borderRadius: '16px',
-    boxShadow: '0px 4px 40px rgba(0, 0, 0, 0.08)',
-    backgroundColor: 'rgb(255, 255, 255)',
-    color: 'rgb(23, 43, 77)',
-    padding: '14px 15px',
-    transition: 'transform .2s, background .3s',
-    '&:hover': {
-      transform: 'scale(1.02)',
-      zIndex: '1'
-      // backgroundColor: 'var(--hover_bg)'
-    },
-    '& .MuiChip-root': {
-      fontWeight: '600'
-    }
-  },
-  backlog: {
-    '--chip-color': '#7F76EB',
-    '--chip-border-color': '#EDEDFF',
-    '--chip-bg-color': '#F9F6FF'
-  },
-  pending: {
-    '--chip-color': '#F8A300',
-    '--chip-border-color': '#FFEEC9',
-    '--chip-bg-color': '#FFFEEF'
-  },
-  inProgress: {
-    '--chip-color': '#F16A9A',
-    '--chip-border-color': '#FFEBF2',
-    '--chip-bg-color': '#FFF3FA'
-  },
-  completed: {
-    '--chip-color': '#31AC1D',
-    '--chip-border-color': '#CBF8B6',
-    '--chip-bg-color': '#F1FEED'
-  },
-  nameShape: {
-    width: 20,
-    height: 20,
-    borderRadius: '100vmax',
-    backgroundColor: 'var(--chip-color)',
-    display: 'block'
-  },
-  sectionName: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px'
   }
+  // fixedTopHead: {
+  //   position: 'sticky',
+  //   zIndex: 4,
+  //   top: '0px',
+  //   background: '#FAFDFF'
+  // }
+  // activitybox: {
+  //   cursor: 'pointer',
+  //   background: 'white',
+  //   position: 'relative',
+  //   margin: '0px 6px 14px',
+  //   borderRadius: '16px',
+  //   boxShadow: '0px 4px 40px rgba(0, 0, 0, 0.08)',
+  //   backgroundColor: 'rgb(255, 255, 255)',
+  //   color: 'rgb(23, 43, 77)',
+  //   padding: '14px 15px',
+  //   transition: 'transform .2s, background .3s',
+  //   '&:hover': {
+  //     transform: 'scale(1.02)',
+  //     zIndex: '1'
+  //     // backgroundColor: 'var(--hover_bg)'
+  //   },
+  //   '& .MuiChip-root': {
+  //     fontWeight: '600'
+  //   }
+  // }
+  // columns: {
+  //   position: 'relative',
+  //   '&::after': {
+  //     content: '""',
+  //     position: 'absolute',
+  //     right: 0,
+  //     top: 0,
+  //     bottom: 0,
+  //     width: 1,
+  //     backgroundColor: '#E7E7E7'
+  //   },
+  //   '&:last-of-type': {
+  //     '&::after': {
+  //       content: 'unset'
+  //     }
+  //   }
+  // },
+  // activityMainBlock: {
+  //   marginTop: '20Px',
+  //   height: 'calc(100vh - 28vh)',
+  //   overflow: 'auto'
+  // },
+  // block: {
+  //   borderRadius: '4px',
+  //   minHeight: 'calc(100vh - 33.5vh)',
+  //   height: '100%'
+  // },
+  // mediumDevice: {
+  //   ['@media (min-width:600px)']: {
+  //     flexGrow: '0',
+  //     maxWidth: '50%',
+  //     flexBasis: '50%'
+  //   },
+  //   ['@media (min-width:900px)']: {
+  //     flexGrow: '0',
+  //     maxWidth: '33.333333%',
+  //     flexBasis: '33.333333%'
+  //   },
+  //   ['@media (min-width:1200px)']: {
+  //     flexGrow: '0',
+  //     maxWidth: '25%',
+  //     flexBasis: '25%'
+  //   }
+  // },
+  // taskContainer: {
+  //   backgroundColor: '#FAFDFF',
+  //   padding: '15px',
+  //   marginTop: '34px'
+  // },
+  // backlog: {
+  //   '--chip-color': '#7F76EB',
+  //   '--chip-border-color': '#EDEDFF',
+  //   '--chip-bg-color': '#F9F6FF'
+  // },
+  // pending: {
+  //   '--chip-color': '#F8A300',
+  //   '--chip-border-color': '#FFEEC9',
+  //   '--chip-bg-color': '#FFFEEF'
+  // },
+  // inProgress: {
+  //   '--chip-color': '#F16A9A',
+  //   '--chip-border-color': '#FFEBF2',
+  //   '--chip-bg-color': '#FFF3FA'
+  // },
+  // completed: {
+  //   '--chip-color': '#31AC1D',
+  //   '--chip-border-color': '#CBF8B6',
+  //   '--chip-bg-color': '#F1FEED'
+  // },
+  // nameShape: {
+  //   width: 20,
+  //   height: 20,
+  //   borderRadius: '100vmax',
+  //   backgroundColor: 'var(--chip-color)',
+  //   display: 'block'
+  // },
+  // sectionName: {
+  //   display: 'flex',
+  //   alignItems: 'center',
+  //   gap: '10px'
+  // }
 }));
 
 const WorkOrderTechnician = () => {
@@ -192,15 +196,10 @@ const WorkOrderTechnician = () => {
         newObj['status'] = item.status;
         return newObj;
       });
-    data = groupBy(data, 'status');
+
+    data = groupBy({ objectArray: data, property: 'status', sortBy: WORKORDER_TECHNICIAN_SERVICE_STATUS });
     setCardData(data);
   }, [serviceData, servicesToKeep]);
-
-  const cardDataRows: datarowInterface[] = [
-    { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
-    { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
-    { accessor: 'stepData', title: 'Time', type: 'timer' }
-  ];
 
   const WORKORDER_STATUS_COLOR = {
     pending: '#FFFFE0',
@@ -253,19 +252,26 @@ const WorkOrderTechnician = () => {
       });
   };
 
-  const getFieldsWithOtherDetails = (steps: any) => {
-    const stepTimes = [];
-    steps.forEach((item) => {
-      let obj: any = {};
-      obj.startDate = item?.startDate;
-      obj.endDate = item?.endDate;
-      obj.pauseDate = item?.pauseDate;
-      obj.duration = item?.duration || 0;
-      obj.status = item?.status;
-      stepTimes.push(obj);
-    });
-    return stepTimes;
-  };
+  // const getFieldsWithOtherDetails = (steps: any) => {
+  //   const stepTimes = [];
+  //   steps.forEach((item) => {
+  //     let obj: any = {};
+  //     obj.startDate = item?.startDate;
+  //     obj.endDate = item?.endDate;
+  //     obj.pauseDate = item?.pauseDate;
+  //     obj.duration = item?.duration || 0;
+  //     obj.status = item?.status;
+  //     stepTimes.push(obj);
+  //   });
+  //   return stepTimes;
+  // };
+
+  const cardDataRows: datarowInterface[] = [
+    { accessor: 'serviceName', type: 'title' },
+    { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
+    { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
+    { accessor: 'stepData', title: 'Time', type: 'timer' }
+  ];
 
   return (
     <Box className="main-container-v1">
@@ -375,11 +381,9 @@ const WorkOrderTechnician = () => {
             cardDataRows={cardDataRows}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
-            cardTitleAccessor="serviceName"
             sm={6}
             md={4}
             lg={3}
-            xl={3}
             px={2}
             cardOnClick={(e, data) => {
               let tempServiceData = data?.service;
@@ -554,78 +558,77 @@ const WorkOrderTechnician = () => {
     </Box>
   );
 };
-
-const getTotalTime = (stepTimes: any) => {
-  let totalTimes = 0;
-  let shouldTimerRun = stepTimes?.filter((e) => e.status === WORKORDER_SERVICE_STEP_STATUS.start)?.length ? true : false;
-  stepTimes.forEach((item) => {
-    totalTimes += item?.duration || 0;
-    if (item.startDate && item.status === WORKORDER_SERVICE_STEP_STATUS.start) {
-      totalTimes += new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime();
-    }
-  });
-  stepTimes.forEach((item) => {});
-  return { shouldTimerRun, totalTimes };
-};
-
-const RenderTotalTime = ({ stepTimes }: any) => {
-  const [time, setTime] = useState(null);
-  useEffect(() => {
-    const { shouldTimerRun, totalTimes } = getTotalTime(stepTimes);
-    let interval;
-    if (shouldTimerRun) {
-      let currentDifference = totalTimes;
-      interval = setInterval(() => {
-        currentDifference += 1000;
-        setTime(convertMsToTime(currentDifference));
-      }, 1000);
-    } else {
-      setTime(convertMsToTime(totalTimes));
-    }
-    return () => {
-      clearInterval(interval);
-    };
-  }, [stepTimes]);
-
-  if (stepTimes.length === 0) return <></>;
-  return (
-    <Box
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        border: '1px solid #E7E7E7',
-        backgroundColor: 'transparent',
-        padding: '2px 7px',
-        borderRadius: '16px',
-        color: '#3B435C'
-      }}
-    >
-      <AccessTimeIcon style={{ marginRight: '3px', fontSize: '1rem' }} />
-      {time}
-    </Box>
-  );
-};
-
 export default WorkOrderTechnician;
 
-const RenderStatusIcon = ({ stepStatus }: { stepStatus: string }) => {
-  return (
-    <>
-      {stepStatus === WORKORDER_SERVICE_STEP_STATUS.passed && (
-        <HtmlTooltip title={stepStatus}>
-          <Box style={{ color: '#4BAE4F', fontSize: '25px' }}>
-            <AiFillCheckCircle style={{ display: 'block' }} />
-          </Box>
-        </HtmlTooltip>
-      )}
-      {stepStatus === WORKORDER_SERVICE_STEP_STATUS.failed && (
-        <HtmlTooltip title={stepStatus}>
-          <Box style={{ color: '#F25F54', fontSize: '25px' }}>
-            <AiFillExclamationCircle style={{ display: 'block' }} />
-          </Box>
-        </HtmlTooltip>
-      )}
-    </>
-  );
-};
+// const getTotalTime = (stepTimes: any) => {
+//   let totalTimes = 0;
+//   let shouldTimerRun = stepTimes?.filter((e) => e.status === WORKORDER_SERVICE_STEP_STATUS.start)?.length ? true : false;
+//   stepTimes.forEach((item) => {
+//     totalTimes += item?.duration || 0;
+//     if (item.startDate && item.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+//       totalTimes += new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime();
+//     }
+//   });
+//   stepTimes.forEach((item) => {});
+//   return { shouldTimerRun, totalTimes };
+// };
+
+// const RenderTotalTime = ({ stepTimes }: any) => {
+//   const [time, setTime] = useState(null);
+//   useEffect(() => {
+//     const { shouldTimerRun, totalTimes } = getTotalTime(stepTimes);
+//     let interval;
+//     if (shouldTimerRun) {
+//       let currentDifference = totalTimes;
+//       interval = setInterval(() => {
+//         currentDifference += 1000;
+//         setTime(convertMsToTime(currentDifference));
+//       }, 1000);
+//     } else {
+//       setTime(convertMsToTime(totalTimes));
+//     }
+//     return () => {
+//       clearInterval(interval);
+//     };
+//   }, [stepTimes]);
+
+//   if (stepTimes.length === 0) return <></>;
+//   return (
+//     <Box
+//       style={{
+//         display: 'flex',
+//         flexWrap: 'wrap',
+//         alignItems: 'center',
+//         border: '1px solid #E7E7E7',
+//         backgroundColor: 'transparent',
+//         padding: '2px 7px',
+//         borderRadius: '16px',
+//         color: '#3B435C'
+//       }}
+//     >
+//       <AccessTimeIcon style={{ marginRight: '3px', fontSize: '1rem' }} />
+//       {time}
+//     </Box>
+//   );
+// };
+
+// const RenderStatusIcon = ({ stepStatus }: { stepStatus: string }) => {
+//   return (
+//     <>
+//       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.passed && (
+//         <HtmlTooltip title={stepStatus}>
+//           <Box style={{ color: '#4BAE4F', fontSize: '25px' }}>
+//             <AiFillCheckCircle style={{ display: 'block' }} />
+//           </Box>
+//         </HtmlTooltip>
+//       )}
+//       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.failed && (
+//         <HtmlTooltip title={stepStatus}>
+//           <Box style={{ color: '#F25F54', fontSize: '25px' }}>
+//             <AiFillExclamationCircle style={{ display: 'block' }} />
+//           </Box>
+//         </HtmlTooltip>
+//       )}
+//     </>
+//   );
+// };

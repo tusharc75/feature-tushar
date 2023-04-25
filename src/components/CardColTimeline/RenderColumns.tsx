@@ -8,10 +8,9 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   cardDataRows: datarowInterface[];
   passFailStatus?: boolean;
   passFailAccessor?: string;
-  cardTitleAccessor: string;
 }
 
-const RenderColumns: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, passFailStatus, passFailAccessor, cardTitleAccessor }) => {
+const RenderColumns: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, passFailStatus, passFailAccessor }) => {
   return (
     <div>
       {data.map((colData) => (
@@ -21,7 +20,6 @@ const RenderColumns: React.FC<colDataInterface> = ({ data, cardOnClick, cardData
           cardDataRows={cardDataRows}
           passFailStatus={passFailStatus}
           passFailAccessor={passFailAccessor}
-          cardTitleAccessor={cardTitleAccessor}
         />
       ))}
     </div>

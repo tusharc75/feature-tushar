@@ -12,7 +12,6 @@ interface cardColInterface extends BoxProps {
   cardDataRows: datarowInterface[];
   passFailStatus?: boolean;
   passFailAccessor?: string;
-  cardTitleAccessor: string;
   xs?: boolean | GridSize;
   sm?: boolean | GridSize;
   md?: boolean | GridSize;
@@ -22,8 +21,9 @@ interface cardColInterface extends BoxProps {
 
 export interface datarowInterface {
   accessor: string;
-  title: string;
-  type: 'date' | 'dateTime' | 'text' | 'timer';
+  title?: string;
+  type: 'date' | 'dateTime' | 'text' | 'timer' | 'link' | 'title' | 'linkTitle';
+  link?: (data: any) => string;
 }
 
 const CardColTimeline: React.FC<cardColInterface> = ({
@@ -33,7 +33,6 @@ const CardColTimeline: React.FC<cardColInterface> = ({
   cardDataRows,
   passFailStatus = true,
   passFailAccessor = 'passfail',
-  cardTitleAccessor = '',
   className = '',
   xs = 12,
   sm = 6,
@@ -86,7 +85,6 @@ const CardColTimeline: React.FC<cardColInterface> = ({
                   cardDataRows={cardDataRows}
                   passFailStatus={passFailStatus}
                   passFailAccessor={passFailAccessor}
-                  cardTitleAccessor={cardTitleAccessor}
                 />
               )}
             </Grid>
@@ -99,7 +97,14 @@ const CardColTimeline: React.FC<cardColInterface> = ({
 
 export default CardColTimeline;
 
-export function groupBy(objectArray: any, property: string) {
+interface groupByinterface {
+  objectArray: any[];
+  property: string;
+  sortBy?: string[];
+}
+
+export function groupBy({ objectArray, property, sortBy = [] }: groupByinterface) {
+  objectArray.sort((a, b) => sortBy.indexOf(a[property]) - sortBy.indexOf(b[property]));
   return objectArray.reduce((acc, obj) => {
     const key = obj[property];
     if (!acc[key]) {
