@@ -738,6 +738,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                       (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
                       <Steps
                         workOrderId={workOrderId}
+                        warehouse={workOrderData?.warehouse?.optionValue}
                         selectedService={selectedService}
                         allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                         setDisableCompleteFail={setDisableCompleteFail}
@@ -1149,6 +1150,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           uniqueId={consumablesDialog.uniqueId}
           stepId={consumablesDialog.stepId}
           serviceName={consumablesDialog.serviceName}
+          warehouse={workOrderData?.warehouse?.optionValue}
         />
       )}
       {logsDialog && (

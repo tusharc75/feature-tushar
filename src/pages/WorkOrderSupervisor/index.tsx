@@ -20,8 +20,7 @@ import moment from 'moment';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { dateFormatForInputControl } from '../../constants/helpers';
 import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import styles from './index.module.scss';
-import RenderColumns from './RenderColumns';
+import CardColTimeline, { datarowInterface } from 'src/components/CardColTimeline';
 
 const WorkOrderSupervisor = () => {
   const renderedFrom = camelCase(routes?.workOrderSupervisor?.title);
@@ -112,6 +111,7 @@ const WorkOrderSupervisor = () => {
         finalObject['serviceName'] = u?.service?.optionLabel;
         finalObject['assignedUser'] = u?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
         finalObject['createDate'] = u?.workOrderDetail?.createDate;
+        finalObject['workOrderId'] = u?.workOrderDetail?._id;
 
         if (u.status === 'Pending') {
           pending.push(finalObject);
@@ -127,7 +127,15 @@ const WorkOrderSupervisor = () => {
         };
       });
 
-      dispatch({ type: 'initialize', data: { Pending: pending, 'In-Progress': inProgress, Completed: completed }, count: count });
+      dispatch({
+        type: 'initialize',
+        data: {
+          Pending: { data: pending, color: '#F8A300' },
+          'In-Progress': { data: inProgress, color: '#F16A9A' },
+          Completed: { data: completed, color: '#31AC1D' }
+        },
+        count: count
+      });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -195,6 +203,13 @@ const WorkOrderSupervisor = () => {
       });
     });
   }
+
+  const cardDataRows: datarowInterface[] = [
+    { accessor: 'workOrder', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?.workOrderId}` },
+    { accessor: 'serviceName', title: 'Service Name', type: 'text' },
+    { accessor: 'assignedUser', title: 'Technician', type: 'text' },
+    { accessor: 'createDate', title: 'Due Date', type: 'date' }
+  ];
 
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -336,40 +351,16 @@ const WorkOrderSupervisor = () => {
             //   refreshGrid={fetchData}
             //   showOnlyShowFilteredRecordSwitch={true}
             // />
-            <Box className={styles.container}>
-              <Grid container spacing={3}>
-                {Object.keys(dataRows).map((col) => {
-                  return (
-                    <Grid
-                      item
-                      xs={12}
-                      sm={6}
-                      md={4}
-                      className={styles.singleCol}
-                      style={
-                        {
-                          '--bg': col === 'Completed' ? '#31AC1D' : col === 'In-Progress' ? '#F16A9A' : '#F8A300',
-                          '--border': col === 'Completed' ? '#F1FEED' : col === 'In-Progress' ? '#FFF3FA' : '#FFFEEF',
-                          '--color': col === 'Completed' ? '#31AC1D' : col === 'In-Progress' ? '#F16A9A' : '#F8A300'
-                        } as React.CSSProperties
-                      }
-                    >
-                      <Typography className={styles.colTitle}>
-                        <span></span>
-                        {col} ({loading ? '--' : dataRows[col].length})
-                      </Typography>
-                      {loading ? (
-                        <Box p={2} height={500} bgcolor="white">
-                          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                        </Box>
-                      ) : (
-                        <RenderColumns colData={dataRows[col]} />
-                      )}
-                    </Grid>
-                  );
-                })}
-              </Grid>
-            </Box>
+            <>
+              <CardColTimeline
+                data={dataRows}
+                loading={loading}
+                cardDataRows={cardDataRows}
+                passFailStatus={true}
+                passFailAccessor="serviceStatus"
+                px={2}
+              />
+            </>
           ) : (
             <Box p={2} height={500} bgcolor="white">
               <CommonSkeleton lenArray={[...Array(10).keys()]} />

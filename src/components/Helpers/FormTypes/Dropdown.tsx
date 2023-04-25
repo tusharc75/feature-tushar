@@ -9,6 +9,7 @@ import { getNestedlookupDependentOn, sidebarResource } from 'src/constants/helpe
 import ManageWellMaster from 'src/pages/WellMaster/ManageWellMaster';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
 import ManageStorageLocation from 'src/pages/StorageLocation/ManageStorageLocation';
+import { camelCase } from 'lodash';
 
 function Dropdown({
     InfoLabel,
@@ -50,7 +51,7 @@ function Dropdown({
                         options={(fieldData && fieldData?.isDependentDropdown) ?
                             option?.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn]) :
                             (fieldData && fieldData?.lookupDependentOn) ?
-                                option?.filter((_f) => _f[fieldData?.lookupDependentOn] === values[fieldData?.lookupDependentOn]) :
+                                option?.filter((_f) => _f[camelCase(allFields?.find((e) => e.fieldName === fieldData?.lookupDependentOn)?.lookupResource) || fieldData?.lookupDependentOn] === values[fieldData?.lookupDependentOn]) :
                                 option?.filter(f => f?.optionLabel)}
                         freeSolo={type === 'dropDown' && !lookup}
                         getOptionLabel={(option: any) => (option ? option.optionLabel : '')}

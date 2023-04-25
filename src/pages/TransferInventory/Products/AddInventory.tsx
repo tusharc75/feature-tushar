@@ -18,16 +18,8 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import routes from 'src/components/Helpers/Routes';
 
-interface Props {
-  plantId: string;
-  close: () => any;
-  isAdding?: boolean;
-  submit: (p: any[]) => any;
-  renderedFrom: string;
-  existingProducts: any[];
-}
 
-const AddInventory = ({ plantId, close, isAdding, submit, renderedFrom, ignoreIds }) => {
+const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, renderedFrom, ignoreIds }) => {
 
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
@@ -91,8 +83,7 @@ const AddInventory = ({ plantId, close, isAdding, submit, renderedFrom, ignoreId
       gridApi.setRowData([]);
     }
     const queryString = getQueryString();
-    axiosInstance()
-      .get(`${productInventory.api}?wareHouse=${plantId}&${queryString}`)
+    axiosInstance().get(`${productInventory.api}?wareHouse=${warehouse}&${queryString}`)
       .then(({ data: { data, count } }) => {
         const selectedProducts = getLocalStorageArrayData(localStorageSelectedRecords);
         let rows = data?.map((u: any) => {
@@ -128,6 +119,10 @@ const AddInventory = ({ plantId, close, isAdding, submit, renderedFrom, ignoreId
 
     let deepFilter = `page=${page}&limit=${limit}`;
 
+    if (storageLocation) {
+      deepFilter = deepFilter + `&storageLocation=${storageLocation}`
+    }
+
     if (ignoreIds?.length) {
       deepFilter = deepFilter + `&ignoreIds=${JSON.stringify(ignoreIds)}`
     }
@@ -136,7 +131,7 @@ const AddInventory = ({ plantId, close, isAdding, submit, renderedFrom, ignoreId
     if (!user?.user?.brandPolicy?.showSerializedProduct) {
       updatedFilters.push({ field: 'serializedProduct', term: 'No' });
     }
-    
+
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({

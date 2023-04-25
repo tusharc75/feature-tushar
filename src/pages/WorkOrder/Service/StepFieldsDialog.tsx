@@ -18,6 +18,8 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { RenderPassFailChip } from './Steps';
 import { MdKeyboardArrowDown } from 'react-icons/md';
+import ControlPointIcon from '@material-ui/icons/ControlPoint';
+import { AddField } from 'src/components/FormBuilder/AddField';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -110,6 +112,8 @@ const StepFieldsDialog = ({
   const containerRef = React.useRef(null);
   const [height, setHeight] = React.useState(0);
   const [isVisible, setIsVisible] = React.useState(true);
+  const [isAddField, setIsAddField] = React.useState(false);
+  const [sectionName, setSectionName] = React.useState("");
 
   const steps = selectedService?.steps || [];
 
@@ -217,6 +221,38 @@ const StepFieldsDialog = ({
       });
   };
 
+  const handleOpenAddField = (event, name) => {
+    event.stopPropagation()
+    setSectionName(name)
+    setIsAddField(true)
+  }
+
+  const handleCloseAddField = () => {
+    setSectionName("")
+    setIsAddField(false)
+
+  }
+
+  const handleAddField = (field: any) => {
+    field.sectionName = sectionName;
+    axiosInstance()
+      .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/${step?._id}/add-field`, field)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        handleCloseAddField();
+        handleClose()
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        handleClose()
+      });
+  }
+
+
   return (
     <>
       <div className={`${styles.sidebarContainer} ${styles.active}`}>
@@ -253,9 +289,14 @@ const StepFieldsDialog = ({
                         fieldData?.formsData?.map((form, index1) => {
                           return form?.name ? (
                             <div key={index1}>
-                              <div className={`detail-box-content ${styles.formHead}`} style={{ color: 'white' }}>
-                                <FaDiceOne size={16} color={'inherit'} style={{ marginRight: '5px', float: 'left' }} />
-                                <h2>{form?.name}</h2>
+                              <div className={`detail-box-content ${styles.formHead}`} style={{ color: 'white', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex' }}>
+                                  <FaDiceOne size={16} color={'inherit'} style={{ marginRight: '5px', float: 'left' }} />
+                                  <h2>{form?.name}</h2>
+                                </div>
+                                <IconButton style={{ padding: "0px", marginTop: "-5px" }} color="primary" size="small" onClick={(e) => handleOpenAddField(e, form.name)} >
+                                  <ControlPointIcon style={{ paddingTop: "2px", color: "white" }} />
+                                </IconButton>
                               </div>
                               <Box marginY={2}>
                                 <Grid spacing={2} container>
@@ -408,6 +449,9 @@ const StepFieldsDialog = ({
           uniqueId={selectedService?.uniqueId}
         />
       )}
+
+      {isAddField && <AddField refrence="formAdd" fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={fieldData.fields} />}
+
     </>
   );
 };

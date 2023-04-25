@@ -8,6 +8,7 @@ import GridFilter from '../GridFilter';
 
 // OTHER COMPONENTS
 import { RefreshButton, ArrangeView, ShowOnlySelected } from './GridButtons';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 const CustomGridFilterHeader = (props) => {
   const {
@@ -69,6 +70,7 @@ const CustomGridFilterHeader = (props) => {
             <DisplyaFilters
               selectedFilter={selectedFilter}
               chipData={chipData}
+              currentGridApi={currentGridApi}
               handleFilterOpen={handleFilterOpen}
               clearSingleFilter={clearSingleFilter}
               clearFilterAll={clearFilterAll}
@@ -77,7 +79,7 @@ const CustomGridFilterHeader = (props) => {
         </div>
         <div style={{ marginInlineStart: 'auto' }}>
           {showFilters && (
-            <Tooltip title="Apply filter" placement="top">
+            <HtmlTooltip title="Apply filter" placement="top">
               <Button
                 style={{ marginRight: buttonGap, color: '#424242' }}
                 startIcon={<BiFilterAlt />}
@@ -87,7 +89,7 @@ const CustomGridFilterHeader = (props) => {
               >
                 Filter
               </Button>
-            </Tooltip>
+            </HtmlTooltip>
           )}
           <ArrangeView
             setSelectedReportView={setSelectedReportView}
@@ -126,12 +128,14 @@ export default CustomGridFilterHeader;
 
 // THIS COMPONENT WILL DISPLAY CHIPS ===============================>
 const DisplyaFilters = (props) => {
-  const { selectedFilter, chipData, handleFilterOpen, clearSingleFilter, clearFilterAll } = props;
+  const { selectedFilter, chipData, handleFilterOpen, clearSingleFilter, clearFilterAll, currentGridApi } = props;
   const [hiddenItems, setHiddenItems] = useState(0);
   const isAppliedFilterPresent = Object.keys(selectedFilter || {}).length > 0;
   const containerRef = useRef(null);
   const countRef = useRef(null);
   const COUNT_PADDING = 10;
+
+  console.log({ activeFilters: currentGridApi?.filterManage?.activeAdvancedFilters, currentGridApi });
 
   useEffect(() => {
     setHiddenItems(0);

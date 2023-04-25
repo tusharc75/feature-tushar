@@ -17,7 +17,7 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import ConsumablesQtyDialog from './ConsumablesQtyDialog';
 
-const Consumables = ({ workOrderId, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
+const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
 
   let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
@@ -93,16 +93,17 @@ const Consumables = ({ workOrderId, isCreate, allowedToEdit, service, uniqueId, 
         canDrag: false,
         Cell: ({ row }: any) => (
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            {!row?.original?.consumedQty && allowedToEdit && (
+            {allowedToEdit && (
               <HtmlTooltip title="Delete">
                 <IconButton
                   size="small"
                   aria-label="Delete"
+                  disabled={row?.original?.consumedQty ? true : false}
                   onClick={() => {
                     handleDelete([row.original]);
                   }}
                 >
-                  <DeleteIcon color="error" />
+                  <DeleteIcon color={row?.original?.consumedQty ? "disabled" : "error"} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -289,10 +290,8 @@ const Consumables = ({ workOrderId, isCreate, allowedToEdit, service, uniqueId, 
             fetchData();
             setOpenConsumablesQtyDialog(false);
           }}
+          warehouse={warehouse}
           selectedRecords={selectedRecords?.filter((e) => !e?.hideSelection)}
-          service={service}
-          uniqueId={uniqueId}
-          stepId={stepId}
           serviceName={serviceName}
         />
       )}
