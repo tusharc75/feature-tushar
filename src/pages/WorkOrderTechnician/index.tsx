@@ -39,6 +39,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import CloseIcon from '@material-ui/icons/Close';
 
+import CardColTimeline, { datarowInterface, groupBy } from 'src/components/CardColTimeline';
+
 const useStyles = makeStyles(() => ({
   activityMainBlock: {
     marginTop: '20Px',
@@ -169,18 +171,36 @@ const WorkOrderTechnician = () => {
 
   const [showFilter, setShowFilter] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [servicesToKeep, setServicesToKeep] = useState(['pending', 'inProgress']);
+  const [servicesToKeep, setServicesToKeep] = useState(['Pending', 'In-Progress']);
+
+  const [cardData, setCardData] = useState(null);
 
   const {
     state: { permissions }
   }: any = useData();
 
-  const WORKORDER_TECHNICIAN_SERVICE_STATUS = {
-    backlog: 'Backlog',
-    pending: 'Pending',
-    inProgress: 'In-Progress',
-    completed: 'Completed'
-  };
+  const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed'];
+
+  useEffect(() => {
+    let data = serviceData
+      .filter((item) => servicesToKeep.includes(item.status))
+      .map((item) => {
+        const newObj = { ...item };
+        newObj['serviceName'] = item.service?.serviceName;
+        newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
+        newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
+        newObj['status'] = item.status;
+        return newObj;
+      });
+    data = groupBy(data, 'status');
+    setCardData(data);
+  }, [serviceData, servicesToKeep]);
+
+  const cardDataRows: datarowInterface[] = [
+    { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
+    { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
+    { accessor: 'stepData', title: 'Time', type: 'timer' }
+  ];
 
   const WORKORDER_STATUS_COLOR = {
     pending: '#FFFFE0',
@@ -298,13 +318,13 @@ const WorkOrderTechnician = () => {
                 <Autocomplete
                   fullWidth
                   multiple
-                  options={Object.keys(WORKORDER_TECHNICIAN_SERVICE_STATUS) || []}
+                  options={WORKORDER_TECHNICIAN_SERVICE_STATUS || []}
                   disableCloseOnSelect
-                  getOptionLabel={(option) => WORKORDER_TECHNICIAN_SERVICE_STATUS[option]}
+                  getOptionLabel={(option) => option}
                   renderOption={(option: any, { selected }: any) => (
                     <React.Fragment>
                       <Checkbox disabled={['pending', 'inProgress']?.includes(option)} checked={servicesToKeep?.includes(option)} />
-                      {WORKORDER_TECHNICIAN_SERVICE_STATUS[option]}
+                      {option}
                     </React.Fragment>
                   )}
                   size="small"
@@ -316,14 +336,14 @@ const WorkOrderTechnician = () => {
                         <Chip
                           style={
                             {
-                              color:
-                                option === 'backlog' ? '#7F75EB' : option === 'pending' ? '#F8A300' : option === 'inProgress' ? '#F16A9A' : '#31AC1D',
-                              background:
-                                option === 'backlog' ? '#F9F6FF' : option === 'pending' ? '#FFFEEF' : option === 'inProgress' ? '#FFF3FA' : '#F1FEED',
+                              // color:
+                              //   option === 'backlog' ? '#7F75EB' : option === 'pending' ? '#F8A300' : option === 'inProgress' ? '#F16A9A' : '#31AC1D',
+                              // background:
+                              //   option === 'backlog' ? '#F9F6FF' : option === 'pending' ? '#FFFEEF' : option === 'inProgress' ? '#FFF3FA' : '#F1FEED',
                               fontWeight: 600
                             } as React.CSSProperties
                           }
-                          label={WORKORDER_TECHNICIAN_SERVICE_STATUS[option]}
+                          label={option}
                           deleteIcon={<CloseIcon style={{ color: '#000000', width: '14px' }} />}
                           {...getTagProps({ index })}
                         />
@@ -331,7 +351,7 @@ const WorkOrderTechnician = () => {
                     })
                   }
                   onChange={(event: any, newValue: any) => {
-                    if (!newValue.includes('pending') || !newValue.includes('inProgress')) {
+                    if (!newValue.includes('Pending') || !newValue.includes('In-Progress')) {
                       return;
                     }
                     setServicesToKeep(newValue);
@@ -347,127 +367,143 @@ const WorkOrderTechnician = () => {
             </IconButton>
           </Box>
         </Box>
-        <Box className={classes.taskContainer}>
+        {cardData && (
+          <CardColTimeline
+            mt={3}
+            data={cardData}
+            loading={loading}
+            cardDataRows={cardDataRows}
+            passFailStatus={true}
+            passFailAccessor="serviceStatus"
+            cardTitleAccessor="serviceName"
+            sm={6}
+            md={4}
+            lg={3}
+            cardOnClick={(e, data) => {
+              let tempServiceData = data?.service;
+              tempServiceData['uniqueId'] = data?._id;
+              tempServiceData['status'] = data?.status;
+              tempServiceData['assetNumber'] = data?.workOrderDetail?.serializedAsset?.optionLabel;
+              tempServiceData['assetId'] = data?.workOrderDetail?.serializedAsset?.optionValue;
+              tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
+              setSelectedService(tempServiceData);
+              setServiceOpen(true);
+            }}
+          />
+        )}
+        {/* <Box className={classes.taskContainer}>
           <Grid container spacing={2} className={` ${classes.activityMainBlock}`}>
-            {Object.keys(WORKORDER_TECHNICIAN_SERVICE_STATUS)
-              ?.filter((key) => {
-                return servicesToKeep.includes(key);
-              })
-              ?.map((key, i) => {
-                return (
-                  <Grid item md={3} xs={12} sm={4} style={{ paddingTop: '0px' }} key={i} className={`${classes.mediumDevice} ${classes.columns}`}>
-                    <div
-                      className={`${classes.block}
-                     ${WORKORDER_TECHNICIAN_SERVICE_STATUS[key] === WORKORDER_TECHNICIAN_SERVICE_STATUS.backlog ? classes.backlog : ''}
-                     ${WORKORDER_TECHNICIAN_SERVICE_STATUS[key] === WORKORDER_TECHNICIAN_SERVICE_STATUS.pending ? classes.pending : ''}
-                     ${WORKORDER_TECHNICIAN_SERVICE_STATUS[key] === WORKORDER_TECHNICIAN_SERVICE_STATUS.inProgress ? classes.inProgress : ''}
-                     ${WORKORDER_TECHNICIAN_SERVICE_STATUS[key] === WORKORDER_TECHNICIAN_SERVICE_STATUS.completed ? classes.completed : ''}
+            {WORKORDER_TECHNICIAN_SERVICE_STATUS?.filter((key) => {
+              return servicesToKeep.includes(key);
+            })?.map((key, i) => {
+              return (
+                <Grid item md={3} xs={12} sm={4} style={{ paddingTop: '0px' }} key={i} className={`${classes.mediumDevice} ${classes.columns}`}>
+                  <div
+                    className={`${classes.block}
+                     ${key === WORKORDER_TECHNICIAN_SERVICE_STATUS[0] ? classes.backlog : ''}
+                     ${key === WORKORDER_TECHNICIAN_SERVICE_STATUS[1] ? classes.pending : ''}
+                     ${key === WORKORDER_TECHNICIAN_SERVICE_STATUS[2] ? classes.inProgress : ''}
+                     ${key === WORKORDER_TECHNICIAN_SERVICE_STATUS[3] ? classes.completed : ''}
                     `}
-                    >
-                      <Box p={1} className={classes.fixedTopHead}>
-                        <Typography variant="subtitle2" className={classes.sectionName}>
-                          <span className={classes.nameShape}></span>
-                          {WORKORDER_SERVICE_STATUS[key]}
-                          {' (' + serviceData?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key]).length + ')'}
-                        </Typography>
-                      </Box>
-                      {!loading
-                        ? serviceData
-                            ?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key])
-                            .map((data, index) => {
-                              const stepTime = getFieldsWithOtherDetails(data?.stepData || []);
+                  >
+                    <Box p={1} className={classes.fixedTopHead}>
+                      <Typography variant="subtitle2" className={classes.sectionName}>
+                        <span className={classes.nameShape}></span>
+                        {key}
+                        {' (' + serviceData?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key]).length + ')'}
+                      </Typography>
+                    </Box>
+                    {!loading
+                      ? serviceData
+                          ?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key])
+                          .map((data, index) => {
+                            const stepTime = getFieldsWithOtherDetails(data?.stepData || []);
 
-                              return (
-                                <Box
-                                  key={index}
-                                  onClick={() => {
-                                    let tempServiceData = data?.service;
-                                    tempServiceData['uniqueId'] = data?._id;
-                                    tempServiceData['status'] = data?.status;
-                                    tempServiceData['assetNumber'] = data?.workOrderDetail?.serializedAsset?.optionLabel;
-                                    tempServiceData['assetId'] = data?.workOrderDetail?.serializedAsset?.optionValue;
-                                    tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
-                                    setSelectedService(tempServiceData);
-                                    setServiceOpen(true);
-                                  }}
-                                  className={` ${classes.activitybox}
+                            return (
+                              <Box
+                                key={index}
+                                onClick={() => {
+                                  let tempServiceData = data?.service;
+                                  tempServiceData['uniqueId'] = data?._id;
+                                  tempServiceData['status'] = data?.status;
+                                  tempServiceData['assetNumber'] = data?.workOrderDetail?.serializedAsset?.optionLabel;
+                                  tempServiceData['assetId'] = data?.workOrderDetail?.serializedAsset?.optionValue;
+                                  tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
+                                  setSelectedService(tempServiceData);
+                                  setServiceOpen(true);
+                                }}
+                                className={` ${classes.activitybox}
                                    
                                   `}
-                                >
-                                  <Box>
-                                    <Grid container>
-                                      <Grid item xs={12}>
-                                        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                                          <Box display="flex">
-                                            <Typography
-                                              style={{
-                                                textOverflow: 'ellipsis',
-                                                overflow: 'hidden',
-                                                whiteSpace: 'nowrap',
-                                                marginRight: '5px'
-                                              }}
-                                              variant="subtitle2"
-                                            >
-                                              {data?.service?.serviceName}
-                                            </Typography>
-                                          </Box>
-                                          <Box ml={1}>
-                                            <RenderTotalTime stepTimes={stepTime} />
-                                          </Box>
-                                        </div>
-                                        <Box mt={1} mr={1}>
-                                          <Chip
-                                            size="small"
-                                            label={`Work Order : ${data?.workOrderDetail?.workOrderNumber}`}
+                              >
+                                <Box>
+                                  <Grid container>
+                                    <Grid item xs={12}>
+                                      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                                        <Box display="flex">
+                                          <Typography
                                             style={{
-                                              color: 'var(--chip-color)',
-                                              borderColor: 'var(--chip-border-color)',
-                                              background: 'var(--chip-bg-color)'
+                                              textOverflow: 'ellipsis',
+                                              overflow: 'hidden',
+                                              whiteSpace: 'nowrap',
+                                              marginRight: '5px'
                                             }}
-                                          />
+                                            variant="subtitle2"
+                                          >
+                                            {data?.service?.serviceName}
+                                          </Typography>
                                         </Box>
-                                        <Box
-                                          display={'flex'}
-                                          alignItems={'center'}
-                                          justifyContent={'space-between'}
-                                          flexWrap={'wrap'}
-                                          gridGap={'8px'}
-                                        >
-                                          {data?.workOrderDetail?.serializedAsset?.optionLabel && (
-                                            <Box mt={1}>
-                                              <Chip
-                                                variant="outlined"
-                                                size="small"
-                                                label={`Asset : ${data?.workOrderDetail?.serializedAsset?.optionLabel}`}
-                                                style={{ color: 'var(--chip-color)', borderColor: 'var(--chip-border-color)' }}
-                                              />
-                                            </Box>
-                                          )}
-                                          {data?.serviceStatus && (
-                                            <Box ml={1}>
-                                              <RenderStatusIcon stepStatus={data?.serviceStatus} />
-                                            </Box>
-                                          )}
+                                        <Box ml={1}>
+                                          <RenderTotalTime stepTimes={stepTime} />
                                         </Box>
-                                      </Grid>
+                                      </div>
+                                      <Box mt={1} mr={1}>
+                                        <Chip
+                                          size="small"
+                                          label={`Work Order : ${data?.workOrderDetail?.workOrderNumber}`}
+                                          style={{
+                                            color: 'var(--chip-color)',
+                                            borderColor: 'var(--chip-border-color)',
+                                            background: 'var(--chip-bg-color)'
+                                          }}
+                                        />
+                                      </Box>
+                                      <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} flexWrap={'wrap'} gridGap={'8px'}>
+                                        {data?.workOrderDetail?.serializedAsset?.optionLabel && (
+                                          <Box mt={1}>
+                                            <Chip
+                                              variant="outlined"
+                                              size="small"
+                                              label={`Asset : ${data?.workOrderDetail?.serializedAsset?.optionLabel}`}
+                                              style={{ color: 'var(--chip-color)', borderColor: 'var(--chip-border-color)' }}
+                                            />
+                                          </Box>
+                                        )}
+                                        {data?.serviceStatus && (
+                                          <Box ml={1}>
+                                            <RenderStatusIcon stepStatus={data?.serviceStatus} />
+                                          </Box>
+                                        )}
+                                      </Box>
                                     </Grid>
-                                  </Box>
+                                  </Grid>
                                 </Box>
-                              );
-                            })
-                        : [...Array(3).keys()]?.map((data, index) => {
-                            return (
-                              <Box key={index} className={` ${classes.activitybox}`} style={{ padding: '0' }}>
-                                <Skeleton variant="rect" animation="wave" width={'100%'} height={100} style={{ borderRadius: '16px' }} />
                               </Box>
                             );
-                          })}
-                    </div>
-                  </Grid>
-                );
-              })}
+                          })
+                      : [...Array(3).keys()]?.map((data, index) => {
+                          return (
+                            <Box key={index} className={` ${classes.activitybox}`} style={{ padding: '0' }}>
+                              <Skeleton variant="rect" animation="wave" width={'100%'} height={100} style={{ borderRadius: '16px' }} />
+                            </Box>
+                          );
+                        })}
+                  </div>
+                </Grid>
+              );
+            })}
           </Grid>
-        </Box>
+        </Box> */}
       </Box>
       {serviceOpen && (
         <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
@@ -501,7 +537,7 @@ const WorkOrderTechnician = () => {
             <Steps
               workOrderId={selectedService?.workOrderId}
               selectedService={selectedService}
-              allowedToEdit={selectedService?.status === WORKORDER_TECHNICIAN_SERVICE_STATUS.backlog ? false : true}
+              allowedToEdit={selectedService?.status === WORKORDER_TECHNICIAN_SERVICE_STATUS[0] ? false : true}
               setDisableCompleteFail={() => {}}
               fetchService={fetchWorkOrderTechnician}
               referencType={'workOrderTechnician'}
