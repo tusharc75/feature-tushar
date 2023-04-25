@@ -15,7 +15,6 @@ import {
 import { Autocomplete } from '@material-ui/lab';
 import { FieldArray, Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -31,7 +30,7 @@ const useClasses = makeStyles(() => ({
   }
 }));
 
-const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords, serviceName }) => {
+const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, selectedRecords, serviceName }) => {
 
   const classes = useClasses();
   const toastConfig = useContext(CustomToastContext);
@@ -41,7 +40,7 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [fullScreen, setFullScreen] = useState(true);
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
 
   const validate = (values) => {
@@ -49,7 +48,7 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
     if (values?.length > 0) {
       values.map((d) => {
         if (user?.user?.brandPolicy?.storageLocation && !d.storageLocation) {
-          errors.storageLocation = 'Storage Location is required .';
+          errors.storageLocation = 'Storage Location is required';
         }
         let tempProduct = selectedRecords.find((u) => u._id === d._id);
         let qty = tempProduct.qty;
@@ -98,9 +97,8 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
         if (data[sidebarResource.storageLocation]) {
-          // const storageLocationOption = data[sidebarResource.storageLocation]?.filter(e => e.warehouse === warehouse);
-          // setStorageLocationOptions(storageLocationOption);
-          setStorageLocationOptions(data[sidebarResource.storageLocation]);
+          const storageLocationOption = data[sidebarResource.storageLocation]?.filter(e => e.warehouse === warehouse);
+          setStorageLocationOptions(storageLocationOption);
         }
       });
   };
@@ -114,7 +112,7 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
   return (
     <Dialog
       open
-      fullScreen={fullScreen || isMobile || isTablet}
+      fullScreen={fullScreen}
       maxWidth="md"
       fullWidth
       onClose={(e, reason) => {
@@ -179,7 +177,6 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
                                     user?.user?.brandPolicy?.storageLocation &&
                                     <TableCell align="left">
                                       <Autocomplete
-                                        disableClearable
                                         options={storageLocationOptions}
                                         getOptionLabel={(option: any) => option ? option.optionLabel : ''}
                                         getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -196,6 +193,8 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
                                             style={{ minWidth: '200px' }}
                                             margin="dense"
                                             name="storageLocation"
+                                            label="Storage Location"
+                                            placeholder="Storage Location"
                                             variant="outlined"
                                             fullWidth
                                             required
@@ -211,12 +210,13 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
                                       fullWidth
                                       size="small"
                                       variant="outlined"
-                                      placeholder={'qty'}
                                       autoComplete="off"
                                       name={'qty'}
                                       disabled={true}
                                       type="number"
                                       value={value['qty']}
+                                      label="Qty"
+                                      placeholder="Qty"
                                     />
                                   </TableCell>
                                   <TableCell align="left">
@@ -224,7 +224,6 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
                                       fullWidth
                                       size="small"
                                       variant="outlined"
-                                      placeholder={'Consume Qty'}
                                       autoComplete="off"
                                       name={'consumedQty'}
                                       type="number"
@@ -239,6 +238,8 @@ const ConsumablesQtyDialog = ({ workOrderId, onClose, onSuccess, selectedRecords
                                           consumedQty: value
                                         });
                                       }}
+                                      label="Consume Qty"
+                                      placeholder="Consume Qty"
                                       helperText={validate([value])?.consumedQty ? 'Consume Qty is limited to Qty.' : ''}
                                     />
                                   </TableCell>
