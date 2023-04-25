@@ -13,11 +13,11 @@ interface cardColInterface extends BoxProps {
   passFailStatus?: boolean;
   passFailAccessor?: string;
   cardTitleAccessor: string;
-  xs?: GridSize;
-  sm?: GridSize;
-  md?: GridSize;
-  lg?: GridSize;
-  xl?: GridSize;
+  xs?: boolean | GridSize;
+  sm?: boolean | GridSize;
+  md?: boolean | GridSize;
+  lg?: boolean | GridSize;
+  xl?: boolean | GridSize;
 }
 
 export interface datarowInterface {
@@ -38,8 +38,8 @@ const CardColTimeline: React.FC<cardColInterface> = ({
   xs = 12,
   sm = 6,
   md = 4,
-  lg = 4,
-  xl = 4,
+  lg = false,
+  xl = false,
   ...others
 }) => {
   return (
