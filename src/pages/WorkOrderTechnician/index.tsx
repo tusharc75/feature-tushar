@@ -196,15 +196,10 @@ const WorkOrderTechnician = () => {
         newObj['status'] = item.status;
         return newObj;
       });
-    data = groupBy(data, 'status');
+
+    data = groupBy({ objectArray: data, property: 'status', sortBy: WORKORDER_TECHNICIAN_SERVICE_STATUS });
     setCardData(data);
   }, [serviceData, servicesToKeep]);
-
-  const cardDataRows: datarowInterface[] = [
-    { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
-    { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
-    { accessor: 'stepData', title: 'Time', type: 'timer' }
-  ];
 
   const WORKORDER_STATUS_COLOR = {
     pending: '#FFFFE0',
@@ -270,6 +265,13 @@ const WorkOrderTechnician = () => {
   //   });
   //   return stepTimes;
   // };
+
+  const cardDataRows: datarowInterface[] = [
+    { accessor: 'serviceName', type: 'title' },
+    { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
+    { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
+    { accessor: 'stepData', title: 'Time', type: 'timer' }
+  ];
 
   return (
     <Box className="main-container-v1">
@@ -379,7 +381,6 @@ const WorkOrderTechnician = () => {
             cardDataRows={cardDataRows}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
-            cardTitleAccessor="serviceName"
             sm={6}
             md={4}
             lg={3}
