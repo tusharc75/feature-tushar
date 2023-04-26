@@ -427,7 +427,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
                 setIsAdding(false);
               })
               .catch((error) => {
-                setAddSerializedAssetDialog(false);
                 setIsAdding(false);
                 toastConfig.setToastConfig(error);
               });

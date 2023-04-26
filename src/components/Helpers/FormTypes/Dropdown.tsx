@@ -236,7 +236,7 @@ function Dropdown({
                                                         optionLabel: data.wellNumber,
                                                         optionValue: data._id,
                                                         order: option.length,
-                                                        wellName: data.wellName
+                                                        wellMaster: data.wellName
                                                     }
                                                     addFieldOption(tempNewOption);
                                                     setOptionsList([tempNewOption, ...option]);

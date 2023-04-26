@@ -216,11 +216,12 @@ const WorkOrder = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterWorkOrders=${
-      WorkOrderType[selectedType - 1].key === `My ${routes.workOrder.title}` ? 2 : 1
-    }`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if(WorkOrderType[selectedType - 1].key === `My ${routes.workOrder.title}`){
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterWorkOrders=${selectedType}`;
+      deepFilter = `?`;
     }
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];

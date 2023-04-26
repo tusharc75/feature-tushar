@@ -157,13 +157,23 @@ const Planning = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}&filterPlanning=${selectedType}` : `?filterPlanning=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (isExport) {
+      deepFilter = `?`;
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    const updatedFilters = [];
+    let filterById = [];
+    if (filterById.length > 0) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    }
 
+    const updatedFilters = [];
     if (selectedPlanningType) {
       updatedFilters.push({
         field: replaceFieldName('type'),
