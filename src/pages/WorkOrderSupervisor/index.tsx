@@ -298,7 +298,6 @@ const WorkOrderSupervisor = () => {
                 variant="inline"
                 style={{ width: '150px' }}
                 size="small"
-                disableFuture
                 openTo="year"
                 format={dateFormatForInputControl}
                 maxDate={globalFilters.to}
@@ -316,7 +315,6 @@ const WorkOrderSupervisor = () => {
                 style={{ width: '150px' }}
                 size="small"
                 minDate={globalFilters.from}
-                disableFuture
                 openTo="year"
                 format={dateFormatForInputControl}
                 label="To"

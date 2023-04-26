@@ -786,7 +786,6 @@ const UserDetailsPage = () => {
                                 variant="inline"
                                 fullWidth
                                 autoOk
-                                disableFuture
                                 size="small"
                                 openTo="year"
                                 format={dateFormatForInputControl}
@@ -806,7 +805,6 @@ const UserDetailsPage = () => {
                                 variant="inline"
                                 fullWidth
                                 autoOk
-                                disableFuture
                                 size="small"
                                 minDate={trackingTime.between.from}
                                 openTo="year"

@@ -283,7 +283,6 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
         setAddingProducts(false);
       })
       .catch((error) => {
-        setAddExistingProductDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
       });

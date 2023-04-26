@@ -315,7 +315,6 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
         setAddingProducts(false);
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
       });

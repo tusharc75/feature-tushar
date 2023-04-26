@@ -161,7 +161,6 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters }: Props) => {
                   variant="inline"
                   fullWidth
                   size="small"
-                  disableFuture
                   openTo="year"
                   format={dateFormatForInputControl}
                   maxDate={globalFilters.between.to}
@@ -181,7 +180,6 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters }: Props) => {
                   fullWidth
                   size="small"
                   minDate={globalFilters.between.from}
-                  disableFuture
                   openTo="year"
                   format={dateFormatForInputControl}
                   label="To"

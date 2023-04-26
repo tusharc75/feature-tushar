@@ -322,7 +322,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
                 });
               })
               .catch((error) => {
-                setAddSerializedAssetDialog(false);
                 setIsAdding(false);
                 toastConfig.setToastConfig(error);
               });
