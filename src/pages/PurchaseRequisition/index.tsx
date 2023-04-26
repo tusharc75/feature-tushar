@@ -137,11 +137,19 @@ const PurchaseRequisition = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+    let deepFilter =  `?page=${page}&limit=${limit}` ;
+    if (isExport) {
+      deepFilter = `?`
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
+    let filterById = [];
+    if (filterById.length > 0) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    }
+    
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
