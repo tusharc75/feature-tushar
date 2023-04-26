@@ -151,11 +151,14 @@ const Sublease = () => {
     };
 
     const getQueryString = (isExport = false) => {
-        let deepFilter = `?page=${page}&limit=${limit}&filterSublease=${selectedType}`;
-        let filterById = [];
-        if (isExport) {
-            deepFilter = `filterSublease=${selectedType}`;
+        let deepFilter = `?page=${page}&limit=${limit}`;
+        if (selectedType === 2) {
+            deepFilter = deepFilter + `&myRecords=1`;
         }
+        if (isExport) {
+            deepFilter = `?`;
+        }
+        let filterById = [];
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
         }

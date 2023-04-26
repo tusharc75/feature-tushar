@@ -142,14 +142,14 @@ const TransferInventory = () => {
 
   const getQueryString = (isExport = false) => {
 
-    let deepFilter = `?page=${page}&limit=${limit}&filterTransferInventory=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterTransferInventory=${selectedType}`;
+      deepFilter = `?`;
     }
-    else {
-      deepFilter = `?page=${page}&limit=${limit}&filterTransferInventory=${selectedType}`;
-    }
-
+    
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
@@ -499,7 +499,6 @@ const TransferInventory = () => {
                 page={page}
                 actionWidth={150}
                 loading={loading}
-                isClientSideGrid={true}
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchTransferInventory}
                 showOnlyShowFilteredRecordSwitch={true}

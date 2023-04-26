@@ -123,7 +123,7 @@ const ConvertInventory = () => {
   };
 
   const fetchProductInventory = () => {
-    if (!warehouseId || !storageLocationId) {
+    if (!warehouseId) {
       dispatch({ type: 'initialize', data: [], count: 0 });
       return;
     }

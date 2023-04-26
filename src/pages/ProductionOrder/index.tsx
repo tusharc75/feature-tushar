@@ -236,12 +236,19 @@ const ProductionOrder = () => {
     };
 
     const getQueryString = (isExport = false) => {
-        let deepFilter = `?page=${page}&limit=${limit}&filterProductionOrders=${selectedType}`;
-        if (isExport) {
-            deepFilter = `filterProductionOrders=${selectedType}`;
+        let deepFilter = `?page=${page}&limit=${limit}`;
+        if (selectedType === 2) {
+          deepFilter = deepFilter + `&myRecords=1`;
         }
+        if (isExport) {
+          deepFilter = `?`;
+        }
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+          }
+
         let filterById = [];
-        if (filterById.length) {
+        if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
         if (!isObjectEmpty(filters)) {

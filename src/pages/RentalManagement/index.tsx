@@ -269,9 +269,12 @@ const RentalManagement = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterRentalManagements=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterRentalManagements=${selectedType}`;
+      deepFilter = `?`;
     }
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
