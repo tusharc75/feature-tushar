@@ -258,9 +258,9 @@ const LeadTimeMaster = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterLeadTimeMasters=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
     if (isExport) {
-      deepFilter = `filterLeadTimeMasters=${selectedType}`;
+      deepFilter = `?`;
     }
     let filterById = [];
     if (accountDetails.accountId) {

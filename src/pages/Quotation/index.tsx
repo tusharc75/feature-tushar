@@ -240,9 +240,12 @@ const Quotation = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterQuotation=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterQuotation=${selectedType}`;
+      deepFilter = `?`;
     }
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id))}`;

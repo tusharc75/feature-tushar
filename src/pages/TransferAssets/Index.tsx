@@ -141,10 +141,14 @@ const TransferAsset = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterTransferAssets=${selectedType}`;
-    if (isExport) {
-      deepFilter = `filterTransferAssets=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
+    if (isExport) {
+      deepFilter = `?`;
+    }
+    
     if (fromRental) {
       let filterById = [];
       filterById.push({ field: 'rentalJob', term: fromRental?._id });
@@ -506,7 +510,7 @@ const TransferAsset = () => {
                 dataRows={dataRows}
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
-                onEdit={() => {}}
+                onEdit={() => { }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {
                   setDeleteRecord(data);
@@ -593,9 +597,8 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -251,9 +251,12 @@ const RepairOrder = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterRepairOrders=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterRepairOrders=${selectedType}`;
+      deepFilter = `?`;
     }
     let filterById = [];
     if (fromRental) {
