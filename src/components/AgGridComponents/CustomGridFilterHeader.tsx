@@ -131,7 +131,6 @@ export default CustomGridFilterHeader;
 
 const filterParams = {
   comparator: (filterLocalDateAtMidnight: Date, cellValue: string) => {
-    console.log(filterLocalDateAtMidnight, cellValue);
     var dateAsString = cellValue;
     if (dateAsString == null) return -1;
     var dateParts = dateAsString.split('/');
@@ -181,7 +180,6 @@ const DisplyaFilters = (props) => {
         const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: element.filter, name: keys[i] };
         filterData.push(data);
       }
-      console.log(currentGridApi.getColumnDefs());
       setChipData(filterData);
     }
   };
