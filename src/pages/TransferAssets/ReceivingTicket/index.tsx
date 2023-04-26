@@ -320,6 +320,16 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
                     data['deliveryToAddress'] = transferAssetData?.transferFromPlant?.address;
 
                     data['wellName'] = transferAssetData?.wellName?.optionValue;
+
+                    if (transferAssetData?.wellNumber) {
+                      if (transferAssetData?.wellNumber?.optionValue) {
+                        data['wellNumber'] = transferAssetData?.wellNumber?.optionValue;
+                      }
+                      else {
+                        data['wellNumber'] = transferAssetData?.wellNumber?.map((e) => e?.optionValue);
+                      }
+                    }
+
                     data['afeNumber'] = transferAssetData?.afeNumber;
                     if (transferAssetData?.processor?.optionValue) {
                       data['processor'] = transferAssetData?.processor?.optionValue;

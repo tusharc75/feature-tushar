@@ -316,7 +316,6 @@ function GridFilter({
     }
 
     // setChipData(chipData);
-    console.log(filterModel);
     return filterModel;
   };
 

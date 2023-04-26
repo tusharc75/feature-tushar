@@ -103,12 +103,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -315,21 +315,20 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
       let rows = data.material.filter((e) => e.parentId === null);
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${
-          parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === 'product'
+        parent.detail = `${parent.type === 'service'
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent?.packageDetail?.packageName
-        }`;
+          }`;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription || ''
-            : '';
+              ? parent?.productDetail?.productDescription || ''
+              : parent.type === 'package'
+                ? parent?.packageDetail?.packageDescription || ''
+                : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
@@ -369,10 +368,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
             ? true
             : false
           : parent.subRows.length !== 0
-          ? parent.assetAssignedQty ===
-              parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+            ? parent.assetAssignedQty ===
+            parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
             parent.subRows.every((d) => d.isValid)
-          : true;
+            : true;
 
         if (parent.subRows.length && parent.isValid) {
           if (parent.subRows.every((d) => d.isValid)) {
@@ -475,16 +474,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.productDetail?.productName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
       // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
       _subRow.assetQty =
@@ -527,11 +526,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           ? true
           : false
         : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
-        ? true
-        : _subRow.assetAssignedQty ===
-          tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
-        ? true
-        : false;
+          ? true
+          : _subRow.assetAssignedQty ===
+            tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+            ? true
+            : false;
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
@@ -937,6 +936,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
             _id: rentalManagementData?._id,
             warehouse: rentalManagementData?.warehouse?.optionValue,
             wellName: rentalManagementData?.wellName?.optionValue,
+            wellNumber: rentalManagementData?.wellNumber ?
+              rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue) : null,
             fromDate: rentalManagementData?.estimateStartDate,
             toDate: rentalManagementData?.estimateEndDate,
             afeNumber: rentalManagementData?.afeNumber
@@ -988,6 +989,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           refrenceData={{
             products: [...showOrderDialog?.products?.filter((e) => e.serialized === true)],
             wellName: rentalManagementData?.wellName?.optionValue,
+            wellNumber: rentalManagementData?.wellNumber ?
+              rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue) : null,
             afeNumber: rentalManagementData?.afeNumber,
             warehouse: rentalManagementData?.warehouse?.optionValue
           }}
@@ -1015,7 +1018,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
               return { product: e._id, unit: e.unit, qty: e.assetsCount };
             })}
           currency={rentalManagementData.currency}
-          refrenceData={{ wellName: rentalManagementData?.wellName?.optionValue, afeNumber: rentalManagementData?.afeNumber }}
+          refrenceData={{
+            wellName: rentalManagementData?.wellName?.optionValue,
+            wellNumber: rentalManagementData?.wellNumber ?
+              rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue) : null,
+            afeNumber: rentalManagementData?.afeNumber
+          }}
           rentalManagementId={rentalManagementData._id}
           warehouseId={rentalManagementData?.warehouse?.optionValue}
         />

@@ -13,8 +13,6 @@ const ChangesDialog = ({ open, onClose, changes, operations }) => {
 
   const [fullScreen, setFullScreen] = useState(true);
 
-  console.log(operations)
-
   return (
     <Dialog
       maxWidth="md"

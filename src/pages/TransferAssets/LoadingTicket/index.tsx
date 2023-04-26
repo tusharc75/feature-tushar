@@ -439,6 +439,14 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                         data['deliveryToAddress'] = transferAssetData?.supplierShipTo?.optionValue;
                       }
                       data['wellName'] = transferAssetData?.wellName?.optionValue;
+                      if (transferAssetData?.wellNumber) {
+                        if (transferAssetData?.wellNumber?.optionValue) {
+                          data['wellNumber'] = transferAssetData?.wellNumber?.optionValue;
+                        }
+                        else {
+                          data['wellNumber'] = transferAssetData?.wellNumber?.map((e) => e?.optionValue);
+                        }
+                      }
                       data['afeNumber'] = transferAssetData?.afeNumber;
                       if (transferAssetData?.processor?.optionValue) {
                         data['processor'] = transferAssetData?.processor?.optionValue;
@@ -456,7 +464,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                       !canReceive ||
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                        selectedRecords.length
+                      selectedRecords.length
                     }
                     onClick={() => {
                       setShowConfirmBoxReceive(true);
@@ -470,7 +478,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     disabled={
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                        selectedRecords.length
+                      selectedRecords.length
                     }
                     onClick={() => {
                       const products = [];
@@ -495,9 +503,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   </MenuItem>
 
                   {permissions?.transferAsset?.isUpdate &&
-                  selectedRecords.length &&
-                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                    ?.length === selectedRecords?.length ? (
+                    selectedRecords.length &&
+                    selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                      ?.length === selectedRecords?.length ? (
                     <MenuItem
                       onClick={() => {
                         setShowConfirmBox(true);
@@ -531,7 +539,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                 // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
               }}
               extraParamsToCheckDelete={true}
-              onDelete={(data) => {}}
+              onDelete={(data) => { }}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -550,7 +558,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={(data) => {}}
+              onClone={(data) => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
