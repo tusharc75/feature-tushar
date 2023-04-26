@@ -88,13 +88,14 @@ const ResourceLogs = () => {
           }
         }) => {
           let rows = data?.map((u) => {
+            var changeString = [];
+            var changes = [];
+            var operations = [];
+
             if (Array.isArray(u?.changes)) {
-              var changes = [];
-              var changeArr = [];
-              var operations = [];
               u?.changes?.forEach((e) => {
                 if (e?.fieldLabel) {
-                  changeArr.push(e);
+                  changes.push(e);
                   var oldValue = e?.oldValue;
                   var newValue = e?.newValue;
                   if (e?.type === 'date') {
@@ -109,19 +110,26 @@ const ResourceLogs = () => {
                     newValue = newValue?.label;
                   }
                   if (oldValue && newValue) {
-                    changes.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`);
+                    changeString.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`);
                   } else {
-                    changes.push(`${e.fieldLabel} changed to ${newValue}`);
+                    changeString.push(`${e.fieldLabel} changed to ${newValue}`);
                   }
                 } else if (e?.label) {
                   operations.push(e);
                 }
               });
-              u.changeString = changes?.toString();
-
-              u.changeArr = changeArr;
-              u.operations = operations;
             }
+            else {
+              operations.push({ ...u?.changes });
+            }
+            if (changeString?.length) {
+              u.changeString = changeString?.toString();
+            }
+            else {
+              u.changeString = 'Click View for check changes';
+            }
+            u.changes = changes;
+            u.operations = operations;
             u.key = selectedResource?.key;
             return u;
           });
@@ -196,7 +204,7 @@ const ResourceLogs = () => {
       <>
         <HtmlTooltip title="View Changes">
           <IconButton
-            onClick={() => setOpenDialog({ open: true, changes: params?.data?.changeArr || [], operations: params?.data?.operations || [] })}
+            onClick={() => setOpenDialog({ open: true, changes: params?.data?.changes || [], operations: params?.data?.operations || [] })}
           >
             <VisibilityIcon color="primary" fontSize="small" />
           </IconButton>
