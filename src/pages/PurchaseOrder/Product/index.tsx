@@ -384,9 +384,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         setAddingProducts(false);
       })
       .catch((error) => {
-        setAddProductDialog(false);
-        toastConfig.setToastConfig(error);
         setAddingProducts(false);
+        toastConfig.setToastConfig(error);
       });
   };
 

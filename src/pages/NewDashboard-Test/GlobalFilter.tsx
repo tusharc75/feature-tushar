@@ -160,7 +160,6 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                   variant="inline"
                   fullWidth
                   size="small"
-                  disableFuture
                   openTo="year"
                   format={dateFormatForInputControl}
                   maxDate={globalFilters.between.to}
@@ -180,7 +179,6 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                   fullWidth
                   size="small"
                   minDate={globalFilters.between.from}
-                  disableFuture
                   openTo="year"
                   format={dateFormatForInputControl}
                   label="To"

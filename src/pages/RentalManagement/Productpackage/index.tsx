@@ -397,7 +397,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
         setPriceDataDialog({ open: false, material: null });
       })
       .catch((error) => {
-        setAddExistingProductDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
         setPriceDataDialog({ open: false, material: null });
