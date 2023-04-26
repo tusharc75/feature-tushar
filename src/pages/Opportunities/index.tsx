@@ -12,7 +12,7 @@ import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { GiHiveMind } from 'react-icons/gi';
 import ManageOpportunityDialog from './ManageOpportunityDialog/ManageOpportunityDialog';
-import { opportunity, isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout } from '../../constants/helpers';
+import { opportunity, isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
@@ -311,14 +311,16 @@ const Opportunities = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterOpportunities=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterOpportunities=${selectedType}`;
+      deepFilter = `?`;
     }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
-
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
@@ -652,6 +654,9 @@ const Opportunities = () => {
                 loading={loading}
                 renderedFrom={opportunityResource}
                 refreshGrid={fetchOpportunities}
+                showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.opportunity}
               /> : null
         }
 

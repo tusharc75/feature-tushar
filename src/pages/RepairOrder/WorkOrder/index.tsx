@@ -1,4 +1,3 @@
-import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Grid, Box, Button, Menu, MenuItem, Chip, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -8,13 +7,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import {
-  repairOrder,
-  REPAIR_ORDER_TYPE,
-  workOrder,
-  WORKORDER_SERVICE_STATUS,
-  WORK_ORDER_STATUS
-} from '../../../constants/helpers';
+import { repairOrder, REPAIR_ORDER_TYPE, workOrder, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { Delete, ExpandMore } from '@material-ui/icons';
@@ -24,6 +17,10 @@ import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { capitalize, sortBy } from 'lodash';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -35,12 +32,14 @@ const WorkOrder = ({
   allowedToDelete,
   isPostWorkService,
   setCurrentStep,
-  createNewVersionQuote
+  createNewVersionQuote,
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
-  }: any = useData();
+    state: {
+      user: { user }
+    }
+  } = useData();
   const [selectedProducts, setSelectedProducts] = useState([]);
 
   const [columns, setColumns] = useState(null);
@@ -54,7 +53,9 @@ const WorkOrder = ({
   const [arrangeView, setArrangeView] = useState(false);
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedAssets, setSelectedAssets] = useState([]);
+  const [isUpdating, setUpdating] = useState(false);
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
+  const [updateDialog, setUpdateDialog] = useState({ open: false, data: null});
 
   useEffect(() => {
     fetchFields();
@@ -70,7 +71,11 @@ const WorkOrder = ({
   }, [selectedProducts]);
 
   const fetchFields = async () => {
-    const coloum: any = [
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderService}`);
+    var data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, repairOrderData?.currency || 'USD');
+    const newColumns = genrateCustomTableColumns(data, repairOrderData?.currency || 'USD');
+    let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
@@ -83,7 +88,7 @@ const WorkOrder = ({
         Header: 'Type',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.type === "serializedAsset" ? "Asset" : capitalize(row.original.type)}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
       },
       {
         accessor: 'detail',
@@ -92,19 +97,46 @@ const WorkOrder = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <a className="link text-truncate" target='_blank' href={`${row.original.type === 'service'
-              ? routes.serviceMasterDetail.path
-              : row.original.type === 'product'
-                ? routes.productDetail.path
-                : row.original.type === 'serializedAsset'
-                  ? routes.serializedAssetDetail.path
-                  : routes.packagesDetail.path
-              }/${row.original.materialId}`}>{row.original.detail}</a>
-            {row.original?.subRows?.length ?
+            { row.original.type === 'service' ? (
+              <p
+                onClick={() => {
+                  setUpdateDialog({
+                    open: true,
+                    data: row.original,
+                  });
+                }}
+                className="link text-truncate"
+                title={row.original?.detail}
+              >
+                {row.original?.detail}
+              </p>
+            ) : (
+              <p className="text-truncate">{row.original?.detail}</p>
+            )}
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'serializedAsset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+            {row.original?.subRows?.length ? (
               <Box ml={1} className="d-flex align-items-center">
                 {`(${row.original?.subRows?.length})`}
-              </Box> : null}
-            {row.original.type === 'service' && (
+              </Box>
+            ) : null}
+            {user?.brandPolicy?.repairOrderQuotation && row.original.type === 'service' && (
               <Box ml={1}>
                 {row?.original?.preWork ? (
                   <HtmlTooltip title="Pre Work Service">
@@ -203,8 +235,8 @@ const WorkOrder = ({
         Cell: ({ row }) => (row.original['qty'] ? <p> {row?.original?.qty}</p> : <NoDataCell />)
       }
     ];
-    setColumns([
-      ...coloum,
+    coloum = [...coloum, ...newColumns];
+    coloum.push(
       {
         accessor: 'action',
         Header: 'Action',
@@ -217,8 +249,13 @@ const WorkOrder = ({
           return row?.original?.type === 'service' || row?.original?.type === 'package' ? (
             <>
               <IconButton
-                disabled={row?.original?.type === 'package' && row?.original?.subRows?.length === 0 ? false :
-                  row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete ? false : true}
+                disabled={
+                  row?.original?.type === 'package' && row?.original?.subRows?.length === 0
+                    ? false
+                    : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
+                    ? false
+                    : true
+                }
                 size="small"
                 aria-label="Details"
                 onClick={() => {
@@ -228,8 +265,13 @@ const WorkOrder = ({
               >
                 <Delete
                   fontSize="small"
-                  color={row?.original?.type === 'package' && row?.original?.subRows?.length === 0 ? 'error' :
-                    row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete ? 'error' : 'disabled'}
+                  color={
+                    row?.original?.type === 'package' && row?.original?.subRows?.length === 0
+                      ? 'error'
+                      : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
+                      ? 'error'
+                      : 'disabled'
+                  }
                 />
               </IconButton>
             </>
@@ -250,7 +292,8 @@ const WorkOrder = ({
           ) : null;
         }
       }
-    ]);
+    );
+    setColumns(coloum);
   };
 
   const handleWorkOrderDelete = (ids) => {
@@ -293,7 +336,7 @@ const WorkOrder = ({
         })
         .then(({ data }) => {
           if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
-            createNewVersionQuote(true)
+            createNewVersionQuote(true);
           }
           setDeleting(false);
           setShowConfirmBox(false);
@@ -327,35 +370,37 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'service'
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'serializedAsset'
-            ? parent?.serializedAsset?.assetNumber
-            : parent?.packageDetail?.packageName
-        }`;
+          ? parent?.serializedAsset?.assetNumber
+          : parent?.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'serializedAsset'
-                ? parent?.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === 'service'
-        ? parent.serviceDetail?.status
-        : parent.type === 'product'
+      parent.status = `${
+        parent.type === 'service'
+          ? parent.serviceDetail?.status
+          : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
-        }`;
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
@@ -399,18 +444,18 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow?.serializedAsset?.assetNumber
-              : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow?.serializedAsset?.assetNumber
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -446,7 +491,7 @@ const WorkOrder = ({
       .post(`${workOrder.api}/service`, data)
       .then(() => {
         if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
-          createNewVersionQuote(true)
+          createNewVersionQuote(true);
         }
         fetchData();
       })
@@ -505,93 +550,118 @@ const WorkOrder = ({
       });
   };
 
+  const handleSaveData = async (rows: any) => {
+    setUpdating(true);
+    rows.forEach((element) => {
+      delete element.index;
+      delete element.detail;
+      delete element.isValid;
+      delete element.hideSelection;
+    });
+    const workOrderId = rows[0]?.workOrder?._id;
+    axiosInstance()
+      .put(`${repairOrder.api}/${repairOrderData._id}/work-order/${workOrderId}`, { material: rows })
+      .then(({ data }) => {
+        setUpdating(false);
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setUpdateDialog({ open: false, data: null});
+      })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+
   return (
     <Fragment>
-      <Box display="flex" justifyContent="flex-end" mt={1} mb={2}>
-        <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1}>
-          {allowedToEdit && (
-            <Box display="flex" gridColumnGap={5}>
-              <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedProducts?.length === 0}
-              >
-                Actions <ExpandMore />
-              </Button>
-              <Menu
-                anchorEl={anchorActionEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
+      <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
+        {allowedToEdit && (
+          <Box display="flex" gridColumnGap={5}>
+            <Button
+              variant="outlined"
+              color="default"
+              size="small"
+              onClick={openActions}
+              aria-controls="action-menu"
+              disabled={selectedProducts?.length === 0}
+              endIcon={<ExpandMore />}
+            >
+              Actions
+            </Button>
+            <Menu
+              anchorEl={anchorActionEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorActionEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setAddServicesDialog({ open: true });
                 }}
-                id="action-menu"
-                open={Boolean(anchorActionEl)}
-                onClose={closeActions}
               >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setAddServicesDialog({ open: true });
-                  }}
-                >
-                  Add Services
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setUserAssignDialog(true);
-                  }}
-                >
-                  Assign Technician
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setArrangeView(true);
-                  }}
-                  disabled={
-                    selectedProducts?.length && selectedProducts?.every((d) => d.workOrder?._id === selectedServices[0]?.workOrder?._id)
-                      ? false
-                      : true
-                  }
-                >
-                  Arrange Services
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setDeleteData(selectedServices?.length ? selectedServices : selectedAssets);
-                    setShowConfirmBox(true);
-                    closeActions();
-                  }}
-                  disabled={
-                    selectedProducts?.filter((e) => e.type === 'service').length
-                      ? selectedServices?.filter(
+                Add Services
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setUserAssignDialog(true);
+                }}
+              >
+                Assign Technician
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setArrangeView(true);
+                }}
+                disabled={
+                  selectedProducts?.length && selectedProducts?.every((d) => d.workOrder?._id === selectedServices[0]?.workOrder?._id) ? false : true
+                }
+              >
+                Arrange Services
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setDeleteData(selectedServices?.length ? selectedServices : selectedAssets);
+                  setShowConfirmBox(true);
+                  closeActions();
+                }}
+                disabled={
+                  selectedProducts?.filter((e) => e.type === 'service').length
+                    ? selectedServices?.filter(
                         (d) =>
                           d.type === 'service' &&
                           d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
                           d.status === WORKORDER_SERVICE_STATUS.pending
                       )?.length === selectedServices?.length
-                        ? false
-                        : true
-                      : selectedAssets?.length
-                        ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
-                          selectedAssets?.length
-                          ? false
-                          : true
-                        : true
-                  }
-                >
-                  Delete
-                </MenuItem>
-              </Menu>
-            </Box>
-          )}
-        </Box>
+                      ? false
+                      : true
+                    : selectedAssets?.length
+                    ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
+                      selectedAssets?.length
+                      ? false
+                      : true
+                    : true
+                }
+              >
+                Delete
+              </MenuItem>
+            </Menu>
+          </Box>
+        )}
       </Box>
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
@@ -676,6 +746,18 @@ const WorkOrder = ({
               handleClose={() => setArrangeView(false)}
               handleSubmit={(data) => handleArrangeUpdate(data, selectedServices[0]?.workOrder?._id)}
               loading={false}
+            />
+          )}
+          {updateDialog.open && (
+            <UpdateWorkOrderDialog
+              onClose={() => {
+                setUpdateDialog({ open: false, data: null});
+              }}
+              materialData={updateDialog.data}
+       
+              handleUpdate={handleSaveData}
+              loadingEdit={isUpdating}
+              repairOrderData={repairOrderData}
             />
           )}
         </Grid>

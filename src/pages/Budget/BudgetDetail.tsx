@@ -9,12 +9,13 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, sidebarResource } from '../../constants/helpers';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { Skeleton } from '@material-ui/lab';
 import ManageBudgetDialog from './ManageBudgetDialog';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const BudgetDetail = () => {
   const { id } = useParams();
@@ -114,6 +115,7 @@ const BudgetDetail = () => {
                   </Button>
                 )}
                 {permissions?.budget?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                <ActivityButton referenceId={budgetData?._id} resource={ACTIVITY_RESOURCE.budget} />
               </>
           </Box>
         </Box>

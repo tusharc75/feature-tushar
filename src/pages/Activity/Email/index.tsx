@@ -19,7 +19,7 @@ import reactHtmlparser, { convertNodeToElement } from 'react-html-parser';
 import { HiOutlineMail } from 'react-icons/hi';
 import Dialog from '@material-ui/core/Dialog';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
-import { getApi, getData, isObjectEmpty } from '../../../constants/helpers';
+import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
 import styles from '../../Leads/Header.module.scss';
 import emailStyles from './email.module.scss';
 import './email.scss';
@@ -34,6 +34,7 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import { Autocomplete } from '@material-ui/lab';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
+import { ViewEmail } from 'src/components/Activity/Email/ViewEmail';
 
 const tabs = {
   Inbox: 1,
@@ -58,6 +59,7 @@ const Email = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [openViewEmail, setOpenViewEmail] = useState(false);
   const [emailId, setEmailId] = useState(null);
   const [currentTab, setCurrentTab] = useState(1);
   const [emailUsersOptions, setEmailUsersOptions] = useState([]);
@@ -68,6 +70,7 @@ const Email = () => {
   const columnState = JSON.parse(localStorage.getItem('emailPage'));
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [fullScreenViewEmail, setFullScreenViewEmail] = useState(true);
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = 'emailPage_selected';
@@ -138,13 +141,11 @@ const Email = () => {
   useEffect(() => {
     if (resource && resource?.optionValue) {
       setLoadingResources(true);
+      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue];
       axiosInstance()
-        .get(`${getApi(resource?.optionValue)}?limit=100`)
+        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
         .then(({ data: { data } }) => {
-          if (data.length) {
-            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
-            setResourceData(mappedData || []);
-          }
+          setResourceData(data[lookupResource] || []);
           setLoadingResources(false);
         })
         .catch((error) => {
@@ -243,7 +244,7 @@ const Email = () => {
       className="link cursor-pointer"
       onClick={(e) => {
         if (permissions?.email?.isUpdate) {
-          setOpen(true);
+          setOpenViewEmail(true);
           setEmailId(params.data.id);
         }
       }}
@@ -393,6 +394,11 @@ const Email = () => {
     setOpen(false);
   };
 
+  const handleCloseViewEmail = () => {
+    setEmailId(null);
+    setOpenViewEmail(false);
+  };
+
   const handleTab = (e, currentTab) => {
     dispatch({
       type: 'initialize',
@@ -442,14 +448,17 @@ const Email = () => {
                   <Autocomplete
                     disabled={loadingResources}
                     options={resourceData}
-                    getOptionLabel={(option: any) => option.name}
-                    getOptionSelected={(option: any, value: any) => option.name === value.name}
+                    getOptionLabel={(option: any) => option.optionLabel}
+                    getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
                     style={{ width: '250px' }}
                     value={selectedResourceData}
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
-                      if (newValue?.id) {
-                        setFilter((prevState) => [...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]);
+                      if (newValue?.optionValue) {
+                        setFilter((prevState) => [
+                          ...prevState,
+                          { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }
+                        ]);
                       } else {
                         setFilter([]);
                       }
@@ -461,10 +470,10 @@ const Email = () => {
               </Grid>
               <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
                 <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Grid>
+                  <Box style={{ flexGrow: 1, flexBasis: 'calc(100% - 171px)' }}>
                     <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'large' }} activityName="email" />
-                  </Grid>
-                  <Grid style={{ display: 'flex', gap: '5px' }}>
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', flexBasis: '163px' }}>
                     {
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -488,8 +497,9 @@ const Email = () => {
                       aria-controls="action-menu"
                       disabled={selectedRecords.length > 0 ? false : true}
                       className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      endIcon={<ExpandMore />}
                     >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      {isMobile && !isTablet ? '' : 'Actions'}
                     </Button>
                     <Menu
                       anchorEl={anchorEl}
@@ -513,7 +523,7 @@ const Email = () => {
                         Delete
                       </MenuItem>
                     </Menu>
-                  </Grid>
+                  </Box>
                 </Box>
               </Grid>
             </Grid>
@@ -609,7 +619,7 @@ const Email = () => {
               relatedTo={[
                 {
                   type: resource && selectedResourceData ? resource.optionValue : 'user',
-                  referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
+                  referenceId: resource && selectedResourceData ? selectedResourceData.optionValue : user?.user?._id,
                   access: true
                 }
               ]}
@@ -617,6 +627,43 @@ const Email = () => {
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+            />
+          </Dialog>
+        ) : null}
+
+        {openViewEmail ? (
+          <Dialog
+            open={openViewEmail}
+            fullScreen={fullScreenViewEmail || isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+            aria-labelledby="customized-dialog-title"
+            maxWidth="md"
+            onClose={(e, reason) => {
+              if (reason !== 'backdropClick') {
+                handleCloseViewEmail();
+              }
+            }}
+            fullWidth
+          >
+            <ViewEmail
+              emailId={emailId}
+              handleClose={() => {
+                handleCloseViewEmail();
+              }}
+              fetchData={fetchEmails}
+              relatedTo={[
+                {
+                  type: resource && selectedResourceData ? resource.optionValue : 'user',
+                  referenceId: resource && selectedResourceData ? selectedResourceData.optionValue : user?.user?._id,
+                  access: true
+                }
+              ]}
+              options={emailUsersOptions}
+              isMinimized={!fullScreenViewEmail}
+              onMinimizeMaximize={() => {
+                setFullScreenViewEmail((prevState) => !prevState);
               }}
               showManimizeMaximize={true}
             />

@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Box, Button, Popover, FormControl, FormGroup, Divider, FormControlLabel, Tooltip, Switch, IconButton } from '@material-ui/core';
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { CustomOfflineContext } from '../../../../StateProvider/OfflineContext/OfflineContext';
 import axiosInstance from '../../../../axios/axiosInstance';
 import { useData } from '../../../../StateProvider/Provider';
 import { disabledColumns, getSortedColumns } from '../../../../constants/columns';
@@ -12,6 +11,7 @@ import ReportArrangeView from '../../ReportArrangeView';
 import { BiFilterAlt } from 'react-icons/bi';
 // import { BsArrowLeftRight } from 'react-icons/bs';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 let timeout;
 
@@ -80,7 +80,7 @@ const ArrangeView = ({
 
   return (
     <>
-      <Tooltip title="Arrange View" placement="top">
+      <HtmlTooltip title="Arrange View" placement="top">
         <IconButton
           {...otherProps}
           style={{
@@ -88,8 +88,8 @@ const ArrangeView = ({
             height: '32px',
             background: 'white',
             padding: '11px',
-            border: '1px solid #e5e5e5',
-            color: '#737373',
+            border: '1px solid #DEDEDE',
+            color: '#424242',
             ...style
           }}
           aria-describedby="columnSelection"
@@ -101,7 +101,7 @@ const ArrangeView = ({
         >
           <SwapHorizIcon />
         </IconButton>
-      </Tooltip>
+      </HtmlTooltip>
       {openColumnSelection && (
         <>
           {renderedFrom?.includes('report') && reportSave ? (

@@ -14,6 +14,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageCompetencyMaster from './ManageCompetencyMaster';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
 
 const CompetencyMasterDetail = () => {
   const { id } = useParams();
@@ -114,6 +116,7 @@ const CompetencyMasterDetail = () => {
               )}
               {permissions?.competencyMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
+            <ActivityButton referenceId={competencyMasterData?._id} resource={ACTIVITY_RESOURCE.competencyMaster} />
           </Box>
         </Box>
       </Box>
@@ -145,7 +148,7 @@ const CompetencyMasterDetail = () => {
                 <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
                   <Grid container>
                     <Grid item xs={2}>
-                      <Typography variant="body1">#</Typography>
+                      <Typography variant="body1">Index</Typography>
                     </Grid>
                     <Grid item xs={4}>
                       <Typography variant="body1">Name</Typography>

@@ -47,6 +47,7 @@ import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityD
 import Warehouse from '../Account/Warehouse';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { AccountHierarchyIcon } from 'src/assets/svg/svgIcons';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -343,7 +344,7 @@ const ContactDetailsPage = (props) => {
       onClick: () => {
         setOrgChartInFullScreenDialog(true);
       },
-      icon: <FcFlowChart />,
+      icon: <AccountHierarchyIcon width={23} height={23} />,
       // icon: <TiFlowChildren />,
       show: true,
       class: 'account'
@@ -736,9 +737,9 @@ const ContactDetailsPage = (props) => {
             </>
           )}
         </Box>
-        <div className={`pt-3 modified_style_of_accordion`}>
+        <div className={`pt-3 `}>
           {permissions?.opportunity?.isRead && (
-            <span id={`opportunityAccordion `}>
+            <Box mb={2} id={`opportunityAccordion `}>
               <OpportunityInAccordian
                 opportunityPermissions={permissions.opportunity}
                 opportunities={opportunities}
@@ -754,10 +755,10 @@ const ContactDetailsPage = (props) => {
                 contactResource={contactResource}
                 isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
               />
-            </span>
+            </Box>
           )}
           {permissions?.projectSales?.isRead && accountResource === customerAccount.accountResource && (
-            <span id="projectsAccordion">
+            <Box mb={2} id="projectsAccordion">
               <ProjectInAccordion
                 recordsPerLine={3}
                 projectSales={projectSales}
@@ -770,10 +771,10 @@ const ContactDetailsPage = (props) => {
                 accountName={contactData?.accountName?.optionLabel}
                 resource={accountResource}
               />
-            </span>
+            </Box>
           )}
           {accountResource === customerAccount.accountResource && permissions?.quoteBuilder?.isRead && (
-            <span id="quotesAccordion">
+            <Box mb={2} id="quotesAccordion">
               <QuotesInAccordion
                 recordsPerLine={3}
                 quotes={quotes}
@@ -788,14 +789,8 @@ const ContactDetailsPage = (props) => {
                 isRenderedFromCustomerAccount={true}
                 isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
               />
-            </span>
+            </Box>
           )}
-          {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
-          {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (
-                  <LeadInAccordion
-                    recordsPerLine={3}
-                    lead={contactData.staticData.lead} />
-                )} */}
         </div>
 
         <Grid item xs={12}>

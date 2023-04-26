@@ -546,6 +546,16 @@ const routes = {
     title: storedRoutes && storedRoutes.repairType && storedRoutes.repairType.title ? storedRoutes.repairType?.title : RESOURCE_LABEL.repairType,
     path: '/repair-type/detail'
   },
+
+  storageLocation: {
+    title: storedRoutes && storedRoutes.storageLocation && storedRoutes.storageLocation.title ? storedRoutes.storageLocation?.title : RESOURCE_LABEL.storageLocation,
+    path: '/storage-location'
+  },
+  storageLocationDetail: {
+    title: storedRoutes && storedRoutes.storageLocation && storedRoutes.storageLocation.title ? storedRoutes.storageLocation?.title : RESOURCE_LABEL.storageLocation,
+    path: '/storage-location/detail'
+  },
+
   cageManagement: {
     title:
       storedRoutes && storedRoutes.cageManagement && storedRoutes.cageManagement.title
@@ -883,7 +893,29 @@ const routes = {
         ? storedRoutes.fleetReceiver?.title
         : RESOURCE_LABEL.fleetReceiver,
     path: '/fleet-receiver'
-  }
+  },
+  transactionLock: {
+    title: storedRoutes && storedRoutes.transactionLock && storedRoutes.transactionLock.title ? storedRoutes.transactionLock?.title : RESOURCE_LABEL.transactionLock,
+    path: '/transaction-lock'
+  },
+  transactionLockDetail: {
+    title: storedRoutes && storedRoutes.transactionLock && storedRoutes.transactionLock.title ? storedRoutes.transactionLock?.title : RESOURCE_LABEL.transactionLock,
+    path: '/transaction-lock/detail'
+  },
+  wellNumber: {
+    title: storedRoutes && storedRoutes.wellNumber && storedRoutes.wellNumber.title ? storedRoutes.wellNumber?.title : RESOURCE_LABEL.wellNumber,
+    path: '/well-number'
+  },
+  wellNumberDetail: {
+    title: storedRoutes && storedRoutes.wellNumber && storedRoutes.wellNumber.title ? storedRoutes.wellNumber?.title : RESOURCE_LABEL.wellNumber,
+    path: '/well-number/detail'
+  },
+  planningView: {
+    title: storedRoutes && storedRoutes.planningView && storedRoutes.planningView.title
+      ? storedRoutes.planningView?.title
+      : 'Planning View',
+    path: '/planning-view'
+  },
 };
 
 export default routes;

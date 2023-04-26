@@ -17,6 +17,8 @@ import Material from './Material';
 import { camelCase } from 'lodash';
 import ManagePlanning from './ManagePlanning';
 import { FaWpforms } from 'react-icons/fa';
+import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const PlanningDetail = () => {
   const renderedFrom = camelCase(routes?.planning.title);
@@ -125,6 +127,7 @@ const PlanningDetail = () => {
               {permissions?.planning?.isDelete && allowedToDelete && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
+            <ActivityButton referenceId={planningData?._id} resource={ACTIVITY_RESOURCE.planning} />
             </>
           </Box>
         </Box>

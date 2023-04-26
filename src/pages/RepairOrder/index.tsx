@@ -13,7 +13,8 @@ import {
   repairOrder,
   prepareDataForGrid,
   getLocalStorageArrayData,
-  removeLocalStorage
+  removeLocalStorage,
+  sidebarResource
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -29,7 +30,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { SiStatuspage } from 'react-icons/all';
 import ManageRepairOrder from './ManageRepairOrder';
 import RepairOrderHeader from './RepairOrderHeader';
@@ -77,7 +77,6 @@ const RepairOrder = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const [frameworkComponents, setFrameworkComponents] = useState({});
-  const { isOffline } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState([]);
 
   const { getColumnData } = useColumns();
@@ -96,10 +95,6 @@ const RepairOrder = () => {
     data.forEach((o) => {
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.repairOrderDetail.path);
       if (currentColumn !== null) {
-        if (isOffline) {
-          currentColumn.columnData['filter'] = false;
-          currentColumn.columnData['sortable'] = false;
-        }
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
           rendererNames.push(currentColumn?.rendererName);
@@ -256,9 +251,12 @@ const RepairOrder = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterRepairOrders=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterRepairOrders=${selectedType}`;
+      deepFilter = `?`;
     }
     let filterById = [];
     if (fromRental) {
@@ -509,6 +507,8 @@ const RepairOrder = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchRepairOrders}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.repairOrder}
             />
           )
         ) : null}

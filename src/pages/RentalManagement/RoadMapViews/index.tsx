@@ -725,9 +725,6 @@ const RentalManagementViews = (props) => {
               <HtmlTooltip arrow placement="top" title={<>Consume Products</>}>
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   Consume Products
-                  {/* {item.ticketName}
-                  <br />
-                  {item.ticketType} Ticket */}
                 </div>
               </HtmlTooltip>
             )
@@ -842,8 +839,9 @@ const RentalManagementViews = (props) => {
               setColorInfo(!colorInfo);
             }}
             aria-controls="action-menu"
+            endIcon={colorInfo ? <ExpandLess /> : <ExpandMore />}
           >
-            {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
+            {'Color Info'}
           </Button>
         </Box>
         {colorInfo && (

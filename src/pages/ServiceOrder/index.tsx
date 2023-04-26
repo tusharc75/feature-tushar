@@ -13,7 +13,7 @@ import {
   prepareDataForGrid,
   getLocalStorageArrayData,
   removeLocalStorage,
-  RESOURCE_LABEL
+  sidebarResource
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -29,7 +29,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import {
   FaSuitcase,
   SiStatuspage,
@@ -87,7 +86,6 @@ const ServiceOrder = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const [frameworkComponents, setFrameworkComponents] = useState({});
-  const { isOffline } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState([]);
 
   const { getColumnData } = useColumns();
@@ -105,10 +103,6 @@ const ServiceOrder = () => {
     data.forEach((o) => {
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serviceOrderDetail.path);
       if (currentColumn !== null) {
-        if (isOffline) {
-          currentColumn.columnData['filter'] = false;
-          currentColumn.columnData['sortable'] = false;
-        }
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
           rendererNames.push(currentColumn?.rendererName);
@@ -507,7 +501,7 @@ const ServiceOrder = () => {
               refreshGrid={fetchServiceOrders}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
-              resource={RESOURCE_LABEL.serviceOrder}
+              resource={sidebarResource.serviceOrder}
             />
           )
         ) : null}

@@ -53,7 +53,8 @@ import {
   supplierAccount,
   customerContact,
   supplierContact,
-  quoteBuilder
+  quoteBuilder,
+  ACTIVITY_RESOURCE
 } from '../../constants/helpers';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
 import LeadAccordionInUserDetailPage from './LeadAccordionInUserDetailPage';
@@ -77,6 +78,7 @@ import { BiReset } from 'react-icons/all';
 import { BiEdit } from 'react-icons/bi';
 import { MdDelete } from 'react-icons/md';
 import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -624,6 +626,7 @@ const UserDetailsPage = () => {
                   onClick={() => handleDeleteUser(true)}
                 />
               ) : null}
+              <ActivityButton referenceId={userData?._id} resource={ACTIVITY_RESOURCE.user} />
             </Box>
           </Box>
         </Box>

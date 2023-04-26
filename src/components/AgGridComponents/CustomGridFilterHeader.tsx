@@ -8,6 +8,7 @@ import GridFilter from '../GridFilter';
 
 // OTHER COMPONENTS
 import { RefreshButton, ArrangeView, ShowOnlySelected } from './GridButtons';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 const CustomGridFilterHeader = (props) => {
   const {
@@ -23,7 +24,7 @@ const CustomGridFilterHeader = (props) => {
     columnApi,
     renderedFrom,
     isClientSideGrid,
-    buttonGap = '10px',
+    buttonGap = '8px',
     dispatch,
     showOnlyShowFilteredRecordSwitch = false,
     selectedRecords = null
@@ -44,6 +45,7 @@ const CustomGridFilterHeader = (props) => {
 
   const clearSingleFilter = (name) => {
     currentGridApi.destroyFilter(name);
+    currentGridApi.onFilterChanged();
     let formValues = { ...currentFomValue };
     delete formValues[name];
     setCurrentFomValue(formValues);
@@ -59,26 +61,27 @@ const CustomGridFilterHeader = (props) => {
 
   return (
     <>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', marginBottom: '15px', justifyContent: 'space-between' }}>
-        {showOnlyShowFilteredRecordSwitch && (
-          <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '10px 0 0px' }} />
-        )}
-        {showFilters && (
-          <div className="table-filter-v1" style={{ flexBasis: '766px', maxWidth: '766px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', margin: '8px', justifyContent: 'space-between' }}>
+        <div className="table-filter-v1" style={{ flexBasis: '766px', maxWidth: '766px', paddingRight: '52px' }}>
+          {showOnlyShowFilteredRecordSwitch && (
+            <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '0px 0 10px' }} />
+          )}
+          {showFilters && (
             <DisplyaFilters
               selectedFilter={selectedFilter}
               chipData={chipData}
+              currentGridApi={currentGridApi}
               handleFilterOpen={handleFilterOpen}
               clearSingleFilter={clearSingleFilter}
               clearFilterAll={clearFilterAll}
             />
-          </div>
-        )}
+          )}
+        </div>
         <div style={{ marginInlineStart: 'auto' }}>
           {showFilters && (
-            <Tooltip title="Apply filter" placement="top">
+            <HtmlTooltip title="Apply filter" placement="top">
               <Button
-                style={{ marginRight: buttonGap }}
+                style={{ marginRight: buttonGap, color: '#424242' }}
                 startIcon={<BiFilterAlt />}
                 size={'small'}
                 className="btn-outline-v1 light "
@@ -86,7 +89,7 @@ const CustomGridFilterHeader = (props) => {
               >
                 Filter
               </Button>
-            </Tooltip>
+            </HtmlTooltip>
           )}
           <ArrangeView
             setSelectedReportView={setSelectedReportView}
@@ -125,12 +128,14 @@ export default CustomGridFilterHeader;
 
 // THIS COMPONENT WILL DISPLAY CHIPS ===============================>
 const DisplyaFilters = (props) => {
-  const { selectedFilter, chipData, handleFilterOpen, clearSingleFilter, clearFilterAll } = props;
+  const { selectedFilter, chipData, handleFilterOpen, clearSingleFilter, clearFilterAll, currentGridApi } = props;
   const [hiddenItems, setHiddenItems] = useState(0);
   const isAppliedFilterPresent = Object.keys(selectedFilter || {}).length > 0;
   const containerRef = useRef(null);
   const countRef = useRef(null);
   const COUNT_PADDING = 10;
+
+  console.log({ activeFilters: currentGridApi?.filterManage?.activeAdvancedFilters, currentGridApi });
 
   useEffect(() => {
     setHiddenItems(0);

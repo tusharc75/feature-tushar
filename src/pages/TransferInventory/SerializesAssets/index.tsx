@@ -15,14 +15,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import { INVENTORY_STATUS } from 'src/constants/helpers';
 
-const SerialzedAssets = ({
-  allowedToEdit,
-  transferInventoryData,
-  setNextStep,
-  renderedFrom,
-  stepFullScreen,
-  canLoad
-}) => {
+const SerialzedAssets = ({ allowedToEdit, transferInventoryData, setNextStep, renderedFrom, stepFullScreen, canLoad }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions }
@@ -61,7 +54,7 @@ const SerialzedAssets = ({
               <Link className="link" title={row.original.detail} to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}>
                 <p>{row.original.detail}</p>
               </Link>
-              {(allowedToEdit && row.original.status === INVENTORY_STATUS.reserved) &&
+              {allowedToEdit && row.original.status === INVENTORY_STATUS.reserved && (
                 <HtmlTooltip title={`Remove`}>
                   <IconButton
                     size="small"
@@ -73,7 +66,7 @@ const SerialzedAssets = ({
                     <Delete fontSize="small" color="error" />
                   </IconButton>
                 </HtmlTooltip>
-              }
+              )}
             </Fragment>
           )}
         </div>
@@ -203,8 +196,8 @@ const SerialzedAssets = ({
 
   return (
     <Fragment>
-      {(allowedToEdit && canLoad) &&
-        <Box display="flex" justifyContent="flex-end" p={1}>
+      {allowedToEdit && canLoad && (
+        <Box display="flex" justifyContent="flex-end" m={1}>
           <Button
             variant="contained"
             color="primary"
@@ -228,7 +221,7 @@ const SerialzedAssets = ({
           >
             {'Assign ' + routes.serializedAsset.title}
           </Button>
-          {selectedRecords.filter((e: any) => e.type === 'asset').length > 0 &&
+          {selectedRecords.filter((e: any) => e.type === 'asset').length > 0 && (
             <Box ml={1}>
               <Button
                 variant="contained"
@@ -237,24 +230,21 @@ const SerialzedAssets = ({
                 size="small"
                 disabled={selectedRecords.filter((e: any) => e.type === 'asset').length === 0}
                 onClick={() => {
-                  const assets = selectedRecords.filter((e: any) => e.type === 'asset')
+                  const assets = selectedRecords.filter((e: any) => e.type === 'asset');
                   setShowConfirmBox(true);
                   setDeleteData(assets.map((a: any) => a.assetId));
                 }}
               >
                 Remove
               </Button>
-            </Box>}
+            </Box>
+          )}
         </Box>
-      }
-      <Box
-        zIndex={5}
-        width={'100%'}
-        height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 350px)"}
-      >
+      )}
+      <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 350px)'}>
         {rowsData ? (
           <CustomReactTable
-            height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 365px)"}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 365px)'}
             columns={columns}
             data={rowsData}
             onSelect={setSelectedRecords}

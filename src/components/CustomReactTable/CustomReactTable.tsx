@@ -129,9 +129,8 @@ export default function CustomReactTable({
   // customPageSize = 20,
   displayCustomReactTableHeaderOptions = true,
   hideExpander = false,
-  onSaveEdit = null,
+  onSaveEdit = null
 }) {
-
   const defaultColumn = React.useMemo(
     () => ({
       minWidth: 80,
@@ -145,118 +144,124 @@ export default function CustomReactTable({
   const [isCellEditing, setIsCellEditing] = React.useState(false);
   const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
 
+  useEffect(() => {
+    setIsCellEditing(false);
+    setCurrentRowEditing(null);
+    setCellValue(null);
+  }, [data]);
+
   const newColumns = React.useMemo(
     () =>
       hideExpander
         ? [
-          {
-            id: 'selection',
-            sticky: 'left',
-            width: 100,
-            minWidth: 100,
-            canDrag: false,
-            Header: ({ getToggleAllRowsSelectedProps }) => (
-              <div>
-                <IndeterminateCheckbox from="Header" {...getToggleAllRowsSelectedProps()} />
-              </div>
-            ),
-            Cell: ({ row }) =>
-              row?.original?.hideSelection ? null : (
-                <div style={{ paddingLeft: row.depth > 0 ? `${row.depth * 2}rem` : '' }}>
-                  <IndeterminateCheckbox from="Cell" {...row.getToggleRowSelectedProps()} />
+            {
+              id: 'selection',
+              sticky: 'left',
+              width: 100,
+              minWidth: 100,
+              canDrag: false,
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <div>
+                  <IndeterminateCheckbox from="Header" {...getToggleAllRowsSelectedProps()} />
                 </div>
-              )
-          },
-          ...columns.map((m) => {
-            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-          })
-        ]
+              ),
+              Cell: ({ row }) =>
+                row?.original?.hideSelection ? null : (
+                  <div style={{ paddingLeft: row.depth > 0 ? `${row.depth * 2}rem` : '' }}>
+                    <IndeterminateCheckbox from="Cell" {...row.getToggleRowSelectedProps()} />
+                  </div>
+                )
+            },
+            ...columns.map((m) => {
+              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+            })
+          ]
         : [
-          {
-            id: 'expander',
-            Header: ({ isAllRowsExpanded }) => (
-              <span
-                style={{
-                  paddingLeft: '0.3rem',
-                  color: 'black'
-                }}
-              >
-                {isAllRowsExpanded ? (
-                  <FaAngleDown
-                    className="cursor-pointer"
-                    onClick={() => {
-                      toggleAllRowsExpanded(false);
-                    }}
-                  />
-                ) : (
-                  <FaAngleRight
-                    className="cursor-pointer"
-                    onClick={() => {
-                      toggleAllRowsExpanded(true);
-                    }}
-                  />
-                )}
-              </span>
-            ),
-            sticky: 'left',
-            width: isMobile && !isTablet ? 40 : 70,
-            minWidth: isMobile && !isTablet ? 40 : 70,
-            canDrag: false,
-            Cell: ({ row }) =>
-              row.canExpand ? (
+            {
+              id: 'expander',
+              Header: ({ isAllRowsExpanded }) => (
                 <span
-                  {...row.getToggleRowExpandedProps({
-                    style: {
-                      paddingLeft: `${row.depth * 2}rem`
-                    }
-                  })}
+                  style={{
+                    paddingLeft: '0.3rem',
+                    color: 'black'
+                  }}
                 >
-                  {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
+                  {isAllRowsExpanded ? (
+                    <FaAngleDown
+                      className="cursor-pointer"
+                      onClick={() => {
+                        toggleAllRowsExpanded(false);
+                      }}
+                    />
+                  ) : (
+                    <FaAngleRight
+                      className="cursor-pointer"
+                      onClick={() => {
+                        toggleAllRowsExpanded(true);
+                      }}
+                    />
+                  )}
                 </span>
-              ) : null
-          },
+              ),
+              sticky: 'left',
+              width: isMobile && !isTablet ? 40 : 70,
+              minWidth: isMobile && !isTablet ? 40 : 70,
+              canDrag: false,
+              Cell: ({ row }) =>
+                row.canExpand ? (
+                  <span
+                    {...row.getToggleRowExpandedProps({
+                      style: {
+                        paddingLeft: `${row.depth * 2}rem`
+                      }
+                    })}
+                  >
+                    {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
+                  </span>
+                ) : null
+            },
 
-          //  Use below selection if pagination is there
-          // {
-          //     id: 'selection',
-          //     minWidth: 50,
-          //     width: 50,
-          //     maxWidth: 50,
-          //     // The header can use the table's getToggleAllRowsSelectedProps method
-          //     // to render a checkbox
-          //     Header: ({ getToggleAllPageRowsSelectedProps }) => (
-          //         <IndeterminateCheckbox {...getToggleAllPageRowsSelectedProps()} />
-          //     ),
-          //     // The cell can use the individual row's getToggleRowSelectedProps method
-          //     // to the render a checkbox
-          //     Cell: ({ row }) => (
-          //         <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-          //     ),
-          // },
+            //  Use below selection if pagination is there
+            // {
+            //     id: 'selection',
+            //     minWidth: 50,
+            //     width: 50,
+            //     maxWidth: 50,
+            //     // The header can use the table's getToggleAllRowsSelectedProps method
+            //     // to render a checkbox
+            //     Header: ({ getToggleAllPageRowsSelectedProps }) => (
+            //         <IndeterminateCheckbox {...getToggleAllPageRowsSelectedProps()} />
+            //     ),
+            //     // The cell can use the individual row's getToggleRowSelectedProps method
+            //     // to the render a checkbox
+            //     Cell: ({ row }) => (
+            //         <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+            //     ),
+            // },
 
-          //  Use below selection if pagination is not there
-          {
-            id: 'selection',
-            sticky: 'left',
-            width: 100,
-            minWidth: 100,
-            canDrag: false,
-            Header: ({ getToggleAllRowsSelectedProps }) => (
-              <div>
-                <IndeterminateCheckbox from="Header" {...getToggleAllRowsSelectedProps()} />
-              </div>
-            ),
-            Cell: ({ row }) =>
-              row?.original?.hideSelection ? null : (
-                <div style={{ paddingLeft: row.depth > 0 ? `${row.depth * 2}rem` : '' }}>
-                  <IndeterminateCheckbox from="Cell" {...row.getToggleRowSelectedProps()} />
+            //  Use below selection if pagination is not there
+            {
+              id: 'selection',
+              sticky: 'left',
+              width: 100,
+              minWidth: 100,
+              canDrag: false,
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <div>
+                  <IndeterminateCheckbox from="Header" {...getToggleAllRowsSelectedProps()} />
                 </div>
-              )
-          },
-          ...columns.map((m) => {
-            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-          })
-        ],
+              ),
+              Cell: ({ row }) =>
+                row?.original?.hideSelection ? null : (
+                  <div style={{ paddingLeft: row.depth > 0 ? `${row.depth * 2}rem` : '' }}>
+                    <IndeterminateCheckbox from="Cell" {...row.getToggleRowSelectedProps()} />
+                  </div>
+                )
+            },
+            ...columns.map((m) => {
+              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+            })
+          ],
     []
   );
 
@@ -346,7 +351,6 @@ export default function CustomReactTable({
     }
   }, []);
 
-
   useEffect(() => {
     let flatSelectedData = [];
     Object.keys(selectedRowIds).forEach((key) => {
@@ -420,6 +424,7 @@ export default function CustomReactTable({
         style={{
           display: 'block',
           overflow: 'auto',
+          background: 'white',
           height: height ?? '100%'
           // maxWidth: "100%",
           // overflowX: "scroll",
@@ -477,7 +482,7 @@ export default function CustomReactTable({
                       <TableCell
                         onDoubleClick={() => {
                           if (!cell?.column?.editable) return;
-                          setCellValue(cell?.value || '');
+                          setCellValue(parseFloat(cell?.value) || null);
                           setIsCellEditing(true);
                           setCurrentRowEditing(row);
                           setCellState(row.id, cell.column.id, { isEditing: true });
@@ -485,7 +490,7 @@ export default function CustomReactTable({
                             Object.keys(rowState[rowId].cellState).forEach((colId) => {
                               if (rowState[rowId]?.cellState[colId] !== cell.column?.id && rowState[rowId]?.cellState[colId]?.isEditing) {
                                 setCellState(rowId, colId, { isEditing: false });
-                                setIsCellEditing(false);
+                                // setIsCellEditing(false);
                               }
                             });
                           });
@@ -496,13 +501,14 @@ export default function CustomReactTable({
                           }
                         }}
                         {...cell.getCellProps()}
-                        className={`td ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
-                          }`}
+                        className={`td ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} ${
+                          setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
+                        }`}
                       >
                         {!['selection'].includes(cell?.column.id) &&
-                          rowState &&
-                          rowState.hasOwnProperty(row.id) &&
-                          rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
+                        rowState &&
+                        rowState.hasOwnProperty(row.id) &&
+                        rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
                           <input
                             type="number"
                             autoFocus

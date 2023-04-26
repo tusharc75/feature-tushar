@@ -16,7 +16,14 @@ import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage } from 'src/constants/helpers';
+import {
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource
+} from 'src/constants/helpers';
 import ManageCompetencyMaster from './ManageCompetencyMaster';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -24,7 +31,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const CompetencyMaster = () => {
-
   const renderedFrom = camelCase(routes?.competencyMaster.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -128,7 +134,6 @@ const CompetencyMaster = () => {
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
-
 
   const ActionsRenderer = (params) => (
     <Fragment>
@@ -307,8 +312,9 @@ const CompetencyMaster = () => {
                     disabled={selectedRecords.length ? false : true}
                     aria-controls="action-menu"
                     className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'}
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -394,6 +400,8 @@ const CompetencyMaster = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchCompetencyMasterData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.competencyMaster}
             />
           )
         ) : null}

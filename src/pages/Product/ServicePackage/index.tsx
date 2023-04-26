@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -19,9 +19,10 @@ import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { HiBadgeCheck } from 'react-icons/hi';
 import { FcApproval } from 'react-icons/fc';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import { ExpandMore } from '@material-ui/icons';
 
 const ServicePackage = ({ renderedFrom, productId }) => {
-
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -37,6 +38,8 @@ const ServicePackage = ({ renderedFrom, productId }) => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
+
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const {
     state: { permissions, selectedEntity }
@@ -209,6 +212,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
       ids = selectedRecords.map((d) => d._id);
     }
     setDeleting(true);
+    closeActions();
     axiosInstance()
       .put(`${product.api}/${productId}/package/remove`, { ids: ids })
       .then(() => {
@@ -256,20 +260,69 @@ const ServicePackage = ({ renderedFrom, productId }) => {
       });
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Fragment>
-      {permissions?.product?.isUpdate &&
+      {permissions?.product?.isUpdate && (
         <Box display="flex" justifyContent="space-between" p={1} pt={2} pb={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => setOpenAddDialog(true)}>
+          <Button variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
             Add Service Packages
           </Button>
-          <DeleteButton disabled={selectedRecords.length === 0} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
+          <Box display={'flex'}>
+            <Box>
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="default"
+                size="small"
+                onClick={openActions}
+                disabled={selectedRecords.length ? false : true}
+                aria-controls="action-menu"
+                style={{ marginLeft: '0.6rem' }}
+                endIcon={<ExpandMore />}
+              >
+                {isMobile && !isTablet ? '' : 'Actions'}
+              </Button>
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
+                  Delete
+                </MenuItem>
+              </Menu>
+            </Box>
+            <Box ml={1}></Box>
+            <Box display="flex" style={{ marginLeft: 'auto' }}>
+              <ImportExportMenu
+                permissions={permissions?.packages}
+                module="packages-products"
+                api={`${product.api}/unknown/package`}
+                afterImportCompleted={() => {
+                  fetchData();
+                }}
+                isExportAllOrSomeFeature={true}
+                ids={[]}
+                additionalParams={`productId=${productId}`}
+              />
+            </Box>
+          </Box>
         </Box>
-      }
+      )}
       {columns && Object.keys(frameWorkComponent).length > 0 ? (
         isMobile && !isTablet ? (
           <CustomSwipableList
@@ -283,9 +336,9 @@ const ServicePackage = ({ renderedFrom, productId }) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => { }}
+            onEdit={() => {}}
             extraParamsToCheckDelete={false}
-            onDelete={() => { }}
+            onDelete={() => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -293,7 +346,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -312,8 +365,9 @@ const ServicePackage = ({ renderedFrom, productId }) => {
             actionWidth={100}
             loading={loading}
             renderedFrom={renderedFrom}
+            isClientSideGrid={true}
             refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
+            showOnlyShowFilteredRecordSwitch={false}
           />
         )
       ) : (
@@ -339,9 +393,9 @@ const ServicePackage = ({ renderedFrom, productId }) => {
           handleClose={() => setOpenAddDialog(false)}
           ids={[...dataRows?.map((e) => e._id)]}
           onSuccess={(rows) => {
-            handleSubmit(rows)
+            handleSubmit(rows);
           }}
-          packageType={"Service"}
+          packageType={'Service'}
         />
       )}
     </Fragment>

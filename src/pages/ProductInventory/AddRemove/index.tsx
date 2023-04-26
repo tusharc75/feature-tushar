@@ -7,31 +7,29 @@ import {
   Divider,
   List,
   ListItem,
-  ListItemAvatar,
   ListItemText,
   TextField,
   Typography
 } from '@material-ui/core';
+import DateUtils from '@date-io/date-fns';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { Autocomplete } from '@material-ui/lab';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Formik, Form, Field } from 'formik';
-import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
+import { Formik, Form } from 'formik';
 import { read, utils, writeFile } from 'xlsx';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { capitalize } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormat, productInventory } from '../../../constants/helpers';
+import { convertDateInDateTime, dateFormatForInputControl, productInventory, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { KeyboardDatePicker } from 'formik-material-ui-pickers';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => {
+const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, storageLocation = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
@@ -39,6 +37,20 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
   const [availableQtyOnRemoveDate, setAvailableQtyOnRemoveDate] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [lockDate, setLockDate] = useState(null);
+  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
+
+  const [initialData, setInitialData] = useState({
+    qty: 1,
+    price: 0,
+    storageLocation: storageLocation,
+    comment: '',
+    serialNumbers: [],
+    customDate: new Date()
+  })
+
+  const [loadingInitialData, setLoadingInitialData] = useState(false)
+  const [currentInventory, setCurrentInventory] = useState(null)
+  const [selectedStorageLocation, setSelectedStorageLocation] = useState(null)
 
   const {
     state: { user }
@@ -79,6 +91,31 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
       });
   };
 
+  const getStorageLocation = () => {
+    setLoadingInitialData(true)
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
+      .then(({ data: { data } }) => {
+        if (data[sidebarResource.storageLocation]) {
+          const storageLocationOption = data[sidebarResource.storageLocation]?.filter(e => e.warehouse === warehouse);
+          setStorageLocationOptions(storageLocationOption);
+          if (!storageLocation) {
+            setInitialData((preVal) => { return ({ ...preVal, storageLocation: storageLocationOption[0]?.optionValue }) })
+            setSelectedStorageLocation(storageLocationOption[0]?.optionValue)
+          } else {
+            setSelectedStorageLocation(storageLocation)
+          }
+        }
+        setLoadingInitialData(false)
+      });
+  };
+
+  useEffect(() => {
+    if (user?.user?.brandPolicy?.storageLocation) {
+      getStorageLocation();
+    }
+  }, [warehouse])
+
   const handleSubmit = (values) => {
     let data: any;
     setLoading(true);
@@ -94,6 +131,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
               serialNumber: values['serialNumbers']
             })),
         warehouse: warehouse,
+        storageLocation: values.storageLocation,
         receiveDate: values.customDate,
         comment: values.comment
       };
@@ -120,6 +158,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
             ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: [] }))
             : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: serialNumberIds.map((item) => item?._id) })),
         warehouse: warehouse,
+        storageLocation: values.storageLocation,
         customDate: moment(values.customDate).format('MM/DD/YYYY'),
         comment: values.comment
       };
@@ -146,24 +185,26 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
     if (values.qty <= 0) {
       errors['qty'] = 'Please enter valid qty';
     }
+
     if (type === 'remove') {
-      var validateQty = product[0]?.availableInventory;
-      if (product?.length > 1) {
-        validateQty = product?.reduce(function (min, obj) {
-          return obj.availableInventory < min ? obj.availableInventory : min;
-        }, Infinity);
-      }
-      let maxQty = availableQtyOnRemoveDate !== null ? Math.min(validateQty, availableQtyOnRemoveDate) : validateQty;
-      if (parseInt(values.qty) > maxQty) {
-        errors['qty'] = 'qty not more than inventory';
+      if (product?.length === 1) {
+        var validateQty = currentInventory;
+        let maxQty = availableQtyOnRemoveDate !== null ? Math.min(validateQty, availableQtyOnRemoveDate) : validateQty;
+        if (parseInt(values.qty) > maxQty) {
+          errors['qty'] = 'Insufficient Quantity !';
+        }
       }
     }
+
     if (type === 'add') {
       if (parseFloat(values.price) <= 0) {
         errors['price'] = 'Please enter valid price';
       }
     }
 
+    if (user?.user?.brandPolicy?.storageLocation && !values['storageLocation']) {
+      errors['storageLocation'] = 'Please select Storage Location';
+    }
     // find duplicates serial numbers
     const serialNumbersList = values['serialNumbers'];
     const duplicates = serialNumbersList.filter((item, index) => serialNumbersList.indexOf(item) != index);
@@ -176,9 +217,14 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
 
     if (lockDate) {
       if (!moment(values["customDate"]).isSameOrAfter(moment(lockDate))) {
-        errors['customDate'] = `Please selecte valid date`;
+        errors['customDate'] = `Date entered prior to the locked date`;
       }
     }
+
+    if (moment(values["customDate"]).isAfter(moment())) {
+      errors['customDate'] = `Please select valid date`;
+    }
+
     return errors;
   }
 
@@ -224,6 +270,27 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
     e.target.value = null;
   };
 
+  const getCurrentInventory = () => {
+    let api = `${productInventory.api}/current-inventory?warehouse=${warehouse}&product=${product[0]._id}`;
+    if (selectedStorageLocation) {
+      api = `${api}&storageLocation=${selectedStorageLocation}`
+    }
+    if (product?.length === 1) {
+      axiosInstance()
+        .get(api)
+        .then(({ data: { data } }) => {
+          setCurrentInventory(data);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  }
+
+  useEffect(() => {
+    getCurrentInventory()
+  }, [selectedStorageLocation])
+
   return (
     <Dialog
       fullWidth
@@ -237,20 +304,17 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
       }}
       aria-labelledby="assign-roles-dialog"
     >
-      {loadingData ? (
-        <Box p={5} display="flex" justifyContent="center" alignItems="center">
-          <CircularProgress color="inherit" />
-        </Box>
-      ) : (
+      {!loadingData && !loadingInitialData ?
+        initialData &&
         <Formik
-          initialValues={{ qty: 1, price: 0, comment: '', serialNumbers: [], customDate: new Date() }}
+          initialValues={initialData}
           onSubmit={handleSubmit}
           validateOnMount
           validate={validate}
         >
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
-              <MuiPickersUtilsProvider utils={MomentUtils}>
+              <MuiPickersUtilsProvider utils={DateUtils}>
                 <CustomDialogHeader
                   title={`${capitalize(type)} Inventory`}
                   showRequiredLabel={true}
@@ -265,12 +329,11 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                   <List style={{ padding: 0 }}>
                     <ListItem key={product[0]?._id}>
                       {product?.length === 1 ? (
-                        <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${product[0]?.availableInventory}`} />
+                        <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${currentInventory}`} />
                       ) : (
                         <ListItemText primary={`${product?.length} Products`} />
                       )}
-                      <Field
-                        component={TextFieldFormik}
+                      <TextField
                         margin="dense"
                         type="number"
                         label="Qty"
@@ -289,8 +352,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                   </List>
                   {type === 'add' ? (
                     <Box m={1}>
-                      <Field
-                        component={TextFieldFormik}
+                      <TextField
                         margin="dense"
                         type="number"
                         label="Price"
@@ -308,29 +370,63 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                       />
                     </Box>
                   ) : null}
+                  {user?.user?.brandPolicy?.storageLocation &&
+                    <Box m={1}>
+                      <Autocomplete
+                        disableClearable
+                        options={storageLocationOptions}
+                        getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                        value={storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0] : ''}
+                        onChange={(e, val) => {
+                          setFieldValue('storageLocation', val?.optionValue);
+                          setSelectedStorageLocation(val?.optionValue)
+                        }}
+                        renderInput={(params) =>
+                          <TextField
+                            {...params}
+                            margin="dense"
+                            name="storageLocation"
+                            label="Storage Location"
+                            variant="outlined"
+                            fullWidth
+                            required
+                            error={touched['storageLocation'] && Boolean(errors['storageLocation'])}
+                            helperText={touched['storageLocation'] && errors['storageLocation']}
+                          />
+                        }
+                      />
+                    </Box>
+                  }
                   <Box m={1}>
-                    <Field
+                    <KeyboardDatePicker
+                      {...(lockDate ? { minDate: lockDate } : {})}
                       fullWidth
-                      label="Custom Date"
-                      variant="inline"
-                      inputVariant="outlined"
-                      autoOk
-                      required
                       size="small"
                       margin="dense"
-                      component={KeyboardDatePicker}
+                      autoOk
+                      required
+                      variant="inline"
+                      inputVariant="outlined"
+                      value={values.customDate}
                       name="customDate"
                       placeholder={type === 'add' ? 'Receive Date' : 'Remove Date'}
-                      value={values.customDate}
-                      format={dateFormat}
+                      label="Custom Date"
+                      format={dateFormatForInputControl}
                       maxDate={new Date()}
+                      error={touched['customDate'] && Boolean(errors['customDate'])}
+                      helperText={touched['customDate'] && errors['customDate']}
                       onChange={(value) => {
-                        setFieldValue('customDate', value);
+                        var newDate = convertDateInDateTime(value);
+                        setFieldValue('customDate', newDate);
                         if (type === 'remove' && product.length === 1) {
-                          var date = moment(value);
+                          var date = moment(newDate);
                           if (date.isValid()) {
-                            axiosInstance()
-                              .get(`${productInventory.api}/inventory-at-date?date=${value}&warehouse=${warehouse}&product=${product[0]._id}`)
+                            var api = `${productInventory.api}/inventory-at-date?date=${newDate}&warehouse=${warehouse}&product=${product[0]._id}`;
+                            if (values['storageLocation']) {
+                              api = api + `&storageLocation=${values['storageLocation']}`
+                            }
+                            axiosInstance().get(api)
                               .then(({ data: { data } }) => {
                                 setAvailableQtyOnRemoveDate(data);
                               })
@@ -340,15 +436,13 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                           }
                         }
                       }}
-                      {...(lockDate ? { minDate: lockDate } : {})}
                     />
                     {availableQtyOnRemoveDate || availableQtyOnRemoveDate === 0 ? (
                       <Typography variant="caption">{`Inventory on custom date : ${availableQtyOnRemoveDate}`}</Typography>
                     ) : null}
                   </Box>
                   <Box m={1}>
-                    <Field
-                      component={TextFieldFormik}
+                    <TextField
                       margin="dense"
                       type="text"
                       label="Comment"
@@ -451,8 +545,10 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
             </Form>
           )}
         </Formik>
-      )}
-    </Dialog>
+        : <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
+    </Dialog >
   );
 };
 

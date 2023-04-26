@@ -10,7 +10,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { demandOrder } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, demandOrder } from '../../constants/helpers';
 import ManageSalesOrderDialog from './ManageDemandOrderDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
@@ -19,6 +19,7 @@ import { FaWpforms } from 'react-icons/fa';
 import {  BiFoodMenu } from 'react-icons/bi';
 import Material from './Material';
 import { camelCase } from 'lodash';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const DemandOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -130,7 +131,7 @@ const DemandOrderDetails = () => {
             {salesOrderData ? (
               <>
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (
-                  <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                  <Button  className="btn-outline-v1" variant="contained"  size="small" onClick={handleOpenUpdateDialog}>
                     Edit
                   </Button>
                 )}
@@ -140,6 +141,7 @@ const DemandOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
+              <ActivityButton referenceId={salesOrderData?._id} resource={ACTIVITY_RESOURCE.demandOrder} />
           </Box>
         </Box>
       </Box>

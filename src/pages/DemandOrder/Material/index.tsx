@@ -19,6 +19,9 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { CHILD_RESOURCE, RESOURCE_LABEL } from 'src/constants/helpers';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -43,9 +46,11 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
   }, []);
 
   const fetchFields = async () => {
-    var data = fieldsToShow || [];
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.demandOrderDetail}`);
+    var data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, salesOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = genrateCustomTableColumns(data, '', '');
+    const newColumns = genrateCustomTableColumns(data,  salesOrderData?.currency || 'USD', renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -170,15 +175,9 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
     let rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail =
-        parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.packageDetail?.packageName
+      parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
 
-      parent.description =
-        parent.type === 'product'
-          ? parent?.productDetail?.productDescription
-          : parent?.packageDetail?.packageDescription
+      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
 
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
@@ -192,10 +191,8 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName :
-       _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription :
-         _subRow?.packageDetail?.packageDescription 
+      _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
+      _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -255,9 +252,13 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
         });
         if (saveAndNext) {
           const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-          setMaterialEdit({ open: true, data: rowsData[rowIndex + 1], bulkedit: false, showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
-        }
-        else {
+          setMaterialEdit({
+            open: true,
+            data: rowsData[rowIndex + 1],
+            bulkedit: false,
+            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+          });
+        } else {
           setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
         }
       })
@@ -266,7 +267,6 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
         toastConfig.setToastConfig(error);
       });
   };
-
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
@@ -299,7 +299,6 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
       });
   };
 
-
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -318,16 +317,10 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
 
   return (
     <Fragment>
-        {allowedToEdit &&
+      {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" m={1}>
           <Box display="flex" alignItems="center">
-            <Button
-              variant={'outlined'}
-              color="primary"
-              size="small"
-              startIcon={<Add />}
-              onClick={openAddActions}
-              aria-controls="add-menu">
+            <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
               {'Add'}
               <ExpandMore fontSize="small" />
             </Button>
@@ -362,6 +355,8 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
             </Menu>
           </Box>
           <Box display="flex">
+            <PreviewDownload resource={RESOURCE_LABEL.demandOrder} referenceId={salesOrderData?._id} columns={columns} />
+            <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
               variant={isMobile ? 'text' : 'outlined'}
@@ -369,8 +364,9 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
               size="small"
               onClick={openActions}
               aria-controls="action-menu"
+              endIcon={<ExpandMore />}
             >
-              {isMobile ? '' : 'Actions'} <ExpandMore />
+              {isMobile ? '' : 'Actions'}
             </Button>
             <Menu
               anchorEl={anchorEl}
@@ -394,13 +390,15 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection).map((rec: any) => {
-                    const obj: any = {};
-                    obj.id = rec._id;
-                    obj.type = rec?.type;
-                    obj.materialId = rec?.materialId;
-                    return obj;
-                  });
+                  const dataToDelete = selectedRecords
+                    ?.filter((e) => !e.hideSelection)
+                    .map((rec: any) => {
+                      const obj: any = {};
+                      obj.id = rec._id;
+                      obj.type = rec?.type;
+                      obj.materialId = rec?.materialId;
+                      return obj;
+                    });
                   setDeleteData(dataToDelete);
                   closeActions();
                 }}
@@ -410,7 +408,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
             </Menu>
           </Box>
         </Box>
-      }
+      )}
       {columns && rowsData ? (
         <>
           <Box p="6px" zIndex={5} width={'100%'}>
@@ -471,13 +469,13 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
           }}
         />
       )}
-       {addDialog.open && addDialog.type === 'package' && (
+      {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
           referenceType="demandOrder"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           ids={[]}
           onSuccess={(rows) => {
-            handleAdd(rows)
+            handleAdd(rows);
           }}
           packageType={null}
         />
@@ -485,52 +483,5 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
     </Fragment>
   );
 };
-
-const fieldsToShow = [
-  {
-    _id: '630dbe1e9ec41861052354a3',
-    fieldLabel: 'Qty',
-    type: 'decimal',
-    option: [],
-    required: false,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 2,
-    decimalPlaces: 2,
-    sectionName: 'Quantity Information',
-    fieldName: 'qty',
-    resource: 'Sales Order Product',
-    brand: '630dbe1e9ec418610523529c',
-    createdBy: {
-      user: '61b84437885fdf02d9104cb0',
-      date: '2022-08-30T07:37:02.237Z'
-    }
-  },
-  {
-    _id: '630dbe1e9ec41861052354a4',
-    fieldLabel: 'Unit',
-    type: 'dropDown',
-    option: [
-      {
-        optionLabel: 'Option 1',
-        optionValue: 'Option 1'
-      }
-    ],
-    required: false,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    order: 1,
-    sectionName: 'Quantity Information',
-    fieldName: 'unit',
-    resource: 'Sales Order Product',
-    brand: '630dbe1e9ec418610523529c',
-    createdBy: {
-      user: '61b84437885fdf02d9104cb0',
-      date: '2022-08-30T07:37:02.237Z'
-    }
-  }
-];
 
 export default Material;

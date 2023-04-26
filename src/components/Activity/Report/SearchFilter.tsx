@@ -5,7 +5,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { startCase } from 'lodash';
 import { SearchActivity } from '../../../axios/activity';
 import { useData } from '../../../StateProvider/Provider';
-import { resActivityColors, resActivityTextColors } from '../Helpers/utils';
+import { getResActivityColor } from '../Helpers/utils';
 import ActivityModelHandler from '../ActivityModelHandler';
 import { isMobile, isTablet } from 'react-device-detect';
 import { get_activity_resource } from '../Helpers/utils';
@@ -123,8 +123,8 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
               size={chip?.size || 'medium'}
               color={chip?.color || 'primary'}
               style={{
-                backgroundColor: resActivityColors[option.type],
-                color: resActivityTextColors[option.type]
+                backgroundColor: getResActivityColor(index).background,
+                color: getResActivityColor(index).color
               }}
               label={
                 option && option.type === 'my'
@@ -177,6 +177,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
         }
         value={value}
         renderOption={(option) => {
+          const index = options.findIndex((o) => o.type === option.type);
           return (
             <Grid container alignItems="center" spacing={3}>
               <Grid item>
@@ -184,8 +185,8 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
                   size={chip?.size || 'medium'}
                   className={`${classes.chipStyle}`}
                   style={{
-                    backgroundColor: resActivityColors[option.type],
-                    color: resActivityTextColors[option.type]
+                    backgroundColor: getResActivityColor(index > -1 ? index : Math.floor(Math.random() * 50)).background,
+                    color: getResActivityColor(index > -1 ? index : Math.floor(Math.random() * 50)).color
                   }}
                   label={
                     option.isAll

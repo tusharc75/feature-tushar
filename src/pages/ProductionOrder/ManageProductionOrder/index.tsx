@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
 import { Box, Button, Grid, IconButton, Tooltip } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -17,7 +17,6 @@ import {
   getObjKeys,
   getObjKeysWithValues,
   getOwnerDropdownDataSource,
-  isFieldNotTouched,
   setFieldsInAscendingOrder,
   yupSchema,
   generateUniqueIdOnly,
@@ -26,7 +25,6 @@ import {
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from 'react-icons/fa';
@@ -34,7 +32,8 @@ import AddIcon from '@material-ui/icons/AddCircle';
 import InfoIcon from '@material-ui/icons/Info';
 import ManageAccountDialog from '../../Account/ManageAccount';
 import ManageContactDialog from '../../Contact/ManageContact';
-import ManageWarehouse from 'src/pages/Warehouse/ManageWarehouse';
+import { isEqual } from 'lodash';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const ManageProductionOrder = ({
   isClone = false,
@@ -46,7 +45,7 @@ const ManageProductionOrder = ({
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
-  const [productionOrderInitialData, setProductionOrderInitialData] = useState({ fields: [], initialValues: {} });
+  const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
@@ -58,25 +57,18 @@ const ManageProductionOrder = ({
   }: any = useData();
   const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
   const [contactData, setContactData] = useState([]);
   const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
   const [showAddCustomerContactDialog, setShowAddCustomerContactDialog] = useState(false);
-
   const [accountData, setAccountData] = useState([]);
   const [productionOrderData, setProductionOrderData] = useState(null);
   const [customerContactMainDataSource, setCustomerContactMainDataSource] = useState([]);
   const [customerContactDataSource, setCustomerContactDataSource] = useState([]);
   const [newAddedAccountId, setNewAddedAccountId] = useState(null);
-
   const [cloneHeading, setCloneHeading] = useState('');
 
-  const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
-  const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false);
-  const [disablePlantIfAssetAdded, setDisablePlantIfAssetAdded] = useState(true);
-
   const updateAccountDropdown = (data) => {
-    const entityFields = productionOrderInitialData.fields;
+    const entityFields = initialData.fields;
     const customerAccountNameFieldIndex = entityFields.findIndex((d) => d.fieldName === 'customerAccount');
     if (customerAccountNameFieldIndex > -1) {
       entityFields[customerAccountNameFieldIndex].option = [
@@ -93,7 +85,7 @@ const ManageProductionOrder = ({
   };
 
   const updateContactDropdown = (data) => {
-    const entityFields = productionOrderInitialData.fields;
+    const entityFields = initialData.fields;
     const customerContactNameFieldIndex = entityFields.findIndex((d) => d.fieldName === 'customerContact');
     if (customerContactNameFieldIndex > -1) {
       const newCustomer = {
@@ -110,21 +102,21 @@ const ManageProductionOrder = ({
   };
 
   useEffect(() => {
-    const ownerCollabOptions = productionOrderInitialData.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
+    const ownerCollabOptions = initialData.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
     if (ownerCollabOptions?.length > 0) {
       setOwnerCollaboratorData(ownerCollabOptions[0].option);
       setOwnerData(ownerCollabOptions[0].option);
       setCollaboratorData(ownerCollabOptions[0].option);
     }
-    let customerAccountOptions = productionOrderInitialData.fields.find((d) => d.fieldName === 'customerAccount');
+    let customerAccountOptions = initialData.fields.find((d) => d.fieldName === 'customerAccount');
     if (customerAccountOptions) {
       setAccountData(customerAccountOptions.option);
     }
-    let customerContactOptions = productionOrderInitialData.fields.find((d) => d.fieldName === 'customerContact');
+    let customerContactOptions = initialData.fields.find((d) => d.fieldName === 'customerContact');
     if (customerContactOptions) {
       setContactData(customerContactOptions?.option);
     }
-    const customerContactDropdownData = productionOrderInitialData.fields.find((d) => d.fieldName === 'customerContact');
+    const customerContactDropdownData = initialData.fields.find((d) => d.fieldName === 'customerContact');
 
     if (customerContactDropdownData) {
       setCustomerContactMainDataSource(customerContactDropdownData?.option);
@@ -134,8 +126,8 @@ const ManageProductionOrder = ({
         );
       }
     }
-    setFormsData(setFieldsInAscendingOrder(productionOrderInitialData.fields));
-  }, [productionOrderInitialData.fields]);
+    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+  }, [initialData.fields]);
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData));
@@ -162,8 +154,6 @@ const ManageProductionOrder = ({
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-      const plantsOptions = fieldData.find((obj) => ['plant', 'warehouse'].indexOf(obj?.fieldData.fieldName) > -1)?.fieldData?.option ?? [];
-      setOptionsPlantsEntity(plantsOptions);
       if (productionOrderId) {
         try {
           let data;
@@ -172,20 +162,19 @@ const ManageProductionOrder = ({
           setProductionOrderData(data);
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, productionOrderNumber, updatedBy, ...rest } = data;
-            setDisablePlantIfAssetAdded(false);
             rest.status = 'New';
             rest.productionOrderNumber = `PO_${generateUniqueIdOnly()}`;
             setCloneHeading(productionOrderNumber);
-            setProductionOrderInitialData({
+            setInitialData({
               fields: fieldsDataForCreate,
-              initialValues: getObjKeysWithValues(rest, fieldsDataForCreate)
+              values: getObjKeysWithValues(rest, fieldsDataForCreate)
             });
             setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
             setLoading(false);
           } else {
-            setProductionOrderInitialData({
+            setInitialData({
               fields: fieldsDataForUpdate,
-              initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataForUpdate)
             });
             setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
             setLoading(false);
@@ -196,10 +185,9 @@ const ManageProductionOrder = ({
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
         initialData['productionOrderNumber'] = `PO_${generateUniqueIdOnly()}`;
-        setDisablePlantIfAssetAdded(false);
-        setProductionOrderInitialData({
+        setInitialData({
           fields: fieldsDataForCreate,
-          initialValues: initialData
+          values: initialData
         });
         setFormValues(initialData);
         setLoading(false);
@@ -209,51 +197,36 @@ const ManageProductionOrder = ({
     }
   };
 
-  const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
-    if (Object.keys(errors)?.length) {
-      productionOrderInitialData.fields.forEach((input) => {
-        if (input.required || values[input.fieldName]) {
-          setTouched(input.fieldName, true);
-        }
-      });
-      setErrors({ ...errors });
-    } else {
-      handleUpdateRepairJoproductionOrder(values);
-    }
-  };
-
-  const handleUpdateRepairJoproductionOrder = (values) => {
+  const handleSubmit = (values) => {
     setLoading(true);
     if (productionOrderId && isClone === false) {
       values._id = productionOrderId;
       axiosInstance()
         .put(`${productionOrder.api}`, values)
         .then(({ data }) => {
-          setLoading(false);
-          onSuccess();
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: data.message
           });
+          onSuccess();
+          setLoading(false);
         })
         .catch((error) => {
           setLoading(false);
           toastConfig.setToastConfig(error);
         });
     } else {
-      const { productInventory, ...rest } = values;
       axiosInstance()
-        .post(`${productionOrder.api}`, rest)
+        .post(`${productionOrder.api}`, values)
         .then(({ data: { data, message } }) => {
-          history.push(`${routes.productionOrderDetail.path}/${data._id}`);
-          setLoading(false);
-          onSuccess(data);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: message
           });
+          history.push(`${routes.productionOrderDetail.path}/${data?._id}`);
+          setLoading(false);
         })
         .catch((error) => {
           setLoading(false);
@@ -274,12 +247,10 @@ const ManageProductionOrder = ({
     }
   };
 
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
+  function validate(values) {
+    const errors = {};
+    return errors;
+  }
 
   return (
     <Dialog
@@ -295,54 +266,37 @@ const ManageProductionOrder = ({
       }}
       open={true}
     >
-      <CustomDialogHeader
-        title={
+      {initialData?.fields?.length ? (
+        <Formik
+          initialValues={initialData.values}
+          validationSchema={yupSchema(initialData.fields)}
+          validateOnMount
+          validate={validate}
+          onSubmit={handleSubmit}
+        >
+          {({ values, errors, touched, setFieldValue, submitForm }) => ( 
+            <Fragment>
+        <CustomDialogHeader
+          title={
           !productionOrderId
             ? `Create ${routes.productionOrder.title}`
             : `${isClone ? `Clone - ${cloneHeading}` : `Update ${productionOrderData?.productionOrderNumber || ''}`}`
-        }
-        onClose={(e, reason) => {
-          if (isFieldNotTouched(productionOrderInitialData, formValues)) onClose();
-          else setShowConfirmDialog(true);
-        }}
-        isMinimized={!fullScreen}
-        onMinimizeMaximize={() => {
+          }
+          onClose={(e, reason) => {
+            if (isEqual(initialData.values, values)) {
+              onClose();
+            } else {
+              setShowConfirmDialog(true);
+            }
+          }}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
           setFullScreen((prevState) => !prevState);
-        }}
-        showManimizeMaximize={true}
-      />
-      {!productionOrderInitialData?.fields?.length ? (
-        <>
+          }}
+          showManimizeMaximize={true}
+          />
           <CustomDialogContent>
-            <Skeleton width="100%" height="70px" />
-            <Grid container spacing={2}>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                <Grid key={i} item xs={12} sm={6} md={6}>
-                  <Skeleton width="100%" height="60px" />
-                </Grid>
-              ))}
-            </Grid>
-          </CustomDialogContent>
-          <CustomDialogFooter>
-            <Button variant="outlined" size="small" color="primary" disabled>
-              Cancel
-            </Button>
-            <Button variant="contained" size="small" color="primary" disabled>
-              Submit
-            </Button>
-          </CustomDialogFooter>
-        </>
-      ) : (
-        <Formik
-          initialValues={productionOrderInitialData.initialValues}
-          validationSchema={yupSchema(productionOrderInitialData.fields)}
-          validateOnMount
-          onSubmit={() => { }}
-        >
-          {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
-            <>
-              <CustomDialogContent>
-                <Form>
+                <Form autoComplete="off" autoCorrect="off" noValidate>
                   {formsData &&
                     formsData.map((form, i) => {
                       return (form.name && (
@@ -381,12 +335,8 @@ const ManageProductionOrder = ({
                                           doNotShowInfoTooltip={true}
                                           onChange={(e, value) => {
                                             setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                            if (productionOrderInitialData.fields.find((d) => d.fieldName === 'customerContact')) {
+                                            if (initialData.fields.find((d) => d.fieldName === 'customerContact')) {
                                               setFieldValue('customerContact', '');
-                                              handleValuesChange({
-                                                [field.fieldName]: value && value.optionValue ? value.optionValue : '',
-                                                customerContact: ''
-                                              });
                                             }
                                           }}
                                         />
@@ -435,7 +385,6 @@ const ManageProductionOrder = ({
                                           options={customerContactDataSource}
                                           doNotShowInfoTooltip={true}
                                           setFieldValue={(name, value) => {
-                                            handleValuesChange({ [name]: value });
                                             setFieldValue(name, value);
                                           }}
                                           required={field.required}
@@ -486,7 +435,6 @@ const ManageProductionOrder = ({
                                       options={ownerData}
                                       onChange={(e, val) => {
                                         setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                        handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : '' });
 
                                         if (val && val.optionValue !== user?.user?._id) {
                                           const checkOwnerAddedInCollaborator = values['collaborator'].find(
@@ -497,9 +445,6 @@ const ManageProductionOrder = ({
                                               ...values['collaborator'],
                                               collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
                                             ]);
-                                            handleValuesChange({
-                                              collaborator: collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                            });
                                           }
                                         }
                                       }}
@@ -526,7 +471,6 @@ const ManageProductionOrder = ({
                                       type={field.type}
                                       options={collaboratorData}
                                       setFieldValue={(name, value) => {
-                                        handleValuesChange({ [name]: value });
                                         setFieldValue(name, value);
                                       }}
                                       required={field.required}
@@ -538,71 +482,13 @@ const ManageProductionOrder = ({
                                         onCollabOwnerMultiselectOpen(values['owner']);
                                       }}
                                     />
-                                  ) : field.fieldName === 'plant' || field.fieldName === 'warehouse' ? (
-                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions?.warehouse?.isCreate ? 11 : 11}
-                                          sm={permissions?.warehouse?.isCreate ? 11 : 11}
-                                          md={permissions?.warehouse?.isCreate ? 11 : 11}
-                                        >
-                                          <FormTypes
-                                            productionOrderId={productionOrderId}
-                                            {...field}
-                                            fieldData={field}
-                                            disabled={disablePlantIfAssetAdded || (productionOrderId && field.disableOnEdit)}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={optionsPlantsEntity}
-                                            setFieldValue={(name, value) => {
-                                              setFieldValue(name, value);
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                          />
-                                        </Grid>
-                                        {permissions?.warehouse?.isCreate && (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title="Create Plant" className="mt-1">
-                                              <IconButton
-                                                onClick={() => {
-                                                  setShowAddWarehouseDialog(true);
-                                                }}
-                                                disabled={disablePlantIfAssetAdded || (productionOrderId && field.disableOnEdit)}
-                                                size="small"
-                                              >
-                                                <AddIcon
-                                                  color={
-                                                    disablePlantIfAssetAdded || (productionOrderId && field.disableOnEdit) ? 'disabled' : 'primary'
-                                                  }
-                                                />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Grid>
-                                        )}
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip className="mt-2" title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    </Grid>
                                   ) : (
                                     <FormTypes
                                       productionOrderId={productionOrderId}
                                       {...field}
                                       fieldData={field}
-                                      disabled={(productionOrderId && field.disableOnEdit) || field.fieldName === 'productionOrderNumber'}
+                                      allFields={initialData?.fields}
+                                      disabled={(productionOrderId && field.disableOnEdit)}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -611,7 +497,6 @@ const ManageProductionOrder = ({
                                       type={field.type}
                                       options={field.option}
                                       setFieldValue={(name, value) => {
-                                        handleValuesChange({ [name]: value });
                                         setFieldValue(name, value);
                                       }}
                                       required={field.required}
@@ -645,8 +530,11 @@ const ManageProductionOrder = ({
                   color="primary"
                   size="small"
                   onClick={() => {
-                    if (isFieldNotTouched(productionOrderInitialData, values)) onClose();
-                    else setShowConfirmDialog(true);
+                    if (isEqual(initialData.values, values)) {
+                      onClose();
+                    }else{
+                      setShowConfirmDialog(true);
+                    }
                   }}
                 >
                   Cancel
@@ -662,7 +550,7 @@ const ManageProductionOrder = ({
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
-                    handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                    submitForm();
                   }}
                 >
                   Save
@@ -674,8 +562,7 @@ const ManageProductionOrder = ({
                   onSave={() => {
                     setShowConfirmDialog(false);
                     handleScroll(errors);
-
-                    handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                    submitForm();
                   }}
                   onClose={() => {
                     setShowConfirmDialog(false);
@@ -723,33 +610,13 @@ const ManageProductionOrder = ({
                   isAccountFieldDisable={true}
                 />
               )}
-              {showAddWarehouseDialog && (
-                <ManageWarehouse
-                  open={showAddWarehouseDialog}
-                  close={() => setShowAddWarehouseDialog(false)}
-                  isClone={false}
-                  onSuccess={({ data }) => {
-                    if (data._id) {
-                      setShowAddWarehouseDialog(false);
-                      setOptionsPlantsEntity((prevState) => {
-                        return [
-                          ...prevState,
-                          {
-                            optionValue: data._id,
-                            optionLabel: data.warehouseName,
-                            order: optionsPlantsEntity?.length,
-                            default: false
-                          }
-                        ];
-                      });
-                      setFieldValue('warehouse', data._id);
-                    }
-                  }}
-                />
-              )}
-            </>
+            </Fragment>
           )}
         </Formik>
+      ) : (
+        <Box p={2} height={500} bgcolor="white">
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>
       )}
     </Dialog>
   );

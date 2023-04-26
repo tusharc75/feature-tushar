@@ -248,11 +248,18 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
     <div className={styles.cardSection}>
       <div className={styles.cardContainer}>
         {sections.map((section) => {
-          if (section.head === 'Collaboration Tools' || section.head === 'Setups' || section.head === 'Setups & Administration' || section.head === 'Activities') return <></>;
+          if (
+            section.head === 'Collaboration Tools' ||
+            section.head === 'Setups' ||
+            section.head === 'Setups & Administration' ||
+            section.head === 'Activities'
+          )
+            return <></>;
           const style = { '--bg_color': section.color, textAlign: 'left' } as React.CSSProperties;
           return (
-            <button
+            <div
               key={section.head}
+              role="button"
               className={styles.singlecard}
               style={style}
               onClick={() => section.items.length > 0 && setModalContent({ items: section.items, title: section.head })}
@@ -275,7 +282,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
                 )}
                 <p className={styles.cardIcon}>{section.icon}</p>
               </div>
-            </button>
+            </div>
           );
         })}
       </div>
@@ -348,7 +355,8 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
   return (
     <>
       {colabData ? (
-        <button
+        <div
+          role="button"
           style={style}
           className={`${styles.rightInner} ${mode === 'Setups & Administration' && styles.setHeight}`}
           onClick={() => setModalContent({ items: colabData, title: mode })}
@@ -380,7 +388,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
               <Typography component="span">Start Collaborating</Typography>
             </button>
           )}
-        </button>
+        </div>
       ) : null}
       <RenderDialog modalContent={modalContent} handleClose={handleClose} handleRoutes={handleRoutes} />
     </>

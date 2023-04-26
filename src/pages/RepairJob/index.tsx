@@ -5,7 +5,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
 import ManageRepairJobDialog from './ManageRepairJob';
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairJob, prepareDataForGrid, getLocalStorageArrayData } from '../../constants/helpers';
+import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairJob, prepareDataForGrid, getLocalStorageArrayData, sidebarResource } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -260,9 +260,12 @@ const RepairJob = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterRepairJobs=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterRepairJobs=${selectedType}`;
+      deepFilter = `?`;
     }
     let filterById = [];
     if (accountDetails.accountId) {
@@ -550,6 +553,8 @@ const RepairJob = () => {
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchRepairJobs}
                 showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.repairJob}
               /> : null
         }
 

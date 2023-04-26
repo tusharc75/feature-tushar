@@ -1,32 +1,22 @@
-import { useState, useEffect, useContext, Fragment, useMemo } from 'react';
-import { Grid, Box, Button, Paper, Tabs, Tab, useMediaQuery, Menu, MenuItem, Dialog, Tooltip, Typography } from '@material-ui/core';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
+import { Grid, Box, Button, Tabs, Tab, Menu, MenuItem, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import {
-  quotation,
-  getUniqueCurrencies,
-  ACTIVITY_RESOURCE,
-  quotationProcessSteps,
-  CustomDialogTransition,
-  currencyCodeToSymbol,
-  QUOTATION_STATUS
-} from '../../constants/helpers';
+import { quotation, ACTIVITY_RESOURCE, quotationProcessSteps, QUOTATION_STATUS, QUOTATION_TYPE } from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
+import { BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
 import Productpackage from './Productpackage';
-import AdditionalCost from './AdditionalCost';
 import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import {
@@ -34,66 +24,70 @@ import {
   FcOk,
   FcCancel,
   GiReceiveMoney,
-  GrStatusInfo,
   HiPencil,
   IoArrowDownCircleSharp,
   MdDelete,
   MdDeleteSweep,
   RiFlowChart,
-  VscVersions
+  VscVersions,
+  FcApproval
 } from 'react-icons/all';
 import { camelCase } from 'lodash';
-import Service from './Service';
 import QuoteBuilder from './QuoteBuilder';
 import RoadmapViews from './RoadMapViews';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import Steps from 'src/pages/RentalManagement/Steps';
 import contactClass from '../Contact/contact.module.scss';
 import { CircularProgress } from '@material-ui/core';
 import ManualReponseDialog from './ManualRespondDialog';
 import Versions from './Versions';
 import QuotationSummeryDialog from './QuotationSummeryDialog';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CachedIcon from '@material-ui/icons/Cached';
+import Steps, { getIndex } from 'src/components/Steps';
+import ShowDoaData from 'src/components/ShowDoaData';
+import ShowQuoteStatus from 'src/components/ShowQuoteStatus';
+import AdditionalCost from './AdditionalCost';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.quotation.title);
+
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, selectedEntity }
   }: any = useData();
 
-
-  const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [quotationData, setQuotationData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [quotationFields, setQuotationFields] = useState([]);
-  const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [nextStep, setNextStep] = useState(true);
+  const [prevStep, setPrevStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [statusOptions, setStatusOptions] = useState([]);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [anchorElAction, setAnchorElAction] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
-
+  const [DOAData, setDOAData] = useState([]);
   const [currentVersion, setCurrentVersion] = useState(0);
   const [isCloning, setCloning] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
   const [currVersionId, setCurrVersionId] = useState(null);
   const [sentToCustomer, setSentToCustomer] = useState(false);
   const [versionStatus, setVersionStatus] = useState(QUOTATION_STATUS.acceptByCustomer);
+
+  const [convertConfirmBox, setConvertConfirmBox] = useState(false);
+
+  const [stepList, setStepList] = useState(quotationProcessSteps);
+  const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -113,52 +107,73 @@ const QuotationDetails = () => {
     setShowAllVersionStatus(false);
   };
 
-  const handleCloneQuotationWithVersionFromAllVersion = (versionNumber) => {
-    setOpenUpdateDialog(true);
-    setShowAllVersionStatus(false);
-  };
-
-  const handleStatusChange = (o) => {
-    if (o.optionValue && quotationData?.status !== o.optionValue) {
-      updateJobStatus(o.optionValue);
-    }
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const openActionsAction = (event) => {
     setAnchorElAction(event.currentTarget);
   };
+
   const closeActionsAction = () => {
     setAnchorElAction(null);
   };
+
+  const updateDOASetup = (doasetup) => {
+    if (doasetup) {
+      setStepList(quotationProcessSteps);
+      setStepNames(quotationProcessSteps?.map((item) => item.name));
+    } else {
+      setStepList(quotationProcessSteps?.filter((e) => e.name !== 'DOA'));
+      setStepNames(quotationProcessSteps?.filter((e) => e.name !== 'DOA').map((item) => item.name));
+    }
+  };
+
+  const getQuotationFields = useMemo(() => {
+    let tempQuotationFields = quotationFields;
+    if (quotationData && quotationFields.length !== 0) {
+      if (quotationData['type'] === 'Rental Job') {
+        tempQuotationFields = tempQuotationFields.filter(
+          (d) =>
+            d?.fieldData?.fieldName !== 'expectedCustomerDeliveryDate' &&
+            d?.fieldData?.fieldName !== 'supplierSuggestedDeliveryDate' &&
+            d?.fieldData?.fieldName !== 'repairOrder' &&
+            d?.fieldData?.fieldName !== 'salesOrder'
+        );
+      }
+      if (quotationData['type'] === 'Repair Order') {
+        tempQuotationFields = tempQuotationFields.filter(
+          (d) =>
+            d?.fieldData?.fieldName !== 'expectedCustomerDeliveryDate' &&
+            d?.fieldData?.fieldName !== 'supplierSuggestedDeliveryDate' &&
+            d?.fieldData?.fieldName !== 'rentalJob' &&
+            d?.fieldData?.fieldName !== 'salesOrder'
+        );
+      }
+      if (quotationData['type'] === 'Sales Order') {
+        tempQuotationFields = tempQuotationFields.filter(
+          (d) =>
+            d?.fieldData?.fieldName !== 'estimateStartDate' &&
+            d?.fieldData?.fieldName !== 'estimateEndDate' &&
+            d?.fieldData?.fieldName !== 'repairOrder' &&
+            d?.fieldData?.fieldName !== 'rentalJob'
+        );
+      }
+    }
+    return tempQuotationFields;
+  }, [quotationData, quotationFields]);
+
+  const getRessourceFields = async () => {
+    try {
+      const response: any = await axiosInstance().get('/field?resource=Quotation');
+      setQuotationFields(response?.data?.data);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   useEffect(() => {
     if (id) {
       getRessourceFields();
       fetchQuotationData();
     }
   }, [id]);
-
-  const getRessourceFields = async () => {
-    try {
-      const response: any = await axiosInstance().get('/field?resource=Quotation');
-      response?.data?.data.some((o) => {
-        if (o?.fieldData?.fieldName === 'status') {
-          setStatusOptions([...o.fieldData.option]);
-          return true;
-        }
-      });
-      setQuotationFields(response?.data?.data);
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  };
 
   const fetchQuotationData = async (version: any = 0, loading = true) => {
     setLoading(loading);
@@ -167,42 +182,42 @@ const QuotationDetails = () => {
       const response: any = await axiosInstance().get(`${quotation.api}/${id}`);
       data = response?.data?.data;
 
-      setHeadingLabel(data.quotationNumber);
-      setCustomizedRoutes([routes.quotation, { title: `${data.quotationNumber}` }]);
+      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if ([QUOTATION_STATUS.converted].includes(data.status)) {
+        isAllowedToEdit = false;
+      }
+      setAllowedToEdit(isAllowedToEdit && permissions?.quotation?.isUpdate);
+
       setQuotationData(data);
-      let keys = Object.keys(data.versions);
-      if (version == 0) {
-        setCurrentVersion(parseInt(keys[keys.length - 1]));
-        setCurrVersionId(data.versions[keys[keys.length - 1]]?._id);
-        setCurrentStep(
-          quotationProcessSteps.includes(data.versions[keys[keys.length - 1]]?.processStatus)
-            ? quotationProcessSteps.indexOf(data.versions[keys[keys.length - 1]]?.processStatus)
-            : 0
-        );
-        setSentToCustomer(data.versions[keys[keys.length - 1]]?.status === QUOTATION_STATUS.sentToCustomer);
-        setVersionStatus(data.versions[keys[keys.length - 1]]?.status);
+
+      var tempStepList = quotationProcessSteps;
+      if (!data?.doasetup) {
+        tempStepList = quotationProcessSteps?.filter((e) => e.name !== 'DOA');
+      }
+      setStepList(tempStepList);
+      setStepNames(tempStepList?.map((item) => item.name));
+
+      let versionIndex = 0;
+      if (version === 0) {
+        let keys = Object.keys(data.versions);
+        versionIndex = parseInt(keys[keys.length - 1]);
       } else {
-        setCurrentVersion(version);
-        setCurrVersionId(data.versions[version]?._id);
-        setCurrentStep(
-          quotationProcessSteps.includes(data.versions[version]?.processStatus)
-            ? quotationProcessSteps.indexOf(data.versions[version]?.processStatus)
-            : 0
-        );
-        setVersionStatus(data.versions[version]?.status);
-        setSentToCustomer(data.versions[version]?.status === QUOTATION_STATUS.sentToCustomer);
+        versionIndex = version;
       }
-      setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      setCurrentVersion(versionIndex);
+      setCurrVersionId(data.versions[versionIndex]?._id);
+      setCurrentStep(getIndex(data.versions[versionIndex]?.processStatus, tempStepList));
+      setVersionStatus(data.versions[versionIndex]?.status);
+      setSentToCustomer(data.versions[versionIndex]?.status === QUOTATION_STATUS.sentToCustomer);
 
-      setAllowedToEdit(isAllowedToEdit && ['Invoiced', 'Closed'].indexOf(data.status) === -1);
-
-      if (isAllowedToEdit && openEdit === 'true') {
-        setOpenUpdateDialog(true);
-        const params = new URLSearchParams();
-        params.delete('openEdit');
-        history.push({ search: params.toString() });
+      if (data?.doasetup) {
+        const doaResponse: any = await axiosInstance().get(`doa-request/doaFlow/${data._id}/${data.versions[versionIndex]?._id}`);
+        if (doaResponse?.data?.data) {
+          setDOAData(doaResponse?.data?.data?.reverse());
+        }
       }
+
+
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -211,16 +226,13 @@ const QuotationDetails = () => {
   };
 
   const updateProcessStatus = (currStep) => {
-    setUpdatingStatus(true);
     axiosInstance()
-      .put(`${quotation.api}/${id}/process-status/${currVersionId}`, { processStatus: quotationProcessSteps[currStep] })
+      .put(`${quotation.api}/${id}/process-status/${currVersionId}`, { processStatus: stepNames[currStep] })
       .then(() => {
         fetchQuotationData(currentVersion, false);
-        setUpdatingStatus(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setUpdatingStatus(false);
       });
   };
 
@@ -267,19 +279,26 @@ const QuotationDetails = () => {
       });
   };
 
-  const updateJobStatus = (status) => {
+  const handleConvert = () => {
     axiosInstance()
-      .patch(`${quotation.api}/status/${quotationData._id}`, { status: status })
+      .post(`${quotation.api}/${quotationData._id}/convert`)
       .then(({ data: { data } }) => {
         fetchQuotationData();
-        if (status === 'Invoiced') {
-          setCurrentStep(1);
-        }
+        setConvertConfirmBox(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Status changed to ${status}`
+          message: `Converted Successfully`
         });
+        if (quotationData?.type === QUOTATION_TYPE.rentalJob) {
+          history.push(`${routes.rentalManagementDetail.path}/${data?._id}`);
+        }
+        if (quotationData?.type === QUOTATION_TYPE.salesOrder) {
+          history.push(`${routes.salesOrderDetail.path}/${data?._id}`);
+        }
+        if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
+          history.push(`${routes.repairOrderDetail.path}/${data?._id}`);
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -290,13 +309,13 @@ const QuotationDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[routes.quotation, { title: `${quotationData?.quotationNumber}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {quotationData ? (
               <>
-                <Tooltip title="Quote Summary">
+                <HtmlTooltip title="Quote Summary">
                   <Button
                     onClick={() => {
                       setShowQuotationSummaryDialog(true);
@@ -309,9 +328,8 @@ const QuotationDetails = () => {
                   >
                     Summary
                   </Button>
-                </Tooltip>
-
-                <Tooltip title={`Version : ${currentVersion}`}>
+                </HtmlTooltip>
+                <HtmlTooltip title={`Version : ${currentVersion}`}>
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="primary"
@@ -325,17 +343,20 @@ const QuotationDetails = () => {
                   >
                     {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
                   </Button>
-                </Tooltip>
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActionsAction}
-                  aria-controls="action"
-                  endIcon={isMobile && !isTablet ? null : <ExpandMore />}
-                >
-                  {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Action'}
-                </Button>
+                </HtmlTooltip>
+
+                {allowedToEdit && (
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActionsAction}
+                    aria-controls="action"
+                    endIcon={isMobile && !isTablet ? null : <ExpandMore />}
+                  >
+                    {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Action'}
+                  </Button>
+                )}
                 <Menu
                   anchorEl={anchorElAction}
                   keepMounted
@@ -348,6 +369,58 @@ const QuotationDetails = () => {
                   open={Boolean(anchorElAction)}
                   onClose={closeActionsAction}
                 >
+                  {allowedToEdit && (
+                    <MenuItem>
+                      <Button
+                        variant="text"
+                        color="primary"
+                        size="small"
+                        startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
+                        onClick={() => {
+                          handleOpenUpdateDialog();
+                          closeActionsAction();
+                        }}
+                      >
+                        Edit Quote
+                      </Button>
+                    </MenuItem>
+                  )}
+                  <MenuItem>
+                    <Button
+                      disabled={!allowedToEdit || isCloning || loading}
+                      variant="text"
+                      type="button"
+                      size="small"
+                      startIcon={isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />}
+                      onClick={() => {
+                        cloneVersion();
+                        closeActionsAction();
+                      }}
+                    >
+                      {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
+                    </Button>
+                  </MenuItem>
+                  {allowedToEdit &&
+                    quotationData?.type &&
+                    quotationData?.status === QUOTATION_STATUS.acceptByCustomer &&
+                    !quotationData?.rentalJob &&
+                    !quotationData?.repairOrder &&
+                    !quotationData?.salesOrder && (
+                      <MenuItem>
+                        <Button
+                          onClick={() => {
+                            setConvertConfirmBox(true);
+                            closeActionsAction();
+                          }}
+                          variant="text"
+                          type="button"
+                          size="small"
+                          startIcon={<CachedIcon />}
+                        >
+                          Convert to Order
+                        </Button>
+                      </MenuItem>
+                    )}
                   {permissions?.quotation?.isDelete && (
                     <MenuItem>
                       <Button
@@ -379,37 +452,6 @@ const QuotationDetails = () => {
                       </Button>
                     </MenuItem>
                   )}
-                  <MenuItem>
-                    <Button
-                      disabled={!allowedToEdit || isCloning || loading}
-                      variant="text"
-                      type="button"
-                      size="small"
-                      startIcon={isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />}
-                      onClick={() => {
-                        cloneVersion();
-                        closeActionsAction();
-                      }}
-                    >
-                      {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
-                    </Button>
-                  </MenuItem>
-                  {permissions?.quotation?.isUpdate && allowedToEdit && (
-                    <MenuItem>
-                      <Button
-                        variant="text"
-                        color="primary"
-                        size="small"
-                        startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                        onClick={() => {
-                          handleOpenUpdateDialog();
-                          closeActionsAction();
-                        }}
-                      >
-                        Edit Quote
-                      </Button>
-                    </MenuItem>
-                  )}
                 </Menu>
               </>
             ) : (
@@ -419,7 +461,6 @@ const QuotationDetails = () => {
           </Box>
         </Box>
       </Box>
-
       <Box className={`detail-container-v1`}>
         <Tabs
           className="new-tab-container-v1"
@@ -468,107 +509,132 @@ const QuotationDetails = () => {
               </Grid>
             ) : (
               <>
-                <DetailsPage data={quotationData} fields={quotationFields} />
+                <DetailsPage data={quotationData} fields={getQuotationFields} />
               </>
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          {sentToCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcClock size={25} />
-              <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-            </div>
-          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcOk size={25} />
-              <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-            </div>
-          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcCancel size={25} />
-              <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-            </div>
-          ) : null}
+        <TabPanel value={tabValue} index={1} style={{ position: 'relative' }}>
+          {stepNames[currentStep] === 'DOA' && quotationData && (
+            <Box
+              style={{
+                marginLeft: 'auto',
+                maxWidth: 'max-content',
+                marginTop: '-30px'
+              }}
+            >
+              <ShowDoaData status={quotationData.versions[currentVersion].status} doaData={DOAData} />
+            </Box>
+          )}
+          {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.versions[currentVersion]?.status)
+            &&
+            <Box
+              style={{
+                marginLeft: 'auto',
+                maxWidth: 'max-content',
+                marginTop: '-30px'
+              }}
+            >
+              <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+            </Box>
+          }
           <div>
             <Steps
               isNextStep={false}
               nextStep={nextStep}
-              steps={quotationProcessSteps}
+              steps={stepList}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
-              isStepEnded={quotationProcessSteps[currentStep] === 'End'}
+              isStepEnded={[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.versions[currentVersion]?.status)}
               setStepFullScreen={() => setStepFullScreen(true)}
-              isPrevStep={!sentToCustomer}
+              isPrevStep={prevStep}
               updateStatus={updateProcessStatus}
               handleNext={
-                currentStep > 2
+                stepNames[currentStep] === 'Quote Approval'
                   ? () => {
                     setCustomerAcceptable(true);
                   }
                   : null
               }
             />
-            <ContentFullScreen title={quotationProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-              {currentStep === 0 && quotationData && (
+            <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+              {stepNames[currentStep] === 'Add Products' && quotationData && (
                 <Productpackage
                   quotationData={quotationData}
                   setNextStep={setNextStep}
-                  currencySymbol={currencySymbol}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
                   version={currentVersion}
+                  allowedToEdit={allowedToEdit}
+                  updateDOASetup={updateDOASetup}
                 />
               )}
-              {currentStep === 1 && quotationData && (
-                <Service
-                  quotationData={quotationData}
-                  renderedFrom={`${renderedFrom}_grid-2`}
-                  setNextStep={setNextStep}
-                  stepFullScreen={stepFullScreen}
-                  version={currentVersion}
-                />
-              )}
-              {currentStep === 2 && quotationData && (
-                <QuoteBuilder
+              {stepNames[currentStep] === 'Manual Entry' && quotationData && (
+                <AdditionalCost
                   quotationData={quotationData}
                   setNextStep={setNextStep}
-                  currencySymbol={currencySymbol}
-                  stepFullScreen={stepFullScreen}
-                  fetchQuotationData={fetchQuotationData}
+                  renderedFrom={renderedFrom}
                   version={currentVersion}
-                  currentStep={currentStep}
-                  versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                 />
               )}
-              {currentStep === 3 && quotationData && (
+              {stepNames[currentStep] === 'Quote Builder' && quotationData && (
                 <QuoteBuilder
                   quotationData={quotationData}
                   setNextStep={setNextStep}
-                  currencySymbol={currencySymbol}
+                  setPrevStep={setPrevStep}
+                  stepFullScreen={stepFullScreen}
+                  fetchQuotationData={fetchQuotationData}
+                  version={currentVersion}
+                  currentStep={stepNames[currentStep]}
+                  versionData={quotationData?.versions[currentVersion]}
+                  allowedToEdit={allowedToEdit}
+                  renderedFrom={`${renderedFrom}_grid-3`}
+                />
+              )}
+              {stepNames[currentStep] === 'DOA' && quotationData && (
+                <QuoteBuilder
+                  quotationData={quotationData}
+                  setNextStep={setNextStep}
+                  setPrevStep={setPrevStep}
+                  stepFullScreen={stepFullScreen}
+                  fetchQuotationData={fetchQuotationData}
+                  version={currentVersion}
+                  currentStep={stepNames[currentStep]}
+                  versionData={quotationData?.versions[currentVersion]}
+                  allowedToEdit={allowedToEdit}
+                  renderedFrom={`${renderedFrom}_grid-3`}
+                  sentToCustomer={sentToCustomer}
+                  DOAData={DOAData}
+                />
+              )}
+              {stepNames[currentStep] === 'Quote Approval' && quotationData && (
+                <QuoteBuilder
+                  quotationData={quotationData}
+                  setNextStep={setNextStep}
+                  setPrevStep={setPrevStep}
                   sentToCustomer={sentToCustomer}
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}
-                  currentStep={currentStep}
+                  currentStep={stepNames[currentStep]}
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
-
+                  renderedFrom={`${renderedFrom}_grid-3`}
                 />
               )}
-              {currentStep === 4 && quotationData && (
+              {stepNames[currentStep] === 'End' && quotationData && (
                 <QuoteBuilder
                   quotationData={quotationData}
                   setNextStep={setNextStep}
-                  currencySymbol={currencySymbol}
+                  setPrevStep={setPrevStep}
                   stepFullScreen={stepFullScreen}
                   fetchQuotationData={fetchQuotationData}
                   version={currentVersion}
-                  currentStep={currentStep}
+                  currentStep={stepNames[currentStep]}
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
-
+                  renderedFrom={`${renderedFrom}_grid-3`}
                 />
               )}
             </ContentFullScreen>
@@ -576,14 +642,16 @@ const QuotationDetails = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
           <Box>
-            <RoadmapViews quoteName={headingLabel} quoteId={id} versionId={currVersionId} status={'New'} />
+            {quotationData && (
+              <RoadmapViews quoteName={quotationData?.quotationNumber} quoteId={id} versionId={currVersionId} status={quotationData?.status || ''} />
+            )}
           </Box>
         </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this sales order: ${headingLabel} ?`}
+          message={`Are you sure you want to delete this : ${quotationData?.quotationNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -615,10 +683,7 @@ const QuotationDetails = () => {
         />
       )}
       {quotationData && showAllVersionStatus && (
-        <Versions
-          onClose={() => setShowAllVersionStatus(false)}
-          quotationId={id}
-          handleChangeVersion={handleChangeVersion} />
+        <Versions onClose={() => setShowAllVersionStatus(false)} quotationId={id} handleChangeVersion={handleChangeVersion} />
       )}
       {customerAcceptable && (
         <ManualReponseDialog
@@ -627,6 +692,16 @@ const QuotationDetails = () => {
           setCurrentStep={setCurrentStep}
           updateStatus={updateProcessStatus}
           setCustomerAcceptable={setCustomerAcceptable}
+        />
+      )}
+      {convertConfirmBox && (
+        <ConfirmationDialog
+          open={convertConfirmBox}
+          message={`Are you sure you want to convert quotation : ${quotationData?.quotationNumber} ?`}
+          onClose={() => {
+            setConvertConfirmBox(false);
+          }}
+          onOk={handleConvert}
         />
       )}
     </Box>

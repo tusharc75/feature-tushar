@@ -1,7 +1,7 @@
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, Menu, MenuItem } from '@material-ui/core';
 import CustomAgGrid from 'src/components/AgGridComponents/CustomAgGridEditable';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
@@ -10,7 +10,7 @@ import routes from 'src/components/Helpers/Routes';
 import { prepareDataForGrid, packages } from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { useData } from 'src/StateProvider/Provider';
@@ -20,6 +20,7 @@ import Loader from 'src/components/Loader';
 import { camelCase } from 'lodash';
 import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 
 const ServiceTable = ({ packageId, packageData }) => {
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
@@ -40,6 +41,7 @@ const ServiceTable = ({ packageId, packageData }) => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   let canServiceAdd = packageData?.packageType === 'Product' && !packageData?.products?.length ? false : true;
@@ -79,7 +81,7 @@ const ServiceTable = ({ packageId, packageData }) => {
       });
   };
 
-  const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
+  const defaultColumns = [{ field: 'order', headerName: 'Sequence', show: true, cellRenderer: 'commonRenderer' }];
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -160,147 +162,184 @@ const ServiceTable = ({ packageId, packageData }) => {
       });
   };
 
+  const handleClick = (event) => {
+    setAnchorActionEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorActionEl(null);
+  };
+
   const ActionsRenderer = (params) => <span>{params?.data?.qty}</span>;
 
-  return (<Box>
-    <Box mb={1} mt={1} display="flex" justifyContent="space-between">
-      <Box display="flex">
-        {permissions?.packages?.isUpdate && (
-          <Button variant="contained" color="primary" size="small" disabled={!canServiceAdd} onClick={() => setShowServiceAssignDialog(true)}>
-            {`Add Services`}
-          </Button>
-        )}
-      </Box>
-      <Box display="flex">
-        {canServiceAdd && (
-          <ImportExportLinks
-            permissions={permissions?.packages}
-            module="packages-products"
-            api={`${packages.api}/${packageId}/services`}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={[]}
-            additionalParams={`refrenceId=${packageId}`}
-            isBackgroundWhite={true}
-          />
-        )}
-        {permissions?.packages?.isUpdate && (
-          <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <DeleteButton
-              disabled={selectedRecords.length === 0 || isRemovingServices}
-              text={'Delete'}
-              onClick={() => {
-                setShowServiceConfirmBox(true);
-              }}
-            />
-            <Box ml={1} />
-            <Button variant="outlined" color="primary" size="small" disabled={!canServiceAdd} onClick={() => setArrangeView(true)}>
-              <GrDrag fontSize="small" color="primary" className="mr-1" />
-              Arrange
+  return (
+    <Box>
+      <Box mb={1} mt={1} display="flex" justifyContent="space-between">
+        <Box display="flex">
+          {permissions?.packages?.isUpdate && (
+            <Button variant="contained" color="primary" size="small" disabled={!canServiceAdd} onClick={() => setShowServiceAssignDialog(true)}>
+              {`Add Services`}
             </Button>
-          </Box>
-        )}
+          )}
+        </Box>
+        <Box display="flex" style={{ marginLeft: 'auto' }}>
+          {permissions?.packages?.isUpdate && (
+            <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button variant="outlined" color="primary" size="small" disabled={!canServiceAdd} onClick={() => setArrangeView(true)}>
+                <GrDrag fontSize="small" color="primary" className="mr-1" />
+                Arrange
+              </Button>
+              <Box ml={1} />
+              <Button
+                variant={'outlined'}
+                color="primary"
+                aria-controls="simple-menu"
+                aria-haspopup="true"
+                disabled={selectedRecords.length === 0 || isRemovingServices}
+                size="small"
+                onClick={handleClick}
+                endIcon={<ArrowDropDownIcon />}
+              >
+                {'Actions'}
+              </Button>
+              <Menu
+                anchorEl={anchorActionEl}
+                keepMounted
+                open={Boolean(anchorActionEl)}
+                onClose={handleClose}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right'
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right'
+                }}
+              >
+                <MenuItem
+                  disabled={selectedRecords.length === 0 || isRemovingServices}
+                  onClick={() => {
+                    setShowServiceConfirmBox(true);
+                    handleClose();
+                  }}
+                >
+                  Delete
+                </MenuItem>
+              </Menu>
+            </Box>
+          )}
+          <Box ml={1} />
+          {canServiceAdd && (
+            <ImportExportMenu
+              permissions={permissions?.packages}
+              module="packages-products"
+              api={`${packages.api}/${packageId}/services`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              isExportAllOrSomeFeature={true}
+              ids={[]}
+              additionalParams={`refrenceId=${packageId}`}
+            />
+          )}
+        </Box>
       </Box>
-    </Box>
-    {isMobile && !isTablet ? (
-      <CustomSwipableList
-        allowSelection={permissions?.packages?.isUpdate}
-        allowSwipe={permissions?.packages?.isUpdate}
-        permissions={permissions?.packages}
-        primaryField={columns?.find((d) => d.primaryField)}
-        onClick={(data) => {
-          history.push(`${routes.productDetail.path}/${data._id}`);
-        }}
-        dataRows={dataRows}
-        selectedRecords={[]}
-        dispatch={dispatch}
-        onEdit={(data) => { }}
-        extraParamsToCheckDelete={true}
-        onDelete={(data) => { }}
-        rowCount={rowCount}
-        page={page}
-        loading={loading}
-        additionalDetails={[]}
-        chips={[
-          {
-            label: 'Quantity : ',
-            field: 'qty'
+      {isMobile && !isTablet ? (
+        <CustomSwipableList
+          allowSelection={permissions?.packages?.isUpdate}
+          allowSwipe={permissions?.packages?.isUpdate}
+          permissions={permissions?.packages}
+          primaryField={columns?.find((d) => d.primaryField)}
+          onClick={(data) => {
+            history.push(`${routes.productDetail.path}/${data._id}`);
+          }}
+          dataRows={dataRows}
+          selectedRecords={[]}
+          dispatch={dispatch}
+          onEdit={(data) => { }}
+          extraParamsToCheckDelete={true}
+          onDelete={(data) => { }}
+          rowCount={rowCount}
+          page={page}
+          loading={loading}
+          additionalDetails={[]}
+          chips={[
+            {
+              label: 'Quantity : ',
+              field: 'qty'
+            }
+          ]}
+          owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+          onCreate={() => {
+            setShowServiceAssignDialog(true);
+          }}
+          showClone={true}
+          onClone={(data) => { }}
+          renderedFrom={renderedFrom}
+        />
+      ) : Object.keys(frameWorkComponent).length > 0 ? (
+        <CustomAgGrid
+          columns={columns}
+          dataRows={dataRows}
+          frameworkComponents={frameWorkComponent}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          isClientSideGrid={true}
+          actionWidth={150}
+          loading={loading}
+          allowSelection={permissions?.packages?.isUpdate}
+          actionLabel="Qty"
+          renderedFrom={renderedFrom}
+          actionEditable={permissions?.packages?.isUpdate}
+          onCellValueChanged={handleUpdateQuantity}
+          refreshGrid={fetchData}
+        />
+      ) : (
+        <Loader noLoader={false} minHeight={'400px'} text="Loading..." />
+      )}
+      {showServiceAssignDialog && (
+        <AssignServiceDialog
+          reference="package"
+          serviceType={packageData?.serviceType || ''}
+          referenceId={packageId}
+          handleClose={() => setShowServiceAssignDialog(false)}
+          ids={[...dataRows?.map((e) => e._id)]}
+          onSuccess={() => {
+            fetchData();
+            setShowServiceAssignDialog(false);
+          }}
+        />
+      )}
+      {showServiceConfirmBox && (
+        <ConfirmationDialog
+          open={showServiceConfirmBox}
+          message={`Are you sure you want to delete the service(s) ?`}
+          onClose={() => {
+            setShowServiceConfirmBox(false);
+          }}
+          okBtnLoading={isRemovingServices}
+          onOk={removeProducts}
+        />
+      )}
+      {arrangeView && (
+        <ArrangeView
+          data={
+            dataRows?.map((d) => {
+              return { _id: d?._id, name: d?.serviceName || d?.productName, order: d?.order, preWork: d?.preWork };
+            }) || []
           }
-        ]}
-        owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-        onCreate={() => {
-          setShowServiceAssignDialog(true);
-        }}
-        showClone={true}
-        onClone={(data) => { }}
-        renderedFrom={renderedFrom}
-      />
-    ) : Object.keys(frameWorkComponent).length > 0 ? (
-      <CustomAgGrid
-        columns={columns}
-        dataRows={dataRows}
-        frameworkComponents={frameWorkComponent}
-        setGridApi={setGridApi}
-        dispatch={dispatch}
-        rowCount={rowCount}
-        limit={limit}
-        pageSizes={pageSizes}
-        page={page}
-        isClientSideGrid={true}
-        actionWidth={150}
-        loading={loading}
-        allowSelection={permissions?.packages?.isUpdate}
-        actionLabel="Qty"
-        renderedFrom={renderedFrom}
-        actionEditable={permissions?.packages?.isUpdate}
-        onCellValueChanged={handleUpdateQuantity}
-        refreshGrid={fetchData}
-      />
-    ) : (
-      <Loader noLoader={false} minHeight={'400px'} text="Loading..." />
-    )}
-    {showServiceAssignDialog && (
-      <AssignServiceDialog
-        reference="package"
-        serviceType={packageData?.serviceType || ''}
-        referenceId={packageId}
-        handleClose={() => setShowServiceAssignDialog(false)}
-        ids={[...dataRows?.map((e) => e._id)]}
-        onSuccess={() => {
-          fetchData();
-          setShowServiceAssignDialog(false);
-        }}
-      />
-    )}
-    {showServiceConfirmBox && (
-      <ConfirmationDialog
-        open={showServiceConfirmBox}
-        message={`Are you sure you want to delete the service(s) ?`}
-        onClose={() => {
-          setShowServiceConfirmBox(false);
-        }}
-        okBtnLoading={isRemovingServices}
-        onOk={removeProducts}
-      />
-    )}
-    {arrangeView && (
-      <ArrangeView
-        data={
-          dataRows?.map((d) => {
-            return { _id: d?._id, name: d?.serviceName || d?.productName, order: d?.order, preWork: d?.preWork };
-          }) || []
-        }
-        title={'Arrange'}
-        handleClose={() => setArrangeView(false)}
-        handleSubmit={handleArrangeUpdate}
-        loading={isAssigning}
-      />
-    )}
-  </Box>
+          title={'Arrange'}
+          handleClose={() => setArrangeView(false)}
+          handleSubmit={handleArrangeUpdate}
+          loading={isAssigning}
+        />
+      )}
+    </Box>
   );
 };
 

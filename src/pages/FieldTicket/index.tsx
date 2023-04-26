@@ -30,9 +30,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import styles from '../Leads/Header.module.scss';
 import ManageFieldTicket from './ManageFieldTicket';
 
-
 const FieldTicket = () => {
-
   const renderedFrom = camelCase(routes?.fieldTicket.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -41,7 +39,8 @@ const FieldTicket = () => {
     state: { permissions, selectedEntity, user }
   }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
   const [fieldTicketId, setFieldTicketId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -51,7 +50,6 @@ const FieldTicket = () => {
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
   const { getColumnData } = useColumns();
-
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -71,7 +69,7 @@ const FieldTicket = () => {
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer,
+          actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
@@ -279,7 +277,6 @@ const FieldTicket = () => {
               else fetchFieldTicketData();
             }}
             additionalParams={getQueryString(true)}
-            onlyExport={true}
           />
         </Grid>
       </Grid>
@@ -325,8 +322,9 @@ const FieldTicket = () => {
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
                         className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        endIcon={<ExpandMore />}
                       >
-                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                        {isMobile && !isTablet ? '' : 'Actions'}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -419,6 +417,8 @@ const FieldTicket = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchFieldTicketData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.fieldTicket}
             />
           )
         ) : null}

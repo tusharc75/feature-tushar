@@ -18,11 +18,14 @@ import TabPanel from '../../components/TabPanel';
 import Material from './Material';
 import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 
 
 
 const PurchaseRequisitionDetail = () => {
-    const renderedFrom = camelCase(routes?.purchaseRequisition.title);
+  const renderedFrom = camelCase(routes?.purchaseRequisition.title);
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -35,6 +38,7 @@ const PurchaseRequisitionDetail = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], services: [] });
 
   const {
     state: { permissions, user }
@@ -110,6 +114,34 @@ const PurchaseRequisitionDetail = () => {
     setTabValue(newValue);
   };
 
+  const handleManagePuchhaseOrderDialog = () => {
+    const products = purchaseRequisitionData?.material?.filter((item: any) => item?.type == "product")
+    const services = purchaseRequisitionData?.material?.filter((item: any) => item?.type == "service")
+    setOrderDialog({ open: true, products: products, services: services })
+  }
+
+  const handleConvertSuccess = (data: any) => {
+    setOrderDialog({ open: false, products: [], services: [] });
+    axiosInstance()
+        .put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, { 
+          _id: id,
+           purchaseOrder: data?._id,
+           status: 'Converted'
+          })
+        .then(({ data }) => {
+          fetchData()
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `${sidebarResource.purchaseOrder} has been created successfully`
+          });
+        })
+        .catch((err) => {
+          fetchData()
+          // setShowConfirmBox(false);
+        });
+  }
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -118,21 +150,31 @@ const PurchaseRequisitionDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className="btn-outline-v1"
-                    onClick={handleOpenUpdateDialog}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.purchaseRequisition?.isDelete && allowedToDelete && (
-                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                )}
-              </>
+            <>
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                disabled={purchaseRequisitionData?.status === 'Converted' ? true : false}
+                className="btn-outline-v1"
+                onClick={handleManagePuchhaseOrderDialog}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+              >
+                {purchaseRequisitionData?.status === 'Converted' ? 'Converted' : 'Convert'}
+              </Button>
+              {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className="btn-outline-v1"
+                  onClick={handleOpenUpdateDialog}
+                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.purchaseRequisition?.isDelete && allowedToDelete && (
+                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+              )}
+              <ActivityButton referenceId={purchaseRequisitionData?._id} resource={ACTIVITY_RESOURCE.purchaseRequisition} />
+            </>
           </Box>
         </Box>
       </Box>
@@ -192,6 +234,26 @@ const PurchaseRequisitionDetail = () => {
             )}
         </TabPanel>
       </Box>
+      {showOrderDialog.open && (
+        <ManagePurchaseOrder
+          isClone={false}
+          purchaseOrderId={null}
+          onClose={() => setOrderDialog((prevState) => ({ ...prevState, open: false }))}
+          onSuccess={(data: any) => {
+            handleConvertSuccess(data)
+          }}
+          products={showOrderDialog?.products
+            ?.map((e) => {
+              return { product: e._id, unit: e.unit, qty: e.qty };
+            })}
+          services={showOrderDialog?.services
+            ?.map((e) => {
+              return { service: e._id, unit: e.unit, qty: e.qty };
+            })}
+          currency={purchaseRequisitionData.currency}
+          warehouseId={purchaseRequisitionData?.warehouse?.optionValue}
+        />
+      )}
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}

@@ -21,12 +21,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 
 const AttachmentSchema = object().shape({
-  name: string().required('please add attachment name'),
+  name: string().required('Attachment Name is required'),
   fileUrl: string().required('please upload attachment')
 });
 
 const FolderSchema = object().shape({
-  name: string().required('please add folder name')
+  name: string().required('Folder Name is required')
 });
 
 export default function ManageAttachment({
@@ -60,11 +60,6 @@ export default function ManageAttachment({
     fetchAttachmentDetail();
   }, []);
 
-  const checkImageUrl = (url) => {
-    let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
-    let imageExtensions = ['.tif', 'tiff', '.bmp', '.jpg', 'jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
-    return imageExtensions.indexOf(extension) >= 0;
-  };
 
   const fetchAttachmentDetail = async () => {
     setIsFetching(true);
@@ -74,17 +69,10 @@ export default function ManageAttachment({
         .then(({ data: { data } }) => {
           setCanEdit(data?.canEdit);
           if (data.file && data.file.length) {
-            let imageAttachments = [];
-            let nonImageAttachments = [];
-            data.file.map((file) => {
-              let isImageUrl = checkImageUrl(file.url);
-              if (!isImageUrl) {
-                nonImageAttachments.push({ name: file.name, url: file.url });
-              } else {
-                imageAttachments.push({ name: file.name, url: file.url });
-              }
+            data?.file?.sort((a: any, b: any) => {
+              return (new Date(b?.date)).getTime() - (new Date(a?.date)).getTime();
             });
-            setOtherAttachments([...nonImageAttachments, ...imageAttachments]);
+            setOtherAttachments(data.file);
           }
           setFormValues(data);
           setIsFetching(false);
@@ -119,15 +107,7 @@ export default function ManageAttachment({
       setIsFetching(false);
     }
   };
-
-  const showSuccessMessage = (message) => {
-    toastConfig.setToastConfig({
-      open: true,
-      type: 'success',
-      message: message
-    });
-  };
-
+  
   const handleSave = (values) => {
     let request: any = {};
     if (type === 'file') {
@@ -151,9 +131,12 @@ export default function ManageAttachment({
         axiosInstance()
           .put(`/attachment/${attachmentId}`, request)
           .then(({ data }) => {
-            showSuccessMessage(data.message);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
             setLoading(false);
-            // setInitialValues(null)
             handleClose();
             if (fetchData) fetchData();
           })
@@ -165,7 +148,11 @@ export default function ManageAttachment({
         axiosInstance()
           .post(`/attachment`, request)
           .then(({ data }) => {
-            showSuccessMessage(data.message);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
             setLoading(false);
             handleClose();
             if (fetchData) fetchData();
@@ -180,9 +167,12 @@ export default function ManageAttachment({
         axiosInstance()
           .put(`/attachment/folder/${attachmentId}`, request)
           .then(({ data }) => {
-            showSuccessMessage(data.message);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
             setLoading(false);
-            // setInitialValues(null)
             handleClose();
             if (fetchData) fetchData();
           })
@@ -194,7 +184,11 @@ export default function ManageAttachment({
         axiosInstance()
           .post(`/attachment/folder`, request)
           .then(({ data }) => {
-            showSuccessMessage(data.message);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
             setLoading(false);
             handleClose();
             if (fetchData) fetchData();
@@ -208,7 +202,7 @@ export default function ManageAttachment({
   };
 
   const onUploadFile = (file) => {
-    setOtherAttachments((prevState) => [...prevState, { name: file.split('_')[3] || file, url: file }]);
+    setOtherAttachments((prevState) => [{ name: file.split('_')[3] || file, url: file, date: new Date() }, ...prevState]);
   };
 
   const handleDeleteAttachment = (file) => {

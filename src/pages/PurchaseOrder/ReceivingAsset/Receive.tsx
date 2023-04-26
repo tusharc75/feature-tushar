@@ -6,24 +6,24 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { dateFormat, productInventory, purchaseOrder } from '../../../constants/helpers';
-import { Formik, Form, FieldArray, Field } from 'formik';
+import { convertDateInDateTime, dateFormatForInputControl, productInventory, purchaseOrder, sidebarResource } from '../../../constants/helpers';
+import { Formik, Form, FieldArray } from 'formik';
 import { useData } from '../../../StateProvider/Provider';
-import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { read, utils, writeFile } from 'xlsx';
-import { KeyboardDatePicker } from 'formik-material-ui-pickers';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
+import DateUtils from '@date-io/date-fns';
 import moment from 'moment';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrderData }) => {
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const {
-    state: { user, selectedEntity }
-  }: any = useData();
 
-  const [wareHouseList, setwareHouseList] = useState(null);
+  const [fullScreen, setFullScreen] = useState(true);
+
+  const { state: { user, selectedEntity } }: any = useData();
+
+  const [wareHouseOptions, setwareHouseOptions] = useState(null);
+  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
+
   const [defaultWareHouse, setDefaultWareHouse] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lockDate, setLockDate] = useState(null);
@@ -34,7 +34,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
       .get(`/warehouse`)
       .then(({ data: { data } }) => {
         setDefaultWareHouse(data.find((d) => d?._id === purchaseOrderData?.warehouse?.optionValue));
-        setwareHouseList(data);
+        setwareHouseOptions(data);
       });
     fetchSettingsData();
   }, []);
@@ -52,34 +52,62 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
       });
   };
 
-  const handleCreateSerializedAsset = (values) => {
+  const handleSubmit = (values) => {
     setIsSubmitting(true);
-    let products = values?.seriaizedAsset?.map((u) => ({
-      _id: u._id,
-      product: u.productId,
-      serializedProduct: u.serializedProduct,
-      warehouse: u.warehouse?._id,
-      inventoryQuantity: parseInt(u?.inventoryQuantity),
-      assetQuantity: parseInt(u?.assetQuantity),
-      serialNumber: u?.serialNumber,
-      comment: u?.comment
-    }));
-    axiosInstance()
-      .post(`${purchaseOrder.api}/receive-inventory/${purchaseOrderID}`, { products: products, receiveDate: values?.receiveDate })
-      .then(({ data }) => {
-        setIsSubmitting(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+    const data: any = []
+    values?.seriaizedAsset?.forEach((element) => {
+      if (parseInt(element?.inventoryQuantity)) {
+        data.push({
+          _id: element._id,
+          product: element.productId,
+          serializedProduct: element.serializedProduct,
+          warehouse: element?.warehouse?._id,
+          storageLocation: user?.user?.brandPolicy?.storageLocation ? element?.storageLocation?.optionValue : null,
+          inventoryQuantity: parseInt(element?.inventoryQuantity),
+          assetQuantity: parseInt(element?.assetQuantity),
+          serialNumber: element?.serialNumber,
+          comment: element?.comment
         });
-        onSuccess();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setIsSubmitting(false);
+      }
+    });
+    if (data?.length) {
+      axiosInstance().post(`${purchaseOrder.api}/receive-inventory/${purchaseOrderID}`, { products: data, receiveDate: values?.receiveDate })
+        .then(({ data }) => {
+          setIsSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          onSuccess();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setIsSubmitting(false);
+        });
+    }
+    else {
+      setIsSubmitting(false);
+      onSuccess();
+    }
+  };
+
+  const getStorageLocation = () => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
+      .then(({ data: { data } }) => {
+        if (data[sidebarResource.storageLocation]) {
+          const storageLocationOption = data[sidebarResource.storageLocation]?.filter(e => e?.warehouse === defaultWareHouse?._id);
+          setStorageLocationOptions(storageLocationOption);
+        }
       });
   };
+
+  useEffect(() => {
+    if (user?.user?.brandPolicy?.storageLocation && defaultWareHouse) {
+      getStorageLocation();
+    }
+  }, [defaultWareHouse])
 
   const validate = (values) => {
     let errors: any = {};
@@ -103,10 +131,34 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
         if (tempProduct && !d.warehouse) {
           errors.warehouse = 'Plant is required';
         }
+        if (user?.user?.brandPolicy?.storageLocation) {
+          if (tempProduct && !d.storageLocation) {
+            errors.storageLocation = 'Storage Location is required';
+          }
+        }
       });
     }
     return errors;
   };
+
+  const validateDate = (values) => {
+    let errors: any = {};
+
+    if (moment(values["receiveDate"]).isBefore(moment(purchaseOrderData?.purchaseOrderDate))) {
+      errors['receiveDate'] = `Please select valid date`;
+    }
+
+    if (lockDate) {
+      if (!moment(values["receiveDate"]).isSameOrAfter(moment(lockDate))) {
+        errors['receiveDate'] = `Date entered prior to the locked date`;
+      }
+    }
+
+    if (moment(values["receiveDate"]).isAfter(moment())) {
+      errors['receiveDate'] = `Please select valid date`;
+    }
+    return errors;
+  }
 
   const handleExportField = (data: any) => {
     const qty = parseInt(data?.inventoryQuantity) || 0;
@@ -152,7 +204,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
   return (
     <Dialog
       open
-      fullScreen={fullScreen || isMobile || isTablet}
+      fullScreen={fullScreen}
       maxWidth="md"
       fullWidth
       onClose={(e, reason) => {
@@ -170,7 +222,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
         }}
         showManimizeMaximize={true}
       ></CustomDialogHeader>
-      <MuiPickersUtilsProvider utils={MomentUtils}>
+      <MuiPickersUtilsProvider utils={DateUtils}>
         <Formik
           initialValues={{
             receiveDate: new Date(),
@@ -179,6 +231,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
               product: d.productName,
               productId: d.productId,
               warehouse: defaultWareHouse || '',
+              storageLocation: purchaseOrderData?.storageLocation || null,
               inventoryQuantity: d.qty - (d.actualReceived || 0) - (d.rejectQuantity || 0),
               assetQuantity: 0,
               serializedProduct: d.serializedProduct || false,
@@ -193,7 +246,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
           {({ values, setFieldValue, errors }) => (
             <>
               <CustomDialogContent>
-                {values.seriaizedAsset && values.seriaizedAsset.length && wareHouseList ? (
+                {values.seriaizedAsset && values.seriaizedAsset.length && wareHouseOptions ? (
                   <Box p={2}>
                     <Form>
                       <Grid direction="row" justify="space-evenly" alignItems="center">
@@ -211,7 +264,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                         </Grid>
                                         <Grid item xs={12} md={11}>
                                           <Grid container spacing={2} alignItems="center">
-                                            <Grid item xs={12} md={4}>
+                                            <Grid item xs={12} md={3}>
                                               <Autocomplete
                                                 size="small"
                                                 value={data.product}
@@ -227,11 +280,11 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                 renderInput={(params) => <TextField {...params} variant="outlined" name="product" label="Product" />}
                                               />
                                             </Grid>
-                                            <Grid item xs={12} md={4}>
+                                            <Grid item xs={12} md={3}>
                                               <Autocomplete
                                                 size="small"
                                                 value={data.warehouse}
-                                                options={wareHouseList}
+                                                options={wareHouseOptions}
                                                 getOptionLabel={(option: any) =>
                                                   option ? option?.warehouseName || option?.warehouseID || option?.address : ''
                                                 }
@@ -246,7 +299,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                   <TextField
                                                     {...params}
                                                     variant="outlined"
-                                                    name="plants"
+                                                    name="warehouse"
                                                     label="Plant"
                                                     error={validate([data]).warehouse}
                                                     helperText={validate([data]).warehouse ? 'Plant is required' : ''}
@@ -255,13 +308,39 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                 )}
                                               />
                                             </Grid>
-                                            <Grid item xs={12} md={4}>
+                                            {user?.user?.brandPolicy?.storageLocation &&
+                                              <Grid item xs={12} md={3}>
+                                                <Autocomplete
+                                                  size="small"
+                                                  value={data?.storageLocation}
+                                                  options={storageLocationOptions}
+                                                  getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                                                  onChange={(_, newValue) => {
+                                                    arrayHelpers.replace(index, {
+                                                      ...values.seriaizedAsset[index],
+                                                      ['storageLocation']: newValue
+                                                    });
+                                                  }}
+                                                  renderInput={(params) => (
+                                                    <TextField
+                                                      {...params}
+                                                      variant="outlined"
+                                                      name="storageLocation"
+                                                      label="Storage Location"
+                                                      error={validate([data]).storageLocation}
+                                                      helperText={validate([data]).storageLocation ? 'Storage Location is required' : ''}
+                                                      required
+                                                    />
+                                                  )}
+                                                />
+                                              </Grid>
+                                            }
+                                            <Grid item xs={12} md={3}>
                                               <span>
                                                 <b>PO Quantity: </b>
                                                 {data?.row?.qty}
                                               </span>
                                               <br />
-                                              {/* <span><b>Quantity: </b>{data?.row?.qty - (data?.row?.actualReceived || 0)}</span> */}
                                               <span>
                                                 <b>Recieved: </b>
                                                 {data?.row?.actualReceived || 0}
@@ -276,13 +355,12 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                           <Box mt={1}>
                                             <Grid container spacing={2} alignItems="center">
                                               <Grid item xs={12} md={4}>
-                                                <Field
+                                                <TextField
                                                   fullWidth
                                                   label="Inventory Quantity"
                                                   variant="outlined"
                                                   type="number"
                                                   size="small"
-                                                  component={TextField}
                                                   onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                   name="inventoryQuantity"
                                                   placeholder="Inventory Quantity"
@@ -394,13 +472,12 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                           )}
                                           <Box mt={2}>
                                             <Grid item xs={12} md={8}>
-                                              <Field
+                                              <TextField
                                                 fullWidth
                                                 label="Comment"
                                                 variant="outlined"
                                                 type="text"
                                                 size="small"
-                                                component={TextField}
                                                 name="comment"
                                                 placeholder="Comment"
                                                 value={data.comment}
@@ -424,35 +501,30 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                         </Grid>
                       </Grid>
                       <Box pt={2}>
-                        <Grid container>
-                          <Grid item xs={12} md={6}>
-                            <Field
-                              fullWidth
-                              label="Received Date"
-                              variant="inline"
-                              inputVariant="outlined"
-                              autoOk
-                              size="small"
-                              margin="dense"
-                              component={KeyboardDatePicker}
-                              name="receiveDate"
-                              placeholder="Receive Date"
-                              value={values.receiveDate}
-                              format={dateFormat}
-                              minDate={
-                                lockDate
-                                  ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
-                                    ? lockDate
-                                    : purchaseOrderData?.purchaseOrderDate
-                                  : purchaseOrderData?.purchaseOrderDate
-                              }
-                              maxDate={new Date()}
-                              onChange={(value) => {
-                                setFieldValue('receiveDate', value);
-                              }}
-                            />
-                          </Grid>
-                        </Grid>
+                        <KeyboardDatePicker
+                          label="Received Date"
+                          variant="inline"
+                          inputVariant="outlined"
+                          required
+                          autoOk
+                          size="small"
+                          margin="dense"
+                          name="receiveDate"
+                          placeholder="Receive Date"
+                          value={values.receiveDate}
+                          format={dateFormatForInputControl}
+                          minDate={
+                            lockDate
+                              ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                                ? lockDate
+                                : purchaseOrderData?.purchaseOrderDate
+                              : purchaseOrderData?.purchaseOrderDate
+                          }
+                          maxDate={new Date()}
+                          onChange={(value) => {
+                            setFieldValue('receiveDate', convertDateInDateTime(value));
+                          }}
+                        />
                       </Box>
                     </Form>
                   </Box>
@@ -471,11 +543,12 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                     if (
                       !validate(values.seriaizedAsset).inventoryQuantity &&
                       !validate(values.seriaizedAsset).warehouse &&
+                      !validate(values.seriaizedAsset).storageLocation &&
                       !validate(values.seriaizedAsset).assetQuantity &&
                       !validate(values.seriaizedAsset).serialNumber &&
-                      !errors['receiveDate']
+                      !validateDate(values)?.receiveDate
                     ) {
-                      handleCreateSerializedAsset(values);
+                      handleSubmit(values);
                     }
                   }}
                   size="small"

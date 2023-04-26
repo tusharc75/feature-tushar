@@ -330,15 +330,16 @@ const ProjectSales: FC = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterProjects=${selectedType}`;
-    if (isExport) {
-      deepFilter = `filterProjects=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
-
+    if (isExport) {
+      deepFilter = `?`;
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
-
     if (referenceDetails.referenceId) {
       if (referenceDetails.resource === sidebarResource.opportunity) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
@@ -665,6 +666,9 @@ const ProjectSales: FC = () => {
                   loading={loading}
                   renderedFrom={renderedFrom}
                   refreshGrid={fetchProjects}
+                  showOnlyShowFilteredRecordSwitch={true}
+                  showFilters={true}
+                  resource={sidebarResource.projectSales}
                 /> : null
           }
         </div>

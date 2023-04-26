@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, useMediaQuery, Tab, Tabs } from '@material-ui/core';
+import { Grid, Box, Button, Paper, useMediaQuery, Tab, Tabs, Menu, MenuItem } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -9,7 +9,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { serviceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies, serviceOrderSteps } from '../../constants/helpers';
+import { serviceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies, serviceOrderSteps, salesOrder } from '../../constants/helpers';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
@@ -18,7 +18,7 @@ import TabPanel from '../../components/TabPanel';
 import { isMobile, isTablet } from 'react-device-detect';
 import { camelCase } from 'lodash';
 import ManageServiceOrderDialog from './ManageServiceOrder';
-import Steps from '../RentalManagement/Steps';
+import Steps2 from 'src/components/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Services from './Services';
 import Products from './Products';
@@ -27,9 +27,10 @@ import TechnicianDispatch from './TechnicianDispatch';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ServiceOrderViews from './RoadMapViews';
+import { ExpandMore } from '@material-ui/icons';
+import { GrStatusInfo } from 'react-icons/gr';
 
 const ServiceOrderDetailsPage = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.serviceOrder.title);
 
@@ -57,6 +58,9 @@ const ServiceOrderDetailsPage = () => {
   const [nextStep, setNextStep] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [currentStep, setCurrentStep] = useState(null);
+  const [statusOptions, setStatusOptions] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+
 
   useEffect(() => {
     return history.listen((location) => {
@@ -80,7 +84,7 @@ const ServiceOrderDetailsPage = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
-      updateProcessStatus(serviceOrderSteps[currentStep]);
+      updateProcessStatus(serviceOrderSteps[currentStep]?.name);
     }
   }, [currentStep]);
 
@@ -114,7 +118,11 @@ const ServiceOrderDetailsPage = () => {
       setAllowedToDelete(data.owner.optionValue === user?.user?._id);
       setServiceOrderData(data);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
-      setCurrentStep(serviceOrderSteps.indexOf(data?.processStatus) !== -1 ? serviceOrderSteps.indexOf(data?.processStatus) : 0);
+      setCurrentStep(
+        serviceOrderSteps.map((s) => s.name).indexOf(data?.processStatus) !== -1
+          ? serviceOrderSteps.map((s) => s.name).indexOf(data?.processStatus)
+          : 0
+      );
       if (isAllowedToEdit && openEdit === 'true') {
         setOpenUpdateDialog(true);
         const params = new URLSearchParams();
@@ -133,12 +141,18 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const getServiceOrderFields = async () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Service Order');
+      response?.data?.data.some((o) => {
+        if (o?.fieldData?.fieldName === 'status') {
+          setStatusOptions([...o.fieldData.option]);
+          return true;
+        }
+      });
       setServiceOrderFields(response?.data?.data);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -162,6 +176,37 @@ const ServiceOrderDetailsPage = () => {
       });
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const handleStatusChange = (o) => {
+    if (o.optionValue && serviceOrderData?.status !== o.optionValue) {
+      updateStatus(o.optionValue);
+    }
+  };
+
+  const updateStatus = (status) => {
+    axiosInstance()
+      .patch(`${routes.serviceOrder.path}/status/${serviceOrderData._id}`, { status: status })
+      .then(({ data: { data } }) => {
+        fetchServiceOrderData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -178,6 +223,48 @@ const ServiceOrderDetailsPage = () => {
                       {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   </Fragment>
+                )}
+                {permissions?.serviceOrder?.isUpdate && allowedToEdit && (
+                  <Fragment>
+                   <Button
+                   variant="outlined"
+                   color="default"
+                   size="small"
+                   onClick={openActions}
+                   aria-controls="action-menu"
+                   endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                 >
+                   {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                 </Button>
+                 <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      {statusOptions?.map((o, index) => {
+                        return (
+                          <MenuItem
+                            disabled={index <= statusOptions.findIndex((d) => d.optionLabel === serviceOrderData?.status)}
+                            onClick={() => {
+                              closeActions();
+                              handleStatusChange(o);
+                            }}
+                            value={o}
+                          >
+                            {o?.optionLabel}
+                          </MenuItem>
+                        );
+                      })}
+                    </Menu>
+                 </Fragment>
+                 
                 )}
               </Fragment>
             ) : (
@@ -240,16 +327,16 @@ const ServiceOrderDetailsPage = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps
+          <Steps2
             isNextStep={false}
             nextStep={nextStep}
             steps={serviceOrderSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={false}
+            isStepEnded={['Closed'].includes(serviceOrderData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
-          <ContentFullScreen title={serviceOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <ContentFullScreen title={serviceOrderSteps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && serviceOrderData && (
               <Services
                 serviceOrderData={serviceOrderData}
@@ -296,6 +383,8 @@ const ServiceOrderDetailsPage = () => {
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={false}
                 fromInvoice={true}
+                updateStatus={updateStatus}
+                statusOptions={statusOptions}
               />
             )}
           </ContentFullScreen>

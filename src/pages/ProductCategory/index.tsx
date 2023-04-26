@@ -16,7 +16,14 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { getLocalStorageArrayData, gridLoadingTimeout, gridPageSizes, isObjectEmpty, removeLocalStorage } from '../../constants/helpers';
+import {
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  gridPageSizes,
+  isObjectEmpty,
+  removeLocalStorage,
+  sidebarResource
+} from '../../constants/helpers';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
@@ -555,8 +562,9 @@ const ProductCategory = () => {
                       disabled={selectedRecords.length ? false : true}
                       aria-controls="action-menu"
                       className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      endIcon={<ExpandMore />}
                     >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      {isMobile && !isTablet ? '' : 'Actions'}
                     </Button>
                   )}
                   <Menu
@@ -653,6 +661,8 @@ const ProductCategory = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchProductCategory}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.productCategory}
             />
           )
         ) : null}

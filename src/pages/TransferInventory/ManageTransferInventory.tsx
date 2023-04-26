@@ -1,8 +1,5 @@
 import { useState, useEffect, Fragment, useContext, useRef, FC } from 'react';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -14,88 +11,69 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, transferInventory, setFieldsInAscendingOrder, generateUniqueIdOnly } from 'src/constants/helpers';
-import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from 'src/constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
-import ManageWarehouse from '../Warehouse/ManageWarehouse';
 import { FaDiceOne } from 'react-icons/fa';
-
-const mapPlantOption = (data: any, length: number) => {
-  return {
-    address: data.address,
-    default: false,
-    entity: data.entity,
-    optionLabel: data.warehouseName,
-    optionValue: data._id,
-    order: length
-  };
-};
+import { isEqual } from 'lodash';
 
 interface Props {
   isClone?: boolean;
   transferInventoryId?: any;
   onClose?: any;
   onSuccess?: any;
-  number?: string;
   referenceType?: string;
   referenceId?: string;
   referenceData?: any;
-  transferFromDisable?: boolean;
-  transferToDisable?: boolean;
 }
 
 const ManageTransferInventory: FC<Props> = (props) => {
+
+  const { isClone = false, transferInventoryId = null, onClose, onSuccess } = props;
+
   const {
     state: { selectedEntity, permissions, user }
   }: any = useData();
-  const { isClone = false, transferInventoryId = null, onClose, onSuccess, number = '', transferFromDisable, transferToDisable } = props;
 
   const toastConfig = useContext(CustomToastContext);
-  const initialRender = useRef(true);
   const [isSubmitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formValues, setFormValues] = useState(null);
 
-  const [plantsFromOptions, setPlantsFromOptions] = useState([]);
-  const [plantToOptions, setPlantToOptions] = useState([]);
-  const [customerPlants, setCustomerPlants] = useState([]);
   const [cloneHeading, setCloneHeading] = useState('');
-  const [plantToOpen, setPlantToOpen] = useState(false);
-  const [plantFromOpen, setPlantFromOpen] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [isCustomer, setCustomer] = useState(false);
 
-  useEffect(() => {
-    if (!user || !user?.user || !user?.user?.customerAccountId || !user?.user?.customerContactId) return;
-    setCustomer(true);
-    const fetchPlants = () => {
-      axiosInstance()
-        .get(`${routes.warehouse.path}/customer-account`)
-        .then(({ data: { data } }) => {
-          data = data?.map((d: any, index) => ({
-            ...d,
-            optionValue: d?.warehouse,
-            optionLabel: d?.warehouseDetail?.warehouseName,
-            address: d?.warehouseDetail?.address?.optionValue,
-            entity: d?.entity,
-            order: index,
-            default: false
-          }));
-          setCustomerPlants(data);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
-    };
+  //const [customerPlants, setCustomerPlants] = useState([]);
+  //const [isCustomer, setCustomer] = useState(false);
+  // useEffect(() => {
+  //   if (!user || !user?.user || !user?.user?.customerAccountId || !user?.user?.customerContactId) return;
+  //   setCustomer(true);
+  //   const fetchPlants = () => {
+  //     axiosInstance()
+  //       .get(`${routes.warehouse.path}/customer-account`)
+  //       .then(({ data: { data } }) => {
+  //         data = data?.map((d: any, index) => ({
+  //           ...d,
+  //           optionValue: d?.warehouse,
+  //           optionLabel: d?.warehouseDetail?.warehouseName,
+  //           address: d?.warehouseDetail?.address?.optionValue,
+  //           entity: d?.entity,
+  //           order: index,
+  //           default: false
+  //         }));
+  //         setCustomerPlants(data);
+  //       })
+  //       .catch((err) => {
+  //         toastConfig.setToastConfig(err);
+  //       });
+  //   };
 
-    fetchPlants();
-  }, [user]);
+  //   fetchPlants();
+  // }, [user]);
 
   useEffect(() => {
     axiosInstance()
@@ -103,13 +81,6 @@ const ManageTransferInventory: FC<Props> = (props) => {
       .then(({ data: { data } }) => {
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-        let fromOptions = data.find((obj: any) => obj?.fieldData.fieldName === 'transferFromPlant')?.fieldData?.option ?? [];
-        let toOptions = data.find((obj: any) => obj?.fieldData.fieldName === 'transfertoPlant')?.fieldData?.option ?? [];
-
-        setPlantsFromOptions(fromOptions);
-        setPlantToOptions(toOptions);
-
         if (transferInventoryId) {
           axiosInstance()
             .get(`${transferInventory.api}/` + transferInventoryId)
@@ -179,14 +150,20 @@ const ManageTransferInventory: FC<Props> = (props) => {
     }
   };
 
-  const isFieldNotTouched = (initialData, values) => {
-    return (
-      Object.values(simplifyValues(initialData.values, initialData?.fields[0]?.sectionFields || [])).toString() ===
-      Object.values(simplifyValues(values, initialData?.fields[0]?.sectionFields || [])).toString()
-    );
-  };
-
-  const plantFields = ['transferFromPlant', 'transfertoPlant'];
+  const validate = (values) => {
+    const errors = {};
+    if (user?.user?.brandPolicy?.storageLocation) {
+      if (values?.transferFromStorageLocation === values?.transferToStorageLocation) {
+        errors['transferToStorageLocation'] = 'Transfer from and to storage location can not be same';
+      }
+    }
+    else {
+      if (values?.transferFromPlant === values?.transfertoPlant) {
+        errors['transfertoPlant'] = 'Transfer from and to plant can not be same';
+      }
+    }
+    return errors;
+  }
 
   return (
     <Dialog
@@ -204,29 +181,19 @@ const ManageTransferInventory: FC<Props> = (props) => {
     >
       {initialData.fields.length ? (
         <Formik
-          innerRef={(ref) => {
-            if (ref) {
-              setFormValues(ref.values);
-            } else {
-              setFormValues(null);
-            }
-          }}
           initialValues={initialData.values}
           validationSchema={yupSchema(allFields)}
           onSubmit={handleSubmit}
+          validate={validate}
         >
-          {({ values, errors, touched, setFieldValue, submitForm, setErrors }) => (
+          {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={
-                  transferInventoryId
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${routes.transferInventory.title} (${number})`
-                    : 'Create ' + routes.transferInventory.title
+                title={transferInventoryId ? isClone ? `Clone - ${cloneHeading}` : `Update - ${values?.transferNumber}`
+                  : 'Create ' + routes.transferInventory.title
                 }
                 onClose={() => {
-                  if (isFieldNotTouched(initialData, values)) onClose();
+                  if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
                 isMinimized={!fullScreen}
@@ -247,159 +214,31 @@ const ManageTransferInventory: FC<Props> = (props) => {
                         <Box marginY={2}>
                           <Grid spacing={3} container alignItems="center">
                             {form.sectionFields.map((field, index2) => (
-                              <>
-                                {['transfertoPlant', 'transferFromPlant'].includes(field.fieldName) ? (
-                                  <Grid key={index2} item xs={12} sm={6}>
-                                    <Grid container spacing={1} alignItems="center">
-                                      <Grid
-                                        item
-                                        xs={
-                                          (plantFields.includes(field.fieldName) &&
-                                            permissions?.warehouse?.isCreate &&
-                                            field.fieldName === 'transferFromPlant' &&
-                                            !transferFromDisable) ||
-                                            (field.fieldName === 'transfertoPlant' && !transferToDisable)
-                                            ? 11
-                                            : 12
-                                        }
-                                      >
-                                        <FormTypes
-                                          isNew={Boolean(transferInventoryId)}
-                                          {...field}
-                                          disabled={
-                                            (Boolean(transferInventoryId) && field.disableOnEdit) ||
-                                            (field.fieldName === 'transferFromPlant' && transferFromDisable) ||
-                                            (field.fieldName === 'transfertoPlant' && transferToDisable)
-                                          }
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          fieldData={field}
-                                          type={field.type}
-                                          options={
-                                            isCustomer
-                                              ? customerPlants
-                                              : field.fieldName === 'transfertoPlant'
-                                                ? plantToOptions
-                                                : field.fieldName === 'transferFromPlant'
-                                                  ? plantsFromOptions
-                                                  : []
-                                          }
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-
-                                            if (plantFields.includes(field.fieldName)) {
-                                              if (name.includes('transferFromPlant') && value === values?.transfertoPlant) {
-                                                setFieldValue('transfertoPlant', '');
-                                              }
-
-                                              if (name.includes('transfertoPlant') && value === values?.transferFromPlant) {
-                                                setFieldValue('transferFromPlant', '');
-                                              }
-                                            }
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                        />
-                                      </Grid>
-                                      {((field.fieldName === 'transferFromPlant' && !transferFromDisable) ||
-                                        (field.fieldName === 'transfertoPlant' && !transferToDisable)) &&
-                                        plantFields.includes(field.fieldName) &&
-                                        permissions?.warehouse?.isCreate && (
-                                          <Grid item xs={1}>
-                                            <HtmlTooltip title="Add new plant">
-                                              <IconButton
-                                                size="small"
-                                                onClick={() => {
-                                                  if (field.fieldName === 'transfertoPlant') {
-                                                    setPlantToOpen(true);
-                                                  }
-
-                                                  if (field.fieldName === 'transferFromPlant') {
-                                                    setPlantFromOpen(true);
-                                                  }
-                                                }}
-                                              >
-                                                <AddIcon fontSize="small" color={'primary'} />
-                                              </IconButton>
-                                            </HtmlTooltip>
-                                          </Grid>
-                                        )}
-                                    </Grid>
-                                  </Grid>
-                                ) : (
-                                  <Grid key={index2} item xs={12} sm={6}>
-                                    <FormTypes
-                                      isNew={Boolean(transferInventoryId)}
-                                      {...field}
-                                      disabled={
-                                        (Boolean(transferInventoryId) && field.disableOnEdit) ||
-                                        field.fieldName === 'transferNumber' ||
-                                        field.fieldName === 'status'
-                                      }
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      fieldData={field}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={setFieldValue}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                    />
-                                  </Grid>
-                                )}
-                              </>
+                              <Grid key={index2} item xs={12} sm={6}>
+                                <FormTypes
+                                  isNew={Boolean(transferInventoryId)}
+                                  {...field}
+                                  allFields={allFields}
+                                  fieldData={field}
+                                  disabled={(Boolean(transferInventoryId) && field.disableOnEdit)}
+                                  values={values}
+                                  errors={errors}
+                                  touched={touched}
+                                  label={field.fieldLabel}
+                                  name={field.fieldName}
+                                  type={field.type}
+                                  options={field.option}
+                                  setFieldValue={setFieldValue}
+                                  required={field.required}
+                                  fullWidth
+                                  isTooltip={field?.isTooltip || false}
+                                  tooltipMessage={field?.tooltipMessage}
+                                  size="small"
+                                />
+                              </Grid>
                             ))}
                           </Grid>
                         </Box>
-
-                        {plantToOpen && (
-                          <ManageWarehouse
-                            // isUpdateDisabled={false}
-                            // productCategoryId={productCategoryId}
-                            open={plantToOpen}
-                            close={() => setPlantToOpen(false)}
-                            isClone={false}
-                            onSuccess={({ data }) => {
-                              setPlantToOpen(false);
-                              setFieldValue('transfertoPlant', data._id);
-
-                              setPlantToOptions((prevState) => {
-                                const newOption = mapPlantOption(data, prevState.length);
-                                return [newOption, ...prevState];
-                              });
-                            }}
-                          />
-                        )}
-                        {plantFromOpen && (
-                          <ManageWarehouse
-                            // isUpdateDisabled={false}
-                            // productCategoryId={productCategoryId}
-                            open={plantFromOpen}
-                            close={() => setPlantFromOpen(false)}
-                            isClone={false}
-                            onSuccess={({ data }) => {
-                              setPlantFromOpen(false);
-                              setFieldValue('transferFromPlant', data._id);
-
-                              setPlantsFromOptions((prevState) => {
-                                const newOption = mapPlantOption(data, prevState.length);
-                                return [newOption, ...prevState];
-                              });
-                            }}
-                          />
-                        )}
                       </div>
                     ))}
                 </Form>
@@ -410,7 +249,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                   color="primary"
                   disabled={isSubmitting}
                   onClick={() => {
-                    if (isFieldNotTouched(initialData, values)) onClose();
+                    if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
@@ -421,8 +260,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                   Save
                 </CustomButton>
               </CustomDialogFooter>
-
-              {showConfirmDialog ? (
+              {showConfirmDialog && (
                 <ConfirmCancelDialog
                   close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
@@ -435,7 +273,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                     onClose();
                   }}
                 />
-              ) : null}
+              )}
             </Fragment>
           )}
         </Formik>

@@ -97,7 +97,6 @@ const SendEmail = ({ purchaseOrderData }) => {
     handleAttachments();
   };
 
-
   const handleViewPdf = (download, pdfType: string = 'ordered') => {
     if (download) {
       setLoading('download');
@@ -173,7 +172,7 @@ const SendEmail = ({ purchaseOrderData }) => {
     <>
       <Box display="flex" justifyContent="space-between">
         <Box display="flex" alignItems="center">
-          <Box display="flex">
+          <Box display="flex" flexWrap={'wrap'} gridGap={'8px'}>
             {!isMobile && (
               <Button
                 variant="outlined"
@@ -183,14 +182,13 @@ const SendEmail = ({ purchaseOrderData }) => {
                 startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                 disabled={loading === 'view'}
                 onClick={(e) => {
-                  setDownlodingFile(false)
+                  setDownlodingFile(false);
                   handleClick(e);
                 }}
               >
                 {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : loading === 'view' ? 'Please wait...' : 'Preview'}
               </Button>
             )}
-            <Box mx={1} />
             <Button
               variant="outlined"
               color="primary"
@@ -199,13 +197,12 @@ const SendEmail = ({ purchaseOrderData }) => {
               startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
               disabled={loading === 'download'}
               onClick={(e) => {
-                setDownlodingFile(true)
+                setDownlodingFile(true);
                 handleClick(e);
               }}
             >
               {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === 'download' ? 'Please wait...' : 'Download'}
             </Button>
-            <Box mx={1} />
             <Menu
               id="simple-menu"
               anchorEl={anchorEl}
@@ -299,6 +296,3 @@ const SendEmail = ({ purchaseOrderData }) => {
 };
 
 export default SendEmail;
-
-
-

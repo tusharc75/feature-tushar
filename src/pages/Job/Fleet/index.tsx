@@ -179,13 +179,7 @@ const Fleet = ({ jobData, renderedFrom, setNextStep }) => {
 
   return (
     <Fragment>
-      <Box
-        display="flex"
-        mt={1}
-        mb={2}
-        sx={{ flexWrap: isMobile ? 'wrap' : 'no-wrap', justifyContent: 'flex-end' }}
-        style={{ gap: isMobile ? '8px' : '0px' }}
-      >
+      <Box display="flex" m={1} sx={{ flexWrap: isMobile ? 'wrap' : 'no-wrap', justifyContent: 'flex-end' }} style={{ gap: '8px' }}>
         <Button
           variant="outlined"
           className="btn-outline-v1"
@@ -201,7 +195,6 @@ const Fleet = ({ jobData, renderedFrom, setNextStep }) => {
           {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : pdfLoading === 'view' ? 'Please wait...' : 'Preview'}
         </Button>
         <>
-          <Box mx={0.5} />
           <Button
             className="btn-outline-v1"
             variant="outlined"
@@ -220,7 +213,7 @@ const Fleet = ({ jobData, renderedFrom, setNextStep }) => {
       </Box>
       <Box mt={1}>
         {columns && rowsData ? (
-          <Box p="6px" zIndex={5} width={'100%'}>
+          <Box zIndex={5}>
             <CustomReactTable
               height={'calc(100vh - 395px)'}
               columns={columns}

@@ -21,7 +21,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { ExpandMore } from '@material-ui/icons';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { GrDrag } from 'react-icons/gr';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const Steps = ({ serviceId }) => {
   const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_steps`;
@@ -44,9 +44,10 @@ const Steps = ({ serviceId }) => {
 
   const [columns, setColumns] = useState([
     { field: 'stepName', headerName: 'Step Name', show: true, disabled: true, cellRenderer: 'stepNameRenderer' },
-    { field: 'order', headerName: 'Order', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'leadDay', headerName: 'Lead Day', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'price', headerName: 'Price', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'order', headerName: 'Sequence', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'leadDay', headerName: 'Lead Time', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'costPrice', headerName: 'Cost Price', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'listPrice', headerName: 'List Price', show: true, cellRenderer: 'commonRenderer' },
     { field: 'fieldCount', headerName: 'Fields', show: true, cellRenderer: 'commonRenderer' }
   ]);
 
@@ -203,6 +204,13 @@ const Steps = ({ serviceId }) => {
             </Grid>
             <Grid item xs={9} md={9} sm={9}>
               <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
+                {dataRows?.length ? (
+                  <Button variant="outlined" className="btn-outline-v1" size="small" onClick={() => setArrangeView(true)}>
+                    <GrDrag fontSize="small" color="primary" className="mr-1" />
+                    Arrange
+                  </Button>
+                ) : null}
+                <Box ml={1} />
                 <Button
                   variant="outlined"
                   color="default"
@@ -210,8 +218,9 @@ const Steps = ({ serviceId }) => {
                   onClick={openActions}
                   aria-controls="action-menu"
                   disabled={selectedRecords.length === 0}
+                  endIcon={<ExpandMore />}
                 >
-                  Actions <ExpandMore />
+                  Actions
                 </Button>
                 <Menu
                   anchorEl={anchorActionEl}
@@ -243,14 +252,25 @@ const Steps = ({ serviceId }) => {
                   </MenuItem>
                 </Menu>
                 <Box ml={1} />
-                {dataRows?.length ? (
-                  <Button variant="outlined" className="btn-outline-v1" size="small" onClick={() => setArrangeView(true)}>
-                    <GrDrag fontSize="small" color="primary" className="mr-1" />
-                    Arrange
-                  </Button>
-                ) : null}
-                <Box ml={1} />
-                <ImportExportLinks
+
+                <ImportExportMenu
+                  permissions={permissions?.packages}
+                  module="packages-products"
+                  api={`${serviceMaster.api}/steps/${serviceId}`}
+                  afterImportCompleted={() => {
+                    fetchStepsData();
+                  }}
+                  isExportAllOrSomeFeature={true}
+                  total={rowCount}
+                  recordsToExport={selectedRecords.length}
+                  ids={
+                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                      : []
+                  }
+                  additionalParams={`serviceId=${serviceId}`}
+                />
+                {/* <ImportExportMenu
                   permissions={permissions?.serviceMaster}
                   module="Service Master Steps"
                   api={`${serviceMaster.api}/steps/${serviceId}`}
@@ -258,20 +278,12 @@ const Steps = ({ serviceId }) => {
                     fetchStepsData();
                   }}
                   isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                  ids={
-                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                      : []
-                  }
+                  ids={[]}
                   onExportToExcelSuccess={() => {
                     if (gridApi) gridApi.deselectAll();
                     else fetchStepsData();
                   }}
-                  isDropDownIconShow={true}
-                  isBackgroundWhite={true}
-                />
+                /> */}
               </Box>
             </Grid>
           </Grid>

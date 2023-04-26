@@ -1,0 +1,23 @@
+{
+  "extends": [
+    "development"
+  ],
+  "hints": {
+    "no-inline-styles": "off",
+    "compat-api/css": [
+      "default",
+      {
+        "ignore": [
+          "position: sticky",
+          "background-clip",
+          "scroll-behavior",
+          "min-height: auto",
+          "margin-block",
+          "padding-block",
+          "padding-inline",
+          "inset"
+        ]
+      }
+    ]
+  }
+}

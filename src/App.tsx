@@ -199,6 +199,14 @@ import FleetMasterDetail from './pages/FleetMaster/FleetMasterDetail';
 import Job from './pages/Job';
 import JobDetail from './pages/Job/JobDetail';
 import FleetReceiver from './pages/FleetReceiver';
+import StorageLocationDetailsPage from './pages/StorageLocation/StorageLocationDetailsPage';
+import StorageLocation from './pages/StorageLocation';
+import TransactionLock from './pages/TransactionLock';
+import TransactionLockDetail from './pages/TransactionLock/TransactionLockDetail';
+import DOAApprovalQuotation from './pages/DOA/DOAApprovalQuotation';
+import WellNumber from './pages/WellNumber';
+import WellNumberDetail from './pages/WellNumber/WellNumberDetail';
+import PlanningView from './pages/PlanningView';
 
 var notificationInterval: any = null;
 
@@ -304,7 +312,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -667,6 +675,9 @@ function App() {
             <PrivateRoute exact path={`${routes.DOARequest.path}/:id`}>
               <DOAapproval />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.DOARequest.path}/quotation/:id`}>
+              <DOAApprovalQuotation />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.quoteBuilder.path}>
               <QuoteBuilderCombined />
             </PrivateRoute>
@@ -984,6 +995,27 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fleetReceiver.path}`}>
               <FleetReceiver />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.storageLocation.path}`}>
+              <StorageLocation />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.storageLocationDetail.path}/:id`}>
+              <StorageLocationDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.transactionLock.path}`}>
+              <TransactionLock />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.transactionLockDetail.path}/:id`}>
+              <TransactionLockDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.wellNumber.path}`}>
+              <WellNumber />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.wellNumberDetail.path}/:id`}>
+              <WellNumberDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.planningView.path}`}>
+              <PlanningView />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

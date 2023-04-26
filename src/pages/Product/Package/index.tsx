@@ -121,7 +121,7 @@ const Package = ({ renderedFrom, productId }) => {
                         allowAction={false}
                         loading={loading}
                         allowSelection={false}
-                        showOnlyShowFilteredRecordSwitch={true}
+                        showOnlyShowFilteredRecordSwitch={false}
                         refreshGrid={fetchData}
                         renderedFrom={renderedFrom}
                         isClientSideGrid={true}

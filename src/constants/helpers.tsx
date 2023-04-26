@@ -22,6 +22,12 @@ import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
 import { kebabCase, orderBy, uniqBy } from 'lodash';
+import { stepIconInterface } from 'src/components/Steps/icons';
+
+interface stepInterface extends stepIconInterface {
+  name: string;
+  title: string;
+}
 
 export const staticHiddenResource = ['Dashboard', 'Report'];
 
@@ -44,30 +50,97 @@ export const termsAndConditionDocumentUploadMaxSize = {
   text: '2 MB'
 };
 
-export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
-export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Invoice'];
-export const invoiceProcessSteps = ['Add Products', 'Ready To Invoice'];
-export const jobProcessSteps = ['Add', 'Fleet'];
-export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Send To Customer', 'End'];
-export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
-export const rentalManagementSteps = [
-  'Add Products',
-  'Add Services',
-  // 'Add Consumables',
-  'Add-on',
-  'Quotation',
-  'Serialized Asset',
-  'Loading Ticket',
-  'Receiving Ticket',
-  'Final Slip'
+export const rentalManagementSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Add Services', title: 'Services', icon: 'add' },
+  { name: 'Add-on', title: 'Add-on', icon: 'add' },
+  { name: 'Quotation', title: 'Quotation', icon: 'quote' },
+  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
+  { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
+  { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
-export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loading Ticket'];
-export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
-export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
-export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Loading Ticket', 'Invoice'];
+
 export const demandOrderSteps = ['Add Products'];
+
 export const purchaseRequisitionSteps = ['Add Products'];
-export const serviceOrderSteps = ['Add Services', 'Add Products', 'Assign Technician', 'Technician Dispatch', 'Invoice'];
+
+export const productionOrderSteps: stepInterface[] = [{ name: 'Add', title: 'Add', icon: 'add' }];
+
+export const jobProcessSteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Fleet', title: 'Fleet', icon: 'ticket' }
+];
+
+export const salesOrderProcessSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Manual Entry', title: 'Manual Entry', icon: 'manualEntry' },
+  { name: 'Process', title: 'Process', icon: 'process' },
+  { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
+];
+
+export const bulkAssetCreationSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' }
+];
+
+export const subleaseSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Start Sublease', title: 'Sublease', icon: 'startSublease' },
+  { name: 'End Sublease', title: 'End', icon: 'end' }
+];
+
+export const quotationProcessSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
+  { name: 'Quote Builder', title: 'Builder', icon: 'quote' },
+  { name: 'DOA', title: 'DOA', icon: 'doa' },
+  { name: 'Quote Approval', title: 'Approval', icon: 'approval' },
+  { name: 'End', title: 'End', icon: 'end' }
+];
+
+export const invoiceProcessSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Ready To Invoice', title: 'Invoice', icon: 'invoice' }
+];
+
+export const repairJobProcessSteps: stepInterface[] = [
+  { name: 'Serialized Assets', title: 'Assets', icon: 'serializedAssets' },
+  { name: 'Repair Process', title: 'Repair', icon: 'repairOrder' }
+];
+
+export const transferAssetSteps: stepInterface[] = [
+  { name: 'Add Assets', title: 'Add', icon: 'add' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
+  { name: 'Receiving Ticket', title: 'Receiving', icon: 'ticket' }
+];
+
+export const transferInventorySteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' }
+];
+
+export const purchaseOrderSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Receive Products', title: 'Receive', icon: 'receiveProduct' } // need icon
+];
+
+export const repairOrderSteps: stepInterface[] = [
+  { name: 'Add Assets', title: 'Add', icon: 'add' },
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
+  { name: 'Quotation', title: 'Quotation', icon: 'quote' },
+  { name: 'Post Work Service', title: 'Post Work', icon: 'postWork' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'dispatch' },
+  { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
+];
+
+export const serviceOrderSteps: stepInterface[] = [
+  { name: 'Add Services', title: 'Add', icon: 'add' },
+  { name: 'Add Products', title: 'Products', icon: 'assign' },
+  { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
+  { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
+  { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
+];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -231,7 +304,11 @@ export const sidebarResource = {
   fleetMaster: `Fleet Master`,
   job: 'Job',
   fleetDispatch: 'Fleet Dispatch',
-  fleetReceiver: 'Fleet Receiver'
+  fleetReceiver: 'Fleet Receiver',
+  storageLocation: 'Storage Location',
+  transactionLock: 'Transaction Lock',
+  wellNumber: 'Well Number',
+  planningView: 'Planning View'
 };
 
 export const primaryFields = {
@@ -341,7 +418,10 @@ export const RESOURCE_LABEL = {
   resourceLogs: `Resource Logs`,
   fleetMaster: `Fleet Master`,
   job: 'Job',
-  fleetReceiver: 'Fleet Receiver'
+  fleetReceiver: 'Fleet Receiver',
+  storageLocation: 'Storage Location',
+  transactionLock: 'Transaction Lock',
+  wellNumber: 'Well Number'
 };
 
 export const CHILD_RESOURCE = {
@@ -354,6 +434,7 @@ export const CHILD_RESOURCE = {
   repairJobAsset: 'Repair Job Asset',
   invoiceProduct: 'Invoice Product',
   salesOrderProduct: 'Sales Order Product',
+  salesOrderProcess: 'Sales Order Process',
   salesOrderCost: 'Sales Order Cost',
   subleaseProduct: 'Sublease Product',
   quotationProduct: 'Quotation Product',
@@ -365,7 +446,10 @@ export const CHILD_RESOURCE = {
   purchaseRequisition: 'Purchase Requisition Detail',
   serviceOrderAddon: 'Service Order Addon',
   fieldTicketCost: 'Field Ticket Cost',
-  jobDetail: 'Job Detail'
+  jobDetail: 'Job Detail',
+  workOrderService: 'Work Order Service',
+  demandOrderDetail: 'Demand Order Detail',
+  productionOrderDetail: 'Production Order Detail'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -646,6 +730,14 @@ export const repairType = {
   permission: 'Repair Type',
   resource: 'Repair Type'
 };
+
+export const storageLocation = {
+  api: '/storage-location',
+  route: '/storage-location',
+  permission: 'Storage Location',
+  resource: 'Storage Location'
+};
+
 export const cageManagement = {
   api: '/cage-management',
   route: '/cage-management',
@@ -727,6 +819,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       obj[key.fieldName] = value ? value : options;
     } else if (key.type === 'date') {
       obj[key.fieldName] = value ? value : new Date();
+    } else if (key.type === 'dateTime') {
+      obj[key.fieldName] = new Date();
     } else if (key.type === 'year') {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'colorPicker') {
@@ -820,6 +914,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
       }
     } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : defaultValue || 0;
+    } else if (key.type === 'dateTime') {
+      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue || new Date();
     } else if (key.type === 'lookUpDisplay') {
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue || '';
@@ -843,21 +939,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -896,6 +992,8 @@ export const yupSchema = (fields: any[], validEmail = true) => {
           }
         });
     } else if (input.type === 'date') {
+      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
+    } else if (input.type === 'dateTime') {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
     } else if (input.type === 'freeStyleMultiSelect') {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`) : array();
@@ -987,6 +1085,16 @@ export const displayDateTime = (date) => {
 
 export const displayCardDate = (date) => {
   return date ? moment(date).format(cardDateFormat) : date;
+};
+
+export const convertDateInDateTime = (date) => {
+  if (!date) {
+    return date;
+  }
+  var newDate = new Date(date);
+  var currentDate = new Date();
+  newDate.setHours(currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
+  return newDate;
 };
 
 export const materialTableIcons: any = {
@@ -1342,11 +1450,6 @@ export const determineLightOrDark = (color: any) => {
 /**
  * Convert Miliseconds to Hour
  */
-
-export const msToHour = (ms: number) => {
-  let hour = ms / (1000 * 60 * 60);
-  return hour.toFixed(1);
-};
 
 //  Currencies Short Form Symbols
 // const SI_SYMBOL = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"];
@@ -1879,10 +1982,73 @@ export const ACTIVITY_RESOURCE = {
   fieldTicket: 'fieldTicket',
   fleetMaster: 'fleetMaster',
   job: 'Job',
+  purchaseRequisition: 'purchaseRequisition',
+  planning: 'planning',
+  productCategory: 'productCategory',
+  product: 'product',
+  warehouse: 'warehouse',
+  packages: 'packages',
+  pricingCondition: 'pricingCondition',
+  wellMaster: 'wellMaster',
+  productAuction: 'productAuction',
+  serviceMaster: 'serviceMaster',
+  employeeMaster: 'employeeMaster',
+  competencyMaster: 'competencyMaster',
+  user: 'user',
+  marketSegment: 'marketSegment',
+  budget: 'budget',
+  irtTicket: 'irtTicket'
 };
 
 export const LOG_RESOURCE = {
-  serializedAsset: sidebarResource.serializedAsset
+  serializedAsset: sidebarResource.serializedAsset,
+  serviceMaster: sidebarResource.serviceMaster,
+  fleetMaster: sidebarResource.fleetMaster,
+  job: sidebarResource.job,
+  quotation: sidebarResource.quotation,
+  lead: sidebarResource.lead,
+  opportunity: sidebarResource.opportunity,
+  projectSales: sidebarResource.projectSales,
+  invoice: sidebarResource.invoice,
+  zone: sidebarResource.zone,
+  eCommercePolicy: sidebarResource.eCommercePolicy,
+  productAuction: sidebarResource.productAuction,
+  leadTimeMaster: sidebarResource.leadTimeMaster,
+  irtTicket: sidebarResource.irtTicket,
+  purchaseOrder: sidebarResource.purchaseOrder,
+  rentalManagement: sidebarResource.rentalManagement,
+  sublease: sidebarResource.sublease,
+  transferAsset: sidebarResource.transferAsset,
+  planning: sidebarResource.planning,
+  fieldTicket: sidebarResource.fieldTicket,
+  repairOrder: sidebarResource.repairOrder,
+  workOrder: sidebarResource.workOrder,
+  repairJob: sidebarResource.repairJob,
+  repairType: sidebarResource.repairType,
+  employeeMaster: sidebarResource.employeeMaster,
+  serviceOrder: sidebarResource.serviceOrder,
+  product: sidebarResource.product,
+  demandOrder: sidebarResource.demandOrder,
+  address: sidebarResource.address,
+  customerAccount: sidebarResource.customerAccount,
+  customerContact: sidebarResource.customerContact,
+  entity: sidebarResource.entity,
+  packages: sidebarResource.packages,
+  pricingCondition: sidebarResource.pricingCondition,
+  productCategory: sidebarResource.productCategory,
+  supplierAccount: sidebarResource.supplierAccount,
+  supplierContact: sidebarResource.supplierContact,
+  warehouse: sidebarResource.warehouse,
+  budget: sidebarResource.budget,
+  marketSegment: sidebarResource.marketSegment,
+  user: sidebarResource.user,
+  wellMaster: sidebarResource.wellMaster,
+  inventoryCycle: sidebarResource.inventoryCycle,
+  // frequentlyAskedQuestion: sidebarResource.freqentlyAskedQuestion,
+  competencyMaster: sidebarResource.competencyMaster,
+  bulkAssetCreation: sidebarResource.bulkAssetCreation,
+  salesOrder: sidebarResource.salesOrder,
+  transferInventory: sidebarResource.transferInventory
 };
 
 export const REPORT_LIST = [
@@ -2008,166 +2174,9 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.productionOrder, value: sidebarResource.productionOrder, key: 'productionOrder' },
   { title: sidebarResource.serviceOrder, value: sidebarResource.serviceOrder, key: 'serviceOrder' },
   { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' },
-  { title: sidebarResource.job, value: sidebarResource.job, key: 'job' }
+  { title: sidebarResource.job, value: sidebarResource.job, key: 'job' },
+  { title: sidebarResource.purchaseRequisition, value: sidebarResource.purchaseRequisition, key: 'purchaseRequisition' }
 ];
-
-export const getApi = (resource: string) => {
-  switch (kebabCase(resource)) {
-    case 'quote':
-      return 'quote-builder';
-    default:
-      return kebabCase(resource);
-  }
-};
-
-export const getData = (resource: string, data: any) => {
-  switch (kebabCase(resource)) {
-    case 'customer-account':
-      return {
-        name: `${data.accountName}`,
-        id: data._id
-      };
-    case 'customer-contact':
-      return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
-        id: data._id
-      };
-    case 'supplier-account':
-      return {
-        name: `${data.accountName}`,
-        id: data._id
-      };
-    case 'supplier-contact':
-      return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
-        id: data._id
-      };
-    case 'lead':
-      return {
-        name: `${data.concatedName}`,
-        id: data._id
-      };
-    case 'opportunity':
-      return {
-        name: `${data.opportunityName}`,
-        id: data._id
-      };
-    case 'quote':
-      return {
-        name: `${data.quoteName}`,
-        id: data._id
-      };
-    case 'project-sales':
-      return {
-        name: `${data.projectName}`,
-        id: data._id
-      };
-    case 'rental-management':
-      return {
-        name: `${data.rentalJobName}`,
-        id: data._id
-      };
-    case 'repair-job':
-      return {
-        name: `${data.repairJobName}`,
-        id: data._id
-      };
-    case 'transfer-asset':
-      return {
-        name: `${data.transferAssetNumber}`,
-        id: data._id
-      };
-    case 'purchase-order':
-      return {
-        name: `${data.purchaseOrderNumber}`,
-        id: data._id
-      };
-    case 'delivery-ticket':
-      return {
-        name: `${data.ticketName}`,
-        id: data._id
-      };
-    case 'sublease':
-      return {
-        name: `${data.subleaseName}`,
-        id: data._id
-      };
-    case 'sales-order':
-      return {
-        name: `${data.salesOrderNo}`,
-        id: data._id
-      };
-    case 'invoice':
-      return {
-        name: `${data.invoiceNumber}`,
-        id: data._id
-      };
-    case 'serialized-asset':
-      return {
-        name: `${data.assetNumber}`,
-        id: data._id
-      };
-    case 'bulk-asset-creation':
-      return {
-        name: `${data.baNumber}`,
-        id: data._id
-      };
-    case 'transfer-inventory':
-      return {
-        name: `${data.transferNumber}`,
-        id: data._id
-      };
-    case 'quotation':
-      return {
-        name: `${data.quotationNumber}`,
-        id: data._id
-      };
-    case 'demand-order':
-      return {
-        name: `${data?.demandOrderNumber}`,
-        id: data._id
-      };
-    case 'production-order':
-      return {
-        name: `${data?.productionOrderNumber}`,
-        id: data._id
-      };
-    case 'service-order':
-      return {
-        name: `${data?.serviceOrderNumber}`,
-        id: data._id
-      };
-    case 'repair-order':
-      return {
-        name: `${data?.repairOrderNumber}`,
-        id: data._id
-      };
-    case 'work-order':
-      return {
-        name: `${data?.workOrderNumber}`,
-        id: data._id
-      };
-    case 'field-ticket':
-      return {
-        name: `${data?.fieldTicketNumber}`,
-        id: data._id
-      };
-    case 'fleet-master':
-      return {
-        name: `${data?.fleetNumber}`,
-        id: data._id
-      };
-    case 'job':
-      return {
-        name: `${data?.jobNumber}`,
-        id: data._id
-      };
-    default:
-      break;
-  }
-};
 
 export const COLOUR_MASTER = {
   rentalJob: {
@@ -2259,11 +2268,22 @@ export const COLOUR_MASTER = {
 export const leadTimeStatusDropdown = ['Production', 'Supplier', 'Assemble', 'Freight', 'Customer'];
 
 export const QUOTATION_STATUS = {
+  new: 'New',
   buildingQuote: 'Building Quote',
   waitingForSupplierPrice: 'Waiting for Supplier Price',
   sentToCustomer: 'Sent to Customer',
   acceptByCustomer: 'Accepted by Customer',
-  rejectByCustomer: 'Rejected by Customer'
+  rejectByCustomer: 'Rejected by Customer',
+  converted: 'Converted',
+  sentforDOA: 'Sent for DOA',
+  acceptedbyDOA: 'Accepted by DOA',
+  rejectedbyDOA: 'Rejected by DOA'
+};
+
+export const QUOTATION_TYPE = {
+  salesOrder: 'Sales Order',
+  rentalJob: 'Rental Job',
+  repairOrder: 'Repair Order'
 };
 
 export const WORKORDER_SERVICE_COLOR = {
@@ -2398,4 +2418,19 @@ export const TOOLTIP_MESSAGE = {
   add: "You don't have permissions to add",
   edit: "You don't have permissions to edit",
   remove: "You don't have permissions to remove"
+};
+
+export const getNestedlookupDependentOn = (fields, fieldName) => {
+  const result: any = [];
+  const checkNested = (fields, fieldName, result) => {
+    const filterFields: any = fields.filter((d) => d.lookupDependentOn === fieldName);
+    if (filterFields?.length) {
+      filterFields?.forEach((ele: any) => {
+        result.push({ fieldName: ele.fieldName, value: ele?.type === 'multiSelect' ? [] : '' });
+        checkNested(fields, ele.fieldName, result);
+      });
+    }
+  };
+  checkNested(fields, fieldName, result);
+  return result;
 };

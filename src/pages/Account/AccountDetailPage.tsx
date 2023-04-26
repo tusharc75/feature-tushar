@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Box, Button, Grid, Typography, IconButton, Paper, Card, CardContent, List, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Grid, Typography, IconButton, Paper, Card, CardContent, List, useMediaQuery, ListItemIcon, Tooltip } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { camelCase, reverse as _reverse } from 'lodash';
@@ -55,14 +55,39 @@ import { CustomOfflineContext } from '../../StateProvider/OfflineContext/Offline
 import { BiEdit } from 'react-icons/bi';
 import Warehouse from './Warehouse';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import AddIcon from '@material-ui/icons/Add';
 
-function DisplayData({ label, value, icon }) {
+import { AccountHierarchyIcon, ProjectsIcon, OpportunityIcon, QuoteIcon, AccountsTeamsIcon, ContactsIcon } from 'src/assets/svg/svgIcons';
+
+function DisplayData({ label, value, icon, highlightsHead = false }) {
   return (
     <div style={{ flexGrow: 1 }}>
-      <List>
-        <ListItem>
-          <ListItemAvatar>{icon}</ListItemAvatar>
-          <ListItemText primary={value} secondary={label} />
+      <List style={{ padding: 0 }}>
+        <ListItem style={{ alignItems: 'flex-start', paddingInline: '0' }}>
+          <ListItemIcon style={{ minWidth: '24px', marginTop: 11 }}>{icon}</ListItemIcon>
+          <ListItemText
+            primary={
+              highlightsHead ? (
+                <span
+                  style={{
+                    background: '#EFFBF9',
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    display: 'inline-block',
+                    color: '#298B88',
+                    fontWeight: 600
+                  }}
+                >
+                  {value ? value : '-'}
+                </span>
+              ) : value ? (
+                <span style={{ fontSize: '15px' }}>{value}</span>
+              ) : (
+                '-'
+              )
+            }
+            secondary={<span style={{ fontSize: '14px' }}>{label}</span>}
+          />
         </ListItem>
       </List>
     </div>
@@ -325,6 +350,7 @@ export default function AccountDetailPage(props) {
           industry: data.industry,
           typeOfBusiness: data.typeOfBusiness,
           phone: data.phone,
+
           type: 'child',
           current: true,
           parentAccount: data.parentAccount
@@ -339,7 +365,6 @@ export default function AccountDetailPage(props) {
         }
       ];
       let newData = [];
-
       accounts.forEach((account) => {
         if (isObjectEmpty(account)) return true;
 
@@ -348,6 +373,7 @@ export default function AccountDetailPage(props) {
           accountName: account.accountName,
           typeOfAccount: account.typeOfAccount,
           industry: account.industry,
+          parentId: null,
           typeOfBusiness: account.typeOfBusiness,
           phone: account.phone,
           type: 'child',
@@ -357,7 +383,7 @@ export default function AccountDetailPage(props) {
 
         if (account.parentAccount) {
           updatedAccount['parentAccountText'] = account.parentAccount.accountName;
-          updatedAccount['parentAccountId'] = account.parentAccount._id;
+          updatedAccount['parentId'] = account.parentAccount._id;
         } else {
           updatedAccount['type'] = 'parent';
         }
@@ -466,7 +492,7 @@ export default function AccountDetailPage(props) {
       onClick: () => {
         setShowAccountHierarchyInFullScreenDialog(true);
       },
-      icon: <FcFlowChart />,
+      icon: <AccountHierarchyIcon width={42} height={42} />,
       // icon: <TiFlowChildren />,
       show: true,
       class: 'account'
@@ -475,7 +501,7 @@ export default function AccountDetailPage(props) {
       label: 'Projects',
       count: projectSales ? projectSales.length : 0,
       show: permissions?.projectSales?.isRead,
-      icon: <FcMultipleSmartphones />,
+      icon: <ProjectsIcon width={42} height={42} />,
       class: 'project',
       onClick: () => {
         history.push({
@@ -492,7 +518,7 @@ export default function AccountDetailPage(props) {
       label: 'Opportunity',
       count: opportunities ? opportunities.length : 0,
       show: permissions?.opportunity?.isRead ?? false,
-      icon: <FcBinoculars />,
+      icon: <OpportunityIcon width={42} height={42} />,
       class: 'opportunity',
       onClick: () => {
         history.push({
@@ -509,7 +535,7 @@ export default function AccountDetailPage(props) {
       label: 'Quotes',
       count: quotes ? quotes.length : 0,
       show: permissions?.quoteBuilder?.isRead ?? false,
-      icon: <FcMoneyTransfer />,
+      icon: <QuoteIcon width={42} height={42} />,
       class: 'quotes',
       onClick: () => {
         history.push({
@@ -526,13 +552,13 @@ export default function AccountDetailPage(props) {
       label: 'Accounts Teams',
       count: 0,
       show: true,
-      icon: <FcConferenceCall />,
+      icon: <AccountsTeamsIcon width={42} height={42} />,
       class: 'teams'
     },
     {
       label: 'Contacts',
       count: relatedContacts ? relatedContacts.length : 0,
-      icon: <FcContacts />,
+      icon: <ContactsIcon width={42} height={42} />,
       class: 'contact',
       onClick: () => {
         history.push({
@@ -903,7 +929,7 @@ export default function AccountDetailPage(props) {
               </Box>
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-              <Box className={accountClass.set_width_table}>
+              <Box>
                 <AccountHierarchy
                   data={accountHierarchyData}
                   currentAccountId={accountData._id}
@@ -940,9 +966,9 @@ export default function AccountDetailPage(props) {
                 <Warehouse reference={accountResource} api={accountApi} id={id} />
               </TabPanel>
             )}
-            <div className="pt-3 modified_style_of_accordion">
+            <div className="pt-3 ">
               {permissions?.opportunity?.isRead && (
-                <span id="opportunityAccordion">
+                <Box id="opportunityAccordion" mb={2}>
                   <OpportunityInAccordian
                     opportunityPermissions={permissions.opportunity}
                     opportunities={opportunities}
@@ -956,10 +982,10 @@ export default function AccountDetailPage(props) {
                     isRedirect={false}
                     isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit}
                   />
-                </span>
+                </Box>
               )}
               {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource && (
-                <span id="projectsAccordion">
+                <Box id="projectsAccordion" mb={2}>
                   <ProjectInAccordion
                     recordsPerLine={3}
                     projectSales={projectSales}
@@ -972,10 +998,10 @@ export default function AccountDetailPage(props) {
                     accountName={accountData.accountName}
                     resource={accountResource}
                   />
-                </span>
+                </Box>
               )}
               {permissions?.quoteBuilder?.isRead && accountResource == customerAccount.accountResource && (
-                <span id="quotesAccordion">
+                <Box id="quotesAccordion" mb={2}>
                   <QuotesInAccordion
                     recordsPerLine={3}
                     quotes={quotes}
@@ -987,107 +1013,111 @@ export default function AccountDetailPage(props) {
                     isRenderedFromCustomerAccount={true}
                     isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit}
                   />
-                </span>
+                </Box>
               )}
-              {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
-              {/* {permissions?.lead?.isRead && accountData.staticData?.lead && (
-                  <LeadInAccordion
-                    recordsPerLine={3}
-                    lead={accountData.staticData?.lead}
-                  />
-                )} */}
             </div>
-
-            <Grid item xs={12}>
-              <QuickLinks quickLinks={quickLinks} />
-            </Grid>
-
-            {permissions && permissions[contactResource] && permissions[contactResource].isRead && (
+            <Box mb={2}>
               <Grid item xs={12}>
-                <BoxWithBorder style={{ marginTop: '3%', padding: '0px' }}>
-                  <div className={`${accountClass.detail_page_div3}`}>
-                    <div className={`${accountClass.related_contacts}`}>
-                      <Typography color="primary" variant="h6" style={{ margin: '0 10px' }}>
-                        Related Contacts
-                      </Typography>
-                      {permissions[contactResource].isCreate && (
-                        <span>
-                          <IconButton onClick={handleCreateContact} color="primary" size="small">
-                            <ControlPointIcon />
-                          </IconButton>
-                        </span>
-                      )}
-                    </div>
+                <QuickLinks quickLinks={quickLinks} />
+              </Grid>
+            </Box>
+
+            <div className="single-form-v1">
+              <div className="form-head-v1 relative">
+                <h3 className="form-label-style-v1">Related Contacts & Leads</h3>
+                {permissions[contactResource].isCreate && (
+                  <span style={{ position: 'absolute', right: 15 }}>
+                    <Tooltip title="Add Customer Contact" placement="top">
+                      <IconButton onClick={handleCreateContact} color="primary" size="small">
+                        <AddIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </span>
+                )}
+              </div>
+              <div className="formdata-v1">
+                {permissions && permissions[contactResource] && permissions[contactResource].isRead && (
+                  <>
                     {relatedContactsLoading ? (
                       <CommonSkeleton lenArray={[...Array(4).keys()]} />
                     ) : (
                       <>
-                        <Box className={`${accountClass.custom_box1}`}>
-                          <RelatedContacts
-                            contacts={_reverse(relatedContacts.slice(0, 2))}
-                            accountId={accountData._id}
-                            accountName={accountData.accountName}
-                            contactApi={contactApi}
-                            contactRoute={contactRoute}
-                          />
-                        </Box>
+                        <RelatedContacts
+                          contacts={_reverse(relatedContacts.slice(0, 2))}
+                          accountId={accountData._id}
+                          accountName={accountData.accountName}
+                          contactApi={contactApi}
+                          contactRoute={contactRoute}
+                        >
+                          {accountData?.staticData?.lead && permissions && permissions.lead && permissions.lead.isRead && (
+                            <>
+                              {relatedContactsLoading ? (
+                                <CommonSkeleton lenArray={[...Array(4).keys()]} />
+                              ) : (
+                                <Grid item xs={12} sm={12} md={6} lg={4}>
+                                  <Card className="detailCard card-v1" variant="outlined">
+                                    <CardContent className="card-link">
+                                      <Box>
+                                        {accountData?.staticData?.lead?.entity === selectedEntity ? (
+                                          <Link className="link f_size" to={`/lead/detail/${accountData?.staticData?.lead?._id}`}>
+                                            <Typography component={'span'} className="detailName">
+                                              {accountData?.staticData?.lead?.concatedName || ''}
+                                            </Typography>
+                                          </Link>
+                                        ) : hasAccessToEntity(accountData?.staticData?.lead?.entity) ? (
+                                          <Link
+                                            className="link f_size"
+                                            onClick={() => {
+                                              handleEntityChange(accountData?.staticData?.lead?.entity);
+                                              history.push(`/lead/detail/${accountData?.staticData?.lead?._id}`);
+                                            }}
+                                          >
+                                            <Typography component={'span'} className="detailName">
+                                              {accountData?.staticData?.lead?.concatedName || ''}
+                                            </Typography>
+                                          </Link>
+                                        ) : (
+                                          <span className="detailName">{accountData?.staticData?.lead?.concatedName || ''}</span>
+                                        )}
+                                        <Typography
+                                          component={'span'}
+                                          style={{
+                                            display: 'inline-block',
+                                            backgroundColor: '#298B88',
+                                            color: 'white',
+                                            marginLeft: 31,
+                                            padding: '4px 11px',
+                                            borderRadius: '6px',
+                                            fontSize: '12px',
+                                            fontWeight: '600',
+                                            marginBottom: 8
+                                          }}
+                                        >
+                                          Related Lead
+                                        </Typography>
+                                      </Box>
+                                      <Grid container>
+                                        <Grid item xs={12} sm={6}>
+                                          <DisplayData
+                                            label="Title"
+                                            value={accountData?.staticData?.lead?.title || '-'}
+                                            icon={<BsPerson size={15} />}
+                                          />
+                                        </Grid>
+                                      </Grid>
+                                    </CardContent>
+                                  </Card>
+                                </Grid>
+                              )}
+                            </>
+                          )}
+                        </RelatedContacts>
                       </>
                     )}
-                  </div>
-                </BoxWithBorder>
-              </Grid>
-            )}
-            {accountData?.staticData?.lead && permissions && permissions.lead && permissions.lead.isRead && (
-              <Grid item xs={12}>
-                <BoxWithBorder style={{ marginTop: '3%', padding: '0px' }}>
-                  <div id="contactsAccordion" className={`${accountClass.detail_page_div3}`}>
-                    <div className={`${accountClass.leads_data}`}>
-                      <Typography color="primary" variant="h6" style={{ margin: '0 10px' }}>
-                        Related Lead
-                      </Typography>
-                    </div>
-                    {relatedContactsLoading ? (
-                      <CommonSkeleton lenArray={[...Array(4).keys()]} />
-                    ) : (
-                      <>
-                        <Box className={`${accountClass.custom_box1}`}>
-                          <Card>
-                            <CardContent className="detailListing">
-                              <Grid container className="detailCardHeader">
-                                <Grid item xs={12} sm={12}>
-                                  {accountData?.staticData?.lead?.entity === selectedEntity ? (
-                                    <Link className="link f_size" to={`/lead/detail/${accountData?.staticData?.lead?._id}`}>
-                                      {accountData?.staticData?.lead?.concatedName || ''}
-                                    </Link>
-                                  ) : hasAccessToEntity(accountData?.staticData?.lead?.entity) ? (
-                                    <Link
-                                      className="link f_size"
-                                      onClick={() => {
-                                        handleEntityChange(accountData?.staticData?.lead?.entity);
-                                        history.push(`/lead/detail/${accountData?.staticData?.lead?._id}`);
-                                      }}
-                                    >
-                                      {accountData?.staticData?.lead?.concatedName || ''}
-                                    </Link>
-                                  ) : (
-                                    <span>{accountData?.staticData?.lead?.concatedName || ''}</span>
-                                  )}
-                                </Grid>
-                              </Grid>
-                              <Grid container>
-                                <Grid item xs={12} sm={6}>
-                                  <DisplayData label="Title" value={accountData?.staticData?.lead?.title || '-'} icon={<BsPerson size={20} />} />
-                                </Grid>
-                              </Grid>
-                            </CardContent>
-                          </Card>
-                        </Box>
-                      </>
-                    )}
-                  </div>
-                </BoxWithBorder>
-              </Grid>
-            )}
+                  </>
+                )}
+              </div>
+            </div>
           </>
         )}
       </Box>

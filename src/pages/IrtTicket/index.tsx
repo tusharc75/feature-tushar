@@ -32,7 +32,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import ManageIrtTicket from './ManageIrtTicket';
 
 const IrtTicket = () => {
-  
   const renderedFrom = camelCase(routes?.irtTicket.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -52,7 +51,6 @@ const IrtTicket = () => {
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
   const { getColumnData } = useColumns();
-
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -330,8 +328,9 @@ const IrtTicket = () => {
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
                         className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        endIcon={<ExpandMore />}
                       >
-                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                        {isMobile && !isTablet ? '' : 'Actions'}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -424,6 +423,8 @@ const IrtTicket = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchIrtTicketData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.irtTicket}
             />
           )
         ) : null}

@@ -64,6 +64,9 @@ function SettingsDialog({ onClose, warehouse }) {
     if (!values['lockDate']) {
       errors['lockDate'] = 'Lock Date is Required';
     }
+    if (moment(values["lockDate"]).isAfter(moment())) {
+      errors['lockDate'] = `Please select valid date`;
+    }
     return errors;
   };
 

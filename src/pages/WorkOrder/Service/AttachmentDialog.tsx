@@ -20,6 +20,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, workOrder } from 'src/constants/helpers';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
+import { sortBy } from 'lodash';
 
 const AttachmentSchema = object().shape({
   name: string().required('please add attachment name'),
@@ -27,6 +28,7 @@ const AttachmentSchema = object().shape({
 });
 
 export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId, serviceName, stepName, handleClose, handleSuccess }) {
+
   const [initialValues, setInitialValues] = useState(null);
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -42,37 +44,25 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
   const [fullScreen, setFullScreen] = useState(false);
 
   useEffect(() => {
-    fetchAttachmentDetail();
+    fetchData();
   }, []);
 
-  const checkImageUrl = (url) => {
-    let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
-    let imageExtensions = ['.tif', 'tiff', '.bmp', '.jpg', 'jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
-    return imageExtensions.indexOf(extension) >= 0;
-  };
 
-  const fetchAttachmentDetail = async () => {
+  const fetchData = async () => {
     setIsFetching(true);
     axiosInstance()
-      .get(`${workOrder.api}/step/attachment?workOrderId=${workOrderId}&uniqueServiceId=${uniqueServiceId}&stepId=${stepId}`)
+      .get(`${workOrder.api}/step/attachment?workOrderId=${workOrderId}&uniqueServiceId=${uniqueServiceId}${stepId ? `&stepId=${stepId}` : ''}`)
       .then(({ data: { data } }) => {
         if (!data) {
           setInitialValues({ name: stepName, fileUrl: '' });
           setIsFetching(false);
         } else {
           setCanEdit(data?.canEdit);
-          if (data.file && data.file.length) {
-            let imageAttachments = [];
-            let nonImageAttachments = [];
-            data.file.map((file) => {
-              let isImageUrl = checkImageUrl(file.url);
-              if (!isImageUrl) {
-                nonImageAttachments.push({ name: file.name, url: file.url });
-              } else {
-                imageAttachments.push({ name: file.name, url: file.url });
-              }
+          if (data?.file && data?.file?.length) {
+            data?.file?.sort((a: any, b: any) => {
+              return (new Date(b?.date)).getTime() - (new Date(a?.date)).getTime();
             });
-            setOtherAttachments([...nonImageAttachments, ...imageAttachments]);
+            setOtherAttachments(data.file);
           }
           setIsFetching(false);
           setInitialValues({ ...data, fileUrl: data.file && data.file.length && data.file ? data.file[0]?.url : '' });
@@ -92,7 +82,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
       serviceName: serviceName,
       workOrderId: workOrderId,
       uniqueServiceId: uniqueServiceId,
-      stepId: stepId
+      ...(stepId && { stepId: stepId })
     };
     setLoading(true);
     axiosInstance()
@@ -113,7 +103,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
   };
 
   const onUploadFile = (file) => {
-    setOtherAttachments((prevState) => [...prevState, { name: file.split('_')[3] || file, url: file }]);
+    setOtherAttachments((prevState) => [{ name: file.split('_')[3] || file, url: file, date: new Date() }, ...prevState]);
   };
 
   const handleDeleteAttachment = (file) => {
@@ -146,7 +136,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                   onClose={() => {
                     handleClose();
                   }}
-                  title={`${serviceName} - ${stepName} - Attachment`}
+                  title={`${serviceName} ${stepId ? `- ${stepName}` : ''} - Attachment`}
                   isMinimized={!fullScreen}
                   onMinimizeMaximize={() => {
                     setFullScreen((prevState) => !prevState);

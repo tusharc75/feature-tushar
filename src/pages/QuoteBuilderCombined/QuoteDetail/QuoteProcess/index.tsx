@@ -429,7 +429,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -912,7 +912,7 @@ export default function QuoteProcess(props) {
     if (DOARequestId) {
       if (accepted !== 'Rejected') {
         axiosInstance()
-          .post('/doa-request/DOAResponse/' + DOARequestId, { response: 'Accepted' })
+          .post('/doa-request/doaResponse/' + DOARequestId, { response: 'Accepted' })
           .then(({ data }) => {
             toastConfig.setToastConfig({
               open: true,
@@ -927,7 +927,7 @@ export default function QuoteProcess(props) {
           });
       } else {
         axiosInstance()
-          .post('/doa-request/DOAResponse/' + DOARequestId, { response: 'Rejected', comment: comment })
+          .post('/doa-request/doaResponse/' + DOARequestId, { response: 'Rejected', comment: comment })
           .then(({ data }) => {
             toastConfig.setToastConfig({
               open: true,
@@ -1131,7 +1131,6 @@ export default function QuoteProcess(props) {
     });
   }
 
-
   const handleOfferToCustomer = () => {
     axiosInstance()
       .patch(`/quote-builder/send-offer/${quoteData._id}/${currentVersion}`)
@@ -1139,14 +1138,14 @@ export default function QuoteProcess(props) {
         fetchQuoteData(currentVersion);
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  }
+  };
 
   const fetchUserEmails = () => {
     let ownerCollaboratorEmails = [];
@@ -1232,177 +1231,53 @@ export default function QuoteProcess(props) {
   };
 
   const findProfitPercentage = (CP, Profit) => {
-    let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, "") ?? 0)
-    let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, "") ?? 0)
-    return (profit * 100 / parsedCP).toFixed(2);
-  }
+    let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
+    let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
+    return ((profit * 100) / parsedCP).toFixed(2);
+  };
 
   return (
     <>
-      <Paper className={classes.bgProduct}>
-        {/* <Grid
-                    container
-                    className="detailHeader d-flex align-items-center form-label-style mt-0 mb-0"
-                > */}
-        {/* <Grid
-                        item
-                        xs={ProcessStatus === "New" ? 12 : 12}
-                        sm={ProcessStatus === "New" ? 12 : 5}
-                        md={ProcessStatus === "New" ? 12 : 5}
-                        className="d-flex align-items-center justify-content-end"
-                    >
-                        {DOAApproved && versionStatus === "Sent for DOA" && (
-                            <>
-                                <Button
-                                    onClick={() => {
-                                        QuoteStatusChange("Accepted", "", "")
-                                    }}
-                                    variant="outlined"
-                                    size="small"
-                                    startIcon={<ThumbUpIcon />}
-                                    color="primary"
-                                >
-                                    {approvedButtonText}
-                                </Button>
-                                <Button
-                                    onClick={() => {
-                                        setQuoteStatusChangeData("Rejected")
-                                        setShowQuoteStatusChangeDialog(true)
-                                    }}
-                                    startIcon={<ThumbDownIcon />}
-                                    variant="contained"
-                                    size="small"
-                                    color="primary"
-                                >
-                                    Reject
-                                </Button>
-                            </>
-                        )}
-                        {allowedToEdit && ifQuoteApproved.approved ? (
-                            <Button
-                                variant="outlined"
-                                color="primary"
-                                size="small"
-                                startIcon={<HiPencil />}
-                                onClick={handleOpenUpdateDialog}
-                            >
-                                Edit Information
-                            </Button>
-                        ) : null}
-                        <div>
-                            <Button
-                                className="customSelect mx-1"
-                                variant="outlined"
-                                color="primary"
-                                size="small"
-                                aria-controls="simple-menu"
-                                aria-haspopup="true"
-                                onClick={handleClick}>
-                                {`Version : ${currentVersion}`}
-                            </Button>
-                            <Menu
-                                id="simple-menu"
-                                anchorEl={anchorEl}
-                                keepMounted
-                                open={Boolean(anchorEl)}
-                                onClose={handleClose}
-                            >
-                                {Object?.keys(quoteData.versions).map((versionNumber) => (
-                                    <MenuItem onClick={handleChangeVersionInQuote} key={versionNumber} value={versionNumber}>
-                                        {"Version : " + versionNumber}
-                                    </MenuItem>
-                                ))}
-                            </Menu>
-                        </div>
-                        {(
-                            <>
-                                {currentVersion !== 1 && ifQuoteApproved.approved === false && (
-                                    <Button
-                                        variant="text"
-                                        size="small"
-                                        style={{color:"var(--error)"}}
-                                        className={`${isMobile ? "buttonIconMobile" : "buttonIconDesktop"}`}
-                                        disabled={
-                                            !allowedToEdit ||
-                                            deletingDOA || loading || (DOAneeded
-                                                ? DOASteps.findIndex(d => d?.key === ProcessStatus) > 1
-                                                : OtherSteps.findIndex(d => d?.key === ProcessStatus) > 1)
-                                        }
-                                        startIcon={<MdDelete size={ isMobile ? `20` : `16`}/>}
-                                        onClick={deleteVersion}
-                                    >
-                                        { isMobile ? "" : "Delete"}
-                                    </Button>
-                                )}
-                                <Button
-                                    disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
-                                    variant="text"
+      <div>
+        <Steps
+          steps={DOAneeded ? DOASteps : OtherSteps}
+          currentStep={
+            DOAneeded
+              ? DOASteps.findIndex((d) => d?.key === ProcessStatus)
+              : ProcessStatus === 'DOA Process'
+              ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
+              : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
+          }
+          id={quoteData._id}
+          version={currentVersion}
+          Refresh={fetchQuoteData}
+          nextStep={nextStep}
+          versionStatus={versionStatus}
+          loading={loading}
+          approvedQuote={ifQuoteApproved}
+          handleVersionUpdate={() => {
+            handleVersionUpdate(
+              visibleColumns,
+              visibleColumnsExcel,
+              versionStatus === 'Sent for DOA' && !DOAneeded ? 'Sent to Customer' : versionStatus,
+              state?.selectedRecords
+            );
+          }}
+          handleViewPdf={handleViewPdf}
+          allowedToEdit={allowedToEdit}
+          DOAData={DOAData}
+          quoteData={quoteData}
+          globalLoading={globalLoading}
+          setStepFullScreen={() => setStepFullScreen(true)}
+        />
+      </div>
 
-                                    type="button"
-                                    size="small"
-                                    startIcon={
-                                        isCloning ? (
-                                            <CircularProgress
-                                                color="inherit"
-                                                size={16}
-                                            />
-                                        ) : (
-                                            <BiLayerPlus size={ isMobile ? `20` : `16`}/>
-                                        )
-                                    }
-                                    className={`${isMobile ? "buttonIconMobile" : "buttonIconDesktop"}`}
-                                    style={{color:"var(--success-light)"}}
-                                    onClick={() => {
-                                        cloneVersion();
-                                    }}
-                                >
-                                    {isCloning ? (
-                                        <>Cloning v{currentVersion}</>
-                                    ) : ( isMobile ? "" :
-                                        `Clone ${currentVersion}`
-                                    )}
-                                </Button>{" "}
-                            </>
-                        )}
-                    </Grid> */}
-        {/* </Grid> */}
-        <div>
-          <Steps
-            steps={DOAneeded ? DOASteps : OtherSteps}
-            currentStep={
-              DOAneeded
-                ? DOASteps.findIndex((d) => d?.key === ProcessStatus)
-                : ProcessStatus === 'DOA Process'
-                  ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
-                  : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
-            }
-            id={quoteData._id}
-            version={currentVersion}
-            Refresh={fetchQuoteData}
-            nextStep={nextStep}
-            versionStatus={versionStatus}
-            loading={loading}
-            approvedQuote={ifQuoteApproved}
-            handleVersionUpdate={() => {
-              handleVersionUpdate(
-                visibleColumns,
-                visibleColumnsExcel,
-                versionStatus === 'Sent for DOA' && !DOAneeded ? 'Sent to Customer' : versionStatus,
-                state?.selectedRecords
-              );
-            }}
-            handleViewPdf={handleViewPdf}
-            allowedToEdit={allowedToEdit}
-            DOAData={DOAData}
-            quoteData={quoteData}
-            globalLoading={globalLoading}
-            setStepFullScreen={() => setStepFullScreen(true)}
-          />
-        </div>
-      </Paper>
-
-      <div className={`pt-1 subDetailModule ${classes.detailBox}`}>
-        <ContentFullScreen title={DOASteps.find((d) => d?.key === ProcessStatus).label || ""} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+      <div className={`pt-1 subDetailModule `}>
+        <ContentFullScreen
+          title={DOASteps.find((d) => d?.key === ProcessStatus).label || ''}
+          fullScreen={stepFullScreen}
+          setFullScreen={setStepFullScreen}
+        >
           {!loading && quoteData ? (
             <Grid container className="position-relative">
               <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center gap-1">
@@ -1439,7 +1314,7 @@ export default function QuoteProcess(props) {
                   </span>
                 ) : null}
                 {(ProcessStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
-                  (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
+                (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
                   <div className={`d-flex align-items-center justify-content-end doaAction ${isMobile ? 'actio-pos-quote' : ''}`}>
                     {!ifQuoteApproved.approved && (
                       <Button
@@ -1457,10 +1332,10 @@ export default function QuoteProcess(props) {
                       </Button>
                     )}
                     <span className="d-flex align-items-center justify-content-end ml-3">
-                      {!ifQuoteApproved.approved && buttonMessage === "Send to Customer" && !quoteData?.versions[currentVersion]?.offered && (
+                      {!ifQuoteApproved.approved && buttonMessage === 'Send to Customer' && !quoteData?.versions[currentVersion]?.offered && (
                         <Button
                           onClick={() => {
-                            handleOfferToCustomer()
+                            handleOfferToCustomer();
                           }}
                           disabled={!allowedToEdit || (!DOAreq && !Customerreq) || loading}
                           startIcon={<BiMailSend />}
@@ -1470,8 +1345,8 @@ export default function QuoteProcess(props) {
                         >
                           {isMobile && !isTablet ? '' : `Offered Outside of System`}
                         </Button>
-                      )}</span>
-
+                      )}
+                    </span>
                   </div>
                 ) : null}
               </Grid>
@@ -1511,12 +1386,15 @@ export default function QuoteProcess(props) {
                     </Button>
                   </Tooltip>
                   {permissions[qbResource]?.isUpdate &&
-                    (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
+                    (user?.user?._id === quoteData?.owner?.optionValue ||
+                      quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
                       <Tooltip title="Edit Quote PDF Template">
                         <Button
                           onClick={() => {
                             quoteData?.pDFTemplate.optionValue &&
-                              history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`);
+                              history.push(
+                                `/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`
+                              );
                           }}
                           variant="outlined"
                           size="small"
@@ -1760,7 +1638,8 @@ export default function QuoteProcess(props) {
             <Grid item className="quoteHeader">
               <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
                 <span className="quoteAmount" title={totalProfit.fullFormatAmount}>
-                  {totalProfit.fullFormatAmount ? totalProfit.fullFormatAmount : defaultTotalValue} {totalcost.fullFormatAmount ? `(${findProfitPercentage(totalcost, totalProfit)} %)` : ''}
+                  {totalProfit.fullFormatAmount ? totalProfit.fullFormatAmount : defaultTotalValue}{' '}
+                  {totalcost.fullFormatAmount ? `(${findProfitPercentage(totalcost, totalProfit)} %)` : ''}
                 </span>
                 <div className={'quoteBoxContent'}>
                   <span className={'quoteDetailHeading'}>Total Profit </span>
@@ -1835,22 +1714,32 @@ export default function QuoteProcess(props) {
                     multiple
                     value={showPDFArrangeColumns ? visibleColumns : visibleColumnsExcel}
                     onChange={(e, val) => {
-                      if (val.includes("Select All") && ["Select All", ...ColumnName].sort().toString() !== val.sort().toString()) {
+                      if (val.includes('Select All') && ['Select All', ...ColumnName].sort().toString() !== val.sort().toString()) {
                         showPDFArrangeColumns ? setVisibleColumns(ColumnName) : setVisibleColumnsExcel(ColumnName);
-                      }
-                      else if (["Select All", ...ColumnName].sort().toString() === val.sort().toString()) {
+                      } else if (['Select All', ...ColumnName].sort().toString() === val.sort().toString()) {
                         showPDFArrangeColumns ? setVisibleColumns([]) : setVisibleColumnsExcel([]);
-                      }
-                      else {
+                      } else {
                         showPDFArrangeColumns ? setVisibleColumns(val) : setVisibleColumnsExcel(val);
                       }
                     }}
-                    options={["Select All", ...ColumnName]}
+                    options={['Select All', ...ColumnName]}
                     disableCloseOnSelect
                     getOptionLabel={(option) => option}
                     renderOption={(option, { selected }) => (
                       <React.Fragment>
-                        <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={(showExcelArrangeColumns && ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumnsExcel].sort().toString()) || (showPDFArrangeColumns && ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumns].sort().toString()) ? true : selected} />
+                        <Checkbox
+                          icon={icon}
+                          checkedIcon={checkedIcon}
+                          style={{ marginRight: 8 }}
+                          checked={
+                            (showExcelArrangeColumns &&
+                              ['Select All', ...ColumnName].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()) ||
+                            (showPDFArrangeColumns &&
+                              ['Select All', ...ColumnName].sort().toString() === ['Select All', ...visibleColumns].sort().toString())
+                              ? true
+                              : selected
+                          }
+                        />
                         {option}
                       </React.Fragment>
                     )}
@@ -1883,9 +1772,7 @@ export default function QuoteProcess(props) {
               variant="contained"
               color="primary"
               size="small"
-              disabled={
-                showPDFArrangeColumns ? visibleColumns.length === 0 : visibleColumnsExcel.length === 0
-              }
+              disabled={showPDFArrangeColumns ? visibleColumns.length === 0 : visibleColumnsExcel.length === 0}
               onClick={(e) => {
                 e.preventDefault();
                 handleVersionUpdate(visibleColumns, visibleColumnsExcel, versionStatus, state?.selectedRecords);

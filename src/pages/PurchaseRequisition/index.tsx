@@ -28,9 +28,10 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 
 const PurchaseRequisition = () => {
-
   const renderedFrom = camelCase(routes?.purchaseRequisition.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -49,6 +50,8 @@ const PurchaseRequisition = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
+  const [showOrderDialog, setOrderDialog] = useState({ open: false, currency: null, warehouse: null, products: [], services: [] });
+  const [convertedPurchaseRequisitionId, setConvertedPurchaseRequisitionId] = useState(null)
   const { getColumnData } = useColumns();
 
   const fetchGridColumns = () => {
@@ -134,11 +137,19 @@ const PurchaseRequisition = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+    let deepFilter =  `?page=${page}&limit=${limit}` ;
+    if (isExport) {
+      deepFilter = `?`
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
+    let filterById = [];
+    if (filterById.length > 0) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    }
+    
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
@@ -182,7 +193,7 @@ const PurchaseRequisition = () => {
       {permissions?.purchaseRequisition?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
-            size="small"
+            // size="small"
             aria-label="Clone"
             onClick={() => {
               setPurchaseRequisitionId(params.data.id);
@@ -199,6 +210,30 @@ const PurchaseRequisition = () => {
           </IconButton>
         </Tooltip>
       )}
+
+      {
+        params?.data?.status === 'Converted' ?
+          <Tooltip className="cursor-stop" title="This purchase requisition is already converted into purchase order">
+            <IconButton aria-label="Clone" size="small">
+              <AutorenewIcon fontSize="small" color='disabled' />
+            </IconButton>
+          </Tooltip>
+          :
+          <Tooltip title='Convert'>
+            <IconButton
+              size="small"
+              aria-label="Convert"
+              onClick={() => {
+                setConvertedPurchaseRequisitionId(params?.data?.id)
+                const products = params?.data?.material?.filter((item: any) => item?.type == "product")
+                const services = params?.data?.material?.filter((item: any) => item?.type == "service")
+                setOrderDialog({ open: true, currency: params?.data?.currency, warehouse: params?.data?.warehouseId, products: products, services: services })
+              }}
+            >
+              <AutorenewIcon fontSize="small" color='primary' />
+            </IconButton>
+          </Tooltip>
+      }
 
       {params?.data?.canDelete ? (
         <Tooltip title="Delete">
@@ -254,6 +289,27 @@ const PurchaseRequisition = () => {
   useEffect(() => {
     fetchPurchaseRequisitionData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+
+  const handleConvertSuccess = (data: any) => {
+    setOrderDialog({ open: false, currency: null, warehouse: null, products: [], services: [] });
+    axiosInstance()
+      .put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, {
+        _id: convertedPurchaseRequisitionId,
+        purchaseOrder: data?._id,
+        status: 'Converted'
+      })
+      .then(({ data }) => {
+        fetchPurchaseRequisitionData()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `${sidebarResource.purchaseOrder} has been created successfully`
+        });
+      })
+      .catch((err) => {
+        fetchPurchaseRequisitionData()
+      });
+  }
 
   return (
     <Fragment>
@@ -327,8 +383,9 @@ const PurchaseRequisition = () => {
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
                         className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        endIcon={<ExpandMore />}
                       >
-                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                        {isMobile && !isTablet ? '' : 'Actions'}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -421,6 +478,8 @@ const PurchaseRequisition = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchPurchaseRequisitionData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.purchaseRequisition}
             />
           )
         ) : null}
@@ -444,6 +503,26 @@ const PurchaseRequisition = () => {
               setOpen({ open: false, isClone: false });
               fetchPurchaseRequisitionData();
             }}
+          />
+        )}
+        {showOrderDialog.open && (
+          <ManagePurchaseOrder
+            isClone={false}
+            purchaseOrderId={null}
+            onClose={() => setOrderDialog((prevState) => ({ ...prevState, open: false }))}
+            onSuccess={(data: any) => {
+              handleConvertSuccess(data)
+            }}
+            products={showOrderDialog?.products
+              ?.map((e) => {
+                return { product: e._id, unit: e.unit, qty: e.qty };
+              })}
+            services={showOrderDialog?.services
+              ?.map((e) => {
+                return { service: e._id, unit: e.unit, qty: e.qty };
+              })}
+            currency={showOrderDialog.currency}
+            warehouseId={showOrderDialog?.warehouse}
           />
         )}
       </CustomContainer>

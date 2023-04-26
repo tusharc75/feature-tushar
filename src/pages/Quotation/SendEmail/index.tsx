@@ -38,7 +38,7 @@ const SendEmail = ({
   setShowQuotationSummaryDialog = null,
   currentVersion,
   hideSummary = false,
-  hideVersions = false,
+  hideVersions = false
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -62,7 +62,7 @@ const SendEmail = ({
   }, []);
 
   useEffect(() => {
-    setVisibleColumnsExcel(["Index", "Details", "Type", "Unit", "Qty", `Price ${quotationData?.currency}`, `Final Price ${quotationData?.currency}`]);
+    setVisibleColumnsExcel(['Index', 'Details', 'Type', 'Unit', 'Qty', `Price ${quotationData?.currency}`, `Final Price ${quotationData?.currency}`]);
   }, [quotationData?.currency]);
 
   const fetchEmailsData = () => {
@@ -98,7 +98,7 @@ const SendEmail = ({
         } else {
           return d?.accessor.split('_')[0];
         }
-      })
+      });
 
     axiosInstance()
       .get(`${quotation.api}/${quotationData?._id}/pdf/${versionData._id}/detail?columns=${tempColumns}`)
@@ -151,7 +151,7 @@ const SendEmail = ({
         } else {
           return d?.accessor.split('_')[0];
         }
-      })
+      });
     if (PDFType === 'Regular') {
       setLoading('Regular');
     } else {
@@ -232,7 +232,7 @@ const SendEmail = ({
     <>
       <Box display="flex" justifyContent="space-between">
         <Box display="flex" alignItems="center">
-          <Box display="flex">
+          <Box display="flex" flexWrap={'wrap'} gridGap={8}>
             {!hideSummary && (
               <Button
                 onClick={() => {
@@ -240,7 +240,6 @@ const SendEmail = ({
                 }}
                 variant="outlined"
                 size="small"
-                className="mx-1"
                 startIcon={<GiReceiveMoney />}
                 color="primary"
               >
@@ -252,7 +251,7 @@ const SendEmail = ({
                 variant={isMobile && !isTablet ? 'text' : 'outlined'}
                 color="primary"
                 size="small"
-                className={'btn-outline-v1 mx-1'}
+                className={'btn-outline-v1'}
                 onClick={() => {
                   setShowAllVersionStatus(true);
                 }}
@@ -266,7 +265,7 @@ const SendEmail = ({
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
               color="primary"
               size="small"
-              className={'btn-outline-v1 mx-1'}
+              className={'btn-outline-v1 '}
               onClick={() => {
                 setShowExcelArrangeColumns({ open: true, type: 'Excel' });
               }}
@@ -275,7 +274,6 @@ const SendEmail = ({
             >
               {isMobile && !isTablet ? <AiOutlineFileExcel size={20} /> : `Excel Download`}
             </Button>
-            <Box mx={0.5} />
             <Button
               variant="outlined"
               className="btn-outline-v1"
@@ -292,7 +290,6 @@ const SendEmail = ({
               {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : loading === 'view' ? 'Please wait...' : 'Preview'}
             </Button>
             <>
-              <Box mx={0.5} />
               <Button
                 className="btn-outline-v1"
                 variant="outlined"
@@ -346,7 +343,6 @@ const SendEmail = ({
             </Menu> */}
             {isSendEmail && (
               <>
-                <Box mx={0.5} />
                 <Button
                   variant="outlined"
                   color="primary"
@@ -443,7 +439,7 @@ const SendEmail = ({
                       } else if (['Select All', ...allColumn].sort().toString() === val.sort().toString()) {
                         setVisibleColumnsExcel([]);
                       } else {
-                        setVisibleColumnsExcel(allColumn.filter(d => val.includes(d)));
+                        setVisibleColumnsExcel(allColumn.filter((d) => val.includes(d)));
                       }
                     }}
                     options={['Select All', ...allColumn]}
@@ -457,7 +453,7 @@ const SendEmail = ({
                           style={{ marginRight: 8 }}
                           checked={
                             showExcelArrangeColumns &&
-                              ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
+                            ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
                               ? true
                               : selected
                           }
@@ -474,7 +470,7 @@ const SendEmail = ({
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            {showExcelArrangeColumns.type === 'PDF' ?
+            {showExcelArrangeColumns.type === 'PDF' ? (
               <>
                 <CustomButton
                   variant="contained"
@@ -482,7 +478,9 @@ const SendEmail = ({
                   size="small"
                   loading={loading === 'Regular' || excelArrangeColumnLoading}
                   disabled={loading || visibleColumnsExcel.length === 0}
-                  onClick={(e) => { handleViewPdf(downlodingFile, 'Regular', visibleColumnsExcel); }}
+                  onClick={(e) => {
+                    handleViewPdf(downlodingFile, 'Regular', visibleColumnsExcel);
+                  }}
                 >
                   Regular
                 </CustomButton>
@@ -492,12 +490,15 @@ const SendEmail = ({
                   size="small"
                   loading={loading === 'Detail' || excelArrangeColumnLoading}
                   disabled={loading || visibleColumnsExcel.length === 0}
-                  onClick={(e) => { handleViewPdf(downlodingFile, 'Detail', visibleColumnsExcel); }}
+                  onClick={(e) => {
+                    handleViewPdf(downlodingFile, 'Detail', visibleColumnsExcel);
+                  }}
                 >
                   Detail
                 </CustomButton>
               </>
-              : <CustomButton
+            ) : (
+              <CustomButton
                 variant="contained"
                 color="primary"
                 size="small"
@@ -541,7 +542,8 @@ const SendEmail = ({
                 }}
               >
                 Download
-              </CustomButton>}
+              </CustomButton>
+            )}
           </CustomDialogFooter>
         </Dialog>
       )}

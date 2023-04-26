@@ -511,26 +511,26 @@ body::-webkit-scrollbar-thumb {
 }
 
 .card-view-loader {
-  position : absolute;
-  z-index  : 2;
-  left     : 50%;
-  top      : 50%;
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
   transform: translate(-50%, -50%);
 }
 
 .card-view-loader span {
-  padding        : 15px 25px;
-  border         : 1px solid lightgray;
-  background     : white;
-  font-size      : 1rem;
-  letter-spacing : 1px;
-  width          : 150px;
-  display        : flex;
+  padding: 15px 25px;
+  border: 1px solid lightgray;
+  background: white;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  width: 150px;
+  display: flex;
   justify-content: center;
 }
 
 .card-view-loader span:after {
-  content  : '';
+  content: '';
   animation: dot-animation 2s infinite;
 }
 
@@ -923,7 +923,11 @@ body::-webkit-scrollbar-thumb {
 }
 
 .MobileStep-next-back-button {
-  color: var(--secondary) !important;
+  color: var(--primary-light) !important;
+  &:disabled {
+    opacity: 0.7;
+    pointer-events: none;
+  }
 }
 
 .one {
@@ -1226,8 +1230,8 @@ body::-webkit-scrollbar-thumb {
 .quoteHeader {
   display: flex;
   font-size: 12px;
-  gap: 0.25rem;
   -webkit-gap: 0.25rem;
+  gap: 0.25rem;
   font-weight: bold;
   justify-content: center;
 }
@@ -2176,6 +2180,7 @@ svg.MuiSvgIcon-root {
   }
 }
 
+// ! marked to remove
 // STYLE FOR CUSTOMER CONTACT DETAILS AND CUSTOMER ACCOUNT ACCRODION
 .modified_style_of_accordion {
   .MuiAccordion-root.MuiPaper-root {
@@ -2586,14 +2591,14 @@ svg.MuiSvgIcon-root {
       --padding: 9px 11px;
       --spacing: 18px;
     }
+    color: #424242;
     cursor: pointer;
     font-weight: 400;
     font-size: 12.5185px;
     line-height: 113%;
-    color: #3e3e3e;
     padding: var(--padding, 8px 10px);
     background: #ffffff;
-    border: 0.907407px solid #e2e2e2;
+    border: 1px solid #dedede;
     box-shadow: 0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06);
     border-radius: 3.62963px;
     margin-right: 18px;
@@ -2669,15 +2674,30 @@ svg.MuiSvgIcon-root {
   }
 }
 
+// .MuiTextField-root {
+//   .MuiFormLabel-root {
+//     color: #424242 !important;
+//   }
+// }
+.MuiButton-outlined,
+.MuiButton-outlinedPrimary {
+  color: #424242 !important;
+  border: 1px solid #dedede !important;
+  font-weight: 400 !important;
+  background-color: white !important;
+  box-shadow: unset !important;
+  &:disabled,
+  &.Mui-disabled {
+    background: #e5e5e5 !important;
+    opacity: 1 !important;
+    color: #5b5b5b !important;
+  }
+}
+
 .main-container-v1 {
   @media all and (min-width: 768px) {
     --header-mb: 35px;
     --container-padding: 26px;
-  }
-  .MuiButton-outlinedPrimary {
-    color: #3e3e3e !important;
-    border: 1px solid #e2e2e2 !important;
-    font-weight: 400 !important;
   }
 
   margin-bottom: 20px;
@@ -2732,6 +2752,7 @@ svg.MuiSvgIcon-root {
     box-shadow: 0px 3.90676px 39.0676px rgba(0, 0, 0, 0.08);
     border-radius: 10px;
     min-height: 700px;
+    isolation: isolate;
 
     // height: calc(100vh - 136px);
     @media all and (max-width: 768px) {
@@ -2745,7 +2766,7 @@ svg.MuiSvgIcon-root {
 
     @media all and (max-width: 708px) {
       width: 100%;
-      justify-content: center;
+      justify-content: flex-end;
     }
 
     button {
@@ -2965,14 +2986,14 @@ body {
 
   .btn-outline-v1 {
     background: #ffffff !important;
-    border: 1px solid #e2e2e2 !important;
-    box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
+    border: 1px solid #dedede !important;
+    box-shadow: unset !important;
     border-radius: 3px !important;
     padding: var(--button-v1-padding);
     font-weight: 400 !important;
     font-size: 14.7483px !important;
     line-height: 17px !important;
-    color: #737373;
+    color: #424242;
 
     & > span {
       line-height: 16px;
@@ -3354,5 +3375,48 @@ body {
         }
       }
     }
+  }
+}
+.max-image {
+  img {
+    max-width: 700px !important;
+    width: 100%;
+  }
+}
+.accordion-outlined-button {
+  border: 1px solid #298b88 !important;
+  color: #298b88 !important;
+  min-width: 124px !important;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+  }
+}
+.card-link {
+  &:last-of-type {
+    padding-bottom: 16px !important;
+  }
+  a {
+    color: #555555;
+    transition: color 0.3s;
+    font-weight: 500;
+    &:hover {
+      color: var(--link);
+      text-decoration: underline;
+    }
+    p,
+    span {
+      font-weight: 500;
+    }
+  }
+}
+.relative {
+  position: relative;
+}
+.card-v1 {
+  background: #ffffff !important;
+  border: 1px solid #f0f0f0 !important;
+  box-shadow: 0px 4.28372px 21.4186px rgba(0, 0, 0, 0.06) !important;
+  .detailName {
+    margin-bottom: 10px;
   }
 }

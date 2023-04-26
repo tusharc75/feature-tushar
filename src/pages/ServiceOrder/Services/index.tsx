@@ -117,10 +117,10 @@ const Services = ({
             >
               {row.original.detail}
             </p>
-           {row.original.type === 'package' && (
-            <>
-             <Box ml={1}>
-            <HtmlTooltip title="Add Product">
+            {row.original.type === 'package' && (
+              <>
+                <Box ml={1}>
+                  <HtmlTooltip title="Add Product">
                     <IconButton
                       onClick={() => {
                         setAddExistingProductDialog({ open: true, type: "product", parentId: row.original?._id });
@@ -130,26 +130,26 @@ const Services = ({
                       <AddIcon fontSize="small" color="primary" />
                     </IconButton>
                   </HtmlTooltip>
+                </Box>
+              </>
+            )}
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                style={{ marginLeft: "10px" }}
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
             </Box>
-            </>
-           )}
-          <Box ml={1}>
-          <IconButton
-              size="small"
-              style={{ marginLeft: "10px" }}
-              onClick={() => {
-                if (row.original.type === 'service') {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'product') {
-                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                } else {
-                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                }
-              }}
-            >
-              <OpenInNewIcon fontSize="small" color="primary" />
-            </IconButton>
-          </Box>
           </div>
         )
       }
@@ -166,7 +166,7 @@ const Services = ({
       Cell: ({ row }) => {
         return allowedToEdit ? (
           (!row.original.canDelete) ? (
-            <HtmlTooltip title={'Asset is already assigned'}>
+            <HtmlTooltip title={'Technician is already assigned'}>
               <span>
                 <IconButton size="small" aria-label="Details" disabled={true}>
                   <DeleteIcon fontSize="small" color={'disabled'} />
@@ -291,9 +291,11 @@ const Services = ({
         setUpdating(false);
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         setOpenBulkEdit({
-          open: true, data: data.data.map(d => {
+          open: true, data: data.data.map((d, i) => {
             return {
-              ...d, detail:
+              ...d,
+              srno: i + 1,
+              detail:
                 d.type === 'product'
                   ? d?.productDetail?.productName
                   : d.type === 'service'
@@ -387,7 +389,7 @@ const Services = ({
     handleSaveData(rows);
   };
 
-  const openAddActions = (event) =>{
+  const openAddActions = (event) => {
     setAddAnchorEl(event.currentTarget)
   }
 
@@ -402,46 +404,46 @@ const Services = ({
           <Grid item xs={12} md={12} sm={12}>
             <Box display="flex" justifyContent="space-between" m={1} mb={0}>
               <Box display="flex">
-              <Button
-              variant={'outlined'}
-              color="primary"
-              size="small"
-              startIcon={<AddIcon />}
-              onClick={openAddActions}
-              aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
-                }}
-              >
-                Add Services
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                }}
-              >
-               Add Service Packages
-              </MenuItem>
-            </Menu>
-            </Box>
+                <Button
+                  variant={'outlined'}
+                  color="primary"
+                  size="small"
+                  startIcon={<AddIcon />}
+                  onClick={openAddActions}
+                  aria-controls="add-menu">
+                  {'Add'}
+                  <ExpandMore fontSize="small" />
+                </Button>
+                <Menu
+                  anchorEl={addAnchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="add-menu"
+                  open={Boolean(addAnchorEl)}
+                  onClose={closeAddActions}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      closeAddActions();
+                      setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
+                    }}
+                  >
+                    Add Services
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      closeAddActions();
+                      setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+                    }}
+                  >
+                    Add Service Packages
+                  </MenuItem>
+                </Menu>
+              </Box>
               <Box display="flex">
                 <Button
                   variant={'outlined'}
@@ -463,7 +465,6 @@ const Services = ({
                   }}
                   onClose={handleClose}
                 >
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
                     <MenuItem
                       disabled={isDeleting}
                       onClick={() => {
@@ -473,8 +474,6 @@ const Services = ({
                     >
                       Delete
                     </MenuItem>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
                     <MenuItem
                       onClick={() => {
                         setOpenBulkEdit({ open: true, data: selectedProducts });
@@ -483,7 +482,6 @@ const Services = ({
                     >
                       Bulk Edit
                     </MenuItem>
-                  </HtmlTooltip>
                 </Menu>
               </Box>
             </Box>
@@ -557,7 +555,7 @@ const Services = ({
           ids={[]}
         />
       )}
-        {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
         <AssignProductDialog
           reference={'serviceOrder'}
           serialized={null}

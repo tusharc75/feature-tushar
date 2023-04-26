@@ -15,7 +15,7 @@ import SearchBox from 'src/components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "src/components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "src/components/AgGridComponents/CustomAgGrid";
-import { bulkAssetCreation, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from 'src/constants/helpers';
+import { bulkAssetCreation, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { useData } from "src/StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -153,19 +153,20 @@ const BulkAssetCreation = () => {
     };
 
     const getQueryString = (isExport = false) => {
-        let deepFilter = `?page=${page}&limit=${limit}&filterBulkAssetCreation=${selectedType}`;
-        let filterById = [];
-        if (isExport) {
-            deepFilter = `filterBulkAssetCreation=${selectedType}`;
+        let deepFilter = `?page=${page}&limit=${limit}`;
+        if (selectedType === 2) {
+            deepFilter = deepFilter + `&myRecords=1`;
         }
+        if (isExport) {
+            deepFilter = `?`;
+        }
+        let filterById = [];
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
         }
-
         if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
-
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -513,6 +514,8 @@ const BulkAssetCreation = () => {
                             renderedFrom={renderedFrom}
                             refreshGrid={fetchBulkAssetCreation}
                             showOnlyShowFilteredRecordSwitch={true}
+                            showFilters={true}
+                            resource={sidebarResource.bulkAssetCreation}
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

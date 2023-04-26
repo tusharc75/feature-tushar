@@ -9,9 +9,9 @@ import {
   Box,
   Link as MuiLink,
   CircularProgress,
+  TextField,
 } from '@material-ui/core';
-import { Formik, Form, Field } from 'formik';
-import { TextField } from 'formik-material-ui';
+import { Formik, Form } from 'formik';
 import queryString from 'query-string';
 import { Redirect, Link } from 'react-router-dom';
 import demoImg from '../../assets/clip-hardworking-man.png';
@@ -185,39 +185,55 @@ const ResetPassword = () => {
                 initialValues={{
                   email,
                   password: '',
+                  confirmPassword: '',
                 }}
                 validate={validateForm}
                 onSubmit={handleSubmit}>
-                {({ submitForm }) => (
+                {({ submitForm, values, touched, errors, setFieldValue }) => (
                   <Form className={classes.form}>
-                    <Field
-                      component={TextField}
+                    <TextField
                       name='email'
                       type='email'
                       label='Email'
                       disabled
                       variant='outlined'
                       required
+                      value={values["email"]}
+                      error={touched['email'] && Boolean(errors['email'])}
+                      helperText={touched['email'] && errors['email']}
+                      onChange={(e) => {
+                        setFieldValue('email', e.target.value);
+                      }}
                     />
                     <br />
-                    <Field
-                      component={TextField}
+                    <TextField
                       type='password'
                       label='New Password'
                       name='password'
                       disabled={!isTokenValid || !tokenChecking}
                       variant='outlined'
                       required
+                      value={values["password"]}
+                      error={touched['password'] && Boolean(errors['password'])}
+                      helperText={touched['password'] && errors['password']}
+                      onChange={(e) => {
+                        setFieldValue('password', e.target.value);
+                      }}
                     />
                     <br />
-                    <Field
-                      component={TextField}
+                    <TextField
                       type='password'
                       label='Confirm Password'
                       name='confirmPassword'
                       disabled={!isTokenValid || !tokenChecking}
                       variant='outlined'
                       required
+                      value={values["confirmPassword"]}
+                      error={touched['confirmPassword'] && Boolean(errors['confirmPassword'])}
+                      helperText={touched['confirmPassword'] && errors['confirmPassword']}
+                      onChange={(e) => {
+                        setFieldValue('confirmPassword', e.target.value);
+                      }}
                     />
                     <br />
                     <Button
@@ -227,7 +243,7 @@ const ResetPassword = () => {
                       disabled={isSubmitting || !isTokenValid || !tokenChecking}
                       onClick={submitForm}
                       startIcon={isSubmitting && <CircularProgress size={20} color='inherit' />}
-                      >
+                    >
                       Submit
                     </Button>
                   </Form>

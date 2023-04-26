@@ -1,19 +1,19 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
+import { useState, useEffect, useContext } from 'react';
+import { Grid, Box, Button, Tabs, Tab } from '@material-ui/core';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageWellMaster from './ManageWellMaster';
 import DeleteButton from '../../components/Helpers/DeleteButton';
-import { wellMaster } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, wellMaster } from 'src/constants/helpers';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import WellNumber from './WellNumber';
 
 const WellMasterDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,9 +28,8 @@ const WellMasterDetailsPage = () => {
   const [wellMasterData, setWellMasterData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [wellMasterFields, setWellMasterFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState(null);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
-
+  const [tabValue, setTabValue] = useState(0);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.wellMaster]);
 
   useEffect(() => {
@@ -73,7 +72,6 @@ const WellMasterDetailsPage = () => {
           .put(`${wellMaster.api}/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
-
             history.goBack();
           })
           .catch((err) => {
@@ -85,6 +83,11 @@ const WellMasterDetailsPage = () => {
     }
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -93,34 +96,60 @@ const WellMasterDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.address?.isUpdate && (
-                  <Button
-                    variant="contained"
-                    className={`btn-outline-v1`}
-                    size="small"
-                    onClick={() => {
-                      if (permissions?.wellMaster?.isUpdate) {
-                        setShowManageDialog({ open: true, isClone: false, idToClone: wellMasterData._id });
-                      }
-                    }}
-                  >
-                    Edit
-                  </Button>
-                )}
-                {permissions?.address?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </>
+            {permissions?.wellMaster?.isUpdate && (
+              <Button
+                variant="contained"
+                className={`btn-outline-v1`}
+                size="small"
+                onClick={() => {
+                  if (permissions?.wellMaster?.isUpdate) {
+                    setShowManageDialog({ open: true, isClone: false, idToClone: wellMasterData._id });
+                  }
+                }}
+              >
+                Edit
+              </Button>
+            )}
+            {permissions?.wellMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            <ActivityButton referenceId={wellMasterData?._id} resource={ACTIVITY_RESOURCE.wellMaster} />
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        {loading || !wellMasterFields.length ? (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
-          </Grid>
-        ) : (
-          <DetailsPage data={wellMasterData} fields={wellMasterFields} />
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              height: 0
+            }
+          }}
+        >
+          <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+          {permissions.wellNumber.isRead && (
+            <Tab
+              label={<div className="tab-font">Well Number</div>}
+              value={1}
+              aria-controls="a11y-tabpanel-1"
+              id="a11y-tab-1"
+              className={'tabLayout'}
+            />
+          )}
+        </Tabs>
+        {tabValue === 0 && (
+          <Box>
+            {loading || !wellMasterFields.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={wellMasterData} fields={wellMasterFields} />
+            )}
+          </Box>
         )}
+        {tabValue === 1 && <WellNumber wellName={id} />}
       </Box>
       {showManageDialog.open && (
         <ManageWellMaster

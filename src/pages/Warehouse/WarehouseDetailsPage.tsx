@@ -1,12 +1,11 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper } from '@material-ui/core';
+import { useState, useEffect, useContext } from 'react';
+import { Grid, Box, Button, Tabs, Tab } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -15,7 +14,9 @@ import ManageWarehouse from './ManageWarehouse';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { BiEdit } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdDelete } from 'react-icons/md';
+import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import StorageLocation from './StorageLocation';
 
 const WarehouseDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -30,10 +31,10 @@ const WarehouseDetailsPage = () => {
   const [warehouseData, setWarehouseData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [warehouseFields, setWarehouseFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [addressResource, setAddressResource] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.warehouse]);
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     if (id) {
@@ -48,25 +49,14 @@ const WarehouseDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/warehouse/${id}`);
-
-      handleMainPoints(data);
       setHeadingLbl(data.warehouseName);
       setWarehouseData(data);
       setAddressResource({ id: data._id });
-
       setCustomizedRoutes([routes.warehouse, { title: data.warehouseName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  };
-
-  const handleMainPoints = (data) => {
-    let tempMp = {
-      name: `${data.warehouseName}`,
-      taxJurisdiction: data.taxJurisdiction || ''
-    };
-    setMainPoints(tempMp);
   };
 
   const getWarehouseFields = () => {
@@ -107,6 +97,11 @@ const WarehouseDetailsPage = () => {
     setOpenUpdateDialog(false);
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -136,12 +131,35 @@ const WarehouseDetailsPage = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
+            <ActivityButton referenceId={warehouseData?._id} resource={ACTIVITY_RESOURCE.warehouse} />
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        {warehouseData && <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true} />}
-        <Box>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              height: 0
+            }
+          }}
+        >
+          <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+          {permissions.storageLocation.isRead && (
+            <Tab
+              label={<div className="tab-font">{routes.storageLocation.title}</div>}
+              value={1}
+              aria-controls="a11y-tabpanel-1"
+              id="a11y-tab-1"
+              className={'tabLayout'}
+            />
+          )}
+        </Tabs>
+        {tabValue === 0 && (
+          <Box>
           {loading || !warehouseFields.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
               <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -150,6 +168,8 @@ const WarehouseDetailsPage = () => {
             <DetailsPage data={warehouseData} fields={warehouseFields} />
           )}
         </Box>
+        )}
+        {tabValue === 1 && <StorageLocation warehouse={id} />}
       </Box>
       {openUpdateDialog && (
         <ManageWarehouse
