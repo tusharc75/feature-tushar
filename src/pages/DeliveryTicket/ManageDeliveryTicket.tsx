@@ -215,6 +215,9 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                         tempInitialData["serialNumber"] = serialNumber
                     }
                     tempInitialData["wellName"] = referenceData?.wellName;
+                    if (fieldsDataForUpdate.find((d) => d.fieldName === "wellNumber") && referenceData?.wellNumber) {
+                        tempInitialData["wellNumber"] = referenceData?.wellNumber;
+                    }
                     tempInitialData["afeNumber"] = referenceData?.afeNumber;
                     if (referenceData?.processor) {
                         tempInitialData["deliveryPerson"] = referenceData?.processor;
@@ -810,6 +813,7 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                                                                                     : <FormTypes
                                                                                         {...field}
                                                                                         fieldData={field}
+                                                                                        allFields={initialData.fields}
                                                                                         isNew={!Boolean(deliveryTicketId)}
                                                                                         values={values}
                                                                                         errors={errors}
@@ -838,6 +842,7 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                                                 <FormTypes
                                                     {...field}
                                                     fieldData={field}
+                                                    allFields={initialData.fields}
                                                     disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
                                                     isNew={Boolean(deliveryTicketId)}
                                                     values={values}

@@ -881,7 +881,8 @@ const FormTypes = (props) => {
         }}
       />
     </InfoLabel>
-  ) : type === 'dropDown' && lookup && [sidebarResource.wellMaster, sidebarResource.wellNumber, sidebarResource.warehouse, sidebarResource.storageLocation].includes(fieldData?.lookupResource) ? (
+  ) : (type === 'dropDown' || type === 'multiSelect') &&
+    lookup && [sidebarResource.wellMaster, sidebarResource.wellNumber, sidebarResource.warehouse, sidebarResource.storageLocation].includes(fieldData?.lookupResource) ? (
     <Dropdown
       InfoLabel={InfoLabel}
       fieldData={fieldData}
@@ -907,7 +908,7 @@ const FormTypes = (props) => {
       AddOptionDialog={AddOptionDialog}
       setFieldValue={setFieldValue}
       allFields={allFields}
-      />
+    />
   ) : type === 'dropDown' || type === 'lookup' || (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse)
     || (type === 'formula' && fieldData && fieldData.isDropdown) ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip}>
