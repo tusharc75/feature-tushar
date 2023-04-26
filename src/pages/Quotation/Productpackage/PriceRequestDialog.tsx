@@ -17,6 +17,7 @@ import DeleteButton from 'src/components/Helpers/DeleteButton';
 import moment from 'moment';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const Accordion = withStyles({
   root: {
@@ -66,6 +67,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
   const [response, setResponse] = useState({ open: false, type: '', id: '' });
   const [expandSupplierGrid, setExpandSupplierGrid] = useState(0);
   const [comment, setComment] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (event) => {
     setComment(event.target.value.trimStart());
@@ -88,13 +90,16 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
   ];
 
   const fetchProductGridData = () => {
+    setIsLoading(true);
     if (type === 'Customer') {
       axiosInstance()
         .get(`/quotation/price-request/${quoteData?._id}`)
         .then(({ data: { data } }) => {
           setproductDataList(data);
+          setIsLoading(false);
         })
         .catch((error) => {
+          setIsLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -103,8 +108,10 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
         .get(`/quotation/supplier-price-request/quotation-product-supplier-response/${quoteData?._id}/${versionId}`)
         .then(({ data: { data } }) => {
           setproductDataList(data);
+          setIsLoading(false);
         })
         .catch((error) => {
+          setIsLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -170,7 +177,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
   return (
     <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
       <CustomDialogHeader title={`View ${type} Quote`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
-      {productDataList && productDataList.length !== 0 ? (
+      {productDataList && productDataList.length !== 0 && !isLoading ? (
         productDataList.map((data, index) => {
           const m = data?.material?.map((item: any) => {
             return {
@@ -241,19 +248,25 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                           </Grid>
                         )}
                         <Box p="10px" width={'100%'}>
-                          <CustomReactTable
-                            columns={columns}
-                            data={data.material}
-                            onSelect={() => {}}
-                            childrenProperty="subRows"
-                            uniqueKey="_id"
-                            renderedFrom="quotation_product_package"
-                            isClientSideGrid={true}
-                            hideSelection={true}
-                            hideAction={true}
-                            displayCustomReactTableHeaderOptions={false}
-                            hideExpander={true}
-                          />
+                          {columns && data.material ? (
+                            <CustomReactTable
+                              columns={columns}
+                              data={data.material}
+                              onSelect={() => {}}
+                              childrenProperty="subRows"
+                              uniqueKey="_id"
+                              renderedFrom="quotation_product_package"
+                              isClientSideGrid={true}
+                              hideSelection={true}
+                              hideAction={true}
+                              displayCustomReactTableHeaderOptions={false}
+                              hideExpander={true}
+                            />
+                          ) : (
+                            <Box height={500} bgcolor="white">
+                              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                            </Box>
+                          )}
                         </Box>
                       </>
                     )}
@@ -263,6 +276,10 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
             </Box>
           );
         })
+      ) : isLoading ? (
+        <Box height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
       ) : (
         <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={' Thanks for your submission'}>
           No supplier quote
