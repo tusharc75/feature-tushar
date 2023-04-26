@@ -78,21 +78,12 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
     {
       accessor: 'detail',
       Header: 'Detail',
-      Cell: ({ row }) =>
-        type === 'Customer' ? <p>{row?.original?.productDetail.productName}</p> : <p>{row?.original?.productName ?? row?.original?.serviceName}</p>
+      Cell: ({ row }) => <p>{row?.original?.detail}</p>
     },
     {
       accessor: 'price',
       Header: 'Price',
-      Cell: ({ row }) => (
-        <p className="text-truncate">
-          {row?.original[`price_${quoteData?.currency?.toLowerCase()}`] ? (
-            <p>{row?.original[`price_${quoteData?.currency?.toLowerCase()}`]}</p>
-          ) : (
-            <NoDataCell />
-          )}
-        </p>
-      )
+      Cell: ({ row }) => <p className="text-truncate">{row?.original?.price ? <p>{row?.original?.price}</p> : <NoDataCell />}</p>
     }
   ];
 
@@ -180,88 +171,98 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
     <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
       <CustomDialogHeader title={`View ${type} Quote`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
       {productDataList && productDataList.length !== 0 ? (
-        productDataList.map((data, index) => (
-          <Box ml={2} mr={2}>
-            <div className="pt-1 modified_style_of_accordion_supplier_ask_price">
-              <Accordion expanded={Boolean(expandSupplierGrid === index)} className="omsAccordian accordSupplierAskPrice">
-                <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-                  <Grid container className="pos_rel">
-                    <div
-                      className="clicker_div"
-                      onClick={() => (expandSupplierGrid === index ? setExpandSupplierGrid(null) : setExpandSupplierGrid(index))}
-                    ></div>
-                    <Grid item xs={12} sm={12} md={12}>
-                      <Box display="flex">
-                        <Box>
-                          <IconButton
-                            size="small"
-                            onClick={() => (expandSupplierGrid === index ? setExpandSupplierGrid(null) : setExpandSupplierGrid(index))}
-                          >
-                            {expandSupplierGrid === index ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                          </IconButton>
-                        </Box>
-                        <Box padding="5px">
-                          <Typography variant="subtitle2">{data?.status && `Status : ${data?.status} `}</Typography>
-                        </Box>
-                        <Box padding="5px">
-                          <Typography variant="subtitle2">
-                            {data?.requestDate && `Request Date : ${moment(data?.requestDate).format(dateTimeFormat)} `}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </AccordionSummary>
-                <AccordionDetails>
-                  {expandSupplierGrid === index && (
-                    <>
-                      {((type === 'Customer' && data?.status === 'Request') || (type === 'Supplier' && data?.status === 'Submit')) && (
-                        <Grid item xs={12} sm={12} md={12} container justify="flex-end">
-                          <Box ml={1} mt={1}>
-                            <Button
+        productDataList.map((data, index) => {
+          const m = data?.material?.map((item: any) => {
+            return {
+              ...item,
+              price: item[`price_${quoteData?.currency?.toLowerCase()}`],
+              detail: type === 'Customer' ? item.productDetail.productName : item.productName || item.serviceName
+            };
+          });
+          data.material = m;
+          return (
+            <Box ml={2} mr={2}>
+              <div className="pt-1 modified_style_of_accordion_supplier_ask_price">
+                <Accordion expanded={Boolean(expandSupplierGrid === index)} className="omsAccordian accordSupplierAskPrice">
+                  <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+                    <Grid container className="pos_rel">
+                      <div
+                        className="clicker_div"
+                        onClick={() => (expandSupplierGrid === index ? setExpandSupplierGrid(null) : setExpandSupplierGrid(index))}
+                      ></div>
+                      <Grid item xs={12} sm={12} md={12}>
+                        <Box display="flex">
+                          <Box>
+                            <IconButton
                               size="small"
-                              color="primary"
-                              onClick={() => {
-                                handleAccept(data?._id);
-                              }}
-                              variant="contained"
+                              onClick={() => (expandSupplierGrid === index ? setExpandSupplierGrid(null) : setExpandSupplierGrid(index))}
                             >
-                              Accept
-                            </Button>
+                              {expandSupplierGrid === index ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                            </IconButton>
                           </Box>
-                          <Box ml={1} mt={1}>
-                            <DeleteButton
-                              id="detailDeleteButton"
-                              text={'Reject'}
-                              onClick={() => {
-                                setResponse({ open: true, type: 'Reject', id: data?._id });
-                              }}
-                            />
+                          <Box padding="5px">
+                            <Typography variant="subtitle2">{data?.status && `Status : ${data?.status} `}</Typography>
                           </Box>
-                        </Grid>
-                      )}
-                      <Box p="10px" width={'100%'}>
-                        <CustomReactTable
-                          columns={columns}
-                          data={data.material}
-                          onSelect={() => {}}
-                          childrenProperty="subRows"
-                          uniqueKey="_id"
-                          renderedFrom="quotation_product_package"
-                          isClientSideGrid={true}
-                          hideSelection={true}
-                          hideAction={true}
-                          displayCustomReactTableHeaderOptions={false}
-                          hideExpander={true}
-                        />
-                      </Box>
-                    </>
-                  )}
-                </AccordionDetails>
-              </Accordion>
-            </div>
-          </Box>
-        ))
+                          <Box padding="5px">
+                            <Typography variant="subtitle2">
+                              {data?.requestDate && `Request Date : ${moment(data?.requestDate).format(dateTimeFormat)} `}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    {expandSupplierGrid === index && (
+                      <>
+                        {((type === 'Customer' && data?.status === 'Request') || (type === 'Supplier' && data?.status === 'Submit')) && (
+                          <Grid item xs={12} sm={12} md={12} container justify="flex-end">
+                            <Box ml={1} mt={1}>
+                              <Button
+                                size="small"
+                                color="primary"
+                                onClick={() => {
+                                  handleAccept(data?._id);
+                                }}
+                                variant="contained"
+                              >
+                                Accept
+                              </Button>
+                            </Box>
+                            <Box ml={1} mt={1}>
+                              <DeleteButton
+                                id="detailDeleteButton"
+                                text={'Reject'}
+                                onClick={() => {
+                                  setResponse({ open: true, type: 'Reject', id: data?._id });
+                                }}
+                              />
+                            </Box>
+                          </Grid>
+                        )}
+                        <Box p="10px" width={'100%'}>
+                          <CustomReactTable
+                            columns={columns}
+                            data={data.material}
+                            onSelect={() => {}}
+                            childrenProperty="subRows"
+                            uniqueKey="_id"
+                            renderedFrom="quotation_product_package"
+                            isClientSideGrid={true}
+                            hideSelection={true}
+                            hideAction={true}
+                            displayCustomReactTableHeaderOptions={false}
+                            hideExpander={true}
+                          />
+                        </Box>
+                      </>
+                    )}
+                  </AccordionDetails>
+                </Accordion>
+              </div>
+            </Box>
+          );
+        })
       ) : (
         <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={' Thanks for your submission'}>
           No supplier quote
