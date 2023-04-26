@@ -231,9 +231,12 @@ const DeliveryTicket = () => {
 
   const getQueryString = (isExport = false) => {
     let filterById = [];
-    let deepFilter = `?page=${page}&limit=${limit}&filterDeliveryTickets=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterDeliveryTickets=${selectedType}`;
+      deepFilter = `?`;
     }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;

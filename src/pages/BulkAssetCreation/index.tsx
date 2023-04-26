@@ -153,19 +153,20 @@ const BulkAssetCreation = () => {
     };
 
     const getQueryString = (isExport = false) => {
-        let deepFilter = `?page=${page}&limit=${limit}&filterBulkAssetCreation=${selectedType}`;
-        let filterById = [];
-        if (isExport) {
-            deepFilter = `filterBulkAssetCreation=${selectedType}`;
+        let deepFilter = `?page=${page}&limit=${limit}`;
+        if (selectedType === 2) {
+            deepFilter = deepFilter + `&myRecords=1`;
         }
+        if (isExport) {
+            deepFilter = `?`;
+        }
+        let filterById = [];
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
         }
-
         if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
-
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
