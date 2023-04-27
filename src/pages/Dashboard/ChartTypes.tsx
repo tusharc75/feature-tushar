@@ -306,7 +306,15 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   data={chartData}
                   options={{
                     maintainAspectRatio: false,
-                    indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x'
+                    indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
+                    ...(chart.stack && {scales: {
+                      x: {
+                        stacked: true,
+                      },
+                      y: {
+                        stacked: true,
+                      },
+                    }})  
                   }}
                 />
               )
