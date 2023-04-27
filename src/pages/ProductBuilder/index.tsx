@@ -50,7 +50,6 @@ const ProductBuilder = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
   const columns = [
     {
       field: 'name',
