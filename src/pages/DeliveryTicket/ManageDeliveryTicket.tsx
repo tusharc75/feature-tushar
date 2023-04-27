@@ -99,7 +99,8 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
         }
     }, [initialData.fields, referenceData]);
 
-    const updateFieldProperty = (fields, pickupFromType, deliveryToType, ticketType, pickupFrom, deliveryTo, isPickupFromDisable, isDeliveryToDisable) => {
+    const updateFieldProperty = (fields, pickupFromType, deliveryToType, ticketType, pickupFrom, deliveryTo,
+        isPickupFromDisable, isDeliveryToDisable, isPickupFromStorageLocationDisable, isDeliveryToStorageLocationDisable) => {
         var warehouse = [];
         var customerAccount = [];
         var supplierAccount = [];
@@ -158,6 +159,14 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
             if (ticketType === DELIVERY_TICKET_TYPE.return && element.fieldName === "returnReason") {
                 element.required = true;
             }
+
+
+            if (isPickupFromStorageLocationDisable && element.fieldName === "pickupFromStorageLocation") {
+                element.isUneditable = true
+            }
+            if (isDeliveryToStorageLocationDisable && element.fieldName === "deliveryToStorageLocation") {
+                element.isUneditable = true
+            }
         });
         return fields;
     }
@@ -190,7 +199,7 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                 setDeliveryTicketData(data)
                 setDisableOwnerSelection(deliveryTicketId && user.user._id !== data?.owner?.optionValue);
                 fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.pickupFromType,
-                    data?.deliveryToType, data?.ticketType, data?.pickupFrom, data?.deliveryTo, true, true);
+                    data?.deliveryToType, data?.ticketType, data?.pickupFrom, data?.deliveryTo, true, true, true, true);
                 setInitialData({
                     fields: fieldsDataForUpdate,
                     values: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -200,7 +209,16 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                 const tempInitialData = getObjKeys("", fieldsDataForCreate)
                 var isPickupFromDisable = false;
                 var isDeliveryToDisable = false;
+                var isPickupFromStorageLocationDisable = false;
+                var isDeliveryToStorageLocationDisable = false;
+
                 if ((productInventory || products) && referenceType && referenceData) {
+
+                    if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
+                    }
+                    else {
+                        fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !["pickupFromStorageLocation", "deliveryToStorageLocation"]?.includes(e.fieldName))
+                    }
 
                     tempInitialData["ticketName"] = `${referenceData?.ticketName}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = referenceType;
@@ -214,12 +232,16 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                     if (serialNumber) {
                         tempInitialData["serialNumber"] = serialNumber
                     }
-                    tempInitialData["wellName"] = referenceData?.wellName;
+                    if (fieldsDataForUpdate.find((d) => d.fieldName === "wellName") && referenceData?.wellName) {
+                        tempInitialData["wellName"] = referenceData?.wellName;
+                    }
                     if (fieldsDataForUpdate.find((d) => d.fieldName === "wellNumber") && referenceData?.wellNumber) {
                         tempInitialData["wellNumber"] = referenceData?.wellNumber;
                     }
-                    tempInitialData["afeNumber"] = referenceData?.afeNumber;
-                    if (referenceData?.processor) {
+                    if (fieldsDataForUpdate.find((d) => d.fieldName === "afeNumber") && referenceData?.afeNumber) {
+                        tempInitialData["afeNumber"] = referenceData?.afeNumber;
+                    }
+                    if (fieldsDataForUpdate.find((d) => d.fieldName === "deliveryPerson") && referenceData?.processor) {
                         tempInitialData["deliveryPerson"] = referenceData?.processor;
                     }
                     if (referenceData.status) {
@@ -227,6 +249,9 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                     }
                     isPickupFromDisable = referenceData?.isPickupFromDisable ? true : false;
                     isDeliveryToDisable = referenceData?.isDeliveryToDisable ? true : false;
+
+                    isPickupFromStorageLocationDisable = referenceData?.isPickupFromStorageLocationDisable ? true : false;
+                    isDeliveryToStorageLocationDisable = referenceData?.isDeliveryToStorageLocationDisable ? true : false;
 
                     if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob) {
                         tempInitialData["rentalJob"] = referenceData?.referenceId
@@ -253,10 +278,15 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                     tempInitialData["pickupFromType"] = referenceData?.pickupFromType;
                     tempInitialData["pickupFrom"] = referenceData?.pickupFrom;
                     tempInitialData["pickupFromAddress"] = referenceData?.pickupFromAddress;
+                    if (fieldsDataForUpdate.find((d) => d.fieldName === "pickupFromStorageLocation") && referenceData?.pickupFromStorageLocation) {
+                        tempInitialData["pickupFromStorageLocation"] = referenceData?.pickupFromStorageLocation;
+                    }
                     tempInitialData["deliveryToType"] = referenceData?.deliveryToType;
                     tempInitialData["deliveryTo"] = referenceData?.deliveryTo;
                     tempInitialData["deliveryToAddress"] = referenceData?.deliveryToAddress;
-
+                    if (fieldsDataForUpdate.find((d) => d.fieldName === "deliveryToStorageLocation") && referenceData?.deliveryToStorageLocation) {
+                        tempInitialData["deliveryToStorageLocation"] = referenceData?.deliveryToStorageLocation;
+                    }
                     const warehouse = fieldsDataForUpdate.find((d) => d.fieldName === "warehouse");
                     if (warehouse && warehouse?.option?.length) {
                         if (tempInitialData["pickupFromType"] === DELIVERY_FROM_TO_TYPE.plant) {
@@ -292,7 +322,7 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                 }
                 fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, tempInitialData["pickupFromType"],
                     tempInitialData["deliveryToType"], tempInitialData["ticketType"], tempInitialData["pickupFrom"], tempInitialData["deliveryTo"],
-                    isPickupFromDisable, isDeliveryToDisable);
+                    isPickupFromDisable, isDeliveryToDisable, isPickupFromStorageLocationDisable, isDeliveryToStorageLocationDisable);
                 setInitialData({
                     fields: fieldsDataForCreate,
                     values: tempInitialData,
