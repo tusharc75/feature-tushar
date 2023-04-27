@@ -59,6 +59,18 @@ const DashbaordNew = () => {
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product Category,Market Segment,Customer Account,Product,User,Warehouse`);
         if (!data) return;
 
+       const res = await axiosInstance().get('/field?resource=Project Sales') ; 
+       let businessUnitOptions = [];
+       let serviceFamilyOptions = [];
+       res?.data?.data.forEach((e: any) => {
+         if (e?.fieldData?.fieldName === 'businessUnit') {
+          businessUnitOptions = e.fieldData.option;
+         }
+         else if (e?.fieldData?.fieldName === 'serviceFamily') {
+          serviceFamilyOptions = e.fieldData.option;
+         }
+       });
+       
         Object.keys(data).forEach((_d) => {
           setFilterOptions({
             productDescription: data['Product'],
@@ -73,7 +85,9 @@ const DashbaordNew = () => {
             countryBillTo: countriesData,
             countrySellTo: countriesData,
             country: countriesData,
-            period: periodOption
+            period: periodOption,
+            businessUnit: businessUnitOptions, 
+            serviceFamily: serviceFamilyOptions
           });
         });
       } catch (error) {
