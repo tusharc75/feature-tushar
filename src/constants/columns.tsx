@@ -537,7 +537,21 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
               row.original[ele.fieldName] ? (
                 ele.lookup ? (
                   row.original[ele.fieldName]?.length ? (
-                    <p className="text-truncate">{row.original[ele.fieldName]?.map((d) => d.optionLabel)?.join()}</p>
+                    ele.fieldName === 'supplierAccount' ? (
+                      <p className="text-truncate">
+                        {row.original[ele.fieldName]
+                          ?.map((d) => {
+                            return (
+                              <a className="text-truncate link" href={`${routes.supplierAccountDetail.path}/${d.optionValue}`}>
+                                {d.optionLabel}
+                              </a>
+                            );
+                          })
+                          ?.reduce((prev, curr) => [prev, ', ', curr])}
+                      </p>
+                    ) : (
+                      <p className="text-truncate">{row.original[ele.fieldName]?.map((d) => d.optionLabel)?.join()}</p>
+                    )
                   ) : (
                     <NoDataCell />
                   )
