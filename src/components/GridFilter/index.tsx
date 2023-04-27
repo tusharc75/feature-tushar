@@ -174,7 +174,10 @@ function GridFilter({
 
       const fieldLabel = col.fieldLabel;
       // IF THIS COLUMN DOSEN'T EXIST ON FORMVALUES SKIP TO NEXT ITERATION
-      if (!colNames.includes(key) && col.type !== 'dateTime') {
+      if (
+        !(colNames.includes(key) || colNames.includes(`from_${key}`) || colNames.includes(`to_${key}`)) &&
+        (col.type !== 'dateTime' || col.type !== 'date')
+      ) {
         continue;
       }
 
@@ -215,11 +218,11 @@ function GridFilter({
           });
 
           filterModel[col.fieldName] = {
-            filterType: 'text',
+            filterType: 'date',
             type: 'contains',
             filter: {
-              from: fromDate ? new Date(fromDate) : null,
-              to: toDate ? new Date(toDate) : null
+              from: fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null,
+              to: toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
             }
           };
         }
@@ -321,6 +324,7 @@ function GridFilter({
 
   const handleApplyFilter = () => {
     setCurrentFomValue(formValues || {});
+
     currentGridApi.setFilterModel(createFilterModel());
     setSelectedFilter(selectedUserFilter || null);
     handleClose();
