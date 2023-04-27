@@ -170,54 +170,52 @@ function GridFilter({
 
     for (let i = 0; i < coloums.length; i++) {
       const col = coloums[i];
-      const key = col?.fieldName;
+      const fieldName = col?.fieldName;
+      const fieldLabel = col?.fieldLabel;
 
-      const fieldLabel = col.fieldLabel;
-      // IF THIS COLUMN DOSEN'T EXIST ON FORMVALUES SKIP TO NEXT ITERATION
-      if (
-        !(colNames.includes(key) || colNames.includes(`from_${key}`) || colNames.includes(`to_${key}`)) &&
+      if (!(colNames.includes(fieldName) || colNames.includes(`from_${fieldName}`) || colNames.includes(`to_${fieldName}`)) &&
         (col.type !== 'dateTime' || col.type !== 'date')
       ) {
         continue;
       }
 
-      if (col.type === 'singleLine' && formValues[key]) {
-        chipData.push({ title: fieldLabel, value: formValues[key], name: key });
-        filterModel[key] = {
+      if (col.type === 'singleLine' && formValues[fieldName]) {
+        chipData.push({ title: fieldLabel, value: formValues[fieldName], name: fieldName });
+        filterModel[fieldName] = {
           filterType: 'text',
           type: 'contains',
-          filter: formValues[key]
+          filter: formValues[fieldName]
         };
       }
-      if (col.type === 'dropDown' && formValues[key]) {
-        chipData.push({ title: fieldLabel, value: getDataFromFormValue(formValues[key], key)?.optionLabel, name: key });
-        filterModel[key] = {
+      if (col.type === 'dropDown' && formValues[fieldName]) {
+        chipData.push({ title: fieldLabel, value: getDataFromFormValue(formValues[fieldName], fieldName)?.optionLabel, name: fieldName });
+        filterModel[fieldName] = {
           filterType: 'text',
           type: 'contains',
-          filter: getDataFromFormValue(formValues[key], key)?.optionLabel || null
+          filter: getDataFromFormValue(formValues[fieldName], fieldName)?.optionLabel || null
         };
       }
       if (col.type === 'dateTime' || col.type === 'date') {
-        const from = `from_${col.fieldName}`;
-        const to = `to_${col.fieldName}`;
+
+        const from = `from_${fieldName}`;
+        const to = `to_${fieldName}`;
+
         const fromDate = formValues[from] ? formValues[from] : null;
         const toDate = formValues[to] ? formValues[to] : null;
 
         if (fromDate || toDate) {
           chipData.push({
-            title: col.fieldLabel,
+            title: fieldLabel,
             value:
               fromDate && toDate
                 ? `${fromDate ? moment(fromDate).format('DD/MM/YYYY') : null} - ${toDate ? moment(toDate).format('DD/MM/YYYY') : null}`
                 : fromDate || toDate
-                ? `${fromDate ? `${moment(fromDate).format('DD/MM/YYYY')} (From Date)` : ''} ${
-                    toDate ? `${moment(toDate).format('DD/MM/YYYY')} (To Date)` : ''
+                  ? `${fromDate ? `${moment(fromDate).format('DD/MM/YYYY')} (From Date)` : ''} ${toDate ? `${moment(toDate).format('DD/MM/YYYY')} (To Date)` : ''
                   }`
-                : null,
-            name: col.fieldName
+                  : null,
+            name: fieldName
           });
-
-          filterModel[col.fieldName] = {
+          filterModel[fieldName] = {
             filterType: 'date',
             type: 'contains',
             filter: {
@@ -227,8 +225,7 @@ function GridFilter({
           };
         }
       }
-
-      if (col.type === 'multiSelect' && formValues[key]) {
+      if (col.type === 'multiSelect' && formValues[fieldName]) {
         const multiChipData = [];
         const createMultiSelectModel = (items) => {
           // EDGE CASES
@@ -237,14 +234,13 @@ function GridFilter({
           }
           if (items.length === 1) {
             multiChipData.push(items[0].optionLabel);
-            chipData.push({ title: fieldLabel, value: multiChipData.join(', '), name: key });
+            chipData.push({ title: fieldLabel, value: multiChipData.join(', '), name: fieldName });
             return {
               filterType: 'text',
               type: 'contains',
               filter: items[0].optionLabel
             };
           }
-
           // OTHERWISE
           const obj = {
             filterType: 'text',
@@ -259,72 +255,19 @@ function GridFilter({
             };
           });
 
-          chipData.push({ title: fieldLabel, value: multiChipData.join(', '), name: key });
+          chipData.push({ title: fieldLabel, value: multiChipData.join(', '), name: fieldName });
           return obj;
         };
-        filterModel[key] = {
-          ...createMultiSelectModel(getDataFromFormValue(formValues[key], key))
+        filterModel[fieldName] = {
+          ...createMultiSelectModel(getDataFromFormValue(formValues[fieldName], fieldName))
         };
       }
     }
-
-    if (betweenDate) {
-      const conditions = [];
-      const dateKeys = Object.keys(betweenDate);
-
-      const sortedDateKeys = [];
-      dateKeys.forEach((item, index) => {
-        const [fromTo, key] = item.split('_');
-        if (fromTo === 'from') {
-          const toIndex = dateKeys.indexOf(`to_${key}`);
-          sortedDateKeys.push(item, dateKeys[toIndex]);
-        }
-      });
-
-      const getCondition = (fromTo, data) => {
-        const [_, key] = fromTo.split('_');
-        fromTo = key;
-        if (fromTo == 'from') {
-          return {
-            dateFrom: data,
-            dateTo: null,
-            filterType: 'date',
-            type: 'greaterThan'
-          };
-        } else {
-          return {
-            dateFrom: data,
-            dateTo: null,
-            filterType: 'date',
-            type: 'lessThan'
-          };
-        }
-      };
-      for (let i = 0; i < sortedDateKeys.length; i += 2) {
-        const fromKey = sortedDateKeys[i];
-        const toKey = sortedDateKeys[i + 1];
-        const fromDate = moment(betweenDate[fromKey]).toISOString();
-        const toDate = moment(betweenDate[toKey]).toISOString();
-
-        const [_, key] = fromKey.split('_');
-        filterModel[key] = {
-          ...filterModel[key],
-          filterType: 'date',
-          operator: 'AND',
-          condition1: getCondition(fromKey, fromDate),
-          condition2: getCondition(toKey, toDate),
-          conditions: [getCondition(fromKey, fromDate), getCondition(toKey, toDate)]
-        };
-      }
-    }
-
-    // setChipData(chipData);
     return filterModel;
   };
 
   const handleApplyFilter = () => {
     setCurrentFomValue(formValues || {});
-
     currentGridApi.setFilterModel(createFilterModel());
     setSelectedFilter(selectedUserFilter || null);
     handleClose();
@@ -424,6 +367,7 @@ function GridFilter({
                                 onChange={(e) => {
                                   handleDuration(e.target.value, field);
                                 }}
+                                label="Select Duration"
                               >
                                 <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                                 <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
