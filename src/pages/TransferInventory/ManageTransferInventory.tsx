@@ -96,6 +96,13 @@ const ManageTransferInventory: FC<Props> = (props) => {
                   values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
                 });
               } else {
+                if (data?.canEdit === false) {
+                  fieldsDataForUpdate?.forEach((e) => {
+                    if (["transferFromPlant", "transferFromStorageLocation"]?.includes(e?.fieldName)) {
+                      e.isUneditable = true;
+                    }
+                  })
+                }
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
