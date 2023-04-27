@@ -53,7 +53,6 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'entity',
         'logout',
         'reports',
-        'old-dashboard',
         'erecs',
         'resource-calendar',
         'serialized-asset-new',

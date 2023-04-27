@@ -24,10 +24,15 @@ import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwip
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import { AiFillFilePdf } from 'react-icons/ai';
 import ReceiveDialog from './ReceiveDialog';
+import { useData } from 'src/StateProvider/Provider';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 
 const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
+
+  const { state: { user } }: any = useData();
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -38,8 +43,17 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   const [downloadingFile, setDownlodingFile] = useState(false);
   const [columns, setColumns] = useState(null);
 
+  const [interPlantTransfer, setInterPlantTransfer] = useState(false);
+  const [showConfirmInterPlantTransfer, setShowConfirmInterPlantTransfer] = useState(false);
+  const [loadingInterPlantTransfer, setLoadingInterPlantTransfer] = useState(false);
+
   useEffect(() => {
     fetchFields();
+    if (user?.user?.brandPolicy?.storageLocation) {
+      if (transferInventoryData?.transferFromPlant?.optionValue === transferInventoryData?.transfertoPlant?.optionValue) {
+        setInterPlantTransfer(true)
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -239,8 +253,40 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     }
     data['status'] = DELIVERY_TICKET_STATUS.indTransit;
 
+
+    if (user?.user?.brandPolicy?.storageLocation) {
+      if (transferInventoryData?.transferFromStorageLocation?.optionValue) {
+        data['pickupFromStorageLocation'] = transferInventoryData?.transferFromStorageLocation.optionValue;
+        data['isPickupFromStorageLocationDisable'] = true;
+      }
+      if (transferInventoryData?.transferToStorageLocation?.optionValue) {
+        data['deliveryToStorageLocation'] = transferInventoryData?.transferToStorageLocation.optionValue;
+        data['isDeliveryToStorageLocationDisable'] = true;
+      }
+    }
+
     setShowTicketDialog({ open: true, data: data });
   };
+
+  const handleInterPlantTransfer = () => {
+    setLoadingInterPlantTransfer(true);
+    axiosInstance().put(`${routes.transferInventory.path}/${transferInventoryData._id}/transfer-inter-plant`,
+      dataRows?.map((e) => { return { product: e.productId, qty: e.qty } }))
+      .then(({ data: { data } }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Inventory Received Successfully`
+        });
+        updateStatus(TRANSFER_INVENTORY_STATUS.delivered);
+        setShowConfirmInterPlantTransfer(false);
+        setLoadingInterPlantTransfer(false);
+      })
+      .catch((error) => {
+        setLoadingInterPlantTransfer(false);
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   return (
     <Fragment>
@@ -282,36 +328,51 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         >
           {downloadingFile ? 'Please wait...' : 'Preview'}
         </Button>
-        <Box ml={1}>
-          {allowedToEdit && canLoad && (
+        {interPlantTransfer ? <Box ml={1}>
+          {(allowedToEdit && canReceive && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered) &&
             <Button
-              variant={'outlined'}
-              color="primary"
-              disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
-              onClick={handleLoadingTicketDialog}
-              size="small"
-            >
-              {`Create Loading Ticket`}
-            </Button>
-          )}
-          <Box component="span" ml={1} />
-          {canReceive && (
-            <Button
-              variant={'outlined'}
+              variant={'contained'}
               color="primary"
               onClick={() => {
-                setShowConfirmBoxReceive(true);
+                setShowConfirmInterPlantTransfer(true);
               }}
-              disabled={
-                selectedRecords.length === 0 ||
-                selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
-              }
               size="small"
             >
               {`Receive`}
-            </Button>
-          )}
+            </Button>}
         </Box>
+          :
+          <Box ml={1}>
+            {allowedToEdit && canLoad && (
+              <Button
+                variant={'outlined'}
+                color="primary"
+                disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
+                onClick={handleLoadingTicketDialog}
+                size="small"
+              >
+                {`Create Loading Ticket`}
+              </Button>
+            )}
+            <Box component="span" ml={1} />
+            {canReceive && (
+              <Button
+                variant={'outlined'}
+                color="primary"
+                onClick={() => {
+                  setShowConfirmBoxReceive(true);
+                }}
+                disabled={
+                  selectedRecords.length === 0 ||
+                  selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+                }
+                size="small"
+              >
+                {`Receive`}
+              </Button>
+            )}
+          </Box>
+        }
       </Box>
       <Box>
         {columns ? (
@@ -360,7 +421,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -417,6 +478,17 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           }}
           selectedRecords={selectedRecords}
           transferInventoryData={transferInventoryData}
+        />
+      )}
+      {showConfirmInterPlantTransfer && (
+        <ConfirmationDialogRaw
+          okBtnLoading={loadingInterPlantTransfer}
+          open={showConfirmInterPlantTransfer}
+          message={`Are you sure you have recive this inventory ?`}
+          onClose={() => {
+            setShowConfirmInterPlantTransfer(false);
+          }}
+          onOk={handleInterPlantTransfer}
         />
       )}
     </Fragment>
