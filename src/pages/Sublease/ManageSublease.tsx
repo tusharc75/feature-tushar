@@ -124,7 +124,12 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                         createValues["wellName"] = referenceData?.wellName?.optionValue
                     }
                     if (fieldsDataForCreate.some((e) => e.fieldName === "wellNumber") && referenceData?.wellNumber) {
-                        createValues["wellNumber"] = referenceData?.wellNumber
+                        if (referenceData?.wellNumber?.optionValue) {
+                            createValues["wellNumber"] = referenceData?.wellNumber?.optionValue
+
+                        } else {
+                            createValues["wellNumber"] = referenceData?.wellNumber?.map((e) => e?.optionValue)
+                        }
                     }
                     if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
                         createValues["afeNumber"] = referenceData?.afeNumber
