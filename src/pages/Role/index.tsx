@@ -52,7 +52,6 @@ const Roles: FC = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
   const columns = [
     { field: 'name', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
     { field: 'description', headerName: 'Description', show: true, cellRenderer: 'commonRenderer' },

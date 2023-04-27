@@ -59,7 +59,6 @@ const ProductTemplate: FC = () => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [open, setOpen] = useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
-  // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('productTemplatePage'));
   const columns = [
     { field: 'name', headerName: 'Name', show: true, disabled: true, primaryField: true, cellRenderer: 'nameRenderer' },

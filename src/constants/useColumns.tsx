@@ -301,7 +301,7 @@ export default function useColumns() {
           columnData: {
             ...commonFieldData,
             cellRenderer: 'dateRenderer',
-            filter: true,
+            filter: false,
             filterParams: dateFilterParams
           },
           filter: 'agDateColumnFilter',

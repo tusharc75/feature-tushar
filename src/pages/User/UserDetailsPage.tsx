@@ -770,7 +770,7 @@ const UserDetailsPage = () => {
                             <Grid item xs={12} sm={4}>
                               <FormControl fullWidth size="small" variant="outlined">
                                 <InputLabel id="duration">Select Duration</InputLabel>
-                                <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
+                                <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)} label="Select Duration">
                                   <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                                   <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
                                   <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
