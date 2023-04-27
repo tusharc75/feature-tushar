@@ -202,6 +202,16 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     data['isPickupFromDisable'] = true;
 
     data['wellName'] = repairJobData?.wellName?.optionValue;
+    
+    if (repairJobData?.wellNumber) {
+      if (repairJobData?.wellNumber?.optionValue) {
+        data['wellNumber'] = repairJobData?.wellNumber?.optionValue;
+      }
+      else {
+        data['wellNumber'] = repairJobData?.wellNumber?.map((e) => e?.optionValue);
+      }
+    }
+
     data['afeNumber'] = repairJobData?.afeNumber;
 
     setShowTicketDialog({ open: true, ticketType: ticketType, data: data });

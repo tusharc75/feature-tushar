@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext, useImperativeHandle } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { Chip, Button, Tooltip } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import _ from 'lodash';
 
 import GridFilter from '../GridFilter';
 
 // OTHER COMPONENTS
 import { RefreshButton, ArrangeView, ShowOnlySelected } from './GridButtons';
 import HtmlTooltip from '../CustomTooltipTitle';
+import moment from 'moment';
 
 const CustomGridFilterHeader = (props) => {
   const {
@@ -70,6 +72,7 @@ const CustomGridFilterHeader = (props) => {
             <DisplyaFilters
               selectedFilter={selectedFilter}
               chipData={chipData}
+              setChipData={setChipData}
               currentGridApi={currentGridApi}
               handleFilterOpen={handleFilterOpen}
               clearSingleFilter={clearSingleFilter}
@@ -115,7 +118,7 @@ const CustomGridFilterHeader = (props) => {
           handleClose={handleFilterClose}
           setSelectedFilter={setSelectedFilter}
           selectedFilter={selectedFilter}
-          setChipData={setChipData}
+          // setChipData={setChipData}
           currentFomValue={currentFomValue}
           setCurrentFomValue={setCurrentFomValue}
         />
@@ -126,16 +129,38 @@ const CustomGridFilterHeader = (props) => {
 
 export default CustomGridFilterHeader;
 
+const filterParams = {
+  comparator: (filterLocalDateAtMidnight: Date, cellValue: string) => {
+    var dateAsString = cellValue;
+    if (dateAsString == null) return -1;
+    var dateParts = dateAsString.split('/');
+    var cellDate = new Date(Number(dateParts[2]), Number(dateParts[1]) - 1, Number(dateParts[0]));
+
+    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+      return 0;
+    }
+
+    if (cellDate < filterLocalDateAtMidnight) {
+      return -1;
+    }
+
+    if (cellDate > filterLocalDateAtMidnight) {
+      return 1;
+    }
+    return 0;
+  }
+};
+
 // THIS COMPONENT WILL DISPLAY CHIPS ===============================>
 const DisplyaFilters = (props) => {
-  const { selectedFilter, chipData, handleFilterOpen, clearSingleFilter, clearFilterAll, currentGridApi } = props;
+  const { chipData, setChipData, selectedFilter, handleFilterOpen, clearSingleFilter, clearFilterAll, currentGridApi } = props;
   const [hiddenItems, setHiddenItems] = useState(0);
   const isAppliedFilterPresent = Object.keys(selectedFilter || {}).length > 0;
+  const oldModalRef = React.useRef(null);
+
   const containerRef = useRef(null);
   const countRef = useRef(null);
   const COUNT_PADDING = 10;
-
-  console.log({ activeFilters: currentGridApi?.filterManage?.activeAdvancedFilters, currentGridApi });
 
   useEffect(() => {
     setHiddenItems(0);
@@ -143,6 +168,49 @@ const DisplyaFilters = (props) => {
       hideElementAndShowNumber(containerRef.current);
     }
   }, [chipData]);
+
+  // currentGridApi.addEventListener
+  const chipDataSetter = (currentGridApi, filterModel) => {
+    if (filterModel) {
+      const keys = Object.keys(filterModel);
+      const filterData = [];
+      for (let i = 0; i < keys.length; i++) {
+        const element = filterModel[keys[i]];
+        const currentColumn = currentGridApi.getColumnDef(keys[i]);
+        const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: element.filter, name: keys[i] };
+        filterData.push(data);
+      }
+      setChipData(filterData);
+    }
+  };
+
+  const filterModel = React.useMemo(() => {
+    return currentGridApi?.getFilterModel();
+  }, [currentGridApi, currentGridApi?.getFilterModel()]);
+
+  const setNewColDef = (currentGridApi) => {
+    if (currentGridApi) {
+      const colDefs = currentGridApi.getColumnDefs();
+      const newColDef = colDefs.map((col) => {
+        if (col.cellRenderer === 'dateRenderer') {
+          return { ...col, comparator: filterParams.comparator, filter: 'agDateColumnFilter', filterParams: filterParams };
+        } else {
+          return { ...col };
+        }
+      });
+      currentGridApi.setColumnDefs(newColDef);
+    }
+  };
+
+  useEffect(() => {
+    if (currentGridApi) {
+      setNewColDef(currentGridApi);
+    }
+    if (currentGridApi && filterModel) {
+      if (!oldModalRef.current || !_.isEqual(filterModel, oldModalRef.current || {})) oldModalRef.current = filterModel;
+      chipDataSetter(currentGridApi, filterModel);
+    }
+  }, [currentGridApi, _.isEqual(filterModel, oldModalRef.current || {})]);
 
   const hideElementAndShowNumber = (container) => {
     const containerWidth = container?.clientWidth - 52;

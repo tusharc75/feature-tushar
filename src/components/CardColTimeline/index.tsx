@@ -104,7 +104,7 @@ interface groupByinterface {
 }
 
 export function groupBy({ objectArray, property, sortBy = [] }: groupByinterface) {
-  objectArray.sort((a, b) => sortBy.indexOf(a[property]) - sortBy.indexOf(b[property]));
+  if (sortBy.length > 0) objectArray.sort((a, b) => sortBy.indexOf(a[property]) - sortBy.indexOf(b[property]));
   return objectArray.reduce((acc, obj) => {
     const key = obj[property];
     if (!acc[key]) {

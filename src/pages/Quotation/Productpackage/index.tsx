@@ -333,9 +333,8 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
         setAddingProducts(false);
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
-        toastConfig.setToastConfig(error);
         setAddingProducts(false);
+        toastConfig.setToastConfig(error);
       });
   };
 

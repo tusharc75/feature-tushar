@@ -325,7 +325,6 @@ const Productpackage = ({
         setAddingProducts(false);
       })
       .catch((error) => {
-        setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false });
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
       });

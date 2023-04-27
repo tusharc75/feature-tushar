@@ -107,6 +107,9 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
           if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
             initialData["wellName"] = referenceData?.wellName
           }
+          if (fieldsDataForCreate.some((e) => e.fieldName === "wellNumber") && referenceData?.wellNumber) {
+            initialData["wellNumber"] = referenceData?.wellNumber
+          }
           if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
             initialData["afeNumber"] = referenceData?.afeNumber
           }

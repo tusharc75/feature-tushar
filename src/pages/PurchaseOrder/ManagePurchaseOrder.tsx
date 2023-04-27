@@ -108,6 +108,9 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
                         createValues["wellName"] = refrenceData?.wellName
                     }
+                    if (fieldsDataForCreate.some((e) => e.fieldName === "wellNumber") && refrenceData?.wellNumber) {
+                        createValues["wellNumber"] = refrenceData?.wellNumber
+                    }
                     if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
                         createValues["afeNumber"] = refrenceData?.afeNumber
                     }
@@ -584,6 +587,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                     touched={touched}
                                                                                     label={field.fieldLabel}
                                                                                     fieldData={field}
+                                                                                    allFields={initialData.fields}
                                                                                     name={field.fieldName}
                                                                                     type={field.type}
                                                                                     options={field.option}

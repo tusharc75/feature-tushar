@@ -292,6 +292,14 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                       if (subleaseData?.wellName?.optionValue) {
                         data['wellName'] = subleaseData?.wellName?.optionValue;
                       }
+                      if (subleaseData?.wellNumber) {
+                        if (subleaseData?.wellNumber?.optionValue) {
+                          data['wellNumber'] = subleaseData?.wellNumber?.optionValue;
+                        }
+                        else {
+                          data['wellNumber'] = subleaseData?.wellNumber?.map((e) => e?.optionValue);
+                        }
+                      }
                       if (subleaseData?.afeNumber) {
                         data['afeNumber'] = subleaseData?.afeNumber;
                       }

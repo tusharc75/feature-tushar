@@ -54,7 +54,6 @@ const ConvertedLeads = ({ Chart }) => {
                         inputVariant="outlined"
                         fullWidth
                         size="small"
-                        disableFuture
                         openTo="year"
                         format={dateFormatForInputControl}
                         label="Date Created By"

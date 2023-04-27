@@ -311,7 +311,6 @@ const Filters = (props) => {
                   variant="inline"
                   fullWidth
                   size="small"
-                  disableFuture
                   openTo="year"
                   format={dateFormatForInputControl}
                   maxDate={salesFilter.between.to}
@@ -331,7 +330,6 @@ const Filters = (props) => {
                   fullWidth
                   size="small"
                   minDate={salesFilter.between.from}
-                  disableFuture
                   openTo="year"
                   format={dateFormatForInputControl}
                   label="To"
