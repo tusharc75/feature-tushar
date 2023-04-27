@@ -265,6 +265,7 @@ const AssignProductDialog = ({
         });
     } else {
       onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+      setAssigning(false);
     }
   };
 
