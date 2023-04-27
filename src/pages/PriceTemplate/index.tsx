@@ -54,7 +54,6 @@ const PriceTemplate: FC = () => {
   const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = 'productTemplatePage_selected';
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('priceTemplatePage'));
 
   const columns = [
