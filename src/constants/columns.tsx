@@ -43,7 +43,8 @@ export const detailPagePath = {
   rental: routes.rentalManagementDetail.path,
   deliveryPerson: routes?.userDetail?.path,
   pDFTemplate: routes?.quotePdfTemplateDetail?.path,
-  subMarketSegment: routes?.marketSegment?.path
+  subMarketSegment: routes?.marketSegment?.path,
+  supplierAccount: routes?.supplierAccountDetail?.path
 };
 export const hasDetailPageAsPopup = {
   subMarketSegment: routes?.marketSegment?.path,
@@ -503,13 +504,7 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
             ...currentColumn,
             width: 200,
             Cell: ({ row }) =>
-              row.original[ele.fieldName]?.optionLabel ? (
-                <p>{row.original[ele.fieldName]?.optionLabel}</p>
-              ) : row.original[ele.fieldName] ? (
-                <p>{row.original[ele.fieldName]}</p>
-              ) : (
-                <NoDataCell />
-              )
+              row.original[ele.fieldName] ? ele.lookup ? columnData(ele, row) : <p>{row.original[ele.fieldName]}</p> : <NoDataCell />
           });
         } else if (ele.type === 'decimal') {
           column.push({
@@ -534,39 +529,22 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
             ...currentColumn,
             width: 200,
             Cell: ({ row }) =>
-              row.original[ele.fieldName] ? (
-                ele.lookup ? (
-                  row.original[ele.fieldName]?.length ? (
-                    ele.fieldName === 'supplierAccount' ? (
-                      <p className="text-truncate">
-                        {row.original[ele.fieldName]
-                          ?.map((d) => {
-                            return (
-                              <a className="text-truncate link" href={`${routes.supplierAccountDetail.path}/${d.optionValue}`}>
-                                {d.optionLabel}
-                              </a>
-                            );
-                          })
-                          ?.reduce((prev, curr) => [prev, ', ', curr])}
-                      </p>
-                    ) : (
-                      <p className="text-truncate">{row.original[ele.fieldName]?.map((d) => d.optionLabel)?.join()}</p>
-                    )
-                  ) : (
-                    <NoDataCell />
-                  )
-                ) : (
-                  <p>{row.original[ele.fieldName]?.join()}</p>
-                )
-              ) : (
-                <NoDataCell />
-              )
+              row.original[ele.fieldName] ? ele.lookup ? columnData(ele, row) : <p>{row.original[ele.fieldName]?.join()}</p> : <NoDataCell />
           });
         } else {
           column.push({
             ...currentColumn,
             width: 200,
-            Cell: ({ row }) => (row.original[ele.fieldName] ? <p className="text-truncate">{row.original[ele.fieldName]}</p> : <NoDataCell />)
+            Cell: ({ row }) =>
+              row.original[ele.fieldName] ? (
+                ele.lookup ? (
+                  columnData(ele, row)
+                ) : (
+                  <p className="text-truncate">{row.original[ele.fieldName]}</p>
+                )
+              ) : (
+                <NoDataCell />
+              )
           });
         }
       }
@@ -574,6 +552,53 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, rende
   });
 
   return column;
+};
+
+const columnData = (ele, row) => {
+  // make lookup resource string first letter capital and remove every space using lodash
+  const lookupResource = camelCase(ele.lookupResource).replace(/\s/g, '');
+  const path = routes[`${lookupResource}Detail`].path;
+  if (ele.type === 'multiSelect' && ele.lookup) {
+    return (
+      <p>
+        {row.original[ele.fieldName]?.length ? (
+          <p className="text-truncate">
+            {row.original[ele.fieldName]
+              ?.map((d) => {
+                return (
+                  <a className={`text-truncate ${path ? 'link' : ''}`} href={`${path}/${d.optionValue}`}>
+                    {d.optionLabel}
+                  </a>
+                );
+              })
+              ?.reduce((prev, curr) => [prev, ', ', curr])}
+          </p>
+        ) : (
+          <NoDataCell />
+        )}
+      </p>
+    );
+  } else if (ele.type === 'dropDown' && ele.lookup) {
+    return (
+      <p>
+        {row.original[ele.fieldName]?.optionLabel ? (
+          <a className={`text-truncate ${path ? 'link' : ''}`} href={`${path}/${row.original[ele.fieldName]?.optionValue}`}>
+            {row.original[ele.fieldName]?.optionLabel}
+          </a>
+        ) : (
+          <NoDataCell />
+        )}
+      </p>
+    );
+  } else {
+    return row.original[ele.fieldName]?.optionLabel ? (
+      <a className={`text-truncate ${path ? 'link' : ''}`} href={`${path}/${row.original[ele.fieldName]?.optionValue}`}>
+        {row.original[ele.fieldName]?.optionLabel}
+      </a>
+    ) : (
+      <NoDataCell />
+    );
+  }
 };
 
 const getMembers = (mem) => {
