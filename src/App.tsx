@@ -59,7 +59,7 @@ import QuoteApproval from './pages/Quote-Approval';
 import QuoteDetail from './pages/QuoteBuilderCombined/QuoteDetail/index';
 import DOARequest from './pages/DOA';
 import CurrencyConverter from './pages/CurrencyConverter';
-import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
 import FormBuilder from './pages/FormBuilder';
 import CreateFormBuilder from './pages/FormBuilder/CreateFormBuilder';
 import UserProfilePage from './pages/ProfilePage/index';
@@ -109,8 +109,7 @@ import CustomerSign from './pages/DeliveryTicket/CustomerSign';
 import EcommercePolicy from './pages/EcommercePolicy';
 import Sublease from './pages/Sublease';
 import SubleaseDetailsPage from './pages/Sublease/SubleaseDetailsPage';
-import NewDashboard from './pages/NewDashboard';
-import NewDashboardTest from './pages/NewDashboard-Test';
+import Dashboard from './pages/Dashboard';
 import TransferInventory from './pages/TransferInventory';
 import TransferInventoryDetailPage from './pages/TransferInventory/TransferInventoryDetailPage';
 import Zone from './pages/zone';
@@ -441,7 +440,7 @@ function App() {
             <Route exact path="/forget-password" render={({ location }) => conditionalRedirect(ForgetPassword, location)} />
             <Route exact path="/reset-password" render={({ location }) => conditionalRedirect(ResetPassword, location)} />
             <PrivateRoute exact path="/">
-              <Dashboard />
+              <Home />
             </PrivateRoute>
             <PrivateRoute exact path="/logout">
               <Logout />
@@ -651,21 +650,8 @@ function App() {
               <QuoteDetail />
             </PrivateRoute>
             <PrivateRoute exact path={'/dashboards'}>
-              <NewDashboardTest />
+              <Dashboard />
             </PrivateRoute>
-            <PrivateRoute exact path={'/old-dashboard'}>
-              <NewDashboard />
-            </PrivateRoute>
-            {/* <Route exact path={"/dashboards"}>
-              <KpiDashboard />
-            </Route>
-            <Route exact path={"/dashboard/detail/:id"}>
-              <EditDashboard edit={true} />
-            </Route>
-            <Route exact path={"/dashboard/:id"}>
-              <EditDashboard edit={false} />
-            </Route> */}
-            {/* //Route available for customers to Accept Reject Quote */}
             <Route exact path={'/quote-approval/:id'}>
               <QuoteApproval />
             </Route>

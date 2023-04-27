@@ -4,13 +4,13 @@ import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
-import ChartTypes from '../NewDashboard-Test/ChartTypes';
+import ChartTypes from '../Dashboard/ChartTypes';
 import countriesData from 'src/constants/Country.json';
-import GlobalFilter from '../NewDashboard-Test/GlobalFilter';
+import GlobalFilter from '../Dashboard/GlobalFilter';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { ChartDataType } from '../NewDashboard-Test/ChartTypes';
-import FullScreenChart from '../NewDashboard-Test/FullScreenChart';
+import { ChartDataType } from '../Dashboard/ChartTypes';
+import FullScreenChart from '../Dashboard/FullScreenChart';
 import { periodOption } from '../DashboardBuilder/builderHelpers';
 
 const Chart = () => {
