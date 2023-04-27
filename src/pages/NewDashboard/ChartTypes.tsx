@@ -33,6 +33,7 @@ export type ChartDataType = {
   hasStatus?: boolean;
   statusOptions?: { optionValue: string; optionLabel: string }[];
   numberOfCards?: number;
+  stack?:boolean
 };
 interface Props {
   commonSalesData?: any;
@@ -242,7 +243,6 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
               </Typography>
             )}
           </Box>
-
           <Box minHeight={isScreenSmall ? 350 : chart.col <= 6 ? 400 : 500}>
             {loading ? (
               <Loader noLoader={false} text="" style={{ minHeight: '100%' }} />
@@ -284,7 +284,6 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           </Box>
         </Box>
       )}
-
       {chart.hasFilter && filterData && (
         <FiltersDropdown
           closeAnchor={() => setAnchorElFilter(null)}
