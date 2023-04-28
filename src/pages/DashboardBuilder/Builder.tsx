@@ -244,7 +244,6 @@ const Builder = (props: Props) => {
               }
               label="Exports"
             />
-            {console.log(formValues)}
             {(formValues.chartType === 'Bar' && formValues.kpi.hasOwnProperty('stack')) && 
               <FormControlLabel
                 control={
@@ -256,7 +255,6 @@ const Builder = (props: Props) => {
                 label="Stack"
               />
             }
-            
           </FormGroup>
         </Box>
 

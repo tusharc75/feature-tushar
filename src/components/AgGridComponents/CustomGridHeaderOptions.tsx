@@ -5,7 +5,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
-import { disabledColumns, getSortedColumns } from '../../constants/columns';
+import { disabledColumns, getSortedColumns } from '../../constants/useColumns';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 
 // import { BsArrowLeftRight } from 'react-icons/bs';
