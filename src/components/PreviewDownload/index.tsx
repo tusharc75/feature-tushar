@@ -25,7 +25,7 @@ function PreviewDownload({ resource, referenceId, columns }) {
 
   const [loading, setLoading] = useState(null);
   const [downlodingFile, setDownlodingFile] = useState(null);
-  const [visibleColumnsExcel, setVisibleColumnsExcel] = useState([]);
+  const [visibleColumnsExcel, setVisibleColumnsExcel] = useState(['Select All', ...allColumn]);
   const [excelArrangeColumnLoading, setExcelArrangeColumnLoading] = useState(false);
   const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState({ open: false, type: '' });
 
