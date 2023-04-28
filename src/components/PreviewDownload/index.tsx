@@ -19,13 +19,13 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 function PreviewDownload({ resource, referenceId, columns }) {
   const toastConfig = useContext(CustomToastContext);
   const columnFilter = ['Action'];
-  const allColumn = columns?.filter((d) => !columnFilter.includes(d.Header))?.map((d) => d.Header);
+  const allColumn = columns?.filter((d) => !columnFilter.includes(d.Header))?.map((d) => d.Header) || [];
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [loading, setLoading] = useState(null);
   const [downlodingFile, setDownlodingFile] = useState(null);
-  const [visibleColumnsExcel, setVisibleColumnsExcel] = useState(['Select All', ...allColumn]);
+  const [visibleColumnsExcel, setVisibleColumnsExcel] = useState([]);
   const [excelArrangeColumnLoading, setExcelArrangeColumnLoading] = useState(false);
   const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState({ open: false, type: '' });
 
