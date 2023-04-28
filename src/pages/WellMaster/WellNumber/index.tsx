@@ -3,7 +3,7 @@ import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core
 import { ExpandMore } from '@material-ui/icons';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -157,6 +157,7 @@ const WellNumber = ({ wellName }) => {
     axiosInstance()
       .put(`${routes.wellNumber.path}/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords);
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
