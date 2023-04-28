@@ -22,6 +22,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { CHILD_RESOURCE, RESOURCE_LABEL } from 'src/constants/helpers';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -50,7 +51,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, salesOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = genrateCustomTableColumns(data,  salesOrderData?.currency || 'USD', renderedFrom);
+    const newColumns = genrateCustomTableColumns(data, salesOrderData?.currency || 'USD', renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -137,6 +138,14 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
             </Box>
           </div>
         )
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
       }
     ];
     coloum = [...coloum, ...newColumns];

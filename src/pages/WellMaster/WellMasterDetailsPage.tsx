@@ -66,27 +66,20 @@ const WellMasterDetailsPage = () => {
   };
 
   const handleDeleteWellMaster = () => {
-    if (id) {
-      if (permissions?.wellMaster?.isDelete) {
-        axiosInstance()
-          .put(`${wellMaster.api}/remove`, { ids: [id] })
-          .then(({ data }) => {
-            setShowConfirmBox(false);
-            history.goBack();
-          })
-          .catch((err) => {
-            setShowConfirmBox(false);
-          });
-      }
-    } else {
-      setShowConfirmBox(false);
-    }
+    axiosInstance()
+      .put(`${wellMaster.api}/remove`, { ids: [id] })
+      .then(({ data }) => {
+        setShowConfirmBox(false);
+        history.goBack();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
-
 
   return (
     <Box className="main-container-v1">

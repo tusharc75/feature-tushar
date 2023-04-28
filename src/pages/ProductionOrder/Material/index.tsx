@@ -51,7 +51,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = genrateCustomTableColumns(data,  productionOrderData?.currency || 'USD', renderedFrom);
+    const newColumns = genrateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -137,11 +137,20 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           </div>
         )
       },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
+      }
     ];
     coloum = [...coloum, ...newColumns];
+    console.log(coloum);
     coloum.push({
       accessor: 'action',
-      Header: '',
+      Header: 'Action',
       minWidth: 70,
       width: 70,
       sticky: 'right',
@@ -154,7 +163,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               size="small"
               aria-label="Details"
               onClick={() => {
-                const obj: any = [row.original._id];
+                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
                 setDeleteData(obj);
               }}
               disabled={allowedToDelete && row.original?.allowedToDelete}
@@ -368,7 +377,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload resource={RESOURCE_LABEL.demandOrder} referenceId={productionOrderData?._id} columns={columns} />
+            <PreviewDownload resource={RESOURCE_LABEL.productionOrder} referenceId={productionOrderData?._id} columns={columns} />
             <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
