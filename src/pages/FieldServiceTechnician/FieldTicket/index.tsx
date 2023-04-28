@@ -12,7 +12,7 @@ import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { getFrameworkComponents, getStaticFields } from 'src/constants/columns';
+import { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';

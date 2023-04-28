@@ -263,11 +263,9 @@ const WellNumber = ({ wellName }) => {
                   onClick={() => {
                     closeActions();
                     if (selectedRecords.length === 1) {
-                      setDeleteRecord(selectedRecords[0])
+                      setDeleteRecord(selectedRecords[0]);
                     }
-                    else {
-                      setShowDeleteConfirmBox(true);
-                    }
+                    setShowDeleteConfirmBox(true);
                   }}
                 >
                   Delete

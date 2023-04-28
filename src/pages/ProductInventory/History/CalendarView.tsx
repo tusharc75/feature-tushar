@@ -9,7 +9,7 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-const CalendarView = ({ product, warehouse }) => {
+const CalendarView = ({ product, warehouse, storageLocation }) => {
   const [activities, setActivities] = useState([]);
 
   useEffect(() => {
@@ -17,7 +17,14 @@ const CalendarView = ({ product, warehouse }) => {
   }, []);
 
   const fetchRecords = async () => {
-    const query = warehouse ? `?warehouse=${warehouse}` : ``;
+    var query = `?`;
+    if (warehouse) {
+      query = `${query}&warehouse=${warehouse}`
+    }
+    if (storageLocation) {
+      query = `${query}&storageLocation=${storageLocation}`
+    }
+
     const response = await axiosInstance().get(`/history/product-ledger/${product}${query}`);
     const response1 = await axiosInstance().get(`/product-inventory/product/upcoming-ledger/${product}${query}`);
     let rows = [...response?.data?.data, ...response1?.data?.data];

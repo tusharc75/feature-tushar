@@ -63,7 +63,6 @@ const WellNumberDetail = () => {
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setShowConfirmBox(false);
       });
   };
 

@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, Dialog, FormControl, Grid, TextField } from '@material-ui/core';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
@@ -19,7 +19,7 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 function PreviewDownload({ resource, referenceId, columns }) {
   const toastConfig = useContext(CustomToastContext);
   const columnFilter = ['Action'];
-  const allColumn = columns?.filter((d) => !columnFilter.includes(d.Header))?.map((d) => d.Header);
+  const allColumn = columns?.filter((d) => !columnFilter.includes(d.Header))?.map((d) => d.Header) || [];
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -84,6 +84,11 @@ function PreviewDownload({ resource, referenceId, columns }) {
         toastConfig.setToastConfig(err);
       });
   };
+
+  useEffect(() => {
+    setVisibleColumnsExcel(allColumn)
+  },[columns])
+
   return (
     <Box display="flex" justifyContent="space-between">
       <Box display="flex" alignItems="center">
@@ -199,7 +204,7 @@ function PreviewDownload({ resource, referenceId, columns }) {
                   color="primary"
                   size="small"
                   loading={loading === 'Regular' || excelArrangeColumnLoading}
-                  disabled={loading || visibleColumnsExcel.length === 0}
+                  disabled={loading || visibleColumnsExcel?.length === 0}
                   onClick={(e) => {
                     handleViewPdf(downlodingFile, 'Regular', visibleColumnsExcel);
                   }}
@@ -211,7 +216,7 @@ function PreviewDownload({ resource, referenceId, columns }) {
                   color="primary"
                   size="small"
                   loading={loading === 'Detail' || excelArrangeColumnLoading}
-                  disabled={loading || visibleColumnsExcel.length === 0}
+                  disabled={loading || visibleColumnsExcel?.length === 0}
                   onClick={(e) => {
                     handleViewPdf(downlodingFile, 'Detail', visibleColumnsExcel);
                   }}

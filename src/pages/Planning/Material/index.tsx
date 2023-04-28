@@ -21,9 +21,10 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE } from 'src/constants/helpers';
+import { CHILD_RESOURCE, RESOURCE_LABEL } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
   const {
@@ -443,6 +444,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
             </Menu>
           </Box>
           <Box display="flex">
+            <PreviewDownload resource={RESOURCE_LABEL.planning} referenceId={planningData._id} columns={columns} />
+            <Box mr={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
               variant={isMobile ? 'text' : 'outlined'}

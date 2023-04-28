@@ -4,7 +4,7 @@ import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import axiosInstance from '../../../../axios/axiosInstance';
 import { useData } from '../../../../StateProvider/Provider';
-import { disabledColumns, getSortedColumns } from '../../../../constants/columns';
+import { disabledColumns, getSortedColumns } from '../../../../constants/useColumns';
 import { SET_GRID_METADATA } from '../../../../StateProvider/actionTypes';
 import ArrangeViewDialog from './ArrangeViewDialog';
 import ReportArrangeView from '../../ReportArrangeView';

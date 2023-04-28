@@ -12,20 +12,13 @@ import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
-import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
-import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
-import { ConsoleView, isMobile } from "react-device-detect";
-import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { prepareDataForGrid } from "../../../constants/helpers";
-import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
-import { GrBusinessService } from "react-icons/all";
 import AddExistingMaterialDialog from "../AddExistingMaterialDialog";
 import ConditionDialog from "./ConditionDialog";
 import ConditionDialogOld from "./../AddConditions/ConditionDialog";
 import { startCase } from 'lodash';
 import InfoIcon from "@material-ui/icons/Info";
+import useColumns from "src/constants/useColumns";
 
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
@@ -43,6 +36,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
     const [conditionData, setConditionData] = useState(null)
 
     const [showDialogOld, setShowDialogOld] = useState({ open: false, isBulkedit: false })
+    const { getColumnData } = useColumns();
 
     useEffect(() => {
         fetchCondition()
