@@ -15,7 +15,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { storageLocation, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, sidebarResource } from '../../constants/helpers';
+import { storageLocation, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, sidebarResource, removeLocalStorage } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -176,6 +176,7 @@ const WellNumber = () => {
     axiosInstance()
       .put(`${routes.wellNumber.path}/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords);
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
