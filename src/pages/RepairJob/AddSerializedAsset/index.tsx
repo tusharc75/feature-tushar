@@ -21,7 +21,7 @@ import { useHistory, Link } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import { getFrameworkComponents, genrateColoum } from 'src/constants/columns';
+import { generateColoum } from 'src/constants/columns';
 import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
@@ -30,6 +30,7 @@ import ManageAssetDialog from './ManageAssetDialog';
 import AssetScrapRepairDialog from 'src/components/AssetScrapRepairDialog/AssetScrapRepairDialog';
 import { Edit } from '@material-ui/icons';
 import Tooltip from 'src/components/CustomTooltipTitle';
+import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
 
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -54,6 +55,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
   const [repairJobAssetFields, setRepairJobAssetFields] = useState(null);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
+  const { getColumnData } = useColumns();
 
   useEffect(() => {
     if (repairJobData) {
@@ -113,7 +115,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
     const fieldResponce = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`);
 
     let rendererNames = [];
-    genrateColoum(fieldResponce?.data?.data, columns, rendererNames, false, renderedFrom);
+    generateColoum(fieldResponce?.data?.data, columns, rendererNames, false, renderedFrom, getColumnData);
     setRepairJobAssetFields(fieldResponce?.data?.data);
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
@@ -365,7 +367,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (

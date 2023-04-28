@@ -8,7 +8,7 @@ import CustomGridHeaderOptions from './CustomGridHeaderOptions';
 import { CustomLoadingOverlay, CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter';
 import { orderBy } from 'lodash';
-import { checkStaticField, staticColumns } from '../../constants/columns';
+import { checkStaticField, staticColumns } from '../../constants/useColumns';
 import { GridApi } from 'ag-grid-community';
 import { uniqBy } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';

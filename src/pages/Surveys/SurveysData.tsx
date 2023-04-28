@@ -6,7 +6,7 @@ import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridCompone
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { getColumnData } from 'src/constants/columns';
+import useColumns from 'src/constants/useColumns';
 import { getFrameworkComponents } from 'src/constants/useColumns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -26,6 +26,8 @@ const SurveysData = ({ surveyId }) => {
   }: any = useData();
   const { dataRows, rowCount, loading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
 
+  const { getColumnData } = useColumns();
+
   React.useEffect(() => {
     fetchGridColumns();
     fetchData();
@@ -38,16 +40,11 @@ const SurveysData = ({ surveyId }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.primaryField === true) {
-            columns = [...columns, { field: o?.fieldName, headerName: o?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }];
-          } else {
-            let currentColumn = getColumnData(renderedFrom, o, routes.surveys.path);
-
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName);
-              }
+          let currentColumn = getColumnData(renderedFrom, o, routes.surveysDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
         });
@@ -107,7 +104,7 @@ const SurveysData = ({ surveyId }) => {
     </>
   );
 
-  const handleDelete = () => {};
+  const handleDelete = () => { };
 
   return (
     <div>

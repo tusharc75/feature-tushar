@@ -7,7 +7,7 @@ import CustomGridHeaderOptions from './CustomGridHeaderOptions';
 import { CustomLoadingOverlay, CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter';
 import { orderBy, uniqBy } from 'lodash';
-import { checkStaticField, staticColumns } from '../../constants/columns';
+import { checkStaticField, staticColumns } from '../../constants/useColumns';
 import NumericEditor from './NumericEditor';
 import DateEditor from './DateEditor';
 // import ArrangeView from './GridButtons/ArrangeView/ArrangeView';

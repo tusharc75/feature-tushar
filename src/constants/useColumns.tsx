@@ -13,8 +13,7 @@ import {
   NameRenderer,
   CheckboxRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
-
-import { sidebarResourceObjectFromValues, supplierContact } from './helpers';
+import { sidebarResourceObjectFromValues } from './helpers';
 import { useData } from '../StateProvider/Provider';
 import moment from 'moment';
 
@@ -31,7 +30,9 @@ export const headerName = {
 export const isRenderWithCopy = (name) => {
   return ['mobileNumber', 'phone', 'email'].indexOf(name) >= 0;
 };
+
 const hideColumns = ['salutation', 'middleName', 'lastName', 'suffix'];
+
 export const detailPagePath = {
   leads: leadDetailPage.path,
   owner: routes?.userDetail?.path,
@@ -40,23 +41,22 @@ export const detailPagePath = {
   rental: routes.rentalManagementDetail.path,
   deliveryPerson: routes?.userDetail?.path,
   pDFTemplate: routes?.quotePdfTemplateDetail?.path,
-  subMarketSegment: routes?.marketSegment?.path,
   customerContact: routes?.customerContactDetail?.path,
   supplierContact: routes?.supplierContactDetail?.path
 };
+
 export const hasDetailPageAsPopup = {
-  subMarketSegment: routes?.marketSegment?.path,
-  marketSegment: routes?.marketSegment?.path,
-  productCategory: routes?.productCategory?.path,
   termsConditions: routes?.termsAndConditions?.path
 };
-export const popupResources = ['Product Category', 'Market Segment', 'Warehouse', 'Terms & Conditions'];
+
+export const popupResources = ['Terms & Conditions'];
 
 export const disabledColumns = {
   [routes.rentalManagementDetail.title]: [],
   [routes.deliveryTicketDetail.title]: [],
   [routes.lead.title]: ['firstName']
 };
+
 export const getFrameworkComponents = (rendererNameList, showStaticRenderers = false) => {
   let result = {};
   rendererNameList.forEach((o) => {
@@ -114,6 +114,7 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
   }
   return result;
 };
+
 export const getStaticFields = () => {
   return [
     { field: 'createdBy', headerName: 'Created By', show: true, filter: false, sortable: false, cellRenderer: 'createdByRenderer' },
@@ -141,6 +142,7 @@ export const checkStaticField = (renderedFrom, fieldData) => {
   }
   return fieldData;
 };
+
 export const getSortedColumns = (columns = []) => {
   return columns.sort(function (a, b) {
     let columnNameA = a?.headerName?.toUpperCase(); // ignore upper and lowercase
@@ -154,7 +156,9 @@ export const getSortedColumns = (columns = []) => {
     return 0;
   });
 };
+
 export const staticColumns = ['createdBy', 'updatedBy'];
+
 
 export const dateFilterParams = {
   comparator: (filterLocalDateAtMidnight: Date, cellValue: string) => {
@@ -249,12 +253,12 @@ export default function useColumns() {
           pathName = detailPagePath[joinedFieldName]
             ? detailPagePath[joinedFieldName]
             : field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-            ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-            : routes[joinedFieldName]?.path
-            ? routes[joinedFieldName]?.path
-            : routes[`${joinedFieldName}Detail`]?.path
-            ? routes[`${joinedFieldName}Detail`]?.path
-            : '';
+              ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+              : routes[joinedFieldName]?.path
+                ? routes[joinedFieldName]?.path
+                : routes[`${joinedFieldName}Detail`]?.path
+                  ? routes[`${joinedFieldName}Detail`]?.path
+                  : '';
         }
         return {
           columnData: {

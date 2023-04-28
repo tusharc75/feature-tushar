@@ -5,28 +5,25 @@ import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Dialog } from "@material-ui/core";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import { CustomDialogTransition, gridLoadingTimeout, purchaseOrder, PURCHASE_ORDER_STATUS } from "src/constants/helpers";
 import { useData } from "src/StateProvider/Provider";
 import axiosInstance from "src/axios/axiosInstance";
-import { CreateEmail } from "src/components/Activity/Email/CreateEmail";
 import { isMobile, isTablet } from "react-device-detect";
 import routes from "src/components/Helpers/Routes";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
-import { getFrameworkComponents, genrateColoum } from "src/constants/columns"
+import { generateColoum } from "src/constants/columns"
 import { prepareDataForGrid } from "src/constants/helpers";
 import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
 import { Link } from "react-router-dom";
 import { fetch_po_product_fields, fetch_po_cost_fields } from '../../../components/PurchaseOrder/helper';
+import useColumns, { getFrameworkComponents } from "src/constants/useColumns";
 
 
 const IssuPO = ({ purchaseOrderData, handleViewPdf, updateStatus, setCurrentStep, currentStep, handleAttachments, statusOptions, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
-
-    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -37,6 +34,9 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, updateStatus, setCurrentStep
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
         { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" }
     ])
+
+
+    const { getColumnData } = useColumns();
 
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
 
@@ -59,7 +59,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, updateStatus, setCurrentStep
         let fields_service = await fetch_po_cost_fields(purchaseOrderData?.currency);
         const fields = [...fields_product, ...fields_service]
         let rendererNames = [];
-        genrateColoum(fields, columns, rendererNames, false, renderedFrom);
+        generateColoum(fields, columns, rendererNames, false, renderedFrom, getColumnData);
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
             commonRenderer: CommonRenderer,
