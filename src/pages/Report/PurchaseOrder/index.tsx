@@ -422,14 +422,14 @@ const Report = () => {
           { field: 'price', headerName: 'Price', show: true, filter: false, cellRenderer: 'commonRenderer' },
           { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
           { field: 'warehouse', headerName: 'Plant', show: true, cellRenderer: 'commonRenderer' },
-          ...(user?.user?.brandPolicy?.storageLocation && [
+          ...(user?.user?.brandPolicy?.storageLocation ? [
             {
               field: 'storageLocation',
               headerName: 'Storage Location',
               show: true,
               cellRenderer: 'commonRenderer'
             }
-          ]),
+          ] : []),
           { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
           { field: 'serialNumber', headerName: 'Serial Number', filter: false, show: true, cellRenderer: 'serialNumberRenderer' },
           { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'commonRenderer' }
@@ -693,14 +693,13 @@ const Report = () => {
     }
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderDetails'
-            ? `${productInventory.api}/report/purchase-order-product-wise-report`
-            : resourceCamelCase === 'inventoryEvaluation'
+        `${resourceCamelCase === 'purchaseOrderDetails'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report`
+          : resourceCamelCase === 'inventoryEvaluation'
             ? `${productInventory.api}/report/purchase-order-price`
             : resourceCamelCase === 'inventoryHistory'
-            ? `${productInventory.api}/report/history-report`
-            : `${productInventory.api}/report/supplier-product-price`
+              ? `${productInventory.api}/report/history-report`
+              : `${productInventory.api}/report/supplier-product-price`
         }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
@@ -901,14 +900,13 @@ const Report = () => {
     let filterQuery = getFilter(true);
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderDetails'
-            ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
-            : resourceCamelCase === 'inventoryEvaluation'
+        `${resourceCamelCase === 'purchaseOrderDetails'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
+          : resourceCamelCase === 'inventoryEvaluation'
             ? `${productInventory.api}/report/purchase-order-price/export`
             : resourceCamelCase === 'inventoryHistory'
-            ? `${productInventory.api}/report/history-report/export`
-            : `${productInventory.api}/report/supplier-product-price/export`
+              ? `${productInventory.api}/report/history-report/export`
+              : `${productInventory.api}/report/supplier-product-price/export`
         }${filterQuery}&exportColumn=${JSON.stringify(columns)} `,
         {
           responseType: 'arraybuffer'

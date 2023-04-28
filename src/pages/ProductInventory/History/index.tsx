@@ -111,7 +111,14 @@ const History = ({ product, warehouse, storageLocation }) => {
     { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'finalAvgPrice', headerName: 'Final Average Price', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
     { field: 'warehouse', headerName: 'Plant', show: true, cellRenderer: 'warehouseRenderer' },
-    user?.user?.brandPolicy?.storageLocation && { field: 'storageLocation', headerName: 'Storage Location', show: true, cellRenderer: 'storageLocationRenderer' },
+    ...(user?.user?.brandPolicy?.storageLocation ? [
+      {
+        field: 'storageLocation',
+        headerName: 'Storage Location',
+        show: true,
+        cellRenderer: 'storageLocationRenderer'
+      }
+    ] : []),
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
     { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'userRenderer' },

@@ -402,9 +402,8 @@ const WellNumber = () => {
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            // eslint-disable-next-line no-lone-blocks
-                            {
-                              selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                            if (selectedRecords.length === 1) {
+                              setDeleteRecord(selectedRecords[0]);
                             }
                             setShowDeleteConfirmBox(true);
                           }}

@@ -44,7 +44,11 @@ const HistoryDialog = ({ close, product, warehouse, storageLocation, productName
           />
         ) : (
           <div>
-            <CalendarView product={product} warehouse={warehouse} />
+            <CalendarView
+              product={product}
+              warehouse={warehouse}
+              storageLocation={storageLocation}
+            />
           </div>
         )}
       </CustomDialogContent>
