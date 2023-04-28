@@ -14,9 +14,9 @@ export const CommonRendererWithCopy = (params) => <CustomRenderCell value={param
 
 export const CreatedByRenderer = (params) =>
   params.value ? (
-    <h5 className="createBy" title={`${params?.value} • ${moment(params?.data?.createdByDate?.slice(0, 10)).format(dateFormat)}`}>
+    <h5 className="createBy" title={`${params?.value} • ${moment(params?.data?.createdByDate).format(dateFormat)}`}>
       {params.value}
-      <span className="createdAtTime badge-date">{moment(params?.data?.createdByDate?.slice(0, 10))?.format(dateFormat)}</span>
+      <span className="createdAtTime badge-date">{moment(params?.data?.createdByDate)?.format(dateFormat)}</span>
     </h5>
   ) : (
     <NoDataCell />
@@ -24,8 +24,8 @@ export const CreatedByRenderer = (params) =>
 
 export const DateRenderer = (params) =>
   params.value ? (
-    <h5 className="createBy" title={`${moment(params.value.slice(0, 10)).format(dateFormat)}`}>
-      {moment(params?.value?.slice(0, 10))?.format(dateFormat)}
+    <h5 className="createBy" title={`${moment(params?.value).format(dateFormat)}`}>
+      {moment(params?.value)?.format(dateFormat)}
     </h5>
   ) : (
     <NoDataCell />
@@ -54,10 +54,10 @@ export const UpdatedByRenderer = (params) =>
     <h5
       className="updateBy"
       style={{ minWidth: 'min-content' }}
-      title={`${params.value} • ${moment(params?.data?.updatedByDate?.slice(0, 10)).format(dateFormat)}`}
+      title={`${params.value} • ${moment(params?.data?.updatedByDate).format(dateFormat)}`}
     >
       <span>{params.value}</span>
-      <span className="updatedAtTime badge-date">{moment(params?.data?.updatedByDate?.slice(0, 10))?.format(dateFormat)}</span>
+      <span className="updatedAtTime badge-date">{moment(params?.data?.updatedByDate)?.format(dateFormat)}</span>
     </h5>
   ) : (
     <NoDataCell />

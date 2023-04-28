@@ -265,7 +265,7 @@ export default function useColumns() {
                     columnData: {
                         ...commonFieldData,
                         cellRenderer: "dateRenderer",
-                        Cell: ({ row }) => (<p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{moment(row?.original?.[field?.fieldName]?.slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />}</p>),
+                        Cell: ({ row }) => (<p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{moment(row?.original?.[field?.fieldName]).format(dateFormat)}</p> : <NoDataCell />}</p>),
                         filter: false
                     },
                 }
