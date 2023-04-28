@@ -163,7 +163,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               size="small"
               aria-label="Details"
               onClick={() => {
-                const obj: any = [row.original._id];
+                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
                 setDeleteData(obj);
               }}
               disabled={allowedToDelete && row.original?.allowedToDelete}

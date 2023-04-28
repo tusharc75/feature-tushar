@@ -60,16 +60,6 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
-    newColumns.forEach((element) => {
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
     let coloum: any = [
       {
         accessor: 'index',
@@ -442,7 +432,6 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
             setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
           }}
           materialData={materialEdit.data}
-          purchaseRequisitionData={purchaseRequisitionData}
           handleUpdate={handleSaveData}
           loadingEdit={isUpdating}
           bulkEdit={materialEdit.bulkedit}
