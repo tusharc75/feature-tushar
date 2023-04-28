@@ -11,12 +11,14 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
+import { useHistory } from 'react-router-dom';
 import { CustomDialogTransition, generateUniqueIdOnly, isFieldNotTouched } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
 const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null }) => {
+  const history = useHistory();
   const { state: { user } }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -93,14 +95,15 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
     } else {
       axiosInstance()
         .post(`${routes.purchaseRequisition?.path}`, values)
-        .then(({ data }) => {
+        .then(({ data: { data, message } }) => {
           setLoading(false);
+          history.push(`${routes.purchaseRequisitionDetail.path}/${data._id}`);
          onSuccess(data.data);
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
             type: "success",
-            message: data.message,
+            message: message,
           });
         })
         .catch((error) => {

@@ -316,7 +316,7 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
             validate={validate}
             onSubmit={handleSubmit}
           >
-            {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues, submitForm }) => (
+            {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
                   title={!jobId ? `Create ${routes.job.title}` : `${isClone ? `Clone - ${cloneHeading}` : `Update ${jobData?.jobNumber}`}`}
