@@ -31,7 +31,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { prepareDataForGrid } from 'src/constants/helpers';
-import { getFrameworkComponents, genrateColoum } from 'src/constants/columns';
+import { generateColoum } from 'src/constants/columns';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
@@ -39,6 +39,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import BulkAssetCreationQtyDialog from './BulkAssetCreationQtyDialog';
 import styles from '../../Leads/Header.module.scss';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
 
 const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProduct, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -63,6 +64,8 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
   const [loadingButton, setLoadingButton] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteBulkAssetCreationProduct, setDeleteBulkAssetCreationProduct] = useState([]);
+
+  const { getColumnData } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -94,7 +97,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     var fields = response?.data?.data;
     fields = CURReplaceByCurrencySingle(fields, bulkAssetCreationData?.currency ? bulkAssetCreationData?.currency : 'USD');
     let rendererNames = [];
-    genrateColoum(fields, coloum, rendererNames, false, renderedFrom);
+    generateColoum(fields, coloum, rendererNames, false, renderedFrom, getColumnData);
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       nameRenderer: NameRenderer,
@@ -432,7 +435,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
             showClone={false}
             fullHeight={true}
             renderedFrom={renderedFrom}
-            onClone={() => {}}
+            onClone={() => { }}
           />
         ) : (
           <CustomAgGridEditable

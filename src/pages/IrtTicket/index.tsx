@@ -23,8 +23,6 @@ import {
   removeLocalStorage,
   sidebarResource
 } from 'src/constants/helpers';
-import { getColumnData } from 'src/constants/columns';
-import { Link } from 'react-router-dom';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';

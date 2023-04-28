@@ -5,12 +5,10 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { getFrameworkComponents, getStaticFields } from 'src/constants/columns';
 import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import useColumns from 'src/constants/useColumns';
+import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 function ListView({ resourceList }) {
 

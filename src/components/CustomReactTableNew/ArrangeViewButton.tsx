@@ -3,7 +3,7 @@ import { Tooltip, IconButton } from '@material-ui/core';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
-import { disabledColumns } from '../../constants/columns';
+import { disabledColumns } from '../../constants/useColumns';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import ArrangeViewDialog from './ArrangeViewDialog';
 
