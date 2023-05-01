@@ -173,7 +173,8 @@ function GridFilter({
       const fieldName = col?.fieldName;
       const fieldLabel = col?.fieldLabel;
 
-      if (!(colNames.includes(fieldName) || colNames.includes(`from_${fieldName}`) || colNames.includes(`to_${fieldName}`)) &&
+      if (
+        !(colNames.includes(fieldName) || colNames.includes(`from_${fieldName}`) || colNames.includes(`to_${fieldName}`)) &&
         (col.type !== 'dateTime' || col.type !== 'date')
       ) {
         continue;
@@ -196,7 +197,6 @@ function GridFilter({
         };
       }
       if (col.type === 'dateTime' || col.type === 'date') {
-
         const from = `from_${fieldName}`;
         const to = `to_${fieldName}`;
 
@@ -210,9 +210,10 @@ function GridFilter({
               fromDate && toDate
                 ? `${fromDate ? moment(fromDate).format('DD/MM/YYYY') : null} - ${toDate ? moment(toDate).format('DD/MM/YYYY') : null}`
                 : fromDate || toDate
-                  ? `${fromDate ? `${moment(fromDate).format('DD/MM/YYYY')} (From Date)` : ''} ${toDate ? `${moment(toDate).format('DD/MM/YYYY')} (To Date)` : ''
+                ? `${fromDate ? `${moment(fromDate).format('DD/MM/YYYY')} (From Date)` : ''} ${
+                    toDate ? `${moment(toDate).format('DD/MM/YYYY')} (To Date)` : ''
                   }`
-                  : null,
+                : null,
             name: fieldName
           });
           filterModel[fieldName] = {

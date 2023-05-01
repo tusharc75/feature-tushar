@@ -182,8 +182,8 @@ const DisplyaFilters = (props) => {
             element.filter.from && element.filter.to
               ? `${element.filter.from ? element.filter.from : null} - ${element.filter.to ? element.filter.to : null}`
               : element.filter.from || element.filter.to
-                ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
-                : null;
+              ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
+              : null;
           const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: dateValue, name: keys[i] };
           filterData.push(data);
           continue;
@@ -199,24 +199,7 @@ const DisplyaFilters = (props) => {
     return currentGridApi?.getFilterModel();
   }, [currentGridApi, currentGridApi?.getFilterModel()]);
 
-  const setNewColDef = (currentGridApi) => {
-    if (currentGridApi) {
-      const colDefs = currentGridApi.getColumnDefs();
-      const newColDef = colDefs.map((col) => {
-        if (col.cellRenderer === 'dateRenderer') {
-          return { ...col, comparator: filterParams.comparator, filter: 'agDateColumnFilter', filterParams: filterParams };
-        } else {
-          return { ...col };
-        }
-      });
-      currentGridApi.setColumnDefs(newColDef);
-    }
-  };
-
   useEffect(() => {
-    if (currentGridApi) {
-      setNewColDef(currentGridApi);
-    }
     if (currentGridApi && filterModel) {
       if (!oldModalRef.current || !_.isEqual(filterModel, oldModalRef.current || {})) oldModalRef.current = filterModel;
       chipDataSetter(currentGridApi, filterModel);
