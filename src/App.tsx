@@ -208,6 +208,7 @@ import WellNumberDetail from './pages/WellNumber/WellNumberDetail';
 import PlanningView from './pages/PlanningView';
 import TaxMaster from './pages/TaxMaster';
 import TaxMasterDetail from './pages/TaxMaster/TaxMasterDetail';
+import DynamicPage from './pages/DynamicPage';
 
 var notificationInterval: any = null;
 
@@ -313,7 +314,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -1014,6 +1015,9 @@ function App() {
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
             </Route>
+            <PrivateRoute exact path={`/:route`}>
+              <DynamicPage />
+            </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
           </Switch>
