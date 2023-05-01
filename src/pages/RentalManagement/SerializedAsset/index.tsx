@@ -31,7 +31,7 @@ import { ExpandMore } from '@material-ui/icons';
 import AddNonSerializeAssets from './AddNonSerializeAssets';
 import { removeAssetsInRental } from '../rentalOfflineHelper';
 import WarningIcon from '@material-ui/icons/Warning';
-import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -76,7 +76,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, '');
+    const newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, '');
     let coloum: any = [
       {
         accessor: 'srno',

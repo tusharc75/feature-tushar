@@ -20,7 +20,7 @@ import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -74,7 +74,7 @@ const WorkOrder = ({
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderService}`);
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, repairOrderData?.currency || 'USD');
-    const newColumns = genrateCustomTableColumns(data, repairOrderData?.currency || 'USD');
+    const newColumns = generateCustomTableColumns(data, repairOrderData?.currency || 'USD');
     let coloum: any = [
       {
         accessor: 'index',

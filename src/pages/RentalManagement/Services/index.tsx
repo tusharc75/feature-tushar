@@ -24,7 +24,7 @@ import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceD
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
 const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -68,7 +68,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       });
     }
     setAllFields(JSON.parse(JSON.stringify(allFields)));
-    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';

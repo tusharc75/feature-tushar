@@ -8,7 +8,7 @@ import { salesOrder, sidebarResource } from '../../../constants/helpers';
 import { isMobile } from 'react-device-detect';
 import { startCase } from 'lodash';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import routes from 'src/components/Helpers/Routes';
 
 const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
@@ -25,7 +25,7 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
-    const newColumns = genrateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
     let coloum: any = [
       {
         accessor: 'index',

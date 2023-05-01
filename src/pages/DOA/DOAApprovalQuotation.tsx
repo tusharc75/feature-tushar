@@ -29,7 +29,7 @@ import Loader from "../../components/Loader";
 import ActivityButton from "src/components/Activity/ActivityButton";
 import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
 import NoDataCell from "src/components/Helpers/NoDataCell";
-import { genrateCustomTableColumns } from "src/constants/columns";
+import { generateCustomTableColumns } from "src/constants/columns";
 import { fetch_quotation_product_fields } from "src/components/Quotation/helper";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 
@@ -154,7 +154,7 @@ const DoaQuotationApproval = () => {
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = genrateCustomTableColumns(data, quotationData?.currency, "quotation_product_package");
+    const newColumns = generateCustomTableColumns(data, quotationData?.currency, "quotation_product_package");
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';

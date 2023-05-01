@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import routes from 'src/components/Helpers/Routes';
-import { genrateCustomTableColumns, flattenArray } from 'src/constants/columns';
+import { generateCustomTableColumns, flattenArray } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -59,7 +59,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, planningData?.currency);
     setAllFields(data);
-    const newColumns = genrateCustomTableColumns(data, planningData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, planningData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';

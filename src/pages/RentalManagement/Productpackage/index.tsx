@@ -24,7 +24,7 @@ import { calculateRowsField, fetch_rental_product_fields, getNestedSubRows } fro
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
-import { genrateCustomTableColumns, flattenArray } from 'src/constants/columns';
+import { generateCustomTableColumns, flattenArray } from 'src/constants/columns';
 
 const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -74,7 +74,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       });
     }
     setAllFields(JSON.parse(JSON.stringify(allFields)));
-    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
