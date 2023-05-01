@@ -17,8 +17,9 @@ import CustomSwipableList from "../../../components/SwipableListComponents/Custo
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { prepareDataForGrid, CHILD_RESOURCE } from "../../../constants/helpers";
-import { getFrameworkComponents, genrateColoum } from "../../../constants/columns"
+import { generateColoum } from "../../../constants/columns"
 import { GrBusinessService } from "react-icons/all";
+import useColumns, { getFrameworkComponents } from "src/constants/useColumns";
 
 const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom }) => {
 
@@ -33,6 +34,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom }) => {
 
     const [showCostDialog, setShowCostDialog] = useState(false)
     const [selectedCostData, setSelectedCostData] = useState(null)
+    const { getColumnData } = useColumns();
 
     useEffect(() => {
         fetchFields()
@@ -45,7 +47,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom }) => {
 
         const fields = CURReplaceByCurrencySingle(data, salesOrderData.currency)
         let rendererNames = [];
-        genrateColoum(fields, columns, rendererNames, false, renderedFrom);
+        generateColoum(fields, columns, rendererNames, false, renderedFrom, getColumnData);
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
             commonRenderer: CommonRenderer,

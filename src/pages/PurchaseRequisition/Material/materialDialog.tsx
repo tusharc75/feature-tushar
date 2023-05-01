@@ -22,7 +22,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 
-const MaterialDialog = ({onClose, materialData, purchaseRequisitionData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext  }) => {
+const MaterialDialog = ({onClose, materialData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext  }) => {
   
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -39,14 +39,42 @@ const MaterialDialog = ({onClose, materialData, purchaseRequisitionData, handleU
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseRequisition}`);
     var data = response?.data?.data;
     if (bulkEdit) {
+      let unitArray: any = [];
+      materialData?.forEach((element) => {
+        if (element?.[`${element.type}Detail`]?.unit) {
+          unitArray.push([...element?.[`${element.type}Detail`]?.unit])
+        }
+      });
+      let unit: any = unitArray?.shift()?.filter(function (v) {
+        return unitArray.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      const unitOptions: any = arrayToDropwdownOption(unit)
+      data.forEach((element) => {
+        if (element.fieldName === "unit") {
+          element.option = unitOptions;
+        }
+        element.required = false;
+        element.isFormula = false;
+        element.isMulitFormula = false;
+      })
       data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
-
       setInitialData({
         fields: data,
         values: getObjKeys("", data),
       });
     }
     else {
+      let unitOptions: any = []
+      if (materialData?.[`${materialData.type}Detail`]?.unit) {
+        unitOptions = arrayToDropwdownOption(materialData?.[`${materialData.type}Detail`]?.unit);
+      }
+      data.forEach(element => {
+        if (element.fieldName === "unit") {
+          element.option = unitOptions;
+        }
+      });
       setAllFields(JSON.parse(JSON.stringify(data)))
       setInitialData({
         fields: data,

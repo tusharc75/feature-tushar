@@ -15,7 +15,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { storageLocation, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, sidebarResource } from '../../constants/helpers';
+import { storageLocation, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, sidebarResource, removeLocalStorage } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -33,7 +33,7 @@ import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 
 const WellNumber = () => {
-  
+
   let renderedFrom = camelCase(routes.wellNumber?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -101,7 +101,7 @@ const WellNumber = () => {
     const queryString = getQueryString();
     axiosInstance()
       .get(`${routes.wellNumber.path}${queryString}`)
-      .then(({ data: { data } }) => {
+      .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
@@ -116,14 +116,14 @@ const WellNumber = () => {
           dispatch({
             type: 'initialize',
             data: [...dataRows, ...rows],
-            count: data?.count,
+            count: count,
             selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
-            count: data?.count,
+            count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
@@ -176,6 +176,7 @@ const WellNumber = () => {
     axiosInstance()
       .put(`${routes.wellNumber.path}/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords);
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -402,9 +403,8 @@ const WellNumber = () => {
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            // eslint-disable-next-line no-lone-blocks
-                            {
-                              selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                            if (selectedRecords.length === 1) {
+                              setDeleteRecord(selectedRecords[0]);
                             }
                             setShowDeleteConfirmBox(true);
                           }}
