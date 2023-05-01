@@ -173,36 +173,37 @@ const RentalManagementDetailsPage = () => {
   };
 
   const fetchQuotationData = (versionNumber = null, createIfNotExits = false) => {
-    axiosInstance()
-      .get(
+    if (user?.user?.brandPolicy?.rentalQuotation) {
+      axiosInstance().get(
         createIfNotExits
           ? `${rentalManagement.api}/${rentalManagementData._id}/quotation?createIfNotExits=1`
           : `${rentalManagement.api}/${id}/quotation`
       )
-      .then(({ data: { data } }) => {
-        if (data?.versions) {
-          setQuotationData(data);
-          let keys = Object.keys(data.versions);
-          setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
-          const lastQuoteVersion = data?.versions[versionNumber ? versionNumber : parseInt(keys[keys.length - 1])];
-          if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(lastQuoteVersion?.status)) {
-            setVersionNotClonned(true);
-          } else {
-            setVersionNotClonned(false);
-          }
+        .then(({ data: { data } }) => {
+          if (data?.versions) {
+            setQuotationData(data);
+            let keys = Object.keys(data.versions);
+            setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
+            const lastQuoteVersion = data?.versions[versionNumber ? versionNumber : parseInt(keys[keys.length - 1])];
+            if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(lastQuoteVersion?.status)) {
+              setVersionNotClonned(true);
+            } else {
+              setVersionNotClonned(false);
+            }
 
-          for (let i = 0; i < keys.length; i++) {
-            if (
-              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                data?.versions[keys[i]]?.status
-              )
-            ) {
-              setIsDisableCustomerAccount(true);
-              break;
+            for (let i = 0; i < keys.length; i++) {
+              if (
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  data?.versions[keys[i]]?.status
+                )
+              ) {
+                setIsDisableCustomerAccount(true);
+                break;
+              }
             }
           }
-        }
-      });
+        });
+    }
   };
 
   const fetchAssetStatusRights = () => {
@@ -218,7 +219,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -335,8 +336,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
+        .then(({ data }) => { })
+        .catch((error) => { });
     }
   };
 
