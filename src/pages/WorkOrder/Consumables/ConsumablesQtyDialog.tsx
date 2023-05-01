@@ -47,11 +47,13 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
     let errors: any = {};
     if (values?.length > 0) {
       values.map((d) => {
-        if (user?.user?.brandPolicy?.storageLocation && !d.storageLocation) {
-          errors.storageLocation = 'Storage Location is required';
+        if (user?.user?.brandPolicy?.storageLocation) {
+          if (!d.storageLocation) {
+            errors.storageLocation = 'Storage Location is required';
+          }
         }
         let tempProduct = selectedRecords.find((u) => u._id === d._id);
-        let qty = tempProduct.qty;
+        let qty = tempProduct.qty - (tempProduct?.consumedQty || 0);
         if (tempProduct && d.consumedQty > qty) {
           errors.consumedQty = 'Consume Qty is limited to Qty.';
         }
@@ -269,7 +271,7 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
               </Button>
               <Button
                 onClick={() => {
-                  if (!validate(values.products).consumedQty && (user?.user?.brandPolicy?.storageLocation && !validate(values.products).storageLocation)) {
+                  if (!validate(values.products).consumedQty && !validate(values.products).storageLocation) {
                     handleSubmit(values);
                   }
                 }}
