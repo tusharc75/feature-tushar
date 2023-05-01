@@ -87,9 +87,19 @@ const History = ({ product, warehouse, storageLocation }) => {
 
   const columns = [
     { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false },
-    { field: 'referenceType', headerName: 'Reference Type', show: true, cellRenderer: 'commonRenderer' },
+    {
+      field: 'referenceType', headerName: 'Reference Type', show: true,
+      filter: false,
+      sortable: false,
+      cellRenderer: 'commonRenderer'
+    },
     { field: 'reference', headerName: 'Reference', show: true, filter: false, sortable: false, cellRenderer: 'referenceRenderer' },
-    { field: 'type', headerName: 'Type', show: true, cellRenderer: 'commonRenderer' },
+    {
+      field: 'type', headerName: 'Type', show: true,
+      filter: false,
+      sortable: false,
+      cellRenderer: 'commonRenderer'
+    },
     {
       field: 'qty',
       headerName: 'Credit/Debit',
@@ -109,19 +119,37 @@ const History = ({ product, warehouse, storageLocation }) => {
     { field: 'finalInventory', headerName: 'Final Inventory', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
     { field: 'price', headerName: 'Price', show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
-    { field: 'finalAvgPrice', headerName: 'Final Average Price', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
-    { field: 'warehouse', headerName: 'Plant', show: true, cellRenderer: 'warehouseRenderer' },
+    ...(warehouse && warehouse?.split(",")?.length === 1 ? [
+      {
+        field: 'finalAvgPrice',
+        headerName: 'Final Average Price',
+        show: true,
+        cellRenderer: 'commonRenderer',
+        filter: false,
+        sortable: false
+      }
+    ] : []),
+    {
+      field: 'warehouse',
+      headerName: 'Plant',
+      show: true,
+      filter: false,
+      sortable: false,
+      cellRenderer: 'warehouseRenderer'
+    },
     ...(user?.user?.brandPolicy?.storageLocation ? [
       {
         field: 'storageLocation',
         headerName: 'Storage Location',
         show: true,
+        filter: false,
+        sortable: false,
         cellRenderer: 'storageLocationRenderer'
       }
     ] : []),
-    { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'userRenderer' },
+    { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
+    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
+    { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'userRenderer', filter: false, sortable: false },
     { field: 'purchaseOrderRejectedDate', headerName: 'Purchase Order Rejected Date', filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' },
     { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
   ];
