@@ -14,7 +14,7 @@ import AddIcon from '@material-ui/icons/Add';
 import { isMobile } from 'react-device-detect';
 import { KeyboardArrowDown } from '@material-ui/icons';
 import { startCase } from 'lodash';
-import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import MaterialDialog from './MaterialDialog';
@@ -47,7 +47,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, jobData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = genrateCustomTableColumns(data, jobData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, jobData?.currency, renderedFrom);
 
     let coloum: any = [
       {

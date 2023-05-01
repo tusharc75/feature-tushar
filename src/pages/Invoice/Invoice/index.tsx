@@ -12,7 +12,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_invoice_product_fields } from '../../../components/Invoice/helper';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import InvoiceFacility from './InvoiceFacility';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import { startCase } from 'lodash';
 
 const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, statusOptions, stepFullScreen, renderedFrom }) => {
@@ -46,7 +46,7 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
     try {
       let data = await fetch_invoice_product_fields(invoiceData?.currency);
       setAllFields(JSON.parse(JSON.stringify(data)));
-      const newColumns = genrateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
+      const newColumns = generateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
       let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';

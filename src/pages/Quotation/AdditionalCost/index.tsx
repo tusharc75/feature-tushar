@@ -13,7 +13,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { CHILD_RESOURCE } from '../../../constants/helpers';
-import { genrateCustomTableColumns, flattenArray } from '../../../constants/columns';
+import { generateCustomTableColumns, flattenArray } from '../../../constants/columns';
 import { GrBusinessService } from 'react-icons/all';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { ExpandMore } from '@material-ui/icons';
@@ -53,7 +53,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
     data = response?.data?.data;
     const fields = CURReplaceByCurrencySingle(data, quotationData.currency);
     setAllFields(JSON.parse(JSON.stringify(fields)));
-    const newColumns = genrateCustomTableColumns(fields, quotationData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(fields, quotationData?.currency, renderedFrom);
     let column: any = [
       {
         accessor: 'index',

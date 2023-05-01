@@ -86,7 +86,7 @@ const ServiceMaster = (props: Props) => {
       {
         accessor: 'type',
         Header: 'Type',
-        width: 100,
+        width: 80,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -97,7 +97,7 @@ const ServiceMaster = (props: Props) => {
       {
         accessor: 'detail',
         Header: 'Detail',
-        minWidth: 100,
+        minWidth: 200,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <Link
@@ -116,18 +116,20 @@ const ServiceMaster = (props: Props) => {
       {
         accessor: 'description',
         Header: 'Description',
+        minWidth: 200,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{row.original?.serviceDescription || row.original?.productDetail?.productDescription || <NoDataCell />}</p>
+            {row.original?.description ? <p className="text-truncate" title={row.original?.description}>{row.original?.description}</p> : <NoDataCell />}
           </div>
         )
       },
       {
         accessor: 'qty',
         Header: 'Qty',
-        width: 100,
-        editable: true,
-        Cell: ({ row }) => <p className="text-truncate">{row.original?.qty || <NoDataCell />}</p>
+        width: 150,
+        minWidth: 150,
+        editable: permissions?.product?.isUpdate ? true : false,
+        Cell: ({ row }) => row.original?.qty ? <p>{row.original?.qty}</p> : <NoDataCell />
       },
       {
         accessor: 'stepName',
@@ -149,7 +151,7 @@ const ServiceMaster = (props: Props) => {
         accessor: 'preWork',
         Header: 'Pre Work',
         width: 70,
-        Cell: ({ row }) => <p className="text-truncate">{row.original?.preWork || <NoDataCell />}</p>
+        Cell: ({ row }) => row.original?.preWork ? <p className="text-truncate">{row.original?.preWork}</p> : <NoDataCell />
       });
     }
     if (serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'serviceType')) {
@@ -158,7 +160,7 @@ const ServiceMaster = (props: Props) => {
         Header: 'Service Type',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{row.original?.serviceType || <NoDataCell />}</p>
+            {row.original?.serviceType ? <p>{row.original?.serviceType}</p> : <NoDataCell />}
           </div>
         )
       });
@@ -258,6 +260,7 @@ const ServiceMaster = (props: Props) => {
       serviceData?.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail = parent?.serviceName;
+        parent.description = parent?.serviceDescription;
         parent.type = 'Service';
         parent.qty = 1;
         parent.preWork = parent?.preWork ? 'Yes' : 'No';
@@ -268,6 +271,7 @@ const ServiceMaster = (props: Props) => {
             c.stepName = stepData?.stepName;
             c.order = i + 1 + '.' + `${idx + 1}`;
             c.detail = c?.productDetail?.productName;
+            c.description = c?.productDetail?.productDescription;
             c.type = 'Product';
             return c;
           });
@@ -419,8 +423,8 @@ const ServiceMaster = (props: Props) => {
   const onSaveInlineEdit = async (inputField, updatedData) => {
     if (updatedData.type === 'Product') {
       const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-      if (rowData) {
-        handleSaveData({ _id: rowData._id, qty: parseInt(rowData?.qty) });
+      if (rowData && parseInt(inputField["qty"])) {
+        handleSaveData({ _id: rowData._id, qty: parseInt(inputField["qty"]) });
       }
     }
   };

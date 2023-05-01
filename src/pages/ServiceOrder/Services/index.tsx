@@ -21,7 +21,7 @@ import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManag
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ServiceOrderQty from './ServiceOrderQty';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import CustomEditableGrid from 'src/components/CustomEditableGrid';
 import { flattenArray } from 'src/constants/columns';
 import AddIcon from '@material-ui/icons/Add'
@@ -69,7 +69,7 @@ const Services = ({
   const fetchFields = async () => {
     var allFields = await fetch_service_order_detail_fields(serviceOrderData?.currency);
     setAllFields(allFields)
-    const newColumns = genrateCustomTableColumns(allFields, serviceOrderData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(allFields, serviceOrderData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay'
