@@ -206,6 +206,8 @@ import DOAApprovalQuotation from './pages/DOA/DOAApprovalQuotation';
 import WellNumber from './pages/WellNumber';
 import WellNumberDetail from './pages/WellNumber/WellNumberDetail';
 import PlanningView from './pages/PlanningView';
+import TaxMaster from './pages/TaxMaster';
+import TaxMasterDetail from './pages/TaxMaster/TaxMasterDetail';
 
 var notificationInterval: any = null;
 
@@ -1002,6 +1004,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.planningView.path}`}>
               <PlanningView />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.taxMaster.path}`}>
+              <TaxMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.taxMasterDetail.path}/:id`}>
+              <TaxMasterDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

@@ -308,7 +308,8 @@ export const sidebarResource = {
   storageLocation: 'Storage Location',
   transactionLock: 'Transaction Lock',
   wellNumber: 'Well Number',
-  planningView: 'Planning View'
+  planningView: 'Planning View',
+  taxMaster: 'Tax Master'
 };
 
 export const primaryFields = {
@@ -421,7 +422,8 @@ export const RESOURCE_LABEL = {
   fleetReceiver: 'Fleet Receiver',
   storageLocation: 'Storage Location',
   transactionLock: 'Transaction Lock',
-  wellNumber: 'Well Number'
+  wellNumber: 'Well Number',
+  taxMaster: 'Tax Master'
 };
 
 export const CHILD_RESOURCE = {
