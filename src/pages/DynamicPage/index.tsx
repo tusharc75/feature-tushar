@@ -39,12 +39,14 @@ import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase, startCase } from 'lodash';
 import { useLocation } from 'react-router-dom';
+import ManageDynamicPage from './ManageDynamicPage/ManageDynamicPage';
 
 const DynamicPage = () => {
   const { pathname, key } = useLocation();
   const pathnames = pathname.split('/').filter((x) => x);
   const route = camelCase(pathnames[0]);
   const resource = startCase(pathnames[0]?.replace(/-/g, ' '));
+  const resourcePath = `/${pathnames[0]}`;
   const detailRoutePath = `/${pathnames[0]}/detail`;
 
   let renderedFrom = camelCase(route);
@@ -501,8 +503,10 @@ const DynamicPage = () => {
           </Box>
         )}
       </div>
-      {/* {showManageDialog.open && (
-        <ManageWellNumber
+      {showManageDialog.open && (
+        <ManageDynamicPage
+          resource={resource}
+          resourcePath={resourcePath}
           isClone={showManageDialog.isClone}
           id={showManageDialog.idToClone}
           onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
@@ -511,7 +515,7 @@ const DynamicPage = () => {
             fetchData();
           }}
         />
-      )} */}
+      )}
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
