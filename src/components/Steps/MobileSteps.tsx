@@ -11,10 +11,13 @@ const useStyles = makeStyles(() => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     position: 'fixed',
-    width: '100%',
+    right: 0,
     bottom: -3,
     zIndex: 123,
-    left: 0
+    left: 0,
+    ['@media (min-width:960px)']: {
+      left: '84px'
+    }
   },
   stepLayout: {
     paddingTop: '3px',
