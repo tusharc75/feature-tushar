@@ -916,6 +916,15 @@ const routes = {
       : 'Planning View',
     path: '/planning-view'
   },
+  taxMaster: {
+    title: storedRoutes && storedRoutes.taxMaster && storedRoutes.taxMaster.title ? storedRoutes.taxMaster?.title : RESOURCE_LABEL.taxMaster,
+    path: '/tax-master'
+  },
+  taxMasterDetail: {
+    title: storedRoutes && storedRoutes.taxMaster && storedRoutes.taxMaster.title ? storedRoutes.taxMaster?.title : RESOURCE_LABEL.taxMaster,
+    path: '/tax-master/detail'
+  },
+  
 };
 
 export default routes;
