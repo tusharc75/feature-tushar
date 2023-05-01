@@ -38,7 +38,6 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
 
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
-    const [deliveryTicketData, setDeliveryTicketData] = useState<any>(null);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formsData, setFormsData] = useState([]);
     const [isSubmitting, setSubmitting] = useState(false);
@@ -196,7 +195,6 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                     const response = await axiosInstance().get(`${deliveryTicket.api}/${deliveryTicketId}`)
                     data = response?.data?.data
                 }
-                setDeliveryTicketData(data)
                 setDisableOwnerSelection(deliveryTicketId && user.user._id !== data?.owner?.optionValue);
                 fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.pickupFromType,
                     data?.deliveryToType, data?.ticketType, data?.pickupFrom, data?.deliveryTo, true, true, true, true);
@@ -215,6 +213,25 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                 if ((productInventory || products) && referenceType && referenceData) {
 
                     if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
+                    }
+                    if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && products?.length &&
+                        user?.user?.brandPolicy?.storageLocation && user?.user?.brandPolicy?.rentalInventoryDebit) {
+                        if (ticketType === DELIVERY_TICKET_TYPE.loading) {
+                            fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !["deliveryToStorageLocation"]?.includes(e.fieldName))
+                            fieldsDataForCreate?.forEach((element) => {
+                                if (element?.fieldName === "pickupFromStorageLocation") {
+                                    element.required = true;
+                                }
+                            })
+                        }
+                        if ([DELIVERY_TICKET_TYPE.return, DELIVERY_TICKET_TYPE.receiving]?.includes(ticketType)) {
+                            fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !["pickupFromStorageLocation"]?.includes(e.fieldName))
+                            fieldsDataForCreate?.forEach((element) => {
+                                if (element?.fieldName === "deliveryToStorageLocation") {
+                                    element.required = true;
+                                }
+                            })
+                        }
                     }
                     else {
                         fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !["pickupFromStorageLocation", "deliveryToStorageLocation"]?.includes(e.fieldName))
