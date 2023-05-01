@@ -11,7 +11,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { startCase } from 'lodash';
 import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import InvoiceFacility from './InvoiceFacility';
 
 const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, renderedFrom, stepFullScreen }) => {
@@ -33,7 +33,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
 
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
-    const newColumns = genrateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
     let coloum: any = [
       {
         accessor: 'index',

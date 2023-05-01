@@ -132,7 +132,7 @@ export const getCustomColumnData = (title, field) => {
   }
 };
 
-export const genrateCustomTableColumns = (fields: any[], currency: string, renderedFrom = null) => {
+export const generateCustomTableColumns = (fields: any[], currency: string, renderedFrom = null) => {
   let column = [];
   let _fields = fields;
   _fields.forEach((ele) => {

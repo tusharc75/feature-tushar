@@ -12,7 +12,7 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import SendEmail from '../SendEmail';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
 const QuoteBuilder = ({
   quotationData,
@@ -55,7 +55,7 @@ const QuoteBuilder = ({
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = genrateCustomTableColumns(data, quotationData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, quotationData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';

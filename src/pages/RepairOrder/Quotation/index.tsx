@@ -20,7 +20,7 @@ import { FcCancel, FcClock, FcOk } from 'react-icons/all';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import SendEmail from 'src/pages/Quotation/SendEmail';
 
@@ -208,7 +208,7 @@ const Quotation = ({
       }
     ];
 
-    const newColumns = genrateCustomTableColumns(data, quotationInfo?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, quotationInfo?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';

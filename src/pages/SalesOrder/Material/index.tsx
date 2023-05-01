@@ -18,7 +18,7 @@ import DateRangeIcon from '@material-ui/icons/DateRange';
 import SalesOrderQtyDialog from './SalesOrderQtyDialog';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
 import LeadTimeDialog from './LeadTimeDialog';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -56,7 +56,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
 
-    const newColumns = genrateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
 
     let coloum: any = [
       {

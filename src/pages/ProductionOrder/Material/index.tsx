@@ -20,7 +20,7 @@ import Add from '@material-ui/icons/Add';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
@@ -51,7 +51,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = genrateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
+    const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';

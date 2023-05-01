@@ -19,7 +19,7 @@ import { startCase } from 'lodash';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import AddOnDialog from './AddOnDialog';
 
 const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
@@ -57,7 +57,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     allFields?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = genrateCustomTableColumns(allFields, serviceOrderData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(allFields, serviceOrderData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';

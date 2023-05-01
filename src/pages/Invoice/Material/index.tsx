@@ -16,7 +16,7 @@ import { isMobile } from 'react-device-detect';
 import { ExpandMore, KeyboardArrowDown } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -53,7 +53,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
   const fetchFields = async () => {
     let data = await fetch_invoice_product_fields(invoiceData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = genrateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';

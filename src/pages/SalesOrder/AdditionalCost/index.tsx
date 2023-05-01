@@ -12,7 +12,7 @@ import { isMobile } from 'react-device-detect';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
 import { CHILD_RESOURCE } from '../../../constants/helpers';
-import { genrateCustomTableColumns, flattenArray } from '../../../constants/columns';
+import { generateCustomTableColumns, flattenArray } from '../../../constants/columns';
 import { GrBusinessService } from 'react-icons/all';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { ExpandMore } from '@material-ui/icons';
@@ -46,7 +46,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
     data = response?.data?.data;
     const fields = CURReplaceByCurrencySingle(data, salesOrderData.currency);
     setAllFields(JSON.parse(JSON.stringify(fields)));
-    const newColumns = genrateCustomTableColumns(fields, salesOrderData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(fields, salesOrderData?.currency, renderedFrom);
     let column: any = [
       {
         accessor: 'index',

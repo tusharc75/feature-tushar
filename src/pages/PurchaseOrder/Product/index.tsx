@@ -10,7 +10,7 @@ import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { prepareDataForGrid } from 'src/constants/helpers';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { fetch_po_cost_fields, fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
@@ -199,7 +199,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     });
 
     setProductFields(JSON.parse(JSON.stringify(p_fields)));
-    const newColumns = genrateCustomTableColumns(p_fields, purchaseOrderData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(p_fields, purchaseOrderData?.currency, renderedFrom);
     columns = [...columns, ...newColumns];
     columns.push({
       accessor: 'action',
