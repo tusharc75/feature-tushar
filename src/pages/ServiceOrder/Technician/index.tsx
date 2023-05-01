@@ -20,7 +20,7 @@ import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import SendEmail from '../SendEmail';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
 const Technician = ({
     serviceOrderData,
@@ -66,7 +66,7 @@ const Technician = ({
         data?.forEach((e) => {
             e.isColumnEditable = false;
         });
-        var newColumns = genrateCustomTableColumns(data, serviceOrderData?.currency, renderedFrom);
+        var newColumns = generateCustomTableColumns(data, serviceOrderData?.currency, renderedFrom);
         var column: any = [
             {
                 accessor: 'index',

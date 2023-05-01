@@ -25,7 +25,7 @@ import { RiEditCircleLine } from 'react-icons/ri';
 import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
 import { ExpandMore } from '@material-ui/icons';
 import styles from '../../Leads/Header.module.scss';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
@@ -65,7 +65,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
   const fetchFields = async () => {
     var data = await fetch_sublease_product_fields(subleaseData.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = genrateCustomTableColumns(data, subleaseData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, subleaseData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';

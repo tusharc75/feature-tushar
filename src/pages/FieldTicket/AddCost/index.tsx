@@ -8,7 +8,7 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { CHILD_RESOURCE, removeLocalStorage } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AddCostDialog from './AddCostDialog';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
@@ -46,7 +46,7 @@ const AddCost = ({ id, fieldTicketData }) => {
       .get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`)
       .then(({ data: { data } }) => {
         data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || 'USD');
-        const newColumns = genrateCustomTableColumns(data, fieldTicketData?.currency || 'USD', renderedFrom);
+        const newColumns = generateCustomTableColumns(data, fieldTicketData?.currency || 'USD', renderedFrom);
         let columns: any = [
           {
             accessor: 'index',

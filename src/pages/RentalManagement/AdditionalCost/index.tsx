@@ -16,7 +16,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { calculateRowsField, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { BiChevronDown } from 'react-icons/bi';
-import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 
 const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,7 +52,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       });
     }
     setAllFields(fields)
-    const newColumns = genrateCustomTableColumns(fields, rentalManagementData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(fields, rentalManagementData?.currency, renderedFrom);
     let column: any = [
       {
         accessor: 'srno',
