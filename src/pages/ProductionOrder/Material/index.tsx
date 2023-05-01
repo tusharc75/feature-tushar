@@ -147,7 +147,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       }
     ];
     coloum = [...coloum, ...newColumns];
-    console.log(coloum);
     coloum.push({
       accessor: 'action',
       Header: 'Action',
