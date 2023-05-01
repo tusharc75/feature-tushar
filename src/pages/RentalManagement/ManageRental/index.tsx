@@ -195,14 +195,12 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             else {
                 fieldData = offlineFieldsData?.rentalManagement || [];
             }
-            var statusOptions = []
-            fieldData?.forEach((e: any) => {
-                if (e?.fieldData?.fieldName === 'status') {
-                    statusOptions = e.fieldData.option;
-                }
-            })
+
+            fieldData = fieldData?.filter((e) => !["quotation"].includes(e?.fieldData?.fieldName))
+
             var fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             var fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+            
             if (rentalManagementId) {
                 try {
                     let data;

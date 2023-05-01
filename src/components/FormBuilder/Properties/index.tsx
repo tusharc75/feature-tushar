@@ -54,6 +54,7 @@ const LookupResource = [
   { name: 'Product Category', value: 'Product Category' },
   { name: 'Project Sales', value: 'Project Sales' },
   { name: 'Quotes', value: 'Quotes' },
+  { name: 'Quotation', value: 'Quotation' },
   { name: 'Price Template', value: 'Price Template' },
   { name: 'Product Template', value: 'Product Template' },
   { name: 'Pdf Template', value: 'Quote Pdf Template' },
