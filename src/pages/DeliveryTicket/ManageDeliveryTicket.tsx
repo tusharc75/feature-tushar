@@ -214,7 +214,7 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
 
                     if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
                     }
-                    if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && products?.length &&
+                    else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && products?.length &&
                         user?.user?.brandPolicy?.storageLocation && user?.user?.brandPolicy?.rentalInventoryDebit) {
                         if (ticketType === DELIVERY_TICKET_TYPE.loading) {
                             fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !["deliveryToStorageLocation"]?.includes(e.fieldName))
