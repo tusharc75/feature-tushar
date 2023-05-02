@@ -860,50 +860,46 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 open={Boolean(anchorLinkActionEl)}
                 onClose={closeLinkActions}
               >
-                {purchaseOrderCount > 0 && (
-                  <MenuItem
-                    onClick={() => {
-                      history.push(routes.purchaseOrder.path, {
-                        rental: rentalManagementData
-                      });
-                    }}
-                  >
-                    {`Show ${routes.purchaseOrder.title}`}
-                  </MenuItem>
-                )}
-                {bulkAssetCreationCount > 0 && (
-                  <MenuItem
-                    onClick={() => {
-                      history.push(routes.bulkAssetCreation.path, {
-                        rental: rentalManagementData
-                      });
-                    }}
-                  >
-                    {`Show ${routes.bulkAssetCreation.title}`}
-                  </MenuItem>
-                )}
-                {subleaseCount > 0 && (
-                  <MenuItem
-                    onClick={() => {
-                      history.push(routes.sublease.path, {
-                        rental: rentalManagementData
-                      });
-                    }}
-                  >
-                    {`Show ${routes.sublease.title}`}
-                  </MenuItem>
-                )}
-                {transferAssetCount > 0 && (
-                  <MenuItem
-                    onClick={() => {
-                      history.push(routes.transferAsset.path, {
-                        rental: rentalManagementData
-                      });
-                    }}
-                  >
-                    {`Show ${routes.transferAsset.title}`}
-                  </MenuItem>
-                )}
+                <MenuItem
+                  disabled={purchaseOrderCount <= 0}
+                  onClick={() => {
+                    history.push(routes.purchaseOrder.path, {
+                      rental: rentalManagementData
+                    });
+                  }}
+                >
+                  {`Show ${routes.purchaseOrder.title}`}
+                </MenuItem>
+                <MenuItem
+                  disabled={bulkAssetCreationCount <= 0}
+                  onClick={() => {
+                    history.push(routes.bulkAssetCreation.path, {
+                      rental: rentalManagementData
+                    });
+                  }}
+                >
+                  {`Show ${routes.bulkAssetCreation.title}`}
+                </MenuItem>
+                <MenuItem
+                  disabled={subleaseCount <= 0}
+                  onClick={() => {
+                    history.push(routes.sublease.path, {
+                      rental: rentalManagementData
+                    });
+                  }}
+                >
+                  {`Show ${routes.sublease.title}`}
+                </MenuItem>
+                <MenuItem
+                  disabled={transferAssetCount <= 0}
+                  onClick={() => {
+                    history.push(routes.transferAsset.path, {
+                      rental: rentalManagementData
+                    });
+                  }}
+                >
+                  {`Show ${routes.transferAsset.title}`}
+                </MenuItem>
               </Menu>
             </Box>
           </Box>
