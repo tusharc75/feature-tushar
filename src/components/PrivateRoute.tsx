@@ -4,6 +4,7 @@ import { Redirect, Route, useLocation } from 'react-router-dom';
 import { useData } from '../StateProvider/Provider';
 import Unauthorized from '../pages/Unauthorized';
 import Layout from './Layout';
+import NotFound from 'src/pages/NotFound';
 
 const ProtectedRoute = ({ children, ...rest }) => {
   const {
@@ -13,6 +14,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
   const token = localStorage.getItem('token');
   const [access, setAccess] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [error, setError] = useState(false);
 
   const pathnames = pathname.split('/').filter((x) => x);
 
@@ -58,11 +60,15 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'serialized-asset-new',
         'import-export',
         'custom-report',
-        'competency-master',
+        'competency-master'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
       setChecking(false);
+    } else {
+      setAccess(false);
+      setChecking(false);
+      setError(true);
     }
   };
 
@@ -83,6 +89,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
             </div>
           ) : access ? (
             <Layout>{children}</Layout>
+          ) : error ? (
+            <NotFound />
           ) : (
             <Unauthorized />
           )

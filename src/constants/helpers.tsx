@@ -21,7 +21,7 @@ import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { kebabCase, orderBy, uniqBy } from 'lodash';
+import { kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
 import { stepIconInterface } from 'src/components/Steps/icons';
 
 interface stepInterface extends stepIconInterface {
@@ -861,7 +861,6 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data.optionValue : '');
   for (const key of arr) {
-
     if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : false;
     } else if (key.type === 'multiSelect') {
@@ -937,21 +936,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1155,7 +1154,6 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
 
       data.forEach((d) => {
         const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
-
         if (indexOfPermission > -1) {
           let permission = {
             isCreate: d.isCreate,
@@ -1163,18 +1161,28 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
             isUpdate: d.isUpdate,
             isDelete: d.isDelete
           };
-
           if (accounts.some((acountType) => acountType === d.name)) {
             permission['approveAccount'] = hasApproveAccountPermission;
           }
-
           permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
-
           routesAndTitle[sidebarFieldsKeys[indexOfPermission]] = {
             title: d.resourceLabel || d.name
           };
         } else {
-          console.info(`Custom Error (helper.tsx > getPermissions()) => ${JSON.stringify(d)} resource not found`);
+          let permission = {
+            isCreate: d.isCreate,
+            isRead: d.isRead,
+            isUpdate: d.isUpdate,
+            isDelete: d.isDelete
+          };
+          if (accounts.some((acountType) => acountType === d.name)) {
+            permission['approveAccount'] = hasApproveAccountPermission;
+          }
+          const k = lowerFirst(d.name.replace(/ /g, ''));
+          permissions[k] = permission;
+          routesAndTitle[k] = {
+            title: d.resourceLabel || d.name
+          };
         }
       });
     }
