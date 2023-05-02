@@ -861,7 +861,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 onClose={closeLinkActions}
               >
                 <MenuItem
-                  disabled={purchaseOrderCount <= 0}
+                  disabled={purchaseOrderCount === 0}
                   onClick={() => {
                     history.push(routes.purchaseOrder.path, {
                       rental: rentalManagementData
@@ -871,7 +871,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   {`Show ${routes.purchaseOrder.title}`}
                 </MenuItem>
                 <MenuItem
-                  disabled={bulkAssetCreationCount <= 0}
+                  disabled={bulkAssetCreationCount === 0}
                   onClick={() => {
                     history.push(routes.bulkAssetCreation.path, {
                       rental: rentalManagementData
@@ -881,7 +881,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   {`Show ${routes.bulkAssetCreation.title}`}
                 </MenuItem>
                 <MenuItem
-                  disabled={subleaseCount <= 0}
+                  disabled={subleaseCount === 0}
                   onClick={() => {
                     history.push(routes.sublease.path, {
                       rental: rentalManagementData
@@ -891,7 +891,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   {`Show ${routes.sublease.title}`}
                 </MenuItem>
                 <MenuItem
-                  disabled={transferAssetCount <= 0}
+                  disabled={transferAssetCount === 0}
                   onClick={() => {
                     history.push(routes.transferAsset.path, {
                       rental: rentalManagementData
