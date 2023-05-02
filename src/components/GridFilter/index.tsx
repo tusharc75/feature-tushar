@@ -305,7 +305,7 @@ function GridFilter({
         }}
         aria-describedby="Filter Dialog"
       >
-        <CustomDialogHeader title={`${resource} Filters`} onClose={handleClose} showRequiredLabel={false} />
+        <CustomDialogHeader title={`Filters`} onClose={handleClose} showRequiredLabel={false} />
         <CustomDialogContent>
           <Box pt={2} pb={2}>
             <Grid container spacing={2}>
