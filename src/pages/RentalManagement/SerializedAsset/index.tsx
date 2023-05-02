@@ -22,6 +22,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { useHistory } from 'react-router-dom';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AttachmentIcon from '@material-ui/icons/Attachment';
+import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import RepeatIcon from '@material-ui/icons/Repeat';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -103,12 +104,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -160,6 +161,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 </IconButton>
               </HtmlTooltip>
             )}
+
             {row.original.isBulkAssetCreation && (
               <HtmlTooltip title={`${routes.bulkAssetCreation.title}`}>
                 <IconButton
@@ -170,7 +172,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                     });
                   }}
                 >
-                  <AttachmentIcon fontSize="small" color={'primary'} />
+                  <LibraryBooksIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -315,20 +317,21 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
       let rows = data.material.filter((e) => e.parentId === null);
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
+        parent.detail = `${
+          parent.type === 'service'
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent?.packageDetail?.packageName
-          }`;
+        }`;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-              ? parent?.productDetail?.productDescription || ''
-              : parent.type === 'package'
-                ? parent?.packageDetail?.packageDescription || ''
-                : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+            ? parent?.packageDetail?.packageDescription || ''
+            : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
@@ -368,10 +371,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
             ? true
             : false
           : parent.subRows.length !== 0
-            ? parent.assetAssignedQty ===
-            parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+          ? parent.assetAssignedQty ===
+              parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
             parent.subRows.every((d) => d.isValid)
-            : true;
+          : true;
 
         if (parent.subRows.length && parent.isValid) {
           if (parent.subRows.every((d) => d.isValid)) {
@@ -474,16 +477,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
       // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
       _subRow.assetQty =
@@ -526,11 +529,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           ? true
           : false
         : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
-          ? true
-          : _subRow.assetAssignedQty ===
-            tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
-            ? true
-            : false;
+        ? true
+        : _subRow.assetAssignedQty ===
+          tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+        ? true
+        : false;
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
@@ -830,9 +833,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 </MenuItem>
               </Menu>
               {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
-                <IconButton onClick={openLinkActions} size="small" color="primary">
-                  <ExpandMore fontSize="inherit" />
-                </IconButton>
+                <Button
+                  onClick={openLinkActions}
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  aria-controls="action-menu"
+                  endIcon={<ExpandMore fontSize="inherit" />}
+                >
+                  Show
+                </Button>
               )}
               <Menu
                 anchorEl={anchorLinkActionEl}
@@ -840,7 +850,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 getContentAnchorEl={null}
                 anchorOrigin={{
                   vertical: 'bottom',
-                  horizontal: 'left'
+                  horizontal: 'right'
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right'
                 }}
                 id="action-menu"
                 open={Boolean(anchorLinkActionEl)}
@@ -854,7 +868,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                       });
                     }}
                   >
-                    {`Created ${routes.purchaseOrder.title}`}
+                    {`Show ${routes.purchaseOrder.title}`}
                   </MenuItem>
                 )}
                 {bulkAssetCreationCount > 0 && (
@@ -865,7 +879,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                       });
                     }}
                   >
-                    {`Created ${routes.bulkAssetCreation.title}`}
+                    {`Show ${routes.bulkAssetCreation.title}`}
                   </MenuItem>
                 )}
                 {subleaseCount > 0 && (
@@ -876,7 +890,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                       });
                     }}
                   >
-                    {`Created ${routes.sublease.title}`}
+                    {`Show ${routes.sublease.title}`}
                   </MenuItem>
                 )}
                 {transferAssetCount > 0 && (
@@ -887,7 +901,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                       });
                     }}
                   >
-                    {`Created ${routes.transferAsset.title}`}
+                    {`Show ${routes.transferAsset.title}`}
                   </MenuItem>
                 )}
               </Menu>
@@ -936,8 +950,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
             _id: rentalManagementData?._id,
             warehouse: rentalManagementData?.warehouse?.optionValue,
             wellName: rentalManagementData?.wellName?.optionValue,
-            wellNumber: rentalManagementData?.wellNumber ?
-              rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue) : null,
+            wellNumber: rentalManagementData?.wellNumber
+              ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+              : null,
             fromDate: rentalManagementData?.estimateStartDate,
             toDate: rentalManagementData?.estimateEndDate,
             afeNumber: rentalManagementData?.afeNumber
@@ -989,8 +1004,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           refrenceData={{
             products: [...showOrderDialog?.products?.filter((e) => e.serialized === true)],
             wellName: rentalManagementData?.wellName?.optionValue,
-            wellNumber: rentalManagementData?.wellNumber ?
-              rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue) : null,
+            wellNumber: rentalManagementData?.wellNumber
+              ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+              : null,
             afeNumber: rentalManagementData?.afeNumber,
             warehouse: rentalManagementData?.warehouse?.optionValue
           }}
@@ -1020,8 +1036,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           currency={rentalManagementData.currency}
           refrenceData={{
             wellName: rentalManagementData?.wellName?.optionValue,
-            wellNumber: rentalManagementData?.wellNumber ?
-              rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue) : null,
+            wellNumber: rentalManagementData?.wellNumber
+              ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+              : null,
             afeNumber: rentalManagementData?.afeNumber
           }}
           rentalManagementId={rentalManagementData._id}
