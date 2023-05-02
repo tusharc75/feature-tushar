@@ -484,7 +484,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         <ConfirmationDialogRaw
           okBtnLoading={loadingInterPlantTransfer}
           open={showConfirmInterPlantTransfer}
-          message={`Are you sure you have receive this inventory ?`}
+          message={`Are you sure you have received inventory?`}
           onClose={() => {
             setShowConfirmInterPlantTransfer(false);
           }}
