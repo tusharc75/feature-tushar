@@ -12,27 +12,27 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageTaxMaster from './ManageDynamicForm/ManageDynamicForm';
-import { useLocation } from 'react-router-dom';
+import ManageDynamicForm from './ManageDynamicForm';
 import { camelCase, startCase } from 'lodash';
 
 const DynamicFormDetail = () => {
-  const { id } = useParams();
-  const { pathname, key } = useLocation();
-  const pathnames = pathname.split('/').filter((x) => x);
-  const route = camelCase(pathnames[0]);
-  const resource = startCase(pathnames[0]?.replace(/-/g, ' '));
-  const resourcePath = `/${pathnames[0]}`;
-  const detailRoutePath = `/${pathnames[0]}/detail`;
+
+  const { route, id } = useParams();
+  const resource = startCase(route?.replace(/-/g, ' '));
+  const renderedFrom = camelCase(resource);
+
+  const resourcePath = `/${route}`;
 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.taxMaster]);
-  const [dynamicDetailData, setDynamicDetailData] = useState(null);
+  const [detailData, setDetailData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+
+  const [primaryFieldName, setPrimaryFieldName] = useState(null);
+
   const {
     state: { permissions, user }
   }: any = useData();
@@ -47,8 +47,12 @@ const DynamicFormDetail = () => {
   const fetchFields = async () => {
     axiosInstance()
       .get(`/field?resource=${resource}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
+      .then(({ data: { data } }) => {
+        setFields(data?.filter((field) => field.isRead));
+        const primaryField = data?.find((e) => e?.fieldData?.primaryField)
+        if (primaryField) {
+          setPrimaryFieldName(primaryField?.fieldData?.fieldName)
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -65,8 +69,7 @@ const DynamicFormDetail = () => {
           Resource: resource
         }
       });
-      setDynamicDetailData(data);
-      setCustomizedRoutes([routes.taxMaster, { title: data?.taxCode }]);
+      setDetailData(data);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -115,30 +118,24 @@ const DynamicFormDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs
-            routes={[
-              {
-                title: resource,
-                path: `/${pathnames[0]}`
-              }
-            ]}
-          />
+          <CustomBreadCrumbs routes={[{ title: resource, path: `/${route}` }, {
+            title: primaryFieldName && detailData && detailData[primaryFieldName] ?
+              detailData[primaryFieldName] : resource
+          }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <>
-              {permissions[route]?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                </Button>
-              )}
-              {permissions[route]?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            </>
+            {permissions[renderedFrom]?.isUpdate && (
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                className="btn-outline-v1"
+                onClick={handleOpenUpdateDialog}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+              >
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              </Button>
+            )}
+            {permissions[renderedFrom]?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>
@@ -149,14 +146,14 @@ const DynamicFormDetail = () => {
               <CommonSkeleton lenArray={[...Array(7).keys()]} />
             </Grid>
           ) : (
-            <DetailsPage data={dynamicDetailData} fields={fields} />
+            <DetailsPage data={detailData} fields={fields} />
           )}
         </Box>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resource?.toLowerCase()}  ?`}
+          message={`Are you sure you want to delete ${detailData[primaryFieldName] || resource?.toLowerCase()}  ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -164,7 +161,7 @@ const DynamicFormDetail = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageTaxMaster
+        <ManageDynamicForm
           resource={resource}
           resourcePath={resourcePath}
           id={id}
