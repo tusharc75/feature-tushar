@@ -14,6 +14,8 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import { capitalize } from "lodash";
 import { useData } from "src/StateProvider/Provider";
+import { Link } from 'react-router-dom';
+import routes from "src/components/Helpers/Routes";
 
 const History = ({ handleClose, product, productName, poId, _id }) => {
 
@@ -72,11 +74,48 @@ const History = ({ handleClose, product, productName, poId, _id }) => {
                 };
             }
         },
+        {
+            field: 'warehouse',
+            headerName: 'Plant',
+            show: true,
+            filter: false,
+            sortable: false,
+            cellRenderer: 'warehouseRenderer'
+        },
+        ...(user?.user?.brandPolicy?.storageLocation ? [
+            {
+                field: 'storageLocation',
+                headerName: 'Storage Location',
+                show: true,
+                filter: false,
+                sortable: false,
+                cellRenderer: 'storageLocationRenderer'
+            }
+        ] : []),
         { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
         { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'commonRenderer' },
         { field: 'purchaseOrderRejectedDate', headerName: 'Purchase Order Rejected Date', filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' },
         { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
     ];
+
+
+    const WarehouseRenderer = (params) =>
+        params?.value ? (
+            <Link className="link" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`}>
+                {params.value}
+            </Link>
+        ) : (
+            <NoDataCell />
+        );
+
+    const StorageLocationRenderer = (params) =>
+        params?.value ? (
+            <Link className="link" title={params.value} to={`${routes.storageLocationDetail.path}/${params.data.storageLocationId}`}>
+                {params.value}
+            </Link>
+        ) : (
+            <NoDataCell />
+        );
 
     const CreditDebitRenderer = (params: any) => (
         <span>
@@ -86,6 +125,8 @@ const History = ({ handleClose, product, productName, poId, _id }) => {
 
     const frameworkComponents = {
         creditDebitRenderer: CreditDebitRenderer,
+        warehouseRenderer: WarehouseRenderer,
+        storageLocationRenderer: StorageLocationRenderer,
         commonRenderer: CommonRenderer,
         numberRenderer: NumberRenderer,
         dateTimeRenderer: DateTimeRenderer

@@ -345,7 +345,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                         helperText={touched['qty'] && errors['qty']}
                         onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                         onChange={(e) => {
-                          setFieldValue('qty', e.target.value);
+                          setFieldValue('qty', e.target.value?.replace(/\D/g, ""));
                         }}
                       />
                     </ListItem>

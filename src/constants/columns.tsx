@@ -126,6 +126,7 @@ export const getCustomColumnData = (title, field) => {
       show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
       disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
       editable: field?.isColumnEditable ?? false,
+      decimalPlaces: field?.decimalPlaces,
       primaryField: field?.primaryField ?? false
     };
     return commonFieldData;
@@ -150,6 +151,7 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
               return row?.original[fieldName] ? <p>{row?.original[fieldName]}</p> : <NoDataCell />;
             },
             editable: Boolean(ele?.isColumnEditable),
+            decimalPlaces: ele?.decimalPlaces,
             primaryField: ele?.primaryField ?? false
           });
         });
@@ -162,6 +164,7 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
               accessor: fieldName,
               Header: fieldLabel,
               editable: Boolean(ele?.isColumnEditable),
+              decimalPlaces: ele?.decimalPlaces,
               primaryField: ele?.primaryField ?? false,
               Cell: ({ row }) => {
                 return row?.original[fieldName] ? (
@@ -181,6 +184,7 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
             accessor: fieldName,
             Header: fieldLabel,
             editable: Boolean(ele?.isColumnEditable),
+            decimalPlaces: ele?.decimalPlaces,
             primaryField: ele?.primaryField ?? false,
             Cell: ({ row }) => {
               return row?.original[fieldName] ? (
