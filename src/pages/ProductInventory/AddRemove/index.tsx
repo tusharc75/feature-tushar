@@ -312,7 +312,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
           validateOnMount
           validate={validate}
         >
-          {({ submitForm, touched, errors, setFieldValue, values }) => (
+          {({ touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <MuiPickersUtilsProvider utils={DateUtils}>
                 <CustomDialogHeader
@@ -345,7 +345,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                         helperText={touched['qty'] && errors['qty']}
                         onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                         onChange={(e) => {
-                          setFieldValue('qty', e.target.value);
+                          setFieldValue('qty', e.target.value?.replace(/\D/g, ""));
                         }}
                       />
                     </ListItem>
@@ -537,7 +537,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                     variant="contained"
                     color="primary"
                     type="submit"
-                    onClick={submitForm}>
+                  >
                     {capitalize(type)}
                   </CustomButton>
                 </CustomDialogFooter>

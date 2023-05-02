@@ -1422,7 +1422,8 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(name, e.target.value === "" ? "" : parseFloat(e.target.value));
+              handleChange(name, e.target.value === "" ? "" : 
+              parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
             }
         }
         InputProps={{

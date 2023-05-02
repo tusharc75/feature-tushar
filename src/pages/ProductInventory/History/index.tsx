@@ -29,6 +29,8 @@ const History = ({ product, warehouse, storageLocation }) => {
 
   const [isRevertConfirmation, setIsRevertConfirmation] = useState({ open: false, _id: "", product: "" });
   const [revertLoading, setRevertLoading] = useState(false);
+  
+  const renderedFrom = "Product_Inventory_History"
 
   useEffect(() => {
     fetchRecords();
@@ -153,6 +155,17 @@ const History = ({ product, warehouse, storageLocation }) => {
     { field: 'purchaseOrderRejectedDate', headerName: 'Purchase Order Rejected Date', filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' },
     { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
   ];
+
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+  if (columnState) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
 
   const CreditDebitRenderer = (params: any) => (
     <span>{params?.value ? params?.data?.type === 'Debit' ? `-${params?.value}` : params?.value : <NoDataCell />}</span>
@@ -292,7 +305,7 @@ const History = ({ product, warehouse, storageLocation }) => {
             allowAction={true}
             loading={loading}
             allowSelection={false}
-            renderedFrom={'product_history'}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchRecords}
           />
         ) : (
