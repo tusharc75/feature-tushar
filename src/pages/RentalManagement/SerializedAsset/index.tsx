@@ -860,8 +860,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 open={Boolean(anchorLinkActionEl)}
                 onClose={closeLinkActions}
               >
-                {purchaseOrderCount > 0 && (
+                {permissions?.purchaseOrder?.isRead && (
                   <MenuItem
+                    disabled={purchaseOrderCount === 0}
                     onClick={() => {
                       history.push(routes.purchaseOrder.path, {
                         rental: rentalManagementData
@@ -871,8 +872,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                     {`Show ${routes.purchaseOrder.title}`}
                   </MenuItem>
                 )}
-                {bulkAssetCreationCount > 0 && (
+                {permissions?.bulkAssetCreation?.isRead && (
                   <MenuItem
+                    disabled={bulkAssetCreationCount === 0}
                     onClick={() => {
                       history.push(routes.bulkAssetCreation.path, {
                         rental: rentalManagementData
@@ -882,8 +884,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                     {`Show ${routes.bulkAssetCreation.title}`}
                   </MenuItem>
                 )}
-                {subleaseCount > 0 && (
+
+                {permissions?.sublease?.isRead && (
                   <MenuItem
+                    disabled={subleaseCount === 0}
                     onClick={() => {
                       history.push(routes.sublease.path, {
                         rental: rentalManagementData
@@ -893,8 +897,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                     {`Show ${routes.sublease.title}`}
                   </MenuItem>
                 )}
-                {transferAssetCount > 0 && (
+                {permissions?.transferAsset?.isRead && (
                   <MenuItem
+                    disabled={transferAssetCount === 0}
                     onClick={() => {
                       history.push(routes.transferAsset.path, {
                         rental: rentalManagementData
