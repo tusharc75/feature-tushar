@@ -841,7 +841,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   aria-controls="action-menu"
                   endIcon={<ExpandMore fontSize="inherit" />}
                 >
-                  Show
+                  Tickets
                 </Button>
               )}
               <Menu

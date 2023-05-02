@@ -12,27 +12,27 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageTaxMaster from './ManageDynamicPage/ManageDynamicPage';
-import { useLocation } from 'react-router-dom';
+import ManageDynamicForm from './ManageDynamicForm';
 import { camelCase, startCase } from 'lodash';
 
-const DynamicPageDetail = () => {
-  const { id } = useParams();
-  const { pathname, key } = useLocation();
-  const pathnames = pathname.split('/').filter((x) => x);
-  const route = camelCase(pathnames[0]);
-  const resource = startCase(pathnames[0]?.replace(/-/g, ' '));
-  const resourcePath = `/${pathnames[0]}`;
-  const detailRoutePath = `/${pathnames[0]}/detail`;
+const DynamicFormDetail = () => {
+
+  const { route, id } = useParams();
+  const resource = startCase(route?.replace(/-/g, ' '));
+  const renderedFrom = camelCase(resource);
+
+  const resourcePath = `/${route}`;
 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.taxMaster]);
-  const [taxMasterData, setTaxMasterData] = useState(null);
+  const [detailData, setDetailData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+
+  const [primaryFieldName, setPrimaryFieldName] = useState(null);
+
   const {
     state: { permissions, user }
   }: any = useData();
@@ -47,8 +47,12 @@ const DynamicPageDetail = () => {
   const fetchFields = async () => {
     axiosInstance()
       .get(`/field?resource=${resource}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
+      .then(({ data: { data } }) => {
+        setFields(data?.filter((field) => field.isRead));
+        const primaryField = data?.find((e) => e?.fieldData?.primaryField)
+        if (primaryField) {
+          setPrimaryFieldName(primaryField?.fieldData?.fieldName)
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -60,9 +64,12 @@ const DynamicPageDetail = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`${resourcePath}/${id}`);
-      setTaxMasterData(data);
-      setCustomizedRoutes([routes.taxMaster, { title: data?.taxCode }]);
+      } = await axiosInstance().get(`/dynamic-form/${id}`, {
+        headers: {
+          Resource: resource
+        }
+      });
+      setDetailData(data);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -72,7 +79,15 @@ const DynamicPageDetail = () => {
   const handleDelete = () => {
     if (id) {
       axiosInstance()
-        .put(`${resourcePath}/remove`, { ids: [id] })
+        .put(
+          `/dynamic-form/remove`,
+          { ids: [id] },
+          {
+            headers: {
+              Resource: resource
+            }
+          }
+        )
         .then(({ data }) => {
           setShowConfirmBox(false);
 
@@ -103,30 +118,24 @@ const DynamicPageDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs
-            routes={[
-              {
-                title: resource,
-                path: `/${route}`
-              }
-            ]}
-          />
+          <CustomBreadCrumbs routes={[{ title: resource, path: `/${route}` }, {
+            title: primaryFieldName && detailData && detailData[primaryFieldName] ?
+              detailData[primaryFieldName] : resource
+          }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <>
-              {permissions[route]?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                </Button>
-              )}
-              {permissions[route]?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            </>
+            {permissions[renderedFrom]?.isUpdate && (
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                className="btn-outline-v1"
+                onClick={handleOpenUpdateDialog}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+              >
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              </Button>
+            )}
+            {permissions[renderedFrom]?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>
@@ -137,14 +146,14 @@ const DynamicPageDetail = () => {
               <CommonSkeleton lenArray={[...Array(7).keys()]} />
             </Grid>
           ) : (
-            <DetailsPage data={taxMasterData} fields={fields} />
+            <DetailsPage data={detailData} fields={fields} />
           )}
         </Box>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.taxMaster?.title?.toLowerCase()} ${taxMasterData.taxCode} ?`}
+          message={`Are you sure you want to delete ${detailData[primaryFieldName] || resource?.toLowerCase()}  ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -152,7 +161,7 @@ const DynamicPageDetail = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageTaxMaster
+        <ManageDynamicForm
           resource={resource}
           resourcePath={resourcePath}
           id={id}
@@ -168,4 +177,4 @@ const DynamicPageDetail = () => {
   );
 };
 
-export default DynamicPageDetail;
+export default DynamicFormDetail;
