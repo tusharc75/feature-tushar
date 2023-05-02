@@ -68,7 +68,8 @@ export default function ImportExportLinks({
   isBackgroundWhite = false,
   isDropDownIconShow = false,
   extraImportExportLinks = [],
-  title = ''
+  title = '',
+  headers = null
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
@@ -116,7 +117,10 @@ export default function ImportExportLinks({
       axiosInstance()
         .post(apiUrl ? apiUrl : importApi, formData, {
           responseType: 'blob',
-          headers: { 'Content-Type': 'multipart/form-data' }
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            ...(headers ? headers : {})
+          }
         })
         .then((response) => {
           if (!response.headers['content-disposition']) {
@@ -169,7 +173,10 @@ export default function ImportExportLinks({
     }
     axiosInstance()
       .get(apiUrl ? apiUrl : exportApi, {
-        responseType: 'arraybuffer'
+        responseType: 'arraybuffer',
+        headers: {
+          ...(headers ? headers : {})
+        }
       })
       .then((response) => {
         const fileName = response.headers['content-disposition'].split('filename=')[1];
@@ -200,7 +207,7 @@ export default function ImportExportLinks({
     }
 
     axiosInstance()
-      .get(exportApi, { responseType: 'arraybuffer' })
+      .get(exportApi, { responseType: 'arraybuffer', headers: { ...(headers ? headers : {}) } })
       .then((response) => {
         const fileName = response.headers['content-disposition'].split('filename=')[1];
 

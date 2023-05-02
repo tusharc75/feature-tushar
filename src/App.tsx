@@ -208,8 +208,8 @@ import WellNumberDetail from './pages/WellNumber/WellNumberDetail';
 import PlanningView from './pages/PlanningView';
 import TaxMaster from './pages/TaxMaster';
 import TaxMasterDetail from './pages/TaxMaster/TaxMasterDetail';
-import DynamicPage from './pages/DynamicPage';
-import DynamicPageDetail from './pages/DynamicPage/DynamicPageDetail';
+import DynamicForm from './pages/DynamicForm';
+import DynamicFormDetail from './pages/DynamicForm/DynamicFormDetail';
 
 var notificationInterval: any = null;
 
@@ -1017,13 +1017,12 @@ function App() {
               <PublicRoutePage />
             </Route>
             <PrivateRoute exact path={`/:route`}>
-              <DynamicPage />
+              <DynamicForm />
             </PrivateRoute>
             <PrivateRoute exact path={`/:route/detail/:id`}>
-              <DynamicPageDetail />
+              <DynamicFormDetail />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
-            {/* <Route exact path="/crm/account" component={Account} /> */}
           </Switch>
         </ErrorBoundaryComponent>
       </AnimatePresence>
