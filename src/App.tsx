@@ -1023,7 +1023,6 @@ function App() {
               <DynamicFormDetail />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
-            {/* <Route exact path="/crm/account" component={Account} /> */}
           </Switch>
         </ErrorBoundaryComponent>
       </AnimatePresence>

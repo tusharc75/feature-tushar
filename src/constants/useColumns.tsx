@@ -234,10 +234,10 @@ export default function useColumns() {
             ...commonFieldData,
             disabled: true,
             field: field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName,
-            cellRenderer: permissions[permissionForLinks[field?.resource]]?.isRead ? 'linkRenderer' : 'commonRenderer',
+            cellRenderer: permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? 'linkRenderer' : 'commonRenderer',
             cellRendererParams: { pathName: detailScreenRoute, property: '_id', isForPopup: hasPopup }
           },
-          rendererName: permissions[permissionForLinks[field?.resource]]?.isRead ? 'linkRenderer' : 'commonRenderer'
+          rendererName: permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? 'linkRenderer' : 'commonRenderer'
         };
       } else if (field?.lookup) {
         let joinedFieldName = field?.fieldName.indexOf(' ') > 0 ? camelCase(field?.fieldName) : field?.fieldName;

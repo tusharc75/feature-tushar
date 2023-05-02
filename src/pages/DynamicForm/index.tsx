@@ -2,7 +2,6 @@ import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -13,14 +12,11 @@ import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
-import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
-  storageLocation,
   isObjectEmpty,
   gridLoadingTimeout,
   getLocalStorageArrayData,
-  sidebarResource,
   removeLocalStorage
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -30,26 +26,25 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
-// import ManageWellNumber from './ManageWellNumber';
 import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase, startCase } from 'lodash';
-import { useLocation } from 'react-router-dom';
-import ManageDynamicForm from './ManageDynamicForm/ManageDynamicForm';
+import ManageDynamicForm from './ManageDynamicForm';
+import { useParams, useHistory } from 'react-router-dom';
 
 const DynamicForm = () => {
-  const { pathname, key } = useLocation();
-  const pathnames = pathname.split('/').filter((x) => x);
-  const route = camelCase(pathnames[0]);
-  const resource = startCase(pathnames[0]?.replace(/-/g, ' '));
-  const resourcePath = `/${pathnames[0]}`;
-  const detailRoutePath = `/${pathnames[0]}/detail`;
 
-  let renderedFrom = camelCase(route);
+  const { route } = useParams();
+
+  const resource = startCase(route?.replace(/-/g, ' '));
+
+  const resourcePath = `/${route}`;
+  const detailPagePath = `/${route}/detail`;
+
+  let renderedFrom = camelCase(resource);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -90,7 +85,7 @@ const DynamicForm = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(resource, o?.fieldData, detailRoutePath);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, detailPagePath);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -106,6 +101,8 @@ const DynamicForm = () => {
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -125,8 +122,8 @@ const DynamicForm = () => {
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions[route]?.isUpdate;
-          finalObject['canDelete'] = permissions[route]?.isDelete;
+          finalObject['allowedToEdit'] = permissions[renderedFrom]?.isUpdate;
+          finalObject['canDelete'] = permissions[renderedFrom]?.isDelete;
           let res = {
             ...finalObject
           };
@@ -193,16 +190,13 @@ const DynamicForm = () => {
     } else {
       ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
     }
-    axiosInstance()
-      .put(
-        `/dynamic-form/remove`,
-        { ids: ids },
-        {
-          headers: {
-            Resource: resource
-          }
+    axiosInstance().put(`/dynamic-form/remove`, { ids: ids },
+      {
+        headers: {
+          Resource: resource
         }
-      )
+      }
+    )
       .then(() => {
         removeLocalStorage(localStorageSelectedRecords);
         fetchData();
@@ -217,7 +211,7 @@ const DynamicForm = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions[route]?.isCreate && (
+      {permissions[renderedFrom]?.isCreate && (
         <HtmlTooltip title="Clone">
           <IconButton
             size="small"
@@ -230,7 +224,7 @@ const DynamicForm = () => {
           </IconButton>
         </HtmlTooltip>
       )}
-      {permissions[route]?.isDelete && (
+      {permissions[renderedFrom]?.isDelete && (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
@@ -285,24 +279,17 @@ const DynamicForm = () => {
   const handleFilterClose = () => {
     setisOpenDialog(false);
   };
-  console.log(pathnames[0]);
+
   return (
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs
-            routes={[
-              {
-                title: resource,
-                path: `/${pathnames[0]}`
-              }
-            ]}
-          />
+          <CustomBreadCrumbs routes={[{ title: resource, path: `/${route}` }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions[route]}
-            module="wellNumber"
+            permissions={permissions[renderedFrom]}
+            module={renderedFrom}
             api={'dynamic-form'}
             afterImportCompleted={() => {
               fetchData();
@@ -378,7 +365,7 @@ const DynamicForm = () => {
                     contentPart={null}
                     columns={columns}
                     dispatch={dispatch}
-                    title={routes?.wellNumber?.title}
+                    title={resource}
                     filters={filters}
                   />
                 </Grid>
@@ -397,7 +384,7 @@ const DynamicForm = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions[route]?.isCreate && (
+                  {permissions[renderedFrom]?.isCreate && (
                     <Button
                       onClick={() => {
                         setShowManageDialog({ open: true, isClone: false, idToClone: null });
@@ -412,7 +399,7 @@ const DynamicForm = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions[route]?.isDelete && (
+                  {permissions[renderedFrom]?.isDelete && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -463,16 +450,16 @@ const DynamicForm = () => {
               <CustomSwipableList
                 allowSelection={true}
                 allowSwipe={true}
-                permissions={permissions.wellNumber}
+                permissions={permissions[renderedFrom]}
                 primaryField={columns?.find((d) => d.primaryField)}
                 onClick={(data) => {
-                  history.push(`${detailRoutePath}/${data._id}`);
+                  history.push(`${detailPagePath}/${data._id}`);
                 }}
                 dataRows={dataRows}
                 selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                 dispatch={dispatch}
                 onEdit={(data) => {
-                  history.push(`${detailRoutePath}/${data._id}?openEdit=true`);
+                  history.push(`${detailPagePath}/${data._id}?openEdit=true`);
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {
@@ -534,7 +521,7 @@ const DynamicForm = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${resource?.toLowerCase()} ${deleteRecord?.wellNumber || ''} ? `}
+          message={`Are you sure you want to delete the ${resource?.toLowerCase()} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

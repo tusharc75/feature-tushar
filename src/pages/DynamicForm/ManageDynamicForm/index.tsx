@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -10,26 +10,20 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
-import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { CustomDialogTransition, isFieldNotTouched } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 
 const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, isClone = false, id = null }) => {
+
   const history = useHistory();
-  const {
-    state: { user }
-  }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
-  const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const ref = useRef(null);
 
   useEffect(() => {
     fetchFields();
@@ -40,28 +34,19 @@ const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, isClone
       let data;
       const response = await axiosInstance().get(`/field?resource=${resource}`);
       data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       if (id) {
-        axiosInstance()
-          .get(`/dynamic-form/${id}`, {
-            headers: {
-              Resource: resource
-            }
-          })
+        axiosInstance().get(`/dynamic-form/${id}`, {
+          headers: {
+            Resource: resource
+          }
+        })
           .then(({ data: { data } }) => {
-            let fields = fieldsDataForUpdate;
-            let tempData = data;
-            if (isClone) {
-              fields = fieldsDataForCreate;
-              const { taxCode, ...rest } = data;
-              setCloneHeading(taxCode);
-              tempData = rest;
-            }
             setInitialData({
-              fields: fields,
-              values: getObjKeysWithValues(tempData, fields)
+              fields: isClone ? fieldsDataForCreate : fieldsDataForUpdate,
+              values: getObjKeysWithValues(data, isClone ? fieldsDataForCreate : fieldsDataForUpdate)
             });
           })
           .catch((error) => {
@@ -153,25 +138,18 @@ const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, isClone
           validationSchema={yupSchema(initialData.fields)}
           onSubmit={handleSubmit}
           validate={validate}
-          innerRef={ref}
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
+                  if (!isEqual(values, initialData.values)) {
                     setShowConfirmDialog(true);
                   } else {
                     onClose();
                   }
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.taxCode ? `(${initialData.values?.taxCode})` : ''}`
-                    : `Create ${resource}`
-                }`}
+                title={`${id ? isClone ? `Clone` : `Edit` : `Create`}`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
