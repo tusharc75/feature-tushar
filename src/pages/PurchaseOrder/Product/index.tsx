@@ -551,6 +551,16 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = material.find((d) => d._id === updatedData._id);
     if (rowData?.type === "Product") {
+      if (inputField?.qty) {
+        if (inputField?.qty < ((rowData?.actualReceived || 0) + (rowData?.rejectQuantity || 0))) {
+          toastConfig.setToastConfig({
+            open: true,
+            type: "error",
+            message: 'Quantity should be greater than Actual Received and Reject Quantity',
+          });
+          return false;
+        }
+      }
       let rows: any = [{ ...rowData, ...updatedData }];
       rows = await calculateRowsField(material, inputField, productFields, updatedData);
       handleUpdateQty(rows);
