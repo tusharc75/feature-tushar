@@ -12,11 +12,11 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageTaxMaster from './ManageDynamicPage/ManageDynamicPage';
+import ManageTaxMaster from './ManageDynamicForm/ManageDynamicForm';
 import { useLocation } from 'react-router-dom';
 import { camelCase, startCase } from 'lodash';
 
-const DynamicPageDetail = () => {
+const DynamicFormDetail = () => {
   const { id } = useParams();
   const { pathname, key } = useLocation();
   const pathnames = pathname.split('/').filter((x) => x);
@@ -28,7 +28,7 @@ const DynamicPageDetail = () => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.taxMaster]);
-  const [taxMasterData, setTaxMasterData] = useState(null);
+  const [dynamicDetailData, setDynamicDetailData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -60,8 +60,12 @@ const DynamicPageDetail = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`${resourcePath}/${id}`);
-      setTaxMasterData(data);
+      } = await axiosInstance().get(`/dynamic-form/${id}`, {
+        headers: {
+          Resource: resource
+        }
+      });
+      setDynamicDetailData(data);
       setCustomizedRoutes([routes.taxMaster, { title: data?.taxCode }]);
       setLoading(false);
     } catch (error) {
@@ -72,7 +76,15 @@ const DynamicPageDetail = () => {
   const handleDelete = () => {
     if (id) {
       axiosInstance()
-        .put(`${resourcePath}/remove`, { ids: [id] })
+        .put(
+          `/dynamic-form/remove`,
+          { ids: [id] },
+          {
+            headers: {
+              Resource: resource
+            }
+          }
+        )
         .then(({ data }) => {
           setShowConfirmBox(false);
 
@@ -107,7 +119,7 @@ const DynamicPageDetail = () => {
             routes={[
               {
                 title: resource,
-                path: `/${route}`
+                path: `/${pathnames[0]}`
               }
             ]}
           />
@@ -137,14 +149,14 @@ const DynamicPageDetail = () => {
               <CommonSkeleton lenArray={[...Array(7).keys()]} />
             </Grid>
           ) : (
-            <DetailsPage data={taxMasterData} fields={fields} />
+            <DetailsPage data={dynamicDetailData} fields={fields} />
           )}
         </Box>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.taxMaster?.title?.toLowerCase()} ${taxMasterData.taxCode} ?`}
+          message={`Are you sure you want to delete ${resource?.toLowerCase()}  ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -168,4 +180,4 @@ const DynamicPageDetail = () => {
   );
 };
 
-export default DynamicPageDetail;
+export default DynamicFormDetail;

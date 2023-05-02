@@ -39,9 +39,9 @@ import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase, startCase } from 'lodash';
 import { useLocation } from 'react-router-dom';
-import ManageDynamicPage from './ManageDynamicPage/ManageDynamicPage';
+import ManageDynamicForm from './ManageDynamicForm/ManageDynamicForm';
 
-const DynamicPage = () => {
+const DynamicForm = () => {
   const { pathname, key } = useLocation();
   const pathnames = pathname.split('/').filter((x) => x);
   const route = camelCase(pathnames[0]);
@@ -116,7 +116,11 @@ const DynamicPage = () => {
     }
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${routes.wellNumber.path}${queryString}`)
+      .get(`/dynamic-form/${queryString}`, {
+        headers: {
+          Resource: resource
+        }
+      })
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -190,7 +194,15 @@ const DynamicPage = () => {
       ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
     }
     axiosInstance()
-      .put(`${routes.wellNumber.path}/remove`, { ids: ids })
+      .put(
+        `/dynamic-form/remove`,
+        { ids: ids },
+        {
+          headers: {
+            Resource: resource
+          }
+        }
+      )
       .then(() => {
         removeLocalStorage(localStorageSelectedRecords);
         fetchData();
@@ -273,7 +285,7 @@ const DynamicPage = () => {
   const handleFilterClose = () => {
     setisOpenDialog(false);
   };
-
+  console.log(pathnames[0]);
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -282,7 +294,7 @@ const DynamicPage = () => {
             routes={[
               {
                 title: resource,
-                path: `/${route}`
+                path: `/${pathnames[0]}`
               }
             ]}
           />
@@ -291,7 +303,7 @@ const DynamicPage = () => {
           <ImportExportLinks
             permissions={permissions[route]}
             module="wellNumber"
-            api={'well-number'}
+            api={'dynamic-form'}
             afterImportCompleted={() => {
               fetchData();
             }}
@@ -306,6 +318,9 @@ const DynamicPage = () => {
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchData();
+            }}
+            headers={{
+              Resource: resource
             }}
           />
         </Grid>
@@ -504,7 +519,7 @@ const DynamicPage = () => {
         )}
       </div>
       {showManageDialog.open && (
-        <ManageDynamicPage
+        <ManageDynamicForm
           resource={resource}
           resourcePath={resourcePath}
           isClone={showManageDialog.isClone}
@@ -531,4 +546,4 @@ const DynamicPage = () => {
   );
 };
 
-export default DynamicPage;
+export default DynamicForm;
