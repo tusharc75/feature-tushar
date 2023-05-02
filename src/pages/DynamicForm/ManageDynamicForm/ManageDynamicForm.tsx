@@ -17,7 +17,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 
-const ManageDynamicPage = ({ resource, resourcePath, onClose, onSuccess, isClone = false, id = null }) => {
+const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, isClone = false, id = null }) => {
   const history = useHistory();
   const {
     state: { user }
@@ -45,7 +45,11 @@ const ManageDynamicPage = ({ resource, resourcePath, onClose, onSuccess, isClone
 
       if (id) {
         axiosInstance()
-          .get(`${resourcePath}/${id}`)
+          .get(`/dynamic-form/${id}`, {
+            headers: {
+              Resource: resource
+            }
+          })
           .then(({ data: { data } }) => {
             let fields = fieldsDataForUpdate;
             let tempData = data;
@@ -80,7 +84,11 @@ const ManageDynamicPage = ({ resource, resourcePath, onClose, onSuccess, isClone
     if (id && !isClone) {
       values._id = id;
       axiosInstance()
-        .put(`${routes.taxMaster?.path}`, values)
+        .put(`/dynamic-form`, values, {
+          headers: {
+            Resource: resource
+          }
+        })
         .then(({ data }) => {
           setSubmitting(false);
           onSuccess();
@@ -96,10 +104,14 @@ const ManageDynamicPage = ({ resource, resourcePath, onClose, onSuccess, isClone
         });
     } else {
       axiosInstance()
-        .post(`${routes.taxMaster?.path}`, values)
+        .post(`/dynamic-form`, values, {
+          headers: {
+            Resource: resource
+          }
+        })
         .then(({ data: { data, message } }) => {
           setLoading(false);
-          history.push(`${routes.taxMasterDetail.path}/${data._id}`);
+          history.push(`${resourcePath}/detail/${data._id}`);
           onSuccess(data.data);
           setSubmitting(true);
           toastConfig.setToastConfig({
@@ -239,4 +251,4 @@ const ManageDynamicPage = ({ resource, resourcePath, onClose, onSuccess, isClone
   );
 };
 
-export default ManageDynamicPage;
+export default ManageDynamicForm;
