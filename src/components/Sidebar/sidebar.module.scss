@@ -1,5 +1,5 @@
 .drawer {
-  background-color: #163340 !important;
+  background-color: #0e0e23 !important;
   color: #dbdbdb !important;
   border-right: 0 !important;
 
@@ -39,7 +39,7 @@
         top: -6px;
         bottom: -6px;
         left: -6px;
-        background-color: #298b88;
+        background-color: #0f9fa9;
         z-index: -1;
         width: 33px;
         border-radius: 7px;
@@ -52,7 +52,7 @@
       left: 8px;
       right: 0;
       border-radius: 100vh 0 0 100vh;
-      background-color: #f8fffe;
+      background-color: #f1f5ff;
       top: 0;
       bottom: 0;
     }
@@ -60,7 +60,7 @@
       --height: 16px;
       position: absolute;
       width: 100%;
-      background-color: #f8fffe;
+      background-color: #f1f5ff;
       height: var(--height, 10px);
       left: 0;
       &::before {
@@ -70,7 +70,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: #163340;
+        background-color: #0e0e23;
       }
       &:first-of-type {
         top: calc(var(--height, 10px) * -1);

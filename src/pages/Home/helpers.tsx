@@ -32,53 +32,44 @@ export const assignIconAndText = (groupedData) => {
 
 // CHECK SECTION NAME AND RETURN ICON, COLOR, AND DESCRIPTION
 const setDataBySectionName = (secName, index) => {
-
-  const iconColour = colourCodes[index]?.icon || ['#FFA800', '#E35200']
+  const iconColour = colourCodes[index]?.icon || ['#FFA800', '#E35200'];
   let icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
   let text = '';
-  let color = colourCodes[index]?.main || '#FFF7F2'
+  // let color = colourCodes[index]?.main || '#FFF7F2'
+  let color = '#FFFFFF';
 
-  if (["CRM +", "Sales Management"].includes(secName)) {
+  if (['CRM +', 'Sales Management'].includes(secName)) {
     text = 'Convert leads and close sales deals faster.';
     icon = <DashboardIcons.CRM colors={iconColour} />;
-  }
-  else if (["eCommerce"].includes(secName)) {
+  } else if (['eCommerce'].includes(secName)) {
     text = 'Simplified eCommerce functionalities to smoothen your lives.';
     icon = <DashboardIcons.ECOMMERCE colors={iconColour} />;
-  }
-  else if (["Inventory Management"].includes(secName)) {
+  } else if (['Inventory Management'].includes(secName)) {
     text = 'Manage Inventory and Purchases Smartly.';
     icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
-  }
-  else if (["Rental Operations Management", "ROM"].includes(secName)) {
+  } else if (['Rental Operations Management', 'ROM'].includes(secName)) {
     text = 'Fulfill Rental Orders Faster.';
     icon = <DashboardIcons.ROM colors={iconColour} />;
-  }
-  else if (["Field Service Operations"].includes(secName)) {
+  } else if (['Field Service Operations'].includes(secName)) {
     text = 'Fulfill Service Orders Faster.';
     icon = <DashboardIcons.ACCOUNTS colors={iconColour} />;
-  }
-  else if (["Repair and Maintenance Management"].includes(secName)) {
+  } else if (['Repair and Maintenance Management'].includes(secName)) {
     text = 'Repair and Maintain your product and services at ease.';
     icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColour} />;
-  }
-  else if (["Admin Portal"].includes(secName)) {
+  } else if (['Admin Portal'].includes(secName)) {
     text = 'Build your own Template, Manage Roles and Entities.';
     icon = <DashboardIcons.ADMIN_PORTAL colors={iconColour} />;
-  }
-  else if (["Accounts"].includes(secName)) {
+  } else if (['Accounts'].includes(secName)) {
     text = 'Customer and Supplier Account Management at your fingertips.';
     icon = <DashboardIcons.ACCOUNTS colors={iconColour} />;
-  }
-  else if (["Product Setup"].includes(secName)) {
+  } else if (['Product Setup'].includes(secName)) {
     text = 'Product and Category Setup.';
     icon = <DashboardIcons.PRODUCT_SETUP colors={iconColour} />;
-  }
-  else if (["Dynamic Forms"].includes(secName)) {
+  } else if (['Dynamic Forms'].includes(secName)) {
     text = 'Setup Dynamic Forms & Templates';
     icon = <DashboardIcons.FORM_ICON colors={iconColour} />;
   }
-  
+
   return {
     icon: icon,
     text: text,
@@ -111,4 +102,4 @@ const colourCodes = [
     main: '#F6F1FF',
     icon: ['#AD14F5', '#6203AC']
   }
-]
+];
