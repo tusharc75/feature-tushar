@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, Dialog, TextField } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -9,8 +9,9 @@ import CustomButton from '../Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CommonSkeleton from '../Helpers/CommonSkeleton';
 
-const MergeRecordsDialog = ({ id, onClose, resource, onSuccess }) => {
+const MergeRecordsDialog = ({ ids, onClose, resource, onSuccess }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
@@ -25,8 +26,8 @@ const MergeRecordsDialog = ({ id, onClose, resource, onSuccess }) => {
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=${resource}`)
       .then(({ data: { data } }) => {
-        setFromLabel(data[resource]?.find((item) => item.optionValue === id)?.optionLabel)
-        let options = data[resource]?.filter((item) => item.optionValue !== id);
+        setFromLabel(data[resource]?.filter((item) => ids?.includes(item.optionValue))?.map((e) => e.optionLabel)?.toString())
+        let options = data[resource]?.filter((item) => !ids?.includes(item.optionValue));
         setOptions(options);
       })
       .catch((error) => {
@@ -38,7 +39,7 @@ const MergeRecordsDialog = ({ id, onClose, resource, onSuccess }) => {
     setLoading(true);
     const values = {
       resource: resource,
-      from: id,
+      from: ids,
       to: mergeValue.optionValue
     };
     axiosInstance()
@@ -70,44 +71,49 @@ const MergeRecordsDialog = ({ id, onClose, resource, onSuccess }) => {
     }}
     fullWidth
   >
-    <CustomDialogHeader
-      title={`Merge - ${fromLabel}`}
-      onClose={onClose}
-      isMinimized={!fullScreen}
-      onMinimizeMaximize={() => {
-        setFullScreen((prevState) => !prevState);
-      }}
-      showManimizeMaximize={true}
-    />
-    <CustomDialogContent>
-      <Box py={2}>
-        <Autocomplete
-          size="small"
-          options={options}
-          value={mergeValue}
-          onChange={(_, val) => {
-            setMergeValue(val);
+    {options ?
+      <Fragment>
+        <CustomDialogHeader
+          title={`Merge - ${fromLabel}`}
+          onClose={onClose}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
           }}
-          getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
-          getOptionLabel={(option) => option.optionLabel}
-          renderInput={(props) => <TextField {...props} required variant="outlined" label={`${resource}`} />}
+          showManimizeMaximize={true}
         />
-      </Box>
-    </CustomDialogContent>
-    <CustomDialogFooter>
-      <Button size="small" color="primary" onClick={onClose}>
-        Cancel
-      </Button>
-      <CustomButton
-        loading={loading}
-        disabled={loading || !mergeValue}
-        variant="contained"
-        color="primary"
-        type="submit"
-        onClick={handleSave}>
-        Save
-      </CustomButton>
-    </CustomDialogFooter>
+        <CustomDialogContent>
+          <Box py={2}>
+            <Autocomplete
+              size="small"
+              options={options}
+              value={mergeValue}
+              onChange={(_, val) => {
+                setMergeValue(val);
+              }}
+              getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
+              getOptionLabel={(option) => option.optionLabel}
+              renderInput={(props) => <TextField {...props} required variant="outlined" label={`${resource}`} />}
+            />
+          </Box>
+        </CustomDialogContent>
+        <CustomDialogFooter>
+          <Button size="small" color="primary" onClick={onClose}>
+            Cancel
+          </Button>
+          <CustomButton
+            loading={loading}
+            disabled={loading || !mergeValue}
+            variant="contained"
+            color="primary"
+            type="submit"
+            onClick={handleSave}>
+            Save
+          </CustomButton>
+        </CustomDialogFooter>
+      </Fragment> : <Box p={2} height={500} bgcolor="white">
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>}
   </Dialog>
 
   );
