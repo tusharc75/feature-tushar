@@ -832,7 +832,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   {`Remove Asset/Serial Number`}
                 </MenuItem>
               </Menu>
-
               {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
                 <Button
                   onClick={openLinkActions}
