@@ -11,6 +11,7 @@ import { MdZoomOutMap } from 'react-icons/md';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Box, Button, Paper } from '@material-ui/core';
 import _ from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
 
 const customNodeStyles = {
   workOrder: { name: 'WorkOrder', ...COLOUR_MASTER.repairJob },
@@ -58,6 +59,14 @@ const WorkOrderViews = (props) => {
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
   const [dropdown, setDropdown] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
+  const {
+    state: { user }
+  }: any = useData();
+
+  if (!user?.user?.brandPolicy?.repairOrderQuotation) {
+    customNodeStyles.preWorkService.name = 'Services';
+    delete customNodeStyles.postWorkService;
+  }
 
   useEffect(() => {
     fetchViewsData();
@@ -121,7 +130,7 @@ const WorkOrderViews = (props) => {
             )
           },
           position: { x: xPosition, y: sIdx * 80 },
-          style: s?.preWork ? customNodeStyles.preWorkService : customNodeStyles.postWorkService
+          style: s?.preWork || !user?.user?.brandPolicy?.repairOrderQuotation ? customNodeStyles.preWorkService : customNodeStyles.postWorkService
         });
         flowEdge.push({
           id: `workOrder-service-${serviceId}-${workOrderId}`,
