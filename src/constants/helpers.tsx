@@ -65,7 +65,10 @@ export const demandOrderSteps = ['Add Products'];
 
 export const purchaseRequisitionSteps = ['Add Products'];
 
-export const productionOrderSteps: stepInterface[] = [{ name: 'Add', title: 'Add', icon: 'add' }];
+export const productionOrderSteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
+];
 
 export const jobProcessSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
