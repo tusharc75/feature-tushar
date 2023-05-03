@@ -91,7 +91,7 @@ const Layout = ({ children, width }) => {
     });
   };
 
-  const getHelpers = (helpers: StoreHelpers) => { };
+  const getHelpers = (helpers: StoreHelpers) => {};
 
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status, type, index, action, lifecycle, step } = data;
@@ -224,7 +224,7 @@ const Layout = ({ children, width }) => {
           transition={{ duration: 0.3 }}
           exit={{ opacity: 0 }}
           className={classes.content}
-          style={{ backgroundColor: pathname === '/' ? '#ffffff' : '#f8fffe' }}
+          style={{ backgroundColor: '#f1f5ff' }}
           onClick={handleToggleState}
         >
           <div className={classes.layout} ref={bodyRef} onScroll={onScroll}>
