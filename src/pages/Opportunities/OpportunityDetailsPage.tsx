@@ -610,61 +610,67 @@ function OpportunityDetailsPage() {
           ) : (
             <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
           )}
-          <div className="pt-3 modified_style_of_accordion">
+          <div className="pt-3 ">
             {opportunityData && permissions?.supplierContact?.isRead && (
-              <OpportunityContacts
-                contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
-                title="Supplier Contacts"
-                contactApi={supplierContact.contactApi}
-                isExpanded={expanded.supplierContacts}
-                onAddContact={() => {
-                  fetchSupplierContactData(true);
-                }}
-                onSetExpanded={() => {
-                  setExpanded({
-                    ...expanded,
-                    supplierContacts: !expanded.supplierContacts
-                  });
-                }}
-                recordsPerLine={recordsPerLine}
-                accounts={cloneDeep(opportunityData?.supplierAccount)}
-                isAllowedToUpdate={allowedToEdit}
-              />
+              <Box mb={2}>
+                <OpportunityContacts
+                  contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
+                  title="Supplier Contacts"
+                  contactApi={supplierContact.contactApi}
+                  isExpanded={expanded.supplierContacts}
+                  onAddContact={() => {
+                    fetchSupplierContactData(true);
+                  }}
+                  onSetExpanded={() => {
+                    setExpanded({
+                      ...expanded,
+                      supplierContacts: !expanded.supplierContacts
+                    });
+                  }}
+                  recordsPerLine={recordsPerLine}
+                  accounts={cloneDeep(opportunityData?.supplierAccount)}
+                  isAllowedToUpdate={allowedToEdit}
+                />
+              </Box>
             )}
             {opportunityData && permissions?.customerContact?.isRead && (
-              <OpportunityContacts
-                contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
-                title="Customer Contacts"
-                isExpanded={expanded['customerContacts']}
-                contactApi={customerContact.contactApi}
-                onAddContact={() => {
-                  fetchCustomerContactData(true);
-                }}
-                onSetExpanded={() => {
-                  setExpanded({
-                    ...expanded,
-                    customerContacts: !expanded.customerContacts
-                  });
-                }}
-                recordsPerLine={recordsPerLine}
-                saveContactToOpportunity={handleAssignContacts}
-                accountId={opportunityData?.customerAccount?.optionValue}
-                isAllowedToUpdate={allowedToEdit}
-              />
+              <Box mb={2}>
+                <OpportunityContacts
+                  contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
+                  title="Customer Contacts"
+                  isExpanded={expanded['customerContacts']}
+                  contactApi={customerContact.contactApi}
+                  onAddContact={() => {
+                    fetchCustomerContactData(true);
+                  }}
+                  onSetExpanded={() => {
+                    setExpanded({
+                      ...expanded,
+                      customerContacts: !expanded.customerContacts
+                    });
+                  }}
+                  recordsPerLine={recordsPerLine}
+                  saveContactToOpportunity={handleAssignContacts}
+                  accountId={opportunityData?.customerAccount?.optionValue}
+                  isAllowedToUpdate={allowedToEdit}
+                />
+              </Box>
             )}
             {permissions?.projectSales?.isRead && (
-              <ProjectInAccordion
-                recordsPerLine={3}
-                projectSales={projectSales}
-                type={typeCreateProjectSalesDialog}
-                fetchData={fetchRelatedData}
-                permissions={permissions}
-                isAddProjectSale={true}
-                isAllowedToEdit={allowedToEdit}
-                accountId={opportunityData?._id}
-                accountName={opportunityData?.opportunityName}
-                resource={sidebarResource.opportunity}
-              />
+              <Box mb={2}>
+                <ProjectInAccordion
+                  recordsPerLine={3}
+                  projectSales={projectSales}
+                  type={typeCreateProjectSalesDialog}
+                  fetchData={fetchRelatedData}
+                  permissions={permissions}
+                  isAddProjectSale={true}
+                  isAllowedToEdit={allowedToEdit}
+                  accountId={opportunityData?._id}
+                  accountName={opportunityData?.opportunityName}
+                  resource={sidebarResource.opportunity}
+                />
+              </Box>
             )}
             {permissions?.quoteBuilder?.isRead && (
               <QuotesInAccordion
