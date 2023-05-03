@@ -53,6 +53,8 @@ function Dashboard() {
     setSections(data);
   }, [user, selectedEntity]);
 
+  console.log(sections);
+
   const handleRoutes = (item) => {
     switch (item.name) {
       case 'Pos':
@@ -93,105 +95,6 @@ function Dashboard() {
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" />
           </div>
-          {/* <div className={styles.hero_container}>
-            <h1 className={styles.hero_heading}>Raising resiliency in a rapidly transforming business environment</h1>
-            <p className={styles.hero_paragraph}>Simplify and accelerate your B2B transactions.</p>
-            <img src={SVGImages(IconConst.HERO)} alt="Dashboard Hero Image" className={styles.crm_hero_image} />
-          </div>
-          <div className="card_container">
-            <div className={`${styles.search_section}`}>
-              <div className={`${styles.search_input}`}>
-                <input
-                  type="text"
-                  value={search}
-                  placeholder="Search"
-                  onChange={(e) => {
-                    const searchedValue = e.target.value;
-                    searchedValue.length > 0 ? setShowCloseButton(true) : setShowCloseButton(false);
-                    setSearch(searchedValue);
-                    handleSearch();
-                  }}
-                />
-                <div className={styles.searchIcon}>
-                  <Search color="disabled" />
-                </div>
-                {showCloseButton && (
-                  <div className={styles.clear_icon}>
-                    <ClearIcon onClick={() => clearSearch()} />
-                  </div>
-                )}
-              </div>
-            </div>
-            {search.trim() === '' ? (
-              <div className="card_grid dashboard_homepage">
-                {sections.map((section) => {
-                  return section.items.length > 0 ? (
-                    <div key={section.head} className="single_card">
-                      <div className="card_content">
-                        <div className="card_front">
-                          <div className="card_front_content">
-                            <p className="card_logo">{section.icon}</p>
-                            <h2 className="card_head">{section.head}</h2>
-                            <p className="card_description">{section.text}</p>
-                            <Button className="view_all_button">
-                              View all
-                              <MdNavigateNext />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="card_back">
-                          <div className="card_back_content">
-                            {section.items
-                              .filter((item) => !item?.isHidden)
-                              .map((item) => (
-                                <div key={item.name}>
-                                  <Box marginY={1} component="div" className={`list_component`}>
-                                    <Typography variant="subtitle2" className={styles.hover_list_box}>
-                                      <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
-                                    </Typography>
-                                  </Box>
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null;
-                })}
-              </div>
-            ) : (
-              <div className={`${styles.filtered_data}`}>
-                {filteredData.length !== 0 ? (
-                  filteredData.map((section) => {
-                    return (
-                      <List key={section.head} subheader={<li className={`${styles.list_header} mb-2`}>{section.head}</li>}>
-                        {section.items.map((item) => {
-                          return (
-                            <>
-                              <ListItem
-                                key={item.name}
-                                button
-                                onClick={() => {
-                                  history.push(handleRoutes(item));
-                                }}
-                              >
-                                <ListItemText primary={item.resourceLabel} />
-                              </ListItem>
-                            </>
-                          );
-                        })}
-                      </List>
-                    );
-                  })
-                ) : (
-                  <div className={styles.no_result_container}>
-                    <SentimentVeryDissatisfiedIcon />
-                    <p className={styles.no_result}>Sorry, we couldn't find any result</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div> */}
         </div>
       </div>
     </Fragment>
@@ -335,7 +238,7 @@ interface sidecardInterface {
 const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration Tools' }: sidecardInterface) => {
   const [modalContent, setModalContent] = useState(null);
   const [colabData, setColabData] = useState(null);
-  const style = { '--sideCardBg': mode === 'Collaboration Tools' ? '#fffaee' : '#FDFFF4', width: '100%' } as React.CSSProperties;
+  const style = { '--sideCardBg': '#FFFFFF' } as React.CSSProperties;
   const description =
     (mode === 'Collaboration Tools' && `By using Collaboration tools, collaborate with or within team members easily`) ||
     (mode === 'Setups & Administration' && `List of all product and category setups`);
