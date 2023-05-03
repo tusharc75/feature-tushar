@@ -86,6 +86,12 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
   }, [initialData.fields]);
 
   const handleSubmit = (values) => {
+    if (values?.fromDate) {
+      values.fromDate = moment(values?.fromDate).format('MM/DD/YYYY')
+    }
+    if (values?.toDate) {
+      values.toDate = moment(values?.toDate).format('MM/DD/YYYY')
+    }
     setLoading(true);
     if (id && isClone === false) {
       values._id = id;
@@ -139,7 +145,7 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
     const errors = {};
     let fromDate = moment(values?.fromDate);
     let toDate = moment(values?.toDate);
-    if ( toDate.diff(fromDate, 'days') < 0 ) {
+    if (toDate.diff(fromDate, 'days') < 0) {
       errors['toDate'] = 'Please enter valid to date'
     }
     return errors;
