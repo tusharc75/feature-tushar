@@ -4,7 +4,7 @@ import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
-import ManageRepairJobDialog from './ManageRepairJob';
+import ManageRepairJob from './ManageRepairJob';
 import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairJob, prepareDataForGrid, getLocalStorageArrayData, sidebarResource } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -595,7 +595,7 @@ const RepairJob = () => {
         ) : null}
       </CustomContainer>
       {showManageRepairJobDialog.open && (
-        <ManageRepairJobDialog
+        <ManageRepairJob
           isClone={showManageRepairJobDialog.isClone}
           repairJobId={showManageRepairJobDialog.idToClone}
           onClose={() => setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null })}
