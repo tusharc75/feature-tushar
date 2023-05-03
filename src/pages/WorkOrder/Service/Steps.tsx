@@ -482,7 +482,8 @@ const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDi
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isReturnToStepOnFail && result?.returnToStepOnFail) {
           if (referencType !== 'workOrderTechnician') {
-            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'returnToStepOnFail' }));
+            const returnStep = serviceDetails?.steps?.find((e) => e._id === result?.returnToStepOnFail) || {}
+            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'returnToStepOnFail', step: returnStep }));
           }
         }
         toastConfig.setToastConfig({
@@ -900,9 +901,7 @@ const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDi
             open={true}
             message={
               addServiceConfirmation.type === 'returnToStepOnFail'
-                ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services
-                  ?.map((e) => e.serviceName)
-                  ?.toString()}. Do you want to continue ?`
+                ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''}. Do you want to continue ?`
                 : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
                   ? ` Step fail requires Quote Revision. Do you confirm on this?`
                   : addServiceConfirmation.type === 'jumpStep'
