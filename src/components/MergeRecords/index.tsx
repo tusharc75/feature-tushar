@@ -9,17 +9,17 @@ const MergeRecords = ({ selectedRecords, resource, closeActions, onSuccess }) =>
   return (
     <Fragment>
       <MenuItem
-        disabled={selectedRecords?.length === 1 ? false : true}
+        disabled={selectedRecords?.length ? false : true}
         onClick={() => {
           setOpen(true);
           closeActions();
         }}
       >
-        Merge
+        {`Merge (${selectedRecords?.length})`}
       </MenuItem>
       {open &&
         <MergeRecordsDialog
-          id={selectedRecords[0]?._id}
+          ids={selectedRecords?.map((e) => e?._id)}
           onClose={() => setOpen(false)}
           resource={resource}
           onSuccess={onSuccess}
