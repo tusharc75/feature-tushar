@@ -790,7 +790,7 @@ const ReceivingTicket = ({
 
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
-      .post(`${repairJob.api}/${repairJobId}/assets`, { ids: selectedRecords?.map((s) => s._id) })
+      .post(`${repairJob.api}/${repairJobId}/assets`, { assets: selectedRecords?.map((s) => { return { _id: s._id, currentStatus: s.status } }) })
       .then(({ data }) => {
         axiosInstance()
           .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })

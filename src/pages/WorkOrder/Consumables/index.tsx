@@ -250,7 +250,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       <Grid item xs={12} md={12} sm={12}>
         {columns && dataRows ? (
           <CustomReactTable
-            height={'calc(100vh - 345px)'}
+            height={isCreate ? 'calc(100vh - 140px)' : 'calc(100vh - 345px)'}
             columns={columns}
             data={dataRows}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
