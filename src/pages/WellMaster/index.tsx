@@ -13,7 +13,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { wellMaster, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, sidebarResource } from '../../constants/helpers';
+import { wellMaster, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, sidebarResource, removeLocalStorage } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -26,7 +26,6 @@ import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import { FaSuitcase } from 'react-icons/fa';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
@@ -419,10 +418,13 @@ const WellMaster = () => {
                     </MenuItem>
                     {permissions?.wellMaster?.isUpdate &&
                       <MergeRecords
-                        selectedRecords={selectedRecords}
+                        selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                         resource={sidebarResource?.wellMaster}
                         closeActions={closeActions}
-                        onSuccess={fetchData}
+                        onSuccess={() => {
+                          localStorage.removeItem(localStorageSelectedRecords);
+                          fetchData()
+                        }}
                       />
                     }
                   </Menu>
