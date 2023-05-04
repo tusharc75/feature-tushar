@@ -10,6 +10,7 @@ import ActivityList from './ActivityList';
 import CalendarList from './CalendarList';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
+import routes from 'src/components/Helpers/Routes';
 
 const RoadMap = () => {
 
@@ -175,7 +176,7 @@ const RoadMap = () => {
                   {...params}
                   margin="dense"
                   name="plant"
-                  label="Plant"
+                  label={routes.warehouse.title}
                   variant="outlined"
                   fullWidth />
               }

@@ -2634,14 +2634,14 @@ svg.MuiSvgIcon-root {
           margin: 0;
         }
 
-        font-size: 1rem;
+        font-size: 14px;
         color: #163340 !important;
         font-weight: 600;
       }
 
       p {
         margin: 0px 4px;
-        font-size: 1rem;
+        font-size: 14px;
         color: #163340 !important;
         font-weight: 400;
       }
@@ -2860,23 +2860,22 @@ svg.MuiSvgIcon-root {
       line-height: 16px;
       color: #5b5b5b;
       padding: 10px 34px !important;
-      border: 0 !important;
+      background-color: #fff;
+      border: 1px solid #dcdcdc !important;
+      border-bottom: 0 !important;
 
-      background: #efefef;
-      border-right: 1px solid #d7d7d7 !important;
       &:first-of-type {
-        border-radius: 6px 0 0 6px !important;
+        border-radius: 6px 0 0 0px !important;
       }
 
       &:last-of-type {
-        border-radius: 0 6px 6px 0 !important;
-        border-right: 0 !important;
+        border-radius: 0 6px 0px 0 !important;
       }
 
       &.Mui-selected {
-        background: #ffffff;
-        border: 1px solid #f8f8f8 !important;
-        border-bottom: 3px solid #298b88 !important;
+        background: var(--new_theme_color);
+        color: #fff !important;
+        border: 1px solid #109fa9 !important;
         box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.12);
       }
     }
@@ -3069,7 +3068,7 @@ body {
 
   & > :is(h1, h2, h3, h4, h5, h6) {
     font-weight: 600;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.05;
     color: #2a3042;
   }
@@ -3088,7 +3087,7 @@ body {
   & :is(h1, h2, h3, h4, h5) {
     padding: 7px 10px;
     color: #404855;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
 
     @media all and (max-width: 600px) {

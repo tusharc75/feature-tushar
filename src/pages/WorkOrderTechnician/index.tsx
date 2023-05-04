@@ -197,7 +197,7 @@ const WorkOrderTechnician = () => {
         return newObj;
       });
 
-    data = groupBy({ objectArray: data, property: 'status', sortBy: WORKORDER_TECHNICIAN_SERVICE_STATUS });
+    data = groupBy({ objectArray: data, property: 'status', sortBy: WORKORDER_TECHNICIAN_SERVICE_STATUS, columnsToKeep: servicesToKeep });
     setCardData(data);
   }, [serviceData, servicesToKeep]);
 
@@ -225,10 +225,10 @@ const WorkOrderTechnician = () => {
       selectedWorkOrder && selectedRepairOrder
         ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}&repairOrder=${selectedRepairOrder.optionValue}`
         : selectedWorkOrder
-          ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}`
-          : selectedRepairOrder
-            ? `/work-order-technician?repairOrder=${selectedRepairOrder.optionValue}`
-            : `/work-order-technician`;
+        ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}`
+        : selectedRepairOrder
+        ? `/work-order-technician?repairOrder=${selectedRepairOrder.optionValue}`
+        : `/work-order-technician`;
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
@@ -545,7 +545,7 @@ const WorkOrderTechnician = () => {
               warehouse={selectedService?.workOrderDetail?.warehouse}
               selectedService={selectedService}
               allowedToEdit={selectedService?.status === WORKORDER_TECHNICIAN_SERVICE_STATUS[0] ? false : true}
-              setDisableCompleteFail={() => { }}
+              setDisableCompleteFail={() => {}}
               fetchService={fetchWorkOrderTechnician}
               referencType={'workOrderTechnician'}
               handelClose={() => {

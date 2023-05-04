@@ -161,7 +161,7 @@ const CageManagement = () => {
                                         {...params}
                                         margin="dense"
                                         name="plant"
-                                        placeholder="Plant"
+                                        placeholder={routes.warehouse.title}
                                         variant="standard"
                                         fullWidth
                                         className={isMobile ? "serchBox" : ""}
@@ -170,7 +170,7 @@ const CageManagement = () => {
                                         {...params}
                                         margin="dense"
                                         name="plant"
-                                        label="Plant"
+                                        label={routes.warehouse.title}
                                         variant="outlined"
                                         fullWidth
                                     />
