@@ -37,18 +37,21 @@ import ManageQuotationDialog from './ManageQuotationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 let quotationTimeout;
-const QuotationType = [
-  {
-    key: 'All Quotation',
-    value: 1
-  },
-  {
-    key: 'My Quotation',
-    value: 2
-  }
-];
+
 
 const Quotation = () => {
+
+  const QuotationType = [
+    {
+      key: `All ${routes.quotation.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes.quotation.title}`,
+      value: 2
+    }
+  ];
+
   const renderedFrom = camelCase(routes?.quotation.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
