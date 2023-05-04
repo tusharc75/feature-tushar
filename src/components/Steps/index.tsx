@@ -79,7 +79,7 @@ const Steps = ({
     <div>
       {isMobile ? (
         <MobileSteps
-          stepName={`${activeStep + 1}/${steps.length} ${steps[currentStep].title ? steps[currentStep].title : ''}`}
+          stepName={`${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep].title : ''}`}
           nextButton={
             <Button
               size="small"
