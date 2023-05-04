@@ -24,14 +24,14 @@ import {
   removeLocalStorage,
   sidebarResource
 } from 'src/constants/helpers';
-import ManageCompetencyMaster from './ManageCompetencyMaster';
+import ManageCompetencyType from './ManageCompetencyType';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
-const CompetencyMaster = () => {
-  const renderedFrom = camelCase(routes?.competencyMaster.title);
+const CompetencyType = () => {
+  const renderedFrom = camelCase(routes?.competencyType.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
@@ -64,12 +64,12 @@ const CompetencyMaster = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get('/field?resource=Competency Master')
+      .get('/field?resource=Competency Type')
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.competencyMasterDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.competencyTypeDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -97,14 +97,14 @@ const CompetencyMaster = () => {
     }
 
     axiosInstance()
-      .get(`/competency-master${queryString}`)
+      .get(`/competency-type${queryString}`)
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.competencyMaster?.isDelete;
+          finalObject['canDelete'] = permissions?.competencyType?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.competencyMaster?.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.competencyType?.isUpdate;
           return {
             ...finalObject
           };
@@ -215,7 +215,7 @@ const CompetencyMaster = () => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`/competency-master/remove`, { ids: ids })
+      .put(`/competency-type/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
         fetchCompetencyMasterData();
@@ -244,13 +244,13 @@ const CompetencyMaster = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.competencyMaster.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.competencyType.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.competencyMaster}
-            module="Competency Master"
-            api={'competency-master'}
+            permissions={permissions.competencyType}
+            module="Competency Type"
+            api={'competency-type'}
             afterImportCompleted={() => {
               fetchCompetencyMasterData();
             }}
@@ -275,7 +275,7 @@ const CompetencyMaster = () => {
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
               <div className="d-flex align-items-center">
-                <span className="listingHeader">{routes.competencyMaster.title}</span>
+                <span className="listingHeader">{routes.competencyType.title}</span>
               </div>
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
@@ -329,7 +329,7 @@ const CompetencyMaster = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={!permissions?.competencyMaster?.isDelete}
+                      disabled={!permissions?.competencyType?.isDelete}
                       onClick={() => {
                         closeActions();
                         // eslint-disable-next-line no-lone-blocks
@@ -352,7 +352,7 @@ const CompetencyMaster = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.competencyMaster}
+              permissions={permissions.competencyType}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
                 setCompetencyMasterId(data._id);
@@ -401,14 +401,14 @@ const CompetencyMaster = () => {
               refreshGrid={fetchCompetencyMasterData}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
-              resource={sidebarResource.competencyMaster}
+              resource={sidebarResource.competencyType}
             />
           )
         ) : null}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.competencyMaster?.title?.toLowerCase()}  ${deleteRecord?.name || ''} ?`}
+            message={`Are you sure you want to delete ${routes?.competencyType?.title?.toLowerCase()}  ${deleteRecord?.name || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -418,7 +418,7 @@ const CompetencyMaster = () => {
         )}
 
         {open?.open && (
-          <ManageCompetencyMaster
+          <ManageCompetencyType
             id={competencyMasterId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}
@@ -433,4 +433,4 @@ const CompetencyMaster = () => {
   );
 };
 
-export default CompetencyMaster;
+export default CompetencyType;

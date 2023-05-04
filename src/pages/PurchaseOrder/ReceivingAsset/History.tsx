@@ -76,7 +76,7 @@ const History = ({ handleClose, product, productName, poId, _id }) => {
         },
         {
             field: 'warehouse',
-            headerName: 'Plant',
+            headerName: routes.warehouse.title,
             show: true,
             filter: false,
             sortable: false,
