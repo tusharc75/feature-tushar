@@ -77,7 +77,7 @@ const Steps = ({
 
   return (
     <div>
-      {(isMobile && !isTablet) ? (
+      {isMobile && !isTablet ? (
         <MobileSteps
           stepName={`${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`}
           nextButton={
@@ -137,10 +137,12 @@ const Steps = ({
                 return (
                   <Box
                     className={`
+
                     ${styles.singleStep} 
+
                     ${i < currentStep || isStepEnded ? styles.activeSteps : ''}
                     ${i === currentStep && !isStepEnded ? styles.currentStep : ''}
-                    ${i > currentStep ? styles.inActiveStep : ''}
+                    ${i > currentStep && !isStepEnded ? styles.inActiveStep : ''}
                     single-step-item
                 `}
                     key={step.name}
@@ -152,7 +154,7 @@ const Steps = ({
                     )}
 
                     <Box className={styles.stepIcon}>
-                      <Icon colors={i > currentStep ? null : getColorOficon(i) || ['#FAC94B', '#FF9B04']} />
+                      <Icon colors={i > currentStep && !isStepEnded ? null : getColorOficon(i) || ['#FAC94B', '#FF9B04']} />
                     </Box>
                     <Typography className={styles.label}>{step.title}</Typography>
                     {!isStepEnded && setStepFullScreen && currentStep === i && (

@@ -35,18 +35,20 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
 
 let invoiceTimeout;
-const InvoiceType = [
-  {
-    key: 'All Invoices',
-    value: 1
-  },
-  {
-    key: 'My Invoices',
-    value: 2
-  }
-];
 
 const Invoice = () => {
+
+  const InvoiceType = [
+    {
+      key: `All ${routes.invoice.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes.invoice.title}`,
+      value: 2
+    }
+  ];
+
   const renderedFrom = camelCase(routes?.invoice.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
