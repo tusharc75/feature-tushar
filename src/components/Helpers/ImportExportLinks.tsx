@@ -7,7 +7,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: '100%',
+    // width: '100%',
     flexGrow: 1,
     display: 'flex',
     justifyContent: 'flex-end'
@@ -66,7 +66,10 @@ export default function ImportExportLinks({
   additionalParams = null,
   isDownloadExcel = true,
   isBackgroundWhite = false,
-  isDropDownIconShow = false
+  isDropDownIconShow = false,
+  extraImportExportLinks = [],
+  title = '',
+  headers = null
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
@@ -74,6 +77,15 @@ export default function ImportExportLinks({
   const toastConfig = useContext(CustomToastContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const [imptExptDnldMenuDta, setImptExptDnldMenuDta] = useState({ anchorEl: null, action: null, open: false });
+
+  const handleOpenMenu = (e, action) => {
+    setImptExptDnldMenuDta({ action, anchorEl: e.currentTarget, open: true });
+  };
+
+  const handleCloseMenu = () => {
+    setImptExptDnldMenuDta({ anchorEl: null, action: null, open: false });
+  };
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -83,7 +95,7 @@ export default function ImportExportLinks({
     setAnchorEl(null);
   };
 
-  const uploadData = (event) => {
+  const uploadData = (event, apiUrl = null) => {
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
         hideDuration: null,
@@ -103,9 +115,12 @@ export default function ImportExportLinks({
       }
 
       axiosInstance()
-        .post(importApi, formData, {
+        .post(apiUrl ? apiUrl : importApi, formData, {
           responseType: 'blob',
-          headers: { 'Content-Type': 'multipart/form-data' }
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            ...(headers ? headers : {})
+          }
         })
         .then((response) => {
           if (!response.headers['content-disposition']) {
@@ -135,7 +150,7 @@ export default function ImportExportLinks({
   /**
    * EXPORT TABLES INTO EXCEL
    */
-  const exportToExcel = () => {
+  const exportToExcel = (apiUrl = null) => {
     toastConfig.setToastConfig({
       hideDuration: null,
       open: true,
@@ -157,8 +172,11 @@ export default function ImportExportLinks({
       exportApi = exportApi + `&ids=${JSON.stringify(ids)}`;
     }
     axiosInstance()
-      .get(exportApi, {
-        responseType: 'arraybuffer'
+      .get(apiUrl ? apiUrl : exportApi, {
+        responseType: 'arraybuffer',
+        headers: {
+          ...(headers ? headers : {})
+        }
       })
       .then((response) => {
         const fileName = response.headers['content-disposition'].split('filename=')[1];
@@ -189,7 +207,7 @@ export default function ImportExportLinks({
     }
 
     axiosInstance()
-      .get(exportApi, { responseType: 'arraybuffer' })
+      .get(exportApi, { responseType: 'arraybuffer', headers: { ...(headers ? headers : {}) } })
       .then((response) => {
         const fileName = response.headers['content-disposition'].split('filename=')[1];
 
@@ -216,51 +234,125 @@ export default function ImportExportLinks({
     />
   );
 
-  return !onlyExport ? (
-    <div id="importExportLinks" className={!isDropDownIconShow && `${classes.root}`}>
-      {!isMobile ? (
-        <div className={classes.linksContainer}>
-          {permissions?.isCreate && (
-            <>
-              <label htmlFor="importFromExcel" className={`new-headerbox-button-v1`}>
-                {ImportInput}
-                Import from Excel
-              </label>
-              {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
-            </>
-          )}
-          <label onClick={exportToExcel} className={`new-headerbox-button-v1`}>
-            Export to Excel{' '}
-            {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
-          </label>
-          {isDownloadExcel && (
-            <>
-              {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
-              <label onClick={downloadTemplate} className={`new-headerbox-button-v1`}>
-                Download Template
-              </label>
-            </>
-          )}
-          {/* <Divider
-          orientation="vertical"
-          flexItem
-          className={classes.linkDivider}
-        />
-        <label
-          onClick={(e) => e.preventDefault()}
-          className={`${classes.links} new-headerbox-button-v1`}
+  const RenderButtonMenu = () => {
+    return (
+      <Menu
+        id="button-menu"
+        anchorEl={imptExptDnldMenuDta.anchorEl}
+        keepMounted
+        open={true}
+        onClose={handleCloseMenu}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+      >
+        {permissions?.isCreate && imptExptDnldMenuDta.action === 'import' && (
+          <MenuItem>
+            <label htmlFor="importFromExcel" className="cursor-pointer">
+              {title !== '' ? `${title} Import ` : `Import from Excel`}
+            </label>
+          </MenuItem>
+        )}
+        {imptExptDnldMenuDta.action === 'export' && (
+          <MenuItem
+            onClick={() => {
+              exportToExcel();
+              handleCloseMenu();
+            }}
+          >
+            {title !== '' ? `${title} Export` : `Export to Excel`}
+            {recordsToExport === 0 ? ' (All)' : ` (${recordsToExport})`}
+          </MenuItem>
+        )}
+        {imptExptDnldMenuDta.action === 'download' && (
+          <MenuItem
+            onClick={() => {
+              downloadTemplate();
+              handleCloseMenu();
+            }}
+          >
+            {title !== '' ? `${title} Template` : `Download Template`}
+          </MenuItem>
+        )}
+        {extraImportExportLinks?.map((d, idx) => {
+          if (d.type === 'import' && imptExptDnldMenuDta.action === 'import') {
+            return (
+              <MenuItem key={d.title}>
+                <input
+                  onClick={(e: any) => (e.target.value = null)}
+                  id={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}
+                  name={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}
+                  onChange={(e) => {
+                    uploadData(e, d.api);
+                  }}
+                  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                  style={{
+                    opacity: '0',
+                    position: 'absolute',
+                    zIndex: -1
+                  }}
+                  type="file"
+                />
+                <label htmlFor={`${d.title}-${idx + 1}`.replace(/\s+/g, '')}>{d.title}</label>
+              </MenuItem>
+            );
+          } else if (d.type === 'export' && imptExptDnldMenuDta.action === 'export') {
+            return (
+              <MenuItem
+                key={d.title}
+                onClick={() => {
+                  exportToExcel(d.api);
+                  handleCloseMenu();
+                }}
+              >
+                {d.title}
+              </MenuItem>
+            );
+          } else if (imptExptDnldMenuDta.action === 'download' && d.type === 'download') {
+            return (
+              <MenuItem
+                key={d.title}
+                onClick={() => {
+                  exportToExcel(d.api);
+                  handleCloseMenu();
+                }}
+              >
+                {d.title}
+              </MenuItem>
+            );
+          }
+        })}
+      </Menu>
+    );
+  };
+
+  const RenderMobileMenu = () => {
+    return (
+      <>
+        <Menu
+          id="import-export-links"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right'
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right'
+          }}
         >
-          Email a Link
-        </label> */}
-        </div>
-      ) : (
-        <Menu id="import-export-links" anchorEl={anchorEl} open={open} onClose={handleClose}>
-          {permissions?.isCreate && (
+          {permissions?.isCreate && !onlyExport && (
             <MenuItem>
-              <label htmlFor="importFromExcel">
-                {ImportInput}
-                Import from Excel
-              </label>
+              <label htmlFor="importFromExcel">{title !== '' ? `Import ${title}` : `Import from Excel`}</label>
             </MenuItem>
           )}
           <MenuItem
@@ -269,53 +361,121 @@ export default function ImportExportLinks({
               handleClose();
             }}
           >
-            Export to Excel ({recordsToExport === 0 ? 'All' : `(${recordsToExport})`})
+            {title !== '' ? `Export ${title}` : `Export to Excel`}({recordsToExport === 0 ? 'All' : `(${recordsToExport})`})
           </MenuItem>
-          {isDownloadExcel && (
+          {isDownloadExcel && !onlyExport && (
             <MenuItem
               onClick={() => {
                 downloadTemplate();
                 handleClose();
               }}
             >
-              Download Template
+              {title !== '' ? `${title} Template` : `Download Template`}
             </MenuItem>
           )}
-          {/* <MenuItem>Email a Link</MenuItem> */}
+          {extraImportExportLinks?.map((d, idx) => {
+            if (d.type === 'import') {
+              return (
+                <MenuItem>
+                  <input
+                    onClick={(e: any) => (e.target.value = null)}
+                    id={`${d.title}-${idx + 2}`.replace(/\s+/g, '')}
+                    name={`${d.title}-${idx + 2}`.replace(/\s+/g, '')}
+                    onChange={(e) => {
+                      uploadData(e, d.api);
+                    }}
+                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                    style={{
+                      opacity: '0',
+                      position: 'absolute',
+                      zIndex: -1
+                    }}
+                    type="file"
+                  />
+                  <label htmlFor={`${d.title}-${idx + 2}`.replace(/\s+/g, '')}>{d.title}</label>
+                </MenuItem>
+              );
+            } else {
+              return (
+                <MenuItem
+                  onClick={() => {
+                    exportToExcel(d.api);
+                    handleClose();
+                  }}
+                >
+                  {d.title}
+                </MenuItem>
+              );
+            }
+          })}
         </Menu>
-      )}
-      {isMobile && (
-        <IconButton onClick={handleClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
-          <IoIosArrowDropdown />
-        </IconButton>
-      )}
-    </div>
-  ) : (
+      </>
+    );
+  };
+
+  return (
     <div id="importExportLinks" className={!isDropDownIconShow && `${classes.root}`}>
-      {!isMobile ? (
+      {!isMobile && (
         <div className={classes.linksContainer}>
-          <label onClick={exportToExcel} className={`new-headerbox-button-v1`}>
+          {ImportInput}
+          {permissions?.isCreate && !onlyExport && (
+            <>
+              <label
+                htmlFor={extraImportExportLinks.length > 0 ? '' : 'importFromExcel'}
+                onClick={(e) => {
+                  if (extraImportExportLinks.length > 0) {
+                    handleOpenMenu(e, 'import');
+                  }
+                }}
+                className={`new-headerbox-button-v1`}
+              >
+                {/* {extraImportExportLinks.length > 0 || ImportInput} */}
+                Import from Excel
+              </label>
+              {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
+            </>
+          )}
+          <label
+            onClick={(e) => {
+              if (extraImportExportLinks.length > 0) {
+                handleOpenMenu(e, 'export');
+              } else {
+                exportToExcel();
+              }
+            }}
+            className={`new-headerbox-button-v1`}
+          >
             Export to Excel{' '}
             {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
           </label>
+          {isDownloadExcel && !onlyExport && (
+            <>
+              {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
+              <label
+                onClick={(e) => {
+                  if (extraImportExportLinks.length > 0) {
+                    handleOpenMenu(e, 'download');
+                  } else {
+                    downloadTemplate();
+                  }
+                }}
+                className={`new-headerbox-button-v1`}
+              >
+                Download Template
+              </label>
+            </>
+          )}
         </div>
-      ) : (
-        <Menu id="import-export-links" anchorEl={anchorEl} open={open} onClose={handleClose}>
-          <MenuItem
-            onClick={() => {
-              exportToExcel();
-              handleClose();
-            }}
-          >
-            Export to Excel ({recordsToExport === 0 ? 'All' : `(${recordsToExport})`})
-          </MenuItem>
-        </Menu>
       )}
-      {(isMobile || isDropDownIconShow) && (
-        <IconButton onClick={handleClick} className={`expand-icon-v1`}>
-          <IoIosArrowDropdown />
-        </IconButton>
+      {isMobile && (
+        <>
+          <RenderMobileMenu />
+          <IconButton onClick={handleClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
+            <IoIosArrowDropdown />
+          </IconButton>
+        </>
       )}
+      {imptExptDnldMenuDta.open && <RenderButtonMenu />}
     </div>
   );
 }

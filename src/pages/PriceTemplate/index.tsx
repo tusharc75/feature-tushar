@@ -21,14 +21,14 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
-import MobileFilterDialog from "../../components/MobileFilterDialog";
-import MobileSortDialog from "../../components/MobileSortDialog";
-import { camelCase } from 'lodash'
+import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import { camelCase } from 'lodash';
 
 let priceTemplateTimeout;
 
 const PriceTemplate: FC = () => {
-  const renderedFrom = camelCase(routes?.priceTemplate.title)
+  const renderedFrom = camelCase(routes?.priceTemplate.title);
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -54,7 +54,6 @@ const PriceTemplate: FC = () => {
   const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = 'productTemplatePage_selected';
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('priceTemplatePage'));
 
   const columns = [
@@ -75,10 +74,7 @@ const PriceTemplate: FC = () => {
 
   const { priceTemplateApi } = priceTemplate;
 
-
-  const [isOpenDialog, setisOpenDialog] = useState(false)
-
-
+  const [isOpenDialog, setisOpenDialog] = useState(false);
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -96,9 +92,7 @@ const PriceTemplate: FC = () => {
 
   const handleClickClose = () => {
     setOpen(false);
-
   };
-
 
   useEffect(() => {
     if (permissions && permissions.priceTemplate) {
@@ -289,8 +283,6 @@ const PriceTemplate: FC = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-
-
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -301,7 +293,7 @@ const PriceTemplate: FC = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
               {isMobile && !isTablet && (
                 <div className="d-flex ">
                   <Button
@@ -387,8 +379,9 @@ const PriceTemplate: FC = () => {
                       disabled={selectedRecords.length ? false : true}
                       aria-controls="action-menu"
                       className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      endIcon={<ExpandMore />}
                     >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      {isMobile && !isTablet ? '' : 'Actions'}
                     </Button>
                   )}
                   <Menu
@@ -460,10 +453,12 @@ const PriceTemplate: FC = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure, you want to delete ${routes?.priceTemplate?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.name : ''} ?`}
+            message={`Are you sure, you want to delete ${routes?.priceTemplate?.title?.toLowerCase()} ${
+              deleteRecord?._id ? deleteRecord?.name : ''
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
-              setShowDeleteConfirmBox(false)
+              setShowDeleteConfirmBox(false);
             }}
             onOk={handleDelete}
           />

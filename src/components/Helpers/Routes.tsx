@@ -546,6 +546,16 @@ const routes = {
     title: storedRoutes && storedRoutes.repairType && storedRoutes.repairType.title ? storedRoutes.repairType?.title : RESOURCE_LABEL.repairType,
     path: '/repair-type/detail'
   },
+
+  storageLocation: {
+    title: storedRoutes && storedRoutes.storageLocation && storedRoutes.storageLocation.title ? storedRoutes.storageLocation?.title : RESOURCE_LABEL.storageLocation,
+    path: '/storage-location'
+  },
+  storageLocationDetail: {
+    title: storedRoutes && storedRoutes.storageLocation && storedRoutes.storageLocation.title ? storedRoutes.storageLocation?.title : RESOURCE_LABEL.storageLocation,
+    path: '/storage-location/detail'
+  },
+
   cageManagement: {
     title:
       storedRoutes && storedRoutes.cageManagement && storedRoutes.cageManagement.title
@@ -788,19 +798,19 @@ const routes = {
         : RESOURCE_LABEL?.employeeMaster,
     path: '/employee-master/detail'
   },
-  competencyMaster: {
+ competencyType: {
     title:
-      storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title
-        ? storedRoutes.competencyMaster?.title
-        : RESOURCE_LABEL.competencyMaster,
-    path: '/competency-master'
+      storedRoutes && storedRoutes.competencyType && storedRoutes.competencyType.title
+        ? storedRoutes.competencyType?.title
+        : RESOURCE_LABEL.competencyType,
+    path: '/competency-type'
   },
-  competencyMasterDetail: {
+  competencyTypeDetail: {
     title:
-      storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title
-        ? storedRoutes.competencyMaster?.title
-        : RESOURCE_LABEL.competencyMaster,
-    path: '/competency-master/detail'
+      storedRoutes && storedRoutes.competencyType && storedRoutes.competencyType.title
+        ? storedRoutes.competencyType?.title
+        : RESOURCE_LABEL.competencyType,
+    path: '/competency-type/detail'
   },
   technicianScheduler: {
     title:
@@ -883,7 +893,45 @@ const routes = {
         ? storedRoutes.fleetReceiver?.title
         : RESOURCE_LABEL.fleetReceiver,
     path: '/fleet-receiver'
-  }
+  },
+  transactionLock: {
+    title: storedRoutes && storedRoutes.transactionLock && storedRoutes.transactionLock.title ? storedRoutes.transactionLock?.title : RESOURCE_LABEL.transactionLock,
+    path: '/transaction-lock'
+  },
+  transactionLockDetail: {
+    title: storedRoutes && storedRoutes.transactionLock && storedRoutes.transactionLock.title ? storedRoutes.transactionLock?.title : RESOURCE_LABEL.transactionLock,
+    path: '/transaction-lock/detail'
+  },
+  wellNumber: {
+    title: storedRoutes && storedRoutes.wellNumber && storedRoutes.wellNumber.title ? storedRoutes.wellNumber?.title : RESOURCE_LABEL.wellNumber,
+    path: '/well-number'
+  },
+  wellNumberDetail: {
+    title: storedRoutes && storedRoutes.wellNumber && storedRoutes.wellNumber.title ? storedRoutes.wellNumber?.title : RESOURCE_LABEL.wellNumber,
+    path: '/well-number/detail'
+  },
+  planningView: {
+    title: storedRoutes && storedRoutes.planningView && storedRoutes.planningView.title
+      ? storedRoutes.planningView?.title
+      : 'Planning View',
+    path: '/planning-view'
+  },
+  taxMaster: {
+    title: storedRoutes && storedRoutes.taxMaster && storedRoutes.taxMaster.title ? storedRoutes.taxMaster?.title : RESOURCE_LABEL.taxMaster,
+    path: '/tax-master'
+  },
+  taxMasterDetail: {
+    title: storedRoutes && storedRoutes.taxMaster && storedRoutes.taxMaster.title ? storedRoutes.taxMaster?.title : RESOURCE_LABEL.taxMaster,
+    path: '/tax-master/detail'
+  },
+  competencies: {
+    title: storedRoutes && storedRoutes.competencies && storedRoutes.competencies.title ? storedRoutes.competencies?.title : RESOURCE_LABEL.competencies,
+    path: '/competencies'
+  },
+  competenciesDetail: {
+    title: storedRoutes && storedRoutes.competencies && storedRoutes.competencies.title ? storedRoutes.competencies?.title : RESOURCE_LABEL.competencies,
+    path: '/competencies/detail'
+  },
 };
 
 export default routes;

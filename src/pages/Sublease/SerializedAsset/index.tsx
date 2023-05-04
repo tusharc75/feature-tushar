@@ -63,7 +63,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
         data.forEach((o) => {
           let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
           if (currentColumn !== null) {
-            if (o.fieldData.type === 'singleLine' && o.fieldData.fieldName !== "assetNumber") {
+            if (o.fieldData.type === 'singleLine' && o.fieldData.fieldName !== 'assetNumber') {
               currentColumn.columnData.editable = true;
             }
             columns = [...columns, currentColumn?.columnData];
@@ -100,7 +100,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
       let res = {
         ...prepareDataForGrid(u, user)
       };
-      res["isChecked"] = false;
+      res['isChecked'] = false;
       return res;
     });
     setIsCompleteEnable(isComplate);
@@ -162,24 +162,26 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
 
   return (
     <>
-      <Box display="flex" justifyContent="flex-end" pt={1} alignItems="center" className="bg-white">
-        {allowedToEdit && <Box ml={2}>
-          <ImportExportLinks
-            permissions={permissions?.packages}
-            module="packages-products"
-            api={`${serializedAsset.api}/custom-template`}
-            afterImportCompleted={() => {
-              fetchRecords();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={selectedRecords.length ? selectedRecords.length : dataRows.length}
-            ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
-            isDownloadExcel={false}
-            isBackgroundWhite={true}
-          />
-        </Box>}
-        <Box ml={2}>
+      <Box display="flex" justifyContent="flex-end" m={1} gridGap={'8px'} alignItems="center">
+        {allowedToEdit && (
+          <Box>
+            <ImportExportLinks
+              permissions={permissions?.packages}
+              module="packages-products"
+              api={`${serializedAsset.api}/custom-template`}
+              afterImportCompleted={() => {
+                fetchRecords();
+              }}
+              isExportAllOrSomeFeature={true}
+              total={rowCount}
+              recordsToExport={selectedRecords.length ? selectedRecords.length : dataRows.length}
+              ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
+              isDownloadExcel={false}
+              isBackgroundWhite={true}
+            />
+          </Box>
+        )}
+        <Box>
           {!isMobile && (
             <Button
               onClick={() => {
@@ -229,7 +231,6 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
             </Button>
           )}
         </Box>
-        <Box mx={1} />
         {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
           <Fragment>
             {/* {currentStep === 1 && (
@@ -267,9 +268,9 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               </Fragment>
             )} */}
             {selectedRecords.length > 0 &&
-              selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-              checkUniqWarehouse() &&
-              currentStep === 1 ? (
+            selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+            checkUniqWarehouse() &&
+            currentStep === 1 ? (
               <Fragment>
                 <Tooltip title="Send to Supplier">
                   <Button
@@ -289,13 +290,21 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                       data['isPickupFromDisable'] = true;
                       data['isDeliveryToDisable'] = true;
                       if (subleaseData?.wellName?.optionValue) {
-                        data["wellName"] = subleaseData?.wellName?.optionValue;
+                        data['wellName'] = subleaseData?.wellName?.optionValue;
+                      }
+                      if (subleaseData?.wellNumber) {
+                        if (subleaseData?.wellNumber?.optionValue) {
+                          data['wellNumber'] = subleaseData?.wellNumber?.optionValue;
+                        }
+                        else {
+                          data['wellNumber'] = subleaseData?.wellNumber?.map((e) => e?.optionValue);
+                        }
                       }
                       if (subleaseData?.afeNumber) {
-                        data["afeNumber"] = subleaseData?.afeNumber;
+                        data['afeNumber'] = subleaseData?.afeNumber;
                       }
                       if (subleaseData?.processor?.optionValue) {
-                        data["processor"] = subleaseData?.processor?.optionValue;
+                        data['processor'] = subleaseData?.processor?.optionValue;
                       }
                       setShowTicketDialog({ open: true, data: data });
                     }}
@@ -303,7 +312,6 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                     Send to Supplier
                   </Button>
                 </Tooltip>
-                <Box mx={1} />
               </Fragment>
             ) : null}
             {currentStep === 2 && allowedToEdit && (
@@ -319,13 +327,12 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                 >
                   End Sublease
                 </Button>
-                <Box mx={1} />
               </Fragment>
             )}
           </Fragment>
         )}
       </Box>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
@@ -355,7 +362,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (

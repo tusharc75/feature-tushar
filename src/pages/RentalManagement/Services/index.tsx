@@ -24,7 +24,7 @@ import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceD
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
 const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -68,7 +68,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       });
     }
     setAllFields(JSON.parse(JSON.stringify(allFields)));
-    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -99,12 +99,12 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -135,10 +135,9 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
               >
                 {row.original.detail}
               </p>
-            )
-            }
+            )}
             {
-              < Box ml={1} className="d-flex align-items-center" >
+              <Box ml={1} className="d-flex align-items-center">
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
@@ -153,31 +152,29 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                     </IconButton>
                   </HtmlTooltip>
                 )}
-              </Box >
+              </Box>
             }
-            {
-              !isOffline && (
-                <>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      if (row.original.type === 'service') {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                      } else if (row.original.type === 'product') {
-                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                      } else if (row.original.type === 'asset') {
-                        window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                      } else {
-                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                      }
-                    }}
-                  >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </>
-              )
-            }
-          </div >
+            {!isOffline && (
+              <>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === 'service') {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'product') {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'asset') {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </>
+            )}
+          </div>
         )
       },
       {
@@ -260,16 +257,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent?.packageDetail?.packageName;
+          ? parent?.serviceDetail?.serviceName
+          : parent?.packageDetail?.packageName;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
@@ -302,16 +299,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -473,115 +470,108 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
 
   return (
     <Fragment>
-      <Grid container spacing={2}>
-        {allowedToEdit && (
-          <Grid item xs={12} md={12} sm={12}>
-            <Box display="flex" justifyContent="space-between" mt={1} mb={1}>
-              <Box display="flex">
-                {permissions?.serviceMaster?.isRead && (
-                  <Button
-                    color="primary"
-                    size="small"
-                    disabled={isOffline}
-                    variant={'contained'}
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
-                    }}
-                  >
-                    {isMobile && !isTablet ? 'Service' : `Add Services`}
-                  </Button>
-                )}
-                <Box mx={isMobile ? 0.5 : 1} />
-                {permissions?.packages?.isRead && (
-                  <Button
-                    color="primary"
-                    size="small"
-                    variant={'contained'}
-                    disabled={isOffline}
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                    }}
-                  >
-                    {isMobile && !isTablet ? 'Package' : `Add Service ${routes.packages.title}`}
-                  </Button>
-                )}
-              </Box>
-              <Box display="flex">
-                <Button
-                  variant={'outlined'}
-                  color="primary"
-                  size="small"
-                  onClick={handleClick}
-                  disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                  endIcon={<BiChevronDown />}
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={open}
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  onClose={handleClose}
-                >
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-                    <MenuItem
-                      onClick={() => {
-                        setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
-                        setIsBulkEdit(true);
-                        handleClose();
-                      }}
-                    >
-                      Bulk Edit
-                    </MenuItem>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                    <MenuItem
-                      disabled={isDeleting}
-                      onClick={() => {
-                        handleDeleteMultiple();
-                        handleClose();
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </HtmlTooltip>
-                </Menu>
-              </Box>
-            </Box>
-          </Grid>
-        )}
-        <Grid item xs={12} md={12} sm={12}>
-          {columns && rowsData ? (
-            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
-              <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-                columns={columns}
-                data={rowsData}
-                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-                onSelect={setSelectedProducts}
-                childrenProperty="subRows"
-                uniqueKey="_id"
-                hideSelection={isOffline || !allowedToEdit}
-                hideAction={isOffline || !allowedToEdit}
-                renderedFrom="rental_management_sevices_1"
-                onSaveEdit={async (inputField, updatedData) => {
-                  let rows = await calculateRowsField(material, inputField, allFields, updatedData);
-                  handleSaveData(rows);
+      {allowedToEdit && (
+        <Box display="flex" justifyContent="space-between" m={1}>
+          <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+            {permissions?.serviceMaster?.isRead && (
+              <Button
+                color="primary"
+                size="small"
+                disabled={isOffline}
+                variant={'contained'}
+                onClick={() => {
+                  setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
                 }}
-                isClientSideGrid={true}
-              />
-            </Box>
-          ) : (
-            <Box p={2} height={500} bgcolor="white">
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </Grid>
-      </Grid>
+              >
+                {isMobile && !isTablet ? 'Service' : `Add Services`}
+              </Button>
+            )}
+            {permissions?.packages?.isRead && (
+              <Button
+                color="primary"
+                size="small"
+                variant={'contained'}
+                disabled={isOffline}
+                onClick={() => {
+                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+                }}
+              >
+                {isMobile && !isTablet ? 'Package' : `Add Service ${routes.packages.title}`}
+              </Button>
+            )}
+          </Box>
+          <Box display="flex" ml={1}>
+            <Button
+              variant={'outlined'}
+              color="primary"
+              size="small"
+              onClick={handleClick}
+              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+              endIcon={<BiChevronDown />}
+            >
+              Actions
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              onClose={handleClose}
+            >
+              <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
+                <MenuItem
+                  onClick={() => {
+                    setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
+                    setIsBulkEdit(true);
+                    handleClose();
+                  }}
+                >
+                  Bulk Edit
+                </MenuItem>
+              </HtmlTooltip>
+              <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+                <MenuItem
+                  disabled={isDeleting}
+                  onClick={() => {
+                    handleDeleteMultiple();
+                    handleClose();
+                  }}
+                >
+                  Delete
+                </MenuItem>
+              </HtmlTooltip>
+            </Menu>
+          </Box>
+        </Box>
+      )}
+      {columns && rowsData ? (
+        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+            columns={columns}
+            data={rowsData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+            onSelect={setSelectedProducts}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            hideSelection={isOffline || !allowedToEdit}
+            hideAction={isOffline || !allowedToEdit}
+            renderedFrom="rental_management_sevices_1"
+            onSaveEdit={async (inputField, updatedData) => {
+              let rows = await calculateRowsField(material, inputField, allFields, updatedData);
+              handleSaveData(rows);
+            }}
+            isClientSideGrid={true}
+          />
+        </Box>
+      ) : (
+        <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
       {deleteData && (
         <ConfirmationDialog
           open={true}

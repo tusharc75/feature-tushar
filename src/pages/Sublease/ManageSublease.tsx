@@ -123,6 +123,14 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                     if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
                         createValues["wellName"] = referenceData?.wellName?.optionValue
                     }
+                    if (fieldsDataForCreate.some((e) => e.fieldName === "wellNumber") && referenceData?.wellNumber) {
+                        if (referenceData?.wellNumber?.optionValue) {
+                            createValues["wellNumber"] = referenceData?.wellNumber?.optionValue
+
+                        } else {
+                            createValues["wellNumber"] = referenceData?.wellNumber?.map((e) => e?.optionValue)
+                        }
+                    }
                     if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
                         createValues["afeNumber"] = referenceData?.afeNumber
                     }
@@ -676,6 +684,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                                 touched={touched}
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
+                                                                                allFields={initialData.fields}
                                                                                 type={field.type}
                                                                                 options={field.option}
                                                                                 setFieldValue={(name, value) => {

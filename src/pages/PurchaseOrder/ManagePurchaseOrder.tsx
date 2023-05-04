@@ -24,7 +24,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../Account/ManageAccount";
 import ManageContactDialog from "../Contact/ManageContact";
 
-const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, products = [],
+const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, products = [], services = [],
     currency = null, rentalManagementId = null, warehouseId = null, disableEdit = false, refrenceData = null }) => {
 
     const history = useHistory();
@@ -108,6 +108,9 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
                         createValues["wellName"] = refrenceData?.wellName
                     }
+                    if (fieldsDataForCreate.some((e) => e.fieldName === "wellNumber") && refrenceData?.wellNumber) {
+                        createValues["wellNumber"] = refrenceData?.wellNumber
+                    }
                     if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
                         createValues["afeNumber"] = refrenceData?.afeNumber
                     }
@@ -182,10 +185,13 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
             if (products?.length) {
                 values.products = products;
             }
+            if (services?.length) {
+                values.services = services;
+            }
             axiosInstance().post(`${purchaseOrder.api}`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                if (products?.length) {
-                    onSuccess()
+                if (products?.length || services?.length) {
+                    onSuccess(data)
                 }
                 else {
                     history.push(`${purchaseOrder.api}/detail/${data._id}`);
@@ -581,6 +587,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                     touched={touched}
                                                                                     label={field.fieldLabel}
                                                                                     fieldData={field}
+                                                                                    allFields={initialData.fields}
                                                                                     name={field.fieldName}
                                                                                     type={field.type}
                                                                                     options={field.option}

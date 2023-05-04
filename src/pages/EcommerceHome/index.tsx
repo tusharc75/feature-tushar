@@ -54,17 +54,23 @@ const EcommerceHome = () => {
     }
   };
 
-  const handleClickSave = async () => {
+  const handleClickSave = async (data = null) => {
     try {
       setIsSubmitting(true);
       let body = {
-        items:
-          formData?.map((i, idx) => {
-            return {
-              ...i,
-              order: idx + 1
-            };
-          }) || []
+        items: data
+          ? data?.map((i, idx) => {
+              return {
+                ...i,
+                order: idx + 1
+              };
+            }) || []
+          : formData?.map((i, idx) => {
+              return {
+                ...i,
+                order: idx + 1
+              };
+            }) || []
       };
       await axiosInstance().put('/e-commerce-home', body);
       setIsSubmitting(false);
@@ -109,71 +115,115 @@ const EcommerceHome = () => {
     [findCard, formData, setFormData]
   );
 
-  const handleImport = () => { };
-  const handleExportField = () => { };
-
+  const handleImport = (event) => {
+    if (event.target.files && event.target.files.length) {
+      toastConfig.setToastConfig({
+        hideDuration: null,
+        open: true,
+        type: 'info',
+        message: `Uploading file, Please wait...`
+      });
+      const file_to_read = event.target.files[0];
+      const fileread = new FileReader();
+      fileread.onload = function (e) {
+        const content: any = e.target.result;
+        const data = JSON.parse(content);
+        setFormData(data);
+        handleClickSave(data);
+      };
+      fileread.readAsText(file_to_read);
+      event.target.files = null;
+      event.target.value = '';
+    }
+  };
+  const handleExportField = () => {
+    toastConfig.setToastConfig({
+      hideDuration: null,
+      open: true,
+      type: 'info',
+      message: `Your file will be downloaded/uploaded in a matter of seconds`
+    });
+    const url = window.URL.createObjectURL(new Blob([JSON.stringify(formData) || '']));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `page_structure.json`);
+    document.body.appendChild(link);
+    link.click();
+  };
   useEffect(() => {
     fetchData();
   }, []);
 
-  return (<Box className="main-container-v1">
-    <Box className="headerbox-v1">
-      <Box className="nav-v1">
-        <CustomBreadCrumbs routes={[{ title: routes?.eCommerceHome?.title }]} />
-      </Box>
-      <Box className="controls-v1">
-        <Box className="control-buttons-v1">
-          {/* <label className={`new-headerbox-button-v1`} onClick={handleExportField}>
-            Export
-          </label>
-          <input accept="json" style={{ display: 'none' }} onChange={handleImport} id="import-file" multiple={false} type="file" />
-          <label htmlFor="import-file" className={`new-headerbox-button-v1`}>
-            <Typography >
+  return (
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={[{ title: routes?.eCommerceHome?.title }]} />
+        </Box>
+        <Box className="controls-v1">
+          <Box sx={{ display: 'flex' }}>
+            <label className={`new-headerbox-button-v1`} onClick={handleExportField} style={{ cursor: 'pointer' }}>
+              Export
+            </label>
+            <input
+              onClick={(e: any) => (e.target.value = null)}
+              accept="application/json"
+              style={{
+                opacity: '0',
+                position: 'absolute',
+                zIndex: -1
+              }}
+              onChange={handleImport}
+              id="import-file"
+              multiple={false}
+              type="file"
+            />
+            <label htmlFor="import-file" className={`new-headerbox-button-v1`} style={{ marginRight: '18px', cursor: 'pointer' }}>
               Import
-            </Typography>
-          </label> */}
-          <Button
-            color="primary"
-            variant="contained"
-            size="small"
-            disabled={isSubmitting || loading || oldData === formData}
-            onClick={handleClickSave}
-            startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
-          >
-            Save
-          </Button>
+            </label>
+
+            <Button
+              color="primary"
+              variant="contained"
+              size="small"
+              disabled={isSubmitting || loading || oldData === formData}
+              onClick={handleClickSave}
+              startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+            >
+              Save
+            </Button>
+          </Box>
         </Box>
       </Box>
-    </Box>
-    <Box className={`detail-container-v1`}>
-      <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-        <Box bgcolor="#f5f5f5" p={1}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={3} sm={4}>
-              <Box bgcolor="white" p={3} style={{ height: '80vh' }}>
-                <Grid container spacing={1}>
-                  {ECOM_SECTIONS?.map((i, index) => (
-                    <DragBox key={index} type={i.type} label={i.label} setFormData={setFormData} />
-                  ))}
-                </Grid>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={9} sm={8}>
-              {loading ? (
-                <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
-                  <CircularProgress size={30} color="inherit" />
+      <Box className={`detail-container-v1`}>
+        <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
+          <Box bgcolor="#f5f5f5" p={1}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={3} sm={4}>
+                <Box bgcolor="white" p={3} style={{ height: '80vh' }}>
+                  <Grid container spacing={1}>
+                    {ECOM_SECTIONS?.map((i, index) => (
+                      <DragBox key={index} type={i.type} label={i.label} setFormData={setFormData} />
+                    ))}
+                  </Grid>
                 </Box>
-              ) : (
-                <Box border={1} p={2} bgcolor="grey.100" borderColor="grey.300" className={classes.screenHeightAuto}>
-                  <DropBox formData={formData} setFormData={setFormData} handleRemove={handleRemove} findCard={findCard} moveCard={moveCard} />
-                </Box>
-              )}
+              </Grid>
+              <Grid item xs={12} md={9} sm={8}>
+                {loading ? (
+                  <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
+                    <CircularProgress size={30} color="inherit" />
+                  </Box>
+                ) : (
+                  <Box border={1} p={2} bgcolor="grey.100" borderColor="grey.300" className={classes.screenHeightAuto}>
+                    <DropBox formData={formData} setFormData={setFormData} handleRemove={handleRemove} findCard={findCard} moveCard={moveCard} />
+                  </Box>
+                )}
+              </Grid>
             </Grid>
-          </Grid>
-        </Box>
-      </DndProvider>
+          </Box>
+        </DndProvider>
+      </Box>
     </Box>
-  </Box>
   );
 };
 

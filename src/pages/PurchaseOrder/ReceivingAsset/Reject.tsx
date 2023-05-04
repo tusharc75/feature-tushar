@@ -6,28 +6,38 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Formik, Form, FieldArray, Field } from 'formik';
+import { Formik, Form, FieldArray } from 'formik';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { KeyboardDatePicker } from 'formik-material-ui-pickers';
-import { dateFormat, productInventory, purchaseOrder } from '../../../constants/helpers';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
+import { dateFormatForInputControl, productInventory, purchaseOrder, sidebarResource } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
+import DateUtils from '@date-io/date-fns';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrderData }) => {
+
+  const toastConfig = useContext(CustomToastContext);
+
   const {
     state: { user }
   }: any = useData();
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
+  const [fullScreen, setFullScreen] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const toastConfig = useContext(CustomToastContext);
   const [lockDate, setLockDate] = useState(null);
+  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
+
 
   useEffect(() => {
     fetchSettingsData();
   }, []);
+
+  useEffect(() => {
+    if (user?.user?.brandPolicy?.storageLocation) {
+      getStorageLocation();
+    }
+  }, [])
 
   const fetchSettingsData = () => {
     axiosInstance()
@@ -42,6 +52,16 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
       });
   };
 
+  const getStorageLocation = () => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
+      .then(({ data: { data } }) => {
+        if (data[sidebarResource.storageLocation]) {
+          setStorageLocationOptions(data[sidebarResource.storageLocation]?.filter(e => e.warehouse === purchaseOrderData?.warehouse?.optionValue));
+        }
+      });
+  };
+
   const handleReject = (values, rejectDate) => {
     setIsSubmitting(true);
     const data = [];
@@ -53,7 +73,8 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
           serializedProduct: element.serializedProduct,
           qty: parseInt(element?.rejectQuantity),
           comment: element?.comment === '' ? 'Rejected' : element?.comment,
-          serialNumber: []
+          serialNumber: [],
+          storageLocation: user?.user?.brandPolicy?.storageLocation ? element?.storageLocation?.optionValue : null,
         });
       }
     });
@@ -86,15 +107,38 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
         if (tempProduct && d.rejectQuantity > tempProduct.qty - (tempProduct.rejectQuantity || 0) - (tempProduct.assetQty || 0)) {
           errors.rejectQuantity = 'should be greater';
         }
+        if (user?.user?.brandPolicy?.storageLocation) {
+          if (tempProduct && !d.storageLocation) {
+            errors.storageLocation = 'Storage Location is required';
+          }
+        }
       });
     }
     return errors;
   };
 
+  const validateDate = (values) => {
+    let errors: any = {};
+
+    if (moment(values["rejectDate"]).isBefore(moment(purchaseOrderData?.purchaseOrderDate))) {
+      errors['rejectDate'] = `Please select valid date`;
+    }
+
+    if (lockDate) {
+      if (!moment(values["rejectDate"]).isSameOrAfter(moment(lockDate))) {
+        errors['rejectDate'] = `Date entered prior to the locked date`;
+      }
+    }
+    if (moment(values["rejectDate"]).isAfter(moment())) {
+      errors['rejectDate'] = `Please select valid date`;
+    }
+    return errors;
+  }
+
   return (
     <Dialog
       open
-      fullScreen={fullScreen || isMobile || isTablet}
+      fullScreen={fullScreen}
       maxWidth="md"
       fullWidth
       onClose={(e, reason) => {
@@ -112,12 +156,13 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
         }}
         showManimizeMaximize={true}
       ></CustomDialogHeader>
-      <MuiPickersUtilsProvider utils={MomentUtils}>
+      <MuiPickersUtilsProvider utils={DateUtils}>
         <Formik
           initialValues={{
             rejectDate: new Date(),
             products: productList.map((d) => ({
               _id: d._id,
+              storageLocation: purchaseOrderData?.storageLocation || null,
               product: d.productName,
               productId: d.productId,
               rejectQuantity: 0,
@@ -149,7 +194,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                         </Grid>
                                         <Grid item xs={12} md={11}>
                                           <Grid container spacing={2} alignItems="center">
-                                            <Grid item xs={12} md={8}>
+                                            <Grid item xs={12} md={3}>
                                               <Autocomplete
                                                 size="small"
                                                 value={data.product}
@@ -165,12 +210,38 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                                 renderInput={(params) => <TextField {...params} variant="outlined" name="product" label="Product" />}
                                               />
                                             </Grid>
-                                            <Grid item xs={12} md={4}>
+                                            {user?.user?.brandPolicy?.storageLocation &&
+                                              <Grid item xs={12} md={3}>
+                                                <Autocomplete
+                                                  size="small"
+                                                  value={data?.storageLocation}
+                                                  options={storageLocationOptions}
+                                                  getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                                                  onChange={(_, newValue) => {
+                                                    arrayHelpers.replace(index, {
+                                                      ...values.products[index],
+                                                      ['storageLocation']: newValue
+                                                    });
+                                                  }}
+                                                  renderInput={(params) => (
+                                                    <TextField
+                                                      {...params}
+                                                      variant="outlined"
+                                                      name="storageLocation"
+                                                      label="Storage Location"
+                                                      error={validate([data]).storageLocation}
+                                                      helperText={validate([data]).storageLocation ? 'Storage Location is required' : ''}
+                                                      required
+                                                    />
+                                                  )}
+                                                />
+                                              </Grid>
+                                            }
+                                            <Grid item xs={12} md={3}>
                                               <span>
                                                 <b>PO Quantity: </b>
                                                 {data?.row?.qty}
                                               </span>
-                                              {/* <span><b>Quantity: </b>{data?.row?.qty - (data?.row?.rejectQuantity || 0) - (data?.row?.assetQty || 0)}</span> */}
                                               <br />
                                               <span>
                                                 <b>Received: </b>
@@ -185,14 +256,13 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                           </Grid>
                                           <Box mt={1}>
                                             <Grid container spacing={2} alignItems="center">
-                                              <Grid item xs={12} md={4}>
-                                                <Field
+                                              <Grid item xs={12} md={3}>
+                                                <TextField
                                                   fullWidth
                                                   label="Reject Quantity"
                                                   variant="outlined"
                                                   type="number"
                                                   size="small"
-                                                  component={TextField}
                                                   name="rejectQuantity"
                                                   placeholder="Reject Quantity"
                                                   value={data.rejectQuantity}
@@ -208,14 +278,13 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                                   helperText={validate([data]).rejectQuantity ? 'Reject quantity is more than quantity' : ''}
                                                 />
                                               </Grid>
-                                              <Grid item xs={12} md={8}>
-                                                <Field
+                                              <Grid item xs={12} md={3}>
+                                                <TextField
                                                   fullWidth
                                                   label="Comment"
                                                   variant="outlined"
                                                   type="text"
                                                   size="small"
-                                                  component={TextField}
                                                   name="comment"
                                                   placeholder="Comment"
                                                   value={data.comment}
@@ -240,35 +309,29 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                         </Grid>
                       </Grid>
                       <Box pt={2}>
-                        <Grid container>
-                          <Grid item xs={12} md={6}>
-                            <Field
-                              fullWidth
-                              label="Reject Date"
-                              variant="inline"
-                              inputVariant="outlined"
-                              autoOk
-                              size="small"
-                              margin="dense"
-                              component={KeyboardDatePicker}
-                              name="rejectDate"
-                              placeholder="Reject Date"
-                              value={values.rejectDate}
-                              format={dateFormat}
-                              minDate={
-                                lockDate
-                                  ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
-                                    ? lockDate
-                                    : purchaseOrderData?.purchaseOrderDate
-                                  : purchaseOrderData?.purchaseOrderDate
-                              }
-                              maxDate={new Date()}
-                              onChange={(value) => {
-                                setFieldValue('rejectDate', value);
-                              }}
-                            />
-                          </Grid>
-                        </Grid>
+                        <KeyboardDatePicker
+                          label="Reject Date"
+                          variant="inline"
+                          inputVariant="outlined"
+                          autoOk
+                          size="small"
+                          margin="dense"
+                          name="rejectDate"
+                          placeholder="Reject Date"
+                          value={values.rejectDate}
+                          format={dateFormatForInputControl}
+                          minDate={
+                            lockDate
+                              ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                                ? lockDate
+                                : purchaseOrderData?.purchaseOrderDate
+                              : purchaseOrderData?.purchaseOrderDate
+                          }
+                          maxDate={new Date()}
+                          onChange={(value) => {
+                            setFieldValue('rejectDate', value);
+                          }}
+                        />
                       </Box>
                     </Form>
                   </Box>
@@ -284,7 +347,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                 </Button>
                 <Button
                   onClick={() => {
-                    if (!validate(values.products).rejectQuantity && !errors['rejectDate']) {
+                    if (!validate(values.products).rejectQuantity && !validate(values.products).storageLocation && !validateDate(values)?.rejectDate) {
                       handleReject(values.products, values.rejectDate);
                     }
                   }}

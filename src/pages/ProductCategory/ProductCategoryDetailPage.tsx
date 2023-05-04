@@ -13,6 +13,8 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CreateProductCategory from './CreateProductCategory';
 import DeleteButton from '../../components/Helpers/DeleteButton';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
 
 const ProductCategoryDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -117,6 +119,7 @@ const ProductCategoryDetailPage = () => {
                 </Button>
               )}
               {permissions?.productCategory?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            <ActivityButton referenceId={productCategoryData?._id} resource={ACTIVITY_RESOURCE.productCategory} />   
             </Box>
           </Box>
         </Box>

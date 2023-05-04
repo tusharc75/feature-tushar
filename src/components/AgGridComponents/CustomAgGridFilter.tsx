@@ -3,7 +3,7 @@ import { TextField } from '@material-ui/core';
 import FilterListIcon from '@material-ui/icons/FilterList';
 
 export default forwardRef((props: any, ref) => {
-  const [currentValue, setCurrentValue] = useState(null);
+  const [currentValue, setCurrentValue] = useState('');
   const inputRef = useRef(null);
 
   // expose AG Grid Filter Lifecycle callbacks
@@ -13,7 +13,7 @@ export default forwardRef((props: any, ref) => {
         // When the filter is empty we will receive a null value here
         if (!parentModel) {
           inputRef.current.value = '';
-          setCurrentValue(null);
+          setCurrentValue('');
         } else {
           inputRef.current.value = parentModel.filter + '';
           setCurrentValue(parentModel.filter);
@@ -67,7 +67,7 @@ export default forwardRef((props: any, ref) => {
         style={{ padding: 0 }}
         type="search"
         ref={inputRef}
-        value={currentValue}
+        value={currentValue ? currentValue : ''}
         onChange={onInputBoxChanged}
         size="small"
         fullWidth

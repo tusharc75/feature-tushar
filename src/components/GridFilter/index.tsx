@@ -27,7 +27,7 @@ function GridFilter({
   setSelectedFilter,
   selectedFilter,
   presentFilter = null,
-  setChipData,
+  // setChipData,
   currentFomValue,
   setCurrentFomValue
 }) {
@@ -57,19 +57,22 @@ function GridFilter({
     setSelectedUserFilter(selectedFilter);
   }, []);
 
+  const FILTER_NOT_APPLIED = ['fileUpload', 'multiFileUpload', 'imageUpload', 'multiImageUpload', 'richTextEditor', 'signature', 'colorPicker', 'number', 'decimal'];
+
   const fetchColumns = () => {
     axiosInstance()
       .get(`/field?resource=${resource}`)
       .then(({ data: { data } }) => {
-        const coloum = data?.filter(
-          (e) =>
-            !['currency', 'fileUpload', 'multiFileUpload', 'imageUpload', 'richTextEditor', 'signature', 'colorPicker'].includes(e?.fieldData?.type)
-        );
-        setColoums(
-          coloum?.map((e) => {
-            return { ...e.fieldData };
-          })
-        );
+        const coloum = data?.filter((e) => !FILTER_NOT_APPLIED.includes(e?.fieldData?.type));
+        // for now, we are not supporting multiSelect in filter, we are just modifing the type to dropDown
+        const modifiedColumn = coloum?.map((col: any) => {
+          const d = col.fieldData;
+          if (d?.type === 'multiSelect') {
+            d.type = 'dropDown';
+          }
+          return d;
+        });
+        setColoums(modifiedColumn);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -97,51 +100,51 @@ function GridFilter({
         setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: '1-month' });
         formValues[`from_${field.fieldName}`] = new Date(moment().subtract('1', 'month').calendar());
         formValues[`to_${field.fieldName}`] = new Date();
-        // setBetweenDate((prevState) => ({
-        //   ...prevState,
-        //   [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
-        //   [`to_${field.fieldName}`]: new Date()
-        // }));
+        setBetweenDate((prevState) => ({
+          ...prevState,
+          [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
+          [`to_${field.fieldName}`]: new Date()
+        }));
         break;
       case '3-months':
         setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: '3-months' });
         formValues[`from_${field.fieldName}`] = new Date(moment().subtract('3', 'months').calendar());
         formValues[`to_${field.fieldName}`] = new Date();
-        // setBetweenDate((prevState) => ({
-        //   ...prevState,
-        //   [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
-        //   [`to_${field.fieldName}`]: new Date()
-        // }));
+        setBetweenDate((prevState) => ({
+          ...prevState,
+          [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
+          [`to_${field.fieldName}`]: new Date()
+        }));
         break;
       case '6-months':
         setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: '6-months' });
         formValues[`from_${field.fieldName}`] = new Date(moment().subtract('6', 'months').calendar());
         formValues[`to_${field.fieldName}`] = new Date();
-        // setBetweenDate((prevState) => ({
-        //   ...prevState,
-        //   [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
-        //   [`to_${field.fieldName}`]: new Date()
-        // }));
+        setBetweenDate((prevState) => ({
+          ...prevState,
+          [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
+          [`to_${field.fieldName}`]: new Date()
+        }));
         break;
       case '1-year':
         setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: '1-year' });
         formValues[`from_${field.fieldName}`] = new Date(moment().subtract('1', 'year').calendar());
         formValues[`to_${field.fieldName}`] = new Date();
-        // setBetweenDate((prevState) => ({
-        //   ...prevState,
-        //   [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
-        //   [`to_${field.fieldName}`]: new Date()
-        // }));
+        setBetweenDate((prevState) => ({
+          ...prevState,
+          [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
+          [`to_${field.fieldName}`]: new Date()
+        }));
         break;
       default:
         setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: 'custom' });
         formValues[`from_${field.fieldName}`] = null;
         formValues[`to_${field.fieldName}`] = null;
-        // setBetweenDate((prevState) => ({
-        //   ...prevState,
-        //   [`from_${field.fieldName}`]: null,
-        //   [`to_${field.fieldName}`]: null
-        // }));
+        setBetweenDate((prevState) => ({
+          ...prevState,
+          [`from_${field.fieldName}`]: null,
+          [`to_${field.fieldName}`]: null
+        }));
         break;
     }
   };
@@ -170,39 +173,42 @@ function GridFilter({
 
     for (let i = 0; i < coloums.length; i++) {
       const col = coloums[i];
-      const key = col?.fieldName;
+      const fieldName = col?.fieldName;
+      const fieldLabel = col?.fieldLabel;
 
-      const fieldLabel = col.fieldLabel;
-      // IF THIS COLUMN DOSEN'T EXIST ON FORMVALUES SKIP TO NEXT ITERATION
-      if (!colNames.includes(key) && col.type !== 'dateTime') {
+      if (
+        !(colNames.includes(fieldName) || colNames.includes(`from_${fieldName}`) || colNames.includes(`to_${fieldName}`)) &&
+        (col.type !== 'dateTime' || col.type !== 'date')
+      ) {
         continue;
       }
 
-      if (col.type === 'singleLine' && formValues[key]) {
-        chipData.push({ title: fieldLabel, value: formValues[key], name: key });
-        filterModel[key] = {
+      if (['singleLine', 'multiLine', 'email', 'mobileNumber']?.includes(col.type) && formValues[fieldName]) {
+        chipData.push({ title: fieldLabel, value: formValues[fieldName], name: fieldName });
+        filterModel[fieldName] = {
           filterType: 'text',
           type: 'contains',
-          filter: formValues[key]
+          filter: formValues[fieldName]
         };
       }
-      if (col.type === 'dropDown' && formValues[key]) {
-        chipData.push({ title: fieldLabel, value: getDataFromFormValue(formValues[key], key)?.optionLabel, name: key });
-        filterModel[key] = {
+      if (col.type === 'dropDown' && formValues[fieldName]) {
+        chipData.push({ title: fieldLabel, value: getDataFromFormValue(formValues[fieldName], fieldName)?.optionLabel, name: fieldName });
+        filterModel[fieldName] = {
           filterType: 'text',
           type: 'contains',
-          filter: getDataFromFormValue(formValues[key], key)?.optionLabel || null
+          filter: getDataFromFormValue(formValues[fieldName], fieldName)?.optionLabel || null
         };
       }
-      if (col.type === 'dateTime') {
-        const from = `from_${col.fieldName}`;
-        const to = `to_${col.fieldName}`;
+      if (col.type === 'dateTime' || col.type === 'date') {
+        const from = `from_${fieldName}`;
+        const to = `to_${fieldName}`;
+
         const fromDate = formValues[from] ? formValues[from] : null;
         const toDate = formValues[to] ? formValues[to] : null;
 
         if (fromDate || toDate) {
           chipData.push({
-            title: col.fieldLabel,
+            title: fieldLabel,
             value:
               fromDate && toDate
                 ? `${fromDate ? moment(fromDate).format('DD/MM/YYYY') : null} - ${toDate ? moment(toDate).format('DD/MM/YYYY') : null}`
@@ -210,21 +216,19 @@ function GridFilter({
                   ? `${fromDate ? `${moment(fromDate).format('DD/MM/YYYY')} (From Date)` : ''} ${toDate ? `${moment(toDate).format('DD/MM/YYYY')} (To Date)` : ''
                   }`
                   : null,
-            name: col.fieldName
+            name: fieldName
           });
-
-          filterModel[col.fieldName] = {
-            filterType: 'text',
+          filterModel[fieldName] = {
+            filterType: 'date',
             type: 'contains',
             filter: {
-              from: fromDate ? new Date(fromDate) : null,
-              to: toDate ? new Date(toDate) : null
+              from: fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null,
+              to: toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
             }
           };
         }
       }
-
-      if (col.type === 'multiSelect' && formValues[key]) {
+      if (col.type === 'multiSelect' && formValues[fieldName]) {
         const multiChipData = [];
         const createMultiSelectModel = (items) => {
           // EDGE CASES
@@ -233,14 +237,13 @@ function GridFilter({
           }
           if (items.length === 1) {
             multiChipData.push(items[0].optionLabel);
-            chipData.push({ title: fieldLabel, value: multiChipData.join(', '), name: key });
+            chipData.push({ title: fieldLabel, value: multiChipData.join(', '), name: fieldName });
             return {
               filterType: 'text',
               type: 'contains',
               filter: items[0].optionLabel
             };
           }
-
           // OTHERWISE
           const obj = {
             filterType: 'text',
@@ -255,49 +258,24 @@ function GridFilter({
             };
           });
 
-          chipData.push({ title: fieldLabel, value: multiChipData.join(', '), name: key });
+          chipData.push({ title: fieldLabel, value: multiChipData.join(', '), name: fieldName });
           return obj;
         };
-        filterModel[key] = {
-          ...createMultiSelectModel(getDataFromFormValue(formValues[key], key))
+        filterModel[fieldName] = {
+          ...createMultiSelectModel(getDataFromFormValue(formValues[fieldName], fieldName))
         };
       }
+      if (col.type === 'checkBox') {
+        if (formValues[fieldName] === true || formValues[fieldName] === false) {
+          chipData.push({ title: fieldLabel, value: formValues[fieldName] === true ? 'Yes' : 'No', name: fieldName });
+          filterModel[fieldName] = {
+            filterType: 'text',
+            type: 'contains',
+            filter: formValues[fieldName] === true ? 'Yes' : 'No'
+          };
+        }
+      }
     }
-    // if (betweenDate) {
-    //   for (const i in betweenDate) {
-    //     const data = moment(betweenDate[i]).format();
-    //     const [fromTo, key] = i.split('_');
-    //     const getCondition = (fromTo) => {
-    //       if (fromTo == 'from') {
-    //         return {
-    //           condition1: {
-    //             dateFrom: data,
-    //             dateTo: null,
-    //             filterType: 'date',
-    //             type: 'greaterThan'
-    //           }
-    //         };
-    //       } else {
-    //         return {
-    //           condition2: {
-    //             dateFrom: data,
-    //             dateTo: null,
-    //             filterType: 'date',
-    //             type: 'lessThan'
-    //           }
-    //         };
-    //       }
-    //     };
-    //     filterModel[key] = {
-    //       ...filterModel[key],
-    //       filterType: 'date',
-    //       operator: 'AND',
-    //       ...getCondition(fromTo)
-    //     };
-    //   }
-    // }
-
-    setChipData(chipData);
     return filterModel;
   };
 
@@ -339,7 +317,7 @@ function GridFilter({
         }}
         aria-describedby="Filter Dialog"
       >
-        <CustomDialogHeader title={`${resource} Filters`} onClose={handleClose} showRequiredLabel={false} />
+        <CustomDialogHeader title={`Filters`} onClose={handleClose} showRequiredLabel={false} />
         <CustomDialogContent>
           <Box pt={2} pb={2}>
             <Grid container spacing={2}>
@@ -402,6 +380,7 @@ function GridFilter({
                                 onChange={(e) => {
                                   handleDuration(e.target.value, field);
                                 }}
+                                label="Select Duration"
                               >
                                 <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                                 <MenuItem value={'6-months'}>Last 6 Months</MenuItem>

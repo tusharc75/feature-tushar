@@ -10,7 +10,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { productAuction } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, productAuction } from '../../constants/helpers';
 import ManageProductAuction from './ManageProductAuction';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -20,6 +20,7 @@ import { FaWpforms } from 'react-icons/fa';
 import { camelCase } from 'lodash';
 import BidsPage from './Bids';
 import { Skeleton } from '@material-ui/lab';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -127,6 +128,7 @@ const ProductAuctionDetailsPage = () => {
                 )}
                 {permissions?.productAuction?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
+              <ActivityButton referenceId={productAuctionData?._id} resource={ACTIVITY_RESOURCE.productAuction} />
           </Box>
         </Box>
       </Box>

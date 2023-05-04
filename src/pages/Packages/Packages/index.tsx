@@ -1,7 +1,7 @@
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, Menu, MenuItem } from '@material-ui/core';
 import CustomAgGrid from 'src/components/AgGridComponents/CustomAgGridEditable';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
@@ -10,12 +10,13 @@ import routes from 'src/components/Helpers/Routes';
 import { prepareDataForGrid, packages } from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Loader from 'src/components/Loader';
 import { camelCase } from 'lodash';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
 const PackagesTable = ({ packageId, packageData }) => {
@@ -38,6 +39,7 @@ const PackagesTable = ({ packageId, packageData }) => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   useEffect(() => {
@@ -155,139 +157,178 @@ const PackagesTable = ({ packageId, packageData }) => {
       });
   };
 
-  return (<Box>
-    <Box mb={1} mt={1} display="flex" justifyContent="space-between">
-      <Box display="flex">
-        {permissions?.packages?.isUpdate && (
-          <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-start' }}>
-            <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
-              {`Add Product Packages`}
-            </Button>
-            <Box ml={1} />
-            <Button variant="contained" color="primary" size="small" onClick={() => setShowServiceAssignDialog(true)}>
-              {`Add Service Packages`}
-            </Button>
-          </Box>
-        )}
-      </Box>
-      <Box display="flex">
-        <ImportExportLinks
-          permissions={permissions?.packages}
-          module="packages-products"
-          api={`${packages.api}/${packageId}/package`}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
-          isExportAllOrSomeFeature={true}
-          total={rowCount}
-          recordsToExport={selectedRecords.length}
-          ids={[]}
-          additionalParams={`refrenceId=${packageId}`}
-          isBackgroundWhite={true}
-        />
-        <Box ml={1} />
-        {permissions?.packages?.isUpdate && (
-          <DeleteButton
-            disabled={selectedRecords.length === 0 || isRemovingProducts}
-            text={'Delete'}
-            onClick={() => {
-              setShowProductConfirmBox(true);
+  const handleClick = (event) => {
+    setAnchorActionEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorActionEl(null);
+  };
+
+  return (
+    <Box>
+      <Box mb={1} mt={1} display="flex" justifyContent="space-between">
+        <Box display="flex">
+          {permissions?.packages?.isUpdate && (
+            <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-start' }}>
+              <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
+                {`Add Product Packages`}
+              </Button>
+              <Box ml={1} />
+              <Button variant="contained" color="primary" size="small" onClick={() => setShowServiceAssignDialog(true)}>
+                {`Add Service Packages`}
+              </Button>
+            </Box>
+          )}
+        </Box>
+        <Box display="flex">
+          {permissions?.packages?.isUpdate && (
+            <>
+              <Button
+                variant={'outlined'}
+                color="primary"
+                aria-controls="simple-menu"
+                aria-haspopup="true"
+                disabled={selectedRecords.length === 0 || isRemovingProducts}
+                size="small"
+                onClick={handleClick}
+                endIcon={<ArrowDropDownIcon />}
+              >
+                {'Actions'}
+              </Button>
+              <Menu
+                anchorEl={anchorActionEl}
+                keepMounted
+                open={Boolean(anchorActionEl)}
+                onClose={handleClose}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right'
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right'
+                }}
+              >
+                <MenuItem
+                  disabled={selectedRecords.length === 0 || isRemovingProducts}
+                  onClick={() => {
+                    setShowProductConfirmBox(true);
+                    handleClose();
+                  }}
+                >
+                  Delete
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+
+          <Box ml={1} />
+          <ImportExportMenu
+            permissions={permissions?.packages}
+            module="packages-products"
+            api={`${packages.api}/${packageId}/package`}
+            afterImportCompleted={() => {
+              fetchData();
             }}
+            isExportAllOrSomeFeature={true}
+            ids={[]}
+            additionalParams={`refrenceId=${packageId}`}
           />
-        )}
+        </Box>
       </Box>
+      {isMobile && !isTablet ? (
+        <CustomSwipableList
+          allowSelection={permissions?.packages?.isUpdate}
+          allowSwipe={permissions?.packages?.isUpdate}
+          permissions={permissions?.packages}
+          primaryField={columns?.find((d) => d.primaryField)}
+          onClick={(data) => {
+            history.push(`${routes.productDetail.path}/${data._id}`);
+          }}
+          dataRows={dataRows}
+          selectedRecords={[]}
+          dispatch={dispatch}
+          onEdit={(data) => { }}
+          extraParamsToCheckDelete={true}
+          onDelete={(data) => { }}
+          rowCount={rowCount}
+          page={page}
+          loading={loading}
+          additionalDetails={[]}
+          chips={[
+            {
+              label: 'Quantity : ',
+              field: 'qty'
+            }
+          ]}
+          owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+          onCreate={() => {
+            setShowProductAssignDialog(true);
+          }}
+          showClone={true}
+          onClone={(data) => { }}
+          renderedFrom={renderedFrom}
+        />
+      ) : Object.keys(frameWorkComponent).length > 0 ? (
+        <CustomAgGrid
+          columns={columns}
+          dataRows={dataRows}
+          frameworkComponents={frameWorkComponent}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          isClientSideGrid={true}
+          actionWidth={150}
+          loading={loading}
+          allowSelection={permissions?.packages?.isUpdate}
+          actionLabel="Qty"
+          renderedFrom={renderedFrom}
+          actionEditable={permissions?.packages?.isUpdate}
+          onCellValueChanged={handleUpdateQuantity}
+          refreshGrid={fetchData}
+        />
+      ) : (
+        <Loader noLoader={false} minHeight={'400px'} text="Loading..." />
+      )}
+      {showProductAssignDialog && (
+        <AssignPackageDialog
+          referenceType="packages"
+          handleClose={() => setShowProductAssignDialog(false)}
+          ids={[...dataRows?.map((e) => e._id), packageId]}
+          onSuccess={(rows) => {
+            handleAssignPackage(rows);
+          }}
+          packageType={'Product'}
+        />
+      )}
+      {showServiceAssignDialog && (
+        <AssignPackageDialog
+          referenceType="packages"
+          handleClose={() => setShowServiceAssignDialog(false)}
+          ids={[...dataRows?.map((e) => e._id), packageId]}
+          onSuccess={(rows) => {
+            handleAssignPackage(rows);
+          }}
+          packageType={'Service'}
+        />
+      )}
+      {showProductConfirmBox && (
+        <ConfirmationDialog
+          open={showProductConfirmBox}
+          message={`Are you sure you want to delete the product(s) ?`}
+          onClose={() => {
+            setShowProductConfirmBox(false);
+          }}
+          okBtnLoading={isRemovingProducts}
+          onOk={removeProducts}
+        />
+      )}
     </Box>
-    {isMobile && !isTablet ? (
-      <CustomSwipableList
-        allowSelection={permissions?.packages?.isUpdate}
-        allowSwipe={permissions?.packages?.isUpdate}
-        permissions={permissions?.packages}
-        primaryField={columns?.find((d) => d.primaryField)}
-        onClick={(data) => {
-          history.push(`${routes.productDetail.path}/${data._id}`);
-        }}
-        dataRows={dataRows}
-        selectedRecords={[]}
-        dispatch={dispatch}
-        onEdit={(data) => { }}
-        extraParamsToCheckDelete={true}
-        onDelete={(data) => { }}
-        rowCount={rowCount}
-        page={page}
-        loading={loading}
-        additionalDetails={[]}
-        chips={[
-          {
-            label: 'Quantity : ',
-            field: 'qty'
-          }
-        ]}
-        owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-        onCreate={() => {
-          setShowProductAssignDialog(true);
-        }}
-        showClone={true}
-        onClone={(data) => { }}
-        renderedFrom={renderedFrom}
-      />
-    ) : Object.keys(frameWorkComponent).length > 0 ? (
-      <CustomAgGrid
-        columns={columns}
-        dataRows={dataRows}
-        frameworkComponents={frameWorkComponent}
-        setGridApi={setGridApi}
-        dispatch={dispatch}
-        rowCount={rowCount}
-        limit={limit}
-        pageSizes={pageSizes}
-        page={page}
-        isClientSideGrid={true}
-        actionWidth={150}
-        loading={loading}
-        allowSelection={permissions?.packages?.isUpdate}
-        actionLabel="Qty"
-        renderedFrom={renderedFrom}
-        actionEditable={permissions?.packages?.isUpdate}
-        onCellValueChanged={handleUpdateQuantity}
-        refreshGrid={fetchData}
-      />
-    ) : (
-      <Loader noLoader={false} minHeight={'400px'} text="Loading..." />
-    )}
-    {showProductAssignDialog && (
-      <AssignPackageDialog
-        referenceType="packages"
-        handleClose={() => setShowProductAssignDialog(false)}
-        ids={[...dataRows?.map((e) => e._id), packageId]}
-        onSuccess={(rows) => {
-          handleAssignPackage(rows);
-        }}
-        packageType={'Product'}
-      />
-    )}
-    {showServiceAssignDialog && (
-      <AssignPackageDialog
-        referenceType="packages"
-        handleClose={() => setShowServiceAssignDialog(false)}
-        ids={[...dataRows?.map((e) => e._id), packageId]}
-        onSuccess={(rows) => {
-          handleAssignPackage(rows);
-        }}
-        packageType={'Service'}
-      />
-    )}
-    {showProductConfirmBox && (
-      <ConfirmationDialog
-        open={showProductConfirmBox}
-        message={`Are you sure you want to delete the product(s) ?`}
-        onClose={() => {
-          setShowProductConfirmBox(false);
-        }}
-        okBtnLoading={isRemovingProducts}
-        onOk={removeProducts}
-      />
-    )}
-  </Box>
   );
 };
 

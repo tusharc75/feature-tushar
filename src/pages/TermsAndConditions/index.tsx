@@ -63,7 +63,7 @@ export default function TermsAndCondition(props) {
 
   useEffect(() => {
     const parsedParams = queryString.parse(location?.search);
-    const tempData = termsAndConditionsData.find(d => d.id === parsedParams?.id)
+    const tempData = termsAndConditionsData.find((d) => d.id === parsedParams?.id);
     if (parsedParams?.id && tempData) {
       setShowCreateDialog({ open: true, isClone: false });
 
@@ -150,7 +150,7 @@ export default function TermsAndCondition(props) {
             ...u,
             id: u._id
           }));
-          setTermsAndConditionsData(rows)
+          setTermsAndConditionsData(rows);
           dispatch({ type: 'initialize', data: rows, count: data.count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
@@ -187,7 +187,6 @@ export default function TermsAndCondition(props) {
   const handleFilterClose = () => {
     setisOpenDialog(false);
   };
-
 
   const handleDeleteTermsAndConditions = async () => {
     if (deleteRec?._id || selectedRecords.length > 0) {
@@ -326,27 +325,28 @@ export default function TermsAndCondition(props) {
                 <Grid style={{ display: 'flex', gap: '5px' }}>
                   {actionsPermissions.isCreate && (
                     <Button
-                      variant={isMobile && !isTablet ? "text" : "contained"}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
                       size="small"
-                      className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => setShowCreateDialog({ open: true, isClone: false })}
                       startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                     >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
 
                   <Button
                     disabled={selectedRecords.length === 0}
-                    variant={isMobile && !isTablet ? "text" : "outlined"}
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="default"
                     size="small"
-                    className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                     onClick={openActions}
                     aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'}
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -395,16 +395,16 @@ export default function TermsAndCondition(props) {
               setEditRecord(cloneDeep(d));
             }}
             extraParamsToCheckDelete={false}
-            onDelete={(d) => { }}
+            onDelete={(d) => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
             additionalDetails={[]}
             chips={[]}
             owerCollaboratorInitialsOrImages=""
-            onCreate={() => { }}
+            onCreate={() => {}}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={'termsAndConditions'}
           />
         ) : (

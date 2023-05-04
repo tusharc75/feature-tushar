@@ -15,7 +15,7 @@ import { ExpandMore } from '@material-ui/icons';
 import { Button, Chip, Dialog, Link, Menu, MenuItem, TextField } from '@material-ui/core';
 import { AddOutlined } from '@material-ui/icons';
 import { CreateNote } from '../../../components/Activity/Note/CreateNote';
-import { CustomDialogTransition, getApi, getData, gridLoadingTimeout } from '../../../constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import styles from '../../Leads/Header.module.scss';
@@ -102,18 +102,17 @@ const Note = () => {
   useEffect(() => {
     if (resource && resource?.optionValue) {
       setLoadingResources(true);
+      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue];
       axiosInstance()
-        .get(`${getApi(resource?.optionValue)}?limit=100`)
+        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
         .then(({ data: { data } }) => {
-          if (data.length) {
-            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
-            setResourceData(mappedData || []);
-          }
+          setResourceData(data[lookupResource] || []);
           setLoadingResources(false);
         })
         .catch((error) => {
           setLoadingResources(false);
         });
+
       return () => {
         setSelectedResourceData(null);
         setResourceData(null);
@@ -354,14 +353,17 @@ const Note = () => {
                   <Autocomplete
                     disabled={loadingResources}
                     options={resourceData}
-                    getOptionLabel={(option: any) => option.name}
-                    getOptionSelected={(option: any, value: any) => option.name === value.name}
+                    getOptionLabel={(option: any) => option.optionLabel}
+                    getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
                     style={{ width: isMobile && !isTablet ? '60%' : '250px' }}
                     value={selectedResourceData}
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
-                      if (newValue?.id) {
-                        setFilter((prevState) => [...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]);
+                      if (newValue?.optionValue) {
+                        setFilter((prevState) => [
+                          ...prevState,
+                          { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }
+                        ]);
                       } else {
                         setFilter([]);
                       }
@@ -385,10 +387,10 @@ const Note = () => {
               </Grid>
               <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
                 <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Grid style={{ width: isMobile && !isTablet ? '75%' : '100%', display: 'flex' }}>
+                  <Box style={{ flexGrow: 1, flexBasis: 'calc(100% - 171px)' }}>
                     <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
-                  </Grid>
-                  <Grid style={{ display: 'flex', gap: '5px' }}>
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', flexBasis: '163px' }}>
                     {
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -414,8 +416,9 @@ const Note = () => {
                         aria-controls="action-menu"
                         disabled={selectedRecords.length > 0 ? false : true}
                         className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        endIcon={<ExpandMore />}
                       >
-                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                        {isMobile && !isTablet ? '' : 'Actions'}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -440,7 +443,7 @@ const Note = () => {
                         </MenuItem>
                       </Menu>
                     </div>
-                  </Grid>
+                  </Box>
                 </Box>
               </Grid>
             </Grid>
@@ -534,7 +537,7 @@ const Note = () => {
             relatedTo={[
               {
                 type: resource && selectedResourceData ? resource.optionValue : 'user',
-                referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
+                referenceId: resource && selectedResourceData ? selectedResourceData.optionValue : user?.user?._id,
                 access: true
               }
             ]}

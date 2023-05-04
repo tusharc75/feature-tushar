@@ -35,18 +35,20 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
 
 let invoiceTimeout;
-const InvoiceType = [
-  {
-    key: 'All Invoices',
-    value: 1
-  },
-  {
-    key: 'My Invoices',
-    value: 2
-  }
-];
 
 const Invoice = () => {
+
+  const InvoiceType = [
+    {
+      key: `All ${routes.invoice.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes.invoice.title}`,
+      value: 2
+    }
+  ];
+
   const renderedFrom = camelCase(routes?.invoice.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -231,9 +233,12 @@ const Invoice = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterInvoice=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterInvoice=${selectedType}`;
+      deepFilter = `?`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -388,7 +393,7 @@ const Invoice = () => {
                   permissions={permissions?.invoice}
                   module="invoice"
                   api={invoice.api}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
                   recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -529,6 +534,8 @@ const Invoice = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchInvoiceData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.invoice}
             />
           )
         ) : null}

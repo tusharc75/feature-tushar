@@ -10,8 +10,7 @@ import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
 import { isMobile, isTablet } from 'react-device-detect';
-import { Formik, Form, Field } from 'formik';
-import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
+import { Formik, Form } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 
 const QuantityDialog = ({ handleCloseDialog, handleAddToPickup, product, cartQty = 0, loading }) => {
@@ -28,7 +27,7 @@ const QuantityDialog = ({ handleCloseDialog, handleAddToPickup, product, cartQty
             errors["qty"] = "Please enter valid qty"
         }
         if (parseInt(values.qty) > (product?.availableInventory)) {
-            errors["qty"] = "qty not more than inventory"
+            errors["qty"] = "Insufficient Quantity !"
         }
         return errors;
     }
@@ -72,8 +71,7 @@ const QuantityDialog = ({ handleCloseDialog, handleAddToPickup, product, cartQty
                                     secondary={`Inventory : ${product?.availableInventory}`}
                                 />
                                 {product?.availableInventory ?
-                                    <Field
-                                        component={TextFieldFormik}
+                                    <TextField
                                         margin="dense"
                                         type="number"
                                         label="Qty"

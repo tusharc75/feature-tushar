@@ -18,18 +18,13 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RejectProduct from './RejectProduct';
 import TransformIcon from '@material-ui/icons/Transform';
 import HistoryIcon from '@material-ui/icons/History';
+import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import Receive from './Receive';
 import Reject from './Reject';
+import Logs from './Logs';
 import History from './History';
 
-const ReceivingAsset = ({
-  purchaseOrderData,
-  updateStatus,
-  stepFullScreen,
-  renderedFrom,
-  checkReceivedProduct,
-  allowedToEdit
-}) => {
+const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -38,7 +33,10 @@ const ReceivingAsset = ({
   const [receiveDialog, setReceiveDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectProductDialog, setRejectProductDialog] = useState(null);
+
+  const [logDialog, setLogDialog] = useState({ open: false, _id: '', product: '', productName: '' });
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
+
   const [inventoryHistory, setInventoryHistory] = useState([]);
 
   const [rowsData, setRowsData] = useState(null);
@@ -54,7 +52,9 @@ const ReceivingAsset = ({
     setColumns(null);
     const column = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
-    const productFields = productResult?.data?.data?.filter((e) => ['productCategory', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName));
+    const productFields = productResult?.data?.data?.filter((e) =>
+      ['productCategory', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName)
+    );
     column.push({
       accessor: 'index',
       Header: 'Index',
@@ -99,7 +99,7 @@ const ReceivingAsset = ({
     });
     column.push({
       accessor: 'description',
-      Header: "Description",
+      Header: 'Description',
       width: 200,
       Cell: ({ row }) => {
         return row.original['description'] ? <p className="text-truncate">{row?.original?.description}</p> : <NoDataCell />;
@@ -249,43 +249,60 @@ const ReceivingAsset = ({
         {
           accessor: 'action',
           Header: '',
-          minWidth: 80,
-          width: 80,
+          minWidth: 130,
+          width: 130,
           sticky: 'right',
           disableFilters: true,
           canDrag: false,
           Cell: ({ row }) =>
             row?.original?.type === 'Product' ? (
               <>
-                {permissions?.purchaseOrder?.isUpdate
-                  && allowedToEdit
-                  && row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0)
-                  && ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status)
-                  ? (
-                    <HtmlTooltip title="Reject">
-                      <span>
-                        <IconButton
-                          size="small"
-                          aria-label="reject"
-                          onClick={() => {
-                            setRejectProductDialog(row.original);
-                          }}
-                        >
-                          <TransformIcon fontSize="small" color={'primary'} />
-                        </IconButton>
-                      </span>
-                    </HtmlTooltip>
-                  ) : null}
+                {permissions?.purchaseOrder?.isUpdate &&
+                allowedToEdit &&
+                row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) &&
+                ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+                  <HtmlTooltip title="Reject">
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="reject"
+                        onClick={() => {
+                          setRejectProductDialog(row.original);
+                        }}
+                      >
+                        <TransformIcon fontSize="small" color={'primary'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                ) : null}
                 <HtmlTooltip title="History">
                   <span>
                     <IconButton
                       size="small"
                       aria-label="History"
                       onClick={() => {
-                        setHistoryDialog({ open: true, _id: row?.original?._id, product: row?.original?.productId, productName: row?.original?.detail });
+                        setHistoryDialog({
+                          open: true,
+                          _id: row?.original?._id,
+                          product: row?.original?.productId,
+                          productName: row?.original?.detail
+                        });
                       }}
                     >
                       <HistoryIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
+                <HtmlTooltip title="Logs">
+                  <span>
+                    <IconButton
+                      size="small"
+                      aria-label="Log"
+                      onClick={() => {
+                        setLogDialog({ open: true, _id: row?.original?._id, product: row?.original?.productId, productName: row?.original?.detail });
+                      }}
+                    >
+                      <TrackChangesIcon fontSize="small" color={'primary'} />
                     </IconButton>
                   </span>
                 </HtmlTooltip>
@@ -342,7 +359,13 @@ const ReceivingAsset = ({
           let actualReceived = item.actualReceived;
           subRowsproductSerialNumber?.forEach((e: any, index: any) => {
             if (actualReceived && !e.isUsed) {
-              res.subRows.push({ index: `${res.index}.${index + 1}`, detail: e.serialNumber, type: 'Serial Number', assetId: e?._id, hideSelection: true });
+              res.subRows.push({
+                index: `${res.index}.${index + 1}`,
+                detail: e.serialNumber,
+                type: 'Serial Number',
+                assetId: e?._id,
+                hideSelection: true
+              });
               actualReceived = actualReceived - 1;
               e.isUsed = true;
             }
@@ -353,7 +376,11 @@ const ReceivingAsset = ({
         return res;
       });
 
-      checkReceivedProduct(result?.data?.data?.map((e) => { return { ...e, type: "Product" } }));
+      checkReceivedProduct(
+        result?.data?.data?.map((e) => {
+          return { ...e, type: 'Product' };
+        })
+      );
       setRowsData(rows);
       setSelectedRecords([]);
     } catch (error) {
@@ -363,7 +390,7 @@ const ReceivingAsset = ({
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between" m={1} pb={2}>
+      <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex">
           {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
             <Button
@@ -465,11 +492,20 @@ const ReceivingAsset = ({
           warehouse={purchaseOrderData?.warehouse.optionValue}
         />
       )}
+      {logDialog.open && (
+        <Logs
+          handleClose={() => setLogDialog({ open: false, _id: '', product: '', productName: '' })}
+          productName={logDialog.productName}
+          inventoryHistory={inventoryHistory?.filter((e) => e._id === logDialog._id && e.product === logDialog.product)}
+        />
+      )}
       {historyDialog.open && (
         <History
           handleClose={() => setHistoryDialog({ open: false, _id: '', product: '', productName: '' })}
           productName={historyDialog.productName}
-          inventoryHistory={inventoryHistory?.filter((e) => e._id === historyDialog._id && e.product === historyDialog.product)}
+          poId={purchaseOrderData._id}
+          _id={historyDialog._id}
+          product={historyDialog.product}
         />
       )}
     </>

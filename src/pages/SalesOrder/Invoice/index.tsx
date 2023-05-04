@@ -1,38 +1,39 @@
-
-import Box from "@material-ui/core/Box/Box";
-import { useState, useEffect, Fragment } from "react";
-import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import Grid from "@material-ui/core/Grid/Grid";
-import { IconButton } from "@material-ui/core";
-import { salesOrder } from "../../../constants/helpers";
-import axiosInstance from "../../../axios/axiosInstance";
-import { isMobile } from "react-device-detect";
-import routes from "../../../components/Helpers/Routes";
+import Box from '@material-ui/core/Box/Box';
+import { useState, useEffect, Fragment } from 'react';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import Grid from '@material-ui/core/Grid/Grid';
+import { IconButton } from '@material-ui/core';
+import { salesOrder } from '../../../constants/helpers';
+import axiosInstance from '../../../axios/axiosInstance';
+import { isMobile } from 'react-device-detect';
+import routes from '../../../components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
-import { startCase } from "lodash";
+import { startCase } from 'lodash';
 import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
-import { genrateCustomTableColumns } from "src/constants/columns";
-import InvoiceFacility from "./InvoiceFacility";
+import { generateCustomTableColumns } from 'src/constants/columns';
+import InvoiceFacility from './InvoiceFacility';
 
-const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, renderedFrom,stepFullScreen}) => {
+const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, renderedFrom, stepFullScreen }) => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [rowsData, setRowsData] = useState(null);
-  const [columns, setColumns] = useState(null)
+  const [columns, setColumns] = useState(null);
 
   useEffect(() => {
-    if (statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") > statusOptions.findIndex(d => d.optionLabel === salesOrderData?.status)) {
-      updateJobStatus("Ready to Invoice")
+    if (
+      statusOptions.findIndex((d) => d.optionLabel === 'Ready to Invoice') > statusOptions.findIndex((d) => d.optionLabel === salesOrderData?.status)
+    ) {
+      updateJobStatus('Ready to Invoice');
     }
   }, []);
 
   useEffect(() => {
-    fetchFields()
+    fetchFields();
   }, []);
 
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
-    const newColumns = genrateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
     let coloum: any = [
       {
         accessor: 'index',
@@ -61,13 +62,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
         width: 300,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {
-              <p
-                title={row.original?.detail}
-              >
-                {row.original?.detail}
-              </p>
-            }
+            {<p title={row.original?.detail}>{row.original?.detail}</p>}
 
             <Box ml={1}>
               <IconButton
@@ -103,7 +98,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
     fetchMaterialData();
-  }
+  };
   const fetchMaterialData = async () => {
     setNextStep(false);
     var data: any = [];
@@ -113,7 +108,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${
-          parent.type === 'product'
+        parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
           ? parent.serviceDetail?.serviceName
@@ -143,7 +138,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.detail = `${
-       _subRow.type === 'product'
+        _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
           ? _subRow.serviceDetail?.serviceName
@@ -170,35 +165,34 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
     return subRows;
   };
 
-
   return (
-  <Fragment>
-    <InvoiceFacility salesOrderData={salesOrderData} />
-    <Grid item xs={12} md={12} sm={12} className="mt-3">
-    {columns && rowsData ? (
-        <>
-          <Box p="6px" zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-              columns={columns}
-              data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={setSelectedProducts}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              renderedFrom="sales_order_product_package"
-              isClientSideGrid={true}
-            />
+    <Fragment>
+      <InvoiceFacility salesOrderData={salesOrderData} />
+      <Grid item xs={12} md={12} sm={12}>
+        {columns && rowsData ? (
+          <>
+            <Box zIndex={5} width={'100%'}>
+              <CustomReactTable
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+                columns={columns}
+                data={rowsData}
+                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+                onSelect={setSelectedProducts}
+                childrenProperty="subRows"
+                uniqueKey="_id"
+                renderedFrom="sales_order_product_package"
+                isClientSideGrid={true}
+              />
+            </Box>
+          </>
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        </>
-      ) : (
-        <Box p={2} height={500} bgcolor="white">
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
-    </Grid>
-  </Fragment>
+        )}
+      </Grid>
+    </Fragment>
   );
-}
+};
 
 export default Invoice;

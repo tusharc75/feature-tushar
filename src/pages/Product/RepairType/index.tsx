@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -17,6 +17,7 @@ import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import AddRepairType from './AddRepairTypes';
+import { ExpandMore } from '@material-ui/icons';
 
 interface Props {
   renderedFrom: string;
@@ -37,8 +38,10 @@ const ProductRepairType = (props: Props) => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
+  const [anchorEl, setAnchorEl] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
   const {
     state: { user, permissions, selectedEntity }
@@ -177,6 +180,7 @@ const ProductRepairType = (props: Props) => {
       ids = selectedRecords.map((d) => d._id);
     }
     setDeleting(true);
+    closeActions();
     axiosInstance()
       .put(`${routes.product.path}/${id}/repair-type/remove`, { ids: ids })
       .then(() => {
@@ -208,23 +212,53 @@ const ProductRepairType = (props: Props) => {
       });
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Fragment>
-      {permissions?.product?.isUpdate &&
+      {permissions?.product?.isUpdate && (
         <Box display="flex" justifyContent="space-between" p={1} pt={2} pb={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => setOpenAddDialog(true)}>
+          <Button variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
             Add Repair Types
           </Button>
-          <DeleteButton
-            disabled={selectedRecords.length === 0}
-            text={'Delete'}
-            onClick={() => setShowDeleteConfirmBox(true)} />
+          <Box display={'flex'}>
+            <Button
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              color="default"
+              size="small"
+              onClick={openActions}
+              disabled={selectedRecords.length ? false : true}
+              aria-controls="action-menu"
+              style={{ marginLeft: '0.6rem' }}
+              endIcon={<ExpandMore />}
+            >
+              {isMobile && !isTablet ? '' : 'Actions'}
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
+                Delete
+              </MenuItem>
+            </Menu>
+          </Box>
         </Box>
-      }
+      )}
       {columns && Object.keys(frameWorkComponent).length > 0 ? (
         isMobile && !isTablet ? (
           <CustomSwipableList
@@ -238,9 +272,9 @@ const ProductRepairType = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => { }}
+            onEdit={() => {}}
             extraParamsToCheckDelete={false}
-            onDelete={() => { }}
+            onDelete={() => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -248,7 +282,7 @@ const ProductRepairType = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -268,7 +302,7 @@ const ProductRepairType = (props: Props) => {
             loading={loading}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
+            showOnlyShowFilteredRecordSwitch={false}
           />
         )
       ) : (
@@ -281,8 +315,8 @@ const ProductRepairType = (props: Props) => {
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete the ${routes.repairType?.title} ? `}
           onClose={() => {
-            setDeleteRecord(null)
-            setShowDeleteConfirmBox(false)
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
           okBtnLoading={isDeleting}

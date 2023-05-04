@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext, useImperativeHandle } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { Chip, Button, Tooltip } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import _ from 'lodash';
 
 import GridFilter from '../GridFilter';
 
 // OTHER COMPONENTS
 import { RefreshButton, ArrangeView, ShowOnlySelected } from './GridButtons';
+import HtmlTooltip from '../CustomTooltipTitle';
+import moment from 'moment';
 
 const CustomGridFilterHeader = (props) => {
   const {
@@ -23,7 +26,7 @@ const CustomGridFilterHeader = (props) => {
     columnApi,
     renderedFrom,
     isClientSideGrid,
-    buttonGap = '10px',
+    buttonGap = '8px',
     dispatch,
     showOnlyShowFilteredRecordSwitch = false,
     selectedRecords = null
@@ -44,6 +47,7 @@ const CustomGridFilterHeader = (props) => {
 
   const clearSingleFilter = (name) => {
     currentGridApi.destroyFilter(name);
+    currentGridApi.onFilterChanged();
     let formValues = { ...currentFomValue };
     delete formValues[name];
     setCurrentFomValue(formValues);
@@ -59,26 +63,28 @@ const CustomGridFilterHeader = (props) => {
 
   return (
     <>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', marginBottom: '15px', justifyContent: 'space-between' }}>
-        {showOnlyShowFilteredRecordSwitch && (
-          <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '10px 0 0px' }} />
-        )}
-        {showFilters && (
-          <div className="table-filter-v1" style={{ flexBasis: '766px', maxWidth: '766px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', margin: '8px', justifyContent: 'space-between' }}>
+        <div className="table-filter-v1" style={{ flexBasis: '766px', maxWidth: '766px', paddingRight: '52px' }}>
+          {showOnlyShowFilteredRecordSwitch && (
+            <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '0px 0 10px' }} />
+          )}
+          {showFilters && (
             <DisplyaFilters
               selectedFilter={selectedFilter}
               chipData={chipData}
+              setChipData={setChipData}
+              currentGridApi={currentGridApi}
               handleFilterOpen={handleFilterOpen}
               clearSingleFilter={clearSingleFilter}
               clearFilterAll={clearFilterAll}
             />
-          </div>
-        )}
+          )}
+        </div>
         <div style={{ marginInlineStart: 'auto' }}>
           {showFilters && (
-            <Tooltip title="Apply filter" placement="top">
+            <HtmlTooltip title="Apply Filters" placement="top">
               <Button
-                style={{ marginRight: buttonGap }}
+                style={{ marginRight: buttonGap, color: '#424242' }}
                 startIcon={<BiFilterAlt />}
                 size={'small'}
                 className="btn-outline-v1 light "
@@ -86,7 +92,7 @@ const CustomGridFilterHeader = (props) => {
               >
                 Filter
               </Button>
-            </Tooltip>
+            </HtmlTooltip>
           )}
           <ArrangeView
             setSelectedReportView={setSelectedReportView}
@@ -112,7 +118,7 @@ const CustomGridFilterHeader = (props) => {
           handleClose={handleFilterClose}
           setSelectedFilter={setSelectedFilter}
           selectedFilter={selectedFilter}
-          setChipData={setChipData}
+          // setChipData={setChipData}
           currentFomValue={currentFomValue}
           setCurrentFomValue={setCurrentFomValue}
         />
@@ -123,11 +129,35 @@ const CustomGridFilterHeader = (props) => {
 
 export default CustomGridFilterHeader;
 
+const filterParams = {
+  comparator: (filterLocalDateAtMidnight: Date, cellValue: string) => {
+    var dateAsString = cellValue;
+    if (dateAsString == null) return -1;
+    var dateParts = dateAsString.split('/');
+    var cellDate = new Date(Number(dateParts[2]), Number(dateParts[1]) - 1, Number(dateParts[0]));
+
+    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
+      return 0;
+    }
+
+    if (cellDate < filterLocalDateAtMidnight) {
+      return -1;
+    }
+
+    if (cellDate > filterLocalDateAtMidnight) {
+      return 1;
+    }
+    return 0;
+  }
+};
+
 // THIS COMPONENT WILL DISPLAY CHIPS ===============================>
 const DisplyaFilters = (props) => {
-  const { selectedFilter, chipData, handleFilterOpen, clearSingleFilter, clearFilterAll } = props;
+  const { chipData, setChipData, selectedFilter, handleFilterOpen, clearSingleFilter, clearFilterAll, currentGridApi } = props;
   const [hiddenItems, setHiddenItems] = useState(0);
   const isAppliedFilterPresent = Object.keys(selectedFilter || {}).length > 0;
+  const oldModalRef = React.useRef(null);
+
   const containerRef = useRef(null);
   const countRef = useRef(null);
   const COUNT_PADDING = 10;
@@ -138,6 +168,43 @@ const DisplyaFilters = (props) => {
       hideElementAndShowNumber(containerRef.current);
     }
   }, [chipData]);
+
+  // currentGridApi.addEventListener
+  const chipDataSetter = (currentGridApi, filterModel) => {
+    if (filterModel) {
+      const keys = Object.keys(filterModel);
+      const filterData = [];
+      for (let i = 0; i < keys.length; i++) {
+        const element = filterModel[keys[i]];
+        const currentColumn = currentGridApi.getColumnDef(keys[i]);
+        if (currentColumn.cellRenderer === 'dateRenderer') {
+          const dateValue =
+            element.filter.from && element.filter.to
+              ? `${element.filter.from ? element.filter.from : null} - ${element.filter.to ? element.filter.to : null}`
+              : element.filter.from || element.filter.to
+              ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
+              : null;
+          const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: dateValue, name: keys[i] };
+          filterData.push(data);
+          continue;
+        }
+        const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: element.filter, name: keys[i] };
+        filterData.push(data);
+      }
+      setChipData(filterData);
+    }
+  };
+
+  const filterModel = React.useMemo(() => {
+    return currentGridApi?.getFilterModel();
+  }, [currentGridApi, currentGridApi?.getFilterModel()]);
+
+  useEffect(() => {
+    if (currentGridApi && filterModel) {
+      if (!oldModalRef.current || !_.isEqual(filterModel, oldModalRef.current || {})) oldModalRef.current = filterModel;
+      chipDataSetter(currentGridApi, filterModel);
+    }
+  }, [currentGridApi, _.isEqual(filterModel, oldModalRef.current || {})]);
 
   const hideElementAndShowNumber = (container) => {
     const containerWidth = container?.clientWidth - 52;

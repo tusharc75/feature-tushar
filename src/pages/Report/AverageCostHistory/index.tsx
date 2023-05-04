@@ -49,7 +49,6 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
         let rows = data.map((u) => {
             let finalObject: any = prepareDataForGrid(u, user);
             finalObject.type = capitalize(u.type)
-            finalObject.finalQty = finalObject.qty - (finalObject.soldQty || 0);
             finalObject.amount = parseFloat((finalObject.qty * finalObject.price)?.toFixed(2));
             return finalObject;
         });
@@ -73,8 +72,6 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
                 };
             }
         },
-        { field: "soldQty", headerName: "Sold Quantity", show: false, cellRenderer: "numberRenderer", filter: false, sortable: false, },
-        { field: "finalQty", headerName: "Final Quantity", show: false, cellRenderer: "numberRenderer", filter: false, sortable: false, },
         { field: "price", headerName: "Price", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
         {
             field: "amount", headerName: "Amount", show: true, cellRenderer: "creditDebitRenderer", filter: false, sortable: false,
@@ -87,7 +84,9 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
                 };
             }
         },
-        { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer", },
+        { field: "warehouse", headerName: routes.warehouse.title, show: true, cellRenderer: "commonRenderer", },
+        { field: 'purchaseOrderRejectedDate', headerName: 'Purchase Order Rejected Date', filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' },
+        { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
     ];
 
     const CreditDebitRenderer = (params: any) => (

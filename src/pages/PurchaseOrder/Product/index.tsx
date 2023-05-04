@@ -10,7 +10,7 @@ import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { prepareDataForGrid } from 'src/constants/helpers';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { fetch_po_cost_fields, fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
@@ -199,7 +199,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     });
 
     setProductFields(JSON.parse(JSON.stringify(p_fields)));
-    const newColumns = genrateCustomTableColumns(p_fields, purchaseOrderData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(p_fields, purchaseOrderData?.currency, renderedFrom);
     columns = [...columns, ...newColumns];
     columns.push({
       accessor: 'action',
@@ -384,46 +384,44 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         setAddingProducts(false);
       })
       .catch((error) => {
-        setAddProductDialog(false);
-        toastConfig.setToastConfig(error);
         setAddingProducts(false);
+        toastConfig.setToastConfig(error);
       });
   };
 
   const handleUpdateQty = (rows, saveAndNext = false) => {
     setLoadingEdit(true)
-    axiosInstance()
-      .put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
-      .then(() => {
-        setAddProductDialog(false);
-        fetchData();
-        setAddingProducts(false);
-        setIsBulkEdit(false);
-        if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-          if (rowIndex < rowsData?.length - 1) {
-            if (rowsData[rowIndex + 1]?.type === "Product") {
-              setShowProductDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-            }
-            else if (rowsData[rowIndex + 1]?.type === "Service") {
-              setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-            }
-            else if (rowsData[rowIndex + 1]?.type === "Manual Entry") {
-              setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-            }
-            else {
-              setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-            }
+    axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows }).then(() => {
+      setAddProductDialog(false);
+      fetchData();
+      setAddingProducts(false);
+      setIsBulkEdit(false);
+      if (saveAndNext) {
+        const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+        if (rowIndex < rowsData?.length - 1) {
+          if (rowsData[rowIndex + 1]?.type === "Product") {
+            setShowProductDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
+          }
+          else if (rowsData[rowIndex + 1]?.type === "Service") {
+            setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
+            setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
+          }
+          else if (rowsData[rowIndex + 1]?.type === "Manual Entry") {
+            setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
+            setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
+          }
+          else {
+            setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
           }
         }
-        else {
-          setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-        }
-        setLoadingEdit(false)
-      })
+      }
+      else {
+        setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
+      }
+      setLoadingEdit(false)
+    })
       .catch((error) => {
+        setLoadingEdit(false)
         setAddProductDialog(false);
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
@@ -553,6 +551,16 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = material.find((d) => d._id === updatedData._id);
     if (rowData?.type === "Product") {
+      if (inputField?.qty) {
+        if (inputField?.qty < ((rowData?.actualReceived || 0) + (rowData?.rejectQuantity || 0))) {
+          toastConfig.setToastConfig({
+            open: true,
+            type: "error",
+            message: 'Quantity should be greater than Actual Received and Reject Quantity',
+          });
+          return false;
+        }
+      }
       let rows: any = [{ ...rowData, ...updatedData }];
       rows = await calculateRowsField(material, inputField, productFields, updatedData);
       handleUpdateQty(rows);

@@ -8,9 +8,15 @@ import { Box, TextField } from '@material-ui/core';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
-import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage, convertInventory } from 'src/constants/helpers';
+import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
+import {
+  isObjectEmpty,
+  gridLoadingTimeout,
+  getLocalStorageArrayData,
+  removeLocalStorage,
+  convertInventory,
+  sidebarResource
+} from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import { prepareDataForGrid } from 'src/constants/helpers';
@@ -24,16 +30,20 @@ import { SiConvertio } from 'react-icons/si';
 import CachedIcon from '@material-ui/icons/Cached';
 
 const ConvertInventory = () => {
-
   const renderedFrom = camelCase(routes?.inventoryToAsset.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
-  const [plantId, setPlantId] = useState(null);
-  const [plantOptions, setPlantOptions] = useState([]);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
+
+  const [warehouseId, setWarehouseId] = useState(null);
+  const [storageLocationId, setStorageLocationId] = useState(null);
+  const [warehouseOptions, setWarehouseOptions] = useState([]);
+  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
+
   const [frameworkComponents, setFrameworkComponents] = useState({});
   const [columns, setColumns] = useState([]);
   const [inventory, setInventory] = useState({ open: false, product: [] });
@@ -45,6 +55,26 @@ const ConvertInventory = () => {
   const { getColumnData } = useColumns();
 
   const [anchorEl, setAnchorEl] = useState(null);
+
+  useEffect(() => {
+    getWarehouse();
+  }, [selectedEntity]);
+
+  const getWarehouse = () => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.warehouse},${sidebarResource.storageLocation}`)
+      .then(({ data: { data } }) => {
+        if (data[sidebarResource.warehouse]) {
+          setWarehouseOptions(data[sidebarResource.warehouse]);
+          if (warehouseId === null && data[sidebarResource.warehouse].length) {
+            setWarehouseId(data[sidebarResource.warehouse][0].optionValue);
+          }
+        }
+        if (data[sidebarResource.storageLocation]) {
+          setStorageLocationOptions(data[sidebarResource.storageLocation]);
+        }
+      });
+  };
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -59,25 +89,10 @@ const ConvertInventory = () => {
   }, []);
 
   useEffect(() => {
-    getPlants();
-  }, [selectedEntity]);
-
-  useEffect(() => {
-    fetchProductInventory();
-  }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
-
-  const getPlants = () => {
-    axiosInstance()
-      .get(`/warehouse`)
-      .then(({ data: { data } }) => {
-        setPlantOptions([
-          ...data
-        ]);
-        if (plantId === null && data?.length) {
-          setPlantId(data[0]._id);
-        }
-      });
-  };
+    if (warehouseId) {
+      fetchProductInventory();
+    }
+  }, [warehouseId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
 
   const fetchGridColumns = async () => {
     setColumns(null);
@@ -98,7 +113,7 @@ const ConvertInventory = () => {
         e.show = false;
       }
     });
-    columns.push({ field: "availableInventory", headerName: "Available Inventory", show: true, cellRenderer: "commonRenderer" })
+    columns.push({ field: 'availableInventory', headerName: 'Available Inventory', show: true, cellRenderer: 'commonRenderer' });
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     setFrameworkComponents({
       ...tempFrameworkComponent,
@@ -108,11 +123,15 @@ const ConvertInventory = () => {
   };
 
   const fetchProductInventory = () => {
+    if (!warehouseId) {
+      dispatch({ type: 'initialize', data: [], count: 0 });
+      return;
+    }
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    if (plantId) {
+    if (warehouseId) {
       const queryString = getQueryString();
       axiosInstance()
         .get(`${convertInventory.api}${queryString}`)
@@ -120,7 +139,7 @@ const ConvertInventory = () => {
           let rows = data.data?.map((u) => {
             let finalObject = prepareDataForGrid(u);
             finalObject['productId'] = u._id;
-            finalObject['plantId'] = plantId;
+            finalObject['warehouseId'] = warehouseId;
             finalObject['availableInventory'] = (u?.inventory || 0) - (u?.softHold || 0);
             return {
               ...finalObject
@@ -142,15 +161,12 @@ const ConvertInventory = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const getQueryString = (isExport = false) => {
-    let tempPlantId = plantId;
-
+  const getQueryString = () => {
     let deepFilter = '';
-    if (!isExport) {
-      deepFilter = `?wareHouse=${tempPlantId}`;
-      deepFilter = deepFilter + `&page=${page}&limit=${limit}`;
-    } else {
-      deepFilter = `&wareHouse=${tempPlantId}`;
+    deepFilter = `?warehouse=${warehouseId}`;
+    deepFilter = deepFilter + `&page=${page}&limit=${limit}`;
+    if (storageLocationId) {
+      deepFilter = `${deepFilter}&storageLocation=${storageLocationId}`;
     }
 
     if (!isObjectEmpty(filters)) {
@@ -163,6 +179,7 @@ const ConvertInventory = () => {
       });
       deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}`;
     }
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -174,14 +191,6 @@ const ConvertInventory = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return `${deepFilter}&filterType=and`;
-  };
-
-  const onCellValueChanged = (row) => {
-    let inputData = {
-      plant: plantId,
-      product: row?.data?.productId
-    };
-    axiosInstance().put(`${convertInventory.api}`, inputData);
   };
 
   const ActionsRenderer = (params) => (
@@ -237,32 +246,42 @@ const ConvertInventory = () => {
               </div>
               <Autocomplete
                 style={{ width: '250px' }}
-                options={plantOptions}
-                getOptionLabel={(option: any) => option.warehouseName}
+                options={warehouseOptions}
+                getOptionLabel={(option: any) => option.optionLabel}
                 disableClearable
-                getOptionSelected={(option: any, val) => option._id === val}
-                value={plantOptions.filter((data) => data._id === plantId).length ? plantOptions.filter((data) => data._id === plantId)[0] : ''}
+                getOptionSelected={(option: any, val) => option.optionValue === val}
+                value={
+                  warehouseOptions.filter((data) => data.optionValue === warehouseId).length
+                    ? warehouseOptions.filter((data) => data.optionValue === warehouseId)[0]
+                    : ''
+                }
                 onChange={(e, val) => {
                   if (val !== null) {
-                    setPlantId(val && val._id ? val._id : '');
+                    setWarehouseId(val && val.optionValue ? val.optionValue : '');
+                    setStorageLocationId(null);
                   }
                 }}
-                renderInput={(params) =>
-                  isMobile && !isTablet ? (
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="plant"
-                      placeholder="Plant"
-                      variant="standard"
-                      fullWidth
-                      className={isMobile ? 'serchBox' : ''}
-                    />
-                  ) : (
-                    <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />
-                  )
-                }
+                renderInput={(params) => <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />}
               />
+              {user?.user?.brandPolicy?.storageLocation && (
+                <Autocomplete
+                  style={{ width: '250px' }}
+                  options={storageLocationOptions.filter((item) => item.warehouse === warehouseId)}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  value={
+                    storageLocationOptions.filter((data) => data.optionValue === storageLocationId).length
+                      ? storageLocationOptions.filter((data) => data.optionValue === storageLocationId)[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setStorageLocationId(val?.optionValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
+                  )}
+                />
+              )}
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -287,8 +306,9 @@ const ConvertInventory = () => {
                     className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                     onClick={openActions}
                     aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'}
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -307,7 +327,7 @@ const ConvertInventory = () => {
                         closeActions();
                         setInventory({
                           open: true,
-                          product: getLocalStorageArrayData(`${localStorageSelectedRecords}`),
+                          product: getLocalStorageArrayData(`${localStorageSelectedRecords}`)
                         });
                       }}
                     >
@@ -319,9 +339,9 @@ const ConvertInventory = () => {
             </Grid>
           </Grid>
         </div>
-        {columns && plantId ? (
+        {columns && warehouseId ? (
           Object.keys(frameworkComponents).length > 0 ? (
-            <CustomAgGridEditable
+            <CustomAgGrid
               allowSelection={true}
               allowAction={true}
               columns={columns}
@@ -333,7 +353,6 @@ const ConvertInventory = () => {
               limit={limit}
               pageSizes={pageSizes}
               page={page}
-              onCellValueChanged={onCellValueChanged}
               actionWidth={150}
               loading={loading}
               renderedFrom={renderedFrom}
@@ -346,7 +365,6 @@ const ConvertInventory = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-
         {inventory.open && (
           <InventoryToAsset
             handleClose={() => setInventory({ open: false, product: [] })}
@@ -356,7 +374,8 @@ const ConvertInventory = () => {
               setInventory({ open: false, product: [] });
             }}
             product={inventory.product}
-            warehouse={plantId}
+            warehouse={warehouseId}
+            storageLocation={storageLocationId}
           />
         )}
       </div>

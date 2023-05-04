@@ -277,7 +277,24 @@ const ReportFilters = (props: FiltersProps) => {
   }, [betweenDate, statusPeriodDate]);
 
   const handleDuration = (timeFrameTemp, field, isStatus = false) => {
+    
     switch (timeFrameTemp) {
+      case 'custom':
+        setStatusTimeFrame('custom');
+        isStatus
+          ? setStatusPeriodDate((prevState) => ({
+              ...prevState,
+              [`from_statusPeriod`]: '',
+              [`to_statusPeriod`]: ''
+            }))
+          : setBetweenDate((prevState) => ({
+              ...prevState,
+              [`from_${field.fieldName}`]: '',
+              [`to_${field.fieldName}`]: ''
+            }));
+
+        break;
+
       case '1-month':
         setStatusTimeFrame('1-month');
         isStatus
@@ -339,6 +356,7 @@ const ReportFilters = (props: FiltersProps) => {
         break;
 
       default:
+        setStatusTimeFrame('custom');
         break;
     }
   };
@@ -436,6 +454,7 @@ const ReportFilters = (props: FiltersProps) => {
                             tempArray[tempIndex].timeFrame = e.target.value;
                             setSelectedResources(tempArray);
                           }}
+                          label="Select Duration"
                         >
                           <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                           <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
@@ -519,6 +538,7 @@ const ReportFilters = (props: FiltersProps) => {
                       handleDuration(e.target.value, null, true);
                       setStatusTimeFrame(e.target.value);
                     }}
+                    label="Select Duration"
                   >
                     <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                     <MenuItem value={'6-months'}>Last 6 Months</MenuItem>

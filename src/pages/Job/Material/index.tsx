@@ -14,7 +14,7 @@ import AddIcon from '@material-ui/icons/Add';
 import { isMobile } from 'react-device-detect';
 import { KeyboardArrowDown } from '@material-ui/icons';
 import { startCase } from 'lodash';
-import { flattenArray, genrateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import MaterialDialog from './MaterialDialog';
@@ -22,7 +22,6 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
-  
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -48,7 +47,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, jobData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = genrateCustomTableColumns(data, jobData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, jobData?.currency, renderedFrom);
 
     let coloum: any = [
       {
@@ -231,12 +230,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center">
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => setAddDialog({ open: true, type: 'asset' })}
-            startIcon={<AddIcon />}
-            color="primary">
+          <Button variant="outlined" size="small" onClick={() => setAddDialog({ open: true, type: 'asset' })} startIcon={<AddIcon />} color="primary">
             Add
           </Button>
         </Box>
@@ -297,7 +291,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
         </Box>
       </Box>
       {columns && rowsData ? (
-        <Box p="6px" zIndex={5} width={'100%'}>
+        <Box zIndex={5}>
           <CustomReactTable
             height={'calc(100vh - 395px)'}
             columns={columns}
@@ -344,7 +338,9 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
           handleClose={() => {
             setAddDialog({ open: false, type: '' });
           }}
-          ids={flattenArray(rowsData)?.filter((e) => e.type === 'asset')?.map((e) => e.materialId)}
+          ids={flattenArray(rowsData)
+            ?.filter((e) => e.type === 'asset')
+            ?.map((e) => e.materialId)}
           handleSucess={(rows) => {
             handleAdd(rows);
           }}

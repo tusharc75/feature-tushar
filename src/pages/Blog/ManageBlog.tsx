@@ -53,9 +53,9 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
             let tempData = data;
             if (isClone) {
               fields = fieldsDataForCreate;
-              const { label, ...rest } = data;
-              setCloneHeading(label);
-              tempData = { ...rest, label };
+              const { title, ...rest } = data;
+              setCloneHeading(title);
+              tempData = { ...rest };
             }
             setInitialData({
               fields: fields,
@@ -161,13 +161,12 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
                     onClose();
                   }
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
+                      : `Update ${initialData.values?.title ? `(${initialData.values?.title})` : ''}`
                     : `Create New Blog`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -212,8 +211,8 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                       imageOrFileUploadCompletePercentage={
                                         ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                           ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
+                                            setUploadingImageOrFileProgress(completePercentage);
+                                          }
                                           : null
                                       }
                                     />

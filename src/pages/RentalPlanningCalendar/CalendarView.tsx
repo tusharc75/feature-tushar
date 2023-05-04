@@ -14,7 +14,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any)
 const localizer = momentLocalizer(moment);
-
 const formats = {
     weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
@@ -23,7 +22,6 @@ const options = ['All', 'Rental', 'Planning'];
 const rentalPlanningCalendarType = ['Rental/Planning', 'Assets'];
 
 function CalendarView() {
-
     const toastConfig = useContext(CustomToastContext);
 
     const history = useHistory();
@@ -36,20 +34,16 @@ function CalendarView() {
     const [view, setView] = useState<View>('month');
     const [staticEvents, setStaticEvents] = useState([])
     const [filterToKeep, setFilterToKeep] = useState([]);
-
     const [warehouse, setWarehouse] = useState([])
     const [product, setProduct] = useState([])
     const [asset, setAsset] = useState([])
-
     const [selectedWarehouse, setSelectedWarehouse] = useState([])
     const [selectedProduct, setSelectedProduct] = useState([])
     const [selectedAsset, setSelectedAsset] = useState([])
-
     const [dateRange, setDateRange] = useState({
         estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
         estimateEndDate: moment().endOf('month').format('MM/DD/YYYY')
     })
-
     const [month, setMonth] = useState({
         startDate: moment().startOf('month').format('MM/DD/YYYY'),
         endDate: moment().endOf('month').format('MM/DD/YYYY')
@@ -158,6 +152,7 @@ function CalendarView() {
             const title = type === 'rental' ? d.rentalJobName : type === 'planning' ? d.planningNumber : '- - -'
             const start = type === 'rental' ? new Date(d.estimateStartDate) : type === 'planning' ? new Date(d.startDate) : '- - -'
             const end = type === 'rental' ? new Date(d.estimateEndDate) : type === 'planning' ? new Date(d.endDate) : '- - -'
+
             return (
                 {
                     id: d._id,
@@ -169,7 +164,10 @@ function CalendarView() {
                 }
             )
         });
+
         return createdData;
+
+
     }
 
     const fetchData = () => {
@@ -334,66 +332,10 @@ function CalendarView() {
         filterEvent()
     }, [selectedOption])
 
-    return (<div>
-        <Box display="flex" flexDirection={selectedRentalPlanningCalendarType === 'Assets' ? 'row' : 'column'}>
-            <Box display="flex" flexDirection="row">
-                <Box ml={1}>
-                    <ButtonGroup
-                        id="approveDisapprove"
-                        size="small"
-                        className={'accountActions'}
-                        variant="outlined"
-                        color="primary"
-                        ref={anchorRef1}
-                        aria-label="small outlined button group"
-                    >
-                        <Button style={{ minWidth: '85px' }}>{selectedRentalPlanningCalendarType}</Button>
-                        <Button
-                            color="primary"
-                            size="small"
-                            aria-controls={openRentalPlanningCalendarType ? 'split-button-menu' : undefined}
-                            aria-expanded={openRentalPlanningCalendarType ? 'true' : undefined}
-                            aria-label="select merge strategy"
-                            aria-haspopup="menu"
-                            onClick={handleToggleRentalPlanningCalendarType}
-                            className="all-button"
-                        >
-                            <ArrowDropDownIcon className="all-button-sub-icon" />
-                        </Button>
-                    </ButtonGroup>
-                    <Popper open={openRentalPlanningCalendarType} anchorEl={anchorRef1.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
-                        {({ TransitionProps, placement }) => (
-                            <Grow
-                                {...TransitionProps}
-                                style={{
-                                    transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
-                                }}
-                            >
-                                <Paper>
-                                    <ClickAwayListener onClickAway={handleCloseRentalPlanningCalendarType}>
-                                        <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
-                                            {rentalPlanningCalendarType.map((option, index) => (
-                                                <MenuItem
-                                                    key={option}
-                                                    selected={option === selectedRentalPlanningCalendarType}
-                                                    onClick={(event) => {
-                                                        setSelectedRentalPlanningCalendarType(rentalPlanningCalendarType[index])
-                                                        setOpenRentalPlanningCalendarType(false);
-                                                        setFilterToKeep([])
-                                                    }}
-                                                    style={{ color: 'black' }}
-                                                >
-                                                    {option}
-                                                </MenuItem>
-                                            ))}
-                                        </MenuList>
-                                    </ClickAwayListener>
-                                </Paper>
-                            </Grow>
-                        )}
-                    </Popper>
-                </Box>
-                {selectedRentalPlanningCalendarType === rentalPlanningCalendarType[0] &&
+    return (
+        <div>
+            <Box display="flex" flexDirection={selectedRentalPlanningCalendarType === 'Assets' ? 'row' : 'column'}>
+                <Box display="flex" flexDirection="row">
                     <Box ml={1}>
                         <ButtonGroup
                             id="approveDisapprove"
@@ -401,24 +343,24 @@ function CalendarView() {
                             className={'accountActions'}
                             variant="outlined"
                             color="primary"
-                            ref={anchorRef}
+                            ref={anchorRef1}
                             aria-label="small outlined button group"
                         >
-                            <Button style={{ minWidth: '85px' }}>{selectedOption}</Button>
+                            <Button style={{ minWidth: '85px' }}>{selectedRentalPlanningCalendarType}</Button>
                             <Button
                                 color="primary"
                                 size="small"
-                                aria-controls={open ? 'split-button-menu' : undefined}
-                                aria-expanded={open ? 'true' : undefined}
+                                aria-controls={openRentalPlanningCalendarType ? 'split-button-menu' : undefined}
+                                aria-expanded={openRentalPlanningCalendarType ? 'true' : undefined}
                                 aria-label="select merge strategy"
                                 aria-haspopup="menu"
-                                onClick={handleToggle}
+                                onClick={handleToggleRentalPlanningCalendarType}
                                 className="all-button"
                             >
                                 <ArrowDropDownIcon className="all-button-sub-icon" />
                             </Button>
                         </ButtonGroup>
-                        <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
+                        <Popper open={openRentalPlanningCalendarType} anchorEl={anchorRef1.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
                             {({ TransitionProps, placement }) => (
                                 <Grow
                                     {...TransitionProps}
@@ -427,15 +369,16 @@ function CalendarView() {
                                     }}
                                 >
                                     <Paper>
-                                        <ClickAwayListener onClickAway={handleClose}>
+                                        <ClickAwayListener onClickAway={handleCloseRentalPlanningCalendarType}>
                                             <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
-                                                {options.map((option, index) => (
+                                                {rentalPlanningCalendarType.map((option, index) => (
                                                     <MenuItem
                                                         key={option}
-                                                        selected={option === selectedOption}
+                                                        selected={option === selectedRentalPlanningCalendarType}
                                                         onClick={(event) => {
-                                                            setSelectedOption(options[index])
-                                                            setOpen(false);
+                                                            setSelectedRentalPlanningCalendarType(rentalPlanningCalendarType[index])
+                                                            setOpenRentalPlanningCalendarType(false);
+                                                            setFilterToKeep([])
                                                         }}
                                                         style={{ color: 'black' }}
                                                     >
@@ -449,147 +392,198 @@ function CalendarView() {
                             )}
                         </Popper>
                     </Box>
-                }
-                {selectedRentalPlanningCalendarType === rentalPlanningCalendarType[0] &&
-                    <Box ml={1}>
-                        <Autocomplete
-                            style={{ width: "350px" }}
-                            multiple
-                            options={Object.keys(FILTERS)?.map((key) => key) || []}
-                            disableCloseOnSelect
-                            getOptionLabel={(option) => FILTERS[option]}
-                            renderOption={(option: any) => (
-                                <React.Fragment>
-                                    <Checkbox checked={filterToKeep?.includes(option)} />
-                                    {FILTERS[option]}
-                                </React.Fragment>
-                            )}
-                            size="small"
-                            renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
-                            value={filterToKeep}
-                            onChange={(event: any, newValue: any) => {
-                                setFilterToKeep(newValue);
-                            }}
-                        />
-                    </Box>
-                }
+                    {selectedRentalPlanningCalendarType === rentalPlanningCalendarType[0] &&
+                        <Box ml={1}>
+                            <ButtonGroup
+                                id="approveDisapprove"
+                                size="small"
+                                className={'accountActions'}
+                                variant="outlined"
+                                color="primary"
+                                ref={anchorRef}
+                                aria-label="small outlined button group"
+                            >
+                                <Button style={{ minWidth: '85px' }}>{selectedOption}</Button>
+                                <Button
+                                    color="primary"
+                                    size="small"
+                                    aria-controls={open ? 'split-button-menu' : undefined}
+                                    aria-expanded={open ? 'true' : undefined}
+                                    aria-label="select merge strategy"
+                                    aria-haspopup="menu"
+                                    onClick={handleToggle}
+                                    className="all-button"
+                                >
+                                    <ArrowDropDownIcon className="all-button-sub-icon" />
+                                </Button>
+                            </ButtonGroup>
+                            <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
+                                {({ TransitionProps, placement }) => (
+                                    <Grow
+                                        {...TransitionProps}
+                                        style={{
+                                            transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
+                                        }}
+                                    >
+                                        <Paper>
+                                            <ClickAwayListener onClickAway={handleClose}>
+                                                <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
+                                                    {options.map((option, index) => (
+                                                        <MenuItem
+                                                            key={option}
+                                                            selected={option === selectedOption}
+                                                            onClick={(event) => {
+                                                                setSelectedOption(options[index])
+                                                                setOpen(false);
+                                                            }}
+                                                            style={{ color: 'black' }}
+                                                        >
+                                                            {option}
+                                                        </MenuItem>
+                                                    ))}
+                                                </MenuList>
+                                            </ClickAwayListener>
+                                        </Paper>
+                                    </Grow>
+                                )}
+                            </Popper>
+                        </Box>
+                    }
+                    {selectedRentalPlanningCalendarType === rentalPlanningCalendarType[0] &&
+                        <Box ml={1}>
+                            <Autocomplete
+                                style={{ width: "350px" }}
+                                multiple
+                                options={Object.keys(FILTERS)?.map((key) => key) || []}
+                                disableCloseOnSelect
+                                getOptionLabel={(option) => FILTERS[option]}
+                                renderOption={(option: any) => (
+                                    <React.Fragment>
+                                        <Checkbox checked={filterToKeep?.includes(option)} />
+                                        {FILTERS[option]}
+                                    </React.Fragment>
+                                )}
+                                size="small"
+                                renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
+                                value={filterToKeep}
+                                onChange={(event: any, newValue: any) => {
+                                    setFilterToKeep(newValue);
+                                }}
+                            />
+                        </Box>
+                    }
+                </Box>
+                <Box display="flex" flexDirection="row" marginTop={selectedRentalPlanningCalendarType === 'Assets' ? '0px' : '15px'} ml={1}>
+                    <Grid container spacing={2}>
+                        {filterToKeep?.includes('warehouse') &&
+                            <Grid item xs={12} sm={6} md={4} lg={4}>
+                                <Autocomplete
+                                    options={warehouse}
+                                    // style={{ width: "250px" }}
+                                    multiple
+                                    disableCloseOnSelect
+                                    getOptionLabel={(option: any) => option.optionLabel}
+                                    value={selectedWarehouse}
+                                    onChange={(event, newValue) => {
+                                        setSelectedWarehouse(newValue);
+                                    }}
+                                    size="small"
+                                    renderInput={(params) => <TextField {...params} label={`Select Plant`} variant="outlined" />}
+                                />
+                            </Grid>
+                        }
+                        {filterToKeep?.includes('product') &&
+                            <Grid item xs={12} sm={6} md={4} lg={4}>
+                                <Autocomplete
+                                    options={product}
+                                    // style={{ width: "250px" }}
+                                    multiple
+                                    disableCloseOnSelect
+                                    getOptionLabel={(option: any) => option.optionLabel}
+                                    value={selectedProduct}
+                                    onChange={(event, newValue) => {
+                                        setSelectedProduct(newValue);
+                                    }}
+                                    size="small"
+                                    renderInput={(params) => <TextField {...params} label={`Select Product`} variant="outlined" />}
+                                />
+                            </Grid>
+                        }
+                        {(filterToKeep?.includes('asset') || selectedRentalPlanningCalendarType === 'Assets') &&
+                            <Grid item xs={12} sm={6} md={4} lg={4}>
+                                <Autocomplete
+                                    options={asset}
+                                    style={{ minWidth: selectedRentalPlanningCalendarType === 'Assets' && '350px' }}
+                                    multiple
+                                    disableCloseOnSelect
+                                    getOptionLabel={(option: any) => option.optionLabel}
+                                    value={selectedAsset}
+                                    onChange={(event, newValue) => {
+                                        setSelectedAsset(newValue);
+                                    }}
+                                    size="small"
+                                    renderInput={(params) => <TextField {...params} label={`Select Asset`} variant="outlined" />}
+                                />
+                            </Grid>
+                        }
+                    </Grid>
+                </Box>
             </Box>
-            <Box display="flex" flexDirection="row" marginTop={selectedRentalPlanningCalendarType === 'Assets' ? '0px' : '15px'} ml={1}>
-                <Grid container spacing={2}>
-                    {filterToKeep?.includes('warehouse') &&
-                        // <Box ml={1}>
-                        <Grid item xs={12} sm={6} md={4} lg={4}>
-                            <Autocomplete
-                                options={warehouse}
-                                // style={{ width: "250px" }}
-                                multiple
-                                disableCloseOnSelect
-                                getOptionLabel={(option: any) => option.optionLabel}
-                                value={selectedWarehouse}
-                                onChange={(event, newValue) => {
-                                    setSelectedWarehouse(newValue);
-                                }}
-                                size="small"
-                                renderInput={(params) => <TextField {...params} label={`Select Plant`} variant="outlined" />}
-                            />
-                        </Grid>
-                        // </Box>
+            <DragAndDropCalendar
+                style={{ height: "calc(100vh - 260px)" }}
+                defaultDate={defaultDate}
+                defaultView={'day'}
+                events={events}
+                formats={formats}
+                localizer={localizer}
+                onEventDrop={moveEvent}
+                onEventResize={resizeEvent}
+                popup={true}
+                resizable
+                views={{ month: true, week: true, day: true }}
+                onView={onView}
+                view={view}
+                eventPropGetter={(obj: any) => {
+                    const newStyles = {
+                        backgroundColor: obj.type === 'rental' ? 'rgba(255, 232, 204, 1)' : 'rgba(234, 239, 254, 1)',
+                        color: obj?.type === 'rental' ? 'rgba(236, 85, 0, 1)' : 'rgba(4, 50, 161, 1)',
+                        borderRadius: '4px',
+                        border: 'none',
+                        padding: '8px 16px'
+                    };
+                    return {
+                        style: newStyles
+                    };
+                }}
+                onNavigate={(date) => {
+                    if (view === 'month') {
+                        setDateRange({
+                            estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
+                            estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
+                        });
+                    } else if (view === 'week') {
+                        setDateRange({
+                            estimateStartDate: moment(date).startOf('week').format('MM/DD/YYYY'),
+                            estimateEndDate: moment(date).endOf('week').format('MM/DD/YYYY')
+                        });
+                    } else if (view === 'day') {
+                        setDateRange({
+                            estimateStartDate: moment(date).format('MM/DD/YYYY'),
+                            estimateEndDate: moment(date).format('MM/DD/YYYY')
+                        });
                     }
-                    {filterToKeep?.includes('product') &&
-                        // <Box ml={1}>
-                        <Grid item xs={12} sm={6} md={4} lg={4}>
-                            <Autocomplete
-                                options={product}
-                                // style={{ width: "250px" }}
-                                multiple
-                                disableCloseOnSelect
-                                getOptionLabel={(option: any) => option.optionLabel}
-                                value={selectedProduct}
-                                onChange={(event, newValue) => {
-                                    setSelectedProduct(newValue);
-                                }}
-                                size="small"
-                                renderInput={(params) => <TextField {...params} label={`Select Product`} variant="outlined" />}
-                            />
-                        </Grid>
-                        // </Box>
+                }}
+                onSelectEvent={(event: any) => {
+                    if (event.type === 'rental') {
+                        history.push(`${routes.rentalManagementDetail.path}/${event.id}`);
+                    } else if (event.type === 'planning') {
+                        history.push(`${routes.planningDetail.path}/${event.id}`);
                     }
-                    {(filterToKeep?.includes('asset') || selectedRentalPlanningCalendarType === 'Assets') &&
-                        // <Box ml={1}>
-                        <Grid item xs={12} sm={6} md={4} lg={4}>
-                            <Autocomplete
-                                options={asset}
-                                style={{ minWidth: selectedRentalPlanningCalendarType === 'Assets' && '350px' }}
-                                multiple
-                                disableCloseOnSelect
-                                getOptionLabel={(option: any) => option.optionLabel}
-                                value={selectedAsset}
-                                onChange={(event, newValue) => {
-                                    setSelectedAsset(newValue);
-                                }}
-                                size="small"
-                                renderInput={(params) => <TextField {...params} label={`Select Asset`} variant="outlined" />}
-                            />
-                        </Grid>
-                        // </Box>
-                    }
-                </Grid>
-            </Box>
-        </Box>
-        <DragAndDropCalendar
-            style={{ height: "calc(100vh - 260px)" }}
-            defaultDate={defaultDate}
-            defaultView={'day'}
-            events={events}
-            formats={formats}
-            localizer={localizer}
-            onEventDrop={moveEvent}
-            onEventResize={resizeEvent}
-            popup={true}
-            resizable
-            views={{ month: true, week: true, day: true }}
-            onView={onView}
-            view={view}
-            eventPropGetter={(obj: any) => {
-                const newStyles = {
-                    backgroundColor: obj.type === 'rental' ? 'rgba(255, 232, 204, 1)' : 'rgba(234, 239, 254, 1)',
-                    color: obj?.type === 'rental' ? 'rgba(236, 85, 0, 1)' : 'rgba(4, 50, 161, 1)',
-                    borderRadius: '4px',
-                    border: 'none',
-                    padding: '8px 16px'
-                };
-                return {
-                    style: newStyles
-                };
-            }}
-            onNavigate={(date) => {
-                if (view === 'month') {
-                    setDateRange({
-                        estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
-                        estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
-                    });
-                } else if (view === 'week') {
-                    setDateRange({
-                        estimateStartDate: moment(date).startOf('week').format('MM/DD/YYYY'),
-                        estimateEndDate: moment(date).endOf('week').format('MM/DD/YYYY')
-                    });
-                } else if (view === 'day') {
-                    setDateRange({
-                        estimateStartDate: moment(date).format('MM/DD/YYYY'),
-                        estimateEndDate: moment(date).format('MM/DD/YYYY')
-                    });
-                }
-            }}
-            onSelectEvent={(event: any) => {
-                if (event.type === 'rental') {
-                    history.push(`${routes.rentalManagementDetail.path}/${event.id}`);
-                } else if (event.type === 'planning') {
-                    history.push(`${routes.planningDetail.path}/${event.id}`);
-                }
-            }}
-        />
-    </div>
+                }}
+            />
+        </div >
     )
+
 }
 
 export default CalendarView;

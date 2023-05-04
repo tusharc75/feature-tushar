@@ -59,7 +59,7 @@ import QuoteApproval from './pages/Quote-Approval';
 import QuoteDetail from './pages/QuoteBuilderCombined/QuoteDetail/index';
 import DOARequest from './pages/DOA';
 import CurrencyConverter from './pages/CurrencyConverter';
-import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
 import FormBuilder from './pages/FormBuilder';
 import CreateFormBuilder from './pages/FormBuilder/CreateFormBuilder';
 import UserProfilePage from './pages/ProfilePage/index';
@@ -109,8 +109,7 @@ import CustomerSign from './pages/DeliveryTicket/CustomerSign';
 import EcommercePolicy from './pages/EcommercePolicy';
 import Sublease from './pages/Sublease';
 import SubleaseDetailsPage from './pages/Sublease/SubleaseDetailsPage';
-import NewDashboard from './pages/NewDashboard';
-import NewDashboardTest from './pages/NewDashboard-Test';
+import Dashboard from './pages/Dashboard';
 import TransferInventory from './pages/TransferInventory';
 import TransferInventoryDetailPage from './pages/TransferInventory/TransferInventoryDetailPage';
 import Zone from './pages/zone';
@@ -177,8 +176,8 @@ import ServiceOrder from './pages/ServiceOrder';
 import ServiceOrderDetailsPage from './pages/ServiceOrder/ServiceOrderDetailsPage';
 import EmployeeMaster from './pages/EmployeeMaster';
 import EmployeeMasterDetail from './pages/EmployeeMaster/EmployeeMasterDetail';
-import CompetencyMaster from './pages/CompetencyMaster';
-import CompetencyMasterDetail from './pages/CompetencyMaster/CompetencyMasterDetail';
+import CompetencyType from './pages/CompetencyType';
+import CompetencyTypeDetail from './pages/CompetencyType/CompetencyTypeDetail';
 import TechnicianScheduler from './pages/TechnicianScheduler';
 import BudgetDetail from './pages/Budget/BudgetDetail';
 import MarketSegmentDetail from './pages/MarketSegment/MarketSegmentDetail';
@@ -199,6 +198,20 @@ import FleetMasterDetail from './pages/FleetMaster/FleetMasterDetail';
 import Job from './pages/Job';
 import JobDetail from './pages/Job/JobDetail';
 import FleetReceiver from './pages/FleetReceiver';
+import StorageLocationDetailsPage from './pages/StorageLocation/StorageLocationDetailsPage';
+import StorageLocation from './pages/StorageLocation';
+import TransactionLock from './pages/TransactionLock';
+import TransactionLockDetail from './pages/TransactionLock/TransactionLockDetail';
+import DOAApprovalQuotation from './pages/DOA/DOAApprovalQuotation';
+import WellNumber from './pages/WellNumber';
+import WellNumberDetail from './pages/WellNumber/WellNumberDetail';
+import PlanningView from './pages/PlanningView';
+import TaxMaster from './pages/TaxMaster';
+import TaxMasterDetail from './pages/TaxMaster/TaxMasterDetail';
+import DynamicForm from './pages/DynamicForm';
+import DynamicFormDetail from './pages/DynamicForm/DynamicFormDetail';
+import Competencies from './pages/Competencies';
+import CompetenciesDetail from './pages/Competencies/CompetenciesDetail';
 
 var notificationInterval: any = null;
 
@@ -433,7 +446,7 @@ function App() {
             <Route exact path="/forget-password" render={({ location }) => conditionalRedirect(ForgetPassword, location)} />
             <Route exact path="/reset-password" render={({ location }) => conditionalRedirect(ResetPassword, location)} />
             <PrivateRoute exact path="/">
-              <Dashboard />
+              <Home />
             </PrivateRoute>
             <PrivateRoute exact path="/logout">
               <Logout />
@@ -643,21 +656,8 @@ function App() {
               <QuoteDetail />
             </PrivateRoute>
             <PrivateRoute exact path={'/dashboards'}>
-              <NewDashboardTest />
+              <Dashboard />
             </PrivateRoute>
-            <PrivateRoute exact path={'/old-dashboard'}>
-              <NewDashboard />
-            </PrivateRoute>
-            {/* <Route exact path={"/dashboards"}>
-              <KpiDashboard />
-            </Route>
-            <Route exact path={"/dashboard/detail/:id"}>
-              <EditDashboard edit={true} />
-            </Route>
-            <Route exact path={"/dashboard/:id"}>
-              <EditDashboard edit={false} />
-            </Route> */}
-            {/* //Route available for customers to Accept Reject Quote */}
             <Route exact path={'/quote-approval/:id'}>
               <QuoteApproval />
             </Route>
@@ -666,6 +666,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.DOARequest.path}/:id`}>
               <DOAapproval />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.DOARequest.path}/quotation/:id`}>
+              <DOAApprovalQuotation />
             </PrivateRoute>
             <PrivateRoute exact path={routes.quoteBuilder.path}>
               <QuoteBuilderCombined />
@@ -928,11 +931,11 @@ function App() {
             <PrivateRoute exact path={`${routes.employeeMasterDetail.path}/:id`}>
               <EmployeeMasterDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competencyMaster.path}`}>
-              <CompetencyMaster />
+            <PrivateRoute exact path={`${routes.competencyType.path}`}>
+              <CompetencyType />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competencyMasterDetail.path}/:id`}>
-              <CompetencyMasterDetail />
+            <PrivateRoute exact path={`${routes.competencyTypeDetail.path}/:id`}>
+              <CompetencyTypeDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.technicianScheduler.path}`}>
               <TechnicianScheduler />
@@ -985,11 +988,49 @@ function App() {
             <PrivateRoute exact path={`${routes.fleetReceiver.path}`}>
               <FleetReceiver />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.storageLocation.path}`}>
+              <StorageLocation />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.storageLocationDetail.path}/:id`}>
+              <StorageLocationDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.transactionLock.path}`}>
+              <TransactionLock />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.transactionLockDetail.path}/:id`}>
+              <TransactionLockDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.wellNumber.path}`}>
+              <WellNumber />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.wellNumberDetail.path}/:id`}>
+              <WellNumberDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.planningView.path}`}>
+              <PlanningView />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.taxMaster.path}`}>
+              <TaxMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.taxMasterDetail.path}/:id`}>
+              <TaxMasterDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.competencies.path}`}>
+              <Competencies />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.competenciesDetail.path}/:id`}>
+              <CompetenciesDetail />
+            </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
             </Route>
+            <PrivateRoute exact path={`/:route`}>
+              <DynamicForm />
+            </PrivateRoute>
+            <PrivateRoute exact path={`/:route/detail/:id`}>
+              <DynamicFormDetail />
+            </PrivateRoute>
             <Route path="*" component={NotFound} />
-            {/* <Route exact path="/crm/account" component={Account} /> */}
           </Switch>
         </ErrorBoundaryComponent>
       </AnimatePresence>

@@ -12,7 +12,7 @@ import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { GiHiveMind } from 'react-icons/gi';
 import ManageOpportunityDialog from './ManageOpportunityDialog/ManageOpportunityDialog';
-import { opportunity, isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout } from '../../constants/helpers';
+import { opportunity, isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
@@ -25,31 +25,30 @@ import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { prepareDataForGrid } from "../../constants/helpers"
-import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
-import { MdAccountCircle, MdAdd } from "react-icons/md";
-import { AiFillCrown, SiMarketo, AiFillFileMarkdown, FaPercentage } from "react-icons/all";
+import { SiMarketo, AiFillFileMarkdown, FaPercentage } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaSuitcase } from 'react-icons/fa';
-import useColumns from '../../constants/useColumns';
-import { classNames } from 'react-easy-crop/helpers';
+import useColumns, { getFrameworkComponents, checkStaticField, getStaticFields } from '../../constants/useColumns';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 
-
 let opportunityTimeout;
-const OpportunityTypes = [
-  {
-    key: 'All Opportunities',
-    value: 1
-  },
-  {
-    key: 'My Opportunities',
-    value: 2
-  }
-];
+
 
 const Opportunities = () => {
+
+  const OpportunityTypes = [
+    {
+      key: `All ${routes.opportunity.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes.opportunity.title}`,
+      value: 2
+    }
+  ];
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -311,14 +310,16 @@ const Opportunities = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterOpportunities=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterOpportunities=${selectedType}`;
+      deepFilter = `?`;
     }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
-
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
@@ -652,6 +653,9 @@ const Opportunities = () => {
                 loading={loading}
                 renderedFrom={opportunityResource}
                 refreshGrid={fetchOpportunities}
+                showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.opportunity}
               /> : null
         }
 

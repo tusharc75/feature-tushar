@@ -2,9 +2,7 @@ import Box from '@material-ui/core/Box/Box';
 import { useState, useContext } from 'react';
 import { Button, Dialog, Menu, MenuItem } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import {
-  CustomDialogTransition,
-} from '../../../constants/helpers';
+import { CustomDialogTransition } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
@@ -30,9 +28,9 @@ const InvoiceFacility = ({ salesOrderData }) => {
     setDownlodingFile(type);
     setGeneratingFile(true);
     axiosInstance()
-      .get(PDFType === "Detail" ?
-        `${routes.salesOrder.path}/${salesOrderData._id}/pdf/detail`
-        : `${routes.salesOrder.path}/${salesOrderData._id}/pdf`)
+      .get(
+        PDFType === 'Detail' ? `${routes.salesOrder.path}/${salesOrderData._id}/pdf/detail` : `${routes.salesOrder.path}/${salesOrderData._id}/pdf`
+      )
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -125,7 +123,7 @@ const InvoiceFacility = ({ salesOrderData }) => {
   return (
     <>
       <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center">
+        <Box display="flex" alignItems="center" gridGap={'8px'}>
           {permissions?.salesOrder?.isRead && (
             <Button
               variant="outlined"
@@ -135,14 +133,13 @@ const InvoiceFacility = ({ salesOrderData }) => {
               disabled={downlodingFile === 'Preview' ? true : false}
               startIcon={isMobile ? '' : <AiFillFilePdf />}
               onClick={(e) => {
-                setDownlodingFile("Preview");
+                setDownlodingFile('Preview');
                 handleClick(e);
               }}
             >
               {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === 'Preview' ? 'Please wait...' : 'Preview'}
             </Button>
           )}
-          <Box mx={1} />
           {permissions?.salesOrder?.isRead && (
             <Button
               variant="outlined"
@@ -152,8 +149,8 @@ const InvoiceFacility = ({ salesOrderData }) => {
               disabled={downlodingFile === 'Download' ? true : false}
               startIcon={isMobile ? '' : <AiFillFilePdf />}
               onClick={(e) => {
-                setDownlodingFile("Download");
-                handleClick(e)
+                setDownlodingFile('Download');
+                handleClick(e);
               }}
             >
               {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === 'Download' ? 'Please wait...' : 'Download'}
@@ -168,23 +165,30 @@ const InvoiceFacility = ({ salesOrderData }) => {
             getContentAnchorEl={null}
             anchorOrigin={{
               vertical: 'bottom',
-              horizontal: 'right',
+              horizontal: 'right'
             }}
             transformOrigin={{
               vertical: 'top',
-              horizontal: 'right',
+              horizontal: 'right'
             }}
           >
-            <MenuItem onClick={() => {
-              setAnchorEl(null)
-              handlePDF(downlodingFile, "Regular")
-            }}>Regular</MenuItem>
-            <MenuItem onClick={() => {
-              setAnchorEl(null)
-              handlePDF(downlodingFile, "Detail")
-            }}>Detail</MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAnchorEl(null);
+                handlePDF(downlodingFile, 'Regular');
+              }}
+            >
+              Regular
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAnchorEl(null);
+                handlePDF(downlodingFile, 'Detail');
+              }}
+            >
+              Detail
+            </MenuItem>
           </Menu>
-          <Box mx={1} />
           {permissions?.salesOrder?.isRead && (
             <Button
               variant="outlined"
@@ -194,8 +198,8 @@ const InvoiceFacility = ({ salesOrderData }) => {
               startIcon={isMobile ? '' : <MdEmail />}
               onClick={() => {
                 fetchEmailsData();
-                handlePDF("Email", "Detail")
-                handlePDF("Email", "Regular")
+                handlePDF('Email', 'Detail');
+                handlePDF('Email', 'Regular');
               }}
             >
               {isMobile ? <MdEmail size={22} /> : downlodingFile === 'Email' ? 'Please wait...' : `Send Email`}

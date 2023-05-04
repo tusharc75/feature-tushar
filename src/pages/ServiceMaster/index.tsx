@@ -19,7 +19,8 @@ import {
   getLocalStorageArrayData,
   serviceMaster,
   removeLocalStorage,
-  RESOURCE_LABEL
+  RESOURCE_LABEL,
+  sidebarResource
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -289,6 +290,47 @@ const ServiceMaster = () => {
               else fetchData();
             }}
             additionalParams={getQueryString(true)}
+            title={routes.serviceMaster.title}
+            extraImportExportLinks={[
+              {
+                title: 'Step Template',
+                api: `${serviceMaster.api}/steps/unknown/template`,
+                type: 'download'
+              },
+              {
+                title: 'Step Export',
+                api: `${serviceMaster.api}/steps/unknown/template?export=true${
+                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                    : ''
+                }`,
+                type: 'export'
+              },
+              {
+                title: 'Step Import',
+                api: `${serviceMaster.api}/steps/unknown/import`,
+                type: 'import'
+              },
+              {
+                title: 'Consumable Template',
+                api: `${serviceMaster.api}/product/unknown/template`,
+                type: 'download'
+              },
+              {
+                title: 'Consumable Export',
+                api: `${serviceMaster.api}/product/unknown/template?export=true${
+                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                    : ''
+                }`,
+                type: 'export'
+              },
+              {
+                title: 'Consumable Import',
+                api: `${serviceMaster.api}/product/unknown/import`,
+                type: 'import'
+              }
+            ]}
           />
         </Grid>
       </Grid>
@@ -383,8 +425,9 @@ const ServiceMaster = () => {
                     onClick={openActions}
                     aria-controls="action-menu"
                     disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
+                    endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'}
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -467,6 +510,8 @@ const ServiceMaster = () => {
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchData}
                 showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.serviceMaster}
               />
             )
           ) : null

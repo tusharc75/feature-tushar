@@ -8,7 +8,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { serviceMaster } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, serviceMaster } from '../../constants/helpers';
 import ManageServiceMaster from './ManageServiceMaster';
 import { BiEdit } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -18,6 +18,7 @@ import LeadTimeMaster from '../../components/LeadTime';
 import Steps from './Steps';
 import Product from './Product';
 import { Skeleton } from '@material-ui/lab';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const ServiceMasterDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -106,6 +107,7 @@ const ServiceMasterDetailsPage = () => {
                 {permissions?.serviceMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             )}
+            <ActivityButton referenceId={serviceMasterDetailData?._id} resource={ACTIVITY_RESOURCE.serviceMaster} />
           </Box>
         </Box>
       </Box>

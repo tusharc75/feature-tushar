@@ -129,9 +129,8 @@ export default function CustomReactTable({
   // customPageSize = 20,
   displayCustomReactTableHeaderOptions = true,
   hideExpander = false,
-  onSaveEdit = null,
+  onSaveEdit = null
 }) {
-
   const defaultColumn = React.useMemo(
     () => ({
       minWidth: 80,
@@ -144,6 +143,12 @@ export default function CustomReactTable({
   const [cellValue, setCellValue] = React.useState(null);
   const [isCellEditing, setIsCellEditing] = React.useState(false);
   const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
+
+  useEffect(() => {
+    setIsCellEditing(false);
+    setCurrentRowEditing(null);
+    setCellValue(null);
+  }, [data]);
 
   const newColumns = React.useMemo(
     () =>
@@ -346,7 +351,6 @@ export default function CustomReactTable({
     }
   }, []);
 
-
   useEffect(() => {
     let flatSelectedData = [];
     Object.keys(selectedRowIds).forEach((key) => {
@@ -420,6 +424,7 @@ export default function CustomReactTable({
         style={{
           display: 'block',
           overflow: 'auto',
+          background: 'white',
           height: height ?? '100%'
           // maxWidth: "100%",
           // overflowX: "scroll",
@@ -477,7 +482,7 @@ export default function CustomReactTable({
                       <TableCell
                         onDoubleClick={() => {
                           if (!cell?.column?.editable) return;
-                          setCellValue(cell?.value || '');
+                          setCellValue(parseFloat(cell?.value) || null);
                           setIsCellEditing(true);
                           setCurrentRowEditing(row);
                           setCellState(row.id, cell.column.id, { isEditing: true });
@@ -485,7 +490,7 @@ export default function CustomReactTable({
                             Object.keys(rowState[rowId].cellState).forEach((colId) => {
                               if (rowState[rowId]?.cellState[colId] !== cell.column?.id && rowState[rowId]?.cellState[colId]?.isEditing) {
                                 setCellState(rowId, colId, { isEditing: false });
-                                setIsCellEditing(false);
+                                // setIsCellEditing(false);
                               }
                             });
                           });
@@ -517,7 +522,7 @@ export default function CustomReactTable({
                             value={cellValue}
                             onChange={(e) => {
                               let value: any = e.target.value;
-                              value = parseFloat(value);
+                              value = parseFloat(parseFloat(value)?.toFixed(cell?.column?.decimalPlaces || 0));
                               if (value < 0) return;
                               setCellValue(value);
                             }}

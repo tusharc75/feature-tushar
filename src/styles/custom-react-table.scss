@@ -9,7 +9,7 @@ $isAppliedBill: #a8ec9c;
   .table {
     // border: 1px solid #ddd;
     .tr {
-      background: #f6fafa;
+      background: #fff;
 
       :last-child {
         .td {
@@ -39,9 +39,9 @@ $isAppliedBill: #a8ec9c;
       background: white;
       overflow: hidden;
 
-      :last-child {
-        border-right: 0;
-      }
+      // :last-child {
+      //   border-right: 0;
+      // }
 
       .resizer {
         display: inline-block;
@@ -118,16 +118,16 @@ $isAppliedBill: #a8ec9c;
       }
 
       .isService {
-        background: #FFFAEF;
-        border-bottom: 1px solid #FFFAEF;
+        background: #fffaef;
+        border-bottom: 1px solid #fffaef;
       }
 
       // background-color: #fff;
       overflow: hidden;
 
-      :last-child {
-        border-right: 0;
-      }
+      // :last-child {
+      //   border-right: 0;
+      // }
 
       .resizer {
         display: inline-block;
@@ -196,9 +196,8 @@ $isAppliedBill: #a8ec9c;
         }
 
         td.isService {
-          background: #FFFAEF;
+          background: #fffaef;
         }
-        
 
         td.error {
           background: #efcccc;
@@ -308,6 +307,37 @@ $isAppliedBill: #a8ec9c;
       top: 0;
       right: 0px;
       border-radius: 100vmax;
+    }
+  }
+}
+
+.editable-table-v1 {
+  th.th {
+    font-weight: 500 !important;
+    font-size: 12.6448px !important;
+    line-height: 18px !important;
+    color: #1d1d1d !important;
+  }
+  tfoot.footer td {
+    font-weight: 500 !important;
+    font-size: 12.6448px !important;
+    line-height: 18px !important;
+    color: #1d1d1d !important;
+  }
+  .full-height-cell {
+    height: 100%;
+    display: grid;
+    align-items: center;
+    p {
+      font-weight: 400 !important;
+      font-size: 13px !important;
+      line-height: 19px !important;
+      & + div {
+        margin-left: 0 !important;
+        svg {
+          font-size: 18px;
+        }
+      }
     }
   }
 }

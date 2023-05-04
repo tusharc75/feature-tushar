@@ -53,7 +53,8 @@ import {
   supplierAccount,
   customerContact,
   supplierContact,
-  quoteBuilder
+  quoteBuilder,
+  ACTIVITY_RESOURCE
 } from '../../constants/helpers';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
 import LeadAccordionInUserDetailPage from './LeadAccordionInUserDetailPage';
@@ -77,6 +78,7 @@ import { BiReset } from 'react-icons/all';
 import { BiEdit } from 'react-icons/bi';
 import { MdDelete } from 'react-icons/md';
 import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -624,6 +626,7 @@ const UserDetailsPage = () => {
                   onClick={() => handleDeleteUser(true)}
                 />
               ) : null}
+              <ActivityButton referenceId={userData?._id} resource={ACTIVITY_RESOURCE.user} />
             </Box>
           </Box>
         </Box>
@@ -767,7 +770,7 @@ const UserDetailsPage = () => {
                             <Grid item xs={12} sm={4}>
                               <FormControl fullWidth size="small" variant="outlined">
                                 <InputLabel id="duration">Select Duration</InputLabel>
-                                <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
+                                <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)} label="Select Duration">
                                   <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                                   <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
                                   <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
@@ -783,7 +786,6 @@ const UserDetailsPage = () => {
                                 variant="inline"
                                 fullWidth
                                 autoOk
-                                disableFuture
                                 size="small"
                                 openTo="year"
                                 format={dateFormatForInputControl}
@@ -803,7 +805,6 @@ const UserDetailsPage = () => {
                                 variant="inline"
                                 fullWidth
                                 autoOk
-                                disableFuture
                                 size="small"
                                 minDate={trackingTime.between.from}
                                 openTo="year"

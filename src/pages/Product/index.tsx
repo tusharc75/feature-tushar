@@ -18,7 +18,7 @@ import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { product, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
+import { product, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage, sidebarResource } from '../../constants/helpers';
 import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -577,7 +577,7 @@ const Product = () => {
               {
                 title: 'Child Product Template',
                 api: `${product.api}/unknown/bom/template`,
-                type: 'export'
+                type: 'download'
               },
               {
                 title: 'Child Product Export',
@@ -596,10 +596,10 @@ const Product = () => {
               {
                 title: 'Service Template',
                 api: `${product.api}/unknown/service-master/template`,
-                type: 'export'
+                type: 'download'
               },
               {
-                title: 'Service Template Export',
+                title: 'Service Export',
                 api: `${product.api}/unknown/service-master/template?export=true${
                   getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                     ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
@@ -615,7 +615,7 @@ const Product = () => {
               {
                 title: 'Service Package Template',
                 api: `${product.api}/unknown/package/template`,
-                type: 'export'
+                type: 'download'
               },
               {
                 title: 'Service Package Export',
@@ -825,8 +825,9 @@ const Product = () => {
                       disabled={selectedRecords.length ? false : true}
                       aria-controls="action-menu"
                       className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      endIcon={<ExpandMore />}
                     >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      {isMobile && !isTablet ? '' : 'Actions'}
                     </Button>
 
                     <Menu
@@ -926,6 +927,8 @@ const Product = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchProduct}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.product}
             />
           )
         ) : (

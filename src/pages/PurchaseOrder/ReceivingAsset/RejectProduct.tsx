@@ -4,19 +4,17 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Formik, Form, Field } from 'formik';
-import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
+import { Formik, Form } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { productInventory } from 'src/constants/helpers';
+import { productInventory, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
-import { KeyboardDatePicker } from 'formik-material-ui-pickers';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
-import { dateFormat, purchaseOrder } from '../../../constants/helpers';
+import { dateFormatForInputControl } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
+import DateUtils from '@date-io/date-fns';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, purchaseOrderData }) => {
   const {
@@ -27,6 +25,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
   const [loading, setLoading] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
   const [lockDate, setLockDate] = useState(null);
+  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
@@ -34,6 +33,12 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
     fetchData();
     fetchSettingsData();
   }, []);
+
+  useEffect(() => {
+    if (user?.user?.brandPolicy?.storageLocation) {
+      getStorageLocation();
+    }
+  }, [])
 
   const fetchSettingsData = () => {
     axiosInstance()
@@ -64,6 +69,16 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
       });
   };
 
+  const getStorageLocation = () => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
+      .then(({ data: { data } }) => {
+        if (data[sidebarResource.storageLocation]) {
+          setStorageLocationOptions(data[sidebarResource.storageLocation].filter(e => e.warehouse === warehouse));
+        }
+      });
+  };
+
   const handleSubmit = (values) => {
     const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers']?.indexOf(item?.serialNumber) > -1);
     const data = [
@@ -72,7 +87,8 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
         comment: values?.comment === '' ? 'Rejected' : values?.comment,
         product: product.productId,
         qty: parseInt(values.qty),
-        serialNumber: serialNumberIds?.map((item) => item?._id)
+        serialNumber: serialNumberIds?.map((item) => item?._id),
+        storageLocation: user?.user?.brandPolicy?.storageLocation ? values['storageLocation'] : null,
       }
     ];
     setLoading(true);
@@ -102,11 +118,19 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
       errors['serialNumbers'] = `Please select serial numbers same as quantity`;
     }
 
+    if (user?.user?.brandPolicy?.storageLocation && !values['storageLocation']) {
+      errors['storageLocation'] = `Storage Location is required`;
+    }
+
 
     if (lockDate) {
       if (!moment(values["rejectDate"]).isSameOrAfter(moment(lockDate))) {
-        errors['rejectDate'] = `Please selecte valid date`;
+        errors['rejectDate'] = `Date entered prior to the locked date`;
       }
+    }
+
+    if (moment(values["rejectDate"]).isAfter(moment())) {
+      errors['rejectDate'] = `Please select valid date`;
     }
 
     return errors;
@@ -125,8 +149,8 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
       }}
       aria-labelledby="assign-roles-dialog"
     >
-      <MuiPickersUtilsProvider utils={MomentUtils}>
-        <Formik initialValues={{ qty: 1, rejectDate: new Date(), comment: '' }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+      <MuiPickersUtilsProvider utils={DateUtils}>
+        <Formik initialValues={{ qty: 1, rejectDate: new Date(), comment: '', storageLocation: purchaseOrderData?.storageLocation?.optionValue || null, }} onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <CustomDialogHeader
@@ -146,8 +170,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                       primary={product?.productName}
                       secondary={`Quantity : ${product?.qty - (product?.rejectQuantity || 0) - (product?.assetQty || 0)}`}
                     />
-                    <Field
-                      component={TextFieldFormik}
+                    <TextField
                       margin="dense"
                       type="number"
                       required
@@ -165,8 +188,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                   </ListItem>
                 </List>
                 <Box m={1}>
-                  <Field
-                    component={TextFieldFormik}
+                  <TextField
                     margin="dense"
                     type="text"
                     label="Comment"
@@ -216,8 +238,34 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                     </Box>
                   </Fragment>
                 ) : null}
+                {(user?.user?.brandPolicy?.storageLocation && storageLocationOptions) &&
+                  <Box m={1}>
+                    <Autocomplete
+                      disableClearable
+                      options={storageLocationOptions}
+                      getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      value={storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0] : ''}
+                      onChange={(e, val) => {
+                        setFieldValue('storageLocation', val?.optionValue);
+                      }}
+                      renderInput={(params) =>
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          name="storageLocation"
+                          label="Storage Location"
+                          margin="dense"
+                          required
+                          error={touched['storageLocation'] && Boolean(errors['storageLocation'])}
+                          helperText={touched['storageLocation'] && errors['storageLocation']}
+                        />
+                      }
+                    />
+                  </Box>
+                }
                 <Box m={1}>
-                  <Field
+                  <KeyboardDatePicker
                     fullWidth
                     label="Reject Date"
                     variant="inline"
@@ -226,11 +274,10 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                     required
                     size="small"
                     margin="dense"
-                    component={KeyboardDatePicker}
                     name="rejectDate"
                     placeholder="Reject Date"
                     value={values.rejectDate}
-                    format={dateFormat}
+                    format={dateFormatForInputControl}
                     minDate={
                       lockDate
                         ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0

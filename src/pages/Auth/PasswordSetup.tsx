@@ -7,9 +7,9 @@ import {
   Paper,
   Button,
   CircularProgress,
+  TextField,
 } from "@material-ui/core";
-import { Formik, Form, Field } from "formik";
-import { TextField } from "formik-material-ui";
+import { Formik, Form } from "formik";
 import queryString from "query-string";
 import { useHistory, Redirect } from "react-router-dom";
 
@@ -89,7 +89,6 @@ const PasswordSetup = () => {
 
   const validateForm = (values) => {
     const errors: any = {};
-
     if (!values.password) {
       errors.password = 'Required field';
     }
@@ -131,39 +130,55 @@ const PasswordSetup = () => {
               <Formik
                 initialValues={{
                   email,
-                  password: "",
+                  password: '',
+                  confirmPassword: '',
                 }}
                 validate={validateForm}
                 onSubmit={handleSubmit}
               >
-                {({ submitForm }) => (
+                {({ submitForm, values, touched, errors, setFieldValue }) => (
                   <Form className={classes.form}>
-                    <Field
-                      component={TextField}
+                    <TextField
                       name="email"
                       type="email"
                       label="Email"
                       disabled
                       variant="outlined"
                       required
+                      value={values["email"]}
+                      error={touched['email'] && Boolean(errors['email'])}
+                      helperText={touched['email'] && errors['email']}
+                      onChange={(e) => {
+                        setFieldValue('email', e.target.value);
+                      }}
                     />
                     <br />
-                    <Field
-                      component={TextField}
+                    <TextField
                       type="password"
                       label="New Password"
                       name="password"
                       variant="outlined"
                       required
+                      value={values["password"]}
+                      error={touched['password'] && Boolean(errors['password'])}
+                      helperText={touched['password'] && errors['password']}
+                      onChange={(e) => {
+                        setFieldValue('password', e.target.value);
+                      }}
                     />
                     <br />
-                    <Field
-                      component={TextField}
+                    <TextField
                       type='password'
                       label='Confirm Password'
                       name='confirmPassword'
                       variant='outlined'
                       required
+                      value={values["confirmPassword"]}
+                      error={touched['confirmPassword'] && Boolean(errors['confirmPassword'])}
+                      helperText={touched['confirmPassword'] && errors['confirmPassword']}
+                      onChange={(e) => {
+                        setFieldValue('confirmPassword', e.target.value);
+                      }}
                     />
                     <br />
                     <Button
@@ -172,7 +187,7 @@ const PasswordSetup = () => {
                       size="small"
                       disabled={isSubmitting}
                       onClick={submitForm}
-                      startIcon={isSubmitting && <CircularProgress size={20} color='inherit' /> }
+                      startIcon={isSubmitting && <CircularProgress size={20} color='inherit' />}
                     >
                       Submit
                     </Button>

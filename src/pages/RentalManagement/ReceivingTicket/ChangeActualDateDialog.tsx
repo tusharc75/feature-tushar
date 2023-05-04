@@ -10,6 +10,17 @@ import moment from 'moment';
 
 const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) => {
 
+  function validate(values) {
+    const errors = {};
+    if (data?.isAllowedStartDate && data?.isAllowedEndDate) {
+      let manualStartDate = moment(values?.manualStartDate);
+      let manualEndDate = moment(values?.manualEndDate);
+      if (manualEndDate.diff(manualStartDate, 'days') < 0) {
+        errors['manualEndDate'] = 'Please enter valid end date';
+      }
+    }
+    return errors;
+  }
 
   return (
     <Dialog
@@ -29,9 +40,19 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
         } :
           data?.isAllowedStartDate ? { manualStartDate: new Date(data?.manualStartDate) } :
             data?.isAllowedEndDate ? { manualEndDate: new Date(data?.manualEndDate) } : {}}
-        onSubmit={(values) => { }}>
+        validate={validate}
+        onSubmit={(values) => {
+          const newValues: any = {};
+          if (data.isAllowedStartDate) {
+            newValues.manualStartDate = new Date(values.manualStartDate)?.toISOString()
+          }
+          if (data.isAllowedEndDate) {
+            newValues.manualEndDate = new Date(values.manualEndDate)?.toISOString()
+          }
+          handleSubmit(newValues);
+        }}>
         {({ values, errors, touched, setFieldValue }) => (
-          <Form>
+          <Form >
             <CustomDialogHeader title={data?.assetNumber || ''} onClose={onClose} />
             <CustomDialogContent>
               <Box p={2}>
@@ -42,8 +63,8 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
                         size="small"
                         fullWidth
                         values={values}
-                        maxDate={values.manualEndDate || moment().add(5, 'years')}
-                        error={errors}
+                        maxDate={values.manualEndDate || new Date()}
+                        errors={errors}
                         touched={touched}
                         type="date"
                         label="Start Date"
@@ -60,7 +81,7 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
                         fullWidth
                         minDate={data?.minEndDate || values.manualStartDate}
                         values={values}
-                        error={errors}
+                        errors={errors}
                         touched={touched}
                         type="date"
                         label="End Date"
@@ -84,16 +105,7 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
                 size="small"
                 variant="contained"
                 color="primary"
-                onClick={() => {
-                  const newValues: any = {};
-                  if (data.isAllowedStartDate) {
-                    newValues.manualStartDate = new Date(values.manualStartDate)?.toISOString()
-                  }
-                  if (data.isAllowedEndDate) {
-                    newValues.manualEndDate = new Date(values.manualEndDate)?.toISOString()
-                  }
-                  handleSubmit(newValues);
-                }}
+                type="submit"
               >
                 Save
               </Button>

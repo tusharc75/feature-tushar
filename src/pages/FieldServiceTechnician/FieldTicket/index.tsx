@@ -12,14 +12,13 @@ import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { getFrameworkComponents, getStaticFields } from 'src/constants/columns';
+import { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import useColumns from 'src/constants/useColumns';
 
 const FieldTicket = ({ selectedFieldService }) => {
-
   const renderedFrom = camelCase(`${routes.fieldTicket?.title}`);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -39,7 +38,8 @@ const FieldTicket = ({ selectedFieldService }) => {
   const [fieldTicketId, setFieldTicketId] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
   useEffect(() => {
     fetchGridColumns();
@@ -49,7 +49,6 @@ const FieldTicket = ({ selectedFieldService }) => {
     fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedFieldService]);
 
-
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.fieldTicket}`)
@@ -57,7 +56,7 @@ const FieldTicket = ({ selectedFieldService }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicketDetail.path)
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicketDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -68,7 +67,7 @@ const FieldTicket = ({ selectedFieldService }) => {
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer,
+          actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
@@ -110,7 +109,9 @@ const FieldTicket = ({ selectedFieldService }) => {
           });
         }
         dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => { dispatch({ type: 'loading', loading: false }); }, gridLoadingTimeout);
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
@@ -268,8 +269,9 @@ const FieldTicket = ({ selectedFieldService }) => {
                   disabled={selectedRecords.length ? false : true}
                   aria-controls="action-menu"
                   style={{ marginLeft: '0.4rem' }}
+                  endIcon={<ExpandMore />}
                 >
-                  {'Actions'} <ExpandMore />
+                  {'Actions'}
                 </Button>
                 <Menu
                   anchorEl={anchorEl}

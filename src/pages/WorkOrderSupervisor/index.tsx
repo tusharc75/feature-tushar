@@ -1,44 +1,49 @@
-import { Box, Button, Grid, TextField } from '@material-ui/core';
+import { Box, Button, Grid, TextField, Typography } from '@material-ui/core';
 import React, { Fragment, useEffect, useState, useReducer, useContext } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { useData } from '../../StateProvider/Provider';
-import { MdOutlineSupervisorAccount } from 'react-icons/md';
 import { Autocomplete } from '@material-ui/lab';
 import { FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { workOrderSupervisor, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from '../../constants/helpers';
+import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import { workOrderSupervisor, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { camelCase } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import moment from 'moment';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { dateFormatForInputControl } from '../../constants/helpers';
-import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CardColTimeline, { datarowInterface } from 'src/components/CardColTimeline';
 
 const WorkOrderSupervisor = () => {
-
-  const renderedFrom = camelCase(routes?.workOrderSupervisor?.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const [gridApi, setGridApi] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
+
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
   const [selectedRepairOrder, setSelectedRepairOrder] = useState(null);
-  const [workOrderData, setWorkOrderData] = useState([]);
-  const [repairOrderData, setRepairOrderData] = useState([]);
-  const [usersData, setUsersData] = useState([]);
+  const [selectedService, setSelectedService] = useState(null);
+
+  const [usersOption, setUsersOption] = useState([]);
+  const [workOrderOption, setWorkOrderOption] = useState([]);
+  const [repairOrderOption, setRepairOrderOption] = useState([]);
+  const [serviceMasterOption, setServiceMasterOption] = useState([]);
 
   const [timeFrame, setTimeFrame] = React.useState<any>('1-year');
   const [globalFilters, setGlobalFilters] = useState({ from: new Date(moment().subtract(1, 'year').calendar()), to: new Date() });
+
+  useEffect(() => {
+    let timeout = setTimeout(fetchData, 600);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [selectedUser, selectedWorkOrder, selectedRepairOrder, selectedService, timeFrame, globalFilters.from, globalFilters.to]);
 
   React.useEffect(() => {
     switch (timeFrame) {
@@ -73,11 +78,12 @@ const WorkOrderSupervisor = () => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=User,Work Order,Repair Order`)
+      .get(`/sa-formbuilder/lookup?lookupResource=User,Work Order,Repair Order,Service Master`)
       .then(({ data: { data } }) => {
-        setUsersData(data['User']);
-        setWorkOrderData(data['Work Order']);
-        setRepairOrderData(data['Repair Order']);
+        setUsersOption(data['User']);
+        setWorkOrderOption(data['Work Order']);
+        setRepairOrderOption(data['Repair Order']);
+        setServiceMasterOption(data['Service Master']);
       });
   }, []);
 
@@ -92,18 +98,45 @@ const WorkOrderSupervisor = () => {
       let response = await axiosInstance().get(`${workOrderSupervisor.api}${queryString}`);
       data = response?.data?.data;
       count = response?.data?.count;
-      data = data?.map((u) => {
+
+      const completed = [];
+      const pending = [];
+      const inProgress = [];
+      data = data?.forEach((u) => {
         let finalObject = prepareDataForGrid(u);
         finalObject['user'] = u?.assignedUsers[0]?.optionLabel;
         finalObject['workOrder'] = u?.workOrderDetail?.workOrderNumber;
         finalObject['serviceName'] = u?.service?.optionLabel;
-        finalObject['assignedUser'] = u?.assignedUsers?.map((e) => e?.optionLabel)?.toString()
+        finalObject['assignedUser'] = u?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
+        finalObject['createDate'] = u?.workOrderDetail?.createDate;
+        finalObject['workOrderId'] = u?.workOrderDetail?._id;
+
+        if (u.status === 'Pending') {
+          pending.push(finalObject);
+        }
+        if (u.status === 'Completed') {
+          completed.push(finalObject);
+        }
+        if (u.status === 'In-Progress') {
+          inProgress.push(finalObject);
+        }
         return {
           ...finalObject
         };
       });
-      dispatch({ type: 'initialize', data: data, count: count });
-      setTimeout(() => { dispatch({ type: 'loading', loading: false }); }, gridLoadingTimeout);
+
+      dispatch({
+        type: 'initialize',
+        data: {
+          Pending: { data: pending, color: '#F8A300' },
+          'In-Progress': { data: inProgress, color: '#F16A9A' },
+          Completed: { data: completed, color: '#31AC1D' }
+        },
+        count: count
+      });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
@@ -137,41 +170,22 @@ const WorkOrderSupervisor = () => {
     if (selectedRepairOrder) {
       deepFilter = `${deepFilter}&repairOrders=${selectedRepairOrder}`;
     }
-    if (showFilteredRecordsOnly) {
-      const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+    if (selectedService) {
+      deepFilter = `${deepFilter}&services=${selectedService}`;
     }
     if (globalFilters) {
-      deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format("YYYY/MM/DD")}&to=${moment(globalFilters.to).format("YYYY/MM/DD")}`
+      deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
     }
     return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
 
-  const handleShow = () => {
-    fetchData();
-  };
 
-  const frameworkComponents = {
-    commonRenderer: CommonRenderer,
-  };
-
-  const columns = [
-    { field: 'workOrder', headerName: 'Work Order', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'serviceName', headerName: 'Service Name', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'assignedUser', headerName: 'Technician', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'status', headerName: 'Status', show: true, disabled: true, cellRenderer: 'commonRenderer' }
+  const cardDataRows: datarowInterface[] = [
+    { accessor: 'workOrder', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?.workOrderId}` },
+    { accessor: 'serviceName', title: 'Service Name', type: 'text' },
+    { accessor: 'assignedUser', title: 'Technician', type: 'text' },
+    { accessor: 'createDate', title: 'Due Date', type: 'date' }
   ];
-
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
 
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -180,182 +194,146 @@ const WorkOrderSupervisor = () => {
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[routes.workOrderSupervisor]} />
           </Grid>
-          <Grid item md={8} sm={1} xs={2}>
-            {/* <ImportExportLinks
-              permissions={permissions?.workOrderSupervisor}
-              module="product inventory"
-              api={'workordersupervisor'}
-              afterImportCompleted={() => {
-                fetchWorkOrderSuperVisorData();
-              }}
-              isExportAllOrSomeFeature={true}
-              total={10}
-              recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)].length}
-              ids={
-                [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-                  ? [...getLocalStorageArrayData(localStorageSelectedRecords)].map((obj) => obj._id)
-                  : []
-              }
-              onExportToExcelSuccess={() => {
-                if (gridApi) gridApi.deselectAll();
-                else fetchWorkOrderSuperVisorData();
-              }}
-              additionalParams={getQueryString(true)}
-            /> */}
-          </Grid>
         </Grid>
         <div className="main-container">
           <div className="header-panel">
-            <Grid container>
-              <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center gap-1">
-                <Autocomplete
-                  style={{ width: '200px' }}
-                  options={usersData}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => { return option.optionValue === val.optionValue }}
-                  value={usersData.filter((data) => data.optionValue === selectedUser).length ? usersData.filter((data) => data.optionValue === selectedUser)[0] : ''}
-                  onChange={(e, val) => {
-                    setSelectedUser(val && val.optionValue ? val.optionValue : '');
-                  }}
-                  renderInput={(params) =>
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="user"
-                      placeholder="Technician"
-                      label="Technician"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  }
-                />
-                <Autocomplete
-                  style={{ width: '200px' }}
-                  options={workOrderData}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => {
-                    return option.optionValue === val.optionValue;
-                  }}
-                  value={workOrderData.filter((data) => data.optionValue === selectedWorkOrder).length ? workOrderData.filter((data) => data.optionValue === selectedWorkOrder)[0] : ''}
-                  onChange={(e, val) => {
-                    setSelectedWorkOrder(val && val.optionValue ? val.optionValue : '');
-                  }}
-                  renderInput={(params) =>
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="workOrder"
-                      placeholder="Work Order"
-                      label="Work Order"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  }
-                />
-                <Autocomplete
-                  style={{ width: '200px' }}
-                  options={repairOrderData}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => {
-                    return option.optionValue === val.optionValue;
-                  }}
-                  value={repairOrderData.filter((data) => data.optionValue === selectedRepairOrder).length ? repairOrderData.filter((data) => data.optionValue === selectedRepairOrder)[0] : ''}
-                  onChange={(e, val) => {
-                    setSelectedRepairOrder(val && val.optionValue ? val.optionValue : '');
-                  }}
-                  renderInput={(params) =>
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="repairOrder"
-                      placeholder="Repair Order"
-                      label="Repair Order"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  }
-                />
-                <FormControl style={{ width: '150px' }} size="medium" margin="dense" variant="outlined">
-                  <InputLabel id="duration">Select Duration</InputLabel>
-                  <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
-                    <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                    <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                    <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                    <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                    <MenuItem value={'custom'}>Custom</MenuItem>
-                  </Select>
-                </FormControl>
-                <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom'}
-                  inputVariant="outlined"
-                  variant="inline"
-                  style={{ width: '150px' }}
-                  size="small"
-                  disableFuture
-                  openTo="year"
-                  format={dateFormatForInputControl}
-                  maxDate={globalFilters.to}
-                  label="From"
-                  views={['year', 'month', 'date']}
-                  value={globalFilters.from}
-                  onChange={(date) => {
-                    setGlobalFilters({ ...globalFilters, from: date });
-                  }}
-                />
-                <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom'}
-                  inputVariant="outlined"
-                  variant="inline"
-                  style={{ width: '150px' }}
-                  size="small"
-                  minDate={globalFilters.from}
-                  disableFuture
-                  openTo="year"
-                  format={dateFormatForInputControl}
-                  label="To"
-                  views={['year', 'month', 'date']}
-                  value={globalFilters.to}
-                  onChange={(date) => {
-                    setGlobalFilters({ ...globalFilters, to: date });
-                  }}
-                />
-                <Button
-                  onClick={handleShow}
-                  style={{
-                    marginLeft: '1rem',
-                  }}
-                  variant={'contained'}
-                  size="small"
-                  color="primary"
-                >
-                  Show
-                </Button>
-              </Grid>
-            </Grid>
+            <Box flexWrap={'wrap'} className="d-flex align-items-center gap-1">
+              <Autocomplete
+                style={{ width: '200px' }}
+                options={usersOption}
+                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                getOptionSelected={(option: any, val) => {
+                  return option.optionValue === val.optionValue;
+                }}
+                value={
+                  usersOption.filter((data) => data.optionValue === selectedUser).length
+                    ? usersOption.filter((data) => data.optionValue === selectedUser)[0]
+                    : ''
+                }
+                onChange={(e, val) => {
+                  setSelectedUser(val && val.optionValue ? val.optionValue : '');
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} margin="dense" name="user" placeholder="Technician" label="Technician" variant="outlined" fullWidth />
+                )}
+              />
+              <Autocomplete
+                style={{ width: '200px' }}
+                options={workOrderOption}
+                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                getOptionSelected={(option: any, val) => {
+                  return option.optionValue === val.optionValue;
+                }}
+                value={
+                  workOrderOption.filter((data) => data.optionValue === selectedWorkOrder).length
+                    ? workOrderOption.filter((data) => data.optionValue === selectedWorkOrder)[0]
+                    : ''
+                }
+                onChange={(e, val) => {
+                  setSelectedWorkOrder(val && val.optionValue ? val.optionValue : '');
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} margin="dense" name="workOrder" placeholder="Work Order" label="Work Order" variant="outlined" fullWidth />
+                )}
+              />
+              <Autocomplete
+                style={{ width: '200px' }}
+                options={repairOrderOption}
+                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                getOptionSelected={(option: any, val) => {
+                  return option.optionValue === val.optionValue;
+                }}
+                value={
+                  repairOrderOption.filter((data) => data.optionValue === selectedRepairOrder).length
+                    ? repairOrderOption.filter((data) => data.optionValue === selectedRepairOrder)[0]
+                    : ''
+                }
+                onChange={(e, val) => {
+                  setSelectedRepairOrder(val && val.optionValue ? val.optionValue : '');
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    margin="dense"
+                    name="repairOrder"
+                    placeholder="Repair Order"
+                    label="Repair Order"
+                    variant="outlined"
+                    fullWidth
+                  />
+                )}
+              />
+              <Autocomplete
+                style={{ width: '200px' }}
+                options={serviceMasterOption}
+                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                getOptionSelected={(option: any, val) => {
+                  return option.optionValue === val.optionValue;
+                }}
+                value={
+                  serviceMasterOption.filter((data) => data.optionValue === selectedService).length
+                    ? serviceMasterOption.filter((data) => data.optionValue === selectedService)[0]
+                    : ''
+                }
+                onChange={(e, val) => {
+                  setSelectedService(val && val.optionValue ? val.optionValue : '');
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} margin="dense" name="user" placeholder="Service" label="Service" variant="outlined" fullWidth />
+                )}
+              />
+              <FormControl style={{ width: '150px' }} size="medium" margin="dense" variant="outlined">
+                <InputLabel id="duration">Select Duration</InputLabel>
+                <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)} label="Select Duration">
+                  <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                  <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                  <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                  <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                  <MenuItem value={'custom'}>Custom</MenuItem>
+                </Select>
+              </FormControl>
+              <KeyboardDatePicker
+                disabled={timeFrame !== 'custom'}
+                inputVariant="outlined"
+                variant="inline"
+                style={{ width: '150px' }}
+                size="small"
+                openTo="year"
+                format={dateFormatForInputControl}
+                maxDate={globalFilters.to}
+                label="From"
+                views={['year', 'month', 'date']}
+                value={globalFilters.from}
+                onChange={(date) => {
+                  setGlobalFilters({ ...globalFilters, from: date });
+                }}
+              />
+              <KeyboardDatePicker
+                disabled={timeFrame !== 'custom'}
+                inputVariant="outlined"
+                variant="inline"
+                style={{ width: '150px' }}
+                size="small"
+                minDate={globalFilters.from}
+                openTo="year"
+                format={dateFormatForInputControl}
+                label="To"
+                views={['year', 'month', 'date']}
+                value={globalFilters.to}
+                onChange={(date) => {
+                  setGlobalFilters({ ...globalFilters, to: date });
+                }}
+              />
+            </Box>
           </div>
-          {columns ? (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={150}
-              allowAction={false}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              showOnlyShowFilteredRecordSwitch={true}
-            />)
-            : (
-              <Box p={2} height={500} bgcolor="white">
-                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Box>
-            )}
+          <CardColTimeline
+            data={dataRows}
+            loading={loading}
+            cardDataRows={cardDataRows}
+            passFailStatus={true}
+            passFailAccessor="serviceStatus"
+            px={2}
+          />
         </div>
       </Fragment>
     </MuiPickersUtilsProvider>

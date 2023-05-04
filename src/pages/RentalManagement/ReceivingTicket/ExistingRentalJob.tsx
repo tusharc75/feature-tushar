@@ -166,6 +166,14 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
       tempInitialData["deliveryTo"] = rentalData?.deliveryTo;
       tempInitialData["deliveryToAddress"] = rentalData?.deliveryToAddress;
       tempInitialData["wellName"] = referenceData?.wellName?.optionValue;
+      if (referenceData?.wellNumber) {
+        if (referenceData?.wellNumber?.optionValue) {
+          tempInitialData['wellNumber'] = referenceData?.wellNumber?.optionValue;
+        }
+        else {
+          tempInitialData['wellNumber'] = referenceData?.wellNumber?.map((e) => e?.optionValue);
+        }
+      }
       tempInitialData["afeNumber"] = referenceData?.afeNumber;
       if (referenceData?.processor?.optionValue) {
         tempInitialData["deliveryPerson"] = referenceData?.processor?.optionValue;

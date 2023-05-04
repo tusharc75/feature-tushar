@@ -12,7 +12,9 @@ import {
   ListItemText,
   Tooltip,
   Menu,
-  MenuItem
+  MenuItem,
+  Button,
+  ListItemIcon
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -34,11 +36,13 @@ import { customerAccount, customerContact, formatAmountWithCurrency } from '../.
 import { MoreVert } from '@material-ui/icons';
 import AssignOpportunityDialog from '../AssignRolesDialog/AssignOpportunityDialog';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 const Accordion = withStyles({
   root: {
-    border: '1px solid rgba(0, 0, 0, .125) ',
-    boxShadow: 'none',
+    border: '0px',
+    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.06)',
+
     '&:not(:last-child)': {
       borderBottom: 0
     },
@@ -46,7 +50,8 @@ const Accordion = withStyles({
       display: 'none'
     },
     '&$expanded': {
-      margin: 'auto'
+      margin: 'auto',
+      boxShadow: '0px 17.7266px 35.4532px rgba(0, 0, 0, 0.03)'
     }
   },
   expanded: {}
@@ -54,13 +59,14 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
   root: {
-    backgroundColor: 'white',
-    borderBottom: '1px solid #f1ece8',
-    background: '#ffffff',
-    fontWeight: 'bold',
-    padding: '0px',
+    backgroundColor: '#FFFFFF',
+    padding: '0 8px',
+    minHeight: 48,
+    borderRadius: '3.54532px',
     '&$expanded': {
-      minHeight: 46
+      minHeight: 48,
+      backgroundColor: '#EFFBF9',
+      borderRadius: '3.54532px 3.54532px 0px 0px'
     }
   },
   content: {
@@ -73,22 +79,42 @@ const AccordionSummary = withStyles({
 
 const AccordionDetails = withStyles((theme) => ({
   root: {
-    padding: 0,
-    display: 'block'
-  },
-  amount: {
-    float: 'right',
-    fontWeight: 'bold'
+    display: 'block',
+    padding: theme.spacing(2),
+    border: '1px solid #ececec',
+    borderRadius: '0px 0px 6px 6px'
   }
 }))(MuiAccordionDetails);
 
-function DisplayData({ key, label, value, icon }) {
+function DisplayData({ key, label, value, icon, highlightsHead = false }) {
   return (
     <div style={{ flexGrow: 1 }}>
-      <List>
-        <ListItem key={key}>
-          <ListItemAvatar>{icon}</ListItemAvatar>
-          <ListItemText primary={value ? value : '-'} secondary={label} />
+      <List style={{ padding: 0 }}>
+        <ListItem key={key} style={{ alignItems: 'flex-start', paddingInline: '0' }}>
+          <ListItemIcon style={{ minWidth: '24px', marginTop: 11 }}>{icon}</ListItemIcon>
+          <ListItemText
+            primary={
+              highlightsHead ? (
+                <span
+                  style={{
+                    background: '#EFFBF9',
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    display: 'inline-block',
+                    color: '#298B88',
+                    fontWeight: 600
+                  }}
+                >
+                  {value ? value : '-'}
+                </span>
+              ) : value ? (
+                <span style={{ fontSize: '15px' }}>{value}</span>
+              ) : (
+                '-'
+              )
+            }
+            secondary={<span style={{ fontSize: '14px' }}>{label}</span>}
+          />
         </ListItem>
       </List>
     </div>
@@ -165,7 +191,7 @@ export default function OpportunityInAccordian({
   };
   return (
     <>
-      <Accordion expanded={expandOpportunity} className={`omsAccordian accordOpportunity `} onChange={() => setExpandOpportunity(!expandOpportunity)}>
+      <Accordion expanded={expandOpportunity} className={`omsAccordian  `} onChange={() => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container>
             <Grid item xs={8} alignItems="center">
@@ -174,7 +200,9 @@ export default function OpportunityInAccordian({
                   <IconButton size="small">{expandOpportunity === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
                 </Box>
                 <Box padding="5px">
-                  <Typography variant="subtitle2">Opportunity ({opportunities?.length || 0})</Typography>
+                  <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
+                    Opportunity ({opportunities?.length || 0})
+                  </Typography>
                 </Box>
               </Box>
             </Grid>
@@ -184,7 +212,15 @@ export default function OpportunityInAccordian({
                   <>
                     {contactResource === customerContact.contactResource ? (
                       <>
-                        <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleOpenMenu}>
+                        <IconButton
+                          aria-haspopup="true"
+                          color="primary"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenMenu(e);
+                          }}
+                        >
                           <MoreVert />
                         </IconButton>
                         <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
@@ -210,7 +246,15 @@ export default function OpportunityInAccordian({
                       </>
                     ) : (
                       <>
-                        <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleOpenMenu}>
+                        <IconButton
+                          aria-haspopup="true"
+                          color="primary"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenMenu(e);
+                          }}
+                        >
                           <MoreVert />
                         </IconButton>
                         <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
@@ -232,75 +276,70 @@ export default function OpportunityInAccordian({
             </Grid>
           </Grid>
         </AccordionSummary>
-        <Box margin={0.5} />
         <AccordionDetails>
-          <>
+          <Box>
             {expandOpportunity && (
               <>
                 {opportunities && opportunities.length ? (
                   <Grid container spacing={1}>
                     {opportunities.map((obj, index) => (
                       <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
-                        <Card className="detailCard ">
-                          <CardContent className="detailListing custom_card_style_for_contact_details">
-                            {/* <div className="cardStyle"> </div> */}
+                        <Card className="detailCard  card-v1" variant="outlined">
+                          <CardContent className="card-link">
                             <Grid item xs={12}>
-                              <Grid container className="detailCardHeader">
-                                <Grid item xs={7} sm={8}>
-                                  {hasAccessToEntity(obj.entity) ? (
-                                    obj.entity === selectedEntity ? (
-                                      <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
-                                        <Typography className="detailName">{obj?.opportunityName}</Typography>
-                                      </Link>
-                                    ) : (
-                                      <Link
-                                        className="link"
-                                        onClick={() => {
-                                          handleEntityChange(obj.entity);
-                                          history.push(`${routes.opportunityDetail.path}/${obj._id}`);
-                                        }}
-                                      >
-                                        <Typography className="detailName">{obj?.opportunityName}</Typography>
-                                      </Link>
-                                    )
-                                  ) : (
-                                    <span className="d-flex gap-2 align-items-center">
-                                      <Typography className="detailName">{obj.opportunityName}</Typography>{' '}
-                                      <Tooltip title={`${obj.opportunityName} belongs to different entity`}>
-                                        <InfoOutlinedIcon fontSize="small" />
-                                      </Tooltip>
-                                    </span>
-                                  )}
-                                </Grid>
-                                <Grid item xs={5} sm={4}>
-                                  <Typography
-                                    className="amount text-truncate"
-                                    title={formatAmountWithCurrency(obj?.currency, obj?.estimatedAmount)?.fullFormatAmount}
+                              {hasAccessToEntity(obj.entity) ? (
+                                obj.entity === selectedEntity ? (
+                                  <Link to={`${routes.opportunityDetail.path}/${obj._id}`}>
+                                    <Typography className="detailName">{obj?.opportunityName}</Typography>
+                                  </Link>
+                                ) : (
+                                  <Link
+                                    onClick={() => {
+                                      handleEntityChange(obj.entity);
+                                      history.push(`${routes.opportunityDetail.path}/${obj._id}`);
+                                    }}
                                   >
-                                    {formatAmountWithCurrency(obj?.currency, obj?.estimatedAmount)?.fullFormatAmount}
-                                  </Typography>
-                                </Grid>
-                              </Grid>
+                                    <Typography className="detailName">{obj?.opportunityName}</Typography>
+                                  </Link>
+                                )
+                              ) : (
+                                <span className="d-flex gap-2 align-items-center">
+                                  <Typography className="detailName">{obj.opportunityName}</Typography>{' '}
+                                  <Tooltip title={`${obj.opportunityName} belongs to different entity`}>
+                                    <InfoOutlinedIcon fontSize="small" />
+                                  </Tooltip>
+                                </span>
+                              )}
+
+                              <Typography
+                                className="amount text-truncate"
+                                title={formatAmountWithCurrency(obj?.currency, obj?.estimatedAmount)?.fullFormatAmount}
+                              >
+                                {formatAmountWithCurrency(obj?.currency, obj?.estimatedAmount)?.fullFormatAmount}
+                              </Typography>
+
                               <Grid container>
-                                <Grid item xs={12} sm={6} md={6} className="buttonClass">
-                                  {obj?.stage ? (
-                                    <DisplayData key={index} label="Stage" value={obj?.stage ?? ''} icon={<BiCustomize size={15} />} />
-                                  ) : (
-                                    ''
-                                  )}
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                  {obj.closeDate ? (
-                                    <DisplayData
-                                      key={index}
-                                      label="Closing Date"
-                                      value={displayDate(obj.closeDate)}
-                                      icon={<IoCalendarOutline size={15} />}
-                                    />
-                                  ) : (
-                                    ''
-                                  )}
-                                </Grid>
+                                {obj?.stage ? (
+                                  <DisplayData
+                                    key={index}
+                                    label="Stage"
+                                    value={obj?.stage ?? ''}
+                                    highlightsHead={true}
+                                    icon={<BiCustomize size={15} />}
+                                  />
+                                ) : (
+                                  ''
+                                )}
+                                {obj.closeDate ? (
+                                  <DisplayData
+                                    key={index}
+                                    label="Closing Date"
+                                    value={displayDate(obj.closeDate)}
+                                    icon={<IoCalendarOutline size={15} />}
+                                  />
+                                ) : (
+                                  ''
+                                )}
                               </Grid>
                             </Grid>
                           </CardContent>
@@ -315,28 +354,26 @@ export default function OpportunityInAccordian({
                 )}
               </>
             )}
-          </>
-        </AccordionDetails>
-        {opportunities && opportunities.length ? (
-          <Box
-            margin={1}
-            className="btn-view gap-1"
-            onClick={() =>
-              history.push(`/opportunity`, {
-                accountId: accountId,
-                accountName: accountName,
-                resource: `${resource}`
-              })
-            }
-            p={1}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <span>View All</span>
-            <HiExternalLink size={20} />
+            {opportunities && opportunities.length ? (
+              <Box mt={2}>
+                <Button
+                  className="accordion-outlined-button"
+                  onClick={() =>
+                    history.push(`/opportunity`, {
+                      accountId: accountId,
+                      accountName: accountName,
+                      resource: `${resource}`
+                    })
+                  }
+                  startIcon={<VisibilityIcon />}
+                  variant="outlined"
+                >
+                  <span>View All</span>
+                </Button>
+              </Box>
+            ) : null}
           </Box>
-        ) : null}
+        </AccordionDetails>
       </Accordion>
 
       {showCreateOpportunityDialog && (

@@ -19,7 +19,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash'
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { FaSuitcase, SiStatuspage, FaWarehouse, GiAutoRepair, GrStatusInfo, BsFillPersonFill, GiCargoShip, FaShippingFast, RiSpaceShipFill } from "react-icons/all"
 import ProductionOrderHeader from './ProductionOrderHeader';
 import HtmlTooltip from "src/components/CustomTooltipTitle";
@@ -28,19 +27,20 @@ import ManageProductionOrder from './ManageProductionOrder';
 
 
 let productionOrderTimeout;
-const ProductionOrderType = [
-    {
-        key: 'All Production Order',
-        value: 1
-    },
-    {
-        key: 'My Production Order',
-        value: 2
-    }
-];
 
 const ProductionOrder = () => {
 
+    const ProductionOrderType = [
+        {
+            key: `All ${routes.productionOrder.title}`,
+            value: 1
+          },
+          {
+            key: `My ${routes.productionOrder.title}`,
+            value: 2
+          }
+    ];
+    
     const renderedFrom = camelCase(routes?.productionOrder.title)
     const localStorageSelectedRecords = `${renderedFrom}_selected`
 
@@ -66,7 +66,6 @@ const ProductionOrder = () => {
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
     const [frameworkComponents, setFrameworkComponents] = useState({});
-    const { isOffline } = useContext(CustomOfflineContext);
     const [columns, setColumns] = useState([]);
 
     const { getColumnData } = useColumns();
@@ -84,10 +83,6 @@ const ProductionOrder = () => {
         data.forEach(o => {
             let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productionOrderDetail.path)
             if (currentColumn !== null) {
-                if (isOffline) {
-                    currentColumn.columnData["filter"] = false
-                    currentColumn.columnData["sortable"] = false
-                }
                 columns = [...columns, currentColumn?.columnData]
                 if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
                     rendererNames.push(currentColumn?.rendererName)
@@ -242,12 +237,19 @@ const ProductionOrder = () => {
     };
 
     const getQueryString = (isExport = false) => {
-        let deepFilter = `?page=${page}&limit=${limit}&filterProductionOrders=${selectedType}`;
-        if (isExport) {
-            deepFilter = `filterProductionOrders=${selectedType}`;
+        let deepFilter = `?page=${page}&limit=${limit}`;
+        if (selectedType === 2) {
+          deepFilter = deepFilter + `&myRecords=1`;
         }
+        if (isExport) {
+          deepFilter = `?`;
+        }
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+          }
+
         let filterById = [];
-        if (filterById.length) {
+        if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
         if (!isObjectEmpty(filters)) {

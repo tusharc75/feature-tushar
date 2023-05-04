@@ -4,13 +4,14 @@ import { Box, CircularProgress, TextField } from "@material-ui/core";
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
 import { gridLoadingTimeout, CustomDialogTransition, packages, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData, deliveryTicket } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import { genrateColoum, getColumnData, getFrameworkComponents, getStaticFields } from "../../../constants/columns";
+import { generateColoum } from "../../../constants/columns";
 import { useData } from "../../../StateProvider/Provider";
 import { CustomOfflineContext } from "src/StateProvider/OfflineContext/OfflineContext";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { fetch_rental_cost_fields } from "src/components/RentalManagment/helper";
 import { CommonRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
+import useColumns, { getFrameworkComponents } from "src/constants/useColumns";
 
 const DeliveryTicketAdditionalCost = ({ renderedFrom, additionalCost }) => {
 
@@ -25,6 +26,7 @@ const DeliveryTicketAdditionalCost = ({ renderedFrom, additionalCost }) => {
         state: { user, permissions }
     }: any = useData();
     const { isOffline } = useContext(CustomOfflineContext);
+    const { getColumnData } = useColumns();
 
     useEffect(() => {
         fetchGridColumns()
@@ -56,7 +58,7 @@ const DeliveryTicketAdditionalCost = ({ renderedFrom, additionalCost }) => {
         const fields = await fetch_rental_cost_fields("USD", isOffline);
         let rendererNames = [];
         let columns = []
-        genrateColoum(fields, columns, rendererNames, false, renderedFrom);
+        generateColoum(fields, columns, rendererNames, false, renderedFrom, getColumnData);
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
             commonRenderer: CommonRenderer,

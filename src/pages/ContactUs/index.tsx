@@ -17,7 +17,14 @@ import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage } from 'src/constants/helpers';
+import {
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource
+} from 'src/constants/helpers';
 import ManageContactUs from './ManageContactUs';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -127,7 +134,6 @@ const ContactUs = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-
   const ActionsRenderer = (params) => (
     <Fragment>
       <Tooltip title="Clone">
@@ -233,7 +239,6 @@ const ContactUs = () => {
     fetchContactUsData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -267,8 +272,7 @@ const ContactUs = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-            </Grid>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>
@@ -303,8 +307,9 @@ const ContactUs = () => {
                     disabled={selectedRecords.length ? false : true}
                     aria-controls="action-menu"
                     className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'}
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -390,6 +395,8 @@ const ContactUs = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchContactUsData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.contactUs}
             />
           )
         ) : null}

@@ -30,8 +30,6 @@ import { CommonRenderer, DateTimeRenderer } from '../../components/AgGridCompone
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import BoxWithBorder from '../../components/BoxWithBorder';
-import ProductHierarchy from '../Product/BOM';
 import { FaDiceOne, FaWpforms } from 'react-icons/fa';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiFoodMenu } from 'react-icons/bi';
@@ -220,7 +218,7 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { ids: [id] });
       if (data.totalUtilization) {
-        data.totalUtilization = moment.duration(data.totalUtilization).hours();
+        data.totalUtilization = Math.floor(moment.duration(data.totalUtilization).asHours());
         if (data.totalUtilization) {
           data.totalUtilization = `${data.totalUtilization} hours`;
         }
@@ -330,7 +328,7 @@ const SerializedAssetDetailsPage = () => {
 
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
-      .post(`${repairJob.api}/${repairJobId}/assets`, { ids: [id] })
+      .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: productInventoryData.status }] })
       .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -341,7 +339,10 @@ const SerializedAssetDetailsPage = () => {
     setUpdateLoading(true);
     axiosInstance()
       .put(`${serializedAsset.api}/update-status`, {
-        assets: [productInventoryData._id],
+        assets: [{
+          _id: productInventoryData._id,
+          currentStatus: productInventoryData?.status
+        }],
         status: obj?.status,
         comment: obj?.reason ? obj?.reason : '',
         reference: { _id: productInventoryData._id, type: INVENTORY_HISTORY_TYPE.serializedAssets }

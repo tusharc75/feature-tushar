@@ -263,29 +263,9 @@ const AssignProductDialog = ({
           setAssigning(false);
           toastConfig.setToastConfig(err);
         });
-    } else if (reference === 'workOrder') {
-      let tempData = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((d) => {
-        return {
-          product: d.id,
-          qty: d.qty
-        };
-      });
-      axiosInstance()
-        .post(`${workOrder.api}/${productId}/consumable`, tempData)
-        .then(({ data }) => {
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-    else {
+    } else {
       onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+      setAssigning(false);
     }
   };
 

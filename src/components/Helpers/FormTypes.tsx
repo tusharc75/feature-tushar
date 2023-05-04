@@ -45,7 +45,8 @@ import {
   dateFormatForInputControl,
   getUniqueCurrencies,
   documentUploadSupportExtensions,
-  formatAmountWithCurrency
+  formatAmountWithCurrency,
+  sidebarResource
 } from '../../constants/helpers';
 import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
@@ -261,8 +262,10 @@ const FormTypes = (props) => {
     handleRemoveField,
     showErrorMessage = false,
     selectedCurrencyCode = null,
+    allFields = [],
     ...rest
   } = props;
+
 
   const [image, setImage] = React.useState<any>("");
   const [imageFileName, setImageFileName] = React.useState<any>("");
@@ -879,7 +882,9 @@ const FormTypes = (props) => {
         }}
       />
     </InfoLabel>
-  ) : type === 'dropDown' && lookup && ["Well Master"].includes(fieldData?.lookupResource) ? (
+  ) : (type === 'dropDown' || type === 'multiSelect') &&
+    lookup && [sidebarResource.wellMaster, sidebarResource.wellNumber, sidebarResource.warehouse, sidebarResource.storageLocation
+      , sidebarResource.competencyType, sidebarResource.competencies].includes(fieldData?.lookupResource) ? (
     <Dropdown
       InfoLabel={InfoLabel}
       fieldData={fieldData}
@@ -903,7 +908,9 @@ const FormTypes = (props) => {
       optionSaveDialog={optionSaveDialog}
       setOptionSaveDialog={setOptionSaveDialog}
       AddOptionDialog={AddOptionDialog}
-      setFieldValue={setFieldValue} />
+      setFieldValue={setFieldValue}
+      allFields={allFields}
+    />
   ) : type === 'dropDown' || type === 'lookup' || (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse)
     || (type === 'formula' && fieldData && fieldData.isDropdown) ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip}>
@@ -1417,7 +1424,8 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(name, e.target.value === "" ? "" : parseFloat(e.target.value));
+              handleChange(name, e.target.value === "" ? "" :
+                parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
             }
         }
         InputProps={{

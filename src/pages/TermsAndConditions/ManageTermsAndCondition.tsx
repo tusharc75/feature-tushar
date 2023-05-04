@@ -2,8 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
-import { TextField as TextFieldFormik } from "formik-material-ui";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 import { object, string } from "yup";
@@ -97,7 +96,7 @@ const TermsAndCondition = ({
   };
   const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(true)
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  
+
   useEffect(() => {
     if (editRecord && editRecord?._id) {
       let tacName = editRecord.TACName
@@ -249,9 +248,8 @@ const TermsAndCondition = ({
                     <Box padding={1}>
                       <Grid container spacing={3}>
                         <Grid item xs={12}>
-                          <Field
+                          <TextField
                             disabled={!hasPermissionToUpdate}
-                            component={TextFieldFormik}
                             fullWidth
                             margin="dense"
                             type="text"
@@ -266,6 +264,8 @@ const TermsAndCondition = ({
                                 e.target.value.trimStart()
                               )
                             }
+                            error={touched["TACName"] && Boolean(errors["TACName"])}
+                            helperText={touched["TACName"] && errors["TACName"]}
                           />
                           <Grid container spacing={1}>
                             <Grid item xs={12} sm={3}>
@@ -424,7 +424,7 @@ const TermsAndCondition = ({
               {
                 showConfirmDialog ?
                   <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
+                    close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false)

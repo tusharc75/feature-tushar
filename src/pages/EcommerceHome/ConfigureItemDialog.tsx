@@ -88,10 +88,10 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
     if (!values?.kpi && ['productList'].includes(values?.type)) {
       errors['kpi'] = 'KPI is required';
     }
-    if (!values?.multiImageUpload && !values?.multiImageUpload?.length && ['imageSlider'].includes(values?.type)) {
+    if (!values?.images && !values?.images?.length && ['imageSlider'].includes(values?.type)) {
       errors['multiImageUpload'] = 'Images are required';
     }
-    if (!values?.imageUpload && !values?.imageUpload?.length && ['image'].includes(values?.type)) {
+    if (!values?.image && !values?.image?.length && ['image'].includes(values?.type)) {
       errors['imageUpload'] = 'Image is required';
     }
 

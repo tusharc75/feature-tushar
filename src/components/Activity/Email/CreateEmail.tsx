@@ -6,7 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import { Formik, Form } from 'formik';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
+import DateUtils from '@date-io/date-fns';
 import TextField from '@material-ui/core/TextField';
 import { object, string, array } from 'yup';
 import { GetEmailDetail, CreateNewEmail, UpdateEmail } from '../../../axios/activity';
@@ -40,6 +40,7 @@ import { useData } from '../../../StateProvider/Provider';
 import TinyMce from '../../../components/TinyMCE';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { values } from 'lodash';
+import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 
 // const emailSchemaHelper = array()
 //   .transform(function (value, originalValue) {
@@ -101,6 +102,7 @@ export const CreateEmail = ({
   const {
     state: { user }
   }: any = useData();
+
   const isESign = user?.user?.brandQuoteDigitalSignature;
   const toastConfig = useContext(CustomToastContext);
   const { instance, accounts } = useMsal();
@@ -230,7 +232,7 @@ export const CreateEmail = ({
             toastConfig.setToastConfig(err);
           });
       }
-    } catch (e) { }
+    } catch (e) {}
   };
 
   const handleSendQuoteEmail = async (values) => {
@@ -336,126 +338,37 @@ export const CreateEmail = ({
     setQuoteBuilderOtherAttachments(quoteBuilderOtherAttachments.filter((o) => o?.name !== name));
   };
 
-  const handleDownloadFile = (file) => {
-    const linkSource = `data:${file.contentType};base64,${file.base64}`;
-    const link = document.createElement('a');
-    link.href = linkSource;
-    link.setAttribute('download', `${file.name}`);
-    document.body.appendChild(link);
-    link.click();
-  };
-
-  const getFileIconSrc = (file) => {
-    let extension = isQuoteBuilder ? file : file.substring(file.lastIndexOf('.')).toLowerCase();
-    let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
-    if (data && data?.source) return data.source;
-  };
-
   const classes = useStyles();
 
   const renderQuotesOtherFileThumbnails = (
-    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
+    <>
       {quoteBuilderOtherAttachments && quoteBuilderOtherAttachments.length > 0 ? (
         <>
-          {quoteBuilderOtherAttachments.map((attachment, i) => {
-            return (
-              <>
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
-                  <Paper className={emailStyles.fileContainer}>
-                    <img src={getFileIconSrc(attachment?.extension)} className={emailStyles.file} alt="attchment" />
-                    <Typography noWrap variant="body2">
-                      {attachment && attachment?.name ? attachment?.name : 'Quotation'}
-                    </Typography>
-                    <div className={emailStyles.fileOverlay}>
-                      <Typography variant="subtitle2">{attachment && attachment?.name ? attachment?.name : 'Quotation'}</Typography>
-                      <div className={emailStyles.actionButton}>
-                        <IconButton>
-                          <GetAppIcon onClick={() => handleDownloadFile(attachment)} />
-                        </IconButton>
-                        <IconButton className={emailStyles.text}>
-                          <DeleteIcon className={emailStyles.deleteIcon} onClick={() => handleDeleteQuoteBuilderOtherAttachment(attachment?.name)} />
-                        </IconButton>
-                      </div>
-                    </div>
-                  </Paper>
-                </Grid>
-              </>
-            );
-          })}
+          <AttachmentThumbnail
+            attachments={quoteBuilderOtherAttachments}
+            handleDeleteAttachment={handleDeleteQuoteBuilderOtherAttachment}
+            canEdit={true}
+          />
         </>
       ) : null}
-    </Grid>
+    </>
   );
 
   const renderQuotesFileThumbnails = (
-    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
+    <>
       {stateQuoteBuilderAttachments && stateQuoteBuilderAttachments.length > 0 ? (
         <>
-          {stateQuoteBuilderAttachments.map((attachment, i) => {
-            return (
-              <>
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
-                  <Paper className={emailStyles.fileContainer}>
-                    <img src={getFileIconSrc(attachment?.contentType)} className={emailStyles.file} alt="attchment" />
-                    <Typography noWrap variant="body2">
-                      {attachment && attachment?.name ? attachment?.name : 'Quotation'}
-                    </Typography>
-                    <div className={emailStyles.fileOverlay}>
-                      <Typography variant="subtitle2">{attachment && attachment?.name ? attachment?.name : 'Quotation'}</Typography>
-                      <div className={emailStyles.actionButton}>
-                        <IconButton>
-                          <GetAppIcon onClick={() => handleDownloadFile(attachment)} />
-                        </IconButton>
-                        <IconButton className={emailStyles.text}>
-                          <DeleteIcon className={emailStyles.deleteIcon} onClick={() => handleDeleteQuoteBuilderAttachment(attachment)} />
-                        </IconButton>
-                      </div>
-                    </div>
-                  </Paper>
-                </Grid>
-              </>
-            );
-          })}
+          <AttachmentThumbnail
+            attachments={stateQuoteBuilderAttachments}
+            handleDeleteAttachment={handleDeleteQuoteBuilderAttachment}
+            canEdit={true}
+          />
         </>
       ) : null}
-    </Grid>
+    </>
   );
 
-  const renderFileThumbnails = (
-    <Grid container spacing={1} className={emailStyles.createEmailContainer}>
-      {otherAttachments && otherAttachments.length > 0 ? (
-        <>
-          {otherAttachments.map((attachment, i) => {
-            return (
-              <>
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
-                  <Paper className={emailStyles.fileContainer}>
-                    <img src={getFileIconSrc(attachment)} className={emailStyles.file} alt="attchment" />
-                    <Typography noWrap variant="body2">
-                      {attachment ? attachment.substring(attachment.lastIndexOf('/') + 1) : 'attachment'}
-                    </Typography>
-                    <div className={emailStyles.fileOverlay}>
-                      <Typography variant="subtitle2">{attachment ? attachment.substring(attachment.lastIndexOf('/') + 1) : 'attachment'}</Typography>
-                      <div className={emailStyles.actionButton}>
-                        <IconButton className={emailStyles.text}>
-                          <a href={`${attachment} `} download={true}>
-                            <GoArrowDown color="white" size={21} />
-                          </a>
-                        </IconButton>
-                        <IconButton className={emailStyles.text}>
-                          <DeleteIcon className={emailStyles.deleteIcon} onClick={() => handleDeleteAttachment(attachment)} />
-                        </IconButton>
-                      </div>
-                    </div>
-                  </Paper>
-                </Grid>
-              </>
-            );
-          })}
-        </>
-      ) : null}
-    </Grid>
-  );
+  const renderFileThumbnails = <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={true} />;
 
   const onUploadFile = (file) => {
     if (checkImageUrl(file)) {
@@ -520,8 +433,7 @@ export const CreateEmail = ({
               <>
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                    {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
-                    <MuiPickersUtilsProvider utils={MomentUtils}>
+                    <MuiPickersUtilsProvider utils={DateUtils}>
                       <Box padding={1}>
                         {emailId ? (
                           <Fragment>

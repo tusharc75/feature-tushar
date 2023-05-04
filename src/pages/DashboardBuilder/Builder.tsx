@@ -244,6 +244,17 @@ const Builder = (props: Props) => {
               }
               label="Exports"
             />
+            {(formValues.chartType === 'Bar' && formValues.kpi.hasOwnProperty('stack')) && 
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formValues.stack}
+                    onChange={(e) => handleChange('stack', e.target.checked)}
+                  />
+                }
+                label="Stack"
+              />
+            }
           </FormGroup>
         </Box>
 

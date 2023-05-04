@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Grid, Box, Button, Tab, Tabs, Menu, MenuItem } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
@@ -10,13 +10,12 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { productionOrder, sidebarResource, ACTIVITY_RESOURCE, PRODUCTION_ORDER_STATUS } from 'src/constants/helpers';
+import { productionOrder, productionOrderSteps, sidebarResource, ACTIVITY_RESOURCE, PRODUCTION_ORDER_STATUS } from 'src/constants/helpers';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import TabPanel from 'src/components/TabPanel';
-import HideWhenOffline from 'src/components/HideWhenOffline';
-import Steps from '../RentalManagement/Steps';
+import Steps2, { getIndex } from 'src/components/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -26,6 +25,8 @@ import { GrStatusInfo } from 'react-icons/gr';
 import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import Process from './WorkOrder';
+import WorkOrder from './WorkOrder';
 
 function a11yProps(index: any) {
   return {
@@ -35,7 +36,6 @@ function a11yProps(index: any) {
 }
 
 const ProductionOrderDetails = () => {
-  
   const renderedFrom = camelCase(routes?.productionOrder.title);
   const toastConfig = useContext(CustomToastContext);
 
@@ -58,10 +58,14 @@ const ProductionOrderDetails = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
-  const [productionOrderProcessSteps, setProductionOrderProcessSteps] = useState(['Add']);
+  const [productionOrderProcessSteps, setProductionOrderProcessSteps] = useState(productionOrderSteps);
   const [anchorEl, setAnchorEl] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+
+  const productionOrderProcessStepsNames = React.useMemo(() => {
+    return productionOrderSteps.map((item) => item.name);
+  }, [productionOrderSteps]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -94,8 +98,8 @@ const ProductionOrderDetails = () => {
   }, []);
 
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= productionOrderProcessSteps.length) {
-      updateProcessStatus(productionOrderProcessSteps[currentStep]);
+    if (currentStep !== null && currentStep >= 0 && currentStep <= productionOrderProcessStepsNames.length) {
+      updateProcessStatus(productionOrderProcessStepsNames[currentStep]);
     }
   }, [currentStep]);
 
@@ -120,9 +124,7 @@ const ProductionOrderDetails = () => {
     axiosInstance()
       .get(`${routes.productionOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        setCurrentStep(
-          productionOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? productionOrderProcessSteps.indexOf(data?.processStatus) : 0
-        );
+        setCurrentStep(getIndex(data?.processStatus, productionOrderProcessSteps));
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
@@ -312,7 +314,7 @@ const ProductionOrderDetails = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps
+          <Steps2
             isNextStep={false}
             nextStep={nextStep}
             steps={productionOrderProcessSteps}
@@ -321,8 +323,8 @@ const ProductionOrderDetails = () => {
             isStepEnded={[PRODUCTION_ORDER_STATUS.completed].includes(productionOrderData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
-          <ContentFullScreen title={productionOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {productionOrderProcessSteps[currentStep] === 'Add' && productionOrderData && (
+          <ContentFullScreen title={productionOrderProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            {productionOrderProcessStepsNames[currentStep] === 'Add' && productionOrderData && (
               <Material
                 productionOrderData={productionOrderData}
                 setNextStep={setNextStep}
@@ -330,6 +332,14 @@ const ProductionOrderDetails = () => {
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit && permissions?.productionOrder?.isUpdate ? true : false}
                 allowedToDelete={allowedToDelete}
+              />
+            )}
+             {productionOrderProcessStepsNames[currentStep] === 'Work Order' && productionOrderData && (
+              <WorkOrder
+                productionOrderData={productionOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-2`}
+                stepFullScreen={stepFullScreen}
               />
             )}
           </ContentFullScreen>

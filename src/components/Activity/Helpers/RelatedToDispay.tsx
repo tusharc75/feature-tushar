@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Chip, Box, Typography } from '@material-ui/core';
 import { purple } from '@material-ui/core/colors';
-import { resActivityColors, resActivityTextColors } from './utils';
+import { getResActivityColor } from './utils';
 import { useHistory } from 'react-router-dom';
 import routes from '../../Helpers/Routes';
 
@@ -23,17 +23,17 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export const RelatedToDispay = ({ relatedTo }) => {
+export const RelatedToDispay = ({ relatedTo, inline = false }) => {
   const classes = useStyles();
   const history = useHistory();
   const handleClick = (obj, resourceName) => {
     history.push(`${routes[resourceName].path}/detail/${obj?._id}`);
   };
   return (
-    <Box>
-      <Box mb={1}>
+    <Box style={{ display: inline ? 'flex' : 'block', flexWrap: 'wrap', alignItems: 'center' }}>
+      <Box mb={inline ? 0 : 1}>
         <Typography variant="body2" className={classes.boldFont}>
-          Related to
+          Related to {inline && ' : '}
         </Typography>
       </Box>
       {relatedTo &&
@@ -44,8 +44,8 @@ export const RelatedToDispay = ({ relatedTo }) => {
               label={`${routes[_element?.type]?.title + ' - ' + _element.name} `}
               size="medium"
               style={{
-                backgroundColor: resActivityColors[_element.type],
-                color: resActivityTextColors[_element.type]
+                backgroundColor: getResActivityColor(index).background,
+                color: getResActivityColor(index).color
               }}
               clickable={true}
               onClick={(e) => {

@@ -2,8 +2,7 @@ import React, { useState, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import { TextField as TextFieldFormik } from "formik-material-ui";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import { object, string } from "yup";
 import InputAdornment from '@material-ui/core/InputAdornment'
 import Dialog from '@material-ui/core/Dialog';
@@ -13,7 +12,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import axiosInstance from "../../../axios/axiosInstance";
 import CustomButton from "../../../components/Helpers/CustomButton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { IconButton } from "@material-ui/core";
+import { IconButton, TextField } from "@material-ui/core";
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { isMobile, isTablet } from "react-device-detect";
@@ -170,11 +169,8 @@ export default function ManageUpdateEmailAndPassword({
                 {({
                     values,
                     setFieldValue,
-                    setFieldError,
-                    setFieldTouched,
-                    submitForm,
+                    setErrors,
                     errors,
-                    setErrors
                 }) => (
                     <>
                         <CustomDialogContent>
@@ -186,9 +182,7 @@ export default function ManageUpdateEmailAndPassword({
                                                 isUpdatePassword ?
                                                     <>
                                                         <Grid style={{ display: "flex" }} item sm={10}>
-
-                                                            <Field
-                                                                component={TextFieldFormik}
+                                                            <TextField
                                                                 fullWidth
                                                                 margin="dense"
                                                                 type={visibity["oldPassword"] ? "string" : "password"}
@@ -201,12 +195,13 @@ export default function ManageUpdateEmailAndPassword({
                                                                 InputProps={{
                                                                     endAdornment: (<PasswordEndAdornment fieldName="oldPassword" />)
                                                                 }}
+                                                                error={Boolean(errors['oldPassword'])}
+                                                                helperText={errors['oldPassword']}
                                                             />
                                                         </Grid>
 
                                                         <Grid item sm={10}>
-                                                            <Field
-                                                                component={TextFieldFormik}
+                                                            <TextField
                                                                 fullWidth
                                                                 margin="dense"
                                                                 type={visibity["newPassword"] ? "string" : "password"}
@@ -219,11 +214,12 @@ export default function ManageUpdateEmailAndPassword({
                                                                 InputProps={{
                                                                     endAdornment: (<PasswordEndAdornment fieldName="newPassword" />)
                                                                 }}
+                                                                error={Boolean(errors['newPassword'])}
+                                                                helperText={errors['newPassword']}
                                                             />
                                                         </Grid>
                                                         <Grid item sm={10}>
-                                                            <Field
-                                                                component={TextFieldFormik}
+                                                            <TextField
                                                                 fullWidth
                                                                 margin="dense"
                                                                 type={visibity["confirmPassword"] ? "string" : "password"}
@@ -238,14 +234,15 @@ export default function ManageUpdateEmailAndPassword({
                                                                 InputProps={{
                                                                     endAdornment: (<PasswordEndAdornment fieldName="confirmPassword" />)
                                                                 }}
+                                                                error={Boolean(errors['confirmPassword'])}
+                                                                helperText={errors['confirmPassword']}
                                                             />
                                                         </Grid>
                                                     </>
                                                     : null}
                                             {
                                                 isUpdateEmail ? <Grid item sm={12}>
-                                                    <Field
-                                                        component={TextFieldFormik}
+                                                    <TextField
                                                         style={{ width: '400px' }}
                                                         fullWidth
                                                         margin="dense"
@@ -280,6 +277,7 @@ export default function ManageUpdateEmailAndPassword({
                                 onClick={() => {
                                     if (isUpdatePassword) {
                                         let errors = validateForm(values)
+                                        setErrors(errors)
                                         if (Object.keys(errors).length === 0) {
                                             handleSubmit(values)
                                         }

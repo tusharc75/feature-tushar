@@ -61,7 +61,6 @@ const MarketSegment = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -132,8 +131,6 @@ const MarketSegment = () => {
         setColumns([...columns]);
       });
   };
-
-
 
   const ActionsRenderer = (params) => (
     <Fragment>
@@ -401,8 +398,9 @@ const MarketSegment = () => {
                       onClick={openActions}
                       disabled={selectedRecords.length ? false : true}
                       aria-controls="action-menu"
+                      endIcon={<ExpandMore />}
                     >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      {isMobile && !isTablet ? '' : 'Actions'}
                     </Button>
                   )}
                   <Menu

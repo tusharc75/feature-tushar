@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import { makeStyles, Dialog, Typography, IconButton, Grid, Box, Button, Tooltip } from '@material-ui/core';
+import { makeStyles, Dialog, Typography, IconButton, Grid, Box, Button } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { BiTask } from 'react-icons/bi';
@@ -7,6 +7,7 @@ import { VscCalendar } from 'react-icons/vsc';
 import { BsBriefcase } from 'react-icons/bs';
 import { GoNote } from 'react-icons/go';
 import { HiOutlineMail } from 'react-icons/hi';
+import BiMailSend from 'react-icons/bi';
 
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import { AiOutlinePaperClip, AiOutlineHistory } from 'react-icons/ai';
@@ -33,6 +34,9 @@ import { useData } from './../../StateProvider/Provider';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CloseIcon from '@material-ui/icons/Close';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
+import MailIcon from '@material-ui/icons/Mail';
+import HtmlTooltip from '../CustomTooltipTitle';
+import { isEmpty } from 'lodash';
 
 const useStyles = makeStyles(() => ({
   activityBox: {
@@ -99,7 +103,7 @@ const Activity = (props) => {
   });
   const [showHistory, setShowHistory] = useState(false);
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, user }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -206,6 +210,15 @@ const Activity = (props) => {
     }
   };
 
+  const emailCopy = async (e, text) => {
+    e.stopPropagation();
+    await navigator.clipboard.writeText(text);
+    toastConfig.setToastConfig({
+      type: 'success',
+      message: 'Email copied to clipboard'
+    });
+  };
+
   return (
     <>
       <Box>
@@ -242,25 +255,33 @@ const Activity = (props) => {
                         <Grid item xs={4} container justify="flex-end" alignItems="center">
                           {data === 'Attachment' && (
                             <Box mr={1}>
-                              <Tooltip title={'Add Folder'}>
-                                <IconButton
-                                  size="small"
-                                  onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}
-                                  style={{ marginRight: '3px' }}
-                                >
-                                  {' '}
+                              <HtmlTooltip title={'Add Folder'}>
+                                <IconButton size="small" onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}>
                                   <CreateNewFolderIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
                                 </IconButton>
-                              </Tooltip>
+                              </HtmlTooltip>
+                            </Box>
+                          )}
+                          {data === 'Email' && user?.user?.brandPolicy?.inboundEmail && isEmpty(user?.user?.brandPolicy?.inboundEmail) && (
+                            <Box mr={1}>
+                              <HtmlTooltip title={`support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`}>
+                                <IconButton
+                                  size="small"
+                                  onClick={(e) => {
+                                    emailCopy(e, `support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`);
+                                  }}
+                                >
+                                  <MailIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+                                </IconButton>
+                              </HtmlTooltip>
                             </Box>
                           )}
                           <Box mr={1}>
-                            <Tooltip title={infoTitle[data]}>
+                            <HtmlTooltip title={infoTitle[data]}>
                               <InfoOutlinedIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
-                            </Tooltip>
+                            </HtmlTooltip>
                           </Box>
                           <IconButton size="small" onClick={(event) => handleCreateActivity(event, data)}>
-                            {' '}
                             <AddOutlinedIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
                           </IconButton>
                         </Grid>
@@ -284,7 +305,7 @@ const Activity = (props) => {
                   {type === 'Email' && data === 'Email' ? (
                     <Email relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
-                  {type === 'Attachment' && data === 'Attachment' ? (
+                  {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' ? (
                     <Attachments relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
                 </Box>

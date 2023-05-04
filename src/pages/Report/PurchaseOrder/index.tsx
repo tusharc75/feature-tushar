@@ -14,7 +14,15 @@ import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridCompone
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
-import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, productInventory, isObjectEmpty } from 'src/constants/helpers';
+import {
+  prepareDataForGrid,
+  gridLoadingTimeout,
+  downloadExcel,
+  primaryFields,
+  productInventory,
+  isObjectEmpty,
+  RESOURCE_LABEL
+} from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import MomentUtils from '@date-io/moment';
@@ -34,7 +42,7 @@ const Report = () => {
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
-    state: { permissions, selectedEntity }
+    state: { user, permissions, selectedEntity }
   } = useData();
   const { type } = useParams();
   const history = useHistory();
@@ -91,7 +99,9 @@ const Report = () => {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
-        POFields.filter((field) => ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field: any) => {
+        POFields.filter((field) =>
+          ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
+        ).forEach((field: any) => {
           if (field?.fieldData.fieldName === 'purchaseOrderNumber') {
             resourceFieldData.push(field);
             columns.push({
@@ -138,30 +148,32 @@ const Report = () => {
           }
         });
 
-        productFields.filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName)).forEach((field: any) => {
-          if (field?.fieldData.fieldName === 'productName') {
-            resourceFieldData.push({
-              ...field,
-              fieldData: { ...field.fieldData, fieldName: 'productId', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
-            });
-            columns.push({
-              field: 'productName',
-              headerName: field?.fieldData?.fieldLabel,
-              show: true,
-              disabled: false,
-              cellRenderer: 'productRenderer'
-            });
-          }
-          if (field?.fieldData.fieldName === 'productNumber') {
-            columns.push({
-              field: 'productNumber',
-              headerName: field?.fieldData?.fieldLabel,
-              show: true,
-              disabled: false,
-              cellRenderer: 'commonRenderer'
-            });
-          }
-        });
+        productFields
+          .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
+          .forEach((field: any) => {
+            if (field?.fieldData.fieldName === 'productName') {
+              resourceFieldData.push({
+                ...field,
+                fieldData: { ...field.fieldData, fieldName: 'productId', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
+              });
+              columns.push({
+                field: 'productName',
+                headerName: field?.fieldData?.fieldLabel,
+                show: true,
+                disabled: false,
+                cellRenderer: 'productRenderer'
+              });
+            }
+            if (field?.fieldData.fieldName === 'productNumber') {
+              columns.push({
+                field: 'productNumber',
+                headerName: field?.fieldData?.fieldLabel,
+                show: true,
+                disabled: false,
+                cellRenderer: 'commonRenderer'
+              });
+            }
+          });
 
         POProductFields.forEach((o) => {
           let currentColumn = getColumnData('Purchase Order Product', o?.fieldData, '');
@@ -180,13 +192,14 @@ const Report = () => {
             show: true,
             disabled: false,
             cellRenderer: 'dateTimeRenderer',
-            filter: false, sortable: false
+            filter: false,
+            sortable: false
           }
         ];
 
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
-          ...tempFrameworkComponent,
+          ...tempFrameworkComponent
         };
         setFrameWorkComponent({ ...tempFrameworkComponent, ...customFrameworkComponents });
       }
@@ -292,16 +305,9 @@ const Report = () => {
 
         columns?.forEach((e) => {
           if (
-            [
-              'productName',
-              'productDescription',
-              'productCategory',
-              'productCondition',
-              'totalQty',
-              'averagePrice',
-              'totalPrice',
-              'margin'
-            ].includes(e.field)
+            ['productName', 'productDescription', 'productCategory', 'productCondition', 'totalQty', 'averagePrice', 'totalPrice', 'margin'].includes(
+              e.field
+            )
           ) {
             e.show = true;
           } else {
@@ -331,6 +337,47 @@ const Report = () => {
             });
           }
         });
+
+        if (user?.user?.brandPolicy?.storageLocation && POFields?.length) {
+          let storageLocationOptions: any = [];
+          await axiosInstance()
+            .get('/sa-formbuilder/lookup?lookupResource=Storage Location')
+            .then(({ data: { data } }) => {
+              storageLocationOptions = data['Storage Location'];
+            });
+          resourceFieldData.push({
+            fieldData: {
+              _id: '63f71ce5b17c69a1ab7e4c06',
+              fieldLabel: 'Storage Location',
+              type: 'dropDown',
+              option: [...storageLocationOptions],
+              required: false,
+              isTooltip: false,
+              tooltipMessage: '',
+              editAble: true,
+              deletAble: true,
+              order: 5,
+              hiddenField: false,
+              isDefaultValue: false,
+              disableOnEdit: false,
+              addManualOptionInExcel: false,
+              addAdditionalOption: false,
+              lookup: true,
+              lookupResource: RESOURCE_LABEL.storageLocation,
+              isDropdown: false,
+              isWarningTooltip: false,
+              warningTooltipMessage: '',
+              defaultValue: '',
+              fieldName: 'storageLocation',
+              sectionName: 'PO Information',
+              resource: RESOURCE_LABEL.purchaseOrder,
+              brand: user.brand
+            },
+            isCreate: true,
+            isRead: true,
+            isUpdate: true
+          });
+        }
 
         productFields
           .filter((field) => ['productName'].includes(field?.fieldData.fieldName))
@@ -374,7 +421,15 @@ const Report = () => {
           },
           { field: 'price', headerName: 'Price', show: true, filter: false, cellRenderer: 'commonRenderer' },
           { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
-          { field: 'warehouse', headerName: 'Plant', show: true, cellRenderer: 'commonRenderer' },
+          { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'commonRenderer' },
+          ...(user?.user?.brandPolicy?.storageLocation ? [
+            {
+              field: 'storageLocation',
+              headerName: 'Storage Location',
+              show: true,
+              cellRenderer: 'commonRenderer'
+            }
+          ] : []),
           { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
           { field: 'serialNumber', headerName: 'Serial Number', filter: false, show: true, cellRenderer: 'serialNumberRenderer' },
           { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'commonRenderer' }
@@ -653,15 +708,14 @@ const Report = () => {
       .then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
           if (resourceCamelCase === 'purchaseOrderDetails') {
-            if (u?.productLedger?.type === "credit") {
-              u.actualReceived = u?.productLedger?.qty
-              u.rejectQuantity = 0
+            if (u?.productLedger?.type === 'credit') {
+              u.actualReceived = u?.productLedger?.qty;
+              u.rejectQuantity = 0;
+            } else {
+              u.rejectQuantity = u?.productLedger?.qty;
+              u.actualReceived = 0;
             }
-            else {
-              u.rejectQuantity = u?.productLedger?.qty
-              u.actualReceived = 0
-            }
-            u.date = u?.productLedger?.date
+            u.date = u?.productLedger?.date;
           }
           let finalObject: any = prepareDataForGrid(u);
           if (finalObject?.listPrice) {
@@ -729,12 +783,12 @@ const Report = () => {
         return 'product.optionLabel';
       case 'warehouse':
         return 'warehouse.optionLabel';
-      case "projectManager":
-        return "projectManager.optionLabel";
-      case "rentalJob":
-        return "rentalJob.optionLabel";
-      case "pDFTemplate":
-        return "pDFTemplate.optionLabel";
+      case 'projectManager':
+        return 'projectManager.optionLabel';
+      case 'rentalJob':
+        return 'rentalJob.optionLabel';
+      case 'pDFTemplate':
+        return 'pDFTemplate.optionLabel';
       default:
         return field;
     }
@@ -805,8 +859,6 @@ const Report = () => {
           }
         });
       }
-
-
     }
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {

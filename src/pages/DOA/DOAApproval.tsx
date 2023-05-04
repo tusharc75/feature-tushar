@@ -128,7 +128,7 @@ const DOAApproval = () => {
           });
       } else {
         axiosInstance()
-          .post("/doa-request/DOAResponse/" + id, { response: "Accepted" })
+          .post("/doa-request/doaResponse/" + id, { response: "Accepted" })
           .then(({ data }) => {
             history.push("/doa-request");
           })
@@ -139,7 +139,7 @@ const DOAApproval = () => {
       }
     } else {
       axiosInstance()
-        .post("/doa-request/DOAResponse/" + id, { response: "Rejected", comment: comment })
+        .post("/doa-request/doaResponse/" + id, { response: "Rejected", comment: comment })
         .then(({ data }) => {
           history.push("/doa-request");
         })

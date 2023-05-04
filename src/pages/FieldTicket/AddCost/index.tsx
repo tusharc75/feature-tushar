@@ -8,7 +8,7 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { CHILD_RESOURCE, removeLocalStorage } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AddCostDialog from './AddCostDialog';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
@@ -18,17 +18,18 @@ import { isMobile, isTablet } from 'react-device-detect';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
-import EditIcon from "@material-ui/icons/Edit";
+import EditIcon from '@material-ui/icons/Edit';
 
 const AddCost = ({ id, fieldTicketData }) => {
-
   const renderedFrom = camelCase(routes?.fieldTicket.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const { state: { permissions } }: any = useData();
+  const {
+    state: { permissions }
+  }: any = useData();
   const [rowsData, setRowsData] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -45,7 +46,7 @@ const AddCost = ({ id, fieldTicketData }) => {
       .get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`)
       .then(({ data: { data } }) => {
         data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || 'USD');
-        const newColumns = genrateCustomTableColumns(data, fieldTicketData?.currency || 'USD', renderedFrom);
+        const newColumns = generateCustomTableColumns(data, fieldTicketData?.currency || 'USD', renderedFrom);
         let columns: any = [
           {
             accessor: 'index',
@@ -100,7 +101,7 @@ const AddCost = ({ id, fieldTicketData }) => {
     axiosInstance()
       .get(`/field-ticket/${id}/cost`)
       .then(({ data: { data } }) => {
-        let rows = []
+        let rows = [];
         if (data) {
           rows = data?.map((i, index) => {
             return { index: index + 1, ...i };
@@ -148,7 +149,8 @@ const AddCost = ({ id, fieldTicketData }) => {
   };
 
   const handleViewPdf = (download) => {
-    axiosInstance().get(`/field-ticket/${fieldTicketData._id}/pdf`)
+    axiosInstance()
+      .get(`/field-ticket/${fieldTicketData._id}/pdf`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -203,7 +205,7 @@ const AddCost = ({ id, fieldTicketData }) => {
             size="small"
             startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
             onClick={(e) => {
-              handleViewPdf(false)
+              handleViewPdf(false);
             }}
           >
             Preview
@@ -217,7 +219,7 @@ const AddCost = ({ id, fieldTicketData }) => {
             size="small"
             startIcon={<IoMdDownload />}
             onClick={(e) => {
-              handleViewPdf(true)
+              handleViewPdf(true);
             }}
           >
             Download
@@ -230,8 +232,9 @@ const AddCost = ({ id, fieldTicketData }) => {
             size="small"
             onClick={openActions}
             aria-controls="action-menu"
+            endIcon={<ExpandMore />}
           >
-            {'Actions'} <ExpandMore />
+            {'Actions'}
           </Button>
           <Menu
             anchorEl={anchorEl}

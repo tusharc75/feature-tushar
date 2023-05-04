@@ -35,18 +35,22 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { camelCase } from 'lodash'
 
 let salesOrderTimeout;
-const SalesOrderType = [
-  {
-    key: 'All Sales Order',
-    value: 1
-  },
-  {
-    key: 'My Sales Order',
-    value: 2
-  }
-];
+
 
 const SalesOrder = () => {
+
+  const SalesOrderType = [
+    {
+      key: `All ${routes?.salesOrder.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes?.salesOrder.title}`,
+      value: 2
+    }
+  ];
+
+
   const renderedFrom = camelCase(routes?.salesOrder.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -231,9 +235,12 @@ const SalesOrder = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterSalesOrder=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterSalesOrder=${selectedType}`;
+      deepFilter = `?`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -526,6 +533,8 @@ const SalesOrder = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchSalesOrder}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.salesOrder}
             />
           ) : null}
         {showDeleteWarningConfirmBox ? (
@@ -547,7 +556,7 @@ const SalesOrder = () => {
             onOk={handleDeleteSalesOrder}
           />
         ) : null}
-        {singleSalesOrderDelete.show ? (
+        {singleSalesOrderDelete.show && (
           <ConfirmationDialog
             open={singleSalesOrderDelete.show}
             message={`Are you sure you want to delete Sales Order: ${singleSalesOrderDelete.salesOrderName}?`}
@@ -560,7 +569,7 @@ const SalesOrder = () => {
             }
             onOk={handleSingleDeleteSalesOrder}
           />
-        ) : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+        )}
       </CustomContainer>
       {showManageSalesOrderDialog.open && (
         <ManageSalesOrderDialog

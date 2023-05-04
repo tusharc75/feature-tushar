@@ -1,388 +1,216 @@
-import { useEffect, useState, useContext, Fragment } from 'react';
-import { Typography, List, ListItem, ListItemText } from '@material-ui/core';
-import { Link, useHistory } from 'react-router-dom';
-import { useData } from '../../StateProvider/Provider';
-import { kebabCase } from 'lodash';
-import styles from './Dashboard.module.scss';
-import './style.scss';
-import { SVGImages, IconConst } from '../../assets/dashboard_images';
-import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
-import routes from 'src/components/Helpers/Routes';
-import { withStyles } from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
-import { HiArrowRight } from 'react-icons/hi';
-import { groupByKey, assignIconAndText } from './helpers';
-import Chart from './Chart';
+import { Box, Grid, Typography } from '@material-ui/core';
+import React from 'react';
+import DateFnsUtils from '@date-io/date-fns';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import moment from 'moment';
 
-function Dashboard() {
-  const history = useHistory();
-  const { dispatch }: any = useData();
+import axiosInstance from 'src/axios/axiosInstance';
+import ChartTypes from './ChartTypes';
+import countriesData from 'src/constants/Country.json';
+import GlobalFilter from './GlobalFilter';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import Loader from 'src/components/Loader';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import placeholder_img from 'src/assets/PerformanceTuning.png';
+import { useData } from 'src/StateProvider/Provider';
+import { ChartDataType } from './ChartTypes';
+import AssetStats from '../KpiDashboard/AssetDashboard/AssetStats';
+import FullScreenChart from './FullScreenChart';
+import { periodOption } from '../DashboardBuilder/builderHelpers';
+
+const DashbaordNew = () => {
   const {
-    state: { user, selectedEntity }
+    state: { user, userLoading, selectedEntity }
   } = useData();
-  const [sections, setSections] = useState([]);
-  const [search, setSearch] = useState('');
-  const [filteredData, setFilteredData] = useState([]);
-  const [objBySectionName, setObjBySectionName] = useState(null);
+  const { setToastConfig } = React.useContext(CustomToastContext);
+  const [filtersOptions, setFilterOptions] = React.useState(null);
+  const [dashboardLoading, setDashboardLoading] = React.useState(false);
+  const [dashboardList, setDashboardList] = React.useState([]);
+  const [charts, setCharts] = React.useState([]);
+  const [openFullScreenChart, setOpenFullScreenChart] = React.useState(false);
+  const [selectedChart, setSelectedChart] = React.useState(null);
+  const [globalFilters, setGlobalFilters] = React.useState(() => {
+    const selectedDashboard = localStorage.getItem('selectedDashboard') ? localStorage.getItem('selectedDashboard') : '';
 
-  useEffect(() => {
-    let arr = [];
-    let allData = [];
-    // let allData = user && [...user?.role.sideBar];
-    let entityData;
-    if (user?.entity && user.entity.length) {
-      entityData = user.entity.find((curEntity) => curEntity._id === selectedEntity);
-    }
-    if (entityData?.resource) {
-      allData = entityData.resource;
-    }
-    allData?.forEach((u) => {
-      u['resourceLabel'] = u?.homePageLabel || u?.resourceLabel || u?.name;
-      u['sectionNameLowerCase'] = u.sectionName?.toLowerCase();
-      u['resourceLabelLowerCase'] = u?.homePageLabel?.toLowerCase() || u?.resourceLabel?.toLowerCase() || u?.name?.toLowerCase();
-      !arr.includes(u.sectionName) && arr.push(u.sectionName);
-    });
-
-    const groupedData = groupByKey(allData, (section) => section.sectionName);
-    setObjBySectionName(groupedData);
-    const data = assignIconAndText(groupedData);
-    setSections(data);
-  }, [user, selectedEntity]);
-
-  const handleRoutes = (item) => {
-    switch (item.name) {
-      case 'Pos':
-        return routes.pos.path;
-      default:
-        return `/${kebabCase(item.name)}`;
-    }
-  };
-
-  // SEARCH FUNCTION
-  const handleSearch = (value) => {
-    const searchedValueInLowerCase = value?.toLowerCase();
-    const filteredItems = [];
-    sections.forEach((section) => {
-      const items = section.items.filter(
-        (ff) => ff.sectionNameLowerCase.indexOf(searchedValueInLowerCase) > -1 || ff.resourceLabelLowerCase.indexOf(searchedValueInLowerCase) > -1
-      );
-      if (items.length > 0) {
-        filteredItems.push({ ...section, items: items });
+    return {
+      dashboardType: selectedDashboard,
+      currency: user?.user?.currency,
+      between: {
+        from: new Date(moment().subtract(1, 'year').calendar()),
+        to: new Date()
       }
-    });
-    setFilteredData(filteredItems);
+    };
+  });
+  const [selectedDashboardId, setSelectedDashboardId] = React.useState(null);
+
+  React.useEffect(() => {
+    const selectedDashboard = dashboardList.find((d) => d.name === globalFilters?.dashboardType);
+    setSelectedDashboardId(selectedDashboard?._id);
+    if (selectedDashboard) {
+      setCharts(selectedDashboard?.charts || []);
+    }
+  }, [globalFilters?.dashboardType]);
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product Category,Market Segment,Customer Account,Product,User,Warehouse`);
+        if (!data) return;
+
+       const res = await axiosInstance().get('/field?resource=Project Sales') ; 
+       let businessUnitOptions = [];
+       let serviceFamilyOptions = [];
+       res?.data?.data.forEach((e: any) => {
+         if (e?.fieldData?.fieldName === 'businessUnit') {
+          businessUnitOptions = e.fieldData.option;
+         }
+         else if (e?.fieldData?.fieldName === 'serviceFamily') {
+          serviceFamilyOptions = e.fieldData.option;
+         }
+       });
+       
+        Object.keys(data).forEach((_d) => {
+          setFilterOptions({
+            productDescription: data['Product'],
+            productCategory: data['Product Category'],
+            customerAccount: data['Customer Account'].filter((c: any) =>
+              Array.isArray(c?.entity) ? c?.entity?.findIndex((entity: any) => entity === selectedEntity) !== -1 : c?.entity === selectedEntity
+            ),
+            salesRep: data['User'].filter((u: any) => u?.entities?.findIndex((d: any) => d.entity === selectedEntity) !== -1),
+            marketSegment: data['Market Segment'].filter((d) => !d.parentMarketSegment),
+            subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
+            warehouse: data['Warehouse'],
+            countryBillTo: countriesData,
+            countrySellTo: countriesData,
+            country: countriesData,
+            period: periodOption,
+            businessUnit: businessUnitOptions, 
+            serviceFamily: serviceFamilyOptions
+          });
+        });
+      } catch (error) {
+        alert(JSON.stringify(error));
+      }
+    })();
+    fetchDashboards();
+  }, []);
+
+  const fetchDashboards = () => {
+    setDashboardLoading(true);
+    axiosInstance()
+      .get('/dashboard-master')
+      .then(({ data: { data } }) => {
+        if (data?.length) {
+          const savedSelected = localStorage.getItem('selectedDashboard');
+          if (!savedSelected) {
+            setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name }));
+            setCharts(data[0]?.charts);
+            setSelectedDashboardId(data[0]?._id);
+          } else {
+            setGlobalFilters((prevState) => ({ ...prevState, dashboardType: savedSelected }));
+            const selectedDashboard = data.find((d) => d.name === savedSelected);
+            if (selectedDashboard) {
+              setCharts(selectedDashboard?.charts || []);
+              setSelectedDashboardId(selectedDashboard?._id);
+            }
+          }
+          setDashboardList(data);
+        }
+        setDashboardLoading(false);
+      })
+      .catch((err) => {
+        setToastConfig(err);
+        setDashboardLoading(false);
+      });
   };
 
   return (
-    <Fragment>
-      <div className={` ${styles.contentWrapper}`}>
-        <div className={styles.main}>
-          <div className={styles.leftContainer}>
-            {search.trim() !== '' ? (
-              <SearchResult filteredData={filteredData} history={history} handleRoutes={handleRoutes} />
-            ) : (
-              <DisplayCardGrid sections={sections} handleRoutes={handleRoutes} />
-            )}
-            <Chart />
-          </div>
-          <div className={styles.rightContainer}>
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" />
-          </div>
-          {/* <div className={styles.hero_container}>
-            <h1 className={styles.hero_heading}>Raising resiliency in a rapidly transforming business environment</h1>
-            <p className={styles.hero_paragraph}>Simplify and accelerate your B2B transactions.</p>
-            <img src={SVGImages(IconConst.HERO)} alt="Dashboard Hero Image" className={styles.crm_hero_image} />
-          </div>
-          <div className="card_container">
-            <div className={`${styles.search_section}`}>
-              <div className={`${styles.search_input}`}>
-                <input
-                  type="text"
-                  value={search}
-                  placeholder="Search"
-                  onChange={(e) => {
-                    const searchedValue = e.target.value;
-                    searchedValue.length > 0 ? setShowCloseButton(true) : setShowCloseButton(false);
-                    setSearch(searchedValue);
-                    handleSearch();
-                  }}
-                />
-                <div className={styles.searchIcon}>
-                  <Search color="disabled" />
-                </div>
-                {showCloseButton && (
-                  <div className={styles.clear_icon}>
-                    <ClearIcon onClick={() => clearSearch()} />
-                  </div>
-                )}
-              </div>
-            </div>
-            {search.trim() === '' ? (
-              <div className="card_grid dashboard_homepage">
-                {sections.map((section) => {
-                  return section.items.length > 0 ? (
-                    <div key={section.head} className="single_card">
-                      <div className="card_content">
-                        <div className="card_front">
-                          <div className="card_front_content">
-                            <p className="card_logo">{section.icon}</p>
-                            <h2 className="card_head">{section.head}</h2>
-                            <p className="card_description">{section.text}</p>
-                            <Button className="view_all_button">
-                              View all
-                              <MdNavigateNext />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="card_back">
-                          <div className="card_back_content">
-                            {section.items
-                              .filter((item) => !item?.isHidden)
-                              .map((item) => (
-                                <div key={item.name}>
-                                  <Box marginY={1} component="div" className={`list_component`}>
-                                    <Typography variant="subtitle2" className={styles.hover_list_box}>
-                                      <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
-                                    </Typography>
-                                  </Box>
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null;
-                })}
-              </div>
-            ) : (
-              <div className={`${styles.filtered_data}`}>
-                {filteredData.length !== 0 ? (
-                  filteredData.map((section) => {
-                    return (
-                      <List key={section.head} subheader={<li className={`${styles.list_header} mb-2`}>{section.head}</li>}>
-                        {section.items.map((item) => {
-                          return (
-                            <>
-                              <ListItem
-                                key={item.name}
-                                button
-                                onClick={() => {
-                                  history.push(handleRoutes(item));
-                                }}
-                              >
-                                <ListItemText primary={item.resourceLabel} />
-                              </ListItem>
-                            </>
-                          );
-                        })}
-                      </List>
-                    );
-                  })
-                ) : (
-                  <div className={styles.no_result_container}>
-                    <SentimentVeryDissatisfiedIcon />
-                    <p className={styles.no_result}>Sorry, we couldn't find any result</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div> */}
+    <div className="main-container-v1">
+      <MuiPickersUtilsProvider utils={DateFnsUtils}>
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[{ title: 'Dashboards' }]} />
         </div>
-      </div>
-    </Fragment>
-  );
-}
-
-export default Dashboard;
-
-const SearchResult = ({ filteredData, history, handleRoutes }) => {
-  return (
-    <div className={styles.searchResult}>
-      <div className={`${styles.filtered_data} `} style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll' }}>
-        {filteredData.length !== 0 ? (
-          filteredData.map((section) => {
-            return (
-              <List key={section.head} subheader={<li className={`${styles.list_header} mb-2`}>{section.head}</li>}>
-                {section.items.map((item) => {
-                  return (
-                    <>
-                      <ListItem
-                        key={item.name}
-                        button
-                        onClick={() => {
-                          history.push(handleRoutes(item));
-                        }}
-                      >
-                        <ListItemText primary={item.resourceLabel} />
-                      </ListItem>
-                    </>
-                  );
-                })}
-              </List>
-            );
-          })
-        ) : (
-          <div className={styles.no_result_container}>
-            <SentimentVeryDissatisfiedIcon />
-            <p className={styles.no_result}>Sorry, we couldn't find any result</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const DisplayCardGrid = ({ sections, handleRoutes }) => {
-  const [modalContent, setModalContent] = useState(null);
-
-  const handleClose = () => {
-    setModalContent(null);
-  };
-
-  return (
-    <div className={styles.cardSection}>
-      <div className={styles.cardContainer}>
-        {sections.map((section) => {
-          if (section.head === 'Collaboration Tools' || section.head === 'Setups' || section.head === 'Setups & Administration' || section.head === 'Activities') return <></>;
-          const style = { '--bg_color': section.color, textAlign: 'left' } as React.CSSProperties;
-          return (
-            <button
-              key={section.head}
-              className={styles.singlecard}
-              style={style}
-              onClick={() => section.items.length > 0 && setModalContent({ items: section.items, title: section.head })}
-            >
-              <Typography component="h2" className={styles.cardHeading}>
-                {section.head}
-              </Typography>
-              <Typography component="p" className={styles.cardDesc}>
-                {section.items.length > 0 ? section.text : 'Coming Soon.'}
-              </Typography>
-              <div className={styles.cardBottomSection}>
-                {section.items.length > 0 && (
-                  <div
-                    className={styles.viewAll}
-                    onClick={() => section.items.length > 0 && setModalContent({ items: section.items, title: section.head })}
+        <div className="detail-container-v1">
+          {!userLoading ? (
+            <React.Fragment>
+              <GlobalFilter
+                dashboardList={dashboardList.map((d) => ({ id: d._id, name: d.name }))}
+                globalFilters={globalFilters}
+                setGlobalFilters={setGlobalFilters}
+                disabled={dashboardList.length === 0}
+              />
+              <Box pt={1}>
+                {dashboardLoading ? (
+                  <Loader minHeight={'100%'} height="calc(100vh - 200px)" noLoader={false} text="Loading Dashboards..." />
+                ) : dashboardList.length === 0 ? (
+                  <Box
+                    style={{ height: 'calc(100vh - 256px)', minHeight: '400px' }}
+                    width={'100%'}
+                    display={'flex'}
+                    flexDirection="column"
+                    justifyContent={'center'}
+                    alignItems={'center'}
+                    bgcolor={'rgba(255, 255, 255, 0.7)'}
+                    className="asdfkasjhdfkjsdh"
                   >
-                    <Typography component="span">View All</Typography>
-                    <HiArrowRight />
-                  </div>
+                    <img width={400} height={340} src={placeholder_img} alt="dashboard" />
+                    <Typography color="textSecondary" variant="h5">
+                      You don't have access to any dashboard
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Grid
+                    container
+                    spacing={1}
+                    justifyContent="space-between"
+                    alignItems="stretch"
+                    style={{ height: 'calc(100vh - 256px)', minHeight: '600px', overflow: 'auto' }}
+                  >
+                    {charts.map((chart: ChartDataType, index: number) => (
+                      <ChartTypes
+                        globalFilters={globalFilters}
+                        key={chart.chartType + ' ' + index + 1}
+                        chart={chart}
+                        filterData={{ ...filtersOptions }}
+                        setSelectedChart={(currentChart: ChartDataType) => {
+                          setSelectedChart(currentChart);
+                          setOpenFullScreenChart(true);
+                        }}
+                        selectedDashboardId={selectedDashboardId}
+                        fetchDashboards={fetchDashboards}
+                      />
+                    ))}
+                    {globalFilters.dashboardType?.includes('Asset') && (
+                      <Grid item xs={12}>
+                        <AssetStats />
+                      </Grid>
+                    )}
+                  </Grid>
                 )}
-                <p className={styles.cardIcon}>{section.icon}</p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-      <RenderDialog modalContent={modalContent} handleClose={handleClose} handleRoutes={handleRoutes} />
+              </Box>
+            </React.Fragment>
+          ) : (
+            <Loader minHeight="100%" noLoader={false} text="Loading Data..." />
+          )}
+        </div>
+        {openFullScreenChart && (
+          <FullScreenChart
+            chart={selectedChart}
+            globalFilters={globalFilters}
+            filterData={{ ...filtersOptions }}
+            close={() => {
+              setOpenFullScreenChart(false);
+              setSelectedChart(null);
+            }}
+            selectedDashboardId={selectedDashboardId}
+            fetchDashboards={fetchDashboards}
+          />
+        )}
+      </MuiPickersUtilsProvider>
     </div>
   );
 };
 
-const RenderDialog = ({ modalContent, handleClose, handleRoutes }) => {
-  const DialogContent = withStyles((theme) => ({
-    root: {
-      padding: theme.spacing(2)
-    }
-  }))(MuiDialogContent);
-  return (
-    <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={Boolean(modalContent)} className={styles.dialogContainer}>
-      <MuiDialogTitle disableTypography className={styles.modalHead}>
-        <Typography variant="h6" className={styles.modalTitle}>
-          {modalContent?.title}
-        </Typography>
-        <IconButton aria-label="close" onClick={() => handleClose()}>
-          <CloseIcon />
-        </IconButton>
-      </MuiDialogTitle>
-      <DialogContent className={styles.dialogContent}>
-        <ul className={styles.linkList}>
-          {modalContent?.items
-            ?.filter((item) => !item?.isHidden)
-            .map((item) => (
-              <li key={item.name}>
-                <Typography component="span">
-                  <Link to={handleRoutes(item)} className={styles.dialogLinks}>
-                    {item.resourceLabel || item.name}
-                  </Link>
-                </Typography>
-              </li>
-            ))}
-        </ul>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-interface sidecardInterface {
-  objBySectionName: any;
-  handleRoutes: any;
-  mode: 'Collaboration Tools' | 'Setups & Administration';
-}
-
-const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration Tools' }: sidecardInterface) => {
-  const [modalContent, setModalContent] = useState(null);
-  const [colabData, setColabData] = useState(null);
-  const style = { '--sideCardBg': mode === 'Collaboration Tools' ? '#fffaee' : '#FDFFF4', width: '100%' } as React.CSSProperties;
-  const description =
-    (mode === 'Collaboration Tools' && `By using Collaboration tools, collaborate with or within team members easily`) ||
-    (mode === 'Setups & Administration' && `List of all product and category setups`);
-
-  const checkLinkAvailability = ['Product Master', 'Pricing Setup', 'Product Categories'];
-
-  useEffect(() => {
-    if (objBySectionName) {
-      if (mode === 'Collaboration Tools') setColabData(objBySectionName['Collaboration Tools'] || objBySectionName['Activities'] || null);
-      else setColabData(objBySectionName['Setups & Administration'] || objBySectionName['Setups'] || objBySectionName['Product Setup'] || null);
-    }
-  }, [objBySectionName]);
-
-  const handleClose = () => {
-    setModalContent(null);
-  };
-  return (
-    <>
-      {colabData ? (
-        <button
-          style={style}
-          className={`${styles.rightInner} ${mode === 'Setups & Administration' && styles.setHeight}`}
-          onClick={() => setModalContent({ items: colabData, title: mode })}
-        >
-          <img src={SVGImages(mode)} alt={`${mode} Logo`} className={styles.colabLogo} />
-          <Typography component={'h2'}>{mode}</Typography>
-          <Typography component={'p'}>{description}</Typography>
-          {mode === 'Setups & Administration' && (
-            <>
-              <ul className={styles.linkList}>
-                {colabData
-                  ?.filter((item) => !item?.isHidden && checkLinkAvailability.includes(item.resourceLabel || item.name))
-                  .map((item) => (
-                    <li key={item.name}>
-                      <Link to={handleRoutes(item)} className={styles.dialogLinks}>
-                        <Typography component="span">{item.resourceLabel || item.name}</Typography>
-                      </Link>
-                    </li>
-                  ))}
-              </ul>
-              <div className={styles.viewAll} onClick={() => colabData.length > 0 && setModalContent({ items: colabData, title: mode })}>
-                <Typography component="span">View All</Typography>
-                <HiArrowRight />
-              </div>
-            </>
-          )}
-          {mode === 'Collaboration Tools' && (
-            <button className={styles.colabButton} onClick={() => setModalContent({ items: colabData, title: mode })}>
-              <Typography component="span">Start Collaborating</Typography>
-            </button>
-          )}
-        </button>
-      ) : null}
-      <RenderDialog modalContent={modalContent} handleClose={handleClose} handleRoutes={handleRoutes} />
-    </>
-  );
-};
+export default DashbaordNew;

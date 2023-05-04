@@ -23,7 +23,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
   const [activity, setActivity] = useState([]);
   const [treeList, setTreeList] = useState([]);
   const [loadingRoadmap, setLoadingRoadmap] = useState(false);
-
+  
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
   }, [filter.view, refresh]);
@@ -38,6 +38,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
       .get(`/technician-scheduler/service-order?serviceOrders=${orderId}`)
       .then(({ data }) => {
         setActivity(data?.data);
+        
         setTreeList(data?.data);
         setLoadingRoadmap(false);
       })
@@ -45,7 +46,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
         setLoadingRoadmap(false);
       });
   };
-
+  
   const fetchRoadmap = async () => {
     setLoadingRoadmap(true);
     await axiosInstance()
@@ -128,7 +129,9 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
               <Box>
                 <ActivityList
                   fetchRoadmap={fetchRoadmap}
-                  activity={activity}
+                  activity={selectedRecords?.length === 1? activity.filter((item)=>{
+                    return selectedRecords[0]?.competency? (selectedRecords[0]?.competency.includes(item?.competency[0]?.optionLabel)):item
+                  }):activity}
                   treeList={treeList}
                   expanded={expanded}
                   selected={selected}
@@ -146,7 +149,9 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
                 <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
                   <CalendarList
                     fetchRoadmap={fetchRoadmap}
-                    activity={activity}
+                    activity={selectedRecords?.length === 1? activity.filter((item)=>{
+                      return selectedRecords[0]?.competency? (selectedRecords[0]?.competency.includes(item?.competency[0]?.optionLabel)):item
+                    }):activity}
                     expanded={expanded}
                     selected={selected}
                     handleSelect={handleSelect}

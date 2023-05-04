@@ -25,18 +25,10 @@ import { RiEditCircleLine } from 'react-icons/ri';
 import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
 import { ExpandMore } from '@material-ui/icons';
 import styles from '../../Leads/Header.module.scss';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
-const Productpackage = ({
-  subleaseData,
-  setNextStep,
-  fetchData,
-  isIssued,
-  renderedFrom,
-  allowedToEdit,
-  stepFullScreen
-}) => {
+const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -73,10 +65,10 @@ const Productpackage = ({
   const fetchFields = async () => {
     var data = await fetch_sublease_product_fields(subleaseData.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = genrateCustomTableColumns(data, subleaseData?.currency, renderedFrom);
-    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    const newColumns = generateCustomTableColumns(data, subleaseData?.currency, renderedFrom);
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay'
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
     let coloum: any = [
       {
@@ -144,7 +136,7 @@ const Productpackage = ({
       },
       {
         accessor: 'description',
-        Header: "Description",
+        Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
@@ -291,7 +283,6 @@ const Productpackage = ({
         setAddingProducts(false);
       })
       .catch((error) => {
-        setAddExistingProductDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
       });
@@ -395,145 +386,140 @@ const Productpackage = ({
 
   return (
     <Fragment>
-      <Grid container spacing={2}>
-        {allowedToEdit && (
-          <Grid item xs={12} md={12} sm={12}>
-            <Box display="flex" justifyContent="space-between" m={1}>
-              <Box display="flex">
-                {subleaseData.status === SUBLEASE_STATUS.new && (
-                  <Fragment>
-                    {permissions?.product?.isRead && (
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-                        onClick={() => {
-                          setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
-                        }}
-                      >
-                        {isMobile && !isTablet ? `Products` : `Add Products`}
-                      </Button>
-                    )}
-                    <Box mx={1} />
-                    {permissions?.packages?.isRead && (
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        style={isMobile && !isTablet ? { color: 'var(--colorOpportunity)' } : {}}
-                        onClick={() => {
-                          setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                        }}
-                      >
-                        {isMobile && !isTablet ? `${routes.packages.title}` : `Add ${routes.packages.title}`}
-                      </Button>
-                    )}
-                  </Fragment>
+      {allowedToEdit && (
+        <Box display="flex" justifyContent="space-between" m={1}>
+          <Box display="flex">
+            {subleaseData.status === SUBLEASE_STATUS.new && (
+              <Fragment>
+                {permissions?.product?.isRead && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    color="primary"
+                    size="small"
+                    style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
+                    onClick={() => {
+                      setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
+                    }}
+                  >
+                    {isMobile && !isTablet ? `Products` : `Add Products`}
+                  </Button>
                 )}
-              </Box>
-              <Box display="flex">
-                {material?.length && !isIssued && !rowsData?.some((f) => !f.isValid) ? (
-                  <Fragment>
-                    <HtmlTooltip title={'Start Sublease'}>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          issueSublease();
-                        }}
-                        disabled={isIssueing}
-                        endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
-                      >
-                        {isMobile && !isTablet ? <MdDelete size={20} /> : 'Start Sublease'}
-                      </Button>
-                    </HtmlTooltip>
-                    <Box mx={1} />
-                  </Fragment>
-                ) : null}
-                <Button
-                  disabled={selectedProducts?.length ? false : true}
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                  aria-controls="action-menu"
-                >
-                  {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
+                <Box mx={1} />
+                {permissions?.packages?.isRead && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
-                    disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                    size="small"
+                    style={isMobile && !isTablet ? { color: 'var(--colorOpportunity)' } : {}}
                     onClick={() => {
-                      setAnchorEl(null);
-                      setIsProductEdit({ open: true, isBulkedit: true });
+                      setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                     }}
                   >
-                    {'Bulk Edit'}
-                  </MenuItem>
-                  <MenuItem
+                    {isMobile && !isTablet ? `${routes.packages.title}` : `Add ${routes.packages.title}`}
+                  </Button>
+                )}
+              </Fragment>
+            )}
+          </Box>
+          <Box display="flex">
+            {material?.length && !isIssued && !rowsData?.some((f) => !f.isValid) ? (
+              <Fragment>
+                <HtmlTooltip title={'Start Sublease'}>
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
-                    disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+                    size="small"
                     onClick={() => {
-                      const dataToDelete =
-                        selectedProducts &&
-                        selectedProducts
-                          .filter((e) => !e.hideSelection)
-                          .map((rec: any) => {
-                            const obj: any = {};
-                            obj.id = rec._id;
-                            obj.type = rec?.type;
-                            obj.materialId = rec?.materialId;
-                            return obj;
-                          });
-                      setDeleteData(dataToDelete);
+                      issueSublease();
                     }}
+                    disabled={isIssueing}
+                    endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
                   >
-                    {'Delete'}
-                  </MenuItem>
-                </Menu>
-              </Box>
-            </Box>
-          </Grid>
-        )}
-        <Grid item xs={12} md={12} sm={12}>
-          {columns && rowsData ? (
-            <Box zIndex={5} width={'100%'}>
-              <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-                columns={columns}
-                data={rowsData}
-                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-                onSelect={setSelectedProducts}
-                childrenProperty="subRows"
-                uniqueKey="_id"
-                hideSelection={!allowedToEdit}
-                hideAction={!allowedToEdit}
-                renderedFrom="sublease_product_package"
-                isClientSideGrid={true}
-              />
-            </Box>
-          ) : (
-            <Box p={2} height={500} bgcolor="white">
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </Grid>
-      </Grid>
+                    {isMobile && !isTablet ? <MdDelete size={20} /> : 'Start Sublease'}
+                  </Button>
+                </HtmlTooltip>
+                <Box mx={1} />
+              </Fragment>
+            ) : null}
+            <Button
+              disabled={selectedProducts?.length ? false : true}
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              color="default"
+              size="small"
+              onClick={openActions}
+              className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+              aria-controls="action-menu"
+              endIcon={<ExpandMore />}
+            >
+              {isMobile && !isTablet ? '' : 'Actions'}
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                color="primary"
+                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                onClick={() => {
+                  setAnchorEl(null);
+                  setIsProductEdit({ open: true, isBulkedit: true });
+                }}
+              >
+                {'Bulk Edit'}
+              </MenuItem>
+              <MenuItem
+                color="primary"
+                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+                onClick={() => {
+                  const dataToDelete =
+                    selectedProducts &&
+                    selectedProducts
+                      .filter((e) => !e.hideSelection)
+                      .map((rec: any) => {
+                        const obj: any = {};
+                        obj.id = rec._id;
+                        obj.type = rec?.type;
+                        obj.materialId = rec?.materialId;
+                        return obj;
+                      });
+                  setDeleteData(dataToDelete);
+                }}
+              >
+                {'Delete'}
+              </MenuItem>
+            </Menu>
+          </Box>
+        </Box>
+      )}
+      {columns && rowsData ? (
+        <Box zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+            columns={columns}
+            data={rowsData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+            onSelect={setSelectedProducts}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
+            renderedFrom="sublease_product_package"
+            isClientSideGrid={true}
+          />
+        </Box>
+      ) : (
+        <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
       {deleteData && (
         <ConfirmationDialog
           open={true}

@@ -10,7 +10,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import { leadDetailPage } from '../../routes/Lead';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, isObjectEmpty, processFieldName } from '../../constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, processFieldName, sidebarResource } from '../../constants/helpers';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import { HiUserGroup } from 'react-icons/hi';
 import { lead, prepareDataForGrid } from '../../constants/helpers';
@@ -31,19 +31,22 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { BsBuilding, AiFillMail } from 'react-icons/all';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const LeadTypes = [
-  {
-    key: 'All Leads',
-    value: 1
-  },
-  {
-    key: 'My Leads',
-    value: 2
-  }
-];
+
 
 let leadTimeout;
 const Leads = () => {
+  
+  const LeadTypes = [
+    {
+      key: `All ${routes.lead.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes.lead.title}`,
+      value: 2
+    }
+  ];
+
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -250,16 +253,16 @@ const Leads = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterLeads=${selectedType}`;
-
-    if (isExport) {
-      deepFilter = `filterLeads=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
-
+    if (isExport) {
+      deepFilter = `?`;
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
-
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
@@ -669,6 +672,9 @@ const Leads = () => {
               loading={loading}
               renderedFrom={leadResource}
               refreshGrid={fetchLeads}
+              showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.lead}
             />
           )
         ) : null}

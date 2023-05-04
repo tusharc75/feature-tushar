@@ -37,18 +37,21 @@ import ManageQuotationDialog from './ManageQuotationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 let quotationTimeout;
-const QuotationType = [
-  {
-    key: 'All Quotation',
-    value: 1
-  },
-  {
-    key: 'My Quotation',
-    value: 2
-  }
-];
+
 
 const Quotation = () => {
+
+  const QuotationType = [
+    {
+      key: `All ${routes.quotation.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes.quotation.title}`,
+      value: 2
+    }
+  ];
+
   const renderedFrom = camelCase(routes?.quotation.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -240,9 +243,12 @@ const Quotation = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterQuotation=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterQuotation=${selectedType}`;
+      deepFilter = `?`;
     }
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id))}`;
@@ -534,6 +540,8 @@ const Quotation = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchQuotation}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.quotation}
             />
           ) : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         {showDeleteWarningConfirmBox &&

@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useContext, useEffect } from 'react';
-import { Box, Button, Dialog, Divider, FormControlLabel, InputAdornment, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, Divider, FormControlLabel, InputAdornment, TextField, Switch } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useState } from 'react';
 import { currencyCodeToSymbol, CustomDialogTransition, getUniqueCurrencies, workOrder } from 'src/constants/helpers';
@@ -9,8 +9,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { serviceMaster } from 'src/constants/helpers';
-import { Formik, Form, Field } from 'formik';
-import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
+import { Formik, Form } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import Checkbox from '@material-ui/core/Checkbox';
 import { Autocomplete } from '@material-ui/lab';
@@ -265,8 +264,7 @@ export default function StepDialog({
                   <CustomDialogContent>
                     <Grid container spacing={2}>
                       <Grid xs={12} md={6} sm={6} item>
-                        <Field
-                          component={TextFieldFormik}
+                        <TextField
                           margin="dense"
                           type="text"
                           label="Step Name"
@@ -284,12 +282,11 @@ export default function StepDialog({
                         />
                       </Grid>
                       <Grid xs={12} md={6} sm={6} item>
-                        <Field
-                          component={TextFieldFormik}
+                        <TextField
                           margin="dense"
                           type="number"
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                          label="Lead Day"
+                          label="Lead Time"
                           name="leadDay"
                           variant="outlined"
                           fullWidth
@@ -388,7 +385,7 @@ export default function StepDialog({
                       <FormControlLabel
                         disabled={notEditable}
                         control={
-                          <Checkbox
+                          <Switch
                             name="isPassFail"
                             disabled={notEditable}
                             checked={values['isPassFail']}
@@ -396,9 +393,8 @@ export default function StepDialog({
                               setFieldValue('isPassFail', e.target.checked);
                             }}
                             color="primary"
-                          />
-                        }
-                        label="Pass Fail"
+                          />}
+                        label="Pass Fail Logic"
                       />
                     </Box>
                     {values['isPassFail'] && (
@@ -420,7 +416,7 @@ export default function StepDialog({
                                     color="primary"
                                   />
                                 }
-                                label="Addon Service on Pass"
+                                label="Add Services on Pass"
                               />
                             </Grid>
                             <Grid item xs={6}>
@@ -445,7 +441,7 @@ export default function StepDialog({
                                     setFieldValue('passAddon', values);
                                   }}
                                   renderInput={(params) => (
-                                    <TextField {...params} label="Pass Addon Services" name="passAddon" disabled={notEditable} variant="outlined" />
+                                    <TextField {...params} label="Add Services on Pass" name="passAddon" disabled={notEditable} variant="outlined" />
                                   )}
                                 />
                               )}
@@ -469,7 +465,7 @@ export default function StepDialog({
                                     color="primary"
                                   />
                                 }
-                                label="Addon Service on Fail"
+                                label="Add Services on Fail"
                               />
                             </Grid>
                             <Grid item xs={6}>
@@ -495,7 +491,7 @@ export default function StepDialog({
                                     setFieldValue('failAddon', values);
                                   }}
                                   renderInput={(params) => (
-                                    <TextField {...params} label="Fail Addon Services" name="failAddon" disabled={notEditable} variant="outlined" />
+                                    <TextField {...params} label="Add Services on Fail" name="failAddon" disabled={notEditable} variant="outlined" />
                                   )}
                                 />
                               )}
@@ -519,7 +515,7 @@ export default function StepDialog({
                                     color="primary"
                                   />
                                 }
-                                label="Jump Step On Pass"
+                                label="Skip Steps on Pass"
                               />
                             </Grid>
                             <Grid item xs={6}>
@@ -544,7 +540,7 @@ export default function StepDialog({
                                     setFieldValue('jumpStepsPass', values);
                                   }}
                                   renderInput={(params) => (
-                                    <TextField {...params} label="Jump Steps On Pass" name="jumpStepsPass" disabled={notEditable} variant="outlined" />
+                                    <TextField {...params} label="Skip Steps on Pass" name="jumpStepsPass" disabled={notEditable} variant="outlined" />
                                   )}
                                 />
                               )}
@@ -568,7 +564,7 @@ export default function StepDialog({
                                     color="primary"
                                   />
                                 }
-                                label="Jump Step On Fail"
+                                label="Skip Steps on Fail"
                               />
                             </Grid>
                             <Grid item xs={6}>
@@ -591,33 +587,35 @@ export default function StepDialog({
                                     setFieldValue('jumpStepsFail', values);
                                   }}
                                   renderInput={(params) => (
-                                    <TextField {...params} label="Jump Steps On Fail" name="jumpStepsFail" disabled={notEditable} variant="outlined" />
+                                    <TextField {...params} label="Skip Steps on Fail" name="jumpStepsFail" disabled={notEditable} variant="outlined" />
                                   )}
                                 />
                               )}
                             </Grid>
                           </Grid>
                         </Box>
-                        <Box pt={2}>
-                          <Grid container>
-                            <Grid item xs={6}>
-                              <FormControlLabel
-                                control={
-                                  <Checkbox
-                                    name="isQuoteRevisionOnFail"
-                                    disabled={notEditable}
-                                    checked={values?.isQuoteRevisionOnFail}
-                                    onChange={(e) => {
-                                      setFieldValue('isQuoteRevisionOnFail', e.target.checked);
-                                    }}
-                                    color="primary"
-                                  />
-                                }
-                                label="Quote Revision On Fail"
-                              />
+                        {user?.brandPolicy?.repairOrderQuotation &&
+                          <Box pt={2}>
+                            <Grid container>
+                              <Grid item xs={6}>
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      name="isQuoteRevisionOnFail"
+                                      disabled={notEditable}
+                                      checked={values?.isQuoteRevisionOnFail}
+                                      onChange={(e) => {
+                                        setFieldValue('isQuoteRevisionOnFail', e.target.checked);
+                                      }}
+                                      color="primary"
+                                    />
+                                  }
+                                  label="Quote Revision On Fail"
+                                />
+                              </Grid>
                             </Grid>
-                          </Grid>
-                        </Box>
+                          </Box>
+                        }
                         <Box pt={2}>
                           <Grid container>
                             <Grid item xs={6}>
@@ -756,23 +754,25 @@ export default function StepDialog({
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>}
       </Dialog>
-      {openFieldDialog && (
-        <FieldDialog
-          reference={'workOrder'}
-          serviceId={serviceId}
-          stepIds={[stepId]}
-          steps={[]}
-          fields={fields}
-          notEditable={notEditable}
-          handleClose={() => {
-            setOpenFieldDialog(false);
-          }}
-          handleSucess={(data: any) => {
-            setFields(data);
-            setOpenFieldDialog(false);
-          }}
-        />
-      )}
+      {
+        openFieldDialog && (
+          <FieldDialog
+            reference={'workOrder'}
+            serviceId={serviceId}
+            stepIds={[stepId]}
+            steps={[]}
+            fields={fields}
+            notEditable={notEditable}
+            handleClose={() => {
+              setOpenFieldDialog(false);
+            }}
+            handleSucess={(data: any) => {
+              setFields(data);
+              setOpenFieldDialog(false);
+            }}
+          />
+        )
+      }
     </>
   );
 }

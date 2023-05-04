@@ -13,12 +13,12 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile } from 'react-device-detect';
-import {  startCase } from 'lodash';
+import { startCase } from 'lodash';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import SalesOrderQtyDialog from './SalesOrderQtyDialog';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
 import LeadTimeDialog from './LeadTimeDialog';
-import { genrateCustomTableColumns } from 'src/constants/columns';
+import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -52,11 +52,12 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   useEffect(() => {
     fetchFields();
   }, []);
-
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = genrateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+
+    const newColumns = generateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+
     let coloum: any = [
       {
         accessor: 'index',
@@ -97,7 +98,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
               </p>
             }
 
-            {row?.original?.type !== 'service' &&
+            {row?.original?.type !== 'service' && (
               <Box ml={1} className="d-flex align-items-center">
                 {row.original?.subRows?.length > 0 && (
                   <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
@@ -113,7 +114,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
                   </HtmlTooltip>
                 </Box>
               </Box>
-            }
+            )}
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -132,6 +133,13 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
             </Box>
           </div>
         )
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        minWidth: 300,
+        width: 300,
+        Cell: ({ row }) => <p title={row.original?.description}>{row.original?.description}</p>
       },
       {
         accessor: 'leadTime',
@@ -196,19 +204,18 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-           parent.type === 'product'
+      parent.detail = `${parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription
-          : parent?.serviceDetail?.serviceDescription;
+            ? parent?.packageDetail?.packageDescription
+            : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
@@ -227,19 +234,18 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-       _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;
@@ -309,7 +315,6 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
         setAddingProducts(false);
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
       });
@@ -462,8 +467,8 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
                 Actions
               </Button>
             </span>
-            </HtmlTooltip>
-            <Menu
+          </HtmlTooltip>
+          <Menu
             anchorEl={anchorActionEl}
             keepMounted
             getContentAnchorEl={null}
@@ -476,7 +481,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           >
             <MenuItem
               onClick={() => {
-                setIsProductEdit({ open: true, isBulkedit: true })
+                setIsProductEdit({ open: true, isBulkedit: true });
                 closeActions();
               }}
             >
@@ -484,7 +489,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
             </MenuItem>
 
             <MenuItem
-               onClick={() => {
+              onClick={() => {
                 const dataToDelete =
                   selectedProducts &&
                   selectedProducts
@@ -497,7 +502,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
                       return obj;
                     });
                 setDeleteData(dataToDelete);
-                closeActions()
+                closeActions();
               }}
             >
               Delete
@@ -507,7 +512,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       </Box>
       {columns && rowsData ? (
         <>
-          <Box p="6px" zIndex={5} width={'100%'}>
+          <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}

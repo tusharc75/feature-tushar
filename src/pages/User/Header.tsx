@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { Box, Grid, MenuItem, Button, Menu, Chip } from "@material-ui/core";
-import { AddOutlined, ExpandMore } from "@material-ui/icons";
-import SearchBox from "../../components/Helpers/SearchBox";
-import { FaUsers } from "react-icons/fa";
+import { useState } from 'react';
+import { Box, Grid, MenuItem, Button, Menu, Chip } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import SearchBox from '../../components/Helpers/SearchBox';
+import { FaUsers } from 'react-icons/fa';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
-import styles from "../Leads/Header.module.scss";
-import routes from "../../components/Helpers/Routes";
-import { isMobile, isTablet } from "react-device-detect";
-import { MdAdd, MdSort, MdFilterList } from "react-icons/all";
+import styles from '../Leads/Header.module.scss';
+import routes from '../../components/Helpers/Routes';
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
 
 const Header = (props) => {
   const {
@@ -51,7 +51,6 @@ const Header = (props) => {
     setAnchorEl(null);
   };
 
-
   const handleClickOpen = () => {
     setSortOpen(true);
   };
@@ -59,7 +58,6 @@ const Header = (props) => {
   const handleFilterClose = () => {
     setisOpenDialog(false);
   };
-
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -127,7 +125,6 @@ const Header = (props) => {
           </>
         )}
 
-
         {entityRoleRedirectDetails.id && (
           <Chip
             className="ml-3"
@@ -138,57 +135,56 @@ const Header = (props) => {
             }}
           />
         )}
-
       </Grid>
       <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
         <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} id="resourceOperations">
-          <Grid style={{ display: "flex", flex: 1 }}>
+          <Grid style={{ display: 'flex', flex: 1 }}>
             <SearchBox
               searchbox={styles.search_box_input}
               onSearch={onSearch}
               value={searchVal}
               size="small"
               placeholder="Search Users"
-              width={isMobile && !isTablet ? "200px" : "242px"}
+              width={isMobile && !isTablet ? '200px' : '242px'}
               style={isMobile && !isTablet ? { flex: 1 } : {}}
             />
           </Grid>
 
-
-          <Grid style={{ display: "flex", gap: "5px" }}>
+          <Grid style={{ display: 'flex', gap: '5px' }}>
             {userPermissions.isCreate && (
               <Button
-                variant={isMobile && !isTablet ? "text" : "contained"}
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
                 color="primary"
                 size="small"
                 onClick={onCreate}
-                className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                 startIcon={isMobile && !isTablet ? null : <AddOutlined />}
               >
-                {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
+                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
               </Button>
             )}
 
             {userPermissions.isDelete || userPermissions.isUpdate ? (
               <>
                 <Button
-                  className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
-                  variant={isMobile && !isTablet ? "text" : "outlined"}
+                  className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
                   color="default"
                   size="small"
                   disabled={selectedRecordsLength === 0}
                   onClick={openActions}
                   aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
                 >
-                  {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                  {isMobile && !isTablet ? '' : 'Actions'}
                 </Button>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
                   getContentAnchorEl={null}
                   anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
+                    vertical: 'bottom',
+                    horizontal: 'left'
                   }}
                   id="action-menu"
                   open={Boolean(anchorEl)}
@@ -197,7 +193,7 @@ const Header = (props) => {
                   {userPermissions.isDelete && selectedRecordsLength > 0 && (
                     <MenuItem
                       onClick={() => {
-                        manageDeleteUser()
+                        manageDeleteUser();
                         closeActions();
                       }}
                     >
@@ -205,25 +201,11 @@ const Header = (props) => {
                     </MenuItem>
                   )}
 
-                  {
-                    isAssignBrandAdmin && selectedRecordsLength > 0 &&
-                    <MenuItem
-                      onClick={handleAssignBrandAdmin}
-                    >
-                      Assign Brand Admin
-                    </MenuItem>
-                  }
-                  {
-                    isUnAssignBrandAdmin &&
-                    <MenuItem
-                      onClick={handleUnAssignBrandAdmin}
-                    >
-                      Unassign Brand Admin
-                    </MenuItem>
-                  }
+                  {isAssignBrandAdmin && selectedRecordsLength > 0 && <MenuItem onClick={handleAssignBrandAdmin}>Assign Brand Admin</MenuItem>}
+                  {isUnAssignBrandAdmin && <MenuItem onClick={handleUnAssignBrandAdmin}>Unassign Brand Admin</MenuItem>}
 
-                  {
-                    userPermissions.isUpdate && <MenuItem
+                  {userPermissions.isUpdate && (
+                    <MenuItem
                       disabled={approvalProcessActionDisabled}
                       onClick={() => {
                         openApprovalProcessDialog();
@@ -232,7 +214,7 @@ const Header = (props) => {
                     >
                       Set Approval Process
                     </MenuItem>
-                  }
+                  )}
 
                   {/* {
                   userPermissions.isUpdate && <MenuItem
@@ -246,8 +228,8 @@ const Header = (props) => {
                   </MenuItem>
                 } */}
 
-                  {
-                    userPermissions.isUpdate && <MenuItem
+                  {userPermissions.isUpdate && (
+                    <MenuItem
                       disabled={rolesActionDisabled}
                       onClick={() => {
                         openRegionalRolesDialog();
@@ -256,10 +238,10 @@ const Header = (props) => {
                     >
                       Assign Entities - Roles
                     </MenuItem>
-                  }
+                  )}
 
-                  {
-                    userPermissions.isUpdate && entityRoleRedirectDetails.id && <MenuItem
+                  {userPermissions.isUpdate && entityRoleRedirectDetails.id && (
+                    <MenuItem
                       disabled={rolesActionDisabled}
                       onClick={() => {
                         unAssignUsersFromEntity();
@@ -268,10 +250,10 @@ const Header = (props) => {
                     >
                       Un-assign Entity
                     </MenuItem>
-                  }
+                  )}
 
-                  {
-                    isUserSetupPermission && <MenuItem
+                  {isUserSetupPermission && (
+                    <MenuItem
                       disabled={userSetupDisabled}
                       onClick={() => {
                         openUserSetupDialog();
@@ -280,9 +262,9 @@ const Header = (props) => {
                     >
                       User Setup
                     </MenuItem>
-                  }
-                  {
-                    userPermissions.isUpdate && <MenuItem
+                  )}
+                  {userPermissions.isUpdate && (
+                    <MenuItem
                       onClick={() => {
                         handleResetPassword();
                         closeActions();
@@ -290,10 +272,8 @@ const Header = (props) => {
                     >
                       Reset Password
                     </MenuItem>
-                  }
-
+                  )}
                 </Menu>
-
               </>
             ) : null}
           </Grid>

@@ -12,7 +12,7 @@ import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CreateRole from './CreateRole';
 import { PERMISSION } from '../../constants/Roles';
-import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
+import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import RoleHeader from './RoleHeader';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
@@ -52,7 +52,6 @@ const Roles: FC = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
   const columns = [
     { field: 'name', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
     { field: 'description', headerName: 'Description', show: true, cellRenderer: 'commonRenderer' },
@@ -418,6 +417,9 @@ const Roles: FC = () => {
               isClientSideGrid={true}
               refreshGrid={fetchRoles}
               renderedFrom={renderedFrom}
+              showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.role}
             />
           )}
         </CustomContainer>

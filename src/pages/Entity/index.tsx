@@ -5,7 +5,7 @@ import {
   IconButton,
   Tooltip,
 } from "@material-ui/core";
-import { entity, gridLoadingTimeout, isObjectEmpty } from "../../constants/helpers";
+import { entity, gridLoadingTimeout, isObjectEmpty, sidebarResource } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -58,7 +58,6 @@ const Entity: FC = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
   if (columnState) {
@@ -409,6 +408,8 @@ const Entity: FC = () => {
               loading={loading} renderedFrom={renderedFrom}
               refreshGrid={fetchEntity}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.entity}
             /> : null
         }
 

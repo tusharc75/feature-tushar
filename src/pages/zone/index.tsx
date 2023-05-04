@@ -14,7 +14,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { gridLoadingTimeout, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
+import { gridLoadingTimeout, gridPageSizes, isObjectEmpty, sidebarResource } from '../../constants/helpers';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
@@ -35,7 +35,6 @@ import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 
 const Zone = () => {
-
   const renderedFrom = camelCase(routes?.zone.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -399,8 +398,9 @@ const Zone = () => {
                       disabled={selectedRecords.length ? false : true}
                       aria-controls="action-menu"
                       className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      endIcon={<ExpandMore />}
                     >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      {isMobile && !isTablet ? '' : 'Actions'}
                     </Button>
                   )}
                   <Menu
@@ -489,6 +489,8 @@ const Zone = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchZone}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.zone}
             />
           )
         ) : null}
