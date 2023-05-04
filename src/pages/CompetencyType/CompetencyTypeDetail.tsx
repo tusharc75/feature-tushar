@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Menu, MenuItem, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Menu, MenuItem, Paper, Tab, Tabs, Typography } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -15,6 +15,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageCompetencyType from './ManageCompetencyType';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import Competencies from './Competencies';
 
 const CompetencyMasterDetail = () => {
   const { id } = useParams();
@@ -26,6 +27,7 @@ const CompetencyMasterDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
   const {
     state: { permissions }
   }: any = useData();
@@ -94,6 +96,11 @@ const CompetencyMasterDetail = () => {
     setOpenUpdateDialog(false);
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -120,9 +127,29 @@ const CompetencyMasterDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Grid container spacing={1}>
-          <Grid item xs={12} sm={12} md={12}>
-            <Paper>
+      <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              height: 0
+            }
+          }}
+        >
+           <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+          {permissions.competencies.isRead && (
+            <Tab
+              label={<div className="tab-font">{routes?.competencies.title}</div>}
+              value={1}
+              aria-controls="a11y-tabpanel-1"
+              id="a11y-tab-1"
+              className={'tabLayout'}
+            />
+          )}
+          </Tabs>
+          {tabValue === 0 && (
               <Box>
                 {loading || !fields?.length ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -132,9 +159,9 @@ const CompetencyMasterDetail = () => {
                   <DetailsPage data={competencyMasterData} fields={fields} />
                 )}
               </Box>
-            </Paper>
-          </Grid>
-        </Grid>
+          )}
+          {tabValue === 1 && <Competencies competencyType={id} />}
+        
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
