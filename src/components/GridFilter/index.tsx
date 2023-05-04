@@ -57,7 +57,7 @@ function GridFilter({
     setSelectedUserFilter(selectedFilter);
   }, []);
 
-  const FILTER_NOT_APPLIED = ['fileUpload', 'multiFileUpload', 'imageUpload', 'multiImageUpload', 'richTextEditor', 'signature', 'colorPicker'];
+  const FILTER_NOT_APPLIED = ['fileUpload', 'multiFileUpload', 'imageUpload', 'multiImageUpload', 'richTextEditor', 'signature', 'colorPicker', 'number', 'decimal'];
 
   const fetchColumns = () => {
     axiosInstance()
@@ -213,10 +213,9 @@ function GridFilter({
               fromDate && toDate
                 ? `${fromDate ? moment(fromDate).format('DD/MM/YYYY') : null} - ${toDate ? moment(toDate).format('DD/MM/YYYY') : null}`
                 : fromDate || toDate
-                ? `${fromDate ? `${moment(fromDate).format('DD/MM/YYYY')} (From Date)` : ''} ${
-                    toDate ? `${moment(toDate).format('DD/MM/YYYY')} (To Date)` : ''
+                  ? `${fromDate ? `${moment(fromDate).format('DD/MM/YYYY')} (From Date)` : ''} ${toDate ? `${moment(toDate).format('DD/MM/YYYY')} (To Date)` : ''
                   }`
-                : null,
+                  : null,
             name: fieldName
           });
           filterModel[fieldName] = {
