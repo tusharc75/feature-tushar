@@ -210,6 +210,8 @@ import TaxMaster from './pages/TaxMaster';
 import TaxMasterDetail from './pages/TaxMaster/TaxMasterDetail';
 import DynamicForm from './pages/DynamicForm';
 import DynamicFormDetail from './pages/DynamicForm/DynamicFormDetail';
+import Competencies from './pages/Competencies';
+import CompetenciesDetail from './pages/Competencies/CompetenciesDetail';
 
 var notificationInterval: any = null;
 
@@ -1012,6 +1014,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.taxMasterDetail.path}/:id`}>
               <TaxMasterDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.competencies.path}`}>
+              <Competencies />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.competenciesDetail.path}/:id`}>
+              <CompetenciesDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
