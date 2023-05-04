@@ -924,7 +924,14 @@ const routes = {
     title: storedRoutes && storedRoutes.taxMaster && storedRoutes.taxMaster.title ? storedRoutes.taxMaster?.title : RESOURCE_LABEL.taxMaster,
     path: '/tax-master/detail'
   },
-  
+  competencies: {
+    title: storedRoutes && storedRoutes.competencies && storedRoutes.competencies.title ? storedRoutes.competencies?.title : RESOURCE_LABEL.competencies,
+    path: '/competencies'
+  },
+  competenciesDetail: {
+    title: storedRoutes && storedRoutes.competencies && storedRoutes.competencies.title ? storedRoutes.competencies?.title : RESOURCE_LABEL.competencies,
+    path: '/competencies/detail'
+  },
 };
 
 export default routes;
