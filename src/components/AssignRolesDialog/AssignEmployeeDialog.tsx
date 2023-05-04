@@ -26,7 +26,6 @@ import { Autocomplete } from '@material-ui/lab';
 let searchTimeout;
 
 const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, defaultCompetency = [], extraStaticFilter = [] }) => {
-
   const renderedFrom = `${routes.employeeMaster.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -45,7 +44,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
   const [columns, setColumns] = useState([]);
   const { getColumnData } = useColumns();
   const [competencyOptions, setCompetencyOptions] = useState(null);
-  const [selectedCompetency, setSelectedCompetency] = useState(defaultCompetency)
+  const [selectedCompetency, setSelectedCompetency] = useState(defaultCompetency);
 
   useEffect(() => {
     localStorage.removeItem(localStorageSelectedRecords);
@@ -68,9 +67,11 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetency]);
 
   const fetchCompetencyMaster = () => {
-    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Competency Type`).then(({ data: { data } }) => {
-      setCompetencyOptions(data["Competency Type"] || []);
-    })
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=Competency Type`)
+      .then(({ data: { data } }) => {
+        setCompetencyOptions(data['Competency Type'] || []);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -146,7 +147,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
 
     const updatedFilters = [];
     if (selectedCompetency?.length > 0) {
-      updatedFilters.push(...selectedCompetency.map((i) => ({ field: 'competency', term: i.optionLabel })));
+      updatedFilters.push(...selectedCompetency.map((i) => ({ field: 'competencyType', term: i.optionLabel })));
     }
     if (extraStaticFilter?.length) {
       extraStaticFilter?.forEach((e) => {
@@ -215,12 +216,14 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
                     options={competencyOptions}
                     getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                     onChange={(e, val) => {
-                      setSelectedCompetency(val)
+                      setSelectedCompetency(val);
                     }}
                     multiple
                     value={selectedCompetency}
                     filterSelectedOptions={true}
-                    renderInput={(params) => <TextField {...params} margin="dense" name="competency" label="Competency" variant="outlined" fullWidth />}
+                    renderInput={(params) => (
+                      <TextField {...params} margin="dense" name="competency" label="Competency Type" variant="outlined" fullWidth />
+                    )}
                   />
                 </Grid>
                 <Grid item xs={6} className={styles.filter_side}>
