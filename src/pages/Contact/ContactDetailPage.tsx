@@ -798,17 +798,17 @@ const ContactDetailsPage = (props) => {
         </Grid>
 
         {contactData?.staticData?.lead && permissions && permissions.lead && permissions.lead.isRead && (
-          <Grid item xs={12}>
-            <BoxWithBorder style={{ marginTop: '3%', padding: '0px' }}>
-              <div className={`${contactClass.detail_page_div3}`}>
-                <div className={`${contactClass.leads_data}`}>
-                  <Typography color="primary" variant="h6" style={{ margin: '0 10px' }}>
-                    Related Lead
-                  </Typography>
-                </div>
-                <Box className={`${contactClass.custom_box1}`}>
-                  <Card className="contactCard">
-                    <CardContent className="detailListing">
+          <Box mt={2}>
+            <div className={`single-form-v1`}>
+              <div className={`form-head-v1`}>
+                <Typography color="primary" component="h3" style={{ margin: '0 10px' }}>
+                  Related Lead
+                </Typography>
+              </div>
+              <Box className={`formdata-v1 `}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6} lg={4}>
+                    <Paper className="detailListing card-v1">
                       <List>
                         <ListItem>
                           <ListItemAvatar>
@@ -869,12 +869,12 @@ const ContactDetailsPage = (props) => {
                           />
                         </ListItem>
                       </List>
-                    </CardContent>
-                  </Card>
-                </Box>
-              </div>
-            </BoxWithBorder>
-          </Grid>
+                    </Paper>
+                  </Grid>
+                </Grid>
+              </Box>
+            </div>
+          </Box>
         )}
       </Box>
       {showConfirmBox ? (

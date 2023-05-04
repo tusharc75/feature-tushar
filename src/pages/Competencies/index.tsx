@@ -1,21 +1,20 @@
-import { Box, Grid, Button, Menu, MenuItem, Tooltip, IconButton } from '@material-ui/core';
-import { useState, useEffect, Fragment, useContext, useReducer } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { Link } from 'react-router-dom';
-import CustomContainer from 'src/components/CustomContainer';
-import styles from '../Leads/Header.module.scss';
-import routes from 'src/components/Helpers/Routes';
+import { Box, Button, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import routes from 'src/components/Helpers/Routes';
+import styles from '../Leads/Header.module.scss';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { camelCase } from 'lodash';
+import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { useData } from 'src/StateProvider/Provider';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { MdAdd } from 'react-icons/md';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
-import { camelCase } from 'lodash';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import {
   getLocalStorageArrayData,
   gridLoadingTimeout,
@@ -24,52 +23,41 @@ import {
   removeLocalStorage,
   sidebarResource
 } from 'src/constants/helpers';
-import ManageCompetencyMaster from './ManageCompetencyMaster';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import ManageCompetencies from './ManageCompetencies';
 
-const CompetencyMaster = () => {
-  const renderedFrom = camelCase(routes?.competencyMaster.title);
+const Competencies = () => {
+  const renderedFrom = camelCase(routes?.competencies.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-  const {
-    state: { permissions, selectedEntity }
-  }: any = useData();
   const toastConfig = useContext(CustomToastContext);
-
-  //  Grid Variables - Start
-  const [gridApi, setGridApi] = useState(null);
+  const {
+    state: { permissions, selectedEntity, user }
+  }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-
-  const { getColumnData } = useColumns();
+  const [competenciesId, setCompetenciesId] = useState(null);
+  const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
-  const [open, setOpen] = useState({ open: false, isClone: false });
-  const [competencyMasterId, setCompetencyMasterId] = useState(null);
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
+  const [gridApi, setGridApi] = useState(null);
+  const { getColumnData } = useColumns();
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get('/field?resource=Competency Master')
+      .get(`/field?resource=${sidebarResource?.competencies}`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.competencyMasterDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.competenciesDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -88,23 +76,23 @@ const CompetencyMaster = () => {
       });
   };
 
-  const fetchCompetencyMasterData = () => {
+  const fetchCompetenciesData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     axiosInstance()
-      .get(`/competency-master${queryString}`)
+      .get(`${routes?.competencies.path}${queryString}`)
       .then(({ data: { data } }) => {
         let count = data?.count;
-        let rows = data?.data.map((u: any) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.competencyMaster?.isDelete;
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.competencyMaster?.isUpdate;
+        let rows = data?.data?.map((u: any) => {
+          let finalObject: any = prepareDataForGrid(u);
+          finalObject['canDelete'] = permissions?.competencies?.isDelete
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['allowedToEdit'] = permissions?.competencies?.isUpdate;
+
           return {
             ...finalObject
           };
@@ -131,38 +119,6 @@ const CompetencyMaster = () => {
       });
   };
 
-  const handleSearch = (e) => {
-    dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const ActionsRenderer = (params) => (
-    <Fragment>
-      <Tooltip title="Clone">
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setCompetencyMasterId(params?.data?.id);
-            setOpen({ open: true, isClone: true });
-          }}
-        >
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Delete">
-        <IconButton
-          aria-label="Delete"
-          onClick={() => {
-            setDeleteRecord(params?.data);
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          <DeleteIcon fontSize="small" color="error" />
-        </IconButton>
-      </Tooltip>
-    </Fragment>
-  );
-
   const replaceFieldName = (field) => {
     switch (field) {
       case 'createdBy':
@@ -177,11 +133,19 @@ const CompetencyMaster = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+    let deepFilter =  `?page=${page}&limit=${limit}` ;
+    if (isExport) {
+      deepFilter = `?`
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
+    let filterById = [];
+    if (filterById.length > 0) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    }
+    
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
@@ -207,6 +171,63 @@ const CompetencyMaster = () => {
     }
     return deepFilter;
   };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
+
+  const ActionsRenderer = (params) => (
+    <Fragment>
+      {permissions?.competencies?.isCreate ? (
+        <Tooltip title="Clone">
+          <IconButton
+            aria-label="Clone"
+            onClick={() => {
+              setCompetenciesId(params.data.id);
+              setOpen({ open: true, isClone: true });
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+          <IconButton aria-label="Clone" size="small">
+            <FileCopyIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      {params?.data?.canDelete ? (
+        <Tooltip title="Delete">
+          <IconButton
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(params.data);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to delete">
+          <IconButton aria-label="Delete" size="small">
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+    </Fragment>
+  );
+
   const handleDelete = () => {
     let ids = [];
     if (deleteRecord) {
@@ -215,10 +236,10 @@ const CompetencyMaster = () => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`/competency-master/remove`, { ids: ids })
+      .put(`${routes?.competencies?.path}/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
-        fetchCompetencyMasterData();
+        fetchCompetenciesData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
@@ -237,22 +258,23 @@ const CompetencyMaster = () => {
   }, []);
 
   useEffect(() => {
-    fetchCompetencyMasterData();
+    fetchCompetenciesData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+
 
   return (
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.competencyMaster.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.competencies.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.competencyMaster}
-            module="Competency Master"
-            api={'competency-master'}
+            permissions={permissions.competencies}
+            module="competencies"
+            api={'competencies'}
             afterImportCompleted={() => {
-              fetchCompetencyMasterData();
+              fetchCompetenciesData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
@@ -264,7 +286,7 @@ const CompetencyMaster = () => {
             }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
-              else fetchCompetencyMasterData();
+              else fetchCompetenciesData();
             }}
             additionalParams={getQueryString(true)}
           />
@@ -273,11 +295,7 @@ const CompetencyMaster = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <span className="listingHeader">{routes.competencyMaster.title}</span>
-              </div>
-            </Grid>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>
@@ -291,57 +309,68 @@ const CompetencyMaster = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  <Button
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                    onClick={() => {
-                      setCompetencyMasterId(null);
-                      setOpen({ open: true, isClone: false });
-                    }}
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    color="primary"
-                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                  >
-                    {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                  </Button>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    disabled={selectedRecords.length ? false : true}
-                    aria-controls="action-menu"
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                    endIcon={<ExpandMore />}
-                  >
-                    {isMobile && !isTablet ? '' : 'Actions'}
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      disabled={!permissions?.competencyMaster?.isDelete}
+                  {permissions.competencies.isCreate && (
+                    <Button
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
-                        closeActions();
-                        // eslint-disable-next-line no-lone-blocks
-                        {
-                          selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                        }
-                        setShowDeleteConfirmBox(true);
+                        setCompetenciesId(null);
+                        setOpen({ open: true, isClone: false });
                       }}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      size="small"
+                      color="primary"
+                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                     >
-                      Delete
-                    </MenuItem>
-                  </Menu>
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                    </Button>
+                  )}
+                  {permissions?.competencies?.isDelete && (
+                    <>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        disabled={selectedRecords.length ? false : true}
+                        aria-controls="action-menu"
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        endIcon={<ExpandMore />}
+                      >
+                        {isMobile && !isTablet ? '' : 'Actions'}
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        <MenuItem
+                          disabled={
+                            !(
+                              (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) ===
+                              selectedRecords?.length
+                            )
+                          }
+                          onClick={() => {
+                            closeActions();
+                            // eslint-disable-next-line no-lone-blocks
+                            {
+                              selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                            }
+                            setShowDeleteConfirmBox(true);
+                          }}
+                        >
+                          Delete
+                        </MenuItem>
+                      </Menu>
+                    </>
+                  )}
                 </Grid>
               </Box>
             </Grid>
@@ -352,17 +381,17 @@ const CompetencyMaster = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.competencyMaster}
+              permissions={permissions.competencies}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
-                setCompetencyMasterId(data._id);
+                setCompetenciesId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                setCompetencyMasterId(data.id);
+                setCompetenciesId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               extraParamsToCheckDelete={true}
@@ -378,7 +407,7 @@ const CompetencyMaster = () => {
               onCreate={false}
               showClone={true}
               onClone={(data) => {
-                setCompetencyMasterId(data.id);
+                setCompetenciesId(data.id);
                 setOpen({ open: true, isClone: true });
               }}
               chips={[]}
@@ -398,17 +427,17 @@ const CompetencyMaster = () => {
               allowAction={true}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={fetchCompetencyMasterData}
+              refreshGrid={fetchCompetenciesData}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
-              resource={sidebarResource.competencyMaster}
+              resource={sidebarResource.competencies}
             />
           )
         ) : null}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.competencyMaster?.title?.toLowerCase()}  ${deleteRecord?.name || ''} ?`}
+            message={`Are you sure you want to delete ${routes?.competencies?.title?.toLowerCase()}  ${deleteRecord?.competenceName || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -416,15 +445,14 @@ const CompetencyMaster = () => {
             onOk={handleDelete}
           />
         )}
-
         {open?.open && (
-          <ManageCompetencyMaster
-            id={competencyMasterId}
+          <ManageCompetencies
+            id={competenciesId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
-              fetchCompetencyMasterData();
+              fetchCompetenciesData();
             }}
           />
         )}
@@ -433,4 +461,4 @@ const CompetencyMaster = () => {
   );
 };
 
-export default CompetencyMaster;
+export default Competencies;

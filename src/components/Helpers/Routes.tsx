@@ -798,19 +798,19 @@ const routes = {
         : RESOURCE_LABEL?.employeeMaster,
     path: '/employee-master/detail'
   },
-  competencyMaster: {
+ competencyType: {
     title:
-      storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title
-        ? storedRoutes.competencyMaster?.title
-        : RESOURCE_LABEL.competencyMaster,
-    path: '/competency-master'
+      storedRoutes && storedRoutes.competencyType && storedRoutes.competencyType.title
+        ? storedRoutes.competencyType?.title
+        : RESOURCE_LABEL.competencyType,
+    path: '/competency-type'
   },
-  competencyMasterDetail: {
+  competencyTypeDetail: {
     title:
-      storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title
-        ? storedRoutes.competencyMaster?.title
-        : RESOURCE_LABEL.competencyMaster,
-    path: '/competency-master/detail'
+      storedRoutes && storedRoutes.competencyType && storedRoutes.competencyType.title
+        ? storedRoutes.competencyType?.title
+        : RESOURCE_LABEL.competencyType,
+    path: '/competency-type/detail'
   },
   technicianScheduler: {
     title:
@@ -924,7 +924,14 @@ const routes = {
     title: storedRoutes && storedRoutes.taxMaster && storedRoutes.taxMaster.title ? storedRoutes.taxMaster?.title : RESOURCE_LABEL.taxMaster,
     path: '/tax-master/detail'
   },
-  
+  competencies: {
+    title: storedRoutes && storedRoutes.competencies && storedRoutes.competencies.title ? storedRoutes.competencies?.title : RESOURCE_LABEL.competencies,
+    path: '/competencies'
+  },
+  competenciesDetail: {
+    title: storedRoutes && storedRoutes.competencies && storedRoutes.competencies.title ? storedRoutes.competencies?.title : RESOURCE_LABEL.competencies,
+    path: '/competencies/detail'
+  },
 };
 
 export default routes;

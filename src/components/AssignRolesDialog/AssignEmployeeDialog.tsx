@@ -68,8 +68,8 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetency]);
 
   const fetchCompetencyMaster = () => {
-    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Competency Master`).then(({ data: { data } }) => {
-      setCompetencyOptions(data["Competency Master"] || []);
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Competency Type`).then(({ data: { data } }) => {
+      setCompetencyOptions(data["Competency Type"] || []);
     })
       .catch((error) => {
         toastConfig.setToastConfig(error);

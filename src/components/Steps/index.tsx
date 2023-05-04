@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import styles from './steps.module.scss';
 import MobileSteps from './MobileSteps';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { Button, IconButton, Box, Typography } from '@material-ui/core';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
@@ -77,9 +77,9 @@ const Steps = ({
 
   return (
     <div>
-      {isMobile ? (
+      {(isMobile && !isTablet) ? (
         <MobileSteps
-          stepName={`${activeStep + 1}/${steps.length} ${steps[currentStep].title ? steps[currentStep].title : ''}`}
+          stepName={`${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`}
           nextButton={
             <Button
               size="small"
