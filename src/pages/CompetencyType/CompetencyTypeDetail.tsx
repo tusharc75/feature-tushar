@@ -139,7 +139,7 @@ const CompetencyMasterDetail = () => {
           }}
         >
            <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-          {permissions.wellNumber.isRead && (
+          {permissions.competencies.isRead && (
             <Tab
               label={<div className="tab-font">{routes?.competencies.title}</div>}
               value={1}
