@@ -798,19 +798,19 @@ const routes = {
         : RESOURCE_LABEL?.employeeMaster,
     path: '/employee-master/detail'
   },
-  competencyMaster: {
+ competencyType: {
     title:
-      storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title
-        ? storedRoutes.competencyMaster?.title
-        : RESOURCE_LABEL.competencyMaster,
-    path: '/competency-master'
+      storedRoutes && storedRoutes.competencyType && storedRoutes.competencyType.title
+        ? storedRoutes.competencyType?.title
+        : RESOURCE_LABEL.competencyType,
+    path: '/competency-type'
   },
-  competencyMasterDetail: {
+  competencyTypeDetail: {
     title:
-      storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title
-        ? storedRoutes.competencyMaster?.title
-        : RESOURCE_LABEL.competencyMaster,
-    path: '/competency-master/detail'
+      storedRoutes && storedRoutes.competencyType && storedRoutes.competencyType.title
+        ? storedRoutes.competencyType?.title
+        : RESOURCE_LABEL.competencyType,
+    path: '/competency-type/detail'
   },
   technicianScheduler: {
     title:

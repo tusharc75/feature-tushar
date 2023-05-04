@@ -53,7 +53,6 @@ function Dashboard() {
     setSections(data);
   }, [user, selectedEntity]);
 
-  console.log(sections);
 
   const handleRoutes = (item) => {
     switch (item.name) {

@@ -3,7 +3,6 @@ import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Skeleton } from '@material-ui/lab';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
@@ -13,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageCompetencyMaster from './ManageCompetencyMaster';
+import ManageCompetencyType from './ManageCompetencyType';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
 
@@ -40,7 +39,7 @@ const CompetencyMasterDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get('/field?resource=Competency Master')
+      .get('/field?resource=Competency Type')
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
       })
@@ -54,9 +53,9 @@ const CompetencyMasterDetail = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/competency-master/${id}`);
+      } = await axiosInstance().get(`/competency-type/${id}`);
       setCompetencyMasterData(data);
-      setCustomizedRoutes([routes.competencyMaster, { title: data?.competencyType }]);
+      setCustomizedRoutes([routes.competencyType, { title: data?.competencyType }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -65,9 +64,9 @@ const CompetencyMasterDetail = () => {
 
   const handleDelete = () => {
     if (id) {
-      if (permissions?.competencyMaster?.isDelete) {
+      if (permissions?.competencyType?.isDelete) {
         axiosInstance()
-          .put(`/competency-master/remove`, { ids: [id] })
+          .put(`/competency-type/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
 
@@ -104,7 +103,7 @@ const CompetencyMasterDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.competencyMaster?.isUpdate && (
+              {permissions?.competencyType?.isUpdate && (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   className="btn-outline-v1"
@@ -114,15 +113,15 @@ const CompetencyMasterDetail = () => {
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.competencyMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.competencyType?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
-            <ActivityButton referenceId={competencyMasterData?._id} resource={ACTIVITY_RESOURCE.competencyMaster} />
+            <ActivityButton referenceId={competencyMasterData?._id} resource={ACTIVITY_RESOURCE.competencyType} />
           </Box>
         </Box>
       </Box>
       <Box className="detail-container-v1">
         <Grid container spacing={1}>
-          <Grid item xs={12} sm={12} md={8}>
+          <Grid item xs={12} sm={12} md={12}>
             <Paper>
               <Box>
                 {loading || !fields?.length ? (
@@ -135,63 +134,12 @@ const CompetencyMasterDetail = () => {
               </Box>
             </Paper>
           </Grid>
-          <Grid item xs={12} sm={12} md={4}>
-            <Paper style={{ overflow: 'hidden' }}>
-              <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                <Box display={'flex'}>
-                  <Box>
-                    <Typography variant="subtitle2">Competency</Typography>
-                  </Box>
-                </Box>
-              </Box>
-              {competencyMasterData?.competency?.length ? (
-                <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-                  <Grid container>
-                    <Grid item xs={2}>
-                      <Typography variant="body1">Index</Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Typography variant="body1">Name</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="body1">Description</Typography>
-                    </Grid>
-                  </Grid>
-                </Box>
-              ) : null}
-              {competencyMasterData?.competency?.length ? (
-                competencyMasterData?.competency?.map((steps, index) => (
-                  <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-                    <Grid container>
-                      <Grid item xs={2}>
-                        <Typography variant="body2">{index + 1}</Typography>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Typography variant="body2">{steps?.name || ''}</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="body2">{steps?.description || 0}</Typography>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                ))
-              ) : (
-                <Box bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-                  <Grid container>
-                    <Grid item xs={6} justifyContent={'center'}>
-                      <Typography variant="body2">No Data Found</Typography>
-                    </Grid>
-                  </Grid>
-                </Box>
-              )}
-            </Paper>
-          </Grid>
         </Grid>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.competencyMaster?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${routes?.competencyType?.title?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -199,7 +147,7 @@ const CompetencyMasterDetail = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageCompetencyMaster
+        <ManageCompetencyType
           id={id}
           isClone={false}
           onClose={closeUpdateDialog}

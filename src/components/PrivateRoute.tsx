@@ -60,7 +60,6 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'serialized-asset-new',
         'import-export',
         'custom-report',
-        'competency-master'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
