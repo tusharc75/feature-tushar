@@ -147,7 +147,6 @@ const Steps = ({
                 `}
                     key={step.name}
                   >
-                    {console.log({ isStepEnded, currentStep })}
                     {isStepEnded && (
                       <Box className={styles.stepCompleteIcon}>
                         <StepCompleteIcon />
