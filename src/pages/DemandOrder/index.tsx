@@ -32,18 +32,21 @@ import { camelCase } from 'lodash';
 
 let searchTimeout;
 
-const DemandOrderType = [
-    {
-        key: 'All Demand Order',
-        value: 1
-    },
-    {
-        key: 'My Demand Order',
-        value: 2
-    }
-];
+
 
 const DemandOrder = () => {
+
+  const DemandOrderType = [
+    {
+      key: `All ${routes.demandOrder.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes.demandOrder.title}`,
+      value: 2
+    }
+  ];
+
   const renderedFrom = camelCase(routes?.demandOrder.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);

@@ -37,18 +37,20 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 let repairOrderTimeout;
-const RepairOrderType = [
-  {
-    key: 'All Repair Order',
-    value: 1
-  },
-  {
-    key: 'My Repair Order',
-    value: 2
-  }
-];
 
 const RepairOrder = () => {
+
+  const RepairOrderType = [
+    {
+      key: `All ${routes?.repairOrder.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes?.repairOrder.title}`,
+      value: 2
+    }
+  ];
+
   const renderedFrom = camelCase(routes?.repairOrder.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 

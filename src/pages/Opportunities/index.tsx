@@ -34,18 +34,21 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 
 let opportunityTimeout;
-const OpportunityTypes = [
-  {
-    key: 'All Opportunities',
-    value: 1
-  },
-  {
-    key: 'My Opportunities',
-    value: 2
-  }
-];
+
 
 const Opportunities = () => {
+
+  const OpportunityTypes = [
+    {
+      key: `All ${routes.opportunity.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes.opportunity.title}`,
+      value: 2
+    }
+  ];
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {

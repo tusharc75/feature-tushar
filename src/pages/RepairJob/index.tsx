@@ -27,18 +27,21 @@ import { FaSuitcase, SiStatuspage, FaWarehouse, GiAutoRepair, GrStatusInfo, BsFi
 
 
 let repairJobTimeout;
-const RepairJobType = [
-  {
-    key: 'All Repair Job',
-    value: 1
-  },
-  {
-    key: 'My Repair Job',
-    value: 2
-  }
-];
 
 const RepairJob = () => {
+
+  const RepairJobType = [
+    {
+      key: `All ${routes?.repairJob.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes?.repairJob.title}`,
+      value: 2
+    }
+  ];
+
+  
   const renderedFrom = camelCase(routes?.repairJob.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
