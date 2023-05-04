@@ -7,29 +7,31 @@ import { formatAmountWithCurrency } from '../../constants/helpers';
 import { startCase } from 'lodash';
 import { ChartDataType } from './ChartTypes';
 
-export default async (type: string, currency: string, tableData: any[], chart: ChartDataType, isTableView: boolean) => {
+export default async (type: string, currency: string, tableData: any[], chart: ChartDataType, isTableView: boolean, isCurrency: boolean) => {
+
   const { uniqueId, graphType, chartTitle } = chart;
+
   const { title, fileName } = { title: chartTitle.replaceAll('CUR', currency), fileName: chartTitle.replaceAll('CUR', currency) };
 
 
   const columns = Object.keys(tableData[0])
-      .map((k) => {
-        let b = tableData[0];
-        return {
-          colName: k,
-          order: b[k].order
-        };
-      })
-      .sort((a, b) => a.order - b.order)
-      .map((d) => d.colName);
-    let newData = tableData.map((data) => {
-      let obj: any = {};
-      columns.forEach((key) => {
-        obj[key] = data[key].value;
-      });
-
-      return obj;
+    .map((k) => {
+      let b = tableData[0];
+      return {
+        colName: k,
+        order: b[k].order
+      };
+    })
+    .sort((a, b) => a.order - b.order)
+    .map((d) => d.colName);
+  let newData = tableData.map((data) => {
+    let obj: any = {};
+    columns.forEach((key) => {
+      obj[key] = data[key].value;
     });
+
+    return obj;
+  });
 
   if (graphType !== 'Table' && !isTableView) {
     switch (type) {
@@ -120,7 +122,8 @@ export default async (type: string, currency: string, tableData: any[], chart: C
             columns.map((key) =>
               isNaN(Number(data[key]))
                 ? data[key] : key.includes("MT") || key.includes("GM") ? Number(data[key]) ? data[key].toFixed(2) : '00'
-                  : formatAmountWithCurrency(currency, Number(data[key]) ? data[key].toFixed(2) : '00').fullFormatAmount
+                  : isCurrency ? formatAmountWithCurrency(currency, Number(data[key]) ? data[key].toFixed(2) : '00').fullFormatAmount
+                    : Number(data[key])
             )
           );
           //@ts-ignore

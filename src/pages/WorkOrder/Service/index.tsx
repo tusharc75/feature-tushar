@@ -39,7 +39,7 @@ import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
-import { reverse } from 'lodash';
+import { isArray, reverse } from 'lodash';
 import AttachmentDialog from './AttachmentDialog';
 import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
@@ -438,8 +438,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     return stepTimes;
   };
 
-  const handleConvertSuccess = (data: any) => {
-    setShowManagePurchaseOrder(false)
+  const handleUpdatePurchaseOrder = (data: any) => {
     axiosInstance()
       .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-purchase-order`, { purchaseOrderId: data?._id })
       .then(({ data }) => {
@@ -449,6 +448,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           severity: 'success'
         });
         setAssignSteps(false);
+        setShowManagePurchaseOrder(false)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -1097,14 +1097,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               >
                 Logs
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setShowManagePurchaseOrder(true);
-                  setAnchorEl(null);
-                }}
-              >
-                Subcontract PO
-              </MenuItem>
+              {user?.brandPolicy?.subcontractPurchaseOrder &&
+                <MenuItem
+                  onClick={() => {
+                    setShowManagePurchaseOrder(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Subcontract PO
+                </MenuItem>
+              }
             </Menu>
           )}
         </Grid>
@@ -1237,10 +1239,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           purchaseOrderId={null}
           onClose={() => setShowManagePurchaseOrder(false)}
           onSuccess={(data: any) => {
-            handleConvertSuccess(data)
+            handleUpdatePurchaseOrder(data)
           }}
           products={[]}
-          services={[{ service: selectedService._id, unit: selectedService?.unit[0], qty: 1 }]}
+          services={[{
+            service: selectedService?.materialId,
+            unit: isArray(selectedService?.unit) && selectedService?.unit?.length ? selectedService?.unit[0] : '',
+            qty: 1
+          }]}
           warehouseId={workOrderData?.warehouse?.optionValue}
         />
       )}
