@@ -17,7 +17,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
-const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const history = useHistory();
   const { state: { user } }: any = useData();
   const toastConfig = useContext(CustomToastContext);
@@ -49,9 +49,18 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null }) 
             let tempData = data;
             if (isClone) {
               fields = fieldsDataForCreate;
-              const { competenceName, ...rest } = data;
-              setCloneHeading(competenceName);
+              const { competencyName, ...rest } = data;
+              setCloneHeading(competencyName);
               tempData = rest;
+            } else {
+              if (referenceData?.competencyType) {
+                fields?.forEach((e) => {
+                  if (e.fieldName === "competencyType") {
+                    e.disableOnEdit = true
+                    e.isUneditable = true;
+                  }
+                })
+              }
             }
             setInitialData({
               fields: fields,
@@ -63,7 +72,16 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null }) 
           });
       }
       else {
-        const tempInitialData = getObjKeys('', fieldsDataForCreate);
+        const tempInitialData:any = getObjKeys('', fieldsDataForCreate);
+        if (referenceData?.competencyType) {
+          fieldsDataForCreate?.forEach((e) => {
+            if (e.fieldName === "competencyType") {
+              tempInitialData.competencyType = referenceData?.competencyType;
+              e.disableOnEdit = true
+              e.isUneditable = true;
+            }
+          })
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -95,8 +113,12 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null }) 
         .post(`${routes.competencies?.path}`, values)
         .then(({ data: { data, message } }:any) => {
           setLoading(false);
-          history.push(`${routes.competenciesDetail.path}/${data._id}`);
-         onSuccess(data.data);
+          if (referenceData) {
+            onSuccess(data.data);
+          }else{
+            history.push(`${routes.competenciesDetail.path}/${data._id}`);
+            onSuccess(data.data);
+          }
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
@@ -152,7 +174,7 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null }) 
                 title={`${id
                   ? isClone
                     ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.competenceName ? `(${initialData.values?.competenceName})` : ''}`
+                    : `Update ${initialData.values?.competencyName ? `(${initialData.values?.competencyName})` : ''}`
                   : `Create ${routes?.competencies?.title}`
                   }`}
                 isMinimized={!fullScreen}
@@ -173,8 +195,6 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null }) 
                     fullWidth
                   />
                 </Form>
-
-
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button

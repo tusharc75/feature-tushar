@@ -54,7 +54,7 @@ const CompetenciesDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.competencies.path}/${id}`);
       setCompetenciesData(data);
-      setCustomizedRoutes([routes.competencies, { title: data?.competenceName }]);
+      setCustomizedRoutes([routes.competencies, { title: data?.competencyName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -132,7 +132,7 @@ const CompetenciesDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.competencies?.title?.toLowerCase()} ${competenciesData.competenceName} ?`}
+          message={`Are you sure you want to delete ${routes?.competencies?.title?.toLowerCase()} ${competenciesData.competencyName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

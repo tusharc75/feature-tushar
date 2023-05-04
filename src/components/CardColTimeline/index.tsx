@@ -101,11 +101,11 @@ interface groupByinterface {
   objectArray: any[];
   property: string;
   sortBy?: string[];
+  columnsToKeep?: string[];
 }
 
-export function groupBy({ objectArray, property, sortBy = [] }: groupByinterface) {
-  if (sortBy.length > 0) objectArray.sort((a, b) => sortBy.indexOf(a[property]) - sortBy.indexOf(b[property]));
-  return objectArray.reduce((acc, obj) => {
+export function groupBy({ objectArray, property, sortBy = null, columnsToKeep = null }: groupByinterface) {
+  const newObj = objectArray.reduce((acc, obj) => {
     const key = obj[property];
     if (!acc[key]) {
       acc[key] = [];
@@ -114,4 +114,29 @@ export function groupBy({ objectArray, property, sortBy = [] }: groupByinterface
     acc[key].push(obj);
     return acc;
   }, {});
+
+  let newObjkeys = Object.keys(newObj);
+  if (columnsToKeep) {
+    if (newObjkeys.length !== columnsToKeep.length) {
+      columnsToKeep.forEach((col) => {
+        const keyFound = newObjkeys.includes(col) ? null : col;
+        if (keyFound) {
+          newObj[keyFound] = [];
+        }
+      });
+    }
+    newObjkeys = Object.keys(newObj);
+  }
+
+  let sortedObj: any = newObjkeys;
+  if (sortBy) {
+    sortedObj = {};
+    sortBy.forEach((col) => {
+      if (newObjkeys.includes(col)) {
+        sortedObj[col] = newObj[col];
+      }
+    });
+  }
+
+  return sortedObj;
 }

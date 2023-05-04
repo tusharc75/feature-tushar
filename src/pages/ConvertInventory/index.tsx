@@ -261,7 +261,7 @@ const ConvertInventory = () => {
                     setStorageLocationId(null);
                   }
                 }}
-                renderInput={(params) => <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />}
+                renderInput={(params) => <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />}
               />
               {user?.user?.brandPolicy?.storageLocation && (
                 <Autocomplete

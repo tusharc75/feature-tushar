@@ -266,6 +266,7 @@ const FormTypes = (props) => {
     ...rest
   } = props;
 
+
   const [image, setImage] = React.useState<any>("");
   const [imageFileName, setImageFileName] = React.useState<any>("");
   const [readingImage, setReadingImage] = React.useState<any>(false);
@@ -882,7 +883,8 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : (type === 'dropDown' || type === 'multiSelect') &&
-    lookup && [sidebarResource.wellMaster, sidebarResource.wellNumber, sidebarResource.warehouse, sidebarResource.storageLocation].includes(fieldData?.lookupResource) ? (
+    lookup && [sidebarResource.wellMaster, sidebarResource.wellNumber, sidebarResource.warehouse, sidebarResource.storageLocation
+      , sidebarResource.competencyType, sidebarResource.competencies].includes(fieldData?.lookupResource) ? (
     <Dropdown
       InfoLabel={InfoLabel}
       fieldData={fieldData}
@@ -1422,8 +1424,8 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(name, e.target.value === "" ? "" : 
-              parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
+              handleChange(name, e.target.value === "" ? "" :
+                parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
             }
         }
         InputProps={{

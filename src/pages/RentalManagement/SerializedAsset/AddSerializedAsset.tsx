@@ -423,8 +423,8 @@ const AddSerializedAsset = ({
                               {...params}
                               margin="dense"
                               name="plant"
-                              placeholder="Plant"
-                              label="Plant"
+                              placeholder={routes.warehouse.title}
+                              label={routes.warehouse.title}
                               variant="outlined"
                               fullWidth
                               className="m-0"
