@@ -27,19 +27,20 @@ import ManageProductionOrder from './ManageProductionOrder';
 
 
 let productionOrderTimeout;
-const ProductionOrderType = [
-    {
-        key: 'All Production Order',
-        value: 1
-    },
-    {
-        key: 'My Production Order',
-        value: 2
-    }
-];
 
 const ProductionOrder = () => {
 
+    const ProductionOrderType = [
+        {
+            key: `All ${routes.productionOrder.title}`,
+            value: 1
+          },
+          {
+            key: `My ${routes.productionOrder.title}`,
+            value: 2
+          }
+    ];
+    
     const renderedFrom = camelCase(routes?.productionOrder.title)
     const localStorageSelectedRecords = `${renderedFrom}_selected`
 

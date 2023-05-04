@@ -31,19 +31,22 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { BsBuilding, AiFillMail } from 'react-icons/all';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const LeadTypes = [
-  {
-    key: 'All Leads',
-    value: 1
-  },
-  {
-    key: 'My Leads',
-    value: 2
-  }
-];
+
 
 let leadTimeout;
 const Leads = () => {
+  
+  const LeadTypes = [
+    {
+      key: `All ${routes.lead.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes.lead.title}`,
+      value: 2
+    }
+  ];
+
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 

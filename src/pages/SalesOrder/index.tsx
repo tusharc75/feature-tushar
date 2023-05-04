@@ -35,18 +35,22 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { camelCase } from 'lodash'
 
 let salesOrderTimeout;
-const SalesOrderType = [
-  {
-    key: 'All Sales Order',
-    value: 1
-  },
-  {
-    key: 'My Sales Order',
-    value: 2
-  }
-];
+
 
 const SalesOrder = () => {
+
+  const SalesOrderType = [
+    {
+      key: `All ${routes?.salesOrder.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes?.salesOrder.title}`,
+      value: 2
+    }
+  ];
+
+
   const renderedFrom = camelCase(routes?.salesOrder.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
