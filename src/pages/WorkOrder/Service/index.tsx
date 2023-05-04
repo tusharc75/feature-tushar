@@ -41,7 +41,7 @@ import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import { reverse } from 'lodash';
 import AttachmentDialog from './AttachmentDialog';
-
+import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 
 const getTotalTime = (stepTimes: any) => {
@@ -111,6 +111,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [arrangeView, setArrangeView] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
   const [logsDialog, setLogsDialog] = useState(false);
+  const [showManagePurchaseOrder, setShowManagePurchaseOrder] = useState(false);
   const [isColapsed, setIsColapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [disableCompleteFail, setDisableCompleteFail] = useState(false);
@@ -436,6 +437,23 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     });
     return stepTimes;
   };
+
+  const handleConvertSuccess = (data: any) => {
+    setShowManagePurchaseOrder(false)
+    axiosInstance()
+      .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-purchase-order`, { purchaseOrderId: data?._id })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
+        });
+        setAssignSteps(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   const isAllowedToServiceEdit =
     !completed &&
@@ -1079,6 +1097,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               >
                 Logs
               </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setShowManagePurchaseOrder(true);
+                  setAnchorEl(null);
+                }}
+              >
+                Subcontract PO
+              </MenuItem>
             </Menu>
           )}
         </Grid>
@@ -1203,6 +1229,19 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
             setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
           }}
           handleSuccess={() => { }}
+        />
+      )}
+      {showManagePurchaseOrder && (
+        <ManagePurchaseOrder
+          isClone={false}
+          purchaseOrderId={null}
+          onClose={() => setShowManagePurchaseOrder(false)}
+          onSuccess={(data: any) => {
+            handleConvertSuccess(data)
+          }}
+          products={[]}
+          services={[{ service: selectedService._id, unit: selectedService?.unit[0], qty: 1 }]}
+          warehouseId={workOrderData?.warehouse?.optionValue}
         />
       )}
     </Box>
