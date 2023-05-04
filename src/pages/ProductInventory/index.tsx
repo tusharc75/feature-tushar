@@ -532,13 +532,13 @@ const InventoryProduct = () => {
                       {...params}
                       margin="dense"
                       name="plant"
-                      placeholder="Plant"
+                      placeholder={routes.warehouse.title}
                       variant="standard"
                       fullWidth
                       className={isMobile ? 'serchBox' : ''}
                     />
                   ) : (
-                    <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />
+                    <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
                   )
                 }
               />

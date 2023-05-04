@@ -8,6 +8,7 @@ import { gridLoadingTimeout, productInventory, } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { CommonRenderer, CreatedByRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
+import routes from "src/components/Helpers/Routes";
 
 const SerialNumber = ({ product, warehouse }) => {
 
@@ -39,7 +40,7 @@ const SerialNumber = ({ product, warehouse }) => {
 
     const columns = [
         { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-        { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
+        { field: "warehouse", headerName: routes.warehouse.title, show: true, cellRenderer: "commonRenderer" },
         { field: "active", headerName: "Status", show: true, cellRenderer: "statusRenderer" },
         { field: 'createdBy', headerName: 'Created By', show: true, filter: false, sortable: false, cellRenderer: 'createdByRenderer' }
     ];
