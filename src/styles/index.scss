@@ -261,33 +261,33 @@ a {
   font-weight: 600;
 }
 
-.toggle-button-layout {
-  .MuiToggleButton-sizeSmall {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    padding: 8px 16px !important;
-    border-radius: 10px !important;
-    background-color: #f4f4f4;
-    color: var(--primary);
-  }
+// .toggle-button-layout {
+//   .MuiToggleButton-sizeSmall {
+//     font-size: 13px !important;
+//     font-weight: 600 !important;
+//     padding: 8px 16px !important;
+//     border-radius: 10px !important;
+//     background-color: #f4f4f4;
+//     color: var(--primary);
+//   }
 
-  .MuiToggleButton-root.Mui-selected {
-    margin: 0 5px;
-    padding: 8px 16px !important;
-    background-color: #c7e7e6 !important;
-    border: 1px solid #43aeaa !important;
-  }
+//   .MuiToggleButton-root.Mui-selected {
+//     margin: 0 5px;
+//     padding: 8px 16px !important;
+//     background-color: #c7e7e6 !important;
+//     border: 1px solid #43aeaa !important;
+//   }
 
-  .MuiToggleButtonGroup-groupedHorizontal:not(:first-child) {
-    margin: 0 5px;
-    padding: 8px 16px !important;
-  }
+//   .MuiToggleButtonGroup-groupedHorizontal:not(:first-child) {
+//     margin: 0 5px;
+//     padding: 8px 16px !important;
+//   }
 
-  .MuiToggleButtonGroup-groupedHorizontal:not(:last-child) {
-    margin: 0 5px;
-    padding: 8px 16px !important;
-  }
-}
+//   .MuiToggleButtonGroup-groupedHorizontal:not(:last-child) {
+//     margin: 0 5px;
+//     padding: 8px 16px !important;
+//   }
+// }
 
 #img-avatar {
   vertical-align: middle;
@@ -680,8 +680,8 @@ body::-webkit-scrollbar-thumb {
   }
 
   .MuiToggleButton-root.Mui-selected {
-    background-color: #effbf9 !important;
-    color: #298b88 !important;
+    background-color: var(--new_theme_color) !important;
+    color: #fff !important;
   }
 
   & .MuiOutlinedInput-inputMarginDense {
@@ -2622,7 +2622,7 @@ svg.MuiSvgIcon-root {
 .new-custom-breadcrumb-v1 {
   ol {
     li {
-      color: #298b88 !important;
+      color: #163340 !important;
 
       a {
         margin: 0px 4px;
@@ -2632,14 +2632,14 @@ svg.MuiSvgIcon-root {
         }
 
         font-size: 1rem;
-        color: #298b88 !important;
+        color: #163340 !important;
         font-weight: 600;
       }
 
       p {
         margin: 0px 4px;
         font-size: 1rem;
-        color: #909090 !important;
+        color: #163340 !important;
         font-weight: 400;
       }
     }
