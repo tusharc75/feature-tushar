@@ -11,12 +11,11 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { CustomDialogTransition, isFieldNotTouched, setFieldsInAscendingOrder } from 'src/constants/helpers';
+import { CustomDialogTransition, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import routes from 'src/components/Helpers/Routes';
 
 const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -30,10 +29,6 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
-  const [formValues, setFormValues] = useState({});
-  const [competencySteps, setCompetencySteps] = useState([]);
-
-  const ref = useRef(null);
 
   useEffect(() => {
     fetchFields();
@@ -42,23 +37,22 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
   const fetchFields = async () => {
     try {
       let data;
-      const response = await axiosInstance().get('/field?resource=Competency Master');
+      const response = await axiosInstance().get('/field?resource=Competency Type');
       data = response?.data?.data;
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       if (id) {
         axiosInstance()
-          .get(`/competency-master/${id}`)
+          .get(`/competency-type/${id}`)
           .then(({ data: { data } }) => {
             let fields = fieldsDataForUpdate;
             let tempData = data;
-            setCompetencySteps(data?.competency || []);
             if (isClone) {
               fields = fieldsDataForCreate;
-              const { label, ...rest } = data;
-              setCloneHeading(label);
-              tempData = { ...rest, label };
+              const { competencyType, ...rest } = data;
+              setCloneHeading(competencyType);
+              tempData = { ...rest };
             }
             setInitialData({
               fields: fields,
@@ -84,11 +78,10 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
 
   const handleSubmit = (values) => {
     setSubmitting(true);
-    values.competency = competencySteps;
     if (id && !isClone) {
       values._id = id;
       axiosInstance()
-        .put(`/competency-master`, values)
+        .put(`/competency-type`, values)
         .then(({ data }) => {
           setSubmitting(false);
           onSuccess();
@@ -104,15 +97,15 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
         });
     } else {
       axiosInstance()
-        .post(`/competency-master`, values)
-        .then(({ data: { data } }) => {
+        .post(`/competency-type`, values)
+        .then(({ data }) => {
           setLoading(false);
-          onSuccess(data);
+          onSuccess(data?.data);
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: 'Created Successfully'
+            message: data.message
           });
         })
         .catch((error) => {
@@ -121,39 +114,13 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
         });
     }
   };
+
+
   function validate(values) {
     const errors = {};
     return errors;
   }
 
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
-
-  const handleAddLTMSteps = () => {
-    setCompetencySteps([...competencySteps, { name: '', description: '' }]);
-  };
-
-  const handleRemoveLTMSteps = (index) => {
-    const data = competencySteps?.filter((e, i) => i !== index);
-    setCompetencySteps(data);
-  };
-
-  const handleOnDescriptionChangeValue = (index, value) => {
-    const data = [...competencySteps];
-    data[index].description = value;
-    setCompetencySteps(data);
-    // setTotalDays(data?.reduce((acc, curr) => acc + parseInt(curr.days), 0));
-  };
-
-  const handleOnNameChangeValue = (index, value) => {
-    const data = [...competencySteps];
-    data[index].name = value;
-    setCompetencySteps(data);
-  };
 
   return (
     <Dialog
@@ -175,25 +142,23 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
           validationSchema={yupSchema(initialData.fields)}
           onSubmit={handleSubmit}
           validate={validate}
-          innerRef={ref}
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
+                  if (!isEqual(values, initialData.values)) {
                     setShowConfirmDialog(true);
                   } else {
                     onClose();
                   }
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
-                    : `Create New Competency`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
+                  : `Create ${routes.competencyType.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -227,7 +192,6 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
                                       type={field.type}
                                       options={field.option}
                                       setFieldValue={(name, value) => {
-                                        handleValuesChange({ [name]: value });
                                         setFieldValue(name, value);
                                       }}
                                       required={field.required}
@@ -244,88 +208,6 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
                         )
                       );
                     })}
-                  <div className={'detail-box-content'}>
-                    <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                    <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Competency</h2>
-                  </div>
-                  <Grid container>
-                    <Grid item xs={12}>
-                      <Box
-                        style={{ maxHeight: '350px', overflow: 'auto' }}
-                        bgcolor="white"
-                        border={1}
-                        mt={2}
-                        mb={1}
-                        borderColor="grey.300"
-                        width={'100%'}
-                      >
-                        <Box p={1} bgcolor="grey.200">
-                          <Grid container xs={12}>
-                            <Grid item xs={6}>
-                              <Typography variant="body2">Name</Typography>
-                            </Grid>
-                            <Grid item xs={4}>
-                              <Typography variant="body2">Description</Typography>
-                            </Grid>
-                            <Grid item xs={2}>
-                              <Grid container justifyContent="flex-end">
-                                <IconButton
-                                  size="small"
-                                  aria-label="setting"
-                                  onClick={() => {
-                                    handleAddLTMSteps();
-                                  }}
-                                >
-                                  <AddCircleOutlineIcon fontSize="small" />
-                                </IconButton>
-                              </Grid>
-                            </Grid>
-                          </Grid>
-                        </Box>
-                        {competencySteps?.map((steps, index) => (
-                          <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-                            <Grid container spacing={1}>
-                              <Grid item xs={6}>
-                                <TextField
-                                  id="Days-Field"
-                                  variant="outlined"
-                                  margin="dense"
-                                  name="name"
-                                  label="Name"
-                                  type="name"
-                                  fullWidth
-                                  style={{ margin: 0 }}
-                                  value={steps?.name || ''}
-                                  onChange={(event) => handleOnNameChangeValue(index, event.target.value)}
-                                />
-                              </Grid>
-                              <Grid item xs={4}>
-                                <TextField
-                                  id="Days-Field"
-                                  variant="outlined"
-                                  margin="dense"
-                                  name="description"
-                                  label="Description"
-                                  type="description"
-                                  fullWidth
-                                  style={{ margin: 0 }}
-                                  value={steps?.description || ''}
-                                  onChange={(event) => handleOnDescriptionChangeValue(index, event.target.value)}
-                                />
-                              </Grid>
-                              <Grid item xs={2}>
-                                <Grid container justifyContent="flex-end">
-                                  <IconButton size="small" aria-label="setting" onClick={() => handleRemoveLTMSteps(index)}>
-                                    <RemoveCircleOutlineIcon fontSize="small" />
-                                  </IconButton>
-                                </Grid>
-                              </Grid>
-                            </Grid>
-                          </Box>
-                        ))}
-                      </Box>
-                    </Grid>
-                  </Grid>
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
@@ -334,17 +216,11 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
+                    if (!isEqual(values, initialData.values)) {
+                      setShowConfirmDialog(true);
+                    } else {
                       onClose();
-                    else setShowConfirmDialog(true);
+                    }
                   }}
                 >
                   Cancel
