@@ -133,7 +133,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     ] : []),
     {
       field: 'warehouse',
-      headerName: 'Plant',
+      headerName: routes.warehouse.title,
       show: true,
       filter: false,
       sortable: false,
