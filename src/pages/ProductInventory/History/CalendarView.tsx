@@ -19,25 +19,25 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
   const fetchRecords = async () => {
     var query = `?`;
     if (warehouse) {
-      query = `${query}&warehouse=${warehouse}`
+      query = `${query}&warehouse=${warehouse}`;
     }
     if (storageLocation) {
-      query = `${query}&storageLocation=${storageLocation}`
+      query = `${query}&storageLocation=${storageLocation}`;
     }
 
     const response = await axiosInstance().get(`/history/product-ledger/${product}${query}`);
     const response1 = await axiosInstance().get(`/product-inventory/product/upcoming-ledger/${product}${query}`);
     let rows = [...response?.data?.data, ...response1?.data?.data];
 
-    let qty = 0;
-    rows.forEach((item) => {
-      if (item.type === 'credit') {
-        qty += item?.qty;
-      } else {
-        qty -= item?.qty;
-      }
-      item.finalInventory = qty;
-    });
+    // let qty = 0;
+    // rows.forEach((item) => {
+    //   if (item.type === 'credit') {
+    //     qty += item?.qty;
+    //   } else {
+    //     qty -= item?.qty;
+    //   }
+    //   item.finalInventory = qty;
+    // });
 
     let datewise = [];
     let datewiseData = [];
@@ -50,7 +50,7 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
 
     datewise.forEach((d) => {
       let sameDateData = datewise.filter((item) => {
-        return moment(item.date).format("MM-DD-YYYY") === moment(d.date).format("MM-DD-YYYY");
+        return moment(item.date).format('MM-DD-YYYY') === moment(d.date).format('MM-DD-YYYY');
       });
       let lastFinalInventory;
       if (sameDateData && sameDateData.length > 0) {
@@ -71,7 +71,7 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
       return {
         ...d,
         id: d?._id,
-        title: d?.isFinalInventory ? `Final Inventory (${d.finalInventory})` : `${d?.type === "credit" ? "↑" : "↓"} ${d?.referenceType} (${d?.qty})`,
+        title: d?.isFinalInventory ? `Final Inventory (${d.finalInventory})` : `${d?.type === 'credit' ? '↑' : '↓'} ${d?.referenceType} (${d?.qty})`,
         start: new Date(d.date),
         end: new Date(d.date)
       };
