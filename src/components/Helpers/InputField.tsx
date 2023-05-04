@@ -42,6 +42,7 @@ const InputField = (props) => {
                   field.type === 'converter' || field.type === 'currencyAmount' ? (
                     <FormTypes
                       {...rest}
+                      {...field}
                       values={values}
                       errors={errors}
                       touched={touched}
@@ -54,6 +55,7 @@ const InputField = (props) => {
                       isTooltip={field.isTooltip}
                       tooltipMessage={field.tooltipMessage}
                       fields={fieldsData}
+                      allFields={fieldsData}
                       fieldData={field}
                     />
                   ) : field.fieldName === 'day' ? (
@@ -61,6 +63,7 @@ const InputField = (props) => {
                       <Grid item xs={12} sm={6} md={6}>
                         <FormTypes
                           {...rest}
+                          {...field}
                           values={values}
                           errors={errors}
                           touched={touched}
@@ -73,6 +76,7 @@ const InputField = (props) => {
                           isTooltip={field.isTooltip}
                           tooltipMessage={field.tooltipMessage}
                           fields={fieldsData}
+                          allFields={fieldsData}
                           fieldData={field}
                         />
                       </Grid>
@@ -82,6 +86,7 @@ const InputField = (props) => {
                       <Grid item xs={12} sm={6} md={6}>
                         <FormTypes
                           {...rest}
+                          {...field}
                           values={values}
                           errors={errors}
                           touched={touched}
@@ -94,6 +99,7 @@ const InputField = (props) => {
                           isTooltip={field.isTooltip}
                           tooltipMessage={field.tooltipMessage}
                           fields={fieldsData}
+                          allFields={fieldsData}
                           fieldData={field}
                         />
                       </Grid>
@@ -103,12 +109,13 @@ const InputField = (props) => {
                       <Grid container spacing={1}>
                         <Grid
                           item
-                          xs={permissions?.warehouse?.isCreate ? 10 : 11}
-                          sm={permissions?.warehouse?.isCreate ? 10 : 11}
+                          xs={permissions?.address?.isCreate ? 10 : 11}
+                          sm={permissions?.address?.isCreate ? 10 : 11}
                           md={permissions?.isCreate ? 10 : 11}
                         >
                           <FormTypes
                             {...rest}
+                            {...field}
                             values={values}
                             errors={errors}
                             touched={touched}
@@ -121,10 +128,11 @@ const InputField = (props) => {
                             isTooltip={field.isTooltip}
                             tooltipMessage={field.tooltipMessage}
                             fields={fieldsData}
+                            allFields={fieldsData}
                             fieldData={field}
                           />
                         </Grid>
-                        {permissions?.warehouse?.isCreate && (
+                        {permissions?.address?.isCreate && (
                           <Grid item xs={1} sm={1} md={1}>
                             <Tooltip title="Add Address" className="mt-1">
                               <IconButton
@@ -159,6 +167,7 @@ const InputField = (props) => {
                     >
                       <FormTypes
                         {...rest}
+                        {...field}
                         startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''}
                         values={values}
                         errors={errors}
@@ -174,28 +183,29 @@ const InputField = (props) => {
                         onChange={
                           field.fieldName === 'currency'
                             ? (e, val) => {
-                                if (val && val.currencyCode) {
-                                  setFieldValue(field.fieldName, val.currencyCode);
-                                  setCurrencySymbol(val.symbolNative);
-                                } else {
-                                  setFieldValue(field.fieldName, '');
-                                  setCurrencySymbol(null);
-                                }
+                              if (val && val.currencyCode) {
+                                setFieldValue(field.fieldName, val.currencyCode);
+                                setCurrencySymbol(val.symbolNative);
+                              } else {
+                                setFieldValue(field.fieldName, '');
+                                setCurrencySymbol(null);
                               }
+                            }
                             : field.type === 'dropDown'
-                            ? (e, val) => {
+                              ? (e, val) => {
                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
                               }
-                            : null
+                              : null
                         }
                         imageOrFileUploadCompletePercentage={
                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                             ? (completePercentage) => {
-                                onImageUploadCompletePercentage(completePercentage);
-                              }
+                              onImageUploadCompletePercentage(completePercentage);
+                            }
                             : null
                         }
                         fields={fieldsData}
+                        allFields={fieldsData}
                         fieldData={field}
                       />
                     </Grid>

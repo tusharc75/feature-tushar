@@ -437,7 +437,7 @@ const Competencies = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.competencies?.title?.toLowerCase()}  ${deleteRecord?.competenceName || ''} ?`}
+            message={`Are you sure you want to delete ${routes?.competencies?.title?.toLowerCase()}  ${deleteRecord?.competencyName || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

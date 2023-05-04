@@ -85,6 +85,7 @@ const LookupResource = [
   { name: 'Service Order', value: 'Service Order' },
   { name: 'Employee Master', value: 'Employee Master' },
   { name: 'Competency Type', value: 'Competency Type' },
+  { name: 'Competencies', value: 'Competencies' },
   { name: 'Storage Location', value: 'Storage Location' },
 ].sort((a, b) => a.name.localeCompare(b.name));
 

@@ -49,8 +49,8 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null }) 
             let tempData = data;
             if (isClone) {
               fields = fieldsDataForCreate;
-              const { competenceName, ...rest } = data;
-              setCloneHeading(competenceName);
+              const { competencyName, ...rest } = data;
+              setCloneHeading(competencyName);
               tempData = rest;
             }
             setInitialData({
@@ -152,7 +152,7 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null }) 
                 title={`${id
                   ? isClone
                     ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.competenceName ? `(${initialData.values?.competenceName})` : ''}`
+                    : `Update ${initialData.values?.competencyName ? `(${initialData.values?.competencyName})` : ''}`
                   : `Create ${routes?.competencies?.title}`
                   }`}
                 isMinimized={!fullScreen}
@@ -173,8 +173,6 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null }) 
                     fullWidth
                   />
                 </Form>
-
-
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button
