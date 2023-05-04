@@ -176,8 +176,8 @@ import ServiceOrder from './pages/ServiceOrder';
 import ServiceOrderDetailsPage from './pages/ServiceOrder/ServiceOrderDetailsPage';
 import EmployeeMaster from './pages/EmployeeMaster';
 import EmployeeMasterDetail from './pages/EmployeeMaster/EmployeeMasterDetail';
-import CompetencyMaster from './pages/CompetencyMaster';
-import CompetencyMasterDetail from './pages/CompetencyMaster/CompetencyMasterDetail';
+import CompetencyType from './pages/CompetencyType';
+import CompetencyTypeDetail from './pages/CompetencyType/CompetencyTypeDetail';
 import TechnicianScheduler from './pages/TechnicianScheduler';
 import BudgetDetail from './pages/Budget/BudgetDetail';
 import MarketSegmentDetail from './pages/MarketSegment/MarketSegmentDetail';
@@ -210,6 +210,8 @@ import TaxMaster from './pages/TaxMaster';
 import TaxMasterDetail from './pages/TaxMaster/TaxMasterDetail';
 import DynamicForm from './pages/DynamicForm';
 import DynamicFormDetail from './pages/DynamicForm/DynamicFormDetail';
+import Competencies from './pages/Competencies';
+import CompetenciesDetail from './pages/Competencies/CompetenciesDetail';
 
 var notificationInterval: any = null;
 
@@ -929,11 +931,11 @@ function App() {
             <PrivateRoute exact path={`${routes.employeeMasterDetail.path}/:id`}>
               <EmployeeMasterDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competencyMaster.path}`}>
-              <CompetencyMaster />
+            <PrivateRoute exact path={`${routes.competencyType.path}`}>
+              <CompetencyType />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.competencyMasterDetail.path}/:id`}>
-              <CompetencyMasterDetail />
+            <PrivateRoute exact path={`${routes.competencyTypeDetail.path}/:id`}>
+              <CompetencyTypeDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.technicianScheduler.path}`}>
               <TechnicianScheduler />
@@ -1012,6 +1014,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.taxMasterDetail.path}/:id`}>
               <TaxMasterDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.competencies.path}`}>
+              <Competencies />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.competenciesDetail.path}/:id`}>
+              <CompetenciesDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

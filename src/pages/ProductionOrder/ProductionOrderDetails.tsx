@@ -25,6 +25,8 @@ import { GrStatusInfo } from 'react-icons/gr';
 import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import Process from './WorkOrder';
+import WorkOrder from './WorkOrder';
 
 function a11yProps(index: any) {
   return {
@@ -330,6 +332,14 @@ const ProductionOrderDetails = () => {
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit && permissions?.productionOrder?.isUpdate ? true : false}
                 allowedToDelete={allowedToDelete}
+              />
+            )}
+             {productionOrderProcessStepsNames[currentStep] === 'Work Order' && productionOrderData && (
+              <WorkOrder
+                productionOrderData={productionOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-2`}
+                stepFullScreen={stepFullScreen}
               />
             )}
           </ContentFullScreen>

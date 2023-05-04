@@ -65,7 +65,10 @@ export const demandOrderSteps = ['Add Products'];
 
 export const purchaseRequisitionSteps = ['Add Products'];
 
-export const productionOrderSteps: stepInterface[] = [{ name: 'Add', title: 'Add', icon: 'add' }];
+export const productionOrderSteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
+];
 
 export const jobProcessSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
@@ -291,7 +294,7 @@ export const sidebarResource = {
   eCommerceHome: 'e-Commerce Home',
   contactUs: 'Contact Us',
   employeeMaster: 'Employee Master',
-  competencyMaster: 'Competency Master',
+  competencyType: 'Competency Type',
   technicianScheduler: 'Technician Scheduler',
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
@@ -309,7 +312,8 @@ export const sidebarResource = {
   transactionLock: 'Transaction Lock',
   wellNumber: 'Well Number',
   planningView: 'Planning View',
-  taxMaster: 'Tax Master'
+  taxMaster: 'Tax Master',
+  competencies: 'Competencies',
 };
 
 export const primaryFields = {
@@ -408,7 +412,7 @@ export const RESOURCE_LABEL = {
   supportTicket: 'Support Ticket',
   demandOrder: 'Demand Order',
   employeeMaster: 'Employee Master',
-  competencyMaster: 'Competency Master',
+  competencyType: 'Competency Type',
   technicianScheduler: 'Technician Scheduler',
   irtTicket: 'IRT Ticket',
   purchaseRequisition: 'Purchase Requisition',
@@ -423,7 +427,8 @@ export const RESOURCE_LABEL = {
   storageLocation: 'Storage Location',
   transactionLock: 'Transaction Lock',
   wellNumber: 'Well Number',
-  taxMaster: 'Tax Master'
+  taxMaster: 'Tax Master',
+  competencies: 'Competencies',
 };
 
 export const CHILD_RESOURCE = {
@@ -1999,7 +2004,7 @@ export const ACTIVITY_RESOURCE = {
   productAuction: 'productAuction',
   serviceMaster: 'serviceMaster',
   employeeMaster: 'employeeMaster',
-  competencyMaster: 'competencyMaster',
+  competencyType: 'competencyType',
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
@@ -2051,7 +2056,7 @@ export const LOG_RESOURCE = {
   wellMaster: sidebarResource.wellMaster,
   inventoryCycle: sidebarResource.inventoryCycle,
   // frequentlyAskedQuestion: sidebarResource.freqentlyAskedQuestion,
-  competencyMaster: sidebarResource.competencyMaster,
+  competencyType: sidebarResource.competencyType,
   bulkAssetCreation: sidebarResource.bulkAssetCreation,
   salesOrder: sidebarResource.salesOrder,
   transferInventory: sidebarResource.transferInventory

@@ -57,19 +57,22 @@ function GridFilter({
     setSelectedUserFilter(selectedFilter);
   }, []);
 
-  const FILTER_NOT_APPLIED = ['fileUpload', 'multiFileUpload',
-    'imageUpload', 'multiImageUpload', 'richTextEditor', 'signature', 'colorPicker']
+  const FILTER_NOT_APPLIED = ['fileUpload', 'multiFileUpload', 'imageUpload', 'multiImageUpload', 'richTextEditor', 'signature', 'colorPicker'];
 
   const fetchColumns = () => {
     axiosInstance()
       .get(`/field?resource=${resource}`)
       .then(({ data: { data } }) => {
         const coloum = data?.filter((e) => !FILTER_NOT_APPLIED.includes(e?.fieldData?.type));
-        setColoums(
-          coloum?.map((e) => {
-            return { ...e.fieldData };
-          })
-        );
+        // for now, we are not supporting multiSelect in filter, we are just modifing the type to dropDown
+        const modifiedColumn = coloum?.map((col: any) => {
+          const d = col.fieldData;
+          if (d?.type === 'multiSelect') {
+            d.type = 'dropDown';
+          }
+          return d;
+        });
+        setColoums(modifiedColumn);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -210,9 +213,10 @@ function GridFilter({
               fromDate && toDate
                 ? `${fromDate ? moment(fromDate).format('DD/MM/YYYY') : null} - ${toDate ? moment(toDate).format('DD/MM/YYYY') : null}`
                 : fromDate || toDate
-                  ? `${fromDate ? `${moment(fromDate).format('DD/MM/YYYY')} (From Date)` : ''} ${toDate ? `${moment(toDate).format('DD/MM/YYYY')} (To Date)` : ''
+                ? `${fromDate ? `${moment(fromDate).format('DD/MM/YYYY')} (From Date)` : ''} ${
+                    toDate ? `${moment(toDate).format('DD/MM/YYYY')} (To Date)` : ''
                   }`
-                  : null,
+                : null,
             name: fieldName
           });
           filterModel[fieldName] = {
@@ -264,11 +268,11 @@ function GridFilter({
       }
       if (col.type === 'checkBox') {
         if (formValues[fieldName] === true || formValues[fieldName] === false) {
-          chipData.push({ title: fieldLabel, value: formValues[fieldName] === true ? "Yes" : "No", name: fieldName });
+          chipData.push({ title: fieldLabel, value: formValues[fieldName] === true ? 'Yes' : 'No', name: fieldName });
           filterModel[fieldName] = {
             filterType: 'text',
             type: 'contains',
-            filter: formValues[fieldName] === true ? "Yes" : "No"
+            filter: formValues[fieldName] === true ? 'Yes' : 'No'
           };
         }
       }

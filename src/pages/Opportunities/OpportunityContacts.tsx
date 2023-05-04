@@ -1,7 +1,20 @@
 import React, { useState } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import { Card, IconButton, CardContent, Grid, List, ListItem, ListItemAvatar, ListItemText, withStyles, Menu, MenuItem } from '@material-ui/core';
+import {
+  Card,
+  IconButton,
+  CardContent,
+  Grid,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  withStyles,
+  Menu,
+  MenuItem,
+  ListItemIcon
+} from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -18,8 +31,9 @@ import ManageContactDialog from '../Contact/ManageContact';
 
 const Accordion = withStyles({
   root: {
-    border: '1px solid rgba(0, 0, 0, .125) !important',
-    boxShadow: 'none',
+    border: '0px',
+    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.06)',
+
     '&:not(:last-child)': {
       borderBottom: 0
     },
@@ -27,7 +41,8 @@ const Accordion = withStyles({
       display: 'none'
     },
     '&$expanded': {
-      margin: 'auto'
+      margin: 'auto',
+      boxShadow: '0px 17.7266px 35.4532px rgba(0, 0, 0, 0.03)'
     }
   },
   expanded: {}
@@ -35,13 +50,14 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
   root: {
-    backgroundColor: 'white',
-    borderBottom: '1px solid #f1ece8',
-    background: '#ffffff',
-    fontWeight: 'bold',
-    padding: '0px',
+    backgroundColor: '#FFFFFF',
+    padding: '0 8px',
+    minHeight: 48,
+    borderRadius: '3.54532px',
     '&$expanded': {
-      minHeight: 46
+      minHeight: 48,
+      backgroundColor: '#EFFBF9',
+      borderRadius: '3.54532px 3.54532px 0px 0px'
     }
   },
   content: {
@@ -54,31 +70,83 @@ const AccordionSummary = withStyles({
 
 const AccordionDetails = withStyles((theme) => ({
   root: {
-    padding: theme.spacing(1),
-    display: 'block'
+    display: 'block',
+    padding: theme.spacing(2),
+    border: '1px solid #ececec',
+    borderRadius: '0px 0px 6px 6px'
   }
 }))(MuiAccordionDetails);
 
-function DisplayData({ key, label, value, icon, showCopyToText = false }) {
+// function DisplayData({ key, label, value, icon, showCopyToText = false }) {
+//   return (
+//     <div style={{ flexGrow: 1 }}>
+//       <List>
+//         <ListItem key={key}>
+//           <ListItemAvatar>{icon}</ListItemAvatar>
+//           <ListItemText
+//             primary={
+//               <>
+//                 <Grid container>
+//                   <Grid item xs={10} md={10} sm={10} className="text-truncate">
+//                     {value ? value : '-'}{' '}
+//                   </Grid>
+//                   <Grid item xs={2} md={2} sm={2}>
+//                     {showCopyToText ? <CopyToClipboard textToCopy={value} /> : null}
+//                   </Grid>
+//                 </Grid>{' '}
+//               </>
+//             }
+//             secondary={label}
+//           />
+//         </ListItem>
+//       </List>
+//     </div>
+//   );
+// }
+function DisplayData({ key, label, value, icon, highlightsHead = false, showCopyToText = false }) {
   return (
     <div style={{ flexGrow: 1 }}>
-      <List>
-        <ListItem key={key}>
-          <ListItemAvatar>{icon}</ListItemAvatar>
+      <List style={{ padding: 0 }}>
+        <ListItem key={key} style={{ alignItems: 'flex-start', paddingInline: '0' }}>
+          <ListItemIcon style={{ minWidth: '24px', marginTop: 11 }}>{icon}</ListItemIcon>
           <ListItemText
             primary={
-              <>
-                <Grid container>
-                  <Grid item xs={10} md={10} sm={10} className="text-truncate">
-                    {value ? value : '-'}{' '}
-                  </Grid>
-                  <Grid item xs={2} md={2} sm={2}>
-                    {showCopyToText ? <CopyToClipboard textToCopy={value} /> : null}
-                  </Grid>
-                </Grid>{' '}
-              </>
+              highlightsHead ? (
+                <span
+                  style={{
+                    background: '#EFFBF9',
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    color: '#298B88',
+                    fontWeight: 600,
+                    display: showCopyToText ? 'inline-flex' : 'inline-block'
+                  }}
+                >
+                  <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', flexBasis: 'calc(100% - 40px)' }} title={value}>
+                    {value ? value : '-'}
+                  </span>
+                  {showCopyToText ? (
+                    <span>
+                      <CopyToClipboard textToCopy={value} />
+                    </span>
+                  ) : null}
+                </span>
+              ) : value ? (
+                <span style={{ fontSize: '15px', display: showCopyToText ? 'inline-flex' : 'unset' }}>
+                  <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', flexBasis: 'calc(100% - 40px)' }} title={value}>
+                    {value}
+                  </span>
+                  {showCopyToText ? (
+                    <span style={{ flexBasis: '10px' }}>
+                      <CopyToClipboard textToCopy={value} />
+                    </span>
+                  ) : null}
+                </span>
+              ) : (
+                '-'
+              )
             }
-            secondary={label}
+            secondary={<span style={{ fontSize: '14px' }}>{label}</span>}
           />
         </ListItem>
       </List>
@@ -116,9 +184,8 @@ export default function OpportunityContacts({
             {[...contacts].slice(0, maxRecordsToShow).map((obj, index) => {
               return (
                 <Grid key={index} item xs={12} sm={6} md={4}>
-                  <Card className="detailCard">
-                    <CardContent className="detailListing">
-                      <div className="cardStyle"> </div>
+                  <Card className="detailCard   card-v1">
+                    <CardContent className="card-link">
                       <Grid item xs={12}>
                         <Grid container className="detailCardHeader">
                           <Grid item xs={12} sm={12}>
@@ -169,10 +236,9 @@ export default function OpportunityContacts({
     );
   }
   return (
-    <Accordion expanded={isExpanded} className="omsAccordian accordOpportunity">
+    <Accordion expanded={isExpanded} className="omsAccordian" onChange={onSetExpanded}>
       <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
         <Grid container className="pos_rel">
-          <div className="clicker_div" onClick={onSetExpanded}></div>
           <Grid item xs={8}>
             <Box display="flex">
               <Box>
@@ -186,17 +252,17 @@ export default function OpportunityContacts({
             </Box>
           </Grid>
           <Grid item xs={4} container justify="flex-end">
-            {/* <IconButton
-                        color="primary"
-                        size="small"
-                        onClick={onAddContact}
-                    >
-                        <ControlPointIcon />
-                    </IconButton> */}
-
             {isAllowedToUpdate && (
               <>
-                <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleOpenMenu}>
+                <IconButton
+                  aria-haspopup="true"
+                  color="primary"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenMenu(e);
+                  }}
+                >
                   <MoreVert />
                 </IconButton>
                 <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
@@ -224,25 +290,25 @@ export default function OpportunityContacts({
           </Grid>
         </Grid>
       </AccordionSummary>
-      <Box margin={0.5} />
       <AccordionDetails>
         <ContactDetails contacts={contacts} contactApi={contactApi} />
+        {contacts && contacts.length > maxRecordsToShow ? (
+          <>
+            <Box
+              margin={1}
+              className="btn-view gap-1"
+              p={1}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              onClick={() => setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2)}
+            >
+              <FaArrowAltCircleDown size={25} />
+            </Box>
+          </>
+        ) : null}
       </AccordionDetails>
-      {contacts && contacts.length > maxRecordsToShow ? (
-        <>
-          <Box
-            margin={1}
-            className="btn-view gap-1"
-            p={1}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            onClick={() => setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2)}
-          >
-            <FaArrowAltCircleDown size={25} />
-          </Box>
-        </>
-      ) : null}
+
       {showCreateDialog && (
         <ManageContactDialog
           open={showCreateDialog}

@@ -351,6 +351,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
           anchorEl={anchorElExport}
           setAnchorClose={setAnchorElExport}
           currency={globalFilters.currency || currency}
+          isCurrency={chart?.currency || false}
           tableData={chartData ? chartData?.tableData : []}
           chart={chart}
           isTableView={chartData?.graphType !== 'Table' && tableView}

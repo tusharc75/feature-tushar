@@ -384,13 +384,15 @@ const ProductDetailsPage = () => {
                                     <>
                                       <Box display="flex" justifyContent="space-between">
                                         <Typography className="table-head-v1">{routes.warehouse.title}</Typography>
+                                        {user?.user?.brandPolicy?.storageLocation && <Typography className="table-head-v1">{routes.storageLocation.title}</Typography>}
                                         <Typography className="table-head-v1">Qty</Typography>
                                       </Box>
                                       {productInventoryData
                                         ?.filter((d) => d.inventory)
-                                        .map(({ inventory, warehouse }) => (
+                                        .map(({ inventory, warehouse, storageLocation }) => (
                                           <Box display="flex" justifyContent="space-between">
                                             <Typography className="table-data-v1 bt-0 br-0">{warehouse?.name} </Typography>
+                                            {user?.user?.brandPolicy?.storageLocation && <Typography className="table-data-v1 bt-0 br-0">{storageLocation?.storageLocationName} </Typography>}
                                             <Typography className="table-data-v1 bt-0">{inventory}</Typography>
                                           </Box>
                                         ))}
