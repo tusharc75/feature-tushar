@@ -200,8 +200,9 @@ const Technician = ({
 
   const generateNestedData = (material, technician, parent) => {
     const subRowsTechnician: any = [];
+    console.log(technician,technician.filter((e) => e.uniqueId === parent._id));
     technician
-      .filter((e) => e._id === parent._id)
+      .filter((e) => e.uniqueId === parent._id)
       ?.forEach((element, i) => {
         const obj: any = {};
         obj._id = parent._id;
@@ -237,7 +238,7 @@ const Technician = ({
     const sendData: any = [];
     rows?.forEach((e) => {
       sendData.push({
-        _id: selectedProducts[0]?._id,
+        uniqueId: selectedProducts[0]?._id,
         service: selectedProducts[0]?.materialId,
         technician: e?._id,
         estimateStartDate: selectedProducts[0]?.estimateStartDate,
