@@ -257,9 +257,9 @@ export default function Attachment() {
     {
       id: 'action',
       accessor: 'action',
-      Header: '',
-      minWidth: 50,
-      width: 80,
+      Header: 'Actions',
+      minWidth: 120,
+      width: 120,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,

@@ -30,10 +30,7 @@ import { CommonRenderer, DateTimeRenderer } from '../../components/AgGridCompone
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { FaDiceOne, FaWpforms } from 'react-icons/fa';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import CustomTimeline from '../../components/CustomTimeline';
 import { GiAutoRepair, GrStatusInfo } from 'react-icons/all';
 import { MdEdit } from 'react-icons/md';
 import { camelCase, startCase } from 'lodash';
@@ -45,16 +42,9 @@ interface TabPanelProps {
   value: any;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-      {children}
-    </div>
-  );
-}
 
 const SerializedAssetDetailsPage = () => {
+
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.serializedAsset.title);
   const { id } = useParams();
@@ -73,7 +63,6 @@ const SerializedAssetDetailsPage = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [manualStatus, setManualStatus] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [productId, setProductId] = useState(null);
   const [status, setStatus] = useState('');
   const [statusOptions, setStatusOptions] = useState([]);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
@@ -82,20 +71,8 @@ const SerializedAssetDetailsPage = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-  const [tabValue, setTabValue] = useState(0);
-
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setTabValue(newValue);
-  };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   const NameRenderer = (params) => (
     <>
@@ -240,7 +217,6 @@ const SerializedAssetDetailsPage = () => {
         routes.serializedAsset,
         { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
       ]);
-      setProductId(data?.product?.optionValue);
       setProductInventoryData({ ...data, currentOwner: data?.currentOwner?.optionLabel });
       if (data.status === 'Scrap') {
         setCustomField({
@@ -479,7 +455,7 @@ const SerializedAssetDetailsPage = () => {
           <Grid item xs={12} sm={12} md={12} lg={12}>
             <div>
               {productInventoryData && <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true}></DetailsPageHeader>}
-              <Box display={isMobile ? 'none' : ''}>
+              <Box>
                 {loadingProductInventory || !productInventoryFields.length ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -497,7 +473,7 @@ const SerializedAssetDetailsPage = () => {
                   </>
                 )}
               </Box>
-              <Grid container spacing={2} style={isMobile ? { display: 'none' } : { display: '' }}>
+              <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
                   <div className="form-v1 mt-4">
                     <div className="single-form-v1">
@@ -535,82 +511,6 @@ const SerializedAssetDetailsPage = () => {
                   </div>
                 </Grid>
               </Grid>
-              <Tabs
-                className="new-tab-container-v1"
-                value={tabValue}
-                style={isMobile ? { display: '' } : { display: 'none' }}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    display: 'none'
-                  }
-                }}
-              >
-                <Tab
-                  className={'tabLayout'}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                    </div>
-                  }
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  className={'tabLayout'}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                    </div>
-                  }
-                  {...a11yProps(1)}
-                />
-              </Tabs>
-              <TabPanel value={tabValue} index={0}>
-                <Box display={isMobile ? 'flex' : 'none'}>
-                  {loadingProductInventory || !productInventoryFields.length ? (
-                    <Grid container spacing={2} style={{ padding: '8px' }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  ) : (
-                    <>
-                      <DetailsPage
-                        data={productInventoryData}
-                        fields={
-                          productInventoryData?.status && productInventoryData?.status === 'Scrap'
-                            ? [...productInventoryFields, customField]
-                            : productInventoryFields
-                        }
-                      />
-                    </>
-                  )}
-                </Box>
-              </TabPanel>
-              <TabPanel value={tabValue} index={1}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={12} md={12} lg={12}>
-                    <div className="detail-box">
-                      <div className="detail-box-content">
-                        <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                        <h3 className="form-label-style" title="Asset History">
-                          Asset History
-                        </h3>
-                      </div>
-                      <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
-                        {columns ? (
-                          <div>
-                            <CustomTimeline dataRows={dataRows} />
-                          </div>
-                        ) : (
-                          <Box p={2} height={500} bgcolor="white">
-                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                          </Box>
-                        )}
-                      </Grid>
-                    </div>
-                  </Grid>
-                </Grid>
-              </TabPanel>
             </div>
           </Grid>
         </Grid>
