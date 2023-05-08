@@ -91,8 +91,8 @@ function Dashboard() {
             <Chart />
           </div>
           <div className={styles.rightContainer}>
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" />
+            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
           </div>
         </div>
       </div>
