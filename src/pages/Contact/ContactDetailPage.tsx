@@ -664,8 +664,8 @@ const ContactDetailsPage = (props) => {
               </Button>
             )}
             {contactPermissions.isUpdate && canEdit ? (
-              <Button variant={isMobile ? 'text' : 'contained'} size="small" onClick={handleOpneUpdateDialog} className={'btn-outline-v1'}>
-                {isMobile ? <BiEdit size={20} /> : 'Edit'}
+              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} size="small" onClick={handleOpneUpdateDialog} className={'btn-outline-v1'}>
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             ) : null}
 

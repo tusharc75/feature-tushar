@@ -15,6 +15,8 @@ import CreateProductCategory from './CreateProductCategory';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiEdit } from 'react-icons/bi';
 
 const ProductCategoryDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -114,8 +116,13 @@ const ProductCategoryDetailPage = () => {
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
               {permissions?.productCategory?.isUpdate && (
-                <Button variant="contained" size="small" className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
-                  Edit
+                <Button 
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                size="small" 
+                className={'btn-outline-v1'} 
+                onClick={handleOpenUpdateDialog}
+                >
+               {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
               {permissions?.productCategory?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}

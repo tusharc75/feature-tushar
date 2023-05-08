@@ -2125,10 +2125,6 @@ svg.MuiSvgIcon-root {
 }
 
 @media all and (max-width: 1024px) {
-  .MuiTab-root {
-    min-width: unset !important;
-  }
-
   .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
     padding-right: 25px;
     padding-left: 25px;
@@ -2854,6 +2850,9 @@ svg.MuiSvgIcon-root {
     // & > div {
     //   overflow: initial !important;
     // }
+    .MuiTabs-scroller {
+      overflow-x: auto !important;
+    }
     .tabLayout {
       font-weight: 600;
       font-size: 14px;
@@ -2863,6 +2862,7 @@ svg.MuiSvgIcon-root {
       background-color: #fff;
       border: 1px solid #dcdcdc !important;
       border-bottom: 0 !important;
+      min-width: max-content;
 
       &:first-of-type {
         border-radius: 6px 0 0 0px !important;
@@ -3205,6 +3205,13 @@ body {
 }
 
 .custom-react-table-v1 {
+  &.vertical-center {
+    td,
+    td {
+      display: grid;
+      align-items: center;
+    }
+  }
   .table.sticky .header,
   .table.sticky .footer {
     position: sticky;
@@ -3232,6 +3239,7 @@ body {
       line-height: 19px !important;
     }
   }
+
   .ag-filter-icon {
     display: none;
   }

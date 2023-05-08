@@ -12,6 +12,8 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiEdit } from 'react-icons/bi';
 
 const AddressDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -120,8 +122,12 @@ const AddressDetailPage = () => {
             <Box className="control-buttons-v1">
                 <>
                   {permissions?.address?.isUpdate && (
-                    <Button variant="contained" className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                      Edit
+                    <Button 
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    className="btn-outline-v1" 
+                    onClick={handleOpenUpdateDialog}
+                    >
+                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   )}
                   {permissions?.address?.isDelete && (

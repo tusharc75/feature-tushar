@@ -487,7 +487,7 @@ const SerializedAsset = () => {
       <div className="main-container">
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} sm={12} md={8} className="d-flex align-items-center gap-1">
+            <Grid item xs={12} sm={12} md={7} className="d-flex align-items-center gap-1 flex-wrap">
               <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
               <span className="listingHeader">{routes.serializedAsset?.title} </span>
               {warehouse || warehouse || fromPurchaseOrder?.pOId ? (
@@ -628,19 +628,19 @@ const SerializedAsset = () => {
                 </Fragment>
               )}
             </Grid>
-            <Grid md={4} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
+            <Grid md={5} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1 }}>
+                <Box style={{ flexGrow: '1' }}>
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}
-                    width={isMobile ? '200px' : '242px'}
-                    style={isMobile ? { flex: 1 } : {}}
+                    width={isMobile ? '200px' : '210px'}
+                    style={{ width: ['100%'] }}
                     size="small"
                     value={search}
                   />
-                </Grid>
-                <Grid style={{ display: 'flex', gap: '5px' }}>
+                </Box>
+                <Box style={{ display: 'flex', gap: '5px', marginLeft: 'auto' }}>
                   {permissions?.serializedAsset?.isCreate && (
                     <Button
                       onClick={() => {
@@ -776,7 +776,7 @@ const SerializedAsset = () => {
                         </>
                       )}
                   </Menu>
-                </Grid>
+                </Box>
               </Box>
             </Grid>
           </Grid>
@@ -898,8 +898,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

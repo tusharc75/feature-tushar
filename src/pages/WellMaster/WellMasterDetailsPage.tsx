@@ -14,6 +14,8 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import { ACTIVITY_RESOURCE, wellMaster } from 'src/constants/helpers';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import WellNumber from './WellNumber';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiEdit } from 'react-icons/bi';
 
 const WellMasterDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -91,7 +93,7 @@ const WellMasterDetailsPage = () => {
           <Box className="control-buttons-v1">
             {permissions?.wellMaster?.isUpdate && (
               <Button
-                variant="contained"
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
                 className={`btn-outline-v1`}
                 size="small"
                 onClick={() => {
@@ -100,7 +102,7 @@ const WellMasterDetailsPage = () => {
                   }
                 }}
               >
-                Edit
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
             {permissions?.wellMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
