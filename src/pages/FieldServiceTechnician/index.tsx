@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, Menu, MenuItem, Paper, Tab, Tabs, Typography } from '@material-ui/core';
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -10,6 +10,8 @@ import FieldTicket from './FieldTicket';
 import moment from 'moment';
 import { dateFormat } from 'src/constants/helpers';
 import EventNoteIcon from '@material-ui/icons/EventNote';
+import TabPanel from 'src/components/TabPanel';
+import Consumables from './Consumables';
 
 const status = {
   completed: 'Completed',
@@ -56,12 +58,14 @@ const style = {
 };
 
 const FieldServiceTechnician = () => {
-
   const toastConfig = useContext(CustomToastContext);
-  const { state: { permissions, selectedEntity, user } }: any = useData();
+  const {
+    state: { permissions, selectedEntity, user }
+  }: any = useData();
 
   const [fieldService, setFieldService] = useState(null);
   const [selectedFieldService, setSelectedFieldService] = useState(null);
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     fetchData();
@@ -101,6 +105,17 @@ const FieldServiceTechnician = () => {
     return color;
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -132,9 +147,7 @@ const FieldServiceTechnician = () => {
                         <Typography>
                           <span>{data?.serviceOrderNumber}</span>
                         </Typography>
-                        <Typography>
-                          {data?.service?.serviceName}
-                        </Typography>
+                        <Typography>{data?.service?.serviceName}</Typography>
                       </Box>
                       <Box sx={{ ...style.serviceItem, ...style.borderBottom }}>
                         <Typography style={{ fontSize: '12px', fontWeight: '400', color: selectedFieldService === data ? 'white' : 'gray' }}>
@@ -159,10 +172,52 @@ const FieldServiceTechnician = () => {
               {selectedFieldService && (
                 <Box
                   style={{
-                    border: '1px solid #D3D3D3'
+                    border: '1px solid #D3D3D3',
+                    borderTop: 'none'
                   }}
                 >
-                  <FieldTicket selectedFieldService={selectedFieldService} />
+                  <Tabs
+                    className="new-tab-container-v1"
+                    value={tabValue}
+                    onChange={handleMainTabChange}
+                    textColor="primary"
+                    TabIndicatorProps={{
+                      style: {
+                        display: 'none'
+                      }
+                    }}
+                  >
+                    <Tab
+                      className={'tabLayout'}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          {/* <FaWpforms className="mr-1" fontSize="inherit" /> */}
+                          Field Ticket
+                        </div>
+                      }
+                      {...a11yProps(0)}
+                    />
+                    <Tab
+                      className={'tabLayout'}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          {/* <BiFoodMenu className="mr-1" fontSize="inherit" /> */}
+                          Consumables
+                        </div>
+                      }
+                      {...a11yProps(1)}
+                    />
+                  </Tabs>
+                  <TabPanel value={tabValue} index={0}>
+                    <Box>
+                      <FieldTicket selectedFieldService={selectedFieldService} />
+                    </Box>
+                  </TabPanel>
+                  <TabPanel value={tabValue} index={1}>
+                    <Box>
+                      <Consumables selectedFieldService={selectedFieldService} />
+                    </Box>
+                  </TabPanel>
                 </Box>
               )}
             </Grid>
