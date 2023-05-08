@@ -12,7 +12,6 @@ export const headerName = {
 const hideColumns = ['salutation', 'middleName', 'lastName', 'suffix'];
 
 export const generateColoum = (fields, column, rendererNames, editable, renderedFrom, getColumnData) => {
-
   let _fields = fields;
   _fields.forEach((ele) => {
     if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
@@ -337,4 +336,3 @@ const getMembers = (mem) => {
 export function flattenArray(array) {
   return flatMapDeep(array, getMembers);
 }
-

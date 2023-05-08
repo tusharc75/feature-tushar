@@ -258,7 +258,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                     }}
                   />
                 ) : (
-                  <ChevronRight className={styles.sidebarIcon} />
+                  <ChevronRight />
                 )}
               </ListItemIcon>
               <ListItemText
@@ -349,12 +349,16 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                           </>
                         )}
                         <ListItemIcon className={styles.listIcon}>{renderIcon(listItem.section)}</ListItemIcon>
-                        <ListItemText primary={listItem.section} className={`wordWrap`} />
-                        {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
+                        <ListItemText primary={listItem.section} className={`wordWrap `} />
+                        {open[listItem.section] ? <ExpandLess className={styles.listArrowIcon} /> : <ExpandMore className={styles.listArrowIcon} />}
                       </ListItem>
                     </Tooltip>
                     <Collapse in={open[listItem.section]} timeout="auto" unmountOnExit>
-                      <List component="div" disablePadding className={`${styles.subList} `}>
+                      <List
+                        component="div"
+                        disablePadding
+                        className={`${styles.subList} ${items.some((item) => pathName === item) && styles.activeSubList}`}
+                      >
                         {listItem.items.map((item, j) => (
                           <Link
                             className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${
@@ -367,7 +371,19 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                             }}
                             to={handleRoutes(item)}
                           >
-                            <ListItem button selected={pathnames?.includes(lowerCase(item.name))} className={classes.nested}>
+                            <ListItem
+                              button
+                              selected={pathnames?.includes(lowerCase(item.name))}
+                              className={`${classes.nested} ${styles.subListItems} `}
+                              style={{ gap: 32 }}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 13 13" fill="none">
+                                <path
+                                  d="M6.50049 0H13.0005V6.5H12.188V1.39014L0.59082 12.981L0.0195312 12.4097L11.6104 0.8125H6.50049V0Z"
+                                  fill="currentcolor"
+                                  stroke="currentcolor"
+                                ></path>
+                              </svg>
                               <ListItemText primary={item.resourceLabel || item.name} />
                             </ListItem>
                           </Link>
