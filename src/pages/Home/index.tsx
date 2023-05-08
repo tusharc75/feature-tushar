@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, Fragment } from 'react';
-import { Typography, List, ListItem, ListItemText } from '@material-ui/core';
+import { Typography, List, ListItem, ListItemText, Box } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { kebabCase } from 'lodash';
@@ -52,7 +52,6 @@ function Dashboard() {
     const data = assignIconAndText(groupedData);
     setSections(data);
   }, [user, selectedEntity]);
-
 
   const handleRoutes = (item) => {
     switch (item.name) {
@@ -257,18 +256,13 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
   return (
     <>
       {colabData ? (
-        <div
-          role="button"
-          style={style}
-          className={`${styles.rightInner} ${mode === 'Setups & Administration' && styles.setHeight}`}
-          onClick={() => setModalContent({ items: colabData, title: mode })}
-        >
+        <div role="button" style={style} className={`${styles.rightInner} `} onClick={() => setModalContent({ items: colabData, title: mode })}>
           <img src={SVGImages(mode)} alt={`${mode} Logo`} className={styles.colabLogo} />
           <Typography component={'h2'}>{mode}</Typography>
           <Typography component={'p'}>{description}</Typography>
           {mode === 'Setups & Administration' && (
             <>
-              <ul className={styles.linkList}>
+              {/* <ul className={styles.linkList}>
                 {colabData
                   ?.filter((item) => !item?.isHidden && checkLinkAvailability.includes(item.resourceLabel || item.name))
                   .map((item) => (
@@ -278,11 +272,16 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
                       </Link>
                     </li>
                   ))}
-              </ul>
-              <div className={styles.viewAll} onClick={() => colabData.length > 0 && setModalContent({ items: colabData, title: mode })}>
+              </ul> */}
+              <Box
+                pb={1}
+                pt={5}
+                className={styles.viewAll}
+                onClick={() => colabData.length > 0 && setModalContent({ items: colabData, title: mode })}
+              >
                 <Typography component="span">View All</Typography>
                 <HiArrowRight />
-              </div>
+              </Box>
             </>
           )}
           {mode === 'Collaboration Tools' && (

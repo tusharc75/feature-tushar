@@ -32,7 +32,8 @@ export const assignIconAndText = (groupedData) => {
 
 // CHECK SECTION NAME AND RETURN ICON, COLOR, AND DESCRIPTION
 const setDataBySectionName = (secName, index) => {
-  const iconColour = colourCodes[index]?.icon || ['#FFA800', '#E35200'];
+  const colorAccessor = index % colourCodes.length;
+  const iconColour = colourCodes[colorAccessor]?.icon || ['#FFA800', '#E35200'];
   let icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
   let text = '';
   // let color = colourCodes[index]?.main || '#FFF7F2'
@@ -68,6 +69,12 @@ const setDataBySectionName = (secName, index) => {
   } else if (['Dynamic Forms'].includes(secName)) {
     text = 'Setup Dynamic Forms & Templates';
     icon = <DashboardIcons.FORM_ICON colors={iconColour} />;
+  } else if (['Service Operations Management'].includes(secName)) {
+    icon = <DashboardIcons.SERVICE_OPERATION_MANAGEMENT colors={iconColour} />;
+  } else if (['Purchasing Management'].includes(secName)) {
+    icon = <DashboardIcons.PURCHASING_MANAGEMENT colors={iconColour} />;
+  } else if (['Planning & Forecasting'].includes(secName)) {
+    icon = <DashboardIcons.PLANNING_FORECASTING colors={iconColour} />;
   }
 
   return {
@@ -84,7 +91,7 @@ const colourCodes = [
   },
   {
     main: '#F3F8FF',
-    icon: ['#577BFC', '#1608BD']
+    icon: ['#68C82E', '#03640D']
   },
   {
     main: '#FFF7F2',
@@ -92,7 +99,7 @@ const colourCodes = [
   },
   {
     main: '#F9FDEC',
-    icon: ['#3BE961', '#058D12']
+    icon: ['#577BFC', '#1608BD']
   },
   {
     main: '#FFFAEC',
@@ -101,5 +108,13 @@ const colourCodes = [
   {
     main: '#F6F1FF',
     icon: ['#AD14F5', '#6203AC']
+  },
+  {
+    main: '#FFFAEC',
+    icon: ['#68C82E', '#03640D']
+  },
+  {
+    main: '#F6F1FF',
+    icon: ['#EC3F7D', '#FF0550']
   }
 ];

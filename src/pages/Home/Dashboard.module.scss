@@ -231,18 +231,23 @@
     }
     .cardHeading {
       font-weight: 700;
-      font-size: 17.3279px;
+      font-size: 14px;
       line-height: 21px;
       color: #2a3042;
       margin-bottom: 12px;
     }
     .cardDesc {
       font-weight: 500;
-      font-size: 13.4772px;
-      line-height: 2;
+      font-size: 12px;
+      line-height: 20px;
       color: rgba(0, 0, 0, 0.5);
       margin-bottom: 13px;
-      min-height: 54px;
+      min-height: 32px;
+      display: -webkit-box;
+      max-width: 200px;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .cardBottomSection {
       display: flex;
@@ -335,11 +340,6 @@
   }
 }
 .rightInner {
-  &.setHeight {
-    @media all and (min-width: 1600px) {
-      min-height: 506px;
-    }
-  }
   @media all and (min-width: 548px) {
     --hor-gap: 18px;
   }
@@ -387,14 +387,14 @@
   }
   h2 {
     font-weight: 700;
-    font-size: 20px;
+    font-size: 16px;
     line-height: 24px;
     color: #2a3042;
     margin-bottom: 13px;
   }
   p {
     font-weight: 500;
-    font-size: 15.1619px;
+    font-size: 13px;
     line-height: 30px;
     color: rgba(0, 0, 0, 0.5);
   }
