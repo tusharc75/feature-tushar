@@ -558,7 +558,7 @@ function CustomReactTable({
 
   // Render the UI for your table
   return (
-    <div className="custom-react-table custom-react-table-v1">
+    <div className="custom-react-table custom-react-table-v1 vertical-center">
       <CustomReactTableHeaderOptions
         columns={baseColumns}
         // setSelectedReportView={setSelectedReportView}

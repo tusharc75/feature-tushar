@@ -3205,6 +3205,13 @@ body {
 }
 
 .custom-react-table-v1 {
+  &.vertical-center {
+    td,
+    td {
+      display: grid;
+      align-items: center;
+    }
+  }
   .table.sticky .header,
   .table.sticky .footer {
     position: sticky;
@@ -3232,6 +3239,7 @@ body {
       line-height: 19px !important;
     }
   }
+
   .ag-filter-icon {
     display: none;
   }
