@@ -32,7 +32,8 @@ export const assignIconAndText = (groupedData) => {
 
 // CHECK SECTION NAME AND RETURN ICON, COLOR, AND DESCRIPTION
 const setDataBySectionName = (secName, index) => {
-  const iconColour = colourCodes[index]?.icon || ['#FFA800', '#E35200'];
+  const colorIndex = index > 6 ? index - 6 : index;
+  const iconColour = colourCodes[colorIndex]?.icon || ['#FFA800', '#E35200'];
   let icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
   let text = '';
   // let color = colourCodes[index]?.main || '#FFF7F2'
@@ -45,16 +46,16 @@ const setDataBySectionName = (secName, index) => {
     text = 'Simplified eCommerce functionalities to smoothen your lives.';
     icon = <DashboardIcons.ECOMMERCE colors={iconColour} />;
   } else if (['Inventory Management'].includes(secName)) {
-    text = 'Manage Inventory and Purchases Smartly.';
+    text = 'Manage Inventory Smartly.';
     icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
   } else if (['Rental Operations Management', 'ROM'].includes(secName)) {
     text = 'Fulfill Rental Orders Faster.';
     icon = <DashboardIcons.ROM colors={iconColour} />;
-  } else if (['Field Service Operations'].includes(secName)) {
+  } else if (['Field Service Operations', 'Service Operations Management'].includes(secName)) {
     text = 'Fulfill Service Orders Faster.';
     icon = <DashboardIcons.ACCOUNTS colors={iconColour} />;
-  } else if (['Repair and Maintenance Management'].includes(secName)) {
-    text = 'Repair and Maintain your product and services at ease.';
+  } else if (['Repair & Maintenance Management'].includes(secName)) {
+    text = 'Repair & Maintain your product and services at ease.';
     icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColour} />;
   } else if (['Admin Portal'].includes(secName)) {
     text = 'Build your own Template, Manage Roles and Entities.';
@@ -68,6 +69,12 @@ const setDataBySectionName = (secName, index) => {
   } else if (['Dynamic Forms'].includes(secName)) {
     text = 'Setup Dynamic Forms & Templates';
     icon = <DashboardIcons.FORM_ICON colors={iconColour} />;
+  } else if (['Purchasing Management'].includes(secName)) {
+    text = 'Manage Purchases Smartly.';
+    icon = <DashboardIcons.PRODUCT_SETUP colors={iconColour} />;
+  } else if (['Planning & Forecasting'].includes(secName)) {
+    text = '';
+    icon = <DashboardIcons.ACTIVITIES colors={iconColour} />;
   }
 
   return {

@@ -594,12 +594,12 @@ const Product = () => {
                 type: 'import'
               },
               {
-                title: 'Service Template',
+                title: 'Service/Consumable Template',
                 api: `${product.api}/unknown/service-master/template`,
                 type: 'download'
               },
               {
-                title: 'Service Export',
+                title: 'Service/Consumable Export',
                 api: `${product.api}/unknown/service-master/template?export=true${
                   getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                     ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
@@ -608,7 +608,7 @@ const Product = () => {
                 type: 'export'
               },
               {
-                title: 'Service Import',
+                title: 'Service/Consumable Import',
                 api: `${product.api}/unknown/service-master/import`,
                 type: 'import'
               },
