@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useRef, useContext, useImperativeHandle, useMemo } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { Chip, Button, Tooltip } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
@@ -36,6 +36,7 @@ const CustomGridFilterHeader = (props) => {
   const [chipData, setChipData] = useState([]);
   const [currentFomValue, setCurrentFomValue] = useState({});
   const { isOffline } = useContext(CustomOfflineContext);
+  const [isFilterPresent, setIsFilterPresent] = useState<boolean>(false);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
@@ -64,7 +65,10 @@ const CustomGridFilterHeader = (props) => {
   return (
     <>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', margin: '8px', justifyContent: 'space-between' }}>
-        <div className="table-filter-v1" style={{ flexBasis: '766px', maxWidth: '766px', paddingRight: '52px' }}>
+        <div
+          className="table-filter-v1"
+          style={{ flexBasis: isFilterPresent ? '766px' : 'unset', maxWidth: isFilterPresent ? '766px' : 'unset', paddingRight: '52px' }}
+        >
           {showOnlyShowFilteredRecordSwitch && (
             <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '0px 0 10px' }} />
           )}
@@ -77,6 +81,7 @@ const CustomGridFilterHeader = (props) => {
               handleFilterOpen={handleFilterOpen}
               clearSingleFilter={clearSingleFilter}
               clearFilterAll={clearFilterAll}
+              setIsFilterPresent={setIsFilterPresent}
             />
           )}
         </div>
@@ -153,9 +158,9 @@ const filterParams = {
 
 // THIS COMPONENT WILL DISPLAY CHIPS ===============================>
 const DisplyaFilters = (props) => {
-  const { chipData, setChipData, selectedFilter, handleFilterOpen, clearSingleFilter, clearFilterAll, currentGridApi } = props;
+  const { chipData, setChipData, selectedFilter, handleFilterOpen, clearSingleFilter, clearFilterAll, currentGridApi, setIsFilterPresent } = props;
   const [hiddenItems, setHiddenItems] = useState(0);
-  const isAppliedFilterPresent = Object.keys(selectedFilter || {}).length > 0;
+  const isAppliedFilterPresent = React.useMemo(() => Object.keys(selectedFilter || {}).length > 0, [selectedFilter]);
   const oldModalRef = React.useRef(null);
 
   const containerRef = useRef(null);
@@ -252,6 +257,14 @@ const DisplyaFilters = (props) => {
       `;
     }
   };
+
+  useEffect(() => {
+    if (isAppliedFilterPresent || chipData?.length > 0) {
+      setIsFilterPresent(true);
+    } else {
+      setIsFilterPresent(false);
+    }
+  }, [isAppliedFilterPresent, chipData]);
 
   return (
     <div className="">

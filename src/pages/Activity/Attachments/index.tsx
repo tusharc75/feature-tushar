@@ -667,10 +667,10 @@ export default function Attachment() {
               </Grid>
               <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
                 <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Box style={{ flexGrow: 1, flexBasis: 'calc(100% - 171px)' }}>
+                  <Box style={{ flexGrow: 1, minWidth: 210 }}>
                     <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="attachment" />
                   </Box>
-                  <Box style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', flexBasis: '163px' }}>
+                  <Box style={{ display: 'flex', gap: '5px' }}>
                     {
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
