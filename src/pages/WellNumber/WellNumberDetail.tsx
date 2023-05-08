@@ -81,7 +81,6 @@ const WellNumberDetail = () => {
                   setOpenUpdateDialog(true);
                 }}
                 className={'btn-outline-v1'}
-                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
               >
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>

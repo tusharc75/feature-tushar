@@ -219,7 +219,11 @@ const ServiceOrderDetailsPage = () => {
               <Fragment>
                 {permissions?.serviceOrder?.isUpdate && allowedToEdit && (
                   <Fragment>
-                    <Button className={'btn-outline-v1'} variant="contained" size="small" onClick={handleOpenUpdateDialog}>
+                    <Button 
+                    className={'btn-outline-v1'} 
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    size="small" 
+                    onClick={handleOpenUpdateDialog}>
                       {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   </Fragment>
@@ -232,9 +236,9 @@ const ServiceOrderDetailsPage = () => {
                    size="small"
                    onClick={openActions}
                    aria-controls="action-menu"
-                   endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                   endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
                  >
-                   {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                   {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
                  </Button>
                  <Menu
                       anchorEl={anchorEl}

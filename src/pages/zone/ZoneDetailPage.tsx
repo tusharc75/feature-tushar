@@ -16,6 +16,8 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Zipcode from './zip';
+import { BiEdit } from 'react-icons/bi';
+import { isMobile, isTablet } from 'react-device-detect';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -136,8 +138,13 @@ const ZoneDetailPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.zone?.isUpdate && (
-              <Button variant="contained" className={'btn-outline-v1'} size="small" onClick={handleOpenUpdateDialog}>
-                Edit
+              <Button 
+              variant={isMobile && !isTablet ? 'text' : 'contained'}
+              className={'btn-outline-v1'} 
+              size="small" 
+              onClick={handleOpenUpdateDialog}
+              >
+               {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
             {permissions?.zone?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}

@@ -217,9 +217,9 @@ const ProductionOrderDetails = () => {
                       size="small"
                       onClick={openActions}
                       aria-controls="action-menu"
-                      endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                      endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
                     >
-                      {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                      {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
                     </Button>
                     <Menu
                       anchorEl={anchorEl}

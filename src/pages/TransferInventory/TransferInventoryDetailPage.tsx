@@ -15,7 +15,7 @@ import queryString from 'query-string';
 import Steps2 from 'src/components/Steps';
 import { transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import TabPanel from 'src/components/TabPanel';
-import { BiFoodMenu } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import Products from './Products';
 import SerializesAssets from './SerializesAssets';
@@ -23,6 +23,7 @@ import LoadingTicket from './LoadingTicket';
 import { camelCase } from 'lodash';
 import ContentFullScreen from '../../components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const TransferInventoryDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferInventory.title);
@@ -218,8 +219,13 @@ const TransferInventoryDetailPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
-              <Button className={'btn-outline-v1'} variant="contained" size="small" onClick={handleOpenUpdateDialog}>
-                Edit
+              <Button 
+                className={'btn-outline-v1'} 
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                size="small" 
+                onClick={handleOpenUpdateDialog}
+              >
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
             <ActivityButton referenceId={transferInventoryData?._id} resource={ACTIVITY_RESOURCE.transferInventory} />
