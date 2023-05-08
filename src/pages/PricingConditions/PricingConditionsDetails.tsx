@@ -14,11 +14,12 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import PricingConditionsDialog from './PricingConditionsDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { FaWpforms } from 'react-icons/fa';
-import { BiFoodMenu } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { ACTIVITY_RESOURCE, pricingCondition } from '../../constants/helpers';
 import { startCase } from 'lodash';
 import AddConditions from './AddConditions';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { isMobile, isTablet } from 'react-device-detect';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -110,8 +111,13 @@ const PricingConditionsDetails = () => {
           <Box className="control-buttons-v1">
               <>
                 {permissions?.pricingCondition?.isUpdate && (
-                  <Button variant="contained" className={'btn-outline-v1'} size="small" onClick={() => setOpen(true)}>
-                    Edit
+                  <Button 
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className={'btn-outline-v1'} 
+                  size="small" 
+                  onClick={() => setOpen(true)}
+                  >
+                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 )}
                 {permissions?.pricingCondition?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}

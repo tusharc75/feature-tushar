@@ -147,7 +147,7 @@ const PackageDetails = () => {
                     size="small"
                     onClick={handleOpenUpdateDialog}
                   >
-                    {isMobile ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 )}
                 {permissions?.packages?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}

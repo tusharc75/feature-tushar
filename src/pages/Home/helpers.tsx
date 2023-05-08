@@ -46,16 +46,16 @@ const setDataBySectionName = (secName, index) => {
     text = 'Simplified eCommerce functionalities to smoothen your lives.';
     icon = <DashboardIcons.ECOMMERCE colors={iconColour} />;
   } else if (['Inventory Management'].includes(secName)) {
-    text = 'Manage Inventory and Purchases Smartly.';
+    text = 'Manage Inventory Smartly.';
     icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
   } else if (['Rental Operations Management', 'ROM'].includes(secName)) {
     text = 'Fulfill Rental Orders Faster.';
     icon = <DashboardIcons.ROM colors={iconColour} />;
-  } else if (['Field Service Operations'].includes(secName)) {
+  } else if (['Field Service Operations', 'Service Operations Management'].includes(secName)) {
     text = 'Fulfill Service Orders Faster.';
     icon = <DashboardIcons.ACCOUNTS colors={iconColour} />;
-  } else if (['Repair and Maintenance Management'].includes(secName)) {
-    text = 'Repair and Maintain your product and services at ease.';
+  } else if (['Repair & Maintenance Management'].includes(secName)) {
+    text = 'Repair & Maintain your product and services at ease.';
     icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColour} />;
   } else if (['Admin Portal'].includes(secName)) {
     text = 'Build your own Template, Manage Roles and Entities.';
@@ -75,6 +75,12 @@ const setDataBySectionName = (secName, index) => {
     icon = <DashboardIcons.PURCHASING_MANAGEMENT colors={iconColour} />;
   } else if (['Planning & Forecasting'].includes(secName)) {
     icon = <DashboardIcons.PLANNING_FORECASTING colors={iconColour} />;
+  } else if (['Purchasing Management'].includes(secName)) {
+    text = 'Manage Purchases Smartly.';
+    icon = <DashboardIcons.PRODUCT_SETUP colors={iconColour} />;
+  } else if (['Planning & Forecasting'].includes(secName)) {
+    text = '';
+    icon = <DashboardIcons.ACTIVITIES colors={iconColour} />;
   }
 
   return {

@@ -316,7 +316,7 @@ const TransferAssetDetailPage = () => {
           <Box className="control-buttons-v1">
             {permissions?.transferAsset?.isUpdate && !isTransferEnded && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
-                {isMobile ? <BiEdit size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
             <ActivityButton referenceId={transferAssetData?._id} resource={ACTIVITY_RESOURCE.transferAsset} />
