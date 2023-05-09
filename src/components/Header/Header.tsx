@@ -149,7 +149,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   const saveEntity = () => {
     axiosInstance()
       .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -417,8 +417,8 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
     id === selectedEntity
       ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
       : hasAccessToEntity(id)
-        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-        : '';
+      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+      : '';
 
   function handleListKeyDown(event) {
     if (event.key === 'Tab') {
@@ -541,7 +541,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -661,7 +661,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -723,20 +723,20 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-          <MenuItem
-            title={curEntity.entityName}
-            key={curEntity._id}
-            selected={selectedEntity === curEntity._id}
-            onClick={() => {
-              handleSelectedEnity(curEntity._id);
-              closeEntitiesMenu();
-            }}
-          >
-            <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
-            <Box component="span" marginX={1} />
-            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-          </MenuItem>
-        ))
+            <MenuItem
+              title={curEntity.entityName}
+              key={curEntity._id}
+              selected={selectedEntity === curEntity._id}
+              onClick={() => {
+                handleSelectedEnity(curEntity._id);
+                closeEntitiesMenu();
+              }}
+            >
+              <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
+              <Box component="span" marginX={1} />
+              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+            </MenuItem>
+          ))
         : null}
     </Menu>
   );
@@ -767,7 +767,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
 
       {/* Remove below false to show chat notification icon */}
 
-      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => {}}>
         <Badge
           variant="dot"
           overlap="circular"
@@ -804,7 +804,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
         </Popover>
       </MenuItem>
 
-      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => {}}>
         <Badge
           variant="dot"
           overlap="circular"
@@ -951,7 +951,6 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
             </div>
             {/* Searchbar */}
             {!is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />}
-
           </Box>
 
           {/* Brand Logo */}
@@ -1112,62 +1111,6 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
 
 export default Header;
 
-const sectionVariations = (sec) => {
-  let icon = <img src={SVGImages(IconConst.PRODUCT_SETUP)} alt="Product Setup Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
-  let heading = '';
-  let text = '';
-  let color = '#FFEFEE';
-
-  switch (sec) {
-    case 'Product Setup':
-      icon = <img src={SVGImages(IconConst.PRODUCT_SETUP)} alt="Product Setup Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
-      text = 'Product and Category Setup.';
-      color = '#FFEFEE';
-      break;
-    case 'Admin Portal':
-      icon = <img src={SVGImages(IconConst.ADMIN_PORTAL)} alt="Admin Portal Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
-      text = 'Build your own Template, Manage Roles and Entities.';
-      color = '#F3F8FF';
-      break;
-    case 'CRM +':
-      icon = <img src={SVGImages(IconConst.CRM)} alt="Crm Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
-      text = 'Convert leads and close sales deals faster.';
-      color = '#FFF7F2';
-      break;
-    case 'ROM':
-      icon = <img src={SVGImages(IconConst.ROM)} alt="ROM Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
-      text = 'Fulfill Rental Orders Faster.';
-      color = '#F9FDEC';
-      break;
-    case 'Accounts':
-      icon = <img src={SVGImages(IconConst.ACCOUNTS)} alt="Accounts Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
-      text = 'Customer and Supplier Account Management at your fingertips.';
-      color = '#FFFAEC';
-      break;
-    case 'Activities':
-      icon = <img src={SVGImages(IconConst.ACTIVITIES)} alt="Activities Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
-      text = 'Assign and Access Activities related to an Order.';
-      color = '#F6F1FF';
-      break;
-
-    case 'Dynamic Forms':
-      icon = <img src={SVGImages(IconConst.FORM_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
-      text = 'Setup Dynamic Forms & Templates';
-      color = '#FFEFEE';
-      break;
-    case 'Inventory Management':
-      icon = <img src={SVGImages(IconConst.INVENTORY_MANAGEMENT)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
-      text = 'Manage Inventory and Purchases Smartly.';
-      color = '#F3F8FF';
-      break;
-    default:
-      icon = <img src={SVGImages(IconConst.GEN_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
-      text = '';
-      color = '#FFF7F2';
-  }
-  return { icon, heading, text, color };
-};
-
 const SearchBar = ({ user, selectedEntity, history }) => {
   const {
     state: { searchQuery },
@@ -1209,14 +1152,9 @@ const SearchBar = ({ user, selectedEntity, history }) => {
         return sec === u.sectionName && u.isRead;
       });
 
-      let { icon, heading, text, color } = sectionVariations(sec);
-
       return {
-        icon: icon,
-        text: text,
         head: sec,
-        items: list,
-        color: color
+        items: list
       };
     });
 
@@ -1308,7 +1246,7 @@ const SearchResult = ({ filteredData, history, handleRoutes, clearSearch }) => {
         {filteredData.length !== 0 ? (
           filteredData.map((section, key) => {
             return (
-              <List key={key} subheader={<li className={`${styles.list_header}`}>{section.head}</li>}>
+              <List key={key} subheader={<h6 className={`${styles.list_header}`}>{section.head}</h6>}>
                 {section.items.map((item, key) => {
                   return (
                     <>
