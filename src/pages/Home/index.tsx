@@ -169,21 +169,6 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
               style={style}
               onClick={() => section.items.length > 0 && setModalContent({ items: section.items, title: section.head })}
             >
-              {/* <Typography component="h2" className={styles.cardHeading}>
-                {section.head}
-              </Typography>
-              <Typography component="p" className={styles.cardDesc}>
-                {section.items.length > 0 ? section.text : 'Coming Soon.'}
-              </Typography>
-              <div className={styles.cardBottomSection}>
-                {section.items.length > 0 && (
-                  <div className={styles.viewAll}>
-                    <Typography component="span">View All</Typography>
-                    <HiArrowRight />
-                  </div>
-                )}
-                <p className={styles.cardIcon}>{section.icon}</p>
-              </div> */}
               <div className={styles.cardContent}>
                 <div className={styles.cardTop}>
                   <div className={styles.cardIcon}>{section.icon}</div>
