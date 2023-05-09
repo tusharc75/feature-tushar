@@ -72,7 +72,7 @@ export function reducer(state, action) {
       return {
         ...state,
         page: action.page,
-        appendRows: isMobile
+        appendRows: isMobile && !isTablet
       };
 
     case 'pageSizeChange':
@@ -80,7 +80,7 @@ export function reducer(state, action) {
         ...state,
         limit: action.limit,
         page: 0,
-        appendRows: isMobile,
+        appendRows: isMobile && !isTablet,
         loading: false
       };
 
@@ -337,8 +337,8 @@ export default function CustomAgGridEditable({
               ? true
               : checkStaticField(renderedFrom, column.field)
             : column.hasOwnProperty('show') && !column?.show
-            ? true
-            : false
+              ? true
+              : false
         }
         valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
@@ -374,8 +374,8 @@ export default function CustomAgGridEditable({
               ? true
               : checkStaticField(renderedFrom, column.field)
             : column.hasOwnProperty('show') && !column?.show
-            ? true
-            : false
+              ? true
+              : false
         }
         valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
@@ -441,14 +441,14 @@ export default function CustomAgGridEditable({
                   rowClassRules
                     ? rowClassRules
                     : {
-                        'red-data-row':
-                          forProductBuilder &&
-                          function (params) {
-                            const tsp = params.data[`totalSalesPrice_${currency}`] || 0;
-                            const qty = params.data.qty;
-                            return qty === 0 || tsp === 0;
-                          }
-                      }
+                      'red-data-row':
+                        forProductBuilder &&
+                        function (params) {
+                          const tsp = params.data[`totalSalesPrice_${currency}`] || 0;
+                          const qty = params.data.qty;
+                          return qty === 0 || tsp === 0;
+                        }
+                    }
                 }
                 onGridReady={onGridReady}
                 suppressDragLeaveHidesColumns={true}
@@ -587,7 +587,7 @@ export default function CustomAgGridEditable({
                 suppressPaginationPanel={true}
                 paginationPageSize={limit}
                 rowDragManaged={enableRowDrag}
-                // stopEditingWhenCellsLoseFocus={true}
+              // stopEditingWhenCellsLoseFocus={true}
               >
                 {allowSelection && (
                   <AgGridColumn

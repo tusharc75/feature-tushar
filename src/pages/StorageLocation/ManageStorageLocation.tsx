@@ -22,7 +22,7 @@ import { useData } from "../../StateProvider/Provider";
 import { isEqual } from 'lodash';
 
 
-const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onClose, onSuccess, referenceData = null, isRedirectTodetailPage = false }) => {
+const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onClose, onSuccess, referenceData = null }) => {
 
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
@@ -123,7 +123,7 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
 
                 if (referenceData) {
                     onSuccess(data.data);
-                } else if (isRedirectTodetailPage) {
+                } else {
                     history.push(`${routes.storageLocation.path}/detail/${data?.data?._id}`);
                 }
             }).catch((error) => {

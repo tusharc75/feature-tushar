@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useRef, useContext, useImperativeHandle, useMemo } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { Chip, Button, Tooltip } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
@@ -36,6 +36,7 @@ const CustomGridFilterHeader = (props) => {
   const [chipData, setChipData] = useState([]);
   const [currentFomValue, setCurrentFomValue] = useState({});
   const { isOffline } = useContext(CustomOfflineContext);
+  const [isFilterPresent, setIsFilterPresent] = useState<boolean>(false);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
@@ -64,7 +65,10 @@ const CustomGridFilterHeader = (props) => {
   return (
     <>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', margin: '8px', justifyContent: 'space-between' }}>
-        <div className="table-filter-v1" style={{ flexBasis: '766px', maxWidth: '766px', paddingRight: '52px' }}>
+        <div
+          className="table-filter-v1"
+          style={{ flexBasis: isFilterPresent ? '766px' : 'unset', maxWidth: isFilterPresent ? '766px' : 'unset', paddingRight: '52px' }}
+        >
           {showOnlyShowFilteredRecordSwitch && (
             <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '0px 0 10px' }} />
           )}
@@ -77,6 +81,7 @@ const CustomGridFilterHeader = (props) => {
               handleFilterOpen={handleFilterOpen}
               clearSingleFilter={clearSingleFilter}
               clearFilterAll={clearFilterAll}
+              setIsFilterPresent={setIsFilterPresent}
             />
           )}
         </div>
@@ -153,9 +158,9 @@ const filterParams = {
 
 // THIS COMPONENT WILL DISPLAY CHIPS ===============================>
 const DisplyaFilters = (props) => {
-  const { chipData, setChipData, selectedFilter, handleFilterOpen, clearSingleFilter, clearFilterAll, currentGridApi } = props;
+  const { chipData, setChipData, selectedFilter, handleFilterOpen, clearSingleFilter, clearFilterAll, currentGridApi, setIsFilterPresent } = props;
   const [hiddenItems, setHiddenItems] = useState(0);
-  const isAppliedFilterPresent = Object.keys(selectedFilter || {}).length > 0;
+  const isAppliedFilterPresent = React.useMemo(() => Object.keys(selectedFilter || {}).length > 0, [selectedFilter]);
   const oldModalRef = React.useRef(null);
 
   const containerRef = useRef(null);
@@ -207,37 +212,25 @@ const DisplyaFilters = (props) => {
   }, [currentGridApi, _.isEqual(filterModel, oldModalRef.current || {})]);
 
   const hideElementAndShowNumber = (container) => {
-    const containerWidth = container?.clientWidth - 52;
     const childItems = [...container?.children];
 
+    childItems.forEach((item) => (item.style.display = 'inline-flex'));
     let lastVisibleItem = null;
-
-    let tempChildWIdth = 0;
-    let count = 0;
-
+    const hiddenItems = [];
     for (let i = 0; i < childItems.length; i++) {
-      const item = childItems[i];
-      const itemWidth = item.clientWidth;
-      tempChildWIdth += itemWidth;
-      if (tempChildWIdth > containerWidth) {
-        item.style.display = 'none';
-      }
-    }
-
-    for (let i = 0; i < childItems.length; i++) {
-      const item = childItems[i];
-      if (item.style.display === 'none') {
+      const item = childItems[i] as HTMLDivElement;
+      const isOverlapping = item.getBoundingClientRect().right >= container.getBoundingClientRect().right - COUNT_PADDING;
+      if (isOverlapping) {
+        hiddenItems.push(item);
         if (!lastVisibleItem) {
-          if (i != 0) {
-            lastVisibleItem = childItems[i - 1];
-          } else {
-            lastVisibleItem = childItems[i];
-          }
+          lastVisibleItem = childItems[i - 1];
         }
-        count += 1;
-        setHiddenItems((prev) => prev + 1);
       }
     }
+    hiddenItems.forEach((item) => (item.style.display = 'none'));
+
+    const count = hiddenItems.length;
+    setHiddenItems(count);
 
     const deltaX = lastVisibleItem?.offsetLeft + lastVisibleItem?.clientWidth;
 
@@ -252,6 +245,14 @@ const DisplyaFilters = (props) => {
       `;
     }
   };
+
+  useEffect(() => {
+    if (isAppliedFilterPresent || chipData?.length > 0) {
+      setIsFilterPresent(true);
+    } else {
+      setIsFilterPresent(false);
+    }
+  }, [isAppliedFilterPresent, chipData]);
 
   return (
     <div className="">

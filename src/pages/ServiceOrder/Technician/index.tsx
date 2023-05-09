@@ -115,10 +115,10 @@ const Technician = ({
         Cell: ({ row }) => (row.original['status'] ? <p>{row.original?.status}</p> : <NoDataCell />)
       },
       {
-        accessor: 'competency',
-        Header: 'Competency',
+        accessor: 'competencyType',
+        Header: 'Competency Type',
         width: 250,
-        Cell: ({ row }) => (row.original['competency'] ? <p>{row.original?.competency}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row.original['competencyType'] ? <p>{row.original?.competencyType}</p> : <NoDataCell />)
       },
       {
         accessor: 'competencies',
@@ -126,12 +126,6 @@ const Technician = ({
         width: 250,
         Cell: ({ row }) => (row.original['competencies'] ? <p>{row.original?.competencies}</p> : <NoDataCell />)
       },
-      {
-        accessor: 'competencyType',
-        Header: 'Competency Type',
-        width: 250,
-        Cell: ({ row }) => (row.original['competencyType'] ? <p>{row.original?.competencyType}</p> : <NoDataCell />)
-      }
     ];
     column = [...column, ...newColumns];
     column.push({
@@ -180,12 +174,11 @@ const Technician = ({
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent?.packageDetail?.packageName;
-      parent.competency = parent.type === 'service' ? parent?.serviceDetail?.competency?.map((e) => e?.optionLabel)?.toString() : null;
-      parent.serviceCompetency = parent.type === 'service' ? parent?.serviceDetail?.competency || [] : [];
+            ? parent?.serviceDetail?.serviceName
+            : parent?.packageDetail?.packageName;
       parent.competencies = parent.type === 'service' ? parent?.serviceDetail?.competencies?.map((e) => e?.optionLabel)?.join(', ') : null;
       parent.competencyType = parent.type === 'service' ? parent?.serviceDetail?.competencyType?.optionLabel : null;
+      parent.mainCompetencyType = parent.type === 'service' ? parent?.serviceDetail?.competencyType : {};
       parent.status = serviceOrderData?.status;
       parent.subRows = generateNestedData(data, technician, parent);
     });
@@ -200,21 +193,19 @@ const Technician = ({
 
   const generateNestedData = (material, technician, parent) => {
     const subRowsTechnician: any = [];
-    technician
-      .filter((e) => e._id === parent._id)
-      ?.forEach((element, i) => {
-        const obj: any = {};
-        obj._id = parent._id;
-        obj.index = parent.index + '.' + (i + 1);
-        obj.detail = `${element?.technician?.firstName} ${element?.technician?.lastName} - (${element?.technician?.firstName})`;
-        obj.technician = element?.technician?._id;
-        obj.type = 'technician';
-        obj.estimateStartDate = element?.estimateStartDate;
-        obj.estimateEndDate = element?.estimateEndDate;
-        obj.status = element?.status;
-        parent.isValid = true;
-        subRowsTechnician.push(obj);
-      });
+    technician?.filter((e) => e.uniqueId === parent._id)?.forEach((element, i) => {
+      const obj: any = {};
+      obj._id = parent._id;
+      obj.index = parent.index + '.' + (i + 1);
+      obj.detail = `${element?.technician?.firstName} ${element?.technician?.lastName} - (${element?.technician?.firstName})`;
+      obj.technician = element?.technician?._id;
+      obj.type = 'technician';
+      obj.estimateStartDate = element?.estimateStartDate;
+      obj.estimateEndDate = element?.estimateEndDate;
+      obj.status = element?.status;
+      parent.isValid = true;
+      subRowsTechnician.push(obj);
+    });
 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
@@ -223,10 +214,8 @@ const Technician = ({
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
-      _subRow.competency = _subRow.type === 'service' ? _subRow?.serviceDetail?.competency?.map((e) => e.optionLabel)?.toString() : null;
-      _subRow.serviceCompetency = _subRow.type === 'service' ? _subRow?.serviceDetail?.competency || [] : [];
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.subRows = generateNestedData(material, technician, _subRow);
     });
 
@@ -237,7 +226,7 @@ const Technician = ({
     const sendData: any = [];
     rows?.forEach((e) => {
       sendData.push({
-        _id: selectedProducts[0]?._id,
+        uniqueId: selectedProducts[0]?._id,
         service: selectedProducts[0]?.materialId,
         technician: e?._id,
         estimateStartDate: selectedProducts[0]?.estimateStartDate,
@@ -392,7 +381,7 @@ const Technician = ({
           handleClose={() => {
             setAddEmployeeMasterDialog({ open: false, data: null });
           }}
-          defaultCompetency={addEmployeeMasterDialog?.data?.compitencyType}
+          defaultCompetency={[addEmployeeMasterDialog?.data?.mainCompetencyType]}
           ids={[]}
         />
       )}

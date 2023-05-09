@@ -175,9 +175,10 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
         const rows: any = [];
 
         data.filter((e) => e.parentId === null && e.type === 'service').forEach((parent, i) => {
-            technician.filter((e) => e._id === parent._id)?.forEach((element, i) => {
+            technician.filter((e) => e.uniqueId === parent._id)?.forEach((element, i) => {
                 const obj: any = {};
-                obj._id = parent._id;
+                obj._id = element._id;
+                // obj._id = parent._id;
                 obj.service = parent.serviceDetail
                 obj.technician = element?.technician
                 obj.estimateStartDate = element?.estimateStartDate
