@@ -193,22 +193,19 @@ const Technician = ({
 
   const generateNestedData = (material, technician, parent) => {
     const subRowsTechnician: any = [];
-    console.log(technician,technician.filter((e) => e.uniqueId === parent._id));
-    technician
-      .filter((e) => e.uniqueId === parent._id)
-      ?.forEach((element, i) => {
-        const obj: any = {};
-        obj._id = parent._id;
-        obj.index = parent.index + '.' + (i + 1);
-        obj.detail = `${element?.technician?.firstName} ${element?.technician?.lastName} - (${element?.technician?.firstName})`;
-        obj.technician = element?.technician?._id;
-        obj.type = 'technician';
-        obj.estimateStartDate = element?.estimateStartDate;
-        obj.estimateEndDate = element?.estimateEndDate;
-        obj.status = element?.status;
-        parent.isValid = true;
-        subRowsTechnician.push(obj);
-      });
+    technician?.filter((e) => e.uniqueId === parent._id)?.forEach((element, i) => {
+      const obj: any = {};
+      obj._id = parent._id;
+      obj.index = parent.index + '.' + (i + 1);
+      obj.detail = `${element?.technician?.firstName} ${element?.technician?.lastName} - (${element?.technician?.firstName})`;
+      obj.technician = element?.technician?._id;
+      obj.type = 'technician';
+      obj.estimateStartDate = element?.estimateStartDate;
+      obj.estimateEndDate = element?.estimateEndDate;
+      obj.status = element?.status;
+      parent.isValid = true;
+      subRowsTechnician.push(obj);
+    });
 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
