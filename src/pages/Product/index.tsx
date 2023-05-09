@@ -594,12 +594,12 @@ const Product = () => {
                 type: 'import'
               },
               {
-                title: 'Service Template',
+                title: 'Service/Consumable Template',
                 api: `${product.api}/unknown/service-master/template`,
                 type: 'download'
               },
               {
-                title: 'Service Export',
+                title: 'Service/Consumable Export',
                 api: `${product.api}/unknown/service-master/template?export=true${
                   getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                     ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
@@ -608,7 +608,7 @@ const Product = () => {
                 type: 'export'
               },
               {
-                title: 'Service Import',
+                title: 'Service/Consumable Import',
                 api: `${product.api}/unknown/service-master/import`,
                 type: 'import'
               },
@@ -638,7 +638,7 @@ const Product = () => {
       <div className="main-container">
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={isMobile ? 12 : 8} className="d-flex align-items-center gap-1 layout-for-tablet">
+            <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1 layout-for-tablet">
               <Grid style={{ display: 'flex', justifyContent: 'center' }}>
                 <RiShoppingBag3Fill size={22} style={{ paddingBottom: '3px' }} className="headerLogo" />
                 <span className="listingHeader">{routes.product.title} </span>
@@ -789,83 +789,81 @@ const Product = () => {
                 />
               )}
             </Grid>
-            <Grid item xs={isMobile ? 12 : 4}>
-              <Grid container className={styles.filter_side}>
-                <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                  <Grid style={{ display: 'flex', flex: 1 }}>
-                    <SearchBox
-                      onSearch={handleSearch}
-                      searchbox={styles.search_box_input}
-                      width={isMobile ? '200px' : '242px'}
-                      style={isMobile ? { flex: 1 } : {}}
-                      size="small"
-                      value={search}
-                    />
-                  </Grid>
+            <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
+              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
+                <Box style={{ flexGrow: 1, minWidth: 210 }}>
+                  <SearchBox
+                    onSearch={handleSearch}
+                    searchbox={styles.search_box_input}
+                    width={isMobile ? '200px' : '210px'}
+                    style={{ width: '100%' }}
+                    size="small"
+                    value={search}
+                  />
+                </Box>
 
-                  <Grid style={{ display: 'flex', gap: '5px' }}>
-                    {productPermissions.isCreate && (
-                      <Button
-                        onClick={() => OpenProduct(null)}
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        size="small"
-                        color="primary"
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                      >
-                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                      </Button>
-                    )}
-
+                <Box style={{ display: 'flex', gap: '5px' }}>
+                  {productPermissions.isCreate && (
                     <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="default"
+                      onClick={() => OpenProduct(null)}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
                       size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                      endIcon={<ExpandMore />}
+                      color="primary"
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                     >
-                      {isMobile && !isTablet ? '' : 'Actions'}
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
+                  )}
 
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    disabled={selectedRecords.length ? false : true}
+                    aria-controls="action-menu"
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    endIcon={<ExpandMore />}
+                  >
+                    {isMobile && !isTablet ? '' : 'Actions'}
+                  </Button>
+
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      disabled={!productPermissions.isDelete}
+                      onClick={() => {
+                        setShowDeleteConfirmBox(true);
+                        closeActions();
                       }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
                     >
+                      Delete
+                    </MenuItem>
+                    {permissions?.repairType?.isRead && (
                       <MenuItem
-                        disabled={!productPermissions.isDelete}
+                        disabled={!productPermissions.isUpdate && !permissions?.hasOwnProperty('repairType')}
                         onClick={() => {
-                          setShowDeleteConfirmBox(true);
+                          setOpenAddDialog(true);
                           closeActions();
                         }}
                       >
-                        Delete
+                        {`Assign ${routes?.repairType?.title}`}
                       </MenuItem>
-                      {permissions?.repairType?.isRead && (
-                        <MenuItem
-                          disabled={!productPermissions.isUpdate && !permissions?.hasOwnProperty('repairType')}
-                          onClick={() => {
-                            setOpenAddDialog(true);
-                            closeActions();
-                          }}
-                        >
-                          {`Assign ${routes?.repairType?.title}`}
-                        </MenuItem>
-                      )}
-                    </Menu>
-                  </Grid>
+                    )}
+                  </Menu>
                 </Box>
-              </Grid>
+              </Box>
             </Grid>
           </Grid>
         </div>

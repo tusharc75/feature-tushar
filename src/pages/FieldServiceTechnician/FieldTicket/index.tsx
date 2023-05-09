@@ -7,16 +7,16 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage, serviceMaster, sidebarResource } from 'src/constants/helpers';
 import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import useColumns from 'src/constants/useColumns';
+import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 
 const FieldTicket = ({ selectedFieldService }) => {
   const renderedFrom = camelCase(`${routes.fieldTicket?.title}`);
@@ -242,11 +242,10 @@ const FieldTicket = ({ selectedFieldService }) => {
   );
 
   return (
-    <Box>
-      <Box p={2}>
-        <Grid container style={{ display: 'flex' }}>
-          <Grid xs={12} md={6} sm={12}></Grid>
-          <Grid style={{ display: 'flex', justifyContent: 'flex-end' }} xs={12} md={6} sm={12}>
+    <>
+      <Box p={2} pt={0}>
+        <Box display="flex" justifyContent="flex-end" mb={2}>
+          <Box display="flex" flexWrap={'wrap'}>
             <Button
               onClick={() => {
                 setFieldTicketId(null);
@@ -259,6 +258,8 @@ const FieldTicket = ({ selectedFieldService }) => {
             >
               {`Create ${routes.fieldTicket.title}`}
             </Button>
+          </Box>
+          <Box display="flex" ml={1}>
             {permissions?.fieldServiceTechnician?.isDelete && (
               <>
                 <Button
@@ -303,8 +304,8 @@ const FieldTicket = ({ selectedFieldService }) => {
                 </Menu>
               </>
             )}
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
         {Object.keys(frameWorkComponent).length > 0 && (
           <Box pt={2}>
             <CustomAgGrid
@@ -351,11 +352,19 @@ const FieldTicket = ({ selectedFieldService }) => {
             service: selectedFieldService?.service._id,
             startDateTime: selectedFieldService?.estimateStartDate,
             endDateTime: selectedFieldService?.estimateEndDate,
-            technician: selectedFieldService?.technicianAssign?.technician
+            technician: selectedFieldService?.technicianAssign?.technician,
+            steps:
+              selectedFieldService?.service?.steps?.map((m) => {
+                return {
+                  optionLabel: m?.stepName,
+                  optionValue: m?._id
+                };
+              }) || []
           }}
+          fullScreenView={true}
         />
       )}
-    </Box>
+    </>
   );
 };
 

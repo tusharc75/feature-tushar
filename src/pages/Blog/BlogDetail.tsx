@@ -107,7 +107,6 @@ const BlogDetail = () => {
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
                 className="btn-outline-v1"
                 onClick={handleOpenUpdateDialog}
-                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
               >
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>

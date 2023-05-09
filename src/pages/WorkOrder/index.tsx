@@ -36,13 +36,13 @@ let workOrderTimeout;
 const WorkOrder = () => {
   const WorkOrderType = [
     {
-      key: `My ${routes.workOrder.title}`,
+      key: `All ${routes.workOrder.title}`,
       value: 1
     },
     {
-      key: `All ${routes.workOrder.title}`,
+      key: `My ${routes.workOrder.title}`,
       value: 2
-    }
+    },
   ];
 
   let renderedFrom = camelCase(routes?.workOrder.title);
@@ -217,7 +217,7 @@ const WorkOrder = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if(WorkOrderType[selectedType - 1].key === `My ${routes.workOrder.title}`){
+    if (WorkOrderType[selectedType - 1].key === `My ${routes.workOrder.title}`) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {
@@ -442,9 +442,9 @@ const WorkOrder = () => {
             dataRows={dataRows}
             selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
             dispatch={dispatch}
-            onEdit={() => {}}
+            onEdit={() => { }}
             extraParamsToCheckDelete={true}
-            onDelete={() => {}}
+            onDelete={() => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -456,7 +456,7 @@ const WorkOrder = () => {
             ]}
             onCreate={null}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -496,9 +496,8 @@ const WorkOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${
-              deleteRecord?.workOrderName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${deleteRecord?.workOrderName || ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

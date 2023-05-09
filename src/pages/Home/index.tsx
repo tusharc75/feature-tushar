@@ -1,12 +1,12 @@
-import { useEffect, useState, useContext, Fragment } from 'react';
-import { Typography, List, ListItem, ListItemText } from '@material-ui/core';
+import React, { useEffect, useState, useContext, Fragment } from 'react';
+import { Typography, List, ListItem, ListItemText, Box } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { kebabCase } from 'lodash';
 import styles from './Dashboard.module.scss';
 import './style.scss';
 import { SVGImages, IconConst } from '../../assets/dashboard_images';
-import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
+
 import routes from 'src/components/Helpers/Routes';
 import { withStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
@@ -53,7 +53,6 @@ function Dashboard() {
     setSections(data);
   }, [user, selectedEntity]);
 
-
   const handleRoutes = (item) => {
     switch (item.name) {
       case 'Pos':
@@ -83,16 +82,12 @@ function Dashboard() {
       <div className={` ${styles.contentWrapper}`}>
         <div className={styles.main}>
           <div className={styles.leftContainer}>
-            {search.trim() !== '' ? (
-              <SearchResult filteredData={filteredData} history={history} handleRoutes={handleRoutes} />
-            ) : (
-              <DisplayCardGrid sections={sections} handleRoutes={handleRoutes} />
-            )}
+            <DisplayCardGrid sections={sections} handleRoutes={handleRoutes} />
             <Chart />
           </div>
           <div className={styles.rightContainer}>
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" />
+            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
           </div>
         </div>
       </div>
@@ -101,43 +96,6 @@ function Dashboard() {
 }
 
 export default Dashboard;
-
-const SearchResult = ({ filteredData, history, handleRoutes }) => {
-  return (
-    <div className={styles.searchResult}>
-      <div className={`${styles.filtered_data} `} style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll' }}>
-        {filteredData.length !== 0 ? (
-          filteredData.map((section) => {
-            return (
-              <List key={section.head} subheader={<li className={`${styles.list_header} mb-2`}>{section.head}</li>}>
-                {section.items.map((item) => {
-                  return (
-                    <>
-                      <ListItem
-                        key={item.name}
-                        button
-                        onClick={() => {
-                          history.push(handleRoutes(item));
-                        }}
-                      >
-                        <ListItemText primary={item.resourceLabel} />
-                      </ListItem>
-                    </>
-                  );
-                })}
-              </List>
-            );
-          })
-        ) : (
-          <div className={styles.no_result_container}>
-            <SentimentVeryDissatisfiedIcon />
-            <p className={styles.no_result}>Sorry, we couldn't find any result</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 const DisplayCardGrid = ({ sections, handleRoutes }) => {
   const [modalContent, setModalContent] = useState(null);
@@ -151,38 +109,39 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
       <div className={styles.cardContainer}>
         {sections.map((section) => {
           if (
-            section.head === 'Collaboration Tools' ||
             section.head === 'Setups' ||
             section.head === 'Setups & Administration' ||
+            section.head === 'Collaborate' ||
             section.head === 'Activities'
           )
             return <></>;
-          const style = { '--bg_color': section.color, textAlign: 'left' } as React.CSSProperties;
+          const style = {
+            '--bg_color': section.color,
+            textAlign: 'left',
+            '--bg-gradient-colors': `to bottom, ${section.gradient.join(', ')}`
+          } as React.CSSProperties;
           return (
             <div
               key={section.head}
               role="button"
               className={styles.singlecard}
               style={style}
-              onClick={() => section.items.length > 0 && setModalContent({ items: section.items, title: section.head })}
+              aria-label={`open ${section.head}`}
+              onClick={() => section.items.length > 0 && setModalContent({ items: section.items, title: section.head, icon: section.icon })}
             >
-              <Typography component="h2" className={styles.cardHeading}>
-                {section.head}
-              </Typography>
-              <Typography component="p" className={styles.cardDesc}>
-                {section.items.length > 0 ? section.text : 'Coming Soon.'}
-              </Typography>
-              <div className={styles.cardBottomSection}>
-                {section.items.length > 0 && (
-                  <div
-                    className={styles.viewAll}
-                    onClick={() => section.items.length > 0 && setModalContent({ items: section.items, title: section.head })}
-                  >
-                    <Typography component="span">View All</Typography>
+              <div className={styles.cardContent}>
+                <div className={styles.cardTop}>
+                  <div className={styles.cardIcon}>{section.icon}</div>
+                  <div className={styles.cardArrow}>
                     <HiArrowRight />
                   </div>
-                )}
-                <p className={styles.cardIcon}>{section.icon}</p>
+                </div>
+                <Typography component="h2" className={styles.cardHeading}>
+                  {section.head}
+                </Typography>
+                <Typography component="p" className={styles.cardDesc}>
+                  {section.items.length > 0 ? section.text : 'Coming Soon.'}
+                </Typography>
               </div>
             </div>
           );
@@ -200,30 +159,62 @@ const RenderDialog = ({ modalContent, handleClose, handleRoutes }) => {
     }
   }))(MuiDialogContent);
   return (
-    <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={Boolean(modalContent)} className={styles.dialogContainer}>
-      <MuiDialogTitle disableTypography className={styles.modalHead}>
-        <Typography variant="h6" className={styles.modalTitle}>
-          {modalContent?.title}
-        </Typography>
-        <IconButton aria-label="close" onClick={() => handleClose()}>
-          <CloseIcon />
-        </IconButton>
-      </MuiDialogTitle>
-      <DialogContent className={styles.dialogContent}>
-        <ul className={styles.linkList}>
-          {modalContent?.items
-            ?.filter((item) => !item?.isHidden)
-            .map((item) => (
-              <li key={item.name}>
-                <Typography component="span">
-                  <Link to={handleRoutes(item)} className={styles.dialogLinks}>
-                    {item.resourceLabel || item.name}
-                  </Link>
-                </Typography>
-              </li>
-            ))}
-        </ul>
-      </DialogContent>
+    <Dialog
+      onClose={handleClose}
+      aria-labelledby="customized-dialog-title"
+      BackdropProps={{
+        style: {
+          backgroundColor: 'rgba(5, 9, 19, 0.74)',
+          backdropFilter: 'blur(2px)'
+        }
+      }}
+      PaperProps={{
+        style: {
+          borderRadius: 16,
+          margin: 15,
+          marginBottom: 94,
+          boxShadow:
+            '0px 165px 66px rgba(142, 159, 199, 0.01), 0px 93px 56px rgba(142, 159, 199, 0.05), 0px 41px 41px rgba(142, 159, 199, 0.09), 0px 10px 23px rgba(142, 159, 199, 0.1), 0px 0px 0px rgba(142, 159, 199, 0.1)'
+        }
+      }}
+      open={Boolean(modalContent)}
+      className={styles.dialogContainer}
+    >
+      <Box className={styles.dialogContentContainer}>
+        <MuiDialogTitle disableTypography className={styles.modalHead}>
+          <Box className={styles.modalIconAndName}>
+            <Box className={styles.modalIcon}>{modalContent?.icon}</Box>
+            <Typography variant="h6" className={styles.modalTitle}>
+              {modalContent?.title}
+            </Typography>
+          </Box>
+          <IconButton aria-label="close" onClick={() => handleClose()}>
+            <CloseIcon />
+          </IconButton>
+        </MuiDialogTitle>
+        <DialogContent className={styles.dialogContent}>
+          <ul className={styles.linkList}>
+            {modalContent?.items
+              ?.filter((item) => !item?.isHidden)
+              .map((item) => (
+                <li key={item.name}>
+                  <Typography component="span">
+                    <Link to={handleRoutes(item)} className={styles.dialogLinks}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 13 13" fill="none">
+                        <path
+                          d="M6.50049 0H13.0005V6.5H12.188V1.39014L0.59082 12.981L0.0195312 12.4097L11.6104 0.8125H6.50049V0Z"
+                          fill="currentcolor"
+                          stroke="currentcolor"
+                        ></path>
+                      </svg>
+                      {item.resourceLabel || item.name}
+                    </Link>
+                  </Typography>
+                </li>
+              ))}
+          </ul>
+        </DialogContent>
+      </Box>
     </Dialog>
   );
 };
@@ -246,7 +237,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
 
   useEffect(() => {
     if (objBySectionName) {
-      if (mode === 'Collaboration Tools') setColabData(objBySectionName['Collaboration Tools'] || objBySectionName['Activities'] || null);
+      if (mode === 'Collaboration Tools') setColabData(objBySectionName['Collaborate'] || objBySectionName['Activities'] || null);
       else setColabData(objBySectionName['Setups & Administration'] || objBySectionName['Setups'] || objBySectionName['Product Setup'] || null);
     }
   }, [objBySectionName]);
@@ -260,15 +251,16 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
         <div
           role="button"
           style={style}
-          className={`${styles.rightInner} ${mode === 'Setups & Administration' && styles.setHeight}`}
-          onClick={() => setModalContent({ items: colabData, title: mode })}
+          className={`${styles.rightInner} `}
+          aria-label={`open ${mode}`}
+          onClick={() => setModalContent({ items: colabData, title: mode, icon: <img src={SVGImages(mode)} alt={`${mode} Logo`} /> })}
         >
           <img src={SVGImages(mode)} alt={`${mode} Logo`} className={styles.colabLogo} />
           <Typography component={'h2'}>{mode}</Typography>
           <Typography component={'p'}>{description}</Typography>
           {mode === 'Setups & Administration' && (
             <>
-              <ul className={styles.linkList}>
+              {/* <ul className={styles.linkList}>
                 {colabData
                   ?.filter((item) => !item?.isHidden && checkLinkAvailability.includes(item.resourceLabel || item.name))
                   .map((item) => (
@@ -278,11 +270,16 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
                       </Link>
                     </li>
                   ))}
-              </ul>
-              <div className={styles.viewAll} onClick={() => colabData.length > 0 && setModalContent({ items: colabData, title: mode })}>
+              </ul> */}
+              <Box
+                pb={1}
+                pt={5}
+                className={styles.viewAll}
+                onClick={() => colabData.length > 0 && setModalContent({ items: colabData, title: mode })}
+              >
                 <Typography component="span">View All</Typography>
                 <HiArrowRight />
-              </div>
+              </Box>
             </>
           )}
           {mode === 'Collaboration Tools' && (

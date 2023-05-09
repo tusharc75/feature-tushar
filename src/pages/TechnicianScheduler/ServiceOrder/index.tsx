@@ -32,7 +32,8 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
           obj.serviceOrderNumber = ele?.serviceOrderNumber;
           obj.serviceName = ele?.service?.serviceName;
           obj.serviceId = ele?.service?._id;
-          obj.competency = ele?.service?.competency?.map((e) => e?.optionLabel)?.toString();
+          obj.competencyType = ele?.service?.competencyType?.optionLabel;
+          obj.competencies = ele?.service?.competencies?.map((e) => e?.optionLabel)?.toString();
           obj.service = ele?.service;
           obj.customerAccount = ele?.customerAccount?.optionLabel;
           obj.customerAccountId = ele?.customerAccount?.optionValue;
@@ -71,10 +72,16 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
       </Link>
     },
     {
-      accessor: 'competency',
-      Header: 'Competency',
+      accessor: 'competencyType',
+      Header: 'Competency Type',
       width: 250,
-      Cell: ({ row }) => (row.original['competency'] ? <p className="text-truncate">{row.original.competency}</p> : <NoDataCell />)
+      Cell: ({ row }) => (row.original['competencyType'] ? <p className="text-truncate">{row.original.competencyType}</p> : <NoDataCell />)
+    },
+    {
+      accessor: 'competencies',
+      Header: 'Competencies',
+      width: 250,
+      Cell: ({ row }) => (row.original['competencies'] ? <p className="text-truncate">{row.original.competencies}</p> : <NoDataCell />)
     },
     {
       accessor: 'customerAccount',

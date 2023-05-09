@@ -44,7 +44,7 @@
   --colorContact: #003f57;
   --colorAccount: red;
   --colorProject: yellow;
-  --new_theme_color: #329592;
+  --new_theme_color: #0f9fa9;
   --ag-odd-row-background-color: #fff;
 }
 
@@ -75,12 +75,27 @@
       odd-row-background-color: #f5f3f3
     )
   );
-}
-
-.ag-theme-material .ag-cell,
-.ag-theme-material .ag-full-width-row .ag-cell-wrapper.ag-row-group {
-  line-height: 26px;
-  border-right: 1px solid #e2e2e2 !important;
+  .ag-cell.ag-cell-first-right-pinned:not(.ag-cell-range-left):not(.ag-cell-range-single-cell) {
+    border-left: 0;
+  }
+  .ag-header-row-floating-filter .ag-header-cell {
+    border-right: 0px !important;
+    border-left: 0px !important;
+  }
+  .ag-cell,
+  .ag-full-width-row .ag-cell-wrapper.ag-row-group {
+    line-height: 26px;
+    border-right: 0px !important;
+  }
+  .ag-pinned-left-header {
+    border-right: 0px;
+    & > div:first-of-type {
+      border-right: 1px solid var(--ag-row-border-color, var(--ag-secondary-border-color, var(--ag-border-color, #e2e2e2)));
+    }
+  }
+  .ag-pinned-right-header {
+    border-left: 0px;
+  }
 }
 
 .ag-theme-material .ag-ltr .ag-has-focus .ag-cell-focus:not(.ag-cell-range-selected) {
@@ -2125,10 +2140,6 @@ svg.MuiSvgIcon-root {
 }
 
 @media all and (max-width: 1024px) {
-  .MuiTab-root {
-    min-width: unset !important;
-  }
-
   .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
     padding-right: 25px;
     padding-left: 25px;
@@ -2854,6 +2865,9 @@ svg.MuiSvgIcon-root {
     // & > div {
     //   overflow: initial !important;
     // }
+    .MuiTabs-scroller {
+      overflow-x: auto !important;
+    }
     .tabLayout {
       font-weight: 600;
       font-size: 14px;
@@ -2863,6 +2877,7 @@ svg.MuiSvgIcon-root {
       background-color: #fff;
       border: 1px solid #dcdcdc !important;
       border-bottom: 0 !important;
+      min-width: max-content;
 
       &:first-of-type {
         border-radius: 6px 0 0 0px !important;
@@ -3205,6 +3220,13 @@ body {
 }
 
 .custom-react-table-v1 {
+  &.vertical-center {
+    td,
+    td {
+      display: grid;
+      align-items: center;
+    }
+  }
   .table.sticky .header,
   .table.sticky .footer {
     position: sticky;
@@ -3232,6 +3254,7 @@ body {
       line-height: 19px !important;
     }
   }
+
   .ag-filter-icon {
     display: none;
   }

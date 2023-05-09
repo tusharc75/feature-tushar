@@ -9,13 +9,12 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 
 function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleClose, handleSucess }) {
 
-
   const toastConfig = useContext(CustomToastContext);
 
   const handleAssign = () => {
     const data: any = [
       {
-        _id: selectedServiceOrder[0]?.service?.uniqueId,
+        uniqueId: selectedServiceOrder[0]?.service?.uniqueId,
         service: selectedServiceOrder[0]?.service?.materialId,
         technician: technicianData?._id,
         estimateStartDate: selectedServiceOrder[0]?.service?.estimateStartDate,

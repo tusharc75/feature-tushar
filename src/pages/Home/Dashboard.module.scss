@@ -43,7 +43,7 @@
 
 // .custom_form_button {
 //   padding: 12px 34px;
-//   background-color: #41aeaa;
+//   background-color: #0f9fa9;
 //   color: #fff;
 //   font-weight: 600;
 //   font-size: 18px;
@@ -128,7 +128,7 @@
       border: 1px solid rgba(0, 0, 0, 0.2);
 
       &:focus {
-        border: 1px solid #41aeaa;
+        border: 1px solid #0f9fa9;
       }
     }
 
@@ -156,7 +156,7 @@
   background-color: white;
 
   .list_header {
-    background-color: #41aeaa;
+    background-color: #0f9fa9;
     color: #fff;
     border-radius: 4px;
     padding: 12px 16px;
@@ -187,106 +187,172 @@
       --ver-gap: 18px;
       --hor-gap: 18px;
       --grid-columns: repeat(2, 1fr);
-      --card-padding: 27px 38px 28px 20px;
+      --card-padding: 23px 18px 26px 18px;
     }
     @media all and (min-width: 768px) {
       --ver-gap: 20px;
       --hor-gap: 20px;
       --grid-columns: repeat(3, 1fr);
-      --card-padding: 27px 38px 28px 20px;
+      --card-padding: 23px 18px 26px 18px;
     }
     @media all and (min-width: 900px) {
       --ver-gap: 23px;
       --hor-gap: 23px;
       --grid-columns: repeat(2, 1fr);
-      --card-padding: 27px 38px 28px 20px;
+      --card-padding: 23px 18px 28px 18px;
     }
     @media all and (min-width: 1100px) {
       --ver-gap: 23px;
       --hor-gap: 25px;
       --grid-columns: repeat(3, 1fr);
-      --card-padding: 27px 38px 28px 20px;
+      --card-padding: 23px 18px 28px 18px;
     }
     display: grid;
     grid-template-columns: var(--grid-columns, 1fr);
     column-gap: var(--ver-gap, 15px);
     row-gap: var(--hor-gap, 15px);
     .singlecard {
+      --card-border-radius: 12px;
+      --border-width: 4px;
       display: grid;
       background-color: var(--bg_color, #ffefee);
-      border: 1.92532px solid #ebebeb;
-      box-shadow: 0px 3.85064px 38.5064px rgba(0, 0, 0, 0.08);
-      border-radius: 5.77596px;
-      padding: var(--card-padding, 15px);
-      @media all and (min-width: 1600px) {
-        min-height: 240px;
-      }
 
-      cursor: pointer;
-      &:hover {
-        .viewAll svg {
-          margin-left: 10px;
-        }
+      @media all and (min-width: 1600px) {
+        min-height: 178px;
       }
-    }
-    .cardHeading {
-      font-weight: 700;
-      font-size: 17.3279px;
-      line-height: 21px;
-      color: #2a3042;
-      margin-bottom: 12px;
-    }
-    .cardDesc {
-      font-weight: 500;
-      font-size: 13.4772px;
-      line-height: 2;
-      color: rgba(0, 0, 0, 0.5);
-      margin-bottom: 13px;
-      min-height: 54px;
-    }
-    .cardBottomSection {
-      display: flex;
-      align-items: flex-end;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 15px;
-      img {
-        display: block;
-        max-width: 100%;
+      cursor: pointer;
+      box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08), -3px 3px 6px rgba(220, 220, 220, 0.2), 3px -3px 6px rgba(220, 220, 220, 0.2),
+        -3px -3px 6px rgba(255, 255, 255, 0.9), 3px 3px 8px rgba(220, 220, 220, 0.9), inset 1px 1px 2px rgba(255, 255, 255, 0.3),
+        inset -1px -1px 2px rgba(220, 220, 220, 0.5);
+      border-radius: var(--card-border-radius, 12px);
+      position: relative;
+      isolation: isolate;
+      padding-left: var(--border-width, 4px);
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(var(--bg-gradient-colors, to bottom, #ffa800, #e35200));
+        z-index: -2;
+        border-radius: var(--card-border-radius, 12px);
+      }
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        border-radius: var(--card-border-radius, 12px);
+        background-color: var(--bg_color, #ffefee);
+        margin-left: var(--border-width, 4px);
+
+        z-index: -1;
+        margin-right: -0.5px;
+      }
+      .cardContent {
+        padding: var(--card-padding, 15px);
+      }
+      .cardHeading {
+        font-weight: 700;
+        font-size: 17px;
+        line-height: 21px;
+        margin-bottom: 10px;
+      }
+      .cardDesc {
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 20px;
+      }
+      .cardTop {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .cardIcon {
+        overflow: hidden;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+      }
+      .cardArrow {
+        font-size: 16px;
+        transition: transform 0.3s;
+      }
+      &:hover {
+        .cardArrow {
+          transform: translateX(-10px);
+        }
       }
     }
   }
 }
 .dialogContainer {
-  --top-space: 30px;
-  --spacing-hor: 30px;
+  --top-space: 28px;
+  .dialogContentContainer {
+    padding: 24px 32px 40px;
+  }
   .modalHead {
-    padding: 0 !important;
+    padding: 0 0 10px;
     background-color: #fff !important;
     position: relative;
     border-radius: 8.17814px 8.17814px 0 0;
     width: Min(404px, calc(100vw - 64px));
+    border-bottom: 1px solid #e2e2e2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 100%;
 
-    .modalTitle {
-      padding: var(--top-space) var(--spacing-hor, 15px) 23px var(--spacing-hor, 15px);
-      color: #5b5b5b !important;
-      font-weight: 700;
-      font-size: 16px;
-      line-height: 157%;
-    }
     button {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
+      flex-basis: 48px;
+      max-width: 48px;
+      border-radius: 50% !important;
       svg {
         color: #000 !important;
       }
     }
+    .modalIconAndName {
+      display: flex;
+      flex-basis: calc(100% - 48px);
+      max-width: calc(100% - 48px);
+      align-items: center;
+      gap: 24px;
+      .modalIcon {
+        flex-basis: 32px;
+        max-width: 32px;
+        svg {
+          width: 32px;
+          height: 32px;
+          display: block;
+        }
+        img {
+          width: 32px;
+          height: 32px;
+          display: block;
+        }
+      }
+      .modalTitle {
+        color: #5b5b5b !important;
+        font-weight: 700;
+        font-size: 17px;
+        line-height: 157%;
+        flex-basis: calc(100% - 32px);
+        max-width: calc(100% - 32px);
+      }
+    }
   }
   .dialogContent {
-    padding: 0 var(--spacing-hor, 15px) var(--top-space, 15px);
+    margin: var(--top-space, 20px) 0 0;
+    padding: 0;
     max-height: 250px;
+    min-height: 250px;
+    padding-left: 7px;
 
     .linkList {
       list-style-type: none;
@@ -300,10 +366,24 @@
       }
     }
     .dialogLinks {
-      font-size: 14px;
-      line-height: 192%;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 183%;
       text-align: center;
-      color: #298b88;
+      color: #2a3042;
+      transition: color 0.3s;
+      svg {
+        margin-right: 16px;
+        vertical-align: middle;
+      }
+      &:hover {
+        color: var(--new_theme_color, lightblue);
+      }
+    }
+  }
+  @media all and (max-width: 550px) {
+    .modalIcon {
+      display: none;
     }
   }
 }
@@ -335,11 +415,6 @@
   }
 }
 .rightInner {
-  &.setHeight {
-    @media all and (min-width: 1600px) {
-      min-height: 506px;
-    }
-  }
   @media all and (min-width: 548px) {
     --hor-gap: 18px;
   }
@@ -366,14 +441,16 @@
     }
   }
   text-align: left;
-  margin-bottom: var(--hor-gap);
+  margin-bottom: var(--hor-gap, 10px);
   &::last-child {
     margin-bottom: 0;
   }
 
   background: var(--sideCardBg, #fffaee);
   border: 2.16598px solid #ebebeb;
-  box-shadow: 0px 4.33197px 43.3197px rgba(0, 0, 0, 0.08);
+  box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08), -3px 3px 6px rgba(220, 220, 220, 0.2), 3px -3px 6px rgba(220, 220, 220, 0.2),
+    -3px -3px 6px rgba(255, 255, 255, 0.9), 3px 3px 8px rgba(220, 220, 220, 0.9), inset 1px 1px 2px rgba(255, 255, 255, 0.3),
+    inset -1px -1px 2px rgba(220, 220, 220, 0.5);
   border-radius: 10px;
   padding: var(--padding, 20px);
   cursor: pointer;
@@ -387,14 +464,14 @@
   }
   h2 {
     font-weight: 700;
-    font-size: 20px;
+    font-size: 18px;
     line-height: 24px;
     color: #2a3042;
     margin-bottom: 13px;
   }
   p {
     font-weight: 500;
-    font-size: 15.1619px;
+    font-size: 15px;
     line-height: 30px;
     color: rgba(0, 0, 0, 0.5);
   }

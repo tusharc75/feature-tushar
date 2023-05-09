@@ -34,6 +34,7 @@ import ProductRepairType from './RepairType';
 import { MdDelete } from 'react-icons/md';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit } from 'react-icons/bi';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import InventoryHistory from './InventoryHistory';
 import CostDetails from './CostDetails';
 import ServiceMaster from './ServiceMaster';
@@ -80,6 +81,7 @@ const ProductDetailsPage = () => {
 
   const [showConfirmBoxConvert, setShowConfirmBoxConvert] = useState(false);
   const [productInventoryData, setProductInventoryData] = useState([]);
+  const [productInventoryLoading, setProductInventoryLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -195,6 +197,20 @@ const ProductDetailsPage = () => {
       });
   };
 
+  const fetchProductInventoryData = () => {
+    setProductInventoryLoading(true);
+    axiosInstance()
+      .get(`${productInventory.api}/product/${id}`)
+      .then(async ({ data: { data } }) => {
+        setProductInventoryData(data);
+        setProductInventoryLoading(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setProductInventoryLoading(false);
+      });
+  };
+
   const getWarehouses = () => {
     setLoadingWarehouse(true);
     axiosInstance()
@@ -296,7 +312,12 @@ const ProductDetailsPage = () => {
           )}
 
           {permissions?.serviceMaster && (
-            <Tab className={'tabLayout'} value={2} label={<div className="d-flex align-items-center tab-font">Services/Consumables</div>} {...a11yProps(2)} />
+            <Tab
+              className={'tabLayout'}
+              value={2}
+              label={<div className="d-flex align-items-center tab-font">Services/Consumables</div>}
+              {...a11yProps(2)}
+            />
           )}
 
           {permissions?.serviceMaster && (
@@ -364,69 +385,98 @@ const ProductDetailsPage = () => {
                           {permissions?.productInventory?.isRead && (
                             <Grid item xs={12} sm={6} md={4} xl={3}>
                               <div style={{ overflow: 'hidden' }} className="single-form-v1">
-                                <Box display={'flex'} className={'form-head-v1'}>
-                                  <Typography className="form-label-style-v1" variant="subtitle2">
-                                    {routes?.productInventory?.title}
-                                  </Typography>
-                                  <Box pl={1}>
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => {
-                                        history.push(`${routes.productInventory.path}`, { product: id, productName: productData?.productName });
+                                <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
+                                  <Box display="flex" alignItems="center">
+                                    <Typography style={{ fontWeight: '600' }} className="form-label-style-v1" variant="subtitle2">
+                                      {routes?.productInventory?.title}
+                                    </Typography>
+                                    <Box pl={1} display="flex">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => {
+                                          history.push(`${routes.productInventory.path}`, { product: id, productName: productData?.productName });
+                                        }}
+                                      >
+                                        <InfoOutlined fontSize="small" />
+                                      </IconButton>
+                                    </Box>
+                                  </Box>
+                                  <IconButton size="small" onClick={fetchProductInventoryData}>
+                                    <RefreshIcon fontSize="small" />
+                                  </IconButton>
+                                </Box>
+
+                                {!productInventoryLoading ? (
+                                  <Box className="formdata-v1" style={{ minHeight }}>
+                                    {productInventoryData?.filter((d) => d.inventory)?.length ? (
+                                      <>
+                                        <Box display="flex" justifyContent="space-between">
+                                          <Typography className="table-head-v1">{routes.warehouse.title}</Typography>
+                                          {user?.user?.brandPolicy?.storageLocation && (
+                                            <Typography className="table-head-v1">{routes.storageLocation.title}</Typography>
+                                          )}
+                                          <Typography className="table-head-v1">Qty</Typography>
+                                        </Box>
+                                        {productInventoryData
+                                          ?.filter((d) => d.inventory)
+                                          .map(({ inventory, warehouse, storageLocation }) => (
+                                            <Box display="flex" justifyContent="space-between">
+                                              <Typography className="table-data-v1 bt-0 br-0">{warehouse?.name} </Typography>
+                                              {user?.user?.brandPolicy?.storageLocation && (
+                                                <Typography className="table-data-v1 bt-0 br-0">{storageLocation?.storageLocationName} </Typography>
+                                              )}
+                                              <Typography className="table-data-v1 bt-0">{inventory}</Typography>
+                                            </Box>
+                                          ))}
+                                      </>
+                                    ) : (
+                                      <Box textAlign="center" padding={2} minHeight={10}>
+                                        <Typography>No {routes.productInventory.title} Found</Typography>
+                                      </Box>
+                                    )}
+                                    {permissions?.product?.isUpdate &&
+                                      permissions?.serializedAsset?.isCreate &&
+                                      productData?.serializedProduct === false && (
+                                        <Box pt={1}>
+                                          <Button
+                                            variant={'outlined'}
+                                            color="primary"
+                                            onClick={() => {
+                                              setShowConfirmBoxConvert(true);
+                                            }}
+                                            size="small"
+                                          >
+                                            Convert to Serialized Product
+                                          </Button>
+                                          {showConfirmBoxConvert && (
+                                            <ConfirmationDialog
+                                              open={showConfirmBoxConvert}
+                                              message={`Are you sure you want to convert serialized product ?`}
+                                              onClose={() => {
+                                                setShowConfirmBoxConvert(false);
+                                              }}
+                                              onOk={handleConvertSerialized}
+                                            />
+                                          )}
+                                        </Box>
+                                      )}
+                                  </Box>
+                                ) : (
+                                  [1, 2].map((i) => (
+                                    <BoxWithBorder
+                                      key={i}
+                                      style={{
+                                        margin: '8px'
                                       }}
                                     >
-                                      <InfoOutlined fontSize="small" />
-                                    </IconButton>
-                                  </Box>
-                                </Box>
-                                <Box className="formdata-v1" style={{ minHeight }}>
-                                  {productInventoryData?.filter((d) => d.inventory)?.length ? (
-                                    <>
-                                      <Box display="flex" justifyContent="space-between">
-                                        <Typography className="table-head-v1">{routes.warehouse.title}</Typography>
-                                        {user?.user?.brandPolicy?.storageLocation && <Typography className="table-head-v1">{routes.storageLocation.title}</Typography>}
-                                        <Typography className="table-head-v1">Qty</Typography>
+                                      <Box padding={1}>
+                                        <Skeleton variant="text" width="100px" height="20px" />
+                                        <Box marginTop={1} />
+                                        <Skeleton variant="text" width="100%" height="15px" />
                                       </Box>
-                                      {productInventoryData
-                                        ?.filter((d) => d.inventory)
-                                        .map(({ inventory, warehouse, storageLocation }) => (
-                                          <Box display="flex" justifyContent="space-between">
-                                            <Typography className="table-data-v1 bt-0 br-0">{warehouse?.name} </Typography>
-                                            {user?.user?.brandPolicy?.storageLocation && <Typography className="table-data-v1 bt-0 br-0">{storageLocation?.storageLocationName} </Typography>}
-                                            <Typography className="table-data-v1 bt-0">{inventory}</Typography>
-                                          </Box>
-                                        ))}
-                                    </>
-                                  ) : (
-                                    <Box textAlign="center" padding={2} minHeight={10}>
-                                      <Typography>No {routes.productInventory.title} Found</Typography>
-                                    </Box>
-                                  )}
-                                  {permissions?.product?.isUpdate && permissions?.serializedAsset?.isCreate && productData?.serializedProduct === false && (
-                                    <Box pt={1}>
-                                      <Button
-                                        variant={'outlined'}
-                                        color="primary"
-                                        onClick={() => {
-                                          setShowConfirmBoxConvert(true);
-                                        }}
-                                        size="small"
-                                      >
-                                        Convert to Serialized Product
-                                      </Button>
-                                      {showConfirmBoxConvert && (
-                                        <ConfirmationDialog
-                                          open={showConfirmBoxConvert}
-                                          message={`Are you sure you want to convert serialized product ?`}
-                                          onClose={() => {
-                                            setShowConfirmBoxConvert(false);
-                                          }}
-                                          onOk={handleConvertSerialized}
-                                        />
-                                      )}
-                                    </Box>
-                                  )}
-                                </Box>
+                                    </BoxWithBorder>
+                                  ))
+                                )}
                               </div>
                             </Grid>
                           )}
@@ -483,7 +533,11 @@ const ProductDetailsPage = () => {
                                                       }
                                                     }}
                                                   >
-                                                    {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? <ExpandLess /> : <ExpandMore />}
+                                                    {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? (
+                                                      <ExpandLess />
+                                                    ) : (
+                                                      <ExpandMore />
+                                                    )}
                                                   </IconButton>
                                                 </Box>
                                                 <Box ml={1} display="flex" alignItems="center">
@@ -541,8 +595,9 @@ const ProductDetailsPage = () => {
                                                         size="small"
                                                         onClick={() => {
                                                           history.push(`${routes.serializedAsset.path}`, {
-                                                            warehouse: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse)
-                                                              .warehouse,
+                                                            warehouse: productWarehouseData.find(
+                                                              (d) => d?.warehouse?.optionValue === selectedWarehouse
+                                                            ).warehouse,
                                                             product: { id: id, name: headingLabel }
                                                           });
                                                         }}

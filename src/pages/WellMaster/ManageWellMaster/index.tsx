@@ -77,9 +77,20 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
               toastConfig.setToastConfig(error);
             });
         } else {
-          setTitle('Create Well Master');
-          let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-
+          setTitle(`Create ${routes.wellMaster.title}`);
+          let initialData: any = { ...getObjKeys('', fieldsDataForCreate) };
+          if (refrenceData?.customerAccount) {
+            fieldsDataForCreate?.forEach((e) => {
+              if (e.fieldName === "customerAccount") {
+                if (e.type === "multiSelect") {
+                  initialData.customerAccount = [refrenceData?.customerAccount];
+                }
+                else {
+                  initialData.customerAccount = refrenceData?.customerAccount;
+                }
+              }
+            })
+          }
           setAllFields(fieldsDataForCreate);
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -117,13 +128,17 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
         .post(`${wellMaster.api}`, values)
         .then(({ data: { data, message } }) => {
           setSubmitting(false);
-          onSuccess(data);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: message
           });
-          history.push(`${routes.wellMasterDetail.path}/${data?._id}`);
+          if (refrenceData) {
+            onSuccess(data);
+          }
+          else {
+            history.push(`${routes.wellMasterDetail.path}/${data?._id}`);
+          }
         })
         .catch((error) => {
           setSubmitting(false);

@@ -483,7 +483,6 @@ const StorageLocation = () => {
         <ManageStorageLocation
           isClone={showManageDialog.isClone}
           storageLocationId={showManageDialog.idToClone}
-          isRedirectTodetailPage={true}
           onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
             setShowManageDialog({ open: false, isClone: false, idToClone: null });

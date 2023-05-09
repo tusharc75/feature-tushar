@@ -236,7 +236,7 @@ const WorkOrderDetails = () => {
                         aria-controls="action-menu"
                         endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
                       >
-                        {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                        {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -280,7 +280,12 @@ const WorkOrderDetails = () => {
                   {isMobile && !isTablet ? <VisibilityIcon color="primary" /> : 'Preview'}
                 </Button>
                 {permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && !completed && (
-                  <Button variant="contained" size="small" onClick={() => setOpenUpdateDialog(true)} className={'btn-outline-v1'}>
+                  <Button 
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  size="small" 
+                  onClick={() => setOpenUpdateDialog(true)} 
+                  className={'btn-outline-v1'}
+                  >
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 )}

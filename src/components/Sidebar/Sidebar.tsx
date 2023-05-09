@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
 import { CssBaseline, Drawer, List, ListItem, ListItemText, Toolbar, Collapse, ListItemIcon, Tooltip } from '@material-ui/core';
 import { Link, withRouter, useHistory } from 'react-router-dom';
 import Header from '../Header/Header';
@@ -8,27 +7,19 @@ import { useData } from '../../StateProvider/Provider';
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 import { ChevronRight, ExpandMore, ExpandLess } from '@material-ui/icons';
 import { kebabCase, lowerCase, sortBy } from 'lodash';
+import { setDataBySectionName } from 'src/pages/Home/helpers';
 
-import { FaRegUserCircle, FaReact, FaRegRegistered } from 'react-icons/fa';
-import { MdOutlineDashboard, MdOutlineLocalActivity } from 'react-icons/md';
-import { RiFolderSettingsLine, RiAccountPinCircleFill, RiShieldUserLine } from 'react-icons/ri';
-import { SiCivicrm } from 'react-icons/si';
-import { AiOutlineSetting } from 'react-icons/ai';
+import { FaRegUserCircle } from 'react-icons/fa';
+import { MdOutlineDashboard } from 'react-icons/md';
+
 import { BsChatLeftTextFill } from 'react-icons/bs';
-import { ProductSetup, AccountsIcon } from '../../assets/sidebar_assets/icons';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { staticHiddenResource } from '../../constants/helpers';
 
-import { AiOutlineDatabase, AiOutlineFileText } from 'react-icons/ai';
-// import { HiOutlineUser } from 'react-icons/hi';
-import { FaRegUser } from 'react-icons/fa';
+import { AiOutlineFileText } from 'react-icons/ai';
 
-import { AccountCircle } from '@material-ui/icons';
 import useStyles from './style';
 import routes from '../Helpers/Routes';
-import { IoPeopleOutline } from 'react-icons/io5';
-import { BiCart, BiCog } from 'react-icons/bi';
-import { RiSuitcaseLine } from 'react-icons/ri';
 import { SVG } from 'src/assets';
 
 import styles from './sidebar.module.scss';
@@ -50,59 +41,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const pathName = pathnames[0];
 
   const renderIcon = (sectionName: string) => {
-    let icon = <FaReact size={20} className={styles.sidebarIcon} />;
-    switch (sectionName) {
-      case 'Brand Admin':
-        icon = <FaRegUserCircle size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Master Data':
-        icon = <AiOutlineDatabase size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Product Setup':
-        icon = <ProductSetup size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Admin Portal':
-        icon = <RiShieldUserLine size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Accounts':
-        icon = <FaRegUser size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'CRM +':
-        icon = <SiCivicrm size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'ROM':
-        icon = <FaRegRegistered size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Sales Management':
-        icon = <SiCivicrm size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Rental Management':
-        icon = <FaRegRegistered size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Inventory Management':
-        icon = <RiSuitcaseLine size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'eCommerce':
-        icon = <BiCart size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Repair & Maintenance Management':
-        icon = <ProductSetup size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Service Management':
-        icon = <FaRegUser size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Setups & Administration':
-        icon = <BiCog size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Activities':
-        icon = <IoPeopleOutline size={20} className={styles.sidebarIcon} />;
-        break;
-
-      default:
-        icon = <FaReact size={20} className={styles.sidebarIcon} />;
-        break;
-    }
-    return icon;
+    let { sideBarIcon } = setDataBySectionName(sectionName);
+    return sideBarIcon;
   };
 
   let toggleTimeout;
@@ -258,7 +198,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                     }}
                   />
                 ) : (
-                  <ChevronRight className={styles.sidebarIcon} />
+                  <ChevronRight />
                 )}
               </ListItemIcon>
               <ListItemText
@@ -349,12 +289,16 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                           </>
                         )}
                         <ListItemIcon className={styles.listIcon}>{renderIcon(listItem.section)}</ListItemIcon>
-                        <ListItemText primary={listItem.section} className={`wordWrap`} />
-                        {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
+                        <ListItemText primary={listItem.section} className={`wordWrap `} />
+                        {open[listItem.section] ? <ExpandLess className={styles.listArrowIcon} /> : <ExpandMore className={styles.listArrowIcon} />}
                       </ListItem>
                     </Tooltip>
                     <Collapse in={open[listItem.section]} timeout="auto" unmountOnExit>
-                      <List component="div" disablePadding className={`${styles.subList} `}>
+                      <List
+                        component="div"
+                        disablePadding
+                        className={`${styles.subList} ${items.some((item) => pathName === item) && styles.activeSubList}`}
+                      >
                         {listItem.items.map((item, j) => (
                           <Link
                             className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${
@@ -367,7 +311,19 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                             }}
                             to={handleRoutes(item)}
                           >
-                            <ListItem button selected={pathnames?.includes(lowerCase(item.name))} className={classes.nested}>
+                            <ListItem
+                              button
+                              selected={pathnames?.includes(lowerCase(item.name))}
+                              className={`${classes.nested} ${styles.subListItems} `}
+                              style={{ gap: 32 }}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 13 13" fill="none">
+                                <path
+                                  d="M6.50049 0H13.0005V6.5H12.188V1.39014L0.59082 12.981L0.0195312 12.4097L11.6104 0.8125H6.50049V0Z"
+                                  fill="currentcolor"
+                                  stroke="currentcolor"
+                                ></path>
+                              </svg>
                               <ListItemText primary={item.resourceLabel || item.name} />
                             </ListItem>
                           </Link>

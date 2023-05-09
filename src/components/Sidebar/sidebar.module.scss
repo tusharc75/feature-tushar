@@ -30,7 +30,14 @@
   .activeList {
     position: relative;
     isolation: isolate;
-    color: #2da9a4;
+    color: var(--new_theme_color);
+    .listArrowIcon {
+      color: var(--new_theme_color);
+    }
+
+    & > div > span {
+      font-weight: 600;
+    }
     .listIcon {
       position: relative;
       &::before {
@@ -88,9 +95,20 @@
   }
   .subList {
     background-color: hsl(199, 49%, 22%);
+    background-color: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid #1d4254;
+    &.activeSubList {
+      border-radius: 0 15px 0 0;
+    }
+    // padding-left: 56px;
+
+    padding-block: 16px;
+  }
+  .subListItems {
+    padding-left: 47px;
   }
   .active_sub {
-    background-color: hsl(200deg, 49%, 29%);
+    background-color: hsl(240, 43%, 10%);
     display: block;
   }
 }

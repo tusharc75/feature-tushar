@@ -299,9 +299,9 @@ const RepairOrderDetails = () => {
                         size="small"
                         onClick={openActions}
                         aria-controls="action-menu"
-                        endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                        endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
                       >
-                        {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                        {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -369,7 +369,7 @@ const RepairOrderDetails = () => {
                       onClick={() => setOpenUpdateDialog(true)}
                       className={'btn-outline-v1'}
                     >
-                      {isMobile ? <BiEdit size={20} /> : 'Edit'}
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   )}
                 {permissions?.repairOrder?.isDelete && allowedToDelete && repairOrderData?.canDelete && (

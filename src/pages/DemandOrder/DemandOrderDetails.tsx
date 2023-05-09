@@ -16,10 +16,11 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
-import {  BiFoodMenu } from 'react-icons/bi';
+import {  BiEdit, BiFoodMenu } from 'react-icons/bi';
 import Material from './Material';
 import { camelCase } from 'lodash';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const DemandOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -131,8 +132,13 @@ const DemandOrderDetails = () => {
             {salesOrderData ? (
               <>
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (
-                  <Button  className="btn-outline-v1" variant="contained"  size="small" onClick={handleOpenUpdateDialog}>
-                    Edit
+                  <Button  
+                  className="btn-outline-v1" 
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  size="small" 
+                  onClick={handleOpenUpdateDialog}
+                  >
+                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 )}
 

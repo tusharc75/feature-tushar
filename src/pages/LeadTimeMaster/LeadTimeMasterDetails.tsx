@@ -171,8 +171,7 @@ const LeadTimeMasterDetails = () => {
                         color="primary"
                         size="small"
                         onClick={handleOpenUpdateDialog}
-                        className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                        style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                        className={'btn-outline-v1'}
                       >
                         {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                       </Button>
