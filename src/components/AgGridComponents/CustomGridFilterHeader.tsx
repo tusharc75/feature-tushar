@@ -212,37 +212,25 @@ const DisplyaFilters = (props) => {
   }, [currentGridApi, _.isEqual(filterModel, oldModalRef.current || {})]);
 
   const hideElementAndShowNumber = (container) => {
-    const containerWidth = container?.clientWidth - 52;
     const childItems = [...container?.children];
 
+    childItems.forEach((item) => (item.style.display = 'inline-flex'));
     let lastVisibleItem = null;
-
-    let tempChildWIdth = 0;
-    let count = 0;
-
+    const hiddenItems = [];
     for (let i = 0; i < childItems.length; i++) {
-      const item = childItems[i];
-      const itemWidth = item.clientWidth;
-      tempChildWIdth += itemWidth;
-      if (tempChildWIdth > containerWidth) {
-        item.style.display = 'none';
-      }
-    }
-
-    for (let i = 0; i < childItems.length; i++) {
-      const item = childItems[i];
-      if (item.style.display === 'none') {
+      const item = childItems[i] as HTMLDivElement;
+      const isOverlapping = item.getBoundingClientRect().right >= container.getBoundingClientRect().right - COUNT_PADDING;
+      if (isOverlapping) {
+        hiddenItems.push(item);
         if (!lastVisibleItem) {
-          if (i != 0) {
-            lastVisibleItem = childItems[i - 1];
-          } else {
-            lastVisibleItem = childItems[i];
-          }
+          lastVisibleItem = childItems[i - 1];
         }
-        count += 1;
-        setHiddenItems((prev) => prev + 1);
       }
     }
+    hiddenItems.forEach((item) => (item.style.display = 'none'));
+
+    const count = hiddenItems.length;
+    setHiddenItems(count);
 
     const deltaX = lastVisibleItem?.offsetLeft + lastVisibleItem?.clientWidth;
 
