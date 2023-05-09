@@ -108,7 +108,7 @@ const SearchResult = ({ filteredData, history, handleRoutes }) => {
         {filteredData.length !== 0 ? (
           filteredData.map((section) => {
             return (
-              <List key={section.head} subheader={<li className={`${styles.list_header} mb-2`}>{section.head}</li>}>
+              <List key={section.head} subheader={<h6 className={`${styles.list_header} mb-2`}>{section.head}</h6>}>
                 {section.items.map((item) => {
                   return (
                     <>
@@ -156,7 +156,11 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
             section.head === 'Activities'
           )
             return <></>;
-          const style = { '--bg_color': section.color, textAlign: 'left' } as React.CSSProperties;
+          const style = {
+            '--bg_color': section.color,
+            textAlign: 'left',
+            '--bg-gradient-colors': `to bottom, ${section.gradient.join(', ')}`
+          } as React.CSSProperties;
           return (
             <div
               key={section.head}
@@ -165,7 +169,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
               style={style}
               onClick={() => section.items.length > 0 && setModalContent({ items: section.items, title: section.head })}
             >
-              <Typography component="h2" className={styles.cardHeading}>
+              {/* <Typography component="h2" className={styles.cardHeading}>
                 {section.head}
               </Typography>
               <Typography component="p" className={styles.cardDesc}>
@@ -173,15 +177,26 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
               </Typography>
               <div className={styles.cardBottomSection}>
                 {section.items.length > 0 && (
-                  <div
-                    className={styles.viewAll}
-                    onClick={() => section.items.length > 0 && setModalContent({ items: section.items, title: section.head })}
-                  >
+                  <div className={styles.viewAll}>
                     <Typography component="span">View All</Typography>
                     <HiArrowRight />
                   </div>
                 )}
                 <p className={styles.cardIcon}>{section.icon}</p>
+              </div> */}
+              <div className={styles.cardContent}>
+                <div className={styles.cardTop}>
+                  <div className={styles.cardIcon}>{section.icon}</div>
+                  <div className={styles.cardArrow}>
+                    <HiArrowRight />
+                  </div>
+                </div>
+                <Typography component="h2" className={styles.cardHeading}>
+                  {section.head}
+                </Typography>
+                <Typography component="p" className={styles.cardDesc}>
+                  {section.items.length > 0 ? section.text : 'Coming Soon.'}
+                </Typography>
               </div>
             </div>
           );

@@ -2,8 +2,7 @@ import { AiFillAccountBook } from 'react-icons/ai';
 import { SVGImages, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from '../../assets/dashboard_images';
 import DashboardIcons from 'src/assets/dashboard_images/icons';
 
-import { ProductSetup, AccountsIcon } from '../../assets/sidebar_assets/icons';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { ProductSetup } from '../../assets/sidebar_assets/icons';
 import {
   BiCog,
   IoPeopleOutline,
@@ -13,17 +12,10 @@ import {
   FaReact,
   FaRegRegistered,
   FaRegUser,
-  MdOutlineDashboard,
-  MdOutlineLocalActivity,
   MdOutlineDynamicForm,
   MdMiscellaneousServices,
-  MdOutlineChangeHistory,
-  RiFolderSettingsLine,
-  RiAccountPinCircleFill,
   RiShieldUserLine,
   SiCivicrm,
-  AiOutlineSetting,
-  BsChatLeftTextFill,
   RiCustomerServiceLine,
   AiOutlineCalendar,
   GiCircuitry,
@@ -62,12 +54,12 @@ export const assignIconAndText = (groupedData) => {
 export const setDataBySectionName = (secName, index = 0) => {
   const colorAccessor = index % colourCodes.length;
   const iconColour = colourCodes[colorAccessor]?.icon || ['#FFA800', '#E35200'];
+
   let icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
   let text = '';
   let sideBarIcon = <FaReact size={20} />;
-
-  // let color = colourCodes[index]?.main || '#FFF7F2'
-  let color = '#FFFFFF';
+  const color = '#FFFFFF';
+  const gradient = colourCodes[colorAccessor]?.gradient || ['#FFA800', '#E35200'];
 
   if (['CRM +', 'Sales Management'].includes(secName)) {
     text = 'Convert leads and close sales deals faster.';
@@ -144,41 +136,50 @@ export const setDataBySectionName = (secName, index = 0) => {
     icon: icon,
     text: text,
     color: color,
-    sideBarIcon
+    sideBarIcon,
+    gradient
   };
 };
 
 const colourCodes = [
   {
     main: '#FFEFEE',
-    icon: ['#FC5757', '#C60707']
+    icon: ['#FC5757', '#C60707'],
+    gradient: ['#FC5757', '#C60707']
   },
   {
     main: '#F3F8FF',
-    icon: ['#68C82E', '#03640D']
+    icon: ['#68C82E', '#03640D'],
+    gradient: ['#68C82E', '#03640D']
   },
   {
     main: '#FFF7F2',
-    icon: ['#FFA800', '#E35200']
+    icon: ['#FFA800', '#E35200'],
+    gradient: ['#FFA800', '#E35200']
   },
   {
     main: '#F9FDEC',
-    icon: ['#577BFC', '#1608BD']
+    icon: ['#577BFC', '#1608BD'],
+    gradient: ['#577BFC', '#1608BD']
   },
   {
     main: '#FFFAEC',
-    icon: ['#FAC94B', '#FF9B04']
+    icon: ['#FAC94B', '#FF9B04'],
+    gradient: ['#FAC94B', '#FF9B04']
   },
   {
     main: '#F6F1FF',
-    icon: ['#AD14F5', '#6203AC']
+    icon: ['#AD14F5', '#6203AC'],
+    gradient: ['#AD14F5', '#6203AC']
   },
   {
     main: '#FFFAEC',
-    icon: ['#68C82E', '#03640D']
+    icon: ['#68C82E', '#03640D'],
+    gradient: ['#68C82E', '#03640D']
   },
   {
     main: '#F6F1FF',
-    icon: ['#EC3F7D', '#FF0550']
+    icon: ['#EC3F7D', '#FF0550'],
+    gradient: ['#EC3F7D', '#FF0550']
   }
 ];

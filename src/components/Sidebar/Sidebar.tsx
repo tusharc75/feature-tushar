@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
 import { CssBaseline, Drawer, List, ListItem, ListItemText, Toolbar, Collapse, ListItemIcon, Tooltip } from '@material-ui/core';
 import { Link, withRouter, useHistory } from 'react-router-dom';
 import Header from '../Header/Header';
@@ -10,26 +9,17 @@ import { ChevronRight, ExpandMore, ExpandLess } from '@material-ui/icons';
 import { kebabCase, lowerCase, sortBy } from 'lodash';
 import { setDataBySectionName } from 'src/pages/Home/helpers';
 
-import { FaRegUserCircle, FaReact, FaRegRegistered } from 'react-icons/fa';
-import { MdOutlineDashboard, MdOutlineLocalActivity } from 'react-icons/md';
-import { RiFolderSettingsLine, RiAccountPinCircleFill, RiShieldUserLine } from 'react-icons/ri';
-import { SiCivicrm } from 'react-icons/si';
-import { AiOutlineSetting } from 'react-icons/ai';
+import { FaRegUserCircle } from 'react-icons/fa';
+import { MdOutlineDashboard } from 'react-icons/md';
+
 import { BsChatLeftTextFill } from 'react-icons/bs';
-import { ProductSetup, AccountsIcon } from '../../assets/sidebar_assets/icons';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { staticHiddenResource } from '../../constants/helpers';
 
-import { AiOutlineDatabase, AiOutlineFileText } from 'react-icons/ai';
-// import { HiOutlineUser } from 'react-icons/hi';
-import { FaRegUser } from 'react-icons/fa';
+import { AiOutlineFileText } from 'react-icons/ai';
 
-import { AccountCircle } from '@material-ui/icons';
 import useStyles from './style';
 import routes from '../Helpers/Routes';
-import { IoPeopleOutline } from 'react-icons/io5';
-import { BiCart, BiCog } from 'react-icons/bi';
-import { RiSuitcaseLine } from 'react-icons/ri';
 import { SVG } from 'src/assets';
 
 import styles from './sidebar.module.scss';
