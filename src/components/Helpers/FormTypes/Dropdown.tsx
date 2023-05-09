@@ -330,7 +330,9 @@ function Dropdown({
                                                 addFieldOption(tempNewOption);
                                                 setOptionsList([tempNewOption, ...option]);
                                                 if (fieldData.lookupDependentOn) {
-                                                    if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
+                                                    if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]
+                                                        || data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
+                                                    ) {
                                                         handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                                                     }
                                                 }
@@ -369,7 +371,12 @@ function Dropdown({
                                                     setOptionsList([tempNewOption, ...option]);
                                                     if (fieldData.lookupDependentOn) {
                                                         if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
-                                                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                                            if (type === "multiSelect") {
+                                                                handleChange(name, tempNewOption && tempNewOption.optionValue ? [tempNewOption.optionValue] : []);
+                                                            }
+                                                            else {
+                                                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                                            }
                                                         }
                                                     }
                                                     else {

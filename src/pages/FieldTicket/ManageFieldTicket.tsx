@@ -18,7 +18,6 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
-  console.log('referenceData', referenceData);
   const {
     state: { user }
   }: any = useData();
@@ -184,13 +183,12 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                     onClose();
                   }
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
                     : `Create ${routes?.fieldTicket?.title}`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
