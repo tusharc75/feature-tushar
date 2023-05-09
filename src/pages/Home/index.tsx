@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, Fragment } from 'react';
+import React, { useEffect, useState, useContext, Fragment } from 'react';
 import { Typography, List, ListItem, ListItemText, Box } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
@@ -6,7 +6,7 @@ import { kebabCase } from 'lodash';
 import styles from './Dashboard.module.scss';
 import './style.scss';
 import { SVGImages, IconConst } from '../../assets/dashboard_images';
-import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
+
 import routes from 'src/components/Helpers/Routes';
 import { withStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
@@ -82,11 +82,7 @@ function Dashboard() {
       <div className={` ${styles.contentWrapper}`}>
         <div className={styles.main}>
           <div className={styles.leftContainer}>
-            {search.trim() !== '' ? (
-              <SearchResult filteredData={filteredData} history={history} handleRoutes={handleRoutes} />
-            ) : (
-              <DisplayCardGrid sections={sections} handleRoutes={handleRoutes} />
-            )}
+            <DisplayCardGrid sections={sections} handleRoutes={handleRoutes} />
             <Chart />
           </div>
           <div className={styles.rightContainer}>
@@ -100,43 +96,6 @@ function Dashboard() {
 }
 
 export default Dashboard;
-
-const SearchResult = ({ filteredData, history, handleRoutes }) => {
-  return (
-    <div className={styles.searchResult}>
-      <div className={`${styles.filtered_data} `} style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll' }}>
-        {filteredData.length !== 0 ? (
-          filteredData.map((section) => {
-            return (
-              <List key={section.head} subheader={<h6 className={`${styles.list_header} mb-2`}>{section.head}</h6>}>
-                {section.items.map((item) => {
-                  return (
-                    <>
-                      <ListItem
-                        key={item.name}
-                        button
-                        onClick={() => {
-                          history.push(handleRoutes(item));
-                        }}
-                      >
-                        <ListItemText primary={item.resourceLabel} />
-                      </ListItem>
-                    </>
-                  );
-                })}
-              </List>
-            );
-          })
-        ) : (
-          <div className={styles.no_result_container}>
-            <SentimentVeryDissatisfiedIcon />
-            <p className={styles.no_result}>Sorry, we couldn't find any result</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 const DisplayCardGrid = ({ sections, handleRoutes }) => {
   const [modalContent, setModalContent] = useState(null);
@@ -167,6 +126,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
               role="button"
               className={styles.singlecard}
               style={style}
+              aria-label={`open ${section.head}`}
               onClick={() => section.items.length > 0 && setModalContent({ items: section.items, title: section.head, icon: section.icon })}
             >
               <div className={styles.cardContent}>
@@ -211,7 +171,10 @@ const RenderDialog = ({ modalContent, handleClose, handleRoutes }) => {
       PaperProps={{
         style: {
           borderRadius: 16,
-          margin: 15
+          margin: 15,
+          marginBottom: 94,
+          boxShadow:
+            '0px 165px 66px rgba(142, 159, 199, 0.01), 0px 93px 56px rgba(142, 159, 199, 0.05), 0px 41px 41px rgba(142, 159, 199, 0.09), 0px 10px 23px rgba(142, 159, 199, 0.1), 0px 0px 0px rgba(142, 159, 199, 0.1)'
         }
       }}
       open={Boolean(modalContent)}
@@ -289,6 +252,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
           role="button"
           style={style}
           className={`${styles.rightInner} `}
+          aria-label={`open ${mode}`}
           onClick={() => setModalContent({ items: colabData, title: mode, icon: <img src={SVGImages(mode)} alt={`${mode} Logo`} /> })}
         >
           <img src={SVGImages(mode)} alt={`${mode} Logo`} className={styles.colabLogo} />
