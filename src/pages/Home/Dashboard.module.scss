@@ -308,7 +308,7 @@
     button {
       flex-basis: 48px;
       max-width: 48px;
-      border-radius: 50%;
+      border-radius: 50% !important;
       svg {
         color: #000 !important;
       }
