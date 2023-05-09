@@ -10,7 +10,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { serviceOrder } from '../../../constants/helpers';
+import { SERVICE_ORDER_STATUS, serviceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
@@ -46,11 +46,10 @@ const Technician = ({
   const [rowsData, setRowsData] = useState(null);
 
   useEffect(() => {
-    if (
-      statusOptions.findIndex((d) => d.optionLabel === 'Ready to Invoice') >
-      statusOptions.findIndex((d) => d.optionLabel === serviceOrderData?.status)
-    ) {
-      updateStatus('Ready to Invoice');
+    if (fromInvoice) {
+      if ([SERVICE_ORDER_STATUS.new, SERVICE_ORDER_STATUS.inProgress]?.includes(serviceOrderData?.status)) {
+        updateStatus(SERVICE_ORDER_STATUS.readyToInvoice);
+      }
     }
   }, []);
 
@@ -144,8 +143,7 @@ const Technician = ({
                 size="small"
                 aria-label="Details"
                 onClick={() => {
-                  const obj: any = [{ _id: row.original._id, technician: row.original?.technician }];
-                  setDeleteData(obj);
+                  setDeleteData([row.original._id]);
                 }}
               >
                 <DeleteIcon fontSize="small" color={'error'} />
@@ -195,7 +193,7 @@ const Technician = ({
     const subRowsTechnician: any = [];
     technician?.filter((e) => e.uniqueId === parent._id)?.forEach((element, i) => {
       const obj: any = {};
-      obj._id = parent._id;
+      obj._id = element._id;
       obj.index = parent.index + '.' + (i + 1);
       obj.detail = `${element?.technician?.firstName} ${element?.technician?.lastName} - (${element?.technician?.firstName})`;
       obj.technician = element?.technician?._id;
@@ -244,10 +242,10 @@ const Technician = ({
       });
   };
 
-  const handleDelete = (rows) => {
+  const handleDelete = (ids) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${serviceOrder.api}/${serviceOrderData?._id}/technician/delete`, rows)
+      .put(`${serviceOrder.api}/${serviceOrderData?._id}/technician/delete`, { ids })
       .then(() => {
         fetchData();
         setDeleting(false);
@@ -262,12 +260,8 @@ const Technician = ({
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
-    const dataToDelete = selectedProducts && selectedProducts.filter((e) => e.type === 'technician');
-    dataToDelete?.forEach((ele) => {
-      obj.push({ _id: ele._id, technician: ele?.technician });
-    });
-    dataToDelete?.forEach((ele) => {
-      getNestedSubRows(obj, ele);
+    selectedProducts.filter((e) => e.type === 'technician')?.forEach((ele) => {
+      obj.push(ele._id);
     });
     setDeleteData(obj);
   };
@@ -324,17 +318,15 @@ const Technician = ({
                   }}
                   onClose={handleClose}
                 >
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                    <MenuItem
-                      disabled={isDeleting}
-                      onClick={() => {
-                        handleDeleteMultiple();
-                        handleClose();
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </HtmlTooltip>
+                  <MenuItem
+                    disabled={isDeleting}
+                    onClick={() => {
+                      handleDeleteMultiple();
+                      handleClose();
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
                 </Menu>
               </Box>
             )}

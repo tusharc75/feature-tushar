@@ -2373,6 +2373,14 @@ export const IRT_APPROVER_STATUS = {
   declined: 'Declined'
 };
 
+export const SERVICE_ORDER_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  completed: 'Completed'
+};
+
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
     num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;

@@ -23,7 +23,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
   const [activity, setActivity] = useState([]);
   const [treeList, setTreeList] = useState([]);
   const [loadingRoadmap, setLoadingRoadmap] = useState(false);
-  
+
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
   }, [filter.view, refresh]);
@@ -38,7 +38,6 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
       .get(`/technician-scheduler/service-order?serviceOrders=${orderId}`)
       .then(({ data }) => {
         setActivity(data?.data);
-        
         setTreeList(data?.data);
         setLoadingRoadmap(false);
       })
@@ -46,7 +45,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
         setLoadingRoadmap(false);
       });
   };
-  
+
   const fetchRoadmap = async () => {
     setLoadingRoadmap(true);
     await axiosInstance()
@@ -103,6 +102,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
     }
   };
 
+
   return !loadingRoadmap ? (
     <Box bgcolor="white">
       <Box border={1} borderColor="grey.300" display="flex" height={height} style={{ position: 'relative' }}>
@@ -129,9 +129,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
               <Box>
                 <ActivityList
                   fetchRoadmap={fetchRoadmap}
-                  activity={selectedRecords?.length === 1? activity.filter((item)=>{
-                    return selectedRecords[0]?.competency? (selectedRecords[0]?.competency.includes(item?.competency[0]?.optionLabel)):item
-                  }):activity}
+                  activity={selectedRecords?.length === 1 ? activity.filter((item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel) : activity}
                   treeList={treeList}
                   expanded={expanded}
                   selected={selected}
@@ -149,9 +147,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
                 <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
                   <CalendarList
                     fetchRoadmap={fetchRoadmap}
-                    activity={selectedRecords?.length === 1? activity.filter((item)=>{
-                      return selectedRecords[0]?.competency? (selectedRecords[0]?.competency.includes(item?.competency[0]?.optionLabel)):item
-                    }):activity}
+                    activity={selectedRecords?.length === 1 ? activity.filter((item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel) : activity}
                     expanded={expanded}
                     selected={selected}
                     handleSelect={handleSelect}
