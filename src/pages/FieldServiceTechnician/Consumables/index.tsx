@@ -9,6 +9,7 @@ import { Button, IconButton } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import ConsumablesQtyDialog from './ConsumablesQtyDialog';
+import { isMobile } from 'react-device-detect';
 
 const Consumables = ({ selectedFieldService, recall }) => {
 
@@ -30,6 +31,7 @@ const Consumables = ({ selectedFieldService, recall }) => {
         accessor: 'product',
         Header: 'Product',
         width: 300,
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) =>
           row?.original?.product ? (
             <p className="text-truncate" title={row?.original?.product}>
@@ -37,6 +39,17 @@ const Consumables = ({ selectedFieldService, recall }) => {
                 {row.original.productName}
               </a>
             </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'productDescription',
+        Header: 'Description',
+        width: 300,
+        Cell: ({ row }) =>
+          row.original.productDetail?.productDescription ? (
+            <p className="text-truncate">{row.original.productDetail?.productDescription}</p>
           ) : (
             <NoDataCell />
           )

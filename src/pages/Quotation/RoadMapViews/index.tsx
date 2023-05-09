@@ -185,12 +185,11 @@ const QuotationViews = (props) => {
             ref_type: 'quotation',
             ref_id: quoteId,
             label: (
-              <HtmlTooltip arrow placement="top" title={status}>
-                <div>
-                  <Typography variant="body2">{routes.quotation.title}</Typography>
-                  <Typography variant="subtitle2">{quoteName ?? quoteName}</Typography>
-                </div>
-              </HtmlTooltip>
+              <div>
+                <Typography variant="body2">{routes.quotation.title}</Typography>
+                <Typography variant="body2">{quoteName ?? quoteName}</Typography>
+                <Typography variant="subtitle2">{status ?? status}</Typography>
+              </div>
             )
           },
           position: { x: xPosition, y: 70 },
