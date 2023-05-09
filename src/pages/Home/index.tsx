@@ -214,7 +214,18 @@ const RenderDialog = ({ modalContent, handleClose, handleRoutes }) => {
     }
   }))(MuiDialogContent);
   return (
-    <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={Boolean(modalContent)} className={styles.dialogContainer}>
+    <Dialog
+      onClose={handleClose}
+      aria-labelledby="customized-dialog-title"
+      BackdropProps={{
+        style: {
+          backgroundColor: 'rgba(5, 9, 19, 0.74)',
+          backdropFilter: 'blur(2px)'
+        }
+      }}
+      open={Boolean(modalContent)}
+      className={styles.dialogContainer}
+    >
       <MuiDialogTitle disableTypography className={styles.modalHead}>
         <Typography variant="h6" className={styles.modalTitle}>
           {modalContent?.title}
