@@ -81,7 +81,7 @@ const Chart = () => {
     };
 
     return (charts && !userLoading ?
-        <Box pt={3}>
+        <Box p={2} mt={3} bgcolor="white">
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <React.Fragment>
                     <GlobalFilter
@@ -89,7 +89,7 @@ const Chart = () => {
                         setGlobalFilters={setGlobalFilters}
                         disabled={false}
                         dashboardList={[]} />
-                    <Box bgcolor="#efefef" p={1} pt={1}>
+                    <Box mt={1}>
                         <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
                             {charts.map((chart: ChartDataType, index: number) => (
                                 <ChartTypes
