@@ -289,35 +289,66 @@
   }
 }
 .dialogContainer {
-  --top-space: 30px;
-  --spacing-hor: 30px;
+  --top-space: 28px;
+  .dialogContentContainer {
+    padding: 24px 32px;
+  }
   .modalHead {
-    padding: 0 !important;
+    padding: 0 0 10px;
     background-color: #fff !important;
     position: relative;
     border-radius: 8.17814px 8.17814px 0 0;
     width: Min(404px, calc(100vw - 64px));
+    border-bottom: 1px solid #e2e2e2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 100%;
 
-    .modalTitle {
-      padding: var(--top-space) var(--spacing-hor, 15px) 23px var(--spacing-hor, 15px);
-      color: #5b5b5b !important;
-      font-weight: 700;
-      font-size: 16px;
-      line-height: 157%;
-    }
     button {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
+      flex-basis: 48px;
+      max-width: 48px;
+      border-radius: 50%;
       svg {
         color: #000 !important;
       }
     }
+    .modalIconAndName {
+      display: flex;
+      flex-basis: calc(100% - 48px);
+      max-width: calc(100% - 48px);
+      align-items: center;
+      gap: 24px;
+      .modalIcon {
+        flex-basis: 32px;
+        max-width: 32px;
+        svg {
+          width: 32px;
+          height: 32px;
+          display: block;
+        }
+        img {
+          width: 32px;
+          height: 32px;
+          display: block;
+        }
+      }
+      .modalTitle {
+        color: #5b5b5b !important;
+        font-weight: 700;
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 157%;
+        flex-basis: calc(100% - 32px);
+        max-width: calc(100% - 32px);
+      }
+    }
   }
   .dialogContent {
-    padding: 0 var(--spacing-hor, 15px) var(--top-space, 15px);
+    margin: var(--top-space, 20px) 0 0;
+    padding: 0;
     max-height: 250px;
+    min-height: 250px;
 
     .linkList {
       list-style-type: none;
@@ -331,10 +362,24 @@
       }
     }
     .dialogLinks {
-      font-size: 14px;
-      line-height: 192%;
+      font-weight: 400;
+      font-size: 13px;
+      line-height: 183%;
       text-align: center;
-      color: #298b88;
+      color: #2a3042;
+      transition: color 0.3s;
+      svg {
+        margin-right: 16px;
+        vertical-align: middle;
+      }
+      &:hover {
+        color: var(--link, lightblue);
+      }
+    }
+  }
+  @media all and (max-width: 550px) {
+    .modalIcon {
+      display: none;
     }
   }
 }
