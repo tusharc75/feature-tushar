@@ -1,4 +1,4 @@
-import { Box, Button, Paper } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -7,23 +7,29 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import { MdZoomOutMap } from 'react-icons/md';
 import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const customNodeStyles = {
   serviceOrder: {
     name: 'Service Order',
-    ...COLOUR_MASTER.purchaseOrder
-  },
-  serviceOrderClosed: {
-    name: 'Service Order Closed',
-    ...COLOUR_MASTER.purchaseOrder
+    background: '#E2F8FF',
+    borderColor: '#8BCBDF'
   },
   service: {
     name: 'Service',
-    ...COLOUR_MASTER.product
+    background: '#FFF7D9',
+    borderColor: '#FDD33E'
   },
   technician: {
     name: 'Technician',
-    ...COLOUR_MASTER.assets
+    background: '#E6E8F5',
+    borderColor: '#9789F0'
+  },
+  serviceOrderClosed: {
+    name: 'Service Order Completed',
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
   }
 };
 
@@ -57,7 +63,12 @@ function ServiceOrderViews({ serviceData }) {
           data: {
             ref_type: 'serviceOrder',
             ref_id: serviceData?._id,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{serviceData?.serviceOrderNumber || ''}</div>
+            label: (
+              <div>
+                <Typography variant="body2">{routes.quotation.title}</Typography>
+                <Typography variant="subtitle2">{serviceData?.serviceOrderNumber ?? serviceData?.serviceOrderNumber}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 80 },
           style: customNodeStyles.serviceOrder
@@ -65,32 +76,37 @@ function ServiceOrderViews({ serviceData }) {
       ];
       var flowEdge: any[] = [];
       if (allServices?.length) xPosition = xPosition + 300;
-      allServices?.map((service, index) => {
-        serviceIdMaterial[service?.materialId] = service._id;
-        flow.push({
-          id: `${service._id}`,
-          type: 'default',
-          className: 'dark-node',
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          data: {
-            ref_type: 'purchaseOrder',
-            ref_id: service._id,
-            label: (
-              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {service?.serviceDetail?.serviceName || service?.packageDetail?.packageName || service?.productDetail?.productName || ''}
-              </div>
-            )
-          },
-          position: { x: xPosition, y: 80 * index },
-          style: customNodeStyles.service
+      allServices
+        ?.filter((s) => s?.type === 'service')
+        ?.map((service, index) => {
+          serviceIdMaterial[service?.materialId] = service._id;
+          flow.push({
+            id: `${service._id}`,
+            type: 'default',
+            className: 'dark-node',
+            sourcePosition: 'right',
+            targetPosition: 'left',
+            data: {
+              ref_type: 'purchaseOrder',
+              ref_id: service._id,
+              label: (
+                <HtmlTooltip arrow placement="top" title={`Service`}>
+                  <div>
+                    <Typography variant="subtitle2">{service?.serviceDetail?.serviceName ?? service?.serviceDetail?.serviceName}</Typography>
+                  </div>
+                </HtmlTooltip>
+              )
+            },
+            position: { x: xPosition, y: 100 * index },
+            style: customNodeStyles.service
+          });
+          flowEdge.push({
+            id: `${service?._id}__${serviceData?._id}_edge`,
+            source: `${serviceData?._id}`,
+            target: `${service?._id}`,
+            arrowHeadType: 'arrow'
+          });
         });
-        flowEdge.push({
-          id: `${service?._id}__${serviceData?._id}_edge`,
-          source: `${serviceData?._id}`,
-          target: `${service?._id}`
-        });
-      });
 
       if (allTechnician?.length) xPosition = xPosition + 300;
       allTechnician?.map((technician, index) => {
@@ -105,16 +121,24 @@ function ServiceOrderViews({ serviceData }) {
             ref_type: 'technician',
             ref_id: technician?.technician?._id,
             label: (
-              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{technician?.technician?.employeeNumber || ''}</div>
+              <HtmlTooltip arrow placement="top" title={`Technician`}>
+                <div>
+                  <Typography variant="body2">{`${technician?.technician?.firstName ?? technician?.technician?.firstName} ${
+                    technician?.technician?.lastName ?? technician?.technician?.lastName
+                  }${technician?.technician?.employeeNumber ? ` - (${technician?.technician?.employeeNumber})` : ''}`}</Typography>
+                  <Typography variant="subtitle2">{technician?.technician?.status ?? technician?.status}</Typography>
+                </div>
+              </HtmlTooltip>
             )
           },
-          position: { x: xPosition, y: 80 * index },
+          position: { x: xPosition, y: 100 * index },
           style: customNodeStyles.technician
         });
         flowEdge.push({
           id: `${technician?.service?.optionValue}__${technician?.technician?._id}_edge`,
           source: `${serviceIdMaterial[technician?.service?.optionValue]}`,
-          target: `${technician?.technician?._id}`
+          target: `${technician?.technician?._id}`,
+          arrowHeadType: 'arrow'
         });
       });
 
@@ -129,7 +153,12 @@ function ServiceOrderViews({ serviceData }) {
           ref_type: 'received',
           ref_id: serviceData?._id,
           label: (
-            <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{serviceData?.serviceOrderNumber || ''} Closed</div>
+            <HtmlTooltip arrow placement="top" title={serviceData?.status}>
+              <div>
+                <Typography variant="body2">{serviceData?.serviceOrderNumber ?? serviceData?.serviceOrderNumber}</Typography>
+                <Typography variant="subtitle2">{serviceData?.status ?? serviceData?.status}</Typography>
+              </div>
+            </HtmlTooltip>
           )
         },
         position: { x: xPosition, y: 80 },
@@ -140,7 +169,8 @@ function ServiceOrderViews({ serviceData }) {
           flowEdge.push({
             id: `${service?._id}__${serviceData?._id}_edge`,
             source: `${service?._id}`,
-            target: `${serviceData?._id}_Closed`
+            target: `${serviceData?._id}_Closed`,
+            arrowHeadType: 'arrow'
           });
         }
       });
@@ -148,7 +178,8 @@ function ServiceOrderViews({ serviceData }) {
         flowEdge.push({
           id: `${technician?.technician?._id}__${serviceData?._id}_edge`,
           source: `${technician?.technician?._id}`,
-          target: `${serviceData?._id}_Closed`
+          target: `${serviceData?._id}_Closed`,
+          arrowHeadType: 'arrow'
         });
       });
 

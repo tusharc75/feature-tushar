@@ -16,15 +16,16 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { FaDiceOne } from 'react-icons/fa';
 
-const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
+const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
   const {
     state: { user }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [fullScreen, setFullScreen] = useState(fullScreenView || isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -183,12 +184,13 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                     onClose();
                   }
                 }}
-                title={`${id
+                title={`${
+                  id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
                     : `Create ${routes?.fieldTicket?.title}`
-                  }`}
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -207,9 +209,14 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                     fullWidth
                   />
                 </Form>
+                <div className={'detail-box-content'}>
+                  <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                  <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Step Information</h2>
+                </div>
+                <Box marginY={2} />
                 <Autocomplete
                   multiple
-                  id="Step Complete"
+                  id="Steps Performed"
                   options={stepOptions?.map((e) => e?.optionLabel) || []}
                   defaultValue={completeSteps?.map((e) => e?.optionLabel) || []}
                   freeSolo
@@ -235,7 +242,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                     setCompleteSteps(updatedValues);
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} variant="outlined" label="Step Complete" size="small" placeholder="Step Complete" />
+                    <TextField {...params} variant="outlined" label="Steps Performed" size="small" placeholder="Steps Performed" />
                   )}
                 />
               </CustomDialogContent>

@@ -9,16 +9,15 @@ import { Button, IconButton } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import ConsumablesQtyDialog from './ConsumablesQtyDialog';
+import { isMobile } from 'react-device-detect';
 
 const Consumables = ({ selectedFieldService, recall }) => {
-  let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
-  const toastConfig = useContext(CustomToastContext);
+  let renderedFrom = camelCase(routes?.fieldTicket.title + '_consumables');
 
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
-  const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
 
   useEffect(() => {
@@ -32,6 +31,7 @@ const Consumables = ({ selectedFieldService, recall }) => {
         accessor: 'product',
         Header: 'Product',
         width: 300,
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) =>
           row?.original?.product ? (
             <p className="text-truncate" title={row?.original?.product}>
@@ -39,6 +39,17 @@ const Consumables = ({ selectedFieldService, recall }) => {
                 {row.original.productName}
               </a>
             </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'productDescription',
+        Header: 'Description',
+        width: 300,
+        Cell: ({ row }) =>
+          row.original.productDetail?.productDescription ? (
+            <p className="text-truncate">{row.original.productDetail?.productDescription}</p>
           ) : (
             <NoDataCell />
           )
@@ -56,37 +67,12 @@ const Consumables = ({ selectedFieldService, recall }) => {
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
       }
-      // {
-      //   accessor: 'action',
-      //   Header: 'Action',
-      //   width: 50,
-      //   sticky: 'right',
-      //   disableFilters: true,
-      //   canDrag: false,
-      //   Cell: ({ row }: any) => (
-      //     <div style={{ display: 'flex', justifyContent: 'center' }}>
-      //       <HtmlTooltip title="Delete">
-      //         <IconButton
-      //           size="small"
-      //           aria-label="Delete"
-      //           disabled={row?.original?.consumedQty ? true : false}
-      //           onClick={() => {
-      //             handleDelete([row.original]);
-      //           }}
-      //         >
-      //           <DeleteIcon color={row?.original?.consumedQty ? 'disabled' : 'error'} />
-      //         </IconButton>
-      //       </HtmlTooltip>
-      //     </div>
-      //   )
-      // }
     ];
     setColumns(column);
   };
 
   const fetchData = () => {
     setDataRows(null);
-    console.log(selectedFieldService?.technicianAssign?.material);
     const consumableData = selectedFieldService?.technicianAssign?.material?.map((u) => {
       let res: any = {
         ...u,
@@ -98,94 +84,9 @@ const Consumables = ({ selectedFieldService, recall }) => {
     setDataRows(consumableData || []);
   };
 
-  // const handleSubmit = async (rows) => {
-  //   // const data: any = [];
-  //   // rows?.forEach((e) => {
-  //   //   if (parseInt(e.qty)) {
-  //   //     data.push({ product: e._id, qty: parseInt(e.qty), service, uniqueId, stepId });
-  //   //   }
-  //   // });
-  //   // axiosInstance()
-  //   //   .post(`${workOrder.api}/${workOrderId}/consumable`, data)
-  //   //   .then(({ data }) => {
-  //   //     fetchData();
-  //   //     setConsumablesDialog(false);
-  //   //     toastConfig.setToastConfig({
-  //   //       open: true,
-  //   //       type: 'success',
-  //   //       message: data.message
-  //   //     });
-  //   //   })
-  //   //   .catch((error) => {
-  //   //     toastConfig.setToastConfig(error);
-  //   //   });
-  // };
-
-  // const handleDelete = async (rows) => {
-  //   // const ids = rows.map((e) => e._id);
-  //   // axiosInstance()
-  //   //   .put(`${workOrder.api}/${workOrderId}/consumable/remove`, {
-  //   //     ids: ids || []
-  //   //   })
-  //   //   .then(({ data }) => {
-  //   //     fetchData();
-  //   //     toastConfig.setToastConfig({
-  //   //       open: true,
-  //   //       type: 'success',
-  //   //       message: data.message
-  //   //     });
-  //   //   })
-  //   //   .catch((error) => {
-  //   //     toastConfig.setToastConfig(error);
-  //   //   });
-  // };
-
-  // const onSaveInlineEdit = async (inputField, updatedData) => {
-  //   // if (parseInt(inputField.qty) < updatedData.consumedQty) {
-  //   //   toastConfig.setToastConfig({
-  //   //     open: true,
-  //   //     type: 'error',
-  //   //     message: 'Qty can not be less than consumed qty'
-  //   //   });
-  //   //   return;
-  //   // } else if (parseInt(inputField.qty) === 0) {
-  //   //   toastConfig.setToastConfig({
-  //   //     open: true,
-  //   //     type: 'error',
-  //   //     message: 'Qty can not be 0'
-  //   //   });
-  //   //   return;
-  //   // }
-  //   // inputField.qty = parseInt(inputField.qty);
-  //   // axiosInstance()
-  //   //   .put(`${workOrder.api}/${workOrderId}/consumable/update-qty`, [
-  //   //     {
-  //   //       product: updatedData?.productId,
-  //   //       ...inputField,
-  //   //       _id: updatedData._id
-  //   //     }
-  //   //   ])
-  //   //   .then(({ data }) => {
-  //   //     fetchData();
-  //   //     toastConfig.setToastConfig({
-  //   //       open: true,
-  //   //       type: 'success',
-  //   //       message: data.message
-  //   //     });
-  //   //   })
-  //   //   .catch((error) => {
-  //   //     toastConfig.setToastConfig(error);
-  //   //   });
-  // };
-
   return (
     <>
       <Box display="flex" justifyContent="flex-end" p={2} pt={0}>
-        {/* <Box display="flex" flexWrap={'wrap'}>
-          <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
-            Add Products/Consumables
-          </Button>
-        </Box> */}
         <Box display="flex" ml={1}>
           <Button
             disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
@@ -199,7 +100,6 @@ const Consumables = ({ selectedFieldService, recall }) => {
           </Button>
         </Box>
       </Box>
-
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
           {columns && dataRows ? (

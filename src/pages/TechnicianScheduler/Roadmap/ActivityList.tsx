@@ -54,7 +54,8 @@ export default function ActivityList(props) {
             <Avatar variant="circle" sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo} />
             <Box ml={2} flex style={{ flexDirection: 'column' }}>
               <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${data?.firstName} ${data?.lastName}`}</Typography>
-              <p style={{ fontSize: '0.6rem', color: 'grey' }}>{`${data?.competency?.map((e) => e.optionLabel)?.toString()}`}</p>
+              <p style={{ fontSize: '0.8rem', color: 'grey' }}>{`${data?.competencyType?.optionLabel || ''}`}</p>
+              <p style={{ fontSize: '0.6rem', color: 'grey' }}>{`${data?.competencies?.map((e) => e.optionLabel)?.toString()}`}</p>
             </Box>
           </Box>
           <Box width={'20%'} className="d-flex align-items-center">

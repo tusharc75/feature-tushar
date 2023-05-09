@@ -222,7 +222,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
                     value={selectedCompetency}
                     filterSelectedOptions={true}
                     renderInput={(params) => (
-                      <TextField {...params} margin="dense" name="competency" label="Competency Type" variant="outlined" fullWidth />
+                      <TextField {...params} margin="dense" name="competencyType" label="Competency Type" variant="outlined" fullWidth />
                     )}
                   />
                 </Grid>
