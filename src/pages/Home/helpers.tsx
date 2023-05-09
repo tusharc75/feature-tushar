@@ -58,7 +58,7 @@ export const setDataBySectionName = (secName, index = 0) => {
   let icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
   let text = '';
   let sideBarIcon = <FaReact size={20} />;
-  const color = '#FFFFFF';
+  const color = '#ffffff';
   const gradient = colourCodes[colorAccessor]?.gradient || ['#FFA800', '#E35200'];
 
   if (['CRM +', 'Sales Management'].includes(secName)) {

@@ -80,7 +80,7 @@
     width: 44px;
     top: 0;
     bottom: 0;
-    background-color: #298b88;
+    background-color: var(--new_theme_color);
     color: white;
     transition: background 0.3s;
     &:hover {
