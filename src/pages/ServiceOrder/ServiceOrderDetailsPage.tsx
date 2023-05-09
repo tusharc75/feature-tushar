@@ -9,7 +9,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { serviceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies, serviceOrderSteps, salesOrder } from '../../constants/helpers';
+import { serviceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies, serviceOrderSteps, SERVICE_ORDER_STATUS } from '../../constants/helpers';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
@@ -141,7 +141,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const getServiceOrderFields = async () => {
@@ -215,64 +215,58 @@ const ServiceOrderDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {serviceOrderData ? (
+            {permissions?.serviceOrder?.isUpdate && allowedToEdit && (
               <Fragment>
-                {permissions?.serviceOrder?.isUpdate && allowedToEdit && (
-                  <Fragment>
-                    <Button 
-                    className={'btn-outline-v1'} 
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small" 
-                    onClick={handleOpenUpdateDialog}>
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
-                  </Fragment>
-                )}
-                {permissions?.serviceOrder?.isUpdate && allowedToEdit && (
-                  <Fragment>
-                   <Button
-                   variant="outlined"
-                   color="default"
-                   size="small"
-                   onClick={openActions}
-                   aria-controls="action-menu"
-                   endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                 >
-                   {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
-                 </Button>
-                 <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {statusOptions?.map((o, index) => {
-                        return (
-                          <MenuItem
-                            disabled={index <= statusOptions.findIndex((d) => d.optionLabel === serviceOrderData?.status)}
-                            onClick={() => {
-                              closeActions();
-                              handleStatusChange(o);
-                            }}
-                            value={o}
-                          >
-                            {o?.optionLabel}
-                          </MenuItem>
-                        );
-                      })}
-                    </Menu>
-                 </Fragment>
-                 
-                )}
+                <Button
+                  className={'btn-outline-v1'}
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  size="small"
+                  onClick={handleOpenUpdateDialog}>
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
               </Fragment>
-            ) : (
-              <Skeleton variant="text" width="150px" height="32px" />
+            )}
+            {permissions?.serviceOrder?.isUpdate && allowedToEdit && (
+              <Fragment>
+                {[SERVICE_ORDER_STATUS.readyToInvoice, SERVICE_ORDER_STATUS.invoiced]?.includes(serviceOrderData?.status) &&
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                  >
+                    {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
+                  </Button>}
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  {statusOptions?.map((o, index) => {
+                    return (
+                      <MenuItem
+                        disabled={index <= statusOptions.findIndex((d) => d.optionLabel === serviceOrderData?.status)}
+                        onClick={() => {
+                          closeActions();
+                          handleStatusChange(o);
+                        }}
+                        value={o}
+                      >
+                        {o?.optionLabel}
+                      </MenuItem>
+                    );
+                  })}
+                </Menu>
+              </Fragment>
             )}
             <ActivityButton referenceId={serviceOrderData?._id} resource={ACTIVITY_RESOURCE.serviceOrder} />
           </Box>
@@ -337,7 +331,7 @@ const ServiceOrderDetailsPage = () => {
             steps={serviceOrderSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={['Closed'].includes(serviceOrderData?.status)}
+            isStepEnded={[SERVICE_ORDER_STATUS.completed].includes(serviceOrderData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
           <ContentFullScreen title={serviceOrderSteps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
