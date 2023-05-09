@@ -87,7 +87,7 @@ export function reducer(state, action) {
       return {
         ...state,
         page: action.page,
-        appendRows: isMobile
+        appendRows: isMobile && !isTablet
       };
 
     case 'pageSizeChange':
@@ -95,7 +95,7 @@ export function reducer(state, action) {
         ...state,
         limit: action.limit,
         page: 0,
-        appendRows: isMobile,
+        appendRows: isMobile && !isTablet,
         loading: false
       };
 
@@ -137,7 +137,7 @@ export const intialState = {
   filters: {},
   sorting: [],
   selectedRecords: [],
-  appendRows: isMobile,
+  appendRows: isMobile && !isTablet,
   showFilteredRecordsOnly: false
 };
 
@@ -166,7 +166,7 @@ export default function CustomAgGrid({
   customGridOptions = null,
   actionLabel = null,
   actionEditable = false,
-  onCellValueChanged = () => {},
+  onCellValueChanged = () => { },
   showOnlyShowFilteredRecordSwitch = false,
   idProperty = '_id',
   allowHeaderSelection = true,
@@ -386,15 +386,15 @@ export default function CustomAgGrid({
                 ? true
                 : checkStaticField(renderedFrom, column.field)
               : column.hasOwnProperty('show') && !column?.show
-              ? true
-              : false
+                ? true
+                : false
           }
           floatingFilterComponent="customFloatingFilter"
           valueGetter={column.valueGetter ?? null}
-          // floatingFilterComponent={column.floatingFilterComponent ?? null}
-          // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-          //   suppressFilterButton: true,
-          // }}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
         ></AgGridColumn>
       )
     ) : column.isAction ? (
@@ -420,18 +420,18 @@ export default function CustomAgGrid({
               ? true
               : checkStaticField(renderedFrom, column.field)
             : column.hasOwnProperty('show') && !column?.show
-            ? true
-            : false
+              ? true
+              : false
         }
         comparator={() => {
           return 0;
         }}
         floatingFilterComponent="customFloatingFilter"
         valueGetter={column.valueGetter ?? null}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+      // floatingFilterComponent={column.floatingFilterComponent ?? null}
+      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+      //   suppressFilterButton: true,
+      // }}
       ></AgGridColumn>
     );
   });
