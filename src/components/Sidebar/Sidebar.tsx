@@ -8,6 +8,7 @@ import { useData } from '../../StateProvider/Provider';
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 import { ChevronRight, ExpandMore, ExpandLess } from '@material-ui/icons';
 import { kebabCase, lowerCase, sortBy } from 'lodash';
+import { setDataBySectionName } from 'src/pages/Home/helpers';
 
 import { FaRegUserCircle, FaReact, FaRegRegistered } from 'react-icons/fa';
 import { MdOutlineDashboard, MdOutlineLocalActivity } from 'react-icons/md';
@@ -50,59 +51,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const pathName = pathnames[0];
 
   const renderIcon = (sectionName: string) => {
-    let icon = <FaReact size={20} className={styles.sidebarIcon} />;
-    switch (sectionName) {
-      case 'Brand Admin':
-        icon = <FaRegUserCircle size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Master Data':
-        icon = <AiOutlineDatabase size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Product Setup':
-        icon = <ProductSetup size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Admin Portal':
-        icon = <RiShieldUserLine size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Accounts':
-        icon = <FaRegUser size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'CRM +':
-        icon = <SiCivicrm size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'ROM':
-        icon = <FaRegRegistered size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Sales Management':
-        icon = <SiCivicrm size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Rental Management':
-        icon = <FaRegRegistered size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Inventory Management':
-        icon = <RiSuitcaseLine size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'eCommerce':
-        icon = <BiCart size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Repair & Maintenance Management':
-        icon = <ProductSetup size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Service Management':
-        icon = <FaRegUser size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Setups & Administration':
-        icon = <BiCog size={20} className={styles.sidebarIcon} />;
-        break;
-      case 'Activities':
-        icon = <IoPeopleOutline size={20} className={styles.sidebarIcon} />;
-        break;
-
-      default:
-        icon = <FaReact size={20} className={styles.sidebarIcon} />;
-        break;
-    }
-    return icon;
+    let { sideBarIcon } = setDataBySectionName(sectionName);
+    return sideBarIcon;
   };
 
   let toggleTimeout;
