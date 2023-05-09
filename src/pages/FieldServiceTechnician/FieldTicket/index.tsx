@@ -361,6 +361,7 @@ const FieldTicket = ({ selectedFieldService }) => {
                 };
               }) || []
           }}
+          fullScreenView={true}
         />
       )}
     </>
