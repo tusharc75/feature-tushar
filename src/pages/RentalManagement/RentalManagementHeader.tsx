@@ -226,12 +226,12 @@ function RentalManagementHeader({
                   </ToggleButtonGroup>
                 </Box>
               )}
-              {permissions?.rentalPlanningCalendar?.isRead && (
+              {permissions?.planningView?.isRead && (
                 <Box ml={1}>
                   <ToggleButtonGroup size="small">
                     <ToggleButton
                       onClick={() => {
-                        history.push(`${routes.rentalPlanningCalendar.path}`);
+                        history.push(`${routes.planningView.path}`);
                       }}
                     >
                       <span>{`Calendar`}</span>

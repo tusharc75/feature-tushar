@@ -134,28 +134,6 @@ const CustomGridFilterHeader = (props) => {
 
 export default CustomGridFilterHeader;
 
-const filterParams = {
-  comparator: (filterLocalDateAtMidnight: Date, cellValue: string) => {
-    var dateAsString = cellValue;
-    if (dateAsString == null) return -1;
-    var dateParts = dateAsString.split('/');
-    var cellDate = new Date(Number(dateParts[2]), Number(dateParts[1]) - 1, Number(dateParts[0]));
-
-    if (filterLocalDateAtMidnight.getTime() === cellDate.getTime()) {
-      return 0;
-    }
-
-    if (cellDate < filterLocalDateAtMidnight) {
-      return -1;
-    }
-
-    if (cellDate > filterLocalDateAtMidnight) {
-      return 1;
-    }
-    return 0;
-  }
-};
-
 // THIS COMPONENT WILL DISPLAY CHIPS ===============================>
 const DisplyaFilters = (props) => {
   const { chipData, setChipData, selectedFilter, handleFilterOpen, clearSingleFilter, clearFilterAll, currentGridApi, setIsFilterPresent } = props;

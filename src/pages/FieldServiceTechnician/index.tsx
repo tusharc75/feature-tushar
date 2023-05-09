@@ -72,12 +72,15 @@ const FieldServiceTechnician = () => {
   }, []);
 
   const fetchData = () => {
+    setFieldService(null);
     axiosInstance()
       .get(`/field-service-technician`)
       .then(({ data: { data } }) => {
         setFieldService(data?.data);
+        const isAvailable = data?.data.find((d) => d._id === selectedFieldService?._id);
+        const index = data?.data.findIndex((d) => d._id === selectedFieldService?._id);
         if (data?.data?.length) {
-          setSelectedFieldService(data?.data[0]);
+          isAvailable ? setSelectedFieldService(data?.data[index]) : setSelectedFieldService(data?.data[0]);
         }
       })
       .catch((error) => {
@@ -215,7 +218,7 @@ const FieldServiceTechnician = () => {
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
                     <Box>
-                      <Consumables selectedFieldService={selectedFieldService} />
+                      <Consumables selectedFieldService={selectedFieldService} recall={fetchData} />
                     </Box>
                   </TabPanel>
                 </Box>
