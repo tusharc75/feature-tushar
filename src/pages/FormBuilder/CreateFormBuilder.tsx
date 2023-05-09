@@ -90,7 +90,8 @@ const CreateFormBuilder = () => {
   const [sectionName, setsectionName] = useState('');
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
 
-  const sectionNameList = ['CRM +', 'ROM', 'Accounts', 'Product Setup', 'Activities', 'Admin Portal'];
+  const sectionNameList = ['Sales Management', 'eCommerce', 'Inventory Management',
+    'Rental Operations Management', 'Repair & Maintenance Management', 'Purchasing Management', 'Planning & Forecasting'];
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -178,7 +179,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => {});
+          .catch((error) => { });
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -438,10 +439,10 @@ const CreateFormBuilder = () => {
         </Box>
       </Box>
       {openHistoryDialog && (
-        <History 
-        onClose={() =>closeHistoryDialog()}
-         open={openHistoryDialog}
-         resource={resource}
+        <History
+          onClose={() => closeHistoryDialog()}
+          open={openHistoryDialog}
+          resource={resource}
         />
       )
       }

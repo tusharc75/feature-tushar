@@ -35,7 +35,7 @@ const ActivityButton = ({ referenceId, resource }) => {
           onClick={() => setActivityShow(!showActivity)}
           style={{ background: 'var(--new_theme_color)', color: 'white', boxShadow: 'unset' }}
         >
-          Activities
+          Collaborate
         </Button>
       </HideWhenOffline>
       {showActivity && <div className="backdrop-new-v1" onClick={() => setActivityShow(false)}></div>}

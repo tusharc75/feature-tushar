@@ -223,7 +223,7 @@ const Activity = (props) => {
     <>
       <Box>
         <Box className={`${classes.detailsHeader} `}>
-          <h2 className="listingHeader single">Activities</h2>
+          <h2 className="listingHeader single">Collaborate</h2>
           <IconButton onClick={() => close()} className="close-icon-v1">
             <CloseIcon />
           </IconButton>
