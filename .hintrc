@@ -15,7 +15,8 @@
           "margin-block",
           "padding-block",
           "padding-inline",
-          "inset"
+          "inset",
+          "margin-inline"
         ]
       }
     ]
