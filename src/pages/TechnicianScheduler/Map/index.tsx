@@ -103,7 +103,7 @@ const MapView = ({ technician }) => {
                   position={new google.maps.LatLng(selectedService?.shippingAddress?.latitude, selectedService?.shippingAddress?.longitude)}
                   onCloseClick={() => setSelectedService(null)}
                 >
-                  <div>{selectedService?.serviceOrderNumber}</div>
+                  <div>{selectedService?.fieldServiceOrderNumber}</div>
                 </InfoWindow>
               )}
             </>

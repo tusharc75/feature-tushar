@@ -9,17 +9,17 @@ import {
   customerAccount,
   supplierAccount,
   gridLoadingTimeout,
-  serviceOrder,
+  fieldServiceOrder,
   prepareDataForGrid,
   getLocalStorageArrayData,
   removeLocalStorage,
   sidebarResource
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
-import routes from './../../components/Helpers/Routes';
+import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -40,7 +40,7 @@ import {
   FaShippingFast,
   RiSpaceShipFill
 } from 'react-icons/all';
-import ServiceOrderHeader from './ServiceOrderHeader';
+import ServiceOrderHeader from './FieldServiceOrderHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ManageServiceOrder from './ManageServiceOrder';
@@ -58,7 +58,7 @@ const ServiceOrderType = [
 ];
 
 const ServiceOrder = () => {
-  const renderedFrom = camelCase(routes?.serviceOrder.title);
+  const renderedFrom = camelCase(routes?.fieldServiceOrder.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -78,7 +78,7 @@ const ServiceOrder = () => {
   const [singleServiceOrderDelete, setSingleServiceOrderDelete] = useState({
     id: null,
     show: false,
-    serviceOrderNumber: ''
+    fieldServiceOrderNumber: ''
   });
 
   const [gridApi, setGridApi] = useState(null);
@@ -101,7 +101,7 @@ const ServiceOrder = () => {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serviceOrderDetail.path);
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldServiceOrderDetail.path);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -164,7 +164,7 @@ const ServiceOrder = () => {
   const handleSingleDeleteServiceOrder = async () => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .put(`${serviceOrder.api}/remove`, {
+      .put(`${fieldServiceOrder.api}/remove`, {
         ids: [singleServiceOrderDelete.id]
       })
       .then(({ data }) => {
@@ -175,7 +175,7 @@ const ServiceOrder = () => {
         });
         fetchServiceOrders();
         dispatch({ type: 'loading', loading: false });
-        setSingleServiceOrderDelete({ id: null, show: false, serviceOrderNumber: '' });
+        setSingleServiceOrderDelete({ id: null, show: false, fieldServiceOrderNumber: '' });
       })
       .catch((error) => {
         dispatch({ type: 'loading', loading: false });
@@ -213,7 +213,7 @@ const ServiceOrder = () => {
               setSingleServiceOrderDelete({
                 show: true,
                 id: params.data._id,
-                serviceOrderNumber: `${params.data.serviceOrderNumber}`
+                fieldServiceOrderNumber: `${params.data.fieldServiceOrderNumber}`
               });
             }}
           >
@@ -297,7 +297,7 @@ const ServiceOrder = () => {
     try {
       let data: any = [],
         count;
-      const response: any = await axiosInstance().get(`${serviceOrder.api}${queryString}`);
+      const response: any = await axiosInstance().get(`${fieldServiceOrder.api}${queryString}`);
       data = response?.data?.data;
       count = response?.data?.count;
       let rows = data.map((u) => {
@@ -363,7 +363,7 @@ const ServiceOrder = () => {
     }
     if (recordsToDelete.length > 0) {
       axiosInstance()
-        .put(`${serviceOrder.api}/remove`, {
+        .put(`${fieldServiceOrder.api}/remove`, {
           ids: recordsToDelete
         })
         .then(({ data }) => {
@@ -390,16 +390,16 @@ const ServiceOrder = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.serviceOrder]} />
+          <CustomBreadCrumbs routes={[routes.fieldServiceOrder]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <Grid container direction="row">
             <Grid item xs={12} sm={12}>
               <Grid container justify="flex-end">
                 <ImportExportLinks
-                  permissions={permissions?.serviceOrder}
+                  permissions={permissions?.fieldServiceOrder}
                   module="serviceOrder"
-                  api={serviceOrder.api}
+                  api={fieldServiceOrder.api}
                   afterImportCompleted={() => {
                     fetchServiceOrders();
                   }}
@@ -438,7 +438,7 @@ const ServiceOrder = () => {
             showConfirmBox={showConfirmBox}
             canDelete={getLocalStorageArrayData(localStorageSelectedRecords)?.length === 0}
             icon={<FaRegistered className="headerLogo" />}
-            heading={routes.serviceOrder.title}
+            heading={routes.fieldServiceOrder.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             filters={filters}
             // showCloneServiceOrderDialog={() => {
@@ -454,13 +454,13 @@ const ServiceOrder = () => {
               permissions={permissions?.serviceOrder}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
-                history.push(`${routes.serviceOrderDetail.path}/${data._id}`);
+                history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}`);
               }}
               dataRows={dataRows}
               selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.serviceOrderDetail.path}/${data._id}?openEdit=true`);
+                history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}?openEdit=true`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {
@@ -501,7 +501,7 @@ const ServiceOrder = () => {
               refreshGrid={fetchServiceOrders}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
-              resource={sidebarResource.serviceOrder}
+              resource={sidebarResource.fieldServiceOrder}
             />
           )
         ) : null}
@@ -516,8 +516,8 @@ const ServiceOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.serviceOrderNumber ? 'Service Order' : 'Service Orders'}   ${
-              deleteRecord.serviceOrderNumber || ''
+            message={`Are you sure you want to delete ${deleteRecord?.fieldServiceOrderNumber ? 'Service Order' : 'Service Orders'}   ${
+              deleteRecord.fieldServiceOrderNumber || ''
             }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
@@ -531,12 +531,12 @@ const ServiceOrder = () => {
         {singleServiceOrderDelete.show ? (
           <ConfirmationDialog
             open={singleServiceOrderDelete.show}
-            message={`Are you sure you want to delete Service Order: ${singleServiceOrderDelete.serviceOrderNumber}?`}
+            message={`Are you sure you want to delete Service Order: ${singleServiceOrderDelete.fieldServiceOrderNumber}?`}
             onClose={() =>
               setSingleServiceOrderDelete({
                 id: null,
                 show: false,
-                serviceOrderNumber: ''
+                fieldServiceOrderNumber: ''
               })
             }
             onOk={handleSingleDeleteServiceOrder}
@@ -549,7 +549,7 @@ const ServiceOrder = () => {
           serviceOrderId={showManageServiceOrderDialog.idToClone}
           onClose={() => setShowManageServiceOrderDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={(data) => {
-            history.push(`${routes.serviceOrderDetail.path}/${data._id}`);
+            history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}`);
             setShowManageServiceOrderDialog({ open: false, isClone: false, idToClone: null });
           }}
           open={showManageServiceOrderDialog.open}

@@ -267,7 +267,7 @@ const Planning = () => {
                   history.push(`${routes.salesOrderDetail.path}/${params?.data?.salesOrderId}`);
                 }
                 if (params?.data?.type === 'Field Service Order') {
-                  history.push(`${routes.serviceOrderDetail.path}/${params?.data?.serviceOrderId}`);
+                  history.push(`${routes?.fieldServiceOrderDetail.path}/${params?.data?.serviceOrderId}`);
                 }
               }}
             >

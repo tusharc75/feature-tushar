@@ -4,11 +4,10 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { serviceOrder } from 'src/constants/helpers';
+import { fieldServiceOrder } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleClose, handleSucess }) {
-
   const toastConfig = useContext(CustomToastContext);
 
   const handleAssign = () => {
@@ -18,12 +17,13 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         service: selectedServiceOrder[0]?.service?.materialId,
         technician: technicianData?._id,
         estimateStartDate: selectedServiceOrder[0]?.service?.estimateStartDate,
-        estimateEndDate:selectedServiceOrder[0]?.service?.estimateEndDate
+        estimateEndDate: selectedServiceOrder[0]?.service?.estimateEndDate
       }
     ];
-    axiosInstance().post(`${serviceOrder.api}/${selectedServiceOrder[0]._id}/technician`, data)
+    axiosInstance()
+      .post(`${fieldServiceOrder.api}/${selectedServiceOrder[0]._id}/technician`, data)
       .then(() => {
-        handleSucess()
+        handleSucess();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -36,23 +36,16 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
       <CustomDialogContent>
         <Box p={2}>
           <Typography variant="body1" color="textPrimary">
-            Do You want to assign {technicianData?.firstName || ''} {technicianData?.lastName || ''}  to{' '}
-            {`${selectedServiceOrder[0]?.service?.serviceName} (${selectedServiceOrder[0]?.serviceOrderNumber})`}?{' '}
+            Do You want to assign {technicianData?.firstName || ''} {technicianData?.lastName || ''} to{' '}
+            {`${selectedServiceOrder[0]?.service?.serviceName} (${selectedServiceOrder[0]?.fieldServiceOrderNumber})`}?{' '}
           </Typography>
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button
-          size="small"
-          color="primary"
-          onClick={handleClose}>
+        <Button size="small" color="primary" onClick={handleClose}>
           Close
         </Button>
-        <Button
-          size="small"
-          variant="contained"
-          color="primary"
-          onClick={handleAssign}>
+        <Button size="small" variant="contained" color="primary" onClick={handleAssign}>
           Assign
         </Button>
       </CustomDialogFooter>
