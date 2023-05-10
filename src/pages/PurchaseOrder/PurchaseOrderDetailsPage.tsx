@@ -24,8 +24,7 @@ import HideWhenOffline from '../../components/HideWhenOffline';
 import IssuePo from './IssuePo';
 import ReceivingAsset from './ReceivingAsset';
 import { GrStatusGood, GrStatusInfo, RiFlowChart } from 'react-icons/all';
-import Steps from '../RentalManagement/Steps';
-import Steps2, { getIndex } from 'src/components/Steps';
+import Steps, { getIndex } from 'src/components/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from '../../components/ContentFullScreen';
 import PurchaseOrderViews from './RoadMapViews';
@@ -167,8 +166,8 @@ const PurchaseOrderDetailsPage = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const updateStatus = (status) => {
@@ -227,6 +226,13 @@ const PurchaseOrderDetailsPage = () => {
               [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
                 <Fragment>
                   <Button
+                    variant={'contained'}
+                    className={'btn-outline-v1'}
+                    onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}
+                  >
+                    Close
+                  </Button>
+                  {/* <Button
                     variant={'outlined'}
                     color="primary"
                     size="small"
@@ -262,7 +268,7 @@ const PurchaseOrderDetailsPage = () => {
                         </MenuItem>
                       );
                     })}
-                  </Menu>
+                  </Menu> */}
                 </Fragment>
               )}
             {purchaseOrderData?.deleted ? null : ![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ? (
@@ -374,7 +380,7 @@ const PurchaseOrderDetailsPage = () => {
               </Grid>
             ) : (
               <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Steps2
+                <Steps
                   isNextStep={false}
                   nextStep={nextStep}
                   steps={purchaseOrderSteps}
