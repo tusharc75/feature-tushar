@@ -3221,10 +3221,15 @@ body {
 
 .custom-react-table-v1 {
   &.vertical-center {
+    .td,
     td,
-    td {
+    .th,
+    th {
       display: flex;
       align-items: center;
+      & > * {
+        width: 100%;
+      }
     }
   }
   .table.sticky .header,

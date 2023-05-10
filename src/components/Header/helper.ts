@@ -2,6 +2,7 @@ interface initialStateInterface {
   filteredData: filteredListInterface[];
   parentIndex?: number;
   childIndex?: number;
+  isFirstTime?: boolean;
 }
 
 interface filteredListInterface {
@@ -28,21 +29,24 @@ interface Item {
 interface actionInterface {
   type: 'arrowUp' | 'arrowDown' | 'setFilteredData' | 'resetIndex';
   payload?: filteredListInterface[];
+  element?: HTMLDivElement;
 }
 
-export const filterReducerInitialState: initialStateInterface = { filteredData: [], parentIndex: 0, childIndex: 0 };
+export const filterReducerInitialState: initialStateInterface = { filteredData: [], parentIndex: 0, childIndex: 0, isFirstTime: true };
 
 export const filterReducer = (state: initialStateInterface, action: actionInterface) => {
   switch (action.type) {
     case 'arrowUp':
       return {
         ...state,
-        ...decreaseIndex(state.filteredData, state.parentIndex, state.childIndex)
+        isFirstTime: false,
+        ...decreaseIndex(state.filteredData, state.parentIndex, state.childIndex, action.element, state.isFirstTime)
       };
     case 'arrowDown':
       return {
         ...state,
-        ...increaseIndex(state.filteredData, state.parentIndex, state.childIndex)
+        isFirstTime: false,
+        ...increaseIndex(state.filteredData, state.parentIndex, state.childIndex, action.element, state.isFirstTime)
       };
     case 'setFilteredData':
       return {
@@ -52,27 +56,34 @@ export const filterReducer = (state: initialStateInterface, action: actionInterf
     case 'resetIndex':
       return {
         ...state,
+        isFirstTime: true,
         parentIndex: 0,
         childIndex: 0
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 
 const increaseIndex = (
   data: filteredListInterface[],
   currentParentIndex: number,
-  currentChildIndex: number
+  currentChildIndex: number,
+  element: HTMLDivElement,
+  isFirstTime: boolean
 ): { parentIndex: number; childIndex: number } => {
   let parentIndex = currentParentIndex;
   let childIndex = currentChildIndex;
 
-  if (childIndex < data[parentIndex]?.items.length) {
+  if (isFirstTime) {
+    focusElement(element, 0, 0);
+    return;
+  }
+
+  if (childIndex < data[parentIndex]?.items.length - 1) {
     childIndex++;
   } else {
     parentIndex++;
-
     if (parentIndex != data.length) {
       childIndex = 0;
     } else {
@@ -80,7 +91,7 @@ const increaseIndex = (
       childIndex = 0;
     }
   }
-
+  focusElement(element, parentIndex, childIndex);
   return {
     parentIndex,
     childIndex
@@ -90,10 +101,17 @@ const increaseIndex = (
 const decreaseIndex = (
   data: filteredListInterface[],
   currentParentIndex: number,
-  currentChildIndex: number
+  currentChildIndex: number,
+  element: HTMLDivElement,
+  isFirstTime: boolean
 ): { parentIndex: number; childIndex: number } => {
   let parentIndex = currentParentIndex;
   let childIndex = currentChildIndex;
+
+  if (isFirstTime) {
+    focusElement(element, 0, 0);
+    return;
+  }
 
   if (childIndex > 0) {
     childIndex--;
@@ -102,15 +120,22 @@ const decreaseIndex = (
       parentIndex--;
       childIndex = data[parentIndex].items.length - 1;
 
-      childIndex--;
+      // childIndex--;
     } else {
-      parentIndex = 0;
-      childIndex = 0;
+      parentIndex = data.length - 1;
+      childIndex = data[parentIndex].items.length - 1;
     }
   }
-
+  focusElement(element, parentIndex, childIndex);
   return {
     parentIndex,
     childIndex
   };
+};
+
+const focusElement = (element: HTMLDivElement, parentIndex: number, childIndex: number) => {
+  const allUl: HTMLCollection = element.children;
+  const itemToFocus = allUl[parentIndex].children[childIndex + 1] as HTMLDivElement;
+  itemToFocus.focus();
+  itemToFocus.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 };

@@ -1,14 +1,12 @@
-import { Box, Button, Grid, TextField, Typography } from '@material-ui/core';
-import React, { Fragment, useEffect, useState, useReducer, useContext } from 'react';
+import { Box, Grid, TextField } from '@material-ui/core';
+import React, { Fragment, useEffect, useState, useContext } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
 import { Autocomplete } from '@material-ui/lab';
 import { FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
-import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { workOrderSupervisor, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
+import { workOrderSupervisor } from '../../constants/helpers';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { camelCase } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -16,14 +14,11 @@ import moment from 'moment';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { dateFormatForInputControl } from '../../constants/helpers';
 import CardColTimeline, { datarowInterface } from 'src/components/CardColTimeline';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const WorkOrderSupervisor = () => {
 
-  const [gridApi, setGridApi] = useState(null);
   const toastConfig = useContext(CustomToastContext);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
@@ -35,8 +30,11 @@ const WorkOrderSupervisor = () => {
   const [repairOrderOption, setRepairOrderOption] = useState([]);
   const [serviceMasterOption, setServiceMasterOption] = useState([]);
 
-  const [timeFrame, setTimeFrame] = React.useState<any>('1-year');
-  const [globalFilters, setGlobalFilters] = useState({ from: new Date(moment().subtract(1, 'year').calendar()), to: new Date() });
+  const [serviceData, setServiceData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const [timeFrame, setTimeFrame] = React.useState<any>('custom');
+  const [globalFilters, setGlobalFilters] = useState({ from: new Date(moment().startOf('month').format('YYYY/MM/DD')), to: new Date(moment().endOf('month').format('YYYY/MM/DD')) });
 
   useEffect(() => {
     let timeout = setTimeout(fetchData, 600);
@@ -88,17 +86,12 @@ const WorkOrderSupervisor = () => {
   }, []);
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+    setLoading(true)
     const queryString = getQueryString();
     try {
-      let data, count;
+      let data;
       let response = await axiosInstance().get(`${workOrderSupervisor.api}${queryString}`);
       data = response?.data?.data;
-      count = response?.data?.count;
-
       const completed = [];
       const pending = [];
       const inProgress = [];
@@ -108,9 +101,8 @@ const WorkOrderSupervisor = () => {
         finalObject['workOrder'] = u?.workOrderDetail?.workOrderNumber;
         finalObject['serviceName'] = u?.service?.optionLabel;
         finalObject['assignedUser'] = u?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
-        finalObject['createDate'] = u?.workOrderDetail?.createDate;
+        finalObject['dueDate'] = u?.expectedCompletionDate;
         finalObject['workOrderId'] = u?.workOrderDetail?._id;
-
         if (u.status === 'Pending') {
           pending.push(finalObject);
         }
@@ -124,43 +116,20 @@ const WorkOrderSupervisor = () => {
           ...finalObject
         };
       });
-
-      dispatch({
-        type: 'initialize',
-        data: {
-          Pending: { data: pending, color: '#F8A300' },
-          'In-Progress': { data: inProgress, color: '#F16A9A' },
-          Completed: { data: completed, color: '#31AC1D' }
-        },
-        count: count
-      });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
+      setServiceData({
+        Pending: { data: pending, color: '#F8A300' },
+        'In-Progress': { data: inProgress, color: '#F16A9A' },
+        Completed: { data: completed, color: '#31AC1D' }
+      })
+      setLoading(false)
     } catch (error) {
-      dispatch({ type: 'loading', loading: false });
+      setLoading(false)
       toastConfig.setToastConfig(error);
     }
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}`;
-    }
-    if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    }
-    if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
-    }
+    let deepFilter = '?'
     if (selectedUser) {
       deepFilter = `${deepFilter}&user=${selectedUser}`;
     }
@@ -184,7 +153,7 @@ const WorkOrderSupervisor = () => {
     { accessor: 'workOrder', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?.workOrderId}` },
     { accessor: 'serviceName', title: 'Service Name', type: 'text' },
     { accessor: 'assignedUser', title: 'Technician', type: 'text' },
-    { accessor: 'createDate', title: 'Due Date', type: 'date' }
+    { accessor: 'dueDate', title: 'Due Date', type: 'date' }
   ];
 
   return (
@@ -298,11 +267,10 @@ const WorkOrderSupervisor = () => {
                 variant="inline"
                 style={{ width: '150px' }}
                 size="small"
-                openTo="year"
+                autoOk
                 format={dateFormatForInputControl}
                 maxDate={globalFilters.to}
                 label="From"
-                views={['year', 'month', 'date']}
                 value={globalFilters.from}
                 onChange={(date) => {
                   setGlobalFilters({ ...globalFilters, from: date });
@@ -312,13 +280,12 @@ const WorkOrderSupervisor = () => {
                 disabled={timeFrame !== 'custom'}
                 inputVariant="outlined"
                 variant="inline"
+                autoOk
                 style={{ width: '150px' }}
                 size="small"
                 minDate={globalFilters.from}
-                openTo="year"
                 format={dateFormatForInputControl}
                 label="To"
-                views={['year', 'month', 'date']}
                 value={globalFilters.to}
                 onChange={(date) => {
                   setGlobalFilters({ ...globalFilters, to: date });
@@ -326,14 +293,19 @@ const WorkOrderSupervisor = () => {
               />
             </Box>
           </div>
-          <CardColTimeline
-            data={dataRows}
-            loading={loading}
-            cardDataRows={cardDataRows}
-            passFailStatus={true}
-            passFailAccessor="serviceStatus"
-            px={2}
-          />
+          {serviceData ?
+            <CardColTimeline
+              data={serviceData}
+              loading={loading}
+              cardDataRows={cardDataRows}
+              passFailStatus={true}
+              passFailAccessor="serviceStatus"
+              px={2}
+            /> :
+            <Box p={2} height={500} bgcolor="white">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          }
         </div>
       </Fragment>
     </MuiPickersUtilsProvider>

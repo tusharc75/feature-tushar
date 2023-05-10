@@ -71,14 +71,18 @@ export const useKeyPress = ({ targetKey }: keyInterface) => {
   const [keyPressed, setKeyPressed] = useState(false);
 
   useEffect(() => {
-    const downHandler = ({ key }) => {
+    const downHandler = (e) => {
+      const { key } = e;
       if (key === targetKey) {
+        e.preventDefault();
         setKeyPressed(true);
       }
     };
 
-    const upHandler = ({ key }) => {
+    const upHandler = (e) => {
+      const { key } = e;
       if (key === targetKey) {
+        e.preventDefault();
         setKeyPressed(false);
       }
     };

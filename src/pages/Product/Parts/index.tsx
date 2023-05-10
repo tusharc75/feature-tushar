@@ -197,7 +197,7 @@ function Parts({ id }) {
       {hasPermissions && (
         <Box display="flex" justifyContent="space-between" p={1} pt={2} pb={2}>
           <Button variant="contained" color="primary" size="small" onClick={() => setOpenAssignProductDialog(true)}>
-            Add Product
+            Add Products
           </Button>
           <Box display={'flex'}>
             <Button
