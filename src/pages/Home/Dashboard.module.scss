@@ -259,14 +259,15 @@
       }
       .cardHeading {
         font-weight: 700;
-        font-size: 17px;
-        line-height: 21px;
+        font-size: 16px;
+        line-height: 22px;
         margin-bottom: 10px;
       }
       .cardDesc {
         font-weight: 400;
         font-size: 14px;
-        line-height: 20px;
+        line-height: 22px;
+        color: #737373;
       }
       .cardTop {
         display: flex;
@@ -338,7 +339,7 @@
         }
       }
       .modalTitle {
-        color: #5b5b5b !important;
+        color: #2a3042 !important;
         font-weight: 700;
         font-size: 17px;
         line-height: 157%;
@@ -367,10 +368,10 @@
     }
     .dialogLinks {
       font-weight: 500;
-      font-size: 16px;
+      font-size: 15px;
       line-height: 183%;
       text-align: center;
-      color: #2a3042;
+      color: #161924;
       transition: color 0.3s;
       svg {
         margin-right: 16px;
@@ -473,7 +474,7 @@
     font-weight: 500;
     font-size: 15px;
     line-height: 30px;
-    color: rgba(0, 0, 0, 0.5);
+    color: #737373;
   }
   .colabButton {
     display: block;
