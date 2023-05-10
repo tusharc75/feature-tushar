@@ -1836,8 +1836,8 @@ const ReceivingTicket = ({
           referenceData={{
             _id: rentalManagementData._id,
             warehouse: selectedRecords[0].warehouseId,
-            customerAccount: rentalManagementData.customerAccount?.optionValue,
-            customerContact: rentalManagementData.customerContact?.optionValue
+            customerAccount: rentalManagementData?.customerAccount?.optionValue,
+            customerContact: rentalManagementData?.customerContact?.optionValue
           }}
           onClose={() => setShowRepairOrderDialog(false)}
           onSuccess={(obj) => {
