@@ -502,7 +502,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType={'serviceOrder'}
+          referenceType={'fieldServiceOrder'}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
@@ -525,7 +525,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'serviceOrder'}
+          reference={'fieldServiceOrder'}
           onSuccess={(services) => {
             handleAdd(services);
           }}
@@ -537,7 +537,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
         <AssignProductDialog
-          reference={'serviceOrder'}
+          reference={'fieldServiceOrder'}
           serialized={null}
           productsDialogOpen={addExistingProductDialog.open}
           productId={null}

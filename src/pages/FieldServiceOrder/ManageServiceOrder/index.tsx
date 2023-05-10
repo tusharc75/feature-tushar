@@ -20,7 +20,8 @@ import {
   fieldServiceOrder,
   setFieldsInAscendingOrder,
   yupSchema,
-  generateUniqueIdOnly
+  generateUniqueIdOnly,
+  sidebarResource
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -168,7 +169,7 @@ const ManageServiceOrderDialog = ({
     setLoading(true);
     try {
       let fieldData;
-      const response: any = await axiosInstance().get('/field?resource=Field Service Order');
+      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
       fieldData = response?.data?.data;
 
       var statusOptions = [];
@@ -188,7 +189,7 @@ const ManageServiceOrderDialog = ({
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, fieldServiceOrderNumber, updatedBy, ...rest } = data;
             rest['status'] = 'New';
-            rest['fieldServiceOrderNumber'] = `SEO_${generateUniqueIdOnly()}`;
+            rest['fieldServiceOrderNumber'] = `FSO_${generateUniqueIdOnly()}`;
             setCloneHeading(fieldServiceOrderNumber);
             setInitialData({
               fields: fieldsDataForCreate,
@@ -196,10 +197,6 @@ const ManageServiceOrderDialog = ({
             });
             setLoading(false);
           } else {
-            console.log({
-              fields: fieldsDataForCreate,
-              values: getObjKeysWithValues(data, fieldsDataForCreate)
-            });
             setServiceDetails(data);
             setInitialData({
               fields: fieldsDataForUpdate,
@@ -212,12 +209,11 @@ const ManageServiceOrderDialog = ({
         }
       } else {
         let initialData = getObjKeys('', fieldsDataForCreate);
-        console.log(initialData);
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           initialData['currency'] = user.user?.brandCurrency;
         }
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'fieldServiceOrderNumber')) {
-          initialData['fieldServiceOrderNumber'] = `SEO_${generateUniqueIdOnly()}`;
+          initialData['fieldServiceOrderNumber'] = `FSO_${generateUniqueIdOnly()}`;
         }
         setInitialData({
           fields: fieldsDataForCreate,

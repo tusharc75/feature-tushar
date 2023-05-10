@@ -30,15 +30,7 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
 import {
-  FaSuitcase,
   SiStatuspage,
-  FaWarehouse,
-  GiAutoRepair,
-  GrStatusInfo,
-  BsFillPersonFill,
-  GiCargoShip,
-  FaShippingFast,
-  RiSpaceShipFill
 } from 'react-icons/all';
 import ServiceOrderHeader from './FieldServiceOrderHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -46,18 +38,21 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import ManageServiceOrder from './ManageServiceOrder';
 
 let serviceOrderTimeout;
-const ServiceOrderType = [
-  {
-    key: 'All Service Order',
-    value: 1
-  },
-  {
-    key: 'My Service Order',
-    value: 2
-  }
-];
+
 
 const ServiceOrder = () => {
+
+  const ServiceOrderType = [
+    {
+      key: `All ${routes.fieldServiceOrder.title}`,
+      value: 1
+    },
+    {
+      key: `My ${routes.fieldServiceOrder.title}`,
+      value: 2
+    }
+  ];
+
   const renderedFrom = camelCase(routes?.fieldServiceOrder.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -96,7 +91,7 @@ const ServiceOrder = () => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=Service Order`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
     data = response?.data?.data;
     let columns = [];
     let rendererNames = [];
@@ -185,7 +180,7 @@ const ServiceOrder = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions?.serviceOrder?.isCreate ? (
+      {permissions?.fieldServiceOrder?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
@@ -303,8 +298,8 @@ const ServiceOrder = () => {
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
-        finalObject['allowedToEdit'] = permissions?.serviceOrder?.isUpdate;
-        finalObject['canDelete'] = permissions?.serviceOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+        finalObject['allowedToEdit'] = permissions?.fieldServiceOrder?.isUpdate;
+        finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
         return finalObject;
       });
       if (appendRows) {
@@ -398,7 +393,7 @@ const ServiceOrder = () => {
               <Grid container justify="flex-end">
                 <ImportExportLinks
                   permissions={permissions?.fieldServiceOrder}
-                  module="serviceOrder"
+                  module="fieldServiceOrder"
                   api={fieldServiceOrder.api}
                   afterImportCompleted={() => {
                     fetchServiceOrders();
@@ -433,7 +428,7 @@ const ServiceOrder = () => {
             columns={columns}
             dispatch={dispatch}
             searchVal={search}
-            ServiceOrderPermissions={permissions?.serviceOrder}
+            ServiceOrderPermissions={permissions?.fieldServiceOrder}
             onCreate={clickCreateNew}
             showConfirmBox={showConfirmBox}
             canDelete={getLocalStorageArrayData(localStorageSelectedRecords)?.length === 0}
@@ -441,9 +436,9 @@ const ServiceOrder = () => {
             heading={routes.fieldServiceOrder.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             filters={filters}
-            // showCloneServiceOrderDialog={() => {
-            //   handleShowCloneServiceOrderDialog()
-            // }}
+          // showCloneServiceOrderDialog={() => {
+          //   handleShowCloneServiceOrderDialog()
+          // }}
           ></ServiceOrderHeader>
         </div>
         {Object.keys(frameworkComponents).length > 0 ? (
@@ -451,7 +446,7 @@ const ServiceOrder = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions?.serviceOrder}
+              permissions={permissions?.fieldServiceOrder}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
                 history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}`);
@@ -516,9 +511,8 @@ const ServiceOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.fieldServiceOrderNumber ? 'Service Order' : 'Service Orders'}   ${
-              deleteRecord.fieldServiceOrderNumber || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.fieldServiceOrderNumber ? 'Service Order' : 'Service Orders'}   ${deleteRecord.fieldServiceOrderNumber || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
@@ -531,7 +525,7 @@ const ServiceOrder = () => {
         {singleServiceOrderDelete.show ? (
           <ConfirmationDialog
             open={singleServiceOrderDelete.show}
-            message={`Are you sure you want to delete Service Order: ${singleServiceOrderDelete.fieldServiceOrderNumber}?`}
+            message={`Are you sure you want to delete : ${singleServiceOrderDelete.fieldServiceOrderNumber}?`}
             onClose={() =>
               setSingleServiceOrderDelete({
                 id: null,

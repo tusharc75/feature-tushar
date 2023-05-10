@@ -87,7 +87,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
 
         if (referenceData) {
           tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
-          tempInitialData['serviceOrder'] = referenceData?.serviceOrder;
+          tempInitialData['fieldServiceOrder'] = referenceData?.fieldServiceOrder;
           tempInitialData['service'] = referenceData?.service;
           tempInitialData['startDateTime'] = referenceData?.startDateTime;
           tempInitialData['endDateTime'] = referenceData?.endDateTime;
