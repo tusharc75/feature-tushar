@@ -27,21 +27,6 @@ import React from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import CloseIcon from '@material-ui/icons/Close';
 import { CustomDialogTransition } from 'src/constants/helpers';
-
-// import {
-//   convertMsToTime,
-//   CustomDialogTransition,
-//   QUOTATION_STATUS,
-//   REPAIR_ORDER_TYPE,
-//   WORKORDER_SERVICE_STATUS,
-//   WORKORDER_SERVICE_STEP_STATUS
-// } from 'src/constants/helpers';
-// import AccessTimeIcon from '@material-ui/icons/AccessTime';
-// import CustomContainer from 'src/components/CustomContainer';
-// import FilterListIcon from '@material-ui/icons/FilterList';
-// import HtmlTooltip from 'src/components/CustomTooltipTitle';
-// import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
-
 import CardColTimeline, { datarowInterface, groupBy } from 'src/components/CardColTimeline';
 
 const useStyles = makeStyles(() => ({
@@ -173,9 +158,8 @@ const WorkOrderTechnician = () => {
   const [repairOrderOptions, setRepairOrderOptions] = useState([]);
   const [selectedRepairOrder, setSelectedRepairOrder] = useState(null);
 
-  const [showFilter, setShowFilter] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [servicesToKeep, setServicesToKeep] = useState(['Pending', 'In-Progress']);
+  const [selectedServiceStatus, setSelectedServiceStatus] = useState(['Pending', 'In-Progress']);
 
   const [cardData, setCardData] = useState(null);
 
@@ -187,7 +171,7 @@ const WorkOrderTechnician = () => {
 
   useEffect(() => {
     let data = serviceData
-      .filter((item) => servicesToKeep.includes(item.status))
+      .filter((item) => selectedServiceStatus.includes(item.status))
       .map((item) => {
         const newObj = { ...item };
         newObj['serviceName'] = item.service?.serviceName;
@@ -197,41 +181,43 @@ const WorkOrderTechnician = () => {
         return newObj;
       });
 
-    data = groupBy({ objectArray: data, property: 'status', sortBy: WORKORDER_TECHNICIAN_SERVICE_STATUS, columnsToKeep: servicesToKeep });
+    data = groupBy({ objectArray: data, property: 'status', sortBy: WORKORDER_TECHNICIAN_SERVICE_STATUS, columnsToKeep: selectedServiceStatus });
     setCardData(data);
-  }, [serviceData, servicesToKeep]);
+  }, [serviceData, selectedServiceStatus]);
 
-  const WORKORDER_STATUS_COLOR = {
-    pending: '#FFFFE0',
-    inProgress: '#FFD580'
-  };
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Work Order,Repair Order`)
-      .then(({ data: { data } }) => {
-        setWorkOrderOptions(data['Work Order']);
-        setRepairOrderOptions(data['Repair Order']);
-      });
-  }, []);
-
-  useEffect(() => {
-    fetchWorkOrderTechnician();
+    fetchData();
   }, [selectedWorkOrder, selectedRepairOrder]);
 
-  const fetchWorkOrderTechnician = () => {
+  const fetchData = () => {
     setLoading(true);
     let api =
       selectedWorkOrder && selectedRepairOrder
         ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}&repairOrder=${selectedRepairOrder.optionValue}`
         : selectedWorkOrder
-        ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}`
-        : selectedRepairOrder
-        ? `/work-order-technician?repairOrder=${selectedRepairOrder.optionValue}`
-        : `/work-order-technician`;
+          ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}`
+          : selectedRepairOrder
+            ? `/work-order-technician?repairOrder=${selectedRepairOrder.optionValue}`
+            : `/work-order-technician`;
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
+        if (!selectedRepairOrder && !selectedWorkOrder) {
+          const workOrderOption = [];
+          const repairOrderOption = [];
+          data?.forEach((item: any) => {
+            if (item?.workOrderDetail && !workOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?._id)) {
+              workOrderOption.push({ optionValue: item?.workOrderDetail?._id, optionLabel: item?.workOrderDetail?.workOrderNumber })
+            }
+            if (item?.workOrderDetail?.repairOrder
+              && !repairOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?.repairOrder?.optionValue)) {
+              repairOrderOption.push({ optionValue: item?.workOrderDetail?.repairOrder?.optionValue, optionLabel: item?.workOrderDetail?.repairOrder?.optionLabel })
+            }
+          })
+          setWorkOrderOptions(workOrderOption);
+          setRepairOrderOptions(repairOrderOption);
+        }
         setServiceData(data);
         if (selectedService) {
           const tempSelected = data?.find((e) => e._id === selectedService?.uniqueId && e?.service?._id === selectedService?._id);
@@ -327,15 +313,15 @@ const WorkOrderTechnician = () => {
                   options={WORKORDER_TECHNICIAN_SERVICE_STATUS || []}
                   disableCloseOnSelect
                   getOptionLabel={(option) => option}
-                  renderOption={(option: any, { selected }: any) => (
+                  renderOption={(option: any) => (
                     <React.Fragment>
-                      <Checkbox disabled={['pending', 'inProgress']?.includes(option)} checked={servicesToKeep?.includes(option)} />
+                      <Checkbox checked={selectedServiceStatus?.includes(option)} />
                       {option}
                     </React.Fragment>
                   )}
                   size="small"
-                  renderInput={(params) => <TextField {...params} label="Show Services" placeholder="Services" variant="outlined" />}
-                  value={servicesToKeep}
+                  renderInput={(params) => <TextField {...params} label="Status" variant="outlined" />}
+                  value={selectedServiceStatus}
                   renderTags={(value, getTagProps) =>
                     value.map((option, index) => {
                       return (
@@ -357,18 +343,14 @@ const WorkOrderTechnician = () => {
                     })
                   }
                   onChange={(event: any, newValue: any) => {
-                    if (!newValue.includes('Pending') || !newValue.includes('In-Progress')) {
-                      return;
-                    }
-                    setServicesToKeep(newValue);
+                    setSelectedServiceStatus(newValue);
                   }}
                 />
               </Box>
             </Grid>
           </Grid>
-
           <Box>
-            <IconButton size="small" onClick={() => fetchWorkOrderTechnician()}>
+            <IconButton size="small" onClick={() => fetchData()}>
               <RefreshIcon />
             </IconButton>
           </Box>
@@ -400,7 +382,7 @@ const WorkOrderTechnician = () => {
         {/* <Box className={classes.taskContainer}>
           <Grid container spacing={2} className={` ${classes.activityMainBlock}`}>
             {WORKORDER_TECHNICIAN_SERVICE_STATUS?.filter((key) => {
-              return servicesToKeep.includes(key);
+              return selectedServiceStatus.includes(key);
             })?.map((key, i) => {
               return (
                 <Grid item md={3} xs={12} sm={4} style={{ paddingTop: '0px' }} key={i} className={`${classes.mediumDevice} ${classes.columns}`}>
@@ -545,8 +527,8 @@ const WorkOrderTechnician = () => {
               warehouse={selectedService?.workOrderDetail?.warehouse}
               selectedService={selectedService}
               allowedToEdit={selectedService?.status === WORKORDER_TECHNICIAN_SERVICE_STATUS[0] ? false : true}
-              setDisableCompleteFail={() => {}}
-              fetchService={fetchWorkOrderTechnician}
+              setDisableCompleteFail={() => { }}
+              fetchService={fetchData}
               referencType={'workOrderTechnician'}
               handelClose={() => {
                 setServiceOpen(false);

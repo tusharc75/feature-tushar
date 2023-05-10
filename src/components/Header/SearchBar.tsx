@@ -21,14 +21,11 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   const [sections, setSections] = useState([]);
   const [showCloseButton, setShowCloseButton] = useState(false);
   const [search, setSearch] = useState('');
-  const [filteredData, setFilteredData] = useState([]);
   const [filterState, filterDispatch] = useReducer(filterReducer, filterReducerInitialState);
-
-  console.log({ parentIndex: filterState.parentIndex, childIndex: filterState.childIndex });
 
   useEffect(() => {
     filterDispatch({ type: 'resetIndex' });
-  }, [search.trim() !== '']);
+  }, [search.trim() !== '', search]);
 
   useEffect(() => {
     let arr = [];
@@ -83,8 +80,8 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
       }
     });
     filterDispatch({ type: 'setFilteredData', payload: filteredItems });
-    // setFilteredData(filteredItems);
   };
+
   const clearSearch = () => {
     dispatch({ type: SET_SEARCH, payload: '' });
     setSearch('');
@@ -135,15 +132,17 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
         )}
       </div>
       {search.trim() !== '' && pathName === '/' && (
-        <SearchResult
-          filterDispatch={filterDispatch}
-          filteredData={filterState.filteredData}
-          history={history}
-          handleRoutes={handleRoutes}
-          clearSearch={clearSearch}
-          parentIndex={filterState.parentIndex}
-          childIndex={filterState.childIndex}
-        />
+        <>
+          <SearchResult
+            filterDispatch={filterDispatch}
+            filteredData={filterState.filteredData}
+            history={history}
+            handleRoutes={handleRoutes}
+            clearSearch={clearSearch}
+            parentIndex={filterState.parentIndex}
+            childIndex={filterState.childIndex}
+          />
+        </>
       )}
     </div>
   );
@@ -152,16 +151,17 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
 export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch, filterDispatch, parentIndex, childIndex }) => {
   const arrowUpPressed = useKeyPress({ targetKey: 'ArrowUp' });
   const arrowDownPressed = useKeyPress({ targetKey: 'ArrowDown' });
+  const listContainerRef = React.useRef(null);
 
   useEffect(() => {
     if (arrowUpPressed) {
-      filterDispatch({ type: 'arrowUp' });
+      filterDispatch({ type: 'arrowUp', element: listContainerRef.current });
     }
   }, [arrowUpPressed]);
 
   useEffect(() => {
     if (arrowDownPressed) {
-      filterDispatch({ type: 'arrowDown' });
+      filterDispatch({ type: 'arrowDown', element: listContainerRef.current });
     }
   }, [arrowDownPressed]);
 
@@ -175,7 +175,11 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
 
   return (
     <div className={styles.searchResult} ref={resultRef}>
-      <div className={`${styles.filtered_data} `} style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll' }}>
+      <div
+        className={`${styles.filtered_data} `}
+        ref={listContainerRef}
+        style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll', scrollPadding: '37px 0 0 0' }}
+      >
         {filteredData.length !== 0 ? (
           filteredData.map((section, pkey) => {
             return (
@@ -184,7 +188,6 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
                   return (
                     <ListItem
                       key={ckey}
-                      selected={ckey === childIndex && pkey === parentIndex}
                       button
                       onClick={() => {
                         history.push(handleRoutes(item));
