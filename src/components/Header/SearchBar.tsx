@@ -24,8 +24,6 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   const [filteredData, setFilteredData] = useState([]);
   const [filterState, filterDispatch] = useReducer(filterReducer, filterReducerInitialState);
 
-  console.log({ parentIndex: filterState.parentIndex, childIndex: filterState.childIndex });
-
   useEffect(() => {
     filterDispatch({ type: 'resetIndex' });
   }, [search.trim() !== '']);

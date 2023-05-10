@@ -306,7 +306,7 @@ const ProductDetailsPage = () => {
             <Tab
               className={'tabLayout'}
               value={1}
-              label={<div className="d-flex align-items-center tab-font">Child Product</div>}
+              label={<div className="d-flex align-items-center tab-font">Child Products</div>}
               {...a11yProps(1)}
             />
           )}
@@ -355,7 +355,7 @@ const ProductDetailsPage = () => {
             <Tab
               className={'tabLayout'}
               value={7}
-              label={<div className="d-flex align-items-center tab-font">Parent Product</div>}
+              label={<div className="d-flex align-items-center tab-font">Parent Products</div>}
               {...a11yProps(7)}
             />
           )}

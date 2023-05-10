@@ -294,6 +294,14 @@ const RepairOrderDetails = () => {
                   (enableStatusChange || [REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced].includes(repairOrderData?.status)) && (
                     <Fragment>
                       <Button
+                        variant={'contained'}
+                        size="small"
+                        onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)}
+                        className={'btn-outline-v1'}
+                      >
+                        Complete
+                      </Button>
+                      {/* <Button
                         variant="outlined"
                         color="default"
                         size="small"
@@ -335,7 +343,7 @@ const RepairOrderDetails = () => {
                             </MenuItem>
                           );
                         })}
-                      </Menu>
+                      </Menu> */}
                     </Fragment>
                   )}
                 {permissions?.repairOrder?.isUpdate &&
@@ -356,13 +364,12 @@ const RepairOrderDetails = () => {
                       Create New Version
                     </Button>
                   )}
-
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
-                  !(
-                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    ) && ['Add Assets', 'Work Order'].includes(stepNames[currentStep])
+                  ![REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) &&
+                  !([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    quotationVersionData?.status) &&
+                    ['Add Assets', 'Work Order'].includes(stepNames[currentStep])
                   ) && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}

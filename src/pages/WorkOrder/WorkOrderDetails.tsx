@@ -229,6 +229,14 @@ const WorkOrderDetails = () => {
                   workOrderData?.status !== WORK_ORDER_STATUS.completed && (
                     <Fragment>
                       <Button
+                        variant={'contained'}
+                        size="small"
+                        onClick={() => updateJobStatus(WORK_ORDER_STATUS.completed)}
+                        className={'btn-outline-v1'}
+                      >
+                        Complete
+                      </Button>
+                      {/* <Button
                         variant="outlined"
                         color="default"
                         size="small"
@@ -264,7 +272,7 @@ const WorkOrderDetails = () => {
                             </MenuItem>
                           );
                         })}
-                      </Menu>
+                      </Menu> */}
                     </Fragment>
                   )}
                 <Button
@@ -280,11 +288,11 @@ const WorkOrderDetails = () => {
                   {isMobile && !isTablet ? <VisibilityIcon color="primary" /> : 'Preview'}
                 </Button>
                 {permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && !completed && (
-                  <Button 
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small" 
-                  onClick={() => setOpenUpdateDialog(true)} 
-                  className={'btn-outline-v1'}
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    size="small"
+                    onClick={() => setOpenUpdateDialog(true)}
+                    className={'btn-outline-v1'}
                   >
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
