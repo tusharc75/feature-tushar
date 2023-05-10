@@ -122,8 +122,8 @@ const decreaseIndex = (
 
       // childIndex--;
     } else {
-      parentIndex = 0;
-      childIndex = 0;
+      parentIndex = data.length - 1;
+      childIndex = data[parentIndex].items.length - 1;
     }
   }
   focusElement(element, parentIndex, childIndex);
