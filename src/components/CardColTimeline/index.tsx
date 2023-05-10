@@ -59,12 +59,12 @@ const CardColTimeline: React.FC<cardColInterface> = ({
                   '--bg': Boolean(data[col].color)
                     ? data[col].color
                     : col === 'Pending'
-                    ? '#F8A300'
-                    : col === 'In-Progress'
-                    ? '#F16A9A'
-                    : col === 'Completed'
-                    ? '#31AC1D'
-                    : '#7F76EB',
+                      ? '#F8A300'
+                      : col === 'In-Progress'
+                        ? '#F16A9A'
+                        : col === 'Completed'
+                          ? '#31AC1D'
+                          : '#7F76EB',
                   '--border': col === 'Completed' ? '#F1FEED' : col === 'In-Progress' ? '#FFF3FA' : '#FFFEEF',
                   '--color': col === 'Completed' ? '#31AC1D' : col === 'In-Progress' ? '#F16A9A' : '#F8A300'
                 } as React.CSSProperties
@@ -72,7 +72,7 @@ const CardColTimeline: React.FC<cardColInterface> = ({
             >
               <Typography className={styles.colTitle}>
                 <span></span>
-                {col} ({loading ? '--' : data[col].data?.length || data[col].length})
+                {col} ({loading ? '--' : data[col].data?.length || data[col].length || 0})
               </Typography>
               {loading ? (
                 <Box p={2} height={500} bgcolor="white">
