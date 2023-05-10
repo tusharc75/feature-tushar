@@ -377,7 +377,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       </Grid>
       {addProductDialog.open && (
         <AssignProductDialog
-          reference="serviceOrder"
+          reference="fieldServiceOrder"
           serialized={null}
           productsDialogOpen={addProductDialog.open}
           productId={null}

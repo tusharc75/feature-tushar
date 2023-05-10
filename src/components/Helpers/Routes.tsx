@@ -688,14 +688,14 @@ const routes = {
       storedRoutes && storedRoutes.fieldServiceOrder && storedRoutes.fieldServiceOrder.title
         ? storedRoutes.fieldServiceOrder?.title
         : RESOURCE_LABEL.fieldServiceOrder,
-    path: '/service-order'
+    path: '/field-service-order'
   },
   fieldServiceOrderDetail: {
     title:
       storedRoutes && storedRoutes.fieldServiceOrder && storedRoutes.fieldServiceOrder.title
         ? storedRoutes.fieldServiceOrder?.title
         : RESOURCE_LABEL.fieldServiceOrder,
-    path: '/service-order/detail'
+    path: '/field-service-order/detail'
   },
   workOrder: {
     title: storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title ? storedRoutes.workOrder?.title : RESOURCE_LABEL.workOrder,

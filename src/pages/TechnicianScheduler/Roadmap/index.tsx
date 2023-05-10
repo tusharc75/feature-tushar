@@ -29,13 +29,13 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
   }, [filter.view, refresh]);
 
   useEffect(() => {
-    filter.serviceOrder !== '' && fetchServiceOrders(filter.serviceOrder);
-  }, [filter.serviceOrder]);
+    filter.fieldServiceOrder !== '' && fetchServiceOrders(filter.fieldServiceOrder);
+  }, [filter.fieldServiceOrder]);
 
   const fetchServiceOrders = async (orderId) => {
     setLoadingRoadmap(true);
     await axiosInstance()
-      .get(`/technician-scheduler/service-order?serviceOrders=${orderId}`)
+      .get(`/technician-scheduler/field-service-order?serviceOrders=${orderId}`)
       .then(({ data }) => {
         setActivity(data?.data);
         setTreeList(data?.data);

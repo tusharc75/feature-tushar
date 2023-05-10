@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from 'react';
 import { Button, Chip, Dialog, Grid } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, fieldServiceOrder, customerAccount, supplierAccount } from 'src/constants/helpers';
+import { CustomDialogTransition, fieldServiceOrder, customerAccount, supplierAccount, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
@@ -48,13 +48,13 @@ const SendEmail = ({ serviceOrderData }) => {
     attachments.push({
       base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(',') + 1)),
       contentType: pdfFileBase64.split(';')[0].split(':')[1],
-      name: `Service Order-${serviceOrderData.fieldServiceOrderNumber}`
+      name: `Field Service Order-${serviceOrderData.fieldServiceOrderNumber}`
     });
   }
 
   const fetchEmailAttachment = () => {
     axiosInstance()
-      .get(`/pdf/${serviceOrderData._id}?resource=Service Order`)
+      .get(`/pdf/${serviceOrderData._id}?resource=${sidebarResource.fieldServiceOrder}`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -139,11 +139,11 @@ const SendEmail = ({ serviceOrderData }) => {
   const handleAttachments = () => {
     let request;
     request = {
-      name: 'Service Order',
+      name: 'Field Service Order',
       fileUrl: '',
       relatedTo: [
         {
-          type: fieldServiceOrder.resource,
+          type: sidebarResource.fieldServiceOrder,
           referenceId: serviceOrderData?._id,
           access: true
         },
@@ -163,7 +163,7 @@ const SendEmail = ({ serviceOrderData }) => {
       <Box display="flex" justifyContent="space-between">
         <Box display="flex" alignItems="center">
           <Box display="flex">
-            {permissions?.serviceOrder?.isRead && !isMobile && (
+            {permissions?.fieldServiceOrder?.isRead && !isMobile && (
               <Button
                 variant="outlined"
                 color="primary"
@@ -179,7 +179,7 @@ const SendEmail = ({ serviceOrderData }) => {
               </Button>
             )}
             <Box mx={1} />
-            {permissions?.serviceOrder?.isRead && (
+            {permissions?.fieldServiceOrder?.isRead && (
               <Button
                 variant="outlined"
                 color="primary"
@@ -195,7 +195,7 @@ const SendEmail = ({ serviceOrderData }) => {
               </Button>
             )}
             <Box mx={1} />
-            {permissions?.serviceOrder?.isRead && (
+            {permissions?.fieldServiceOrder?.isRead && (
               <Button
                 variant="outlined"
                 color="primary"
@@ -246,7 +246,7 @@ const SendEmail = ({ serviceOrderData }) => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            referenceType="serviceOrder"
+            referenceType="fieldServiceOrder"
           />
         </Dialog>
       )}

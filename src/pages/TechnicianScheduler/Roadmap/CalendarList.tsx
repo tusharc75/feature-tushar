@@ -153,7 +153,7 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
             <Tooltip
               title={
                 <>
-                  <p>{service?.serviceOrder?.fieldServiceOrderNumber}</p>
+                  <p>{service?.fieldServiceOrder?.fieldServiceOrderNumber}</p>
                 </>
               }
               placement="top"

@@ -9,7 +9,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { fieldServiceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies, serviceOrderSteps, SERVICE_ORDER_STATUS } from '../../constants/helpers';
+import { fieldServiceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies, serviceOrderSteps, SERVICE_ORDER_STATUS, RESOURCE_LABEL, sidebarResource } from '../../constants/helpers';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
@@ -145,7 +145,7 @@ const ServiceOrderDetailsPage = () => {
 
   const getServiceOrderFields = async () => {
     try {
-      const response: any = await axiosInstance().get('/field?resource=Service Order');
+      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
       response?.data?.data.some((o) => {
         if (o?.fieldData?.fieldName === 'status') {
           setStatusOptions([...o.fieldData.option]);
@@ -225,7 +225,7 @@ const ServiceOrderDetailsPage = () => {
                 </Button>
               </Fragment>
             )}
-            {permissions?.serviceOrder?.isUpdate && allowedToEdit && (
+            {permissions?.fieldServiceOrder?.isUpdate && allowedToEdit && (
               <Fragment>
                 {[SERVICE_ORDER_STATUS.readyToInvoice, SERVICE_ORDER_STATUS.invoiced]?.includes(serviceOrderData?.status) && (
                   <Button
@@ -268,7 +268,7 @@ const ServiceOrderDetailsPage = () => {
                 </Menu>
               </Fragment>
             )}
-            <ActivityButton referenceId={serviceOrderData?._id} resource={ACTIVITY_RESOURCE.serviceOrder} />
+            <ActivityButton referenceId={serviceOrderData?._id} resource={ACTIVITY_RESOURCE.fieldServiceOrder} />
           </Box>
         </Box>
       </Box>
