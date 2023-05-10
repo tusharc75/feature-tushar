@@ -207,15 +207,6 @@ const WorkOrderTechnician = () => {
   };
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Work Order,Repair Order`)
-      .then(({ data: { data } }) => {
-        setWorkOrderOptions(data['Work Order']);
-        setRepairOrderOptions(data['Repair Order']);
-      });
-  }, []);
-
-  useEffect(() => {
     fetchWorkOrderTechnician();
   }, [selectedWorkOrder, selectedRepairOrder]);
 
@@ -232,6 +223,25 @@ const WorkOrderTechnician = () => {
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
+        if(!selectedRepairOrder && !selectedWorkOrder) {
+          const workOrderOptions = data?.map((item:any) => {
+            const {workOrderDetail} = item;
+            let option = {optionValue: workOrderDetail?._id, optionLabel: workOrderDetail?.workOrderNumber }
+              return option;
+          })
+          const repairOrderOptions = data?.map((item:any) => {
+            const {workOrderDetail} = item;
+            let option = {optionValue: workOrderDetail?.repairOrder?.optionValue, optionLabel: workOrderDetail?.repairOrder?.optionLabel }
+              return option;
+          })
+
+          //Removing duplicate options
+          const uniqueWorkOrderOptions = Array.from(workOrderOptions?.reduce((map, obj) => map?.set(obj.optionValue, obj), new Map()).values());
+          const uniqueRepairOrderOptions = Array.from(repairOrderOptions?.reduce((map, obj) => map?.set(obj.optionValue, obj), new Map()).values());
+
+          setWorkOrderOptions(uniqueWorkOrderOptions);
+          setRepairOrderOptions(uniqueRepairOrderOptions);
+        }
         setServiceData(data);
         if (selectedService) {
           const tempSelected = data?.find((e) => e._id === selectedService?.uniqueId && e?.service?._id === selectedService?._id);
