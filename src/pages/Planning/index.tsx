@@ -396,17 +396,18 @@ const Planning = () => {
                   );
                 })}
               </ToggleButtonGroup>
-              <Box ml={1}>
-                <ToggleButtonGroup size="small">
-                  <ToggleButton
-                    onClick={() => {
-                      history.push(`${routes.rentalPlanningCalendar.path}`);
-                    }}
-                  >
-                    <span>{`Calendar`}</span>
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </Box>
+              {permissions?.planningView?.isRead && (
+                <Box ml={1}>
+                  <ToggleButtonGroup size="small">
+                    <ToggleButton
+                      onClick={() => {
+                        history.push(`${routes.planningView.path}`);
+                      }}
+                    >
+                      <span>{`Calendar`}</span>
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>)}
               {selectedPlanningType && (
                 <Chip
                   className="ml-3"
