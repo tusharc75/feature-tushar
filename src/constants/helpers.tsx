@@ -67,7 +67,7 @@ export const purchaseRequisitionSteps = ['Add Products'];
 
 export const productionOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' }
 ];
 
 export const jobProcessSteps: stepInterface[] = [
@@ -282,7 +282,7 @@ export const sidebarResource = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
-  serviceOrder: 'Service Order',
+  fieldServiceOrder: 'Field Service Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
@@ -313,7 +313,7 @@ export const sidebarResource = {
   wellNumber: 'Well Number',
   planningView: 'Planning View',
   taxMaster: 'Tax Master',
-  competencies: 'Competencies',
+  competencies: 'Competencies'
 };
 
 export const primaryFields = {
@@ -400,7 +400,7 @@ export const RESOURCE_LABEL = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
-  serviceOrder: 'Service Order',
+  fieldServiceOrder: 'Field Service Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
@@ -428,7 +428,7 @@ export const RESOURCE_LABEL = {
   transactionLock: 'Transaction Lock',
   wellNumber: 'Well Number',
   taxMaster: 'Tax Master',
-  competencies: 'Competencies',
+  competencies: 'Competencies'
 };
 
 export const CHILD_RESOURCE = {
@@ -448,10 +448,10 @@ export const CHILD_RESOURCE = {
   quotationCost: 'Quotation Cost',
   quotationService: 'Quotation Service',
   repairOrderProduct: 'Repair Order Product',
-  serviceOrderDetails: 'Service Order Detail',
+  fieldServiceOrderDetails: 'Field Service Order Detail',
   planningMaterial: 'Planning Material',
   purchaseRequisition: 'Purchase Requisition Detail',
-  serviceOrderAddon: 'Service Order Addon',
+  fieldServiceOrderAddon: 'Field Service Order Addon',
   fieldTicketCost: 'Field Ticket Cost',
   jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
@@ -525,9 +525,9 @@ export const productionOrder = {
   api: '/production-order'
 };
 
-export const serviceOrder = {
-  resource: 'serviceOrder',
-  api: '/service-order'
+export const fieldServiceOrder = {
+  resource: 'fieldServiceOrder',
+  api: '/field-service-order'
 };
 
 export const employeeMaster = {
@@ -2037,7 +2037,7 @@ export const LOG_RESOURCE = {
   repairJob: sidebarResource.repairJob,
   repairType: sidebarResource.repairType,
   employeeMaster: sidebarResource.employeeMaster,
-  serviceOrder: sidebarResource.serviceOrder,
+  fieldServiceOrder: sidebarResource.fieldServiceOrder,
   product: sidebarResource.product,
   demandOrder: sidebarResource.demandOrder,
   address: sidebarResource.address,
@@ -2183,7 +2183,7 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.invoice, value: sidebarResource.invoice, key: 'invoice' },
   { title: sidebarResource.demandOrder, value: sidebarResource.demandOrder, key: 'demandOrder' },
   { title: sidebarResource.productionOrder, value: sidebarResource.productionOrder, key: 'productionOrder' },
-  { title: sidebarResource.serviceOrder, value: sidebarResource.serviceOrder, key: 'serviceOrder' },
+  { title: sidebarResource.fieldServiceOrder, value: sidebarResource.fieldServiceOrder, key: 'fieldServiceOrder' },
   { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' },
   { title: sidebarResource.job, value: sidebarResource.job, key: 'job' },
   { title: sidebarResource.purchaseRequisition, value: sidebarResource.purchaseRequisition, key: 'purchaseRequisition' },

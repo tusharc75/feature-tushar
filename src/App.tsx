@@ -172,8 +172,8 @@ import SupportTicket from './pages/SupportTicket';
 import SupportTicketDetail from './pages/SupportTicket/SupportTicketDetail';
 import DemandOrder from './pages/DemandOrder';
 import DemandOrderDetails from './pages/DemandOrder/DemandOrderDetails';
-import ServiceOrder from './pages/ServiceOrder';
-import ServiceOrderDetailsPage from './pages/ServiceOrder/ServiceOrderDetailsPage';
+import FieldServiceOrder from './pages/FieldServiceOrder';
+import FieldServiceOrderDetailsPage from './pages/FieldServiceOrder/FieldServiceOrderDetailsPage';
 import EmployeeMaster from './pages/EmployeeMaster';
 import EmployeeMasterDetail from './pages/EmployeeMaster/EmployeeMasterDetail';
 import CompetencyType from './pages/CompetencyType';
@@ -868,11 +868,11 @@ function App() {
             <PrivateRoute exact path={`${routes.productionOrderDetail.path}/:id`}>
               <ProductionOrderDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.serviceOrder.path}>
-              <ServiceOrder />
+            <PrivateRoute exact path={routes.fieldServiceOrder.path}>
+              <FieldServiceOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.serviceOrderDetail.path}/:id`}>
-              <ServiceOrderDetailsPage />
+            <PrivateRoute exact path={`${routes.fieldServiceOrderDetail.path}/:id`}>
+              <FieldServiceOrderDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.workOrder.path}>
               <WorkOrder />
