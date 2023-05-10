@@ -3223,7 +3223,7 @@ body {
   &.vertical-center {
     td,
     td {
-      display: grid;
+      display: flex;
       align-items: center;
     }
   }
