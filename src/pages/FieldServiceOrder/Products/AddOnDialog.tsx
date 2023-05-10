@@ -12,12 +12,11 @@ import routes from 'src/components/Helpers/Routes';
 import { fetch_service_order_addOn_fields } from 'src/components/ServiceOrder/helper';
 import { CustomDialogTransition, getObjKeys, getObjKeysWithValues, isFieldNotTouched, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { FaDiceOne } from "react-icons/fa";
+import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 
 const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -55,14 +54,14 @@ const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
-    setFields(customData)
-  }
+    setFields(customData);
+  };
 
   const handleSubmit = (values) => {
-    setSubmitting(true)
+    setSubmitting(true);
     if (addOnData) {
       axiosInstance()
-        .put(`${routes.serviceOrder?.path}/${serviceOrderData?._id}/addon`, [{ ...values, _id: addOnData?._id, parentId }])
+        .put(`${routes?.fieldServiceOrder?.path}/${serviceOrderData?._id}/addon`, [{ ...values, _id: addOnData?._id, parentId }])
         .then(({ data }) => {
           onSuccess(data.data);
           setSubmitting(false);
@@ -78,7 +77,7 @@ const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData
         });
     } else {
       axiosInstance()
-        .post(`${routes.serviceOrder?.path}/${serviceOrderData?._id}/addon`, [{ ...values, parentId }])
+        .post(`${routes?.fieldServiceOrder?.path}/${serviceOrderData?._id}/addon`, [{ ...values, parentId }])
         .then(({ data }) => {
           onSuccess(data.data);
           setSubmitting(false);
@@ -110,12 +109,7 @@ const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-          innerRef={ref}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} innerRef={ref}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
@@ -134,70 +128,73 @@ const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData
                 showManimizeMaximize={true}
               />
               <CustomDialogContent>
-                <Form autoComplete="off" autoCorrect="off" noValidate >
-                  {fields && fields?.map((section, i) => (
-                    <div key={i}>
-                      <div className={"detail-box-content detail-product-box"}>
-                        <div className={"product-form-layout"}>
-                          <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-                          <h2 className={`${"form-label-style"} ${"form-label-product"}`} >
-                            {section.name}
-                          </h2>
+                <Form autoComplete="off" autoCorrect="off" noValidate>
+                  {fields &&
+                    fields?.map((section, i) => (
+                      <div key={i}>
+                        <div className={'detail-box-content detail-product-box'}>
+                          <div className={'product-form-layout'}>
+                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                            <h2 className={`${'form-label-style'} ${'form-label-product'}`}>{section.name}</h2>
+                          </div>
                         </div>
+                        <Box marginY={2}>
+                          <Grid spacing={3} container>
+                            {section.sectionFields &&
+                              section.sectionFields.map((field) =>
+                                field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter ? (
+                                  <FormTypes
+                                    fields={initialData.fields}
+                                    fieldData={{ ...field, hideConverter: true }}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field.isTooltip}
+                                    tooltipMessage={field.tooltipMessage}
+                                    size="small"
+                                  />
+                                ) : (
+                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Box display="flex">
+                                      <Box flexGrow={1}>
+                                        <FormTypes
+                                          {...field}
+                                          fields={initialData.fields}
+                                          fieldData={field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field.isTooltip}
+                                          tooltipMessage={field.tooltipMessage}
+                                          size="small"
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </Grid>
+                                )
+                              )}
+                          </Grid>
+                        </Box>
                       </div>
-                      <Box marginY={2}>
-                        <Grid spacing={3} container>
-                          {section.sectionFields && section.sectionFields.map((field) => (
-                            (field.type === "converter" || field.type === "currencyAmount" || field.isConverter) ?
-                              <FormTypes
-                                fields={initialData.fields}
-                                fieldData={{ ...field, hideConverter: true }}
-                                values={values}
-                                errors={errors}
-                                touched={touched}
-                                label={field.fieldLabel}
-                                name={field.fieldName}
-                                type={field.type}
-                                options={field.option}
-                                setFieldValue={(name, value) => {
-                                  setFieldValue(name, value)
-                                }}
-                                required={field.required}
-                                fullWidth
-                                isTooltip={field.isTooltip}
-                                tooltipMessage={field.tooltipMessage}
-                                size="small"
-                              /> : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                <Box display="flex" >
-                                  <Box flexGrow={1}  >
-                                    <FormTypes
-                                      {...field}
-                                      fields={initialData.fields}
-                                      fieldData={field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value)
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field.isTooltip}
-                                      tooltipMessage={field.tooltipMessage}
-                                      size="small"
-                                    />
-                                  </Box>
-                                </Box>
-                              </Grid>
-                          ))}
-                        </Grid>
-                      </Box>
-                    </div>
-                  ))}
+                    ))}
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

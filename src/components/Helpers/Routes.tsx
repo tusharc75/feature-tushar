@@ -548,11 +548,17 @@ const routes = {
   },
 
   storageLocation: {
-    title: storedRoutes && storedRoutes.storageLocation && storedRoutes.storageLocation.title ? storedRoutes.storageLocation?.title : RESOURCE_LABEL.storageLocation,
+    title:
+      storedRoutes && storedRoutes.storageLocation && storedRoutes.storageLocation.title
+        ? storedRoutes.storageLocation?.title
+        : RESOURCE_LABEL.storageLocation,
     path: '/storage-location'
   },
   storageLocationDetail: {
-    title: storedRoutes && storedRoutes.storageLocation && storedRoutes.storageLocation.title ? storedRoutes.storageLocation?.title : RESOURCE_LABEL.storageLocation,
+    title:
+      storedRoutes && storedRoutes.storageLocation && storedRoutes.storageLocation.title
+        ? storedRoutes.storageLocation?.title
+        : RESOURCE_LABEL.storageLocation,
     path: '/storage-location/detail'
   },
 
@@ -677,14 +683,18 @@ const routes = {
         : RESOURCE_LABEL.productionOrder,
     path: '/production-order/detail'
   },
-  serviceOrder: {
+  fieldServiceOrder: {
     title:
-      storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
+      storedRoutes && storedRoutes.fieldServiceOrder && storedRoutes.fieldServiceOrder.title
+        ? storedRoutes.fieldServiceOrder?.title
+        : RESOURCE_LABEL.fieldServiceOrder,
     path: '/service-order'
   },
-  serviceOrderDetail: {
+  fieldServiceOrderDetail: {
     title:
-      storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
+      storedRoutes && storedRoutes.fieldServiceOrder && storedRoutes.fieldServiceOrder.title
+        ? storedRoutes.fieldServiceOrder?.title
+        : RESOURCE_LABEL.fieldServiceOrder,
     path: '/service-order/detail'
   },
   workOrder: {
@@ -798,7 +808,7 @@ const routes = {
         : RESOURCE_LABEL?.employeeMaster,
     path: '/employee-master/detail'
   },
- competencyType: {
+  competencyType: {
     title:
       storedRoutes && storedRoutes.competencyType && storedRoutes.competencyType.title
         ? storedRoutes.competencyType?.title
@@ -895,11 +905,17 @@ const routes = {
     path: '/fleet-receiver'
   },
   transactionLock: {
-    title: storedRoutes && storedRoutes.transactionLock && storedRoutes.transactionLock.title ? storedRoutes.transactionLock?.title : RESOURCE_LABEL.transactionLock,
+    title:
+      storedRoutes && storedRoutes.transactionLock && storedRoutes.transactionLock.title
+        ? storedRoutes.transactionLock?.title
+        : RESOURCE_LABEL.transactionLock,
     path: '/transaction-lock'
   },
   transactionLockDetail: {
-    title: storedRoutes && storedRoutes.transactionLock && storedRoutes.transactionLock.title ? storedRoutes.transactionLock?.title : RESOURCE_LABEL.transactionLock,
+    title:
+      storedRoutes && storedRoutes.transactionLock && storedRoutes.transactionLock.title
+        ? storedRoutes.transactionLock?.title
+        : RESOURCE_LABEL.transactionLock,
     path: '/transaction-lock/detail'
   },
   wellNumber: {
@@ -911,9 +927,7 @@ const routes = {
     path: '/well-number/detail'
   },
   planningView: {
-    title: storedRoutes && storedRoutes.planningView && storedRoutes.planningView.title
-      ? storedRoutes.planningView?.title
-      : 'Planning View',
+    title: storedRoutes && storedRoutes.planningView && storedRoutes.planningView.title ? storedRoutes.planningView?.title : 'Planning View',
     path: '/planning-view'
   },
   taxMaster: {
@@ -925,13 +939,15 @@ const routes = {
     path: '/tax-master/detail'
   },
   competencies: {
-    title: storedRoutes && storedRoutes.competencies && storedRoutes.competencies.title ? storedRoutes.competencies?.title : RESOURCE_LABEL.competencies,
+    title:
+      storedRoutes && storedRoutes.competencies && storedRoutes.competencies.title ? storedRoutes.competencies?.title : RESOURCE_LABEL.competencies,
     path: '/competencies'
   },
   competenciesDetail: {
-    title: storedRoutes && storedRoutes.competencies && storedRoutes.competencies.title ? storedRoutes.competencies?.title : RESOURCE_LABEL.competencies,
+    title:
+      storedRoutes && storedRoutes.competencies && storedRoutes.competencies.title ? storedRoutes.competencies?.title : RESOURCE_LABEL.competencies,
     path: '/competencies/detail'
-  },
+  }
 };
 
 export default routes;

@@ -66,7 +66,7 @@ function ServiceOrderViews({ serviceData }) {
             label: (
               <div>
                 <Typography variant="body2">{routes.quotation.title}</Typography>
-                <Typography variant="subtitle2">{serviceData?.serviceOrderNumber ?? serviceData?.serviceOrderNumber}</Typography>
+                <Typography variant="subtitle2">{serviceData?.fieldServiceOrderNumber ?? serviceData?.fieldServiceOrderNumber}</Typography>
               </div>
             )
           },
@@ -155,7 +155,7 @@ function ServiceOrderViews({ serviceData }) {
           label: (
             <HtmlTooltip arrow placement="top" title={serviceData?.status}>
               <div>
-                <Typography variant="body2">{serviceData?.serviceOrderNumber ?? serviceData?.serviceOrderNumber}</Typography>
+                <Typography variant="body2">{serviceData?.fieldServiceOrderNumber ?? serviceData?.fieldServiceOrderNumber}</Typography>
                 <Typography variant="subtitle2">{serviceData?.status ?? serviceData?.status}</Typography>
               </div>
             </HtmlTooltip>

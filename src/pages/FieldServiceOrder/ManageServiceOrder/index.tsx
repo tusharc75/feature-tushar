@@ -17,7 +17,7 @@ import {
   getObjKeys,
   getObjKeysWithValues,
   getOwnerDropdownDataSource,
-  serviceOrder,
+  fieldServiceOrder,
   setFieldsInAscendingOrder,
   yupSchema,
   generateUniqueIdOnly
@@ -161,14 +161,14 @@ const ManageServiceOrderDialog = ({
   };
 
   useEffect(() => {
-    setLoading(true);
     fetchFields();
   }, [serviceOrderId]);
 
   const fetchFields = async () => {
+    setLoading(true);
     try {
       let fieldData;
-      const response: any = await axiosInstance().get('/field?resource=Service Order');
+      const response: any = await axiosInstance().get('/field?resource=Field Service Order');
       fieldData = response?.data?.data;
 
       var statusOptions = [];
@@ -179,22 +179,27 @@ const ManageServiceOrderDialog = ({
       });
       var fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       var fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
       if (serviceOrderId) {
         try {
           let data;
-          const response: any = await axiosInstance().get(`${serviceOrder.api}/` + serviceOrderId);
+          const response: any = await axiosInstance().get(`${fieldServiceOrder.api}/` + serviceOrderId);
           data = response?.data?.data;
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, serviceOrderNumber, updatedBy, ...rest } = data;
+            const { _id, brand, createdBy, entity, history, products, status, fieldServiceOrderNumber, updatedBy, ...rest } = data;
             rest['status'] = 'New';
-            rest['serviceOrderNumber'] = `SEO_${generateUniqueIdOnly()}`;
-            setCloneHeading(serviceOrderNumber);
+            rest['fieldServiceOrderNumber'] = `SEO_${generateUniqueIdOnly()}`;
+            setCloneHeading(fieldServiceOrderNumber);
             setInitialData({
               fields: fieldsDataForCreate,
               values: getObjKeysWithValues(rest, fieldsDataForCreate)
             });
             setLoading(false);
           } else {
+            console.log({
+              fields: fieldsDataForCreate,
+              values: getObjKeysWithValues(data, fieldsDataForCreate)
+            });
             setServiceDetails(data);
             setInitialData({
               fields: fieldsDataForUpdate,
@@ -207,11 +212,12 @@ const ManageServiceOrderDialog = ({
         }
       } else {
         let initialData = getObjKeys('', fieldsDataForCreate);
+        console.log(initialData);
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           initialData['currency'] = user.user?.brandCurrency;
         }
-        if (fieldsDataForCreate?.some((e) => e.fieldName === 'serviceOrderNumber')) {
-          initialData['serviceOrderNumber'] = `SEO_${generateUniqueIdOnly()}`;
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'fieldServiceOrderNumber')) {
+          initialData['fieldServiceOrderNumber'] = `SEO_${generateUniqueIdOnly()}`;
         }
         setInitialData({
           fields: fieldsDataForCreate,
@@ -229,7 +235,7 @@ const ManageServiceOrderDialog = ({
     if (serviceOrderId && isClone === false) {
       values._id = serviceOrderId;
       axiosInstance()
-        .put(`${serviceOrder.api}`, values)
+        .put(`${fieldServiceOrder.api}`, values)
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -245,14 +251,14 @@ const ManageServiceOrderDialog = ({
         });
     } else {
       axiosInstance()
-        .post(`${serviceOrder.api}`, values)
+        .post(`${fieldServiceOrder.api}`, values)
         .then(({ data: { data, message } }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: message
           });
-          history.push(`${routes.serviceOrderDetail.path}/${data?._id}`);
+          history.push(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
           setLoading(false);
         })
         .catch((error) => {
@@ -325,8 +331,8 @@ const ManageServiceOrderDialog = ({
                 <CustomDialogHeader
                   title={
                     !serviceOrderId
-                      ? `Create ${routes.serviceOrder.title}`
-                      : `${isClone ? `Clone - ${cloneHeading}` : `Update ${serviceOrderData?.serviceOrderNumber}`}`
+                      ? `Create ${routes.fieldServiceOrder.title}`
+                      : `${isClone ? `Clone - ${cloneHeading}` : `Update ${serviceOrderData?.fieldServiceOrderNumber}`}`
                   }
                   onClose={(e, reason) => {
                     if (isEqual(initialData.values, values)) {
@@ -685,10 +691,7 @@ const ManageServiceOrderDialog = ({
                     loading={loading}
                     variant="contained"
                     color="primary"
-                    disabled={
-                      uploadingImageOrFileProgress > 0 ||
-                      loading
-                    }
+                    disabled={uploadingImageOrFileProgress > 0 || loading}
                     onClick={(e) => {
                       e.preventDefault();
                       handleScroll(errors);
@@ -704,7 +707,7 @@ const ManageServiceOrderDialog = ({
                     onSave={() => {
                       setShowConfirmDialog(false);
                       handleScroll(errors);
-                      submitForm()
+                      submitForm();
                     }}
                     close={() => setShowConfirmDialog(false)}
                     onClose={() => {
@@ -724,7 +727,6 @@ const ManageServiceOrderDialog = ({
                     accountApi={customerAccount.accountApi}
                     isGetAccountData={true}
                     onGetAddedAccount={({ data }) => {
-
                       updateAccountDropdown(data);
                       if (initialData?.fields?.some((e) => e.fieldName === 'customerAccount')) {
                         setFieldValue('customerAccount', data._id);
