@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useReducer } from 'react';
 import { IconButton, ListItem, ListItemText, List } from '@material-ui/core';
 import { Clear as ClearIcon } from '@material-ui/icons';
 import { useData } from '../../StateProvider/Provider';
@@ -7,9 +7,10 @@ import routes from '../Helpers/Routes';
 import { kebabCase } from 'lodash';
 import { staticHiddenResource } from '../../constants/helpers';
 import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
-import useClickdOutside from 'src/hooks/useClickOutside';
-import usePathname from 'src/hooks/usePathName';
+import { usePathname, useClickdOutside, useKeyPress } from 'src/hooks';
 import styles from './Header.module.scss';
+
+import { filterReducerInitialState, filterReducer } from './helper';
 
 export const SearchBar = ({ user, selectedEntity, history }) => {
   const {
@@ -21,6 +22,13 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   const [showCloseButton, setShowCloseButton] = useState(false);
   const [search, setSearch] = useState('');
   const [filteredData, setFilteredData] = useState([]);
+  const [filterState, filterDispatch] = useReducer(filterReducer, filterReducerInitialState);
+
+  console.log({ parentIndex: filterState.parentIndex, childIndex: filterState.childIndex });
+
+  useEffect(() => {
+    filterDispatch({ type: 'resetIndex' });
+  }, [search.trim() !== '']);
 
   useEffect(() => {
     let arr = [];
@@ -74,7 +82,8 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
         filteredItems.push({ ...section, items: items });
       }
     });
-    setFilteredData(filteredItems);
+    filterDispatch({ type: 'setFilteredData', payload: filteredItems });
+    // setFilteredData(filteredItems);
   };
   const clearSearch = () => {
     dispatch({ type: SET_SEARCH, payload: '' });
@@ -126,13 +135,36 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
         )}
       </div>
       {search.trim() !== '' && pathName === '/' && (
-        <SearchResult filteredData={filteredData} history={history} handleRoutes={handleRoutes} clearSearch={clearSearch} />
+        <SearchResult
+          filterDispatch={filterDispatch}
+          filteredData={filterState.filteredData}
+          history={history}
+          handleRoutes={handleRoutes}
+          clearSearch={clearSearch}
+          parentIndex={filterState.parentIndex}
+          childIndex={filterState.childIndex}
+        />
       )}
     </div>
   );
 };
 
-export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch }) => {
+export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch, filterDispatch, parentIndex, childIndex }) => {
+  const arrowUpPressed = useKeyPress({ targetKey: 'ArrowUp' });
+  const arrowDownPressed = useKeyPress({ targetKey: 'ArrowDown' });
+
+  useEffect(() => {
+    if (arrowUpPressed) {
+      filterDispatch({ type: 'arrowUp' });
+    }
+  }, [arrowUpPressed]);
+
+  useEffect(() => {
+    if (arrowDownPressed) {
+      filterDispatch({ type: 'arrowDown' });
+    }
+  }, [arrowDownPressed]);
+
   const resultRef = useRef(null);
   const isClickOutside = useClickdOutside(resultRef);
   useEffect(() => {
@@ -145,13 +177,14 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch 
     <div className={styles.searchResult} ref={resultRef}>
       <div className={`${styles.filtered_data} `} style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll' }}>
         {filteredData.length !== 0 ? (
-          filteredData.map((section, key) => {
+          filteredData.map((section, pkey) => {
             return (
-              <List key={key} subheader={<h6 className={`${styles.list_header}`}>{section.head}</h6>}>
-                {section.items.map((item, key) => {
+              <List key={pkey} subheader={<h6 className={`${styles.list_header}`}>{section.head}</h6>}>
+                {section.items.map((item, ckey) => {
                   return (
                     <ListItem
-                      key={key}
+                      key={ckey}
+                      selected={ckey === childIndex && pkey === parentIndex}
                       button
                       onClick={() => {
                         history.push(handleRoutes(item));
