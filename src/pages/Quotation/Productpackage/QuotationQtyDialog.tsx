@@ -29,6 +29,8 @@ interface EditDialogProps {
   selectedProducts: any[]
   isBulkedit: any
   isInlineEdit?: Boolean
+  showSaveAndNext?: Boolean
+  loadingEdit?: Boolean
 }
 
 const rateChangeFields = ["unit", "pricingMethod"]
@@ -43,7 +45,9 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
     material,
     selectedProducts,
     isBulkedit,
-    isInlineEdit = false
+    isInlineEdit = false,
+    showSaveAndNext,
+    loadingEdit
   }) => {
 
 
@@ -54,11 +58,12 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [saveAndNext, setSaveAndNext] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
     fetchFields()
-  }, []);
+  }, [rowData]);
 
   useEffect(() => {
     if (ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
@@ -77,6 +82,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
   }, [initialData, ref.current, isInlineEdit])
 
   const fetchFields = async () => {
+    setInitialData({ fields: [], values: {} });
     var data = await fetch_quotation_product_fields(quotationData?.currency)
     setAllFields(JSON.parse(JSON.stringify(data)))
     if (isBulkedit) {
@@ -176,7 +182,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
       }
       else {
         const rows = await calculateRowsField(material, values, allFields, rowData)
-        handleSaveData(rows)
+        handleSaveData(rows, saveAndNext)
         setShowConfirmationDialog(false);
       }
     }
@@ -390,13 +396,29 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
                   }
                 }}
               >{"Close"}</Button>
+               {isBulkedit === false && showSaveAndNext &&
+                <CustomButton
+                    loading={loadingEdit}
+                    disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={() => {
+                      setSaveAndNext(true);
+                      submitForm()
+                    }}
+                > Save & Next
+                </CustomButton>}
               <CustomButton
-                loading={loading}
-                disabled={isEqual(ref?.current?.values, initialData.values)}
+                loading={loadingEdit}
+                disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
                 variant="contained"
                 color="primary"
                 type="submit"
-                onClick={submitForm}
+                onClick={() => {
+                  setSaveAndNext(false);
+                  submitForm()
+                }}
               > Save
               </CustomButton>
             </CustomDialogFooter>
