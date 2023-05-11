@@ -267,7 +267,7 @@ const Planning = () => {
                   history.push(`${routes.salesOrderDetail.path}/${params?.data?.salesOrderId}`);
                 }
                 if (params?.data?.type === 'Field Service Order') {
-                  history.push(`${routes.serviceOrderDetail.path}/${params?.data?.serviceOrderId}`);
+                  history.push(`${routes?.fieldServiceOrderDetail.path}/${params?.data?.serviceOrderId}`);
                 }
               }}
             >
@@ -396,17 +396,18 @@ const Planning = () => {
                   );
                 })}
               </ToggleButtonGroup>
-              <Box ml={1}>
-                <ToggleButtonGroup size="small">
-                  <ToggleButton
-                    onClick={() => {
-                      history.push(`${routes.rentalPlanningCalendar.path}`);
-                    }}
-                  >
-                    <span>{`Calendar`}</span>
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </Box>
+              {permissions?.planningView?.isRead && (
+                <Box ml={1}>
+                  <ToggleButtonGroup size="small">
+                    <ToggleButton
+                      onClick={() => {
+                        history.push(`${routes.planningView.path}`);
+                      }}
+                    >
+                      <span>{`Calendar`}</span>
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>)}
               {selectedPlanningType && (
                 <Chip
                   className="ml-3"

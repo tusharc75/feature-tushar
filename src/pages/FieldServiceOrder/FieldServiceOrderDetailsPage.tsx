@@ -9,7 +9,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { serviceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies, serviceOrderSteps, SERVICE_ORDER_STATUS } from '../../constants/helpers';
+import { fieldServiceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies, serviceOrderSteps, SERVICE_ORDER_STATUS, RESOURCE_LABEL, sidebarResource } from '../../constants/helpers';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
@@ -32,7 +32,7 @@ import { GrStatusInfo } from 'react-icons/gr';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.serviceOrder.title);
+  const renderedFrom = camelCase(routes?.fieldServiceOrder.title);
 
   const { id } = useParams();
   const history = useHistory();
@@ -60,7 +60,6 @@ const ServiceOrderDetailsPage = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
-
 
   useEffect(() => {
     return history.listen((location) => {
@@ -110,7 +109,7 @@ const ServiceOrderDetailsPage = () => {
   const fetchServiceOrderData = async () => {
     try {
       let data;
-      const response: any = await axiosInstance().get(`${serviceOrder.api}/${id}`);
+      const response: any = await axiosInstance().get(`${fieldServiceOrder.api}/${id}`);
       data = response?.data?.data;
       setLoadingDetails(false);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
@@ -137,16 +136,16 @@ const ServiceOrderDetailsPage = () => {
 
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
-      .put(`${serviceOrder.api}/${id}/process-status`, { processStatus: processStatus })
+      .put(`${fieldServiceOrder.api}/${id}/process-status`, { processStatus: processStatus })
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const getServiceOrderFields = async () => {
     try {
-      const response: any = await axiosInstance().get('/field?resource=Service Order');
+      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
       response?.data?.data.some((o) => {
         if (o?.fieldData?.fieldName === 'status') {
           setStatusOptions([...o.fieldData.option]);
@@ -165,7 +164,7 @@ const ServiceOrderDetailsPage = () => {
 
   const handleDelete = () => {
     axiosInstance()
-      .put(`${serviceOrder.api}/remove`, { ids: [serviceOrderData._id] })
+      .put(`${fieldServiceOrder.api}/remove`, { ids: [serviceOrderData._id] })
       .then(() => {
         setShowConfirmBox(false);
         history.goBack();
@@ -192,7 +191,7 @@ const ServiceOrderDetailsPage = () => {
 
   const updateStatus = (status) => {
     axiosInstance()
-      .patch(`${routes.serviceOrder.path}/status/${serviceOrderData._id}`, { status: status })
+      .patch(`${routes.fieldServiceOrder.path}/status/${serviceOrderData._id}`, { status: status })
       .then(({ data: { data } }) => {
         fetchServiceOrderData();
         toastConfig.setToastConfig({
@@ -206,29 +205,29 @@ const ServiceOrderDetailsPage = () => {
       });
   };
 
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.serviceOrder, { title: `${serviceOrderData ? serviceOrderData?.serviceOrderNumber : ''}` }]} />
+          <CustomBreadCrumbs routes={[routes.fieldServiceOrder, { title: `${serviceOrderData ? serviceOrderData?.fieldServiceOrderNumber : ''}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.serviceOrder?.isUpdate && allowedToEdit && (
+            {permissions?.fieldServiceOrder?.isUpdate && allowedToEdit && (
               <Fragment>
                 <Button
                   className={'btn-outline-v1'}
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   size="small"
-                  onClick={handleOpenUpdateDialog}>
+                  onClick={handleOpenUpdateDialog}
+                >
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               </Fragment>
             )}
-            {permissions?.serviceOrder?.isUpdate && allowedToEdit && (
+            {permissions?.fieldServiceOrder?.isUpdate && allowedToEdit && (
               <Fragment>
-                {[SERVICE_ORDER_STATUS.readyToInvoice, SERVICE_ORDER_STATUS.invoiced]?.includes(serviceOrderData?.status) &&
+                {[SERVICE_ORDER_STATUS.readyToInvoice, SERVICE_ORDER_STATUS.invoiced]?.includes(serviceOrderData?.status) && (
                   <Button
                     variant="outlined"
                     color="default"
@@ -238,7 +237,8 @@ const ServiceOrderDetailsPage = () => {
                     endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
                   >
                     {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
-                  </Button>}
+                  </Button>
+                )}
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
@@ -268,7 +268,7 @@ const ServiceOrderDetailsPage = () => {
                 </Menu>
               </Fragment>
             )}
-            <ActivityButton referenceId={serviceOrderData?._id} resource={ACTIVITY_RESOURCE.serviceOrder} />
+            <ActivityButton referenceId={serviceOrderData?._id} resource={ACTIVITY_RESOURCE.fieldServiceOrder} />
           </Box>
         </Box>
       </Box>
@@ -394,7 +394,7 @@ const ServiceOrderDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${routes.serviceOrder.title.toLowerCase()} ?`}
+          message={`Are you sure you want to delete this ${routes.fieldServiceOrder.title.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -82,7 +82,7 @@ const LookupResource = [
   { name: 'Repair Order', value: 'Repair Order' },
   { name: 'Work Order', value: 'Work Order' },
   { name: 'Invoice', value: 'Invoice' },
-  { name: 'Service Order', value: 'Service Order' },
+  { name: 'Field Service Order', value: 'Field Service Order' },
   { name: 'Employee Master', value: 'Employee Master' },
   { name: 'Competency Type', value: 'Competency Type' },
   { name: 'Competencies', value: 'Competencies' },

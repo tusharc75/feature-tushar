@@ -119,7 +119,6 @@ const getPos = (taskStartDate, taskEndDate, startDate, endDate, totalDay) => {
 };
 
 const RenderServices = ({ name, startDate, endDate, services, handleSelect, totalDay, calendarType, createDate }) => {
-
   const getPriority = () => {
     const priority = ['low', 'medium', 'high'];
     return priority[Math.floor(Math.random() * priority.length)];
@@ -154,7 +153,7 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
             <Tooltip
               title={
                 <>
-                  <p>{service?.serviceOrder?.serviceOrderNumber}</p>
+                  <p>{service?.fieldServiceOrder?.fieldServiceOrderNumber}</p>
                 </>
               }
               placement="top"

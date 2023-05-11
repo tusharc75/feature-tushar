@@ -135,7 +135,7 @@ const FieldTicket = ({ selectedFieldService }) => {
     }
 
     const filterById = [];
-    filterById.push({ field: 'serviceOrder', term: selectedFieldService._id });
+    filterById.push({ field: 'fieldServiceOrder', term: selectedFieldService._id });
     filterById.push({ field: 'service', term: selectedFieldService?.service._id });
     filterById.push({ field: 'technician', term: selectedFieldService?.technicianAssign?.technician });
     deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
@@ -348,7 +348,7 @@ const FieldTicket = ({ selectedFieldService }) => {
             fetchData();
           }}
           referenceData={{
-            serviceOrder: selectedFieldService._id,
+            fieldServiceOrder: selectedFieldService._id,
             service: selectedFieldService?.service._id,
             startDateTime: selectedFieldService?.estimateStartDate,
             endDateTime: selectedFieldService?.estimateEndDate,

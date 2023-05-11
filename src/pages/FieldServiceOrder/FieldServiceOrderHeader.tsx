@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
 import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
@@ -34,7 +34,7 @@ function ServiceOrderHeader(props) {
     // showCloneRentalManagementDialog
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
-  
+
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -47,10 +47,9 @@ function ServiceOrderHeader(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
-
     }
   };
-  const [isOpenDialog, setisOpenDialog] = useState(false)
+  const [isOpenDialog, setisOpenDialog] = useState(false);
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -68,17 +67,10 @@ function ServiceOrderHeader(props) {
 
   const handleClickClose = () => {
     setOpen(false);
-
   };
 
   let toggleInner = options && (
-    <ToggleButtonGroup
-      size="small"
-      className=" toggle-button-layout"
-      value={filter}
-      exclusive
-      onChange={handleFilter}
-    >
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
         return (
           <ToggleButton value={k.key} key={index}>
@@ -121,7 +113,7 @@ function ServiceOrderHeader(props) {
               />
 
               <Button
-               onClick={handleOpen}
+                onClick={handleOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
@@ -140,7 +132,7 @@ function ServiceOrderHeader(props) {
                 contentPart={toggleInner}
                 columns={columns}
                 dispatch={dispatch}
-                title={routes?.serviceOrder?.title}
+                title={routes?.fieldServiceOrder?.title}
                 filters={filters}
               />
             </Grid>
@@ -194,41 +186,41 @@ function ServiceOrderHeader(props) {
               </Button>
             )}
             {ServiceOrderPermissions?.isDelete && (
-                <>
-                  <Button
-                    disabled={canDelete}
-                    variant={isMobile ? "text" : "outlined"}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    className={isMobile ? "mobile_button" : styles.action_submit_btn}
-                  >
-                    {isMobile ? "" :  "Actions" } <ExpandMore/>
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+              <>
+                <Button
+                  disabled={canDelete}
+                  variant={isMobile ? 'text' : 'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                >
+                  {isMobile ? '' : 'Actions'} <ExpandMore />
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      showConfirmBox(null);
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
                   >
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        showConfirmBox(null);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </Menu>
-                </>
-              )}
+                    Delete
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
           </Grid>
         </Box>
       </Grid>

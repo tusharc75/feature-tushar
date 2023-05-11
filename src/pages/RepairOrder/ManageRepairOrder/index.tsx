@@ -62,7 +62,6 @@ const ManageRepairOrder = ({
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [contactData, setContactData] = useState([]);
@@ -73,7 +72,6 @@ const ManageRepairOrder = ({
   const [repairOrderData, setRepairOrderData] = useState(null);
   const [customerContactMainDataSource, setCustomerContactMainDataSource] = useState([]);
   const [customerContactDataSource, setCustomerContactDataSource] = useState([]);
-  const [newAddedAccountId, setNewAddedAccountId] = useState(null);
 
   const [cloneHeading, setCloneHeading] = useState('');
 
@@ -162,6 +160,8 @@ const ManageRepairOrder = ({
       const response: any = await axiosInstance().get('/field?resource=Repair Order');
       fieldData = response?.data?.data;
 
+      fieldData = fieldData?.filter((e) => !['rentalJob', 'quotation']?.includes(e.fieldData.fieldName))
+
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       if (repairOrderId) {
@@ -179,14 +179,12 @@ const ManageRepairOrder = ({
               fields: fieldsDataForCreate,
               values: getObjKeysWithValues(rest, fieldsDataForCreate)
             });
-            setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
             setLoading(false);
           } else {
             setInitialData({
               fields: fieldsDataForUpdate,
               values: getObjKeysWithValues(data, fieldsDataForUpdate)
             });
-            setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
             setLoading(false);
           }
         } catch (error) {
@@ -196,11 +194,9 @@ const ManageRepairOrder = ({
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
         initialData['repairOrderNumber'] = `RO_${generateUniqueIdOnly()}`;
         if (referenceType === "rentalJob") {
+          initialData["rentalJob"] = referenceData?._id;
           if (fieldsDataForCreate?.some((e) => e?.fieldName === "warehouse")) {
             initialData['warehouse'] = referenceData?.warehouse;
-          }
-          if (fieldsDataForCreate?.some((e) => e?.fieldName === "rentalJob")) {
-            initialData["rentalJob"] = referenceData?._id;
           }
           if (fieldsDataForCreate?.some((e) => e?.fieldName === "customerAccount")) {
             initialData['customerAccount'] = referenceData?.customerAccount;
@@ -213,10 +209,9 @@ const ManageRepairOrder = ({
           }
         }
         setInitialData({
-          fields: fieldsDataForCreate?.filter((e) => !["rentalJob"]?.includes(e.fieldName)),
+          fields: fieldsDataForCreate,
           values: initialData
         });
-        setFormValues(initialData);
         setLoading(false);
       }
     } catch (error) {
@@ -307,7 +302,7 @@ const ManageRepairOrder = ({
                   : `${isClone ? `Clone - ${cloneHeading}` : `Update ${repairOrderData?.repairOrderNumber || ''}`}`
               }
               onClose={(e, reason) => {
-                if (isEqual(initialData.values, formValues)) onClose();
+                if (isEqual(initialData.values, values)) onClose();
                 else setShowConfirmDialog(true);
               }}
               isMinimized={!fullScreen}
@@ -749,9 +744,7 @@ const ManageRepairOrder = ({
                 accountApi={customerAccount.accountApi}
                 isGetAccountData={true}
                 onGetAddedAccount={({ data }) => {
-                  setNewAddedAccountId(data._id);
                   updateAccountDropdown(data);
-
                   setFieldValue('customerAccount', data._id);
                   setFieldValue('customerContact', '');
                 }}

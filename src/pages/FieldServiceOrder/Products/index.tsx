@@ -11,7 +11,7 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { serviceOrder } from '../../../constants/helpers';
+import { fieldServiceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
@@ -166,10 +166,10 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
 
     var data: any = [];
 
-    const materialResponse = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
+    const materialResponse = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`);
     const materialData = materialResponse?.data?.data?.material
 
-    const addOnResponse: any = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/addon`);
+    const addOnResponse: any = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/addon`);
     const addOnData = addOnResponse?.data?.data
 
     data = [...materialData, ...addOnData?.map((e) => { return { ...e, type: "Manual Entry" } })];
@@ -234,7 +234,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       material.push(element);
     });
     axiosInstance()
-      .post(`${serviceOrder.api}/${serviceOrderData._id}/material`, { material: material })
+      .post(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`, { material: material })
       .then(({ data }) => {
         setAddingProducts(false);
         setAddProductDialog({ open: false, parentId: null });
@@ -251,11 +251,11 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     try {
       const addOnDelete = rows?.filter((e) => e.type === 'Manual Entry');
       if (addOnDelete?.length) {
-        await axiosInstance().put(`${serviceOrder.api}/${serviceOrderData._id}/addon/delete`, { ids: addOnDelete?.map((e) => e.id) });
+        await axiosInstance().put(`${fieldServiceOrder.api}/${serviceOrderData._id}/addon/delete`, { ids: addOnDelete?.map((e) => e.id) });
       }
       const productDelete = rows?.filter((e) => e.type === 'product');
       if (productDelete?.length) {
-        await axiosInstance().put(`${serviceOrder.api}/${serviceOrderData?._id}/material/delete `, { ids: productDelete.map((d) => d.id) });
+        await axiosInstance().put(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material/delete `, { ids: productDelete.map((d) => d.id) });
       }
       setDeleting(false);
       fetchData();
@@ -377,7 +377,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       </Grid>
       {addProductDialog.open && (
         <AssignProductDialog
-          reference="serviceOrder"
+          reference="fieldServiceOrder"
           serialized={null}
           productsDialogOpen={addProductDialog.open}
           productId={null}

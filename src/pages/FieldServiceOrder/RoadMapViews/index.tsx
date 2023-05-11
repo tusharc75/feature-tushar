@@ -2,7 +2,7 @@ import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { COLOUR_MASTER } from 'src/constants/helpers';
+import { COLOUR_MASTER, fieldServiceOrder } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import { MdZoomOutMap } from 'react-icons/md';
@@ -11,8 +11,8 @@ import routes from 'src/components/Helpers/Routes';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const customNodeStyles = {
-  serviceOrder: {
-    name: 'Service Order',
+  fieldServiceOrder: {
+    name: routes.fieldServiceOrder.title,
     background: '#E2F8FF',
     borderColor: '#8BCBDF'
   },
@@ -48,8 +48,8 @@ function ServiceOrderViews({ serviceData }) {
     setLoading(true);
     try {
       var xPosition = 0;
-      const services = await axiosInstance().get(`service-order/${serviceData?._id}/material`);
-      const technicians = await axiosInstance().get(`service-order/${serviceData?._id}/technician`);
+      const services = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceData?._id}/material`);
+      const technicians = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceData?._id}/technician`);
       const allServices = services?.data?.data?.material;
       const allTechnician = technicians?.data?.data;
       const serviceIdMaterial = {};
@@ -61,17 +61,17 @@ function ServiceOrderViews({ serviceData }) {
           className: 'dark-node',
           sourcePosition: 'right',
           data: {
-            ref_type: 'serviceOrder',
+            ref_type: 'fieldServiceOrder',
             ref_id: serviceData?._id,
             label: (
               <div>
-                <Typography variant="body2">{routes.quotation.title}</Typography>
-                <Typography variant="subtitle2">{serviceData?.serviceOrderNumber ?? serviceData?.serviceOrderNumber}</Typography>
+                <Typography variant="body2">{routes.fieldServiceOrder.title}</Typography>
+                <Typography variant="subtitle2">{serviceData?.fieldServiceOrderNumber ?? serviceData?.fieldServiceOrderNumber}</Typography>
               </div>
             )
           },
           position: { x: xPosition, y: 80 },
-          style: customNodeStyles.serviceOrder
+          style: customNodeStyles.fieldServiceOrder
         }
       ];
       var flowEdge: any[] = [];
@@ -155,7 +155,7 @@ function ServiceOrderViews({ serviceData }) {
           label: (
             <HtmlTooltip arrow placement="top" title={serviceData?.status}>
               <div>
-                <Typography variant="body2">{serviceData?.serviceOrderNumber ?? serviceData?.serviceOrderNumber}</Typography>
+                <Typography variant="body2">{serviceData?.fieldServiceOrderNumber ?? serviceData?.fieldServiceOrderNumber}</Typography>
                 <Typography variant="subtitle2">{serviceData?.status ?? serviceData?.status}</Typography>
               </div>
             </HtmlTooltip>

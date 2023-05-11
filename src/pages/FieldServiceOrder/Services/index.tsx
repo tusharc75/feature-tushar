@@ -11,7 +11,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { serviceOrder } from '../../../constants/helpers';
+import { fieldServiceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
@@ -24,18 +24,11 @@ import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/h
 import { generateCustomTableColumns } from 'src/constants/columns';
 import CustomEditableGrid from 'src/components/CustomEditableGrid';
 import { flattenArray } from 'src/constants/columns';
-import AddIcon from '@material-ui/icons/Add'
+import AddIcon from '@material-ui/icons/Add';
 import { ExpandMore } from '@material-ui/icons';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
-
-const Services = ({
-  serviceOrderData,
-  setNextStep,
-  renderedFrom,
-  stepFullScreen,
-  allowedToEdit
-}: any) => {
+const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -47,14 +40,13 @@ const Services = ({
   const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null });
   const [isAddingProducts, setAddingProducts] = useState(false);
 
-
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
 
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [addAnchorEl, setAddAnchorEl] = useState(null)
+  const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [openBulkEdit, setOpenBulkEdit] = useState({ open: false, data: null });
 
@@ -68,11 +60,11 @@ const Services = ({
 
   const fetchFields = async () => {
     var allFields = await fetch_service_order_detail_fields(serviceOrderData?.currency);
-    setAllFields(allFields)
+    setAllFields(allFields);
     const newColumns = generateCustomTableColumns(allFields, serviceOrderData?.currency, renderedFrom);
-    let qtyIndex = newColumns.findIndex(d => d.accessor === 'qty')
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay'
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
     let column: any = [
       {
@@ -91,14 +83,7 @@ const Services = ({
         disableFilters: true,
         sticky: isMobile ? 'none' : 'left',
         width: 70,
-        Cell: ({ row }) =>
-          row.original['type'] ? (
-            <p>
-              {`${startCase(row.original?.type)} `}
-            </p>
-          ) : (
-            <NoDataCell />
-          )
+        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       },
       {
         accessor: 'detail',
@@ -123,7 +108,7 @@ const Services = ({
                   <HtmlTooltip title="Add Product">
                     <IconButton
                       onClick={() => {
-                        setAddExistingProductDialog({ open: true, type: "product", parentId: row.original?._id });
+                        setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id });
                       }}
                       size="small"
                     >
@@ -136,7 +121,7 @@ const Services = ({
             <Box ml={1}>
               <IconButton
                 size="small"
-                style={{ marginLeft: "10px" }}
+                style={{ marginLeft: '10px' }}
                 onClick={() => {
                   if (row.original.type === 'service') {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
@@ -165,7 +150,7 @@ const Services = ({
       canDrag: false,
       Cell: ({ row }) => {
         return allowedToEdit ? (
-          (!row.original.canDelete) ? (
+          !row.original.canDelete ? (
             <HtmlTooltip title={'Technician is already assigned'}>
               <span>
                 <IconButton size="small" aria-label="Details" disabled={true}>
@@ -199,15 +184,14 @@ const Services = ({
   };
 
   const fetchProductInventory = async () => {
-
     setNextStep(false);
 
     var data: any = [];
 
-    const response = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
+    const response = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`);
     data = response?.data?.data;
 
-    const responseTechnician = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/technician`);
+    const responseTechnician = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/technician`);
     const technician = responseTechnician?.data?.data;
 
     let rows = data.material.filter((e) => e.parentId === null);
@@ -218,20 +202,20 @@ const Services = ({
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent?.packageDetail?.packageName;
+          ? parent?.serviceDetail?.serviceName
+          : parent?.packageDetail?.packageName;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.qtyDisplay = parent.qty;
-      parent.canDelete = technician.some(d => d._id === parent._id) ? false : true;
-      parent.estimateStartDate = parent.estimateStartDate ? parent.estimateStartDate : serviceOrderData?.estimateStartDate
-      parent.estimateEndDate = parent.estimateEndDate ? parent.estimateEndDate : serviceOrderData?.estimateEndDate
+      parent.canDelete = technician.some((d) => d._id === parent._id) ? false : true;
+      parent.estimateStartDate = parent.estimateStartDate ? parent.estimateStartDate : serviceOrderData?.estimateStartDate;
+      parent.estimateEndDate = parent.estimateEndDate ? parent.estimateEndDate : serviceOrderData?.estimateEndDate;
       parent.subRows = generateNestedData(data.material, parent, technician);
     });
 
@@ -251,20 +235,20 @@ const Services = ({
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
-      _subRow.canDelete = technician.some(d => d.service.optionValue === _subRow._id) ? false : true;
-      _subRow.estimateStartDate = _subRow.estimateStartDate ? _subRow.estimateStartDate : serviceOrderData?.estimateStartDate
-      _subRow.estimateEndDate = _subRow.estimateEndDate ? _subRow.estimateEndDate : serviceOrderData?.estimateEndDate
+      _subRow.canDelete = technician.some((d) => d.service.optionValue === _subRow._id) ? false : true;
+      _subRow.estimateStartDate = _subRow.estimateStartDate ? _subRow.estimateStartDate : serviceOrderData?.estimateStartDate;
+      _subRow.estimateEndDate = _subRow.estimateEndDate ? _subRow.estimateEndDate : serviceOrderData?.estimateEndDate;
       _subRow.subRows = generateNestedData(material, _subRow, technician);
     });
     return subRows;
@@ -278,20 +262,22 @@ const Services = ({
       element.materialId = d._id;
       element.type = addExistingProductDialog.type;
       element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
-      element.pricingMethod = d?.pricingMethodMain && d?.pricingMethodMain?.length ? d.pricingMethodMain[0] : d?.pricingMethod ? d?.pricingMethod : '';
+      element.pricingMethod =
+        d?.pricingMethodMain && d?.pricingMethodMain?.length ? d.pricingMethodMain[0] : d?.pricingMethod ? d?.pricingMethod : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addExistingProductDialog.parentId;
-      element.estimateStartDate = serviceOrderData?.estimateStartDate
-      element.estimateEndDate = serviceOrderData?.estimateEndDate
+      element.estimateStartDate = serviceOrderData?.estimateStartDate;
+      element.estimateEndDate = serviceOrderData?.estimateEndDate;
       material.push(element);
     });
     axiosInstance()
-      .post(`${serviceOrder.api}/${serviceOrderData._id}/material`, { material: material })
+      .post(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`, { material: material })
       .then(({ data }) => {
         setUpdating(false);
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         setOpenBulkEdit({
-          open: true, data: data.data.map((d, i) => {
+          open: true,
+          data: data.data.map((d, i) => {
             return {
               ...d,
               srno: i + 1,
@@ -299,11 +285,11 @@ const Services = ({
                 d.type === 'product'
                   ? d?.productDetail?.productName
                   : d.type === 'service'
-                    ? d?.serviceDetail?.serviceName
-                    : d?.packageDetail?.packageName
-            }
+                  ? d?.serviceDetail?.serviceName
+                  : d?.packageDetail?.packageName
+            };
           })
-        })
+        });
         fetchProductInventory();
       })
       .catch((error) => {
@@ -328,7 +314,7 @@ const Services = ({
     });
     setUpdating(true);
     axiosInstance()
-      .put(`${serviceOrder.api}/${serviceOrderData._id}/material`, { material: rows })
+      .put(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`, { material: rows })
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, data: null });
@@ -343,7 +329,7 @@ const Services = ({
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${serviceOrder.api}/${serviceOrderData?._id}/material/delete `, { ids: rows.map(d => d.id) })
+      .put(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material/delete `, { ids: rows.map((d) => d.id) })
       .then(() => {
         setDeleting(false);
         fetchProductInventory();
@@ -390,8 +376,8 @@ const Services = ({
   };
 
   const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget)
-  }
+    setAddAnchorEl(event.currentTarget);
+  };
 
   const closeAddActions = () => {
     setAddAnchorEl(null);
@@ -404,13 +390,7 @@ const Services = ({
           <Grid item xs={12} md={12} sm={12}>
             <Box display="flex" justifyContent="space-between" m={1} mb={0}>
               <Box display="flex">
-                <Button
-                  variant={'outlined'}
-                  color="primary"
-                  size="small"
-                  startIcon={<AddIcon />}
-                  onClick={openAddActions}
-                  aria-controls="add-menu">
+                <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
                   {'Add'}
                   <ExpandMore fontSize="small" />
                 </Button>
@@ -465,23 +445,23 @@ const Services = ({
                   }}
                   onClose={handleClose}
                 >
-                    <MenuItem
-                      disabled={isDeleting}
-                      onClick={() => {
-                        handleDeleteMultiple();
-                        handleClose();
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        setOpenBulkEdit({ open: true, data: selectedProducts });
-                        handleClose();
-                      }}
-                    >
-                      Bulk Edit
-                    </MenuItem>
+                  <MenuItem
+                    disabled={isDeleting}
+                    onClick={() => {
+                      handleDeleteMultiple();
+                      handleClose();
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      setOpenBulkEdit({ open: true, data: selectedProducts });
+                      handleClose();
+                    }}
+                  >
+                    Bulk Edit
+                  </MenuItem>
                 </Menu>
               </Box>
             </Box>
@@ -489,7 +469,7 @@ const Services = ({
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}  >
+            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
@@ -522,7 +502,7 @@ const Services = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType={"serviceOrder"}
+          referenceType={'fieldServiceOrder'}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
@@ -545,7 +525,7 @@ const Services = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'serviceOrder'}
+          reference={'fieldServiceOrder'}
           onSuccess={(services) => {
             handleAdd(services);
           }}
@@ -557,7 +537,7 @@ const Services = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
         <AssignProductDialog
-          reference={'serviceOrder'}
+          reference={'fieldServiceOrder'}
           serialized={null}
           productsDialogOpen={addExistingProductDialog.open}
           productId={null}
@@ -569,7 +549,7 @@ const Services = ({
           }}
         />
       )}
-      {openBulkEdit.open &&
+      {openBulkEdit.open && (
         <CustomEditableGrid
           onClose={() => setOpenBulkEdit({ open: false, data: null })}
           data={openBulkEdit.data}
@@ -577,10 +557,11 @@ const Services = ({
           columns={columns}
           currency={serviceOrderData?.currency}
           handleSave={(rows) => {
-            handleSaveData(rows)
-            setOpenBulkEdit({ open: false, data: null })
-          }} />
-      }
+            handleSaveData(rows);
+            setOpenBulkEdit({ open: false, data: null });
+          }}
+        />
+      )}
     </Fragment>
   );
 };
