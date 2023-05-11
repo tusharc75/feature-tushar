@@ -12,7 +12,7 @@ import { FaUser as UserIcon } from 'react-icons/fa';
 import { TextField, Button, Grid } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 
-const Comments = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName, stepId }) => {
+const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId }) => {
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState(null);
   const [comment, setComment] = useState('');
