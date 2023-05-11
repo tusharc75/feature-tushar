@@ -947,6 +947,13 @@ const routes = {
     title:
       storedRoutes && storedRoutes.competencies && storedRoutes.competencies.title ? storedRoutes.competencies?.title : RESOURCE_LABEL.competencies,
     path: '/competencies/detail'
+  },
+  materialHandling: {
+    title:
+      storedRoutes && storedRoutes.materialHandling && storedRoutes.materialHandling.title
+        ? storedRoutes.materialHandling?.title
+        : RESOURCE_LABEL.materialHandling,
+    path: '/material-handling'
   }
 };
 
