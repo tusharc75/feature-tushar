@@ -9,14 +9,15 @@ import routes from 'src/components/Helpers/Routes';
 import styles from './logs.module.scss';
 import moment from 'moment';
 import { FaUser as UserIcon } from 'react-icons/fa';
+import { TextField, Button, Grid } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 
-const Comments = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName,stepId }) => {
-
+const Comments = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName, stepId }) => {
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState(null);
   const [rows, setRows] = useState(null);
   const [keys, setKeys] = useState(null);
-
+  const [comment, setComment] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -42,14 +43,34 @@ const Comments = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName,s
       .then(({ data: { data } }) => {
         if (data && data?.length) {
           setData(data);
-        }
-        else {
-          setData([])
+        } else {
+          setData([]);
         }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    console.log('comment', comment);
+    console.log('stepId', stepId);
+    console.log('uniqueId', uniqueId);
+    axiosInstance()
+      .post(`${routes.workOrder.path}/${workOrderId}/comment`, {
+        uniqueId: uniqueId,
+        stepId: stepId,
+        comment: comment,
+      })
+      .then(({data : {data}}) => {
+        fetchData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+      // clear the comment text
+      setComment("");
   };
 
   const group = (data: any) => {
@@ -70,7 +91,6 @@ const Comments = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName,s
   };
 
   return (
-    
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="comments-dialog">
       <CustomDialogHeader
         title={`${serviceName ? serviceName : ''} Comments`}
@@ -80,6 +100,28 @@ const Comments = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName,s
         style={{ textTransform: 'capitalize' }}
       />
       <CustomDialogContent>
+        <Grid container justifyContent="center" alignItems="center" spacing={2}>
+            <Grid item xs={10}>
+            <TextField
+                fullWidth
+                value={comment}
+                onChange={e => setComment(e.target.value)}
+                variant="outlined"
+                placeholder="Add a comment"
+            />
+            </Grid>
+            <Grid item xs={2}>
+            <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                onClick={handleSubmit}
+                startIcon={<AddIcon />}
+            >
+                Add
+            </Button>
+            </Grid>
+        </Grid>
         {keys ? (
           keys?.length > 0 ? (
             <Box className={styles.main}>
