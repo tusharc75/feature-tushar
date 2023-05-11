@@ -212,6 +212,7 @@ import DynamicForm from './pages/DynamicForm';
 import DynamicFormDetail from './pages/DynamicForm/DynamicFormDetail';
 import Competencies from './pages/Competencies';
 import CompetenciesDetail from './pages/Competencies/CompetenciesDetail';
+import MaterialHandling from './pages/MaterialHandling';
 
 var notificationInterval: any = null;
 
@@ -1020,6 +1021,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.competenciesDetail.path}/:id`}>
               <CompetenciesDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.materialHandling.path}`}>
+              <MaterialHandling />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
