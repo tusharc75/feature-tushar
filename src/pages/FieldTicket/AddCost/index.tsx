@@ -6,7 +6,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, removeLocalStorage } from 'src/constants/helpers';
+import { CHILD_RESOURCE, RESOURCE_LABEL, removeLocalStorage } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -16,9 +16,8 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { AiFillFilePdf } from 'react-icons/ai';
-import { IoMdDownload } from 'react-icons/io';
 import EditIcon from '@material-ui/icons/Edit';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const AddCost = ({ id, fieldTicketData }) => {
   const renderedFrom = camelCase(routes?.fieldTicket.title);
@@ -148,38 +147,6 @@ const AddCost = ({ id, fieldTicketData }) => {
       });
   };
 
-  const handleViewPdf = (download) => {
-    axiosInstance()
-      .get(`/field-ticket/${fieldTicketData._id}/pdf`)
-      .then(({ data }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
-            responseType: 'blob'
-          })
-          .then(({ data }) => {
-            if (download) {
-              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-              const link = document.createElement('a');
-              link.href = url;
-              link.setAttribute('download', `FieldTicket-${fieldTicketData.fieldTicketNumber}.pdf`);
-              document.body.appendChild(link);
-              link.click();
-            } else {
-              const file = new Blob([data], { type: 'application/pdf' });
-              const fileURL = URL.createObjectURL(file);
-              const pdfWindow = window.open();
-              pdfWindow.location.href = fileURL;
-              toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-            }
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
 
   return (
     <Fragment>
@@ -197,34 +164,8 @@ const AddCost = ({ id, fieldTicketData }) => {
           </Button>
         </Box>
         <Box display="flex">
-          <Button
-            variant="outlined"
-            className="btn-outline-v1"
-            color="primary"
-            type="button"
-            size="small"
-            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
-            onClick={(e) => {
-              handleViewPdf(false);
-            }}
-          >
-            Preview
-          </Button>
-          <Box mx={0.5} />
-          <Button
-            className="btn-outline-v1"
-            variant="outlined"
-            color="primary"
-            type="button"
-            size="small"
-            startIcon={<IoMdDownload />}
-            onClick={(e) => {
-              handleViewPdf(true);
-            }}
-          >
-            Download
-          </Button>
-          <Box mx={0.5} />
+           <PreviewDownload resource={RESOURCE_LABEL.fieldTicket} referenceId={id} columns={columns} />
+            <Box mr={1} />
           <Button
             disabled={selectedRecords.length ? false : true}
             variant={'outlined'}
