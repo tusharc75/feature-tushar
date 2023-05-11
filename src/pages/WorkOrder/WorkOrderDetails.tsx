@@ -11,7 +11,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS } from 'src/constants/helpers';
+import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, INVENTORY_STATUS } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
@@ -54,6 +54,9 @@ const WorkOrderDetails = () => {
   const [previewPdf, setPreviewPdf] = useState(false);
   const [statusOptions, setStatusOptions] = useState([]);
   const [completed, setCompleted] = useState(false);
+
+  const [showConfirmBoxScrap, setShowConfirmBoxScrap] = useState(false);
+
 
   useEffect(() => {
     return history.listen((location) => {
@@ -175,9 +178,13 @@ const WorkOrderDetails = () => {
       });
   };
 
-  const updateJobStatus = (status) => {
+  const updateJobStatus = (status, assetStatus = null) => {
+    const data: any = { status: status }
+    if (assetStatus) {
+      data.assetStatus = assetStatus;
+    }
     axiosInstance()
-      .patch(`${workOrder.api}/status/${id}`, { status: status })
+      .patch(`${workOrder.api}/status/${id}`, data)
       .then(({ data: { data } }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -186,7 +193,6 @@ const WorkOrderDetails = () => {
         });
         fetchWorkOrderData();
       })
-
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -223,6 +229,15 @@ const WorkOrderDetails = () => {
           <Box className="control-buttons-v1">
             {workOrderData ? (
               <>
+                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed &&
+                  <Button
+                    variant={'contained'}
+                    size="small"
+                    onClick={() => setShowConfirmBoxScrap(true)}
+                    className={'btn-outline-v1'}
+                  >
+                    {`${INVENTORY_STATUS.scrap} Asset`}
+                  </Button>}
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
                   workOrderData?.canComplete &&
@@ -409,6 +424,19 @@ const WorkOrderDetails = () => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {showConfirmBoxScrap && (
+        <ConfirmationDialog
+          open={showConfirmBoxScrap}
+          message={`Are you sure you want to scrap asset: ${workOrderData?.serializedAsset?.optionLabel} ?`}
+          onClose={() => {
+            setShowConfirmBoxScrap(false);
+          }}
+          onOk={() => {
+            setShowConfirmBoxScrap(false)
+            updateJobStatus(WORK_ORDER_STATUS.completed, INVENTORY_STATUS.scrap)
+          }}
         />
       )}
       {openUpdateDialog && (
