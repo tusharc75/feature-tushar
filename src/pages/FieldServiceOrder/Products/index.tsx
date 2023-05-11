@@ -322,7 +322,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                       handleClose();
                     }}
                   >
-                    Add Product
+                    Add Products
                   </MenuItem>
                   <MenuItem
                     disabled={selectedProducts?.filter((e) => e.type === 'service')?.length === 1 ? false : true}
