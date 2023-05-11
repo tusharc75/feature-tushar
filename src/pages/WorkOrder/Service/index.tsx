@@ -31,6 +31,7 @@ import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import { useData } from 'src/StateProvider/Provider';
 import Logs from './Logs';
+import Comments from './Comments';
 import CompleteDialog from './CompleteDialog';
 import { Tabs, Tab } from './Tabs';
 import styles from './index.module.scss';
@@ -111,6 +112,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [arrangeView, setArrangeView] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
   const [logsDialog, setLogsDialog] = useState(false);
+  const [commentsDialog, setCommentsDialog] = useState(false);
   const [showManagePurchaseOrder, setShowManagePurchaseOrder] = useState(false);
   const [isColapsed, setIsColapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
@@ -1101,6 +1103,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               >
                 Logs
               </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setCommentsDialog(true);
+                  setAnchorEl(null);
+                }}
+              >
+                Comments
+              </MenuItem>
               {user?.brandPolicy?.subcontractPurchaseOrder &&
                 <MenuItem
                   onClick={() => {
@@ -1194,6 +1204,18 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           handleClose={() => {
             setLogsDialog(false);
           }}
+        />
+      )}
+      {commentsDialog && (
+        <Comments
+          workOrderId={workOrderId}
+          serviceId={selectedService?._id}
+          uniqueId={selectedService?.uniqueId}
+          serviceName={selectedService?.serviceName}
+          stepId={selectedService?.stepId}
+          handleClose={() => {
+          setCommentsDialog(false);
+        }}
         />
       )}
       {openCompleteDialog && (
