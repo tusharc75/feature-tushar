@@ -168,7 +168,12 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
 
   return (
     <Fragment>
-      <PreviewDownload resource={RESOURCE_LABEL.salesOrder} referenceId={salesOrderData._id} columns={columns} />
+      <PreviewDownload 
+        resource={RESOURCE_LABEL.salesOrder} 
+        referenceId={salesOrderData._id} 
+        columns={columns}
+        isSendEmail={true}
+      />
       <Grid item xs={12} md={12} sm={12}>
         {columns && rowsData ? (
           <>
