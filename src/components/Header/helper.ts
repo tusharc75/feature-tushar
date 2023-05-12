@@ -135,7 +135,7 @@ const decreaseIndex = (
 
 const focusElement = (element: HTMLDivElement, parentIndex: number, childIndex: number) => {
   const allUl: HTMLCollection = element.children;
-  const itemToFocus = allUl[parentIndex].children[childIndex + 1] as HTMLDivElement;
-  itemToFocus.focus();
-  itemToFocus.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  const itemToFocus = allUl[parentIndex]?.children[childIndex + 1] as HTMLDivElement;
+  itemToFocus?.focus();
+  itemToFocus?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 };

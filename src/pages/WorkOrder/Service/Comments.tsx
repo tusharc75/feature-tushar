@@ -54,9 +54,6 @@ const Comments = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName, 
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log('comment', comment);
-    console.log('stepId', stepId);
-    console.log('uniqueId', uniqueId);
     axiosInstance()
       .post(`${routes.workOrder.path}/${workOrderId}/comment`, {
         uniqueId: uniqueId,
