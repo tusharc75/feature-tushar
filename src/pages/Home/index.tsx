@@ -62,21 +62,6 @@ function Dashboard() {
     }
   };
 
-  // SEARCH FUNCTION
-  const handleSearch = (value) => {
-    const searchedValueInLowerCase = value?.toLowerCase();
-    const filteredItems = [];
-    sections.forEach((section) => {
-      const items = section.items.filter(
-        (ff) => ff.sectionNameLowerCase.indexOf(searchedValueInLowerCase) > -1 || ff.resourceLabelLowerCase.indexOf(searchedValueInLowerCase) > -1
-      );
-      if (items.length > 0) {
-        filteredItems.push({ ...section, items: items });
-      }
-    });
-    setFilteredData(filteredItems);
-  };
-
   return (
     <Fragment>
       <div className={` ${styles.contentWrapper}`}>
