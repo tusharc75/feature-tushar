@@ -217,8 +217,8 @@
       display: grid;
       background-color: var(--bg_color, #ffefee);
 
-      @media all and (min-width: 1600px) {
-        min-height: 178px;
+      @media all and (min-width: 1366px) {
+        min-height: 219px;
       }
       cursor: pointer;
       box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08), -3px 3px 6px rgba(220, 220, 220, 0.2), 3px -3px 6px rgba(220, 220, 220, 0.2),
