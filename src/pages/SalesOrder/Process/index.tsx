@@ -110,13 +110,13 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 
   const fetchData = async () => {
     setNextStep(false);
+
+    await axiosInstance().put(`${salesOrder.api}/material-procurement/${salesOrderData._id}`);
+
     var material: any = [];
     const response = await axiosInstance().get(`${salesOrder.api}/material/${salesOrderData._id}`);
     material = response?.data?.data?.material;
-    if (!material?.find((e) => e?.procurement?.optionLabel)) {
-      generateProcurement();
-      return;
-    }
+
     const rows = material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -167,17 +167,6 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
-  };
-
-  const generateProcurement = async () => {
-    try {
-      const response = await axiosInstance().put(`${salesOrder.api}/material-procurement/${salesOrderData._id}`);
-      if (response) {
-        fetchData();
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
   };
 
   return (

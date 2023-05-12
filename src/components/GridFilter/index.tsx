@@ -19,6 +19,7 @@ import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import SaveFilterDialog from './SaveFilterDialog';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { isEmpty } from 'lodash';
 
 function GridFilter({
   resource,
@@ -471,6 +472,7 @@ function GridFilter({
             onClick={() => {
               setIsSaveFilter({ open: true, data: selectedUserFilter });
             }}
+            disabled={isEmpty(formValues) ? true : false}
             size="small"
             color="primary"
             variant="contained"
@@ -500,6 +502,7 @@ function GridFilter({
             setIsSaveFilter({ open: false, data: null });
             setFormValues({});
             fetchUserFilters();
+            setSelectedUserFilter(null);
           }}
           filterData={isSaveFilter.data}
           filterValue={formValues}
