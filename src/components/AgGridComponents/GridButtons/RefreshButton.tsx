@@ -5,7 +5,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const RefreshButton = ({ isOffline, className = '', refreshGrid = null, style = {}, ...otherProps }) => {
   return refreshGrid ? (
-    <HtmlTooltip title="Refresh" placement="top">
+    <HtmlTooltip title="Refresh" placement="top" arrow>
       <IconButton
         {...otherProps}
         className={`refresh-arrange-button ${className}`}

@@ -5,6 +5,8 @@ import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
+import { BsCloudDownload, CiImport, CiExport } from 'react-icons/all';
+
 const useStyles = makeStyles((theme) => ({
   root: {
     // width: '100%',
@@ -255,7 +257,7 @@ export default function ImportExportLinks({
         {permissions?.isCreate && imptExptDnldMenuDta.action === 'import' && (
           <MenuItem>
             <label htmlFor="importFromExcel" className="cursor-pointer">
-              {title !== '' ? `${title} Import ` : `Import from Excel`}
+              <span>{title !== '' ? `${title} Import ` : `Import from Excel`}</span>
             </label>
           </MenuItem>
         )}
@@ -430,7 +432,8 @@ export default function ImportExportLinks({
                 className={`new-headerbox-button-v1`}
               >
                 {/* {extraImportExportLinks.length > 0 || ImportInput} */}
-                Import from Excel
+                <span>Import from Excel</span>
+                <CiImport />
               </label>
               {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
             </>
@@ -445,8 +448,11 @@ export default function ImportExportLinks({
             }}
             className={`new-headerbox-button-v1`}
           >
-            Export to Excel{' '}
-            {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
+            <span>
+              Export to Excel{' '}
+              {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
+            </span>
+            <CiExport />
           </label>
           {isDownloadExcel && !onlyExport && (
             <>
@@ -461,7 +467,8 @@ export default function ImportExportLinks({
                 }}
                 className={`new-headerbox-button-v1`}
               >
-                Download Template
+                <span>Download Template</span>
+                <BsCloudDownload />
               </label>
             </>
           )}
