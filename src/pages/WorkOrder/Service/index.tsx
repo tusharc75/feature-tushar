@@ -112,7 +112,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [arrangeView, setArrangeView] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
   const [logsDialog, setLogsDialog] = useState(false);
-  const [commentsDialog, setCommentsDialog] = useState({ open: false, stepId: null });
+  const [commentsDialog, setCommentsDialog] = useState(false);
   const [showManagePurchaseOrder, setShowManagePurchaseOrder] = useState(false);
   const [isColapsed, setIsColapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
@@ -771,7 +771,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                         allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                         setDisableCompleteFail={setDisableCompleteFail}
                         fetchService={fetchRepairOrderData}
-                        setCommentsDialog={setCommentsDialog}
                       />
                     ) : (
                       <Box textAlign="center">
@@ -1106,7 +1105,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  setCommentsDialog({open : true, stepId : null});
+                  setCommentsDialog(true);
                   setAnchorEl(null);
                 }}
               >
@@ -1207,15 +1206,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }}
         />
       )}
-      {commentsDialog && commentsDialog.open && (
+      {commentsDialog && (
         <Comments
           workOrderId={workOrderId}
+          serviceId={selectedService?._id}
           uniqueId={selectedService?.uniqueId}
           serviceName={selectedService?.serviceName}
-          stepId={commentsDialog.stepId}
+          stepId={selectedService?.stepId}
           handleClose={() => {
-            setCommentsDialog({ open: false, stepId: null });
-          }}
+          setCommentsDialog(false);
+        }}
         />
       )}
       {openCompleteDialog && (
