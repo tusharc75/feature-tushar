@@ -385,7 +385,10 @@ const SerializedAssetDetailsPage = () => {
                           variant="outlined"
                           color="default"
                           size="small"
-                          onClick={() => handleStatusUpdate({ status: INVENTORY_STATUS.available })}
+                          onClick={() => {
+                            setStatus(INVENTORY_STATUS.available);
+                            setShowReasonDialog(true);
+                          }}
                           aria-controls="action-menu"
                         >
                           Asset Found
