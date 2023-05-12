@@ -444,7 +444,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload resource={RESOURCE_LABEL.planning} referenceId={planningData._id} columns={columns} />
+            <PreviewDownload resource={RESOURCE_LABEL.planning} referenceId={planningData._id} columns={columns} isSendEmail={true} />
             <Box mr={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
