@@ -428,7 +428,8 @@ export const RESOURCE_LABEL = {
   transactionLock: 'Transaction Lock',
   wellNumber: 'Well Number',
   taxMaster: 'Tax Master',
-  competencies: 'Competencies'
+  competencies: 'Competencies',
+  materialHandling: 'Material Handling'
 };
 
 export const CHILD_RESOURCE = {
