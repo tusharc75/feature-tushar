@@ -300,32 +300,34 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
               <Button variant="outlined" disabled={isSubmitting} size="small" color="primary" onClick={onClose}>
                 Cancel
               </Button>
-              {/* <Button
-                onClick={() => {
-                  if (!validate(values.products).consumedQty && !validate(values.products).storageLocation) {
-                    handleSubmit(values);
-                  }
-                }}
-                size="small"
-                variant="contained"
-                disabled={isSubmitting}
-                color="primary"
-              >
-                Save
-              </Button> */}
-              <Button
-                onClick={() => {
-                  if (!validate(values.products).consumedQty && !validate(values.products).storageLocation) {
-                    handleRequest(values);
-                  }
-                }}
-                size="small"
-                variant="contained"
-                disabled={isSubmitting}
-                color="primary"
-              >
-                Request
-              </Button>
+              {user?.user?.brandPolicy?.workOrderConsumableRequest ?
+                <Button
+                  onClick={() => {
+                    if (!validate(values.products).consumedQty && !validate(values.products).storageLocation) {
+                      handleRequest(values);
+                    }
+                  }}
+                  size="small"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  color="primary"
+                >
+                  Request
+                </Button> :
+                <Button
+                  onClick={() => {
+                    if (!validate(values.products).consumedQty && !validate(values.products).storageLocation) {
+                      handleSubmit(values);
+                    }
+                  }}
+                  size="small"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  color="primary"
+                >
+                  Save
+                </Button>
+              }
             </CustomDialogFooter>
           </>
         )}

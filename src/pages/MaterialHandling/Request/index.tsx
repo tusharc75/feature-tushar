@@ -11,15 +11,19 @@ const Request = ({ workOrder }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const [requestData, setRequestData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     fetchData();
   }, [workOrder]);
 
   const handleUpdateStatus = (status, ids) => {
+    setLoading(true)
     axiosInstance()
       .put(`/material-handling/status/${workOrder}`, { status, ids })
       .then(({ data }) => {
+        setLoading(false)
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -28,6 +32,7 @@ const Request = ({ workOrder }) => {
         fetchData()
       })
       .catch((err) => {
+        setLoading(false)
         toastConfig.setToastConfig(err);
       });
   };
@@ -78,8 +83,9 @@ const Request = ({ workOrder }) => {
                     <Box display='flex'>
                       <Button
                         variant="outlined"
-                        color="primary"
+                        className={'btn-outline-v1'}
                         size="small"
+                        disabled={loading}
                         onClick={() => {
                           handleUpdateStatus(MATERIAL_REQUEST_STATUS.processed, [{ _id: data?._id, uniqueId: data?.uniqueId, qty: data?.qty }]);
                         }}
@@ -89,8 +95,9 @@ const Request = ({ workOrder }) => {
                       <Box pl={2} />
                       <Button
                         variant="outlined"
-                        color="secondary"
+                        className={'btn-outline-red-v1'}
                         size="small"
+                        disabled={loading}
                         onClick={() => {
                           handleUpdateStatus(MATERIAL_REQUEST_STATUS.rejected, [{ _id: data?._id, uniqueId: data?.uniqueId, qty: data?.qty }]);
                         }}
