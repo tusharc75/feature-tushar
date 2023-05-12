@@ -75,12 +75,12 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
             showRequiredLabel={true}
         />
         <Formik
-            initialValues={filterData ? { title: filterData?.title } : { title: "" }}
+            initialValues={{ title: filterData?.title || "" }}
             validateOnMount
             validationSchema={schema}
             onSubmit={handleSubmit}
         >
-            {({ submitForm, setFieldValue }) => (
+            {({ submitForm, setFieldValue, values }) => (
                 <Fragment>
                     <CustomDialogContent>
                         <Form autoComplete="off" autoCorrect="off" noValidate>
@@ -92,6 +92,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                                 label="Title"
                                 name="title"
                                 variant="outlined"
+                                value={values["title"]}
                                 onChange={(e) => {
                                     setFieldValue('title', e.target.value);
                                 }}
