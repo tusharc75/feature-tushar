@@ -3124,6 +3124,9 @@ body {
       font-size: 0.8rem;
     }
   }
+  & a > * {
+    color: var(--link);
+  }
 }
 
 .custom-react-table {
@@ -3450,4 +3453,13 @@ body {
   .detailName {
     margin-bottom: 10px;
   }
+}
+
+.refresh-arrange-button {
+  width: 32px;
+  height: 32px;
+  background: white;
+  padding: 11px;
+  border-radius: 50% !important;
+  color: #424242;
 }

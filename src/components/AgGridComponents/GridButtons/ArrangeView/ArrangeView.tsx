@@ -26,6 +26,7 @@ const ArrangeView = ({
   selectedReportView = null,
   setSelectedReportView = null,
   reportSave = false,
+  className = '',
   style = {},
   ...otherProps
 }) => {
@@ -83,13 +84,8 @@ const ArrangeView = ({
       <HtmlTooltip title="Arrange View" placement="top">
         <IconButton
           {...otherProps}
+          className={`refresh-arrange-button ${className}`}
           style={{
-            width: '46px',
-            height: '32px',
-            background: 'white',
-            padding: '11px',
-            border: '1px solid #DEDEDE',
-            color: '#424242',
             ...style
           }}
           aria-describedby="columnSelection"
