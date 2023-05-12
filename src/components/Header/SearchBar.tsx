@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useReducer } from 'react';
-import { IconButton, ListItem, ListItemText, List } from '@material-ui/core';
+import { IconButton, ListItem, ListItemText, List, ListItemIcon } from '@material-ui/core';
 import { Clear as ClearIcon } from '@material-ui/icons';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SEARCH } from '../../StateProvider/actionTypes';
@@ -9,6 +9,7 @@ import { staticHiddenResource } from '../../constants/helpers';
 import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
 import { usePathname, useClickdOutside, useKeyPress } from 'src/hooks';
 import styles from './Header.module.scss';
+import CallMadeIcon from '@material-ui/icons/CallMade';
 
 import { filterReducerInitialState, filterReducer } from './helper';
 
@@ -188,12 +189,12 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
       <div
         className={`${styles.filtered_data} `}
         ref={listContainerRef}
-        style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll', scrollPadding: '37px 0 0 0' }}
+        style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll', scrollPadding: '48px 0 0 0' }}
       >
         {filteredData.length !== 0 ? (
           filteredData.map((section, pkey) => {
             return (
-              <List key={pkey} subheader={<h6 className={`${styles.list_header}`}>{section.head}</h6>}>
+              <List key={pkey} className={styles.resultUL} subheader={<h6 className={`${styles.list_header}`}>{section.head}</h6>}>
                 {section.items.map((item, ckey) => {
                   return (
                     <ListItem
@@ -205,6 +206,9 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
                       }}
                       className={styles.heaaderResults}
                     >
+                      <ListItemIcon className={styles.listIcon}>
+                        <CallMadeIcon style={{ fontSize: 16 }} />
+                      </ListItemIcon>
                       <ListItemText primary={item.resourceLabel} style={{ fontSize: '14px' }} />
                     </ListItem>
                   );
