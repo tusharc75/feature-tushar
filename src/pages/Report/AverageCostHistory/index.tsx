@@ -85,7 +85,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
             }
         },
         { field: "warehouse", headerName: routes.warehouse.title, show: true, cellRenderer: "commonRenderer", },
-        { field: 'purchaseOrderRejectedDate', headerName: 'Purchase Order Rejected Date', filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' },
+        //{ field: 'purchaseOrderRejectedDate', headerName: 'Purchase Order Rejected Date', filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' },
         { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
     ];
 
