@@ -1209,7 +1209,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       {commentsDialog && (
         <Comments
           workOrderId={workOrderId}
-          serviceId={selectedService?._id}
           uniqueId={selectedService?.uniqueId}
           serviceName={selectedService?.serviceName}
           stepId={selectedService?.stepId}

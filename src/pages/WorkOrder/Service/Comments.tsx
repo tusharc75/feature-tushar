@@ -12,25 +12,14 @@ import { FaUser as UserIcon } from 'react-icons/fa';
 import { TextField, Button, Grid } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 
-const Comments = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName, stepId }) => {
+const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId }) => {
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState(null);
-  const [rows, setRows] = useState(null);
-  const [keys, setKeys] = useState(null);
   const [comment, setComment] = useState('');
 
   useEffect(() => {
     fetchData();
   }, []);
-
-  useEffect(() => {
-    const groupedData = group(data);
-    if (groupedData) {
-      const allKeys = Object.keys(groupedData);
-      setKeys(allKeys);
-    }
-    setRows(groupedData);
-  }, [data]);
 
   const fetchData = () => {
     let url = `${routes.workOrder.path}/${workOrderId}/comment?uniqueId=${uniqueId}`;
@@ -70,25 +59,8 @@ const Comments = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName, 
       setComment("");
   };
 
-  const group = (data: any) => {
-    const groups = data?.reduce((data1, data2) => {
-      const date = data2.date.split('T')[0];
-      if (!data1[date]) {
-        data1[date] = [];
-      }
-      data1[date].push(data2);
-      return data1;
-    }, {});
-    return groups;
-  };
-
-  const getHeadMessage = (row: any) => {
-    let message = `<span>${row.comment}</span>`;
-    return message;
-  };
-
   return (
-    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="comments-dialog">
+    <Dialog fullWidth maxWidth="md" open={true} onClose={handleClose} aria-labelledby="comments-dialog">
       <CustomDialogHeader
         title={`${serviceName ? serviceName : ''} Comments`}
         showManimizeMaximize={false}
@@ -97,61 +69,22 @@ const Comments = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName, 
         style={{ textTransform: 'capitalize' }}
       />
       <CustomDialogContent>
-        <Grid container justifyContent="center" alignItems="center" spacing={2}>
-            <Grid item xs={10}>
-            <TextField
-                fullWidth
-                value={comment}
-                onChange={e => setComment(e.target.value)}
-                variant="outlined"
-                placeholder="Add a comment"
-            />
-            </Grid>
-            <Grid item xs={2}>
-            <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                onClick={handleSubmit}
-                startIcon={<AddIcon />}
-            >
-                Add
-            </Button>
-            </Grid>
-        </Grid>
-        {keys ? (
-          keys?.length > 0 ? (
+        {data ? (
+          data?.length > 0 ? (
             <Box className={styles.main}>
-              {keys?.map((key: string) => {
-                return (
-                  <div className={styles.singleGroup}>
-                    <Box key={key}>
-                      <p className={styles.date}>{moment(key).format('MMM Do YYYY')}</p>
-                    </Box>
-                    <div className={styles.logContainer}>
-                      {rows[key]?.map((row: any) => {
-                        return (
-                          <div className={styles.singleLog} key={row._id}>
-                            
-                            <div className={styles.textContainer}>
-                              <h4 className={styles.logHead} dangerouslySetInnerHTML={{ __html: getHeadMessage(row) }} />
-                              <p className={styles.logDetails}>
-                                {moment(row?.date).format('LT')}
-                                <span> {moment(row?.date).fromNow()}</span>
-                                <span className={styles.timePassedBadge}>
-                                  <UserIcon style={{ marginRight: '5px' }} />
-                                  {row?.user?.optionLabel}
-                                </span>
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </Box>
+            {data.map((item: any) => (
+              <div key={item._id}>
+                <div>
+                  <h4>{item.comment}</h4>
+                  <p>
+                    <UserIcon style={{ marginRight: '5px' }} />
+                    {item.user.firstName} {item.user.lastName}
+                  </p>
+                  <p>{moment(item.date).format('MMM Do YYYY, LT')}</p>
+                </div>
+              </div>
+            ))}
+          </Box>
           ) : (
             <h5>No Comments found.</h5>
           )
@@ -160,9 +93,33 @@ const Comments = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName, 
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
+        <Grid container justifyContent="center" alignItems="center" spacing={2}>
+        <Grid item xs={12}>
+            <TextField
+                fullWidth
+                value={comment}
+                onChange={e => setComment(e.target.value)}
+                variant="outlined"
+                placeholder="Add a comment"
+                multiline
+                maxRows={2}
+                style={{ width: '60%' }}
+            />
+        </Grid>
+        <Grid item xs={12}>
+            <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={handleSubmit}
+                startIcon={<AddIcon />}
+            >
+                Add
+            </Button>
+        </Grid>
+        </Grid>
       </CustomDialogContent>
     </Dialog>
   );
 };
-
 export default Comments;

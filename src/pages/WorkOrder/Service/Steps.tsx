@@ -28,6 +28,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import { GrDrag } from 'react-icons/gr';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
+import Comments from './Comments';
 
 const TimerComponent = ({ stepData, updateTime = true }) => {
   const [time, setTime] = useState(null);
@@ -188,6 +189,7 @@ const Service = ({
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
+  const [commentsDialog, setCommentsDialog] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
 
   const {
@@ -893,6 +895,15 @@ const Service = ({
                   Properties
                 </MenuItem>
               )}
+               <MenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCommentsDialog(true);
+                  setAnchorEl(null);
+                }}
+              >
+                Comments
+              </MenuItem>
             </Menu>
           )}
           {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) && (
@@ -930,6 +941,17 @@ const Service = ({
             step={selectedStep}
             stepData={stepState}
             eidtable={isFieldDialogEditable}
+          />
+        )}
+        {commentsDialog && (
+          <Comments
+            workOrderId={workOrderId}
+            uniqueId={selectedService?.uniqueId}
+            serviceName={selectedService?.serviceName}
+            stepId={selectedStep?._id}
+            handleClose={() => {
+            setCommentsDialog(false);
+          }}
           />
         )}
         {openCompleteDialog && (
