@@ -2382,6 +2382,12 @@ export const SERVICE_ORDER_STATUS = {
   completed: 'Completed'
 };
 
+export const MATERIAL_REQUEST_STATUS = {
+  requested: 'Requested',
+  processed: 'Processed',
+  rejected: 'Rejected',
+};
+
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
     num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;

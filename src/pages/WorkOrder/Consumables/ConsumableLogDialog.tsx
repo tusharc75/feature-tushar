@@ -47,7 +47,6 @@ const style = {
 };
 
 function ConsumableLogDialog({ onClose, product, consumeLog }) {
-  console.log(product, consumeLog);
   const [fullScreen, setFullScreen] = useState(false);
   return (
     <Dialog
