@@ -166,7 +166,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '', handelClose = null }) => {
+const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDisableCompleteFail, fetchService,setCommentsDialog, referencType = '', handelClose = null }) => {
 
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -847,6 +847,15 @@ const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDi
                   Properties
                 </MenuItem>
               )}
+              <MenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setAnchorEl(null);
+                    setCommentsDialog({open: true, stepId : selectedStep._id});
+                  }}
+                >
+                  Comments
+                </MenuItem>
             </Menu>
           )}
           {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) && (
