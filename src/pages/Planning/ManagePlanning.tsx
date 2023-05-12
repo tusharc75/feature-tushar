@@ -132,8 +132,8 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
     try {
       const response = await axiosInstance().get('/field?resource=Planning');
       const data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate && !["rentalJob", "salesOrder", "serviceOrder"]?.includes(obj.fieldData?.fieldName)).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !["rentalJob", "salesOrder", "serviceOrder"]?.includes(obj.fieldData?.fieldName)).map((d: any) => d.fieldData);
+      let fieldsDataForCreate = data.filter((obj) => obj.isCreate && !["rentalJob", "salesOrder", "fieldServiceOrder"]?.includes(obj.fieldData?.fieldName)).map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !["rentalJob", "salesOrder", "fieldServiceOrder"]?.includes(obj.fieldData?.fieldName)).map((d: any) => d.fieldData);
 
       if (id) {
         axiosInstance()

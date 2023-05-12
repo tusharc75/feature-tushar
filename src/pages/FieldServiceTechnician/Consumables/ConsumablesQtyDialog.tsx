@@ -105,7 +105,9 @@ const ConsumablesQtyDialog = ({ selectedFieldService, onClose, onSuccess, select
     >
       <CustomDialogHeader
         title={
-          selectedFieldService?.serviceOrderNumber ? `${selectedFieldService?.serviceOrderNumber} - Products/Consumables` : 'Products/Consumables'
+          selectedFieldService?.fieldServiceOrderNumber
+            ? `${selectedFieldService?.fieldServiceOrderNumber} - Products/Consumables`
+            : 'Products/Consumables'
         }
         onClose={onClose}
         isMinimized={!fullScreen}

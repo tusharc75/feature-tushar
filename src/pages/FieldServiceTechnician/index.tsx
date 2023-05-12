@@ -148,7 +148,7 @@ const FieldServiceTechnician = () => {
                     <Box p={3}>
                       <Box sx={style.serviceHead}>
                         <Typography>
-                          <span>{data?.serviceOrderNumber}</span>
+                          <span>{data?.fieldServiceOrderNumber}</span>
                         </Typography>
                         <Typography>{data?.service?.serviceName}</Typography>
                       </Box>

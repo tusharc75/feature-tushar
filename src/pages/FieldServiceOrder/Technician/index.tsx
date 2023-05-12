@@ -10,7 +10,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { SERVICE_ORDER_STATUS, serviceOrder } from '../../../constants/helpers';
+import { SERVICE_ORDER_STATUS, fieldServiceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
@@ -124,7 +124,7 @@ const Technician = ({
         Header: 'Competencies',
         width: 250,
         Cell: ({ row }) => (row.original['competencies'] ? <p>{row.original?.competencies}</p> : <NoDataCell />)
-      },
+      }
     ];
     column = [...column, ...newColumns];
     column.push({
@@ -159,9 +159,9 @@ const Technician = ({
   const fetchData = async () => {
     setNextStep(false);
     var data: any = [];
-    const response = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
+    const response = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`);
 
-    const responseTechnician = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/technician`);
+    const responseTechnician = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/technician`);
     const technician = responseTechnician?.data?.data;
 
     data = response?.data?.data?.material?.filter((e) => e.type !== 'product');
@@ -172,8 +172,8 @@ const Technician = ({
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent?.packageDetail?.packageName;
+          ? parent?.serviceDetail?.serviceName
+          : parent?.packageDetail?.packageName;
       parent.competencies = parent.type === 'service' ? parent?.serviceDetail?.competencies?.map((e) => e?.optionLabel)?.join(', ') : null;
       parent.competencyType = parent.type === 'service' ? parent?.serviceDetail?.competencyType?.optionLabel : null;
       parent.mainCompetencyType = parent.type === 'service' ? parent?.serviceDetail?.competencyType : {};
@@ -191,19 +191,21 @@ const Technician = ({
 
   const generateNestedData = (material, technician, parent) => {
     const subRowsTechnician: any = [];
-    technician?.filter((e) => e.uniqueId === parent._id)?.forEach((element, i) => {
-      const obj: any = {};
-      obj._id = element._id;
-      obj.index = parent.index + '.' + (i + 1);
-      obj.detail = `${element?.technician?.firstName} ${element?.technician?.lastName} - (${element?.technician?.firstName})`;
-      obj.technician = element?.technician?._id;
-      obj.type = 'technician';
-      obj.estimateStartDate = element?.estimateStartDate;
-      obj.estimateEndDate = element?.estimateEndDate;
-      obj.status = element?.status;
-      parent.isValid = true;
-      subRowsTechnician.push(obj);
-    });
+    technician
+      ?.filter((e) => e.uniqueId === parent._id)
+      ?.forEach((element, i) => {
+        const obj: any = {};
+        obj._id = element._id;
+        obj.index = parent.index + '.' + (i + 1);
+        obj.detail = `${element?.technician?.firstName} ${element?.technician?.lastName} - (${element?.technician?.firstName})`;
+        obj.technician = element?.technician?._id;
+        obj.type = 'technician';
+        obj.estimateStartDate = element?.estimateStartDate;
+        obj.estimateEndDate = element?.estimateEndDate;
+        obj.status = element?.status;
+        parent.isValid = true;
+        subRowsTechnician.push(obj);
+      });
 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
@@ -212,8 +214,8 @@ const Technician = ({
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
       _subRow.subRows = generateNestedData(material, technician, _subRow);
     });
 
@@ -232,7 +234,7 @@ const Technician = ({
       });
     });
     axiosInstance()
-      .post(`${serviceOrder.api}/${serviceOrderData._id}/technician`, sendData)
+      .post(`${fieldServiceOrder.api}/${serviceOrderData._id}/technician`, sendData)
       .then(() => {
         setAddEmployeeMasterDialog({ open: false, data: null });
         fetchData();
@@ -245,7 +247,7 @@ const Technician = ({
   const handleDelete = (ids) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${serviceOrder.api}/${serviceOrderData?._id}/technician/delete`, { ids })
+      .put(`${fieldServiceOrder.api}/${serviceOrderData?._id}/technician/delete`, { ids })
       .then(() => {
         fetchData();
         setDeleting(false);
@@ -260,9 +262,11 @@ const Technician = ({
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
-    selectedProducts.filter((e) => e.type === 'technician')?.forEach((ele) => {
-      obj.push(ele._id);
-    });
+    selectedProducts
+      .filter((e) => e.type === 'technician')
+      ?.forEach((ele) => {
+        obj.push(ele._id);
+      });
     setDeleteData(obj);
   };
 

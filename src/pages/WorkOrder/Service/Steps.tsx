@@ -211,29 +211,36 @@ const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDi
     var serviceDetail = serviceDetailResponse?.data?.data;
     serviceDetail.steps = serviceDetail?.steps?.sort((a, b) => a?.order - b?.order);
 
-    serviceDetail.steps?.forEach((ele, index) => {
-      ele.isAllowToPerform = false;
-      if (index === 0) {
-        ele.isAllowToPerform = true;
-      } else if (index > 0) {
-        const prevStep = serviceDetail?.steps[index - 1];
-        const prevStepData = stepsData?.find(
-          (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === prevStep?._id
-        );
-        const currStepData = stepsData?.find(
-          (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === ele?._id
-        );
-        if (prevStepData?.passFailStatus || currStepData?.passFailStatus) {
+    if (user?.brandPolicy?.workOrderStepSequence) {
+      serviceDetail.steps?.forEach((ele, index) => {
+        ele.isAllowToPerform = false;
+        if (index === 0) {
           ele.isAllowToPerform = true;
-        }
-        if (prevStep?.order === ele?.order) {
-          const stepOfFirstOrder = serviceDetail?.steps?.find((e) => e.order === ele?.order);
-          if (stepOfFirstOrder?.isAllowToPerform) {
+        } else if (index > 0) {
+          const prevStep = serviceDetail?.steps[index - 1];
+          const prevStepData = stepsData?.find(
+            (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === prevStep?._id
+          );
+          const currStepData = stepsData?.find(
+            (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === ele?._id
+          );
+          if (prevStepData?.passFailStatus || currStepData?.passFailStatus) {
             ele.isAllowToPerform = true;
           }
+          if (prevStep?.order === ele?.order) {
+            const stepOfFirstOrder = serviceDetail?.steps?.find((e) => e.order === ele?.order);
+            if (stepOfFirstOrder?.isAllowToPerform) {
+              ele.isAllowToPerform = true;
+            }
+          }
         }
-      }
-    });
+      });
+    }
+    else {
+      serviceDetail.steps?.forEach((ele) => {
+        ele.isAllowToPerform = true;
+      })
+    }
 
     setServiceDetails(serviceDetail);
 
@@ -837,7 +844,7 @@ const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDi
                     setViewStep({ open: true, step: selectedStep });
                   }}
                 >
-                  Settings
+                  Properties
                 </MenuItem>
               )}
             </Menu>
