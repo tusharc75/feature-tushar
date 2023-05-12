@@ -2,7 +2,13 @@ import { AiFillAccountBook } from 'react-icons/ai';
 import { SVGImages, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from '../../assets/dashboard_images';
 import DashboardIcons from 'src/assets/dashboard_images/icons';
 
-import { ProductSetup } from '../../assets/sidebar_assets/icons';
+import {
+  ProductSetup,
+  ServiceManagementIcon,
+  RentalOperationManagementIcon,
+  ServiceOperationManagementIcon,
+  PurchasingManagementIcon
+} from '../../assets/sidebar_assets/icons';
 import {
   BiCog,
   IoPeopleOutline,
@@ -19,7 +25,9 @@ import {
   RiCustomerServiceLine,
   AiOutlineCalendar,
   GiCircuitry,
-  AiOutlineDatabase
+  AiOutlineDatabase,
+  HiOutlineWrenchScrewdriver,
+  MdOutlineEventAvailable
 } from 'react-icons/all';
 
 // CREATE OBJECT FROM LIST GROUPED BY KEYGETTER
@@ -72,11 +80,11 @@ export const setDataBySectionName = (secName, index = 0) => {
   } else if (['Inventory Management'].includes(secName)) {
     text = 'Manage Inventory Smartly.';
     icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
-    sideBarIcon = <RiSuitcaseLine size={20} />;
+    sideBarIcon = <ServiceManagementIcon size={20} />;
   } else if (['Rental Operations Management'].includes(secName)) {
     text = 'Fulfill Rental Orders Faster.';
     icon = <DashboardIcons.ROM colors={iconColour} />;
-    sideBarIcon = <SiCivicrm size={20} />;
+    sideBarIcon = <RentalOperationManagementIcon size={20} />;
   } else if (['ROM'].includes(secName)) {
     text = 'Fulfill Rental Orders Faster.';
     icon = <DashboardIcons.ROM colors={iconColour} />;
@@ -88,7 +96,7 @@ export const setDataBySectionName = (secName, index = 0) => {
   } else if (['Repair & Maintenance Management'].includes(secName)) {
     text = 'Repair & Maintain your product and services at ease.';
     icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColour} />;
-    sideBarIcon = <ProductSetup size={18} />;
+    sideBarIcon = <HiOutlineWrenchScrewdriver size={18} />;
   } else if (['Admin Portal'].includes(secName)) {
     text = 'Build your own Template, Manage Roles and Entities.';
     icon = <DashboardIcons.ADMIN_PORTAL colors={iconColour} />;
@@ -107,17 +115,13 @@ export const setDataBySectionName = (secName, index = 0) => {
     sideBarIcon = <MdOutlineDynamicForm size={20} />;
   } else if (['Service Operations Management'].includes(secName)) {
     icon = <DashboardIcons.SERVICE_OPERATION_MANAGEMENT colors={iconColour} />;
-    sideBarIcon = <MdMiscellaneousServices size={20} />;
+    sideBarIcon = <ServiceOperationManagementIcon size={20} />;
   } else if (['Purchasing Management'].includes(secName)) {
     icon = <DashboardIcons.PURCHASING_MANAGEMENT colors={iconColour} />;
-    sideBarIcon = <RiCustomerServiceLine size={20} />;
+    sideBarIcon = <PurchasingManagementIcon size={20} />;
   } else if (['Planning & Forecasting'].includes(secName)) {
     icon = <DashboardIcons.PLANNING_FORECASTING colors={iconColour} />;
-    sideBarIcon = <AiOutlineCalendar size={20} />;
-  } else if (['Purchasing Management'].includes(secName)) {
-    text = 'Manage Purchases Smartly.';
-    icon = <DashboardIcons.PRODUCT_SETUP colors={iconColour} />;
-    sideBarIcon = <GiCircuitry size={20} />;
+    sideBarIcon = <MdOutlineEventAvailable size={20} />;
   } else if (['Brand Admin'].includes(secName)) {
     sideBarIcon = <FaRegUserCircle size={20} />;
   } else if (['Master Data'].includes(secName)) {
@@ -125,10 +129,10 @@ export const setDataBySectionName = (secName, index = 0) => {
   } else if (['Rental Management'].includes(secName)) {
     sideBarIcon = <FaRegRegistered size={20} />;
   } else if (['Service Management'].includes(secName)) {
-    sideBarIcon = <FaRegUser size={18} />;
+    sideBarIcon = <ServiceManagementIcon size={18} />;
   } else if (['Setups & Administration'].includes(secName)) {
     sideBarIcon = <BiCog size={20} />;
-  } else if (['Activities'].includes(secName)) {
+  } else if (['Activities', 'Collaboration Tools'].includes(secName)) {
     sideBarIcon = <IoPeopleOutline size={20} />;
   }
 

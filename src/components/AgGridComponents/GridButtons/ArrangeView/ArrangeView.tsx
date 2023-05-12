@@ -81,7 +81,7 @@ const ArrangeView = ({
 
   return (
     <>
-      <HtmlTooltip title="Arrange View" placement="top">
+      <HtmlTooltip title="Arrange View" placement="top" arrow>
         <IconButton
           {...otherProps}
           className={`refresh-arrange-button ${className}`}
