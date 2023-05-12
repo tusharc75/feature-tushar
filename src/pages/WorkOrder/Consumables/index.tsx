@@ -15,10 +15,12 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import ConsumablesQtyDialog from './ConsumablesQtyDialog';
-import ConsumableLogDialog from './ConsumableLogDialog';
+import QtyRequestLog from './QtyRequestLog';
 import HistoryIcon from '@material-ui/icons/History';
+import { useData } from 'src/StateProvider/Provider';
 
 const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
+
   let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
   const toastConfig = useContext(CustomToastContext);
@@ -28,8 +30,12 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
-  const [consumableLogDialog, setConsumableLogDialog] = useState({ open: false, product: null, consumeLog: null });
-  const [consumableLog, setConsumableLog] = useState(null);
+  const [openLogDialog, setOpenLogDialog] = useState({ open: false, uniqueId: null });
+
+  const {
+    state: { user }
+  }: any = useData();
+
 
   useEffect(() => {
     fetchColumns();
@@ -81,12 +87,14 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
-      {
-        accessor: 'requestedQty',
-        Header: 'Requested Qty',
-        width: 150,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-      },
+      ...(user?.user?.brandPolicy?.workOrderConsumableRequest ? [
+        {
+          accessor: 'requestedQty',
+          Header: 'Requested Qty',
+          width: 150,
+          Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+        }
+      ] : []),
       {
         accessor: 'consumedQty',
         Header: 'Consumed Qty',
@@ -96,19 +104,19 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       {
         accessor: 'action',
         Header: 'Action',
-        width: 50,
-        sticky: 'right',
+        width: 100,
+        minWidth: 100,
         disableFilters: true,
         canDrag: false,
         Cell: ({ row }: any) => (
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            {row.original?.logs?.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'right' }}>
+            {row.original?.isqtyRequestLog && (
               <HtmlTooltip title="View Logs">
                 <IconButton
                   size="small"
                   aria-label="Delete"
                   onClick={() => {
-                    setConsumableLogDialog({ open: true, product: row.original, consumeLog: row?.original?.logs });
+                    setOpenLogDialog({ open: true, uniqueId: row.original._id });
                   }}
                 >
                   <HistoryIcon />
@@ -144,18 +152,12 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
     if (stepId) {
       query = query + `&stepId=${stepId}`;
     }
-    const consumableLog = await axiosInstance().get(`${workOrder.api}/${workOrderId}/consumable/consumable-log/${workOrderId}`);
-    const consumableLogData = consumableLog?.data?.data;
-    setConsumableLog(consumableLogData);
-
     axiosInstance()
       .get(`${workOrder.api}/${workOrderId}/consumable${query}`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
-          const logs = consumableLogData?.filter((item) => item.uniqueId === u?._id);
           let res: any = {
             ...prepareDataForGrid(u),
-            logs
           };
           res.hideSelection = u?.qty - u?.consumedQty === 0 ? true : false;
           return res;
@@ -323,15 +325,14 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
             serviceName={serviceName}
           />
         )}
-        {consumableLogDialog.open && (
-          <ConsumableLogDialog
-            product={consumableLogDialog.product}
-            consumeLog={consumableLogDialog.consumeLog}
+        {openLogDialog.open && (
+          <QtyRequestLog
+            uniqueId={openLogDialog.uniqueId}
+            workOrderId={workOrderId}
             onClose={() => {
-              setConsumableLogDialog({
+              setOpenLogDialog({
                 open: false,
-                product: null,
-                consumeLog: null
+                uniqueId: null,
               });
             }}
           />
