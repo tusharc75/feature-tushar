@@ -87,7 +87,7 @@ const CustomGridFilterHeader = (props) => {
         </div>
         <div style={{ marginInlineStart: 'auto' }}>
           {showFilters && (
-            <HtmlTooltip title="Apply Filters" placement="top">
+            <HtmlTooltip title="Apply Filters" placement="top" arrow>
               <Button
                 style={{ marginRight: buttonGap, color: '#424242' }}
                 startIcon={<BiFilterAlt />}

@@ -25,7 +25,8 @@ import {
   COLOUR_MASTER,
   getLocalStorageArrayData,
   removeLocalStorage,
-  sidebarResource
+  sidebarResource,
+  INVENTORY_HISTORY_TYPE
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -350,7 +351,7 @@ const SerializedAsset = () => {
         assets: ids,
         status: status,
         comment: '',
-        reference: { _id: '', type: 'Inventory' }
+        reference: { _id: '', type: INVENTORY_HISTORY_TYPE.serializedAssets }
       })
       .then(() => {
         if (gridApi) {
@@ -898,9 +899,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

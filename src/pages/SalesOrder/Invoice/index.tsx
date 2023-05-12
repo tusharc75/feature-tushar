@@ -3,7 +3,7 @@ import { useState, useEffect, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Grid from '@material-ui/core/Grid/Grid';
 import { IconButton } from '@material-ui/core';
-import { salesOrder } from '../../../constants/helpers';
+import { RESOURCE_LABEL, salesOrder } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import { isMobile } from 'react-device-detect';
 import routes from '../../../components/Helpers/Routes';
@@ -13,6 +13,7 @@ import { startCase } from 'lodash';
 import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import InvoiceFacility from './InvoiceFacility';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, renderedFrom, stepFullScreen }) => {
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -167,11 +168,16 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
 
   return (
     <Fragment>
-      <InvoiceFacility salesOrderData={salesOrderData} />
+      <PreviewDownload 
+        resource={RESOURCE_LABEL.salesOrder} 
+        referenceId={salesOrderData._id} 
+        columns={columns}
+        isSendEmail={true}
+      />
       <Grid item xs={12} md={12} sm={12}>
         {columns && rowsData ? (
           <>
-            <Box zIndex={5} width={'100%'}>
+            <Box mt={1} zIndex={5} width={'100%'}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                 columns={columns}

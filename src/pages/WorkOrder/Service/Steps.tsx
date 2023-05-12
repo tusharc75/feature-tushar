@@ -22,9 +22,10 @@ import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import CompleteDialog from './CompleteDialog';
 import { useData } from 'src/StateProvider/Provider';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
+import ArrangeView from 'src/components/Helpers/ArrangeView';
 import AttachmentDialog from './AttachmentDialog';
 import InfoIcon from '@material-ui/icons/Info';
-
+import { GrDrag } from 'react-icons/gr';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 
@@ -66,7 +67,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       width: '100%',
-      height: 'calc(100vh - 221px)',
+      height: 'calc(100vh - 265px)',
       overflowY: 'auto',
       ['@media (max-width:767px)']: {
         height: 'calc(100vh - 364px)'
@@ -111,9 +112,9 @@ const useStyles = makeStyles((theme: Theme) =>
         alignItems: 'center',
         justifyContent: 'space-between'
       },
-      '&:first-of-type': {
-        borderRadius: '8px 8px 0 0'
-      }
+      // '&:first-of-type': {
+      //   borderRadius: '8px 8px 0 0'
+      // }
       // '&:last-of-type': {
       //   borderRadius: '0 0 8px 8px'
       // }
@@ -166,8 +167,16 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '', handelClose = null }) => {
-
+const Service = ({
+  workOrderId,
+  warehouse,
+  selectedService,
+  allowedToEdit,
+  setDisableCompleteFail,
+  fetchService,
+  referencType = '',
+  handelClose = null
+}) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -175,6 +184,7 @@ const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDi
   const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, type: '' });
   const [stepState, setStepState] = useState(null);
   const [serviceData, setServiceData] = useState([]);
+  const [arrangeView, setArrangeView] = useState(false);
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
@@ -235,11 +245,10 @@ const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDi
           }
         }
       });
-    }
-    else {
+    } else {
       serviceDetail.steps?.forEach((ele) => {
         ele.isAllowToPerform = true;
-      })
+      });
     }
 
     setServiceDetails(serviceDetail);
@@ -317,6 +326,23 @@ const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDi
       .then(() => {
         setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
         fetchService();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleStepUpdate = (rows: any[]) => {
+    axiosInstance()
+      .put(`${workOrder.api}/steps-order/${workOrderId}/${selectedService._id}`, { data: rows || [] })
+      .then(({ data }) => {
+        fetchServiceData();
+        setArrangeView(false);
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
+        });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -489,8 +515,14 @@ const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDi
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isReturnToStepOnFail && result?.returnToStepOnFail) {
           if (referencType !== 'workOrderTechnician') {
-            const returnStep = serviceDetails?.steps?.find((e) => e._id === result?.returnToStepOnFail) || {}
-            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'returnToStepOnFail', step: returnStep }));
+            const returnStep = serviceDetails?.steps?.find((e) => e._id === result?.returnToStepOnFail) || {};
+            setAddServiceConfirmation((s) => ({
+              ...s,
+              status: WORKORDER_SERVICE_STEP_STATUS.failed,
+              open: true,
+              type: 'returnToStepOnFail',
+              step: returnStep
+            }));
           }
         }
         toastConfig.setToastConfig({
@@ -561,6 +593,20 @@ const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDi
   return serviceDetails ? (
     serviceDetails?.steps?.length ? (
       <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }} style={{ backgroundColor: 'white' }}>
+        {serviceDetails?.steps?.length > 0 && referencType !== 'workOrderTechnician' && (
+          <Box p={1}>
+            <Grid
+              container
+              justifyContent="flex-end"
+              alignItems="flex-end"
+            >
+              <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                <GrDrag fontSize="small" color="primary" className="mr-1" />
+                Arrange
+              </Button>
+            </Grid>
+          </Box>
+        )}
         <div className={classes.root}>
           {serviceDetails?.steps?.map((step, index) => {
             const { stepData, isStepValid } = getFields(step);
@@ -903,12 +949,26 @@ const Service = ({ workOrderId, warehouse, selectedService, allowedToEdit, setDi
             }}
           />
         )}
+        {arrangeView && (
+          <ArrangeView
+            data={
+              serviceDetails?.steps?.map((d) => {
+                return { _id: d?._id, name: d?.stepName, order: d?.order };
+              }) || []
+            }
+            title={'Arrange'}
+            handleClose={() => setArrangeView(false)}
+            handleSubmit={handleStepUpdate}
+            loading={false}
+          />
+        )}
         {addServiceConfirmation.open && (
           <ConfirmationDialog
             open={true}
             message={
               addServiceConfirmation.type === 'returnToStepOnFail'
-                ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''}. Do you want to continue ?`
+                ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''
+                }. Do you want to continue ?`
                 : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
                   ? ` Step fail requires Quote Revision. Do you confirm on this?`
                   : addServiceConfirmation.type === 'jumpStep'

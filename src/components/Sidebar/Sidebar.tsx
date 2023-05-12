@@ -289,7 +289,12 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                           </>
                         )}
                         <ListItemIcon className={styles.listIcon}>{renderIcon(listItem.section)}</ListItemIcon>
-                        <ListItemText primary={listItem.section} className={`wordWrap `} />
+                        <ListItemText
+                          primary={
+                            listItem.section === 'Activities' || listItem.section === 'Collaboration Tools' ? 'Collaboration Tools' : listItem.section
+                          }
+                          className={`wordWrap `}
+                        />
                         {open[listItem.section] ? <ExpandLess className={styles.listArrowIcon} /> : <ExpandMore className={styles.listArrowIcon} />}
                       </ListItem>
                     </Tooltip>

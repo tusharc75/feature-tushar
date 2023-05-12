@@ -13,16 +13,21 @@ import { Autocomplete } from '@material-ui/lab';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import { MdEmail } from 'react-icons/md';
+import { CreateEmail } from '../Activity/Email/CreateEmail';
+import routes from '../Helpers/Routes';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
-function PreviewDownload({ resource, referenceId, columns }) {
+function PreviewDownload({ resource, referenceId, columns, isSendEmail = false }) {
   const toastConfig = useContext(CustomToastContext);
   const columnFilter = ['Action'];
   const allColumn = columns?.filter((d) => !columnFilter.includes(d.Header))?.map((d) => d.Header) || [];
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
+  const [sendEmail, setSendEmail] = useState(false);
+  const [pdfFileBase64, setPdfFileBase64] = useState(null);
   const [loading, setLoading] = useState(null);
   const [downlodingFile, setDownlodingFile] = useState(null);
   const [visibleColumnsExcel, setVisibleColumnsExcel] = useState([]);
@@ -87,7 +92,84 @@ function PreviewDownload({ resource, referenceId, columns }) {
 
   useEffect(() => {
     setVisibleColumnsExcel(allColumn)
-  },[columns])
+  }, [columns])
+
+  const fetchEmailAttachment = () => {
+    let tempColumns = columns
+      .filter((d) => visibleColumnsExcel?.includes(d?.Header))
+      .map((d) => {
+        if (d?.accessor === 'qtyDisplay') {
+          return 'qty';
+        } else {
+          return d?.accessor.split('_')[0];
+        }
+      });
+
+    axiosInstance()
+      .get(`/pdf/${referenceId}/detail?resource=${resource}&columns=${tempColumns}`)
+      .then(({ data }) => {
+        axiosInstance()
+          .get(`user/download?fileName=${data.data.fileName}`, {
+            responseType: 'blob'
+          })
+          .then(({ data }) => {
+            const file = new Blob([data], { type: 'application/pdf' });
+            generateBase64forFile(file, 'pdf');
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'error',
+              message: 'PDF generating error'
+            });
+          });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const generateBase64forFile = (blobData, type) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data = reader.result;
+      if (type === 'pdf') {
+        setPdfFileBase64(base64data);
+        setSendEmail(true);
+        setLoading(null);
+      }
+    };
+  };
+
+  let attachments = [];
+  if (pdfFileBase64) {
+    attachments.push({
+      base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(',') + 1)),
+      contentType: pdfFileBase64.split(';')[0].split(':')[1],
+      name: `Planning-${referenceId}`
+    });
+  }
+
+  const onSendEmailSuccess = () => {
+    setSendEmail(false);
+    handleAttachments();
+  };
+
+  const handleAttachments = () => {
+    let request;
+    request = {
+      name: 'Planning',
+      fileUrl: '',
+      relatedTo: [
+        {
+          type: resource,
+          referenceId: referenceId,
+          access: true
+        }
+      ]
+    };
+  };
 
   return (
     <Box display="flex" justifyContent="space-between">
@@ -124,8 +206,26 @@ function PreviewDownload({ resource, referenceId, columns }) {
           >
             {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === 'download' ? 'Please wait...' : 'Download'}
           </Button>
+
+          {isSendEmail && (
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              className="btn-outline-v1"
+              disabled={loading === 'email'}
+              startIcon={isMobile ? '' : <MdEmail />}
+              onClick={() => {
+                setLoading('email');
+                fetchEmailAttachment();
+              }}
+            >
+              {isMobile && !isTablet ? <MdEmail size={20} /> : loading === 'email' ? 'Please wait...' : `Send Email`}
+            </Button>
+          )}
         </Box>
       </Box>
+
       {showExcelArrangeColumns.open && (
         <Dialog
           open={showExcelArrangeColumns.open}
@@ -180,7 +280,7 @@ function PreviewDownload({ resource, referenceId, columns }) {
                           style={{ marginRight: 8 }}
                           checked={
                             showExcelArrangeColumns &&
-                            ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
+                              ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
                               ? true
                               : selected
                           }
@@ -226,6 +326,42 @@ function PreviewDownload({ resource, referenceId, columns }) {
               </>
             }
           </CustomDialogFooter>
+        </Dialog>
+      )}
+
+      {sendEmail && (
+        <Dialog
+          open={sendEmail}
+          fullScreen={fullScreen || isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+          aria-labelledby="customized-dialog-title"
+          maxWidth="md"
+          onClose={() => {
+            setSendEmail(false);
+            setFullScreen(false);
+          }}
+          fullWidth
+        >
+          <CreateEmail
+            generatingFile={false}
+            handleClose={() => {
+              setSendEmail(false);
+              setFullScreen(false);
+            }}
+            fetchData={onSendEmailSuccess}
+            id={referenceId}
+            isQuoteBuilder={true}
+            emailId={null}
+            qouteBuilderAttachments={attachments}
+            subject={`hello`}
+            fromQuote={true}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            showManimizeMaximize={true}
+            referenceType="planning"
+          />
         </Dialog>
       )}
     </Box>
