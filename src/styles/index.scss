@@ -3240,7 +3240,7 @@ body {
     th {
       display: flex;
       align-items: center;
-      min-height: 45px;
+      min-height: 50px;
       & > * {
         width: 100%;
       }
@@ -3259,7 +3259,7 @@ body {
   .th {
     & > * {
       font-weight: 500 !important;
-      font-size: 13px !important;
+      font-size: 14px !important;
       line-height: 18px !important;
       color: #2a3547 !important;
     }
@@ -3269,7 +3269,7 @@ body {
   td {
     & > * {
       font-weight: 400 !important;
-      font-size: 13px !important;
+      font-size: 14px !important;
       // line-height: 19px !important;
       color: #2a3547;
     }

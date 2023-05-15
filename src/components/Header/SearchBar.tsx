@@ -209,7 +209,7 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
                       <ListItemIcon className={styles.listIcon}>
                         <CallMadeIcon style={{ fontSize: 16 }} />
                       </ListItemIcon>
-                      <ListItemText primary={item.resourceLabel} style={{ fontSize: '14px' }} />
+                      <ListItemText primary={<span style={{ fontWeight: 500 }}>{item.resourceLabel}</span>} />
                     </ListItem>
                   );
                 })}
