@@ -390,7 +390,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                             }}
                                           />
                                         </Box>
-                                        {permissions.supplierAccount?.isCreate &&
+                                        {permissions?.supplierAccount?.isCreate &&
                                           <Box>
                                             <Tooltip title={`Create ${field?.fieldLabel}`}>
                                               <IconButton

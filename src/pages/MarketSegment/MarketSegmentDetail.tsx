@@ -103,7 +103,7 @@ const MarketSegmentDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
               <>
-                {permissions.marketSegment?.isUpdate && (
+                {permissions?.marketSegment?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     size="small"

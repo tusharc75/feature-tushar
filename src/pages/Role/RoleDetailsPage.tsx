@@ -473,12 +473,12 @@ const RoleDetailsPage = () => {
           <Box className="control-buttons-v1">
             {roleData ? (
               <>
-                {permissions.role.isUpdate && (
+                {permissions?.role.isUpdate && (
                   <Button disabled={isUpdating || checkError()} variant="contained" color="primary" size="medium" onClick={handleUpdateRole}>
                     {isUpdating ? <CircularProgress size={22} /> : 'Update'}
                   </Button>
                 )}
-                {permissions.role.isDelete && !isEditDeleteDisable && (
+                {permissions?.role.isDelete && !isEditDeleteDisable && (
                   <DeleteButton
                     text="Delete"
                     onClick={() => {
@@ -499,7 +499,7 @@ const RoleDetailsPage = () => {
           <Grid item xs={12} sm={12} md={8} lg={8}>
             <Box display="flex" marginTop={2} marginBottom={2} gridGap={10} px={1}>
               <TextField
-                disabled={roleData?.type && roleData?.permission ? true : !permissions.role.isUpdate}
+                disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate}
                 required
                 variant="outlined"
                 size="small"
@@ -510,7 +510,7 @@ const RoleDetailsPage = () => {
               />
 
               <TextField
-                disabled={roleData?.type && roleData?.permission ? true : !permissions.role.isUpdate}
+                disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate}
                 required
                 variant="outlined"
                 size="small"
@@ -535,7 +535,7 @@ const RoleDetailsPage = () => {
                       resource={resource}
                       setField={setField}
                       setResource={setResource}
-                      isDisable={permissions.role.isUpdate ? (isEditDeleteDisable ? true : false) : true}
+                      isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable ? true : false) : true}
                     />
                     {isPolicyTableVisible() && (
                       <PolicyResources
@@ -667,7 +667,7 @@ const RoleDetailsPage = () => {
               <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
                 <Typography variant="subtitle2">Assigned Users ({roleUsers.length || 0})</Typography>
 
-                {permissions.role.isUpdate && (
+                {permissions?.role.isUpdate && (
                   <IconButton title="Assign users" color="primary" size="small" onClick={userDialogOpen}>
                     <ControlPoint />
                   </IconButton>

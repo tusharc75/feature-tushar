@@ -254,7 +254,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             </IconButton>
                           </Tooltip>
                         )}
-                        {canEdit && permissions.attachment.isDelete ? (
+                        {canEdit && permissions?.attachment?.isDelete ? (
                           <Tooltip title="Delete" placement="top">
                             <IconButton
                               size={'small'}

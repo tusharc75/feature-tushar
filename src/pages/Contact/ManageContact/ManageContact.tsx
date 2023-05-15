@@ -392,7 +392,7 @@ export default function ManageContact(props) {
                                               />
                                             </Grid>
 
-                                            {permissions.customerContact?.isCreate && (
+                                            {permissions?.customerContact?.isCreate && (
                                               <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip title="Add Address" className="mt-1">
                                                   <IconButton

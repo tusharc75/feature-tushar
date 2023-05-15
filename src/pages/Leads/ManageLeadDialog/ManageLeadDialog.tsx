@@ -607,7 +607,7 @@ export default function ManageLeadDialog({
                                           {
                                             // permissions.productCategory
                                             //     .isCreate
-                                            permissions.marketSegment.isCreate && (
+                                            permissions?.marketSegment?.isCreate && (
                                               <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip
                                                   title="Add Market Segment"

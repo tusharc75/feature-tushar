@@ -72,7 +72,7 @@ export default function AssignedEntities({
                       : `Un-assign ${obj.entityName}`
                   }
                 >
-                  {permissions.role.isUpdate && (
+                  {permissions?.role?.isUpdate && (
                     <IconButton
                       disabled={selectedEntity === obj._id}
                       onClick={() => unassignEntity(obj)}

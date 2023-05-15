@@ -403,7 +403,7 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                             size="small"
                                             doNotShowInfoTooltip={true}
                                           />
-                                          {permissions.supplierAccount.isCreate && (
+                                          {permissions?.supplierAccount?.isCreate && (
                                             <Grid>
                                               <Tooltip title="Create Account" className="mt-1">
                                                 <IconButton

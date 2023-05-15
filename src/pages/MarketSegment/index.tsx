@@ -135,8 +135,8 @@ const MarketSegment = () => {
   const ActionsRenderer = (params) => (
     <Fragment>
       <Tooltip
-        className={permissions.marketSegment.isCreate ? '' : 'cursor-stop'}
-        title={permissions.marketSegment.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
+        className={permissions?.marketSegment.isCreate ? '' : 'cursor-stop'}
+        title={permissions?.marketSegment.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
       >
         <IconButton
           size="small"
@@ -148,7 +148,7 @@ const MarketSegment = () => {
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
-      {permissions.marketSegment.isDelete ? (
+      {permissions?.marketSegment.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -228,9 +228,9 @@ const MarketSegment = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions.marketSegment.isDelete;
+          finalObject['canDelete'] = permissions?.marketSegment.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions.marketSegment.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.marketSegment.isUpdate;
           return {
             ...finalObject
           };
@@ -375,7 +375,7 @@ const MarketSegment = () => {
                 />
 
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.marketSegment.isCreate && (
+                  {permissions?.marketSegment.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
@@ -389,7 +389,7 @@ const MarketSegment = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions.marketSegment.isDelete && (
+                  {permissions?.marketSegment.isDelete && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_submit_btn}`}
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}

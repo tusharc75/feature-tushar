@@ -884,6 +884,15 @@ const Service = ({
               >
                 Add/Consume Products
               </MenuItem>
+              <MenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCommentsDialog(true);
+                  setAnchorEl(null);
+                }}
+              >
+                Comments
+              </MenuItem>
               {referencType !== 'workOrderTechnician' && (
                 <MenuItem
                   onClick={(e) => {
@@ -895,15 +904,6 @@ const Service = ({
                   Properties
                 </MenuItem>
               )}
-               <MenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCommentsDialog(true);
-                  setAnchorEl(null);
-                }}
-              >
-                Comments
-              </MenuItem>
             </Menu>
           )}
           {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) && (
@@ -950,8 +950,8 @@ const Service = ({
             serviceName={selectedService?.serviceName}
             stepId={selectedStep?._id}
             handleClose={() => {
-            setCommentsDialog(false);
-          }}
+              setCommentsDialog(false);
+            }}
           />
         )}
         {openCompleteDialog && (

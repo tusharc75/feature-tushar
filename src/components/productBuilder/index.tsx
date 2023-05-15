@@ -629,7 +629,7 @@ const ProductBuilder = (props) => {
     <Box p={1} pt={0}>
       {Editable && (
         <div className="d-flex align-items justify-content-end">
-          {permissions.isUpdate && (
+          {permissions?.isUpdate && (
             <ImportExportLinks
               permissions={permissions}
               module="builder"
@@ -650,7 +650,7 @@ const ProductBuilder = (props) => {
               }}
             />
           )}
-          {isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
+          {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
             <Button
               variant="contained"
               color="primary"
@@ -682,7 +682,7 @@ const ProductBuilder = (props) => {
               Ask Supplier to Quote
             </Button>
           )}
-          {stage === "cost" && permissions.isUpdate && (
+          {stage === "cost" && permissions?.isUpdate && (
             <Button
               variant="contained"
               color="primary"
@@ -695,13 +695,13 @@ const ProductBuilder = (props) => {
               {isMobile && !isTablet ? "" : "Bulk Edit"}
             </Button>
           )}
-          {permissions.isUpdate && (
+          {permissions?.isUpdate && (
             <Button
               variant="contained"
               color="primary"
               size="small"
               className="float-right"
-              disabled={isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice ? false : selectedRecords.length ? false : true}
+              disabled={isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice ? false : selectedRecords.length ? false : true}
               onClick={openActions}
               startIcon={<ExpandMore />}
 
@@ -725,7 +725,7 @@ const ProductBuilder = (props) => {
               Delete
             </MenuItem>
             <MenuItem disabled={selectedRecords.length ? false : true} onClick={handleOpenAddField}>Add Field</MenuItem>
-            {isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice &&
+            {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice &&
               (<MenuItem onClick={() => {
                 closeActions()
                 setShowViewSupplierPrice(true)

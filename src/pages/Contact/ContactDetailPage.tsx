@@ -641,7 +641,7 @@ const ContactDetailsPage = (props) => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions.eCommercePolicy?.isRead && contactResource === customerContact.contactResource && (
+            {permissions?.eCommercePolicy?.isRead && contactResource === customerContact.contactResource && (
               <Button
                 color="primary"
                 size="small"
@@ -652,7 +652,7 @@ const ContactDetailsPage = (props) => {
                 E-Commerce Access
               </Button>
             )}
-            {permissions.eCommercePolicy?.isRead && user.user?.userType === userType.brandAdmin && (
+            {permissions?.eCommercePolicy?.isRead && user.user?.userType === userType.brandAdmin && (
               <Button
                 color="primary"
                 size="small"
@@ -663,13 +663,13 @@ const ContactDetailsPage = (props) => {
                 Give Portal Access
               </Button>
             )}
-            {contactPermissions.isUpdate && canEdit ? (
+            {contactPermissions?.isUpdate && canEdit ? (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} size="small" onClick={handleOpneUpdateDialog} className={'btn-outline-v1'}>
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             ) : null}
 
-            {contactPermissions.isDelete && contactData?.owner?.optionValue && user?.user?._id && contactData.owner.optionValue === user.user._id ? (
+            {contactPermissions?.isDelete && contactData?.owner?.optionValue && user?.user?._id && contactData.owner.optionValue === user.user._id ? (
               <DeleteButton text={isMobile ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             ) : null}
             <ActivityButton referenceId={contactData?._id} resource={contactResource} />
@@ -678,7 +678,7 @@ const ContactDetailsPage = (props) => {
       </Box>
       <Box className={`detail-container-v1`}>
         <ProcessFlow
-          disableBackNext={contactPermissions.isUpdate && canEdit ? false : true}
+          disableBackNext={contactPermissions?.isUpdate && canEdit ? false : true}
           steps={steps}
           activeStep={activeStep}
           handleMarkAsCompleted={handleMarkAsCompleted}
@@ -797,7 +797,7 @@ const ContactDetailsPage = (props) => {
           <QuickLinks quickLinks={quickLinks} />
         </Grid>
 
-        {contactData?.staticData?.lead && permissions && permissions.lead && permissions.lead.isRead && (
+        {contactData?.staticData?.lead && permissions && permissions?.lead && permissions?.lead?.isRead && (
           <Box mt={2}>
             <div className={`single-form-v1`}>
               <div className={`form-head-v1`}>

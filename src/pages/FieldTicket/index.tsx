@@ -297,7 +297,7 @@ const FieldTicket = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.fieldTicket.isCreate && (
+                  {permissions?.fieldTicket.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {

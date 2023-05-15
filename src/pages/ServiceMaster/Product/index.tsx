@@ -79,9 +79,6 @@ function Product({ id }) {
       }
     ];
     const productResult = await axiosInstance().get('/field?resource=Product');
-    // const productFields = productResult?.data?.data?.filter((e) =>
-    //   ['productName', 'productNumber', 'productDescription', 'productCategory', 'serializedProduct'].includes(e?.fieldData?.fieldName)
-    // );
 
     productResult?.data?.data
       ?.filter((e) =>

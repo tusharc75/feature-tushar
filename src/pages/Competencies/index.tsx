@@ -270,7 +270,7 @@ const Competencies = () => {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.competencies}
+            permissions={permissions?.competencies}
             module="competencies"
             api={'competencies'}
             afterImportCompleted={() => {
@@ -309,7 +309,7 @@ const Competencies = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.competencies.isCreate && (
+                  {permissions?.competencies?.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {

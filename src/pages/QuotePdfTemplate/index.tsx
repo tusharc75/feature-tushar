@@ -146,14 +146,14 @@ const QuotePdfTemplate: FC = () => {
           <VisibilityIcon color="primary" />
         </IconButton>
       </Tooltip>
-      {permissions.quotePdfTemplate.isCreate && (
+      {permissions?.quotePdfTemplate?.isCreate && (
         <Tooltip title="Clone">
           <IconButton size="small" aria-label="Clone" onClick={() => CreateNew(params.data.id, true)}>
             <FileCopyIcon color="primary" />
           </IconButton>
         </Tooltip>
       )}
-      {permissions.quotePdfTemplate.isDelete ? (
+      {permissions?.quotePdfTemplate?.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -284,9 +284,9 @@ const QuotePdfTemplate: FC = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject.type = routes[camelCase(u?.type)] ? routes[camelCase(u?.type)]?.title : u?.type;
-          finalObject['canDelete'] = permissions.quotePdfTemplate.isDelete && user?.user?._id === finalObject['owner'];
+          finalObject['canDelete'] = permissions?.quotePdfTemplate.isDelete && user?.user?._id === finalObject['owner'];
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions.quotePdfTemplate.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.quotePdfTemplate.isUpdate;
           return {
             ...finalObject
           };
@@ -385,7 +385,7 @@ const QuotePdfTemplate: FC = () => {
                 </Grid>
 
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.quotePdfTemplate.isCreate && (
+                  {permissions?.quotePdfTemplate?.isCreate && (
                     <Button
                       onClick={() => CreateNew('0', false)}
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -397,7 +397,7 @@ const QuotePdfTemplate: FC = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions.quotePdfTemplate.isDelete && (
+                  {permissions?.quotePdfTemplate?.isDelete && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}

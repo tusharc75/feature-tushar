@@ -104,7 +104,7 @@ const BudgetDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
               <>
-                {permissions.budget?.isUpdate && (
+                {permissions?.budget?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     size="small"

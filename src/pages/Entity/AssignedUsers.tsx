@@ -61,7 +61,7 @@ const AssignedUsers = (props) => {
                 <CopyToClipboard textToCopy={obj.email} className="ml-1 mt-4" />
 
 
-                {permissions.role.isUpdate && (
+                {permissions?.role?.isUpdate && (
                   <ListItemSecondaryAction
                     title={
                       selectedEntity === obj._id
