@@ -185,9 +185,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-
       parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
-
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);

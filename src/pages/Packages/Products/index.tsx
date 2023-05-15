@@ -55,9 +55,10 @@ const ProductsTable = ({ packageId, packageData }) => {
         rows.forEach((parent, i) => {
           parent.index = i + 1;
           parent.type = 'product';
-          parent.detail = parent.productName;
-          parent.description = parent.productDescription;
-          parent.productCategory = parent.productCategory?.optionLabel;
+          parent.detail = parent?.productName;
+          parent.description = parent?.productDescription;
+          parent.productNumber = parent?.productNumber;
+          parent.productCategory = parent?.productCategory?.optionLabel;
           parent.parentId = null;
           parent.qty = parent.qty;
           parent.assetQty = assets?.filter((i) => i.product === parent._id)?.length;
@@ -84,7 +85,19 @@ const ProductsTable = ({ packageId, packageData }) => {
     return subRows;
   };
 
-  const fetchColumns = () => {
+  const fetchColumns = async () => {
+
+    const { data: { data } } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+          fieldNames: ['productName', 'productNumber', 'productDescription', 'serializedProduct']
+        }
+      ]
+    });
+
+    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
+
     let coloum: any = [
       {
         accessor: 'index',
@@ -128,6 +141,14 @@ const ProductsTable = ({ packageId, packageData }) => {
         width: 200,
         Cell: ({ row }) => {
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'productNumber',
+        Header: productFields?.find((e) => e.fieldName === 'productNumber')?.fieldLabel || 'Product Number',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['productNumber'] ? <p className="text-truncate">{row.original.productNumber}</p> : <NoDataCell />;
         }
       },
       {

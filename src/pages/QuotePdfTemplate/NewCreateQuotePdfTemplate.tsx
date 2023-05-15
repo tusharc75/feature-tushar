@@ -186,14 +186,12 @@ export default function NewCreateQuotePdfTemplate() {
             const {
               data: { data }
             } = res;
-            console.log(data);
             setQuoteData(data);
             setVersion(queryParams.version);
             if (data?._id) {
               setHasPermissionToUpdate(true);
             }
             tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
-            console.log('quotation', tempPdfTemplate);
           } catch (e) {
             toastConfig.setToastConfig(e);
           }
@@ -226,7 +224,6 @@ export default function NewCreateQuotePdfTemplate() {
             const {
               data: { data }
             } = res;
-            console.log('quote', data);
             setIsLandscapChecked(data?.landscape);
             setInitialValues({
               landscape: data?.landscape,
