@@ -10,7 +10,7 @@
   --error: #dc3545;
   --info: #03afe2;
   --success: #28a745;
-  --link: #04279a;
+  --link: #171db1;
   --white: #ffffff;
   --aliceblue: aliceblue;
   --productRed: #fe6168;
@@ -3237,6 +3237,7 @@ body {
     th {
       display: flex;
       align-items: center;
+      min-height: 45px;
       & > * {
         width: 100%;
       }
@@ -3255,9 +3256,9 @@ body {
   .th {
     & > * {
       font-weight: 500 !important;
-      font-size: 12.6448px !important;
+      font-size: 13px !important;
       line-height: 18px !important;
-      color: #1d1d1d !important;
+      color: #2a3547 !important;
     }
   }
   td,
@@ -3265,8 +3266,9 @@ body {
   td {
     & > * {
       font-weight: 400 !important;
-      font-size: 12px !important;
-      line-height: 19px !important;
+      font-size: 13px !important;
+      // line-height: 19px !important;
+      color: #2a3547;
     }
   }
 
@@ -3276,7 +3278,7 @@ body {
   .arrange-view-v1 {
     z-index: 2;
     width: 46px;
-    height: 40px;
+    height: 44px;
     position: absolute;
     background: white;
     right: 1px;
@@ -3363,7 +3365,7 @@ body {
 .custom-react-table-v1.custom-react-table {
   th,
   .th {
-    height: 40px;
+    height: 45px;
     & > * {
       height: 100%;
     }

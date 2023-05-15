@@ -185,8 +185,8 @@ export const userType = {
   brandAdmin: 2
 };
 
-export const AgGridHeaderHeight = 40;
-export const AgGridRowHeight = 40;
+export const AgGridHeaderHeight = 45;
+export const AgGridRowHeight = 45;
 export const AgGridFloatingFiltersHeight = 38;
 
 export const gridPageSizes = [25, 50, 75];
@@ -2385,7 +2385,7 @@ export const SERVICE_ORDER_STATUS = {
 export const MATERIAL_REQUEST_STATUS = {
   requested: 'Requested',
   processed: 'Processed',
-  rejected: 'Rejected',
+  rejected: 'Rejected'
 };
 
 export const convertMsToTime = (milliseconds: any) => {
