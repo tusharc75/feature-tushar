@@ -3107,7 +3107,7 @@ body {
   border-right: 1px solid #e2e2e2;
 
   & :is(h1, h2, h3, h4, h5) {
-    padding: 7px 10px;
+    padding: 8.6px 10px;
     color: #404855;
     font-size: 13px;
     font-weight: 600;
@@ -3240,7 +3240,7 @@ body {
     th {
       display: flex;
       align-items: center;
-      min-height: 45px;
+      min-height: 50px;
       & > * {
         width: 100%;
       }
@@ -3259,7 +3259,7 @@ body {
   .th {
     & > * {
       font-weight: 500 !important;
-      font-size: 13px !important;
+      font-size: 14px !important;
       line-height: 18px !important;
       color: #2a3547 !important;
     }
@@ -3269,7 +3269,7 @@ body {
   td {
     & > * {
       font-weight: 400 !important;
-      font-size: 13px !important;
+      font-size: 14px !important;
       // line-height: 19px !important;
       color: #2a3547;
     }
