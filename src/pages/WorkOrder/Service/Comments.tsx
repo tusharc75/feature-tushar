@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Dialog } from '@material-ui/core';
+import { Box, Chip, Dialog, Typography } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -8,14 +8,18 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import styles from './logs.module.scss';
 import moment from 'moment';
-import { FaUser as UserIcon } from 'react-icons/fa';
 import { TextField, Button, Grid } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
+import { dateTimeFormat } from 'src/constants/helpers';
+import PersonIcon from '@material-ui/icons/Person';
+import { isMobile, isTablet } from "react-device-detect";
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 
 const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState(null);
   const [comment, setComment] = useState('');
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     fetchData();
@@ -26,9 +30,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId }) =
     if (stepId) {
       url += `&stepId=${stepId}`;
     }
-    
-    axiosInstance()
-      .get(url)
+    axiosInstance().get(url)
       .then(({ data: { data } }) => {
         if (data && data?.length) {
           setData(data);
@@ -49,76 +51,91 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId }) =
         stepId: stepId,
         comment: comment,
       })
-      .then(({data : {data}}) => {
+      .then(({ data: { data } }) => {
         fetchData();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-      // clear the comment text
-      setComment("");
+    setComment("");
   };
 
   return (
-    <Dialog fullWidth maxWidth="md" open={true} onClose={handleClose} aria-labelledby="comments-dialog">
+    <Dialog
+      fullScreen={fullScreen || (isMobile || isTablet)}
+      fullWidth
+      maxWidth="sm"
+      open={true}
+      onClose={handleClose}
+      aria-labelledby="comments-dialog">
       <CustomDialogHeader
-        title={`${serviceName ? serviceName : ''} Comments`}
-        showManimizeMaximize={false}
+        title={`Comments - ${serviceName}`}
         showRequiredLabel={false}
         onClose={handleClose}
-        style={{ textTransform: 'capitalize' }}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={true}
       />
       <CustomDialogContent>
         {data ? (
-          data?.length > 0 ? (
-            <Box className={styles.main}>
+          <Box className={styles.main}>
             {data.map((item: any) => (
               <div key={item._id}>
-                <div>
-                  <h4>{item.comment}</h4>
-                  <p>
-                    <UserIcon style={{ marginRight: '5px' }} />
-                    {item.user.firstName} {item.user.lastName}
-                  </p>
-                  <p>{moment(item.date).format('MMM Do YYYY, LT')}</p>
-                </div>
+                <Typography variant='subtitle1' >{item.comment}</Typography>
+                <Box pt={1} display="flex">
+                  <Chip
+                    avatar={<PersonIcon />}
+                    label={item?.user?.optionLabel}
+                  />
+                  <Box ml={2}>
+                    <Typography variant='body2' >{moment(item.date).format(dateTimeFormat)}</Typography>
+                  </Box>
+                </Box>
               </div>
             ))}
           </Box>
-          ) : (
-            <h5>No Comments found.</h5>
-          )
         ) : (
           <Box p={2} height={500} bgcolor="white">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
         <Grid container justifyContent="center" alignItems="center" spacing={2}>
-        <Grid item xs={12}>
+          <Grid item xs={12}>
             <TextField
-                fullWidth
-                value={comment}
-                onChange={e => setComment(e.target.value)}
-                variant="outlined"
-                placeholder="Add a comment"
-                multiline
-                maxRows={2}
-                style={{ width: '60%' }}
+              fullWidth
+              value={comment}
+              onChange={e => setComment(e.target.value)}
+              variant="outlined"
+              placeholder="Comment"
+              label={"Comment"}
+              multiline
+              rows={2}
             />
-        </Grid>
-        <Grid item xs={12}>
+          </Grid>
+          <Grid item xs={12}>
             <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={handleSubmit}
-                startIcon={<AddIcon />}
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={handleSubmit}
             >
-                Add
+              Add
             </Button>
-        </Grid>
+          </Grid>
         </Grid>
       </CustomDialogContent>
+      <CustomDialogFooter>
+        <Button
+          variant="outlined"
+          color="primary"
+          size="small"
+          onClick={handleClose}
+        >
+          Cancel
+        </Button>
+      </CustomDialogFooter>
     </Dialog>
   );
 };
