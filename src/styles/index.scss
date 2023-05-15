@@ -3241,7 +3241,7 @@ body {
       display: flex;
       align-items: center;
       min-height: 50px;
-      & > * {
+      & > *:not(button) {
         width: 100%;
       }
     }
