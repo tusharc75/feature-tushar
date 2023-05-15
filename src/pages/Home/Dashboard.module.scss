@@ -105,6 +105,7 @@
       --card-padding: 23px 18px 28px 18px;
     }
     display: grid;
+    isolation: isolate;
     grid-template-columns: var(--grid-columns, 1fr);
     column-gap: var(--ver-gap, 15px);
     row-gap: var(--hor-gap, 15px);
