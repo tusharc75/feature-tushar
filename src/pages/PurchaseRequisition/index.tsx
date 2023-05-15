@@ -319,7 +319,7 @@ const PurchaseRequisition = () => {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.purchaseRequisition}
+            permissions={permissions?.purchaseRequisition}
             module="purchaseRequisition"
             api={'purchase-requisition'}
             afterImportCompleted={() => {
@@ -358,7 +358,7 @@ const PurchaseRequisition = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.purchaseRequisition.isCreate && (
+                  {permissions?.purchaseRequisition?.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
@@ -430,7 +430,7 @@ const PurchaseRequisition = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.purchaseRequisition}
+              permissions={permissions?.purchaseRequisition}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
                 setPurchaseRequisitionId(data.id);
