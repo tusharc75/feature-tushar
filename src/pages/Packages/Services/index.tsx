@@ -11,11 +11,9 @@ import { prepareDataForGrid, packages } from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Loader from 'src/components/Loader';
 import { camelCase } from 'lodash';
 import { GrDrag } from 'react-icons/gr';
@@ -23,6 +21,7 @@ import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 
 const ServiceTable = ({ packageId, packageData }) => {
+  
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -44,7 +43,6 @@ const ServiceTable = ({ packageId, packageData }) => {
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
-  let canServiceAdd = packageData?.packageType === 'Product' && !packageData?.products?.length ? false : true;
   useEffect(() => {
     fetchGridColumns();
     fetchData();
@@ -177,7 +175,7 @@ const ServiceTable = ({ packageId, packageData }) => {
       <Box mb={1} mt={1} display="flex" justifyContent="space-between">
         <Box display="flex">
           {permissions?.packages?.isUpdate && (
-            <Button variant="contained" color="primary" size="small" disabled={!canServiceAdd} onClick={() => setShowServiceAssignDialog(true)}>
+            <Button variant="contained" color="primary" size="small" onClick={() => setShowServiceAssignDialog(true)}>
               {`Add Services`}
             </Button>
           )}
@@ -185,7 +183,7 @@ const ServiceTable = ({ packageId, packageData }) => {
         <Box display="flex" style={{ marginLeft: 'auto' }}>
           {permissions?.packages?.isUpdate && (
             <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button variant="outlined" color="primary" size="small" disabled={!canServiceAdd} onClick={() => setArrangeView(true)}>
+              <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
                 <GrDrag fontSize="small" color="primary" className="mr-1" />
                 Arrange
               </Button>
@@ -230,19 +228,17 @@ const ServiceTable = ({ packageId, packageData }) => {
             </Box>
           )}
           <Box ml={1} />
-          {canServiceAdd && (
-            <ImportExportMenu
-              permissions={permissions?.packages}
-              module="packages-products"
-              api={`${packages.api}/${packageId}/services`}
-              afterImportCompleted={() => {
-                fetchData();
-              }}
-              isExportAllOrSomeFeature={true}
-              ids={[]}
-              additionalParams={`refrenceId=${packageId}`}
-            />
-          )}
+          <ImportExportMenu
+            permissions={permissions?.packages}
+            module="packages-products"
+            api={`${packages.api}/${packageId}/services`}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            ids={[]}
+            additionalParams={`refrenceId=${packageId}`}
+          />
         </Box>
       </Box>
       {isMobile && !isTablet ? (

@@ -424,7 +424,7 @@ const StorageLocation = () => {
               <CustomSwipableList
                 allowSelection={true}
                 allowSwipe={true}
-                permissions={permissions.storageLocation}
+                permissions={permissions?.storageLocation}
                 primaryField={columns?.find((d) => d.primaryField)}
                 onClick={(data) => {
                   history.push(`${routes.storageLocationDetail.path}/${data._id}`);

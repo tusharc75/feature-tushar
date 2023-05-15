@@ -11,7 +11,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, serializedAsset, setFieldsInAscendingOrder, supplierAccount } from '../../constants/helpers';
+import { CustomDialogTransition, INVENTORY_STATUS, serializedAsset, setFieldsInAscendingOrder, supplierAccount } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -77,7 +77,8 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                 const { _id, createdBy, updatedBy, assetNumber, ...rest } = data;
                 setCloneHeading(assetNumber);
                 let oldValues = { ...rest };
-                oldValues.status = "New";
+                oldValues.status = INVENTORY_STATUS.new;
+                oldValues.assetNumber = fieldsDataForUpdate?.find((e) => e.fieldName === 'assetNumber')?.defaultValue || ''
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
