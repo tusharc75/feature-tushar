@@ -323,9 +323,9 @@ const QuoteBuilder = ({
               <Tooltip title="Edit Quote PDF Template">
                 <Button
                   onClick={() => {
-                    quotationData?.pdfTemplates?.optionValue &&
+                    quotationData?.pdfTemplate?.optionValue &&
                       history.push(
-                        `/quote-pdf-template/detail/${quotationData?.pdfTemplates?.optionValue}?quotation=${quotationData?._id}&version=${versionData?.version}`,
+                        `/quote-pdf-template/detail/${quotationData?.pdfTemplate?.optionValue}?quotation=${quotationData?._id}&version=${versionData?.version}`,
                         '_blank'
                       );
                   }}
