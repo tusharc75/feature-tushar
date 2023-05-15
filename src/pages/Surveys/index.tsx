@@ -91,9 +91,9 @@ const Survey = () => {
         let count = data?.count;
         let rows = data?.data.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions.surveys.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions.surveys.isUpdate;
+          finalObject['canDelete'] = permissions?.surveys.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['allowedToEdit'] = permissions?.surveys.isUpdate;
 
           return {
             ...finalObject
@@ -264,7 +264,7 @@ const Survey = () => {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.surveys}
+            permissions={permissions?.surveys}
             module="surveys"
             api={'surveys'}
             afterImportCompleted={() => {
@@ -303,7 +303,7 @@ const Survey = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.surveys.isCreate && (
+                  {permissions?.surveys?.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
@@ -375,7 +375,7 @@ const Survey = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.survey}
+              permissions={permissions?.survey}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
                 setSurveyId(data.id);
