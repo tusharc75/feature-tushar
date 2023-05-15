@@ -3143,7 +3143,7 @@ body {
   .text-truncate {
     font-family: 'Poppins', sans-serif, 'Inter', sans-serif;
     font-weight: 400;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 19px;
     color: #1d1d1d;
   }
@@ -3240,7 +3240,7 @@ body {
     th {
       display: flex;
       align-items: center;
-      min-height: 50px;
+      min-height: 45px;
       & > *:not(button) {
         flex-grow: 1;
       }
