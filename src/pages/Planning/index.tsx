@@ -355,7 +355,7 @@ const Planning = () => {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.planning}
+            permissions={permissions?.planning}
             module="planning"
             api={'planning'}
             afterImportCompleted={() => {
@@ -432,7 +432,7 @@ const Planning = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.planning.isCreate && (
+                  {permissions?.planning?.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
@@ -504,7 +504,7 @@ const Planning = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.planning}
+              permissions={permissions?.planning}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
                 setPlanningId(data.id);
