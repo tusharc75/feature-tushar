@@ -454,7 +454,7 @@ const ManageServiceOrderDialog = ({
                                               onOpen={() => onCustomerContactDropdownOpen(values['customerAccount'])}
                                             />
                                           </Grid>
-                                          {permissions.customerContact?.isCreate && (
+                                          {permissions?.customerContact?.isCreate && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip title="Create Contact" className="mt-1">
                                                 <IconButton

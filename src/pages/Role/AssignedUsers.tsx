@@ -55,7 +55,7 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) =
                 </div>
 
                 <CopyToClipboard textToCopy={obj.email} className="ml-1 mt-4" />
-                {permissions.role.isUpdate && (
+                {permissions?.role?.isUpdate && (
                   <ListItemSecondaryAction
                     title={
                       currentUser === obj._id

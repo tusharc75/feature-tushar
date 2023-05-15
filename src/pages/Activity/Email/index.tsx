@@ -518,7 +518,7 @@ const Email = () => {
                           showConfirmBox(null);
                           closeActions();
                         }}
-                        disabled={!permissions.email.isDelete}
+                        disabled={!permissions?.email?.isDelete}
                       >
                         Delete
                       </MenuItem>

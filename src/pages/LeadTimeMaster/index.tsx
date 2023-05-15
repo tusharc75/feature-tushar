@@ -178,7 +178,7 @@ const LeadTimeMaster = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions.leadTimeMaster?.isCreate ? (
+      {permissions?.leadTimeMaster?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"

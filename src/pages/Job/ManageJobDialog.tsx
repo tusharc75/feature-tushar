@@ -388,7 +388,7 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
                                               }}
                                             />
                                           </Grid>
-                                          {permissions.customerAccount?.isCreate && (
+                                          {permissions?.customerAccount?.isCreate && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip title="Create Account" className="mt-1">
                                                 <IconButton

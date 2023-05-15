@@ -104,9 +104,9 @@ const PricingConditions = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions.pricingCondition.isDelete;
+          finalObject['canDelete'] = permissions?.pricingCondition.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions.pricingCondition.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.pricingCondition.isUpdate;
           return {
             ...finalObject
           };
@@ -140,7 +140,7 @@ const PricingConditions = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions.pricingCondition.isDelete && (
+      {permissions?.pricingCondition?.isDelete && (
         <Tooltip title="Delete">
           <IconButton
             size="small"

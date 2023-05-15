@@ -103,7 +103,7 @@ const SupportTicketDetail = () => {
       </Box>
       <Box className="controls-v1">
         <Box className="control-buttons-v1">
-          {permissions.supportTicket?.isUpdate && allowedToEdit && (
+          {permissions?.supportTicket?.isUpdate && allowedToEdit && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'contained'}
               className={'btn-outline-v1'}

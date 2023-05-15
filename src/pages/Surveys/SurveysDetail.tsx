@@ -114,7 +114,7 @@ const SurveysDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions.surveys?.isUpdate && allowedToEdit && (
+            {permissions?.surveys?.isUpdate && allowedToEdit && (
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
                 className={'btn-outline-v1'}
@@ -126,7 +126,7 @@ const SurveysDetail = () => {
                 Fields
               </Button>
             )}
-            {permissions.surveys?.isUpdate && allowedToEdit && (
+            {permissions?.surveys?.isUpdate && allowedToEdit && (
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
                 className={'btn-outline-v1'}

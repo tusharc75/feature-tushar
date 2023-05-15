@@ -369,7 +369,7 @@ const Address = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.address}
+              permissions={permissions?.address}
               primaryField={columns?.find((d) => d.field)}
               onClick={(data) => {
                 history.push(`${routes.addressDetail.path}/${data._id}`);
