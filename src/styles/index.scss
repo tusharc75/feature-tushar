@@ -3242,7 +3242,7 @@ body {
       align-items: center;
       min-height: 50px;
       & > *:not(button) {
-        width: 100%;
+        flex-grow: 1;
       }
     }
   }
