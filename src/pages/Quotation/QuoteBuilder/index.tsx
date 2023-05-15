@@ -1,18 +1,21 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton, Typography } from '@material-ui/core';
+import { Box, Button, IconButton, Tooltip } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { QUOTATION_STATUS, prepareDataForGrid, quotation } from 'src/constants/helpers';
+import { prepareDataForGrid, quotation } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import SendEmail from '../SendEmail';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
+import { useData } from 'src/StateProvider/Provider';
+import { AiFillEdit } from 'react-icons/ai';
+import { useHistory } from 'react-router-dom';
 
 const QuoteBuilder = ({
   quotationData,
@@ -28,9 +31,12 @@ const QuoteBuilder = ({
   renderedFrom,
   DOAData = []
 }) => {
-
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
 
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -47,7 +53,7 @@ const QuoteBuilder = ({
   }, [versionData]);
 
   useEffect(() => {
-    handleCheckNextPrev()
+    handleCheckNextPrev();
   }, [sentToCustomer, DOAData]);
 
   const fetchFields = async () => {
@@ -93,26 +99,28 @@ const QuoteBuilder = ({
                 <span>({row.original?.subRows?.length})</span>
               </Box>
             ) : null}
-            {['product', 'service', 'package', 'serializedAsset']?.includes(row.original.type) &&
+            {['product', 'service', 'package', 'serializedAsset']?.includes(row.original.type) && (
               <Box ml={1}>
                 <IconButton
                   size="small"
                   onClick={() => {
                     window.open(
-                      `${row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : row.original.type === 'product'
+                      `${
+                        row.original.type === 'serializedAsset'
+                          ? routes.serializedAssetDetail.path
+                          : row.original.type === 'product'
                           ? routes.productDetail.path
                           : row.original.type === 'package'
-                            ? routes.packagesDetail.path
-                            : routes.serviceMasterDetail.path
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
                       }/${row.original.materialId}`
                     );
                   }}
                 >
                   <OpenInNewIcon fontSize="small" color="primary" />
                 </IconButton>
-              </Box>}
+              </Box>
+            )}
           </div>
         )
       },
@@ -142,7 +150,6 @@ const QuoteBuilder = ({
   };
 
   const fetchProductInventory = async () => {
-
     setNextStep(false);
     setPrevStep(false);
 
@@ -154,15 +161,16 @@ const QuoteBuilder = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
-        parent.description =
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
+      parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
@@ -184,7 +192,8 @@ const QuoteBuilder = ({
         finalObject['detail'] = item?.detail;
         finalObject['description'] = item?.description;
         finalObject['qtyDisplay'] = item?.qty;
-        finalObject['leadTime'] = Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
+        finalObject['leadTime'] =
+          Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
         finalObject['parentId'] = null;
         finalObject['isValid'] = true;
         finalObject['hideSelection'] = false;
@@ -196,53 +205,49 @@ const QuoteBuilder = ({
       });
     }
     setRowsData([...rows, ...cost]);
-    handleCheckNextPrev()
+    handleCheckNextPrev();
   };
 
   const handleCheckNextPrev = () => {
-    if (currentStep === "Quote Builder") {
+    if (currentStep === 'Quote Builder') {
       setNextStep(true);
       setPrevStep(true);
-    }
-    else if (currentStep === 'DOA') {
+    } else if (currentStep === 'DOA') {
       if (DOAData?.length === 0) {
         setNextStep(false);
         setPrevStep(true);
-      }
-      else if (DOAData?.filter((e) => e.status === "approve")?.length === DOAData?.length) {
+      } else if (DOAData?.filter((e) => e.status === 'approve')?.length === DOAData?.length) {
         setPrevStep(false);
         setNextStep(true);
-      }
-      else {
+      } else {
         setPrevStep(false);
         setNextStep(false);
       }
-    }
-    else if (currentStep === 'Quote Approval') {
+    } else if (currentStep === 'Quote Approval') {
       if (sentToCustomer) {
         setNextStep(true);
         setPrevStep(false);
-      }
-      else {
+      } else {
         setNextStep(false);
         setPrevStep(true);
       }
     }
-  }
+  };
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.srno = parent.srno + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
-        _subRow.description =
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
+      _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
@@ -311,6 +316,30 @@ const QuoteBuilder = ({
             hideSummary={true}
             hideVersions={true}
           />
+          <Box ml={1} />
+          {permissions?.quotation?.isUpdate &&
+            (user?.user?._id === quotationData?.owner?.optionValue ||
+              quotationData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
+              <Tooltip title="Edit Quote PDF Template">
+                <Button
+                  onClick={() => {
+                    quotationData?.pdfTemplates?.optionValue &&
+                      history.push(
+                        `/quote-pdf-template/detail/${quotationData?.pdfTemplates?.optionValue}?quotation=${quotationData?._id}&version=${versionData?.version}`,
+                        '_blank'
+                      );
+                  }}
+                  variant="outlined"
+                  size="small"
+                  className="mr-1"
+                  startIcon={isMobile && !isTablet ? '' : <AiFillEdit />}
+                  color="primary"
+                >
+                  {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
+                  {isMobile && !isTablet ? '' : 'Quote Template'}
+                </Button>
+              </Tooltip>
+            )}
         </Box>
         {currentStep === 'Quote Approval' && (
           <Box display="flex">
@@ -341,11 +370,7 @@ const QuoteBuilder = ({
         )}
         {currentStep === 'DOA' && DOAData?.length === 0 && (
           <Box display="flex">
-            <Button
-              variant="contained"
-              size="small"
-              color="primary"
-              onClick={handleSendForDOA}>
+            <Button variant="contained" size="small" color="primary" onClick={handleSendForDOA}>
               Send for DOA
             </Button>
           </Box>
@@ -358,7 +383,7 @@ const QuoteBuilder = ({
             columns={columns}
             data={rowsData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={() => { }}
+            onSelect={() => {}}
             hideSelection={true}
             hideAction={true}
             childrenProperty="subRows"

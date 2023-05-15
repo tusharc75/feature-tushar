@@ -24,6 +24,7 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomTable from './customTable/customTable';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
+import { quotation } from '../../constants/helpers';
 
 const defaultProductColumns = 7;
 
@@ -114,13 +115,13 @@ export default function NewCreateQuotePdfTemplate() {
   }, []);
 
   useEffect(() => {
-    const options = []
+    const options = [];
     PDF_RESOURCE_LIST?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead === true) {
-        options.push({ title: routes[item.key] ? routes[item.key]?.title : item.title, value: item.value, })
+        options.push({ title: routes[item.key] ? routes[item.key]?.title : item.title, value: item.value });
       }
-    })
-    setpdfResourceOption(options)
+    });
+    setpdfResourceOption(options);
   }, []);
 
   useEffect(() => {
@@ -161,18 +162,38 @@ export default function NewCreateQuotePdfTemplate() {
   useEffect(() => {
     if (id && id !== '0') {
       (async () => {
-        let tempPdfTemplate = null
+        let tempPdfTemplate = null;
         if (queryParams.quote && queryParams.version) {
-          history.replace(`?quote=${queryParams.quote}&version=${queryParams.version}`)
+          history.replace(`?quote=${queryParams.quote}&version=${queryParams.version}`);
           try {
             const res = await axiosInstance().get(`${qbApi}/${queryParams?.quote}?entity=${selectedEntity}`);
-            const { data: { data } } = res;
-            setQuoteData(data)
-            setVersion(queryParams.version)
+            const {
+              data: { data }
+            } = res;
+            setQuoteData(data);
+            setVersion(queryParams.version);
             if (data?._id) {
               setHasPermissionToUpdate(true);
             }
             tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
+          } catch (e) {
+            toastConfig.setToastConfig(e);
+          }
+        } else if (queryParams.quotation && queryParams.version) {
+          history.replace(`?quotation=${queryParams.quotation}&version=${queryParams.version}`);
+          try {
+            const res = await axiosInstance().get(`${quotation.api}/${queryParams?.quotation}?entity=${selectedEntity}`);
+            const {
+              data: { data }
+            } = res;
+            console.log(data);
+            setQuoteData(data);
+            setVersion(queryParams.version);
+            if (data?._id) {
+              setHasPermissionToUpdate(true);
+            }
+            tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
+            console.log('quotation', tempPdfTemplate);
           } catch (e) {
             toastConfig.setToastConfig(e);
           }
@@ -199,13 +220,13 @@ export default function NewCreateQuotePdfTemplate() {
             aboveTable: tempPdfTemplate.aboveTable,
             belowTable: tempPdfTemplate.belowTable
           });
-
         } else {
           try {
             const res = await axiosInstance().get(`/quote-pdf-template/${id}`);
             const {
               data: { data }
             } = res;
+            console.log('quote', data);
             setIsLandscapChecked(data?.landscape);
             setInitialValues({
               landscape: data?.landscape,
@@ -255,7 +276,6 @@ export default function NewCreateQuotePdfTemplate() {
           }
         }
       })();
-
     } else {
       setInitialValues({
         landscape: false,
@@ -273,8 +293,6 @@ export default function NewCreateQuotePdfTemplate() {
       });
     }
     fetchUser();
-
-
   }, [id]);
 
   const fetchUser = () => {
@@ -362,7 +380,9 @@ export default function NewCreateQuotePdfTemplate() {
           toastConfig.setToastConfig(error);
         });
     } else {
-      let api = quoteData ? `/quote-builder/pdf-template/${quoteData._id}/${version}` : '/quote-pdf-template';
+      let api = quoteData
+        ? `${queryParams.quotation ? quotation.api : '/ quote - builder'}/pdf-template/${quoteData._id}/${version}`
+        : '/quote-pdf-template';
       axiosInstance()
         .put(api, {
           _id: id,
@@ -387,7 +407,7 @@ export default function NewCreateQuotePdfTemplate() {
             previewPdfTemplate(data._id);
             setIsUpdatingAndPreview(false);
             if (quoteData?._id) {
-              history.push(`/quotes/detail/${quoteData?._id}`, {
+              history.push(`${queryParams.quotation ? routes.quotationDetail.path : '/quotes/detail'}/${quoteData?._id}`, {
                 versionNumber: `${version}`,
                 tabValue: 1
               });
@@ -396,7 +416,7 @@ export default function NewCreateQuotePdfTemplate() {
             }
           } else {
             if (quoteData?._id) {
-              history.push(`/quotes/detail/${quoteData?._id}`, {
+              history.push(`${queryParams.quotation ? routes.quotationDetail.path : '/quotes/detail'}/${quoteData?._id}`, {
                 versionNumber: `${version}`,
                 tabValue: 1
               });
@@ -440,7 +460,7 @@ export default function NewCreateQuotePdfTemplate() {
       </Grid>
       <div className={`main-container ${classes.mainContainer}`}>
         <Paper className={classes.paper}>
-          {(initialValues && pdfResourceOption) ? (
+          {initialValues && pdfResourceOption ? (
             <Formik
               innerRef={(ref) => ref && setFormValues(ref.values)}
               initialValues={initialValues}
@@ -556,8 +576,8 @@ export default function NewCreateQuotePdfTemplate() {
                               setFieldValue('entity', val && val?.map((d) => d._id));
                               val && val.length !== 0
                                 ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                                )
+                                    ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                                  )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                             }}
                             renderInput={(params) => (
@@ -592,10 +612,10 @@ export default function NewCreateQuotePdfTemplate() {
                             onOpen={() =>
                               values['entity'] && values['entity'].length !== 0
                                 ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                    ownerCollaboratorDataConst.filter((data) =>
+                                      values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                    )
                                   )
-                                )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                             }
                             renderInput={(params) => (
@@ -632,10 +652,10 @@ export default function NewCreateQuotePdfTemplate() {
                             onOpen={() =>
                               values['entity'] && values['entity'].length !== 0
                                 ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                    ownerCollaboratorDataConst.filter((data) =>
+                                      values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                    )
                                   )
-                                )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                             }
                             renderInput={(params) => (
@@ -659,7 +679,11 @@ export default function NewCreateQuotePdfTemplate() {
                             disabled={!isClone && !hasPermissionToUpdate}
                             getOptionLabel={(option) => option.title}
                             getOptionSelected={(option, value) => option.value === value.value}
-                            value={pdfResourceOption.find((data) => data.value === values['type']) ? pdfResourceOption.find((data) => data.value === values['type']) : ''}
+                            value={
+                              pdfResourceOption.find((data) => data.value === values['type'])
+                                ? pdfResourceOption.find((data) => data.value === values['type'])
+                                : ''
+                            }
                             options={pdfResourceOption}
                             onChange={(e, val: any) => {
                               setFieldValue('type', val ? val.value : '');
