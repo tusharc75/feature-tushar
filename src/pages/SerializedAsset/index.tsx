@@ -701,7 +701,7 @@ const SerializedAsset = () => {
                           }}
                           disabled={
                             [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) =>
-                              [INVENTORY_STATUS.new, INVENTORY_STATUS.available, INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(
+                              [INVENTORY_STATUS.available, INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(
                                 o.status
                               )
                             ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
