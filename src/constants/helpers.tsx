@@ -185,8 +185,8 @@ export const userType = {
   brandAdmin: 2
 };
 
-export const AgGridHeaderHeight = 50;
-export const AgGridRowHeight = 50;
+export const AgGridHeaderHeight = 45;
+export const AgGridRowHeight = 45;
 export const AgGridFloatingFiltersHeight = 38;
 
 export const gridPageSizes = [25, 50, 75];
