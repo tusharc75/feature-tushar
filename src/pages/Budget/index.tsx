@@ -137,8 +137,8 @@ function Budget() {
   const ActionsRenderer = (params) => (
     <>
       <Tooltip
-        className={permissions.budget.isCreate ? '' : 'cursor-stop'}
-        title={permissions.budget.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
+        className={permissions?.budget.isCreate ? '' : 'cursor-stop'}
+        title={permissions?.budget.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
       >
         <IconButton
           size="small"
@@ -150,7 +150,7 @@ function Budget() {
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
-      {permissions.budget.isDelete && (
+      {permissions?.budget?.isDelete && (
         <Tooltip title="Delete">
           <IconButton
             size="small"
@@ -238,9 +238,9 @@ function Budget() {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions.budget.isDelete;
+          finalObject['canDelete'] = permissions?.budget.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions.budget.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.budget.isUpdate;
           return {
             ...finalObject
           };
@@ -314,7 +314,7 @@ function Budget() {
           </Grid>
           <Grid item md={8} sm={1} xs={2}>
             <ImportExportLinks
-              permissions={permissions.budget}
+              permissions={permissions?.budget}
               module="budget(s)"
               api={'budget'}
               afterImportCompleted={() => {
@@ -459,7 +459,7 @@ function Budget() {
                 <CustomSwipableList
                   allowSelection={true}
                   allowSwipe={true}
-                  permissions={permissions.budget}
+                  permissions={permissions?.budget}
                   primaryField={columns?.find((d) => d.primaryField)}
                   onClick={(d) => {
                     setShowManageBudgetDialog({ show: true, id: d.id, isClone: false });

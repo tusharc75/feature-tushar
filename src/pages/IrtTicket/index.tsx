@@ -301,7 +301,7 @@ const IrtTicket = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.irtTicket.isCreate && (
+                  {permissions?.irtTicket?.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {

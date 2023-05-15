@@ -168,8 +168,8 @@ const DeliveryTicket = () => {
   };
 
   useEffect(() => {
-    if (permissions && permissions.deliveryTicket) {
-      setdeliveryPermissions(permissions.deliveryTicket);
+    if (permissions && permissions?.deliveryTicket) {
+      setdeliveryPermissions(permissions?.deliveryTicket);
     }
     return () => {
       setdeliveryPermissions(null);

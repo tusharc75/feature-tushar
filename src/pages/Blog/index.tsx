@@ -363,7 +363,7 @@ const Blog = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.blog}
+              permissions={permissions?.blog}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
                 setBlogId(data._id);

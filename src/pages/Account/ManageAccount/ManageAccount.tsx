@@ -957,7 +957,7 @@ export default function ManageAccount(props) {
                                                   />
                                                 </Grid>
                                                 {
-                                                  permissions.marketSegment?.isCreate && (
+                                                  permissions?.marketSegment?.isCreate && (
                                                     <Grid item xs={1} sm={1} md={1}>
                                                       <Tooltip
                                                         title="Add Sub Market Segment"

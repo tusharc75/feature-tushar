@@ -60,7 +60,7 @@ const Roles = ({ unassignRole, data, permissions }) => {
                       </Typography>
                     }
                   />
-                  {permissions.entity.isUpdate && (
+                  {permissions?.entity?.isUpdate && (
                     <ListItemSecondaryAction
                       title={
                         obj.permission

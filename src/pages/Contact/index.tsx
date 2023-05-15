@@ -423,7 +423,7 @@ export default function Contact(props) {
 
   const ActionsRenderer = (params) => (
     <>
-      {contactPermissions.isCreate ? (
+      {contactPermissions?.isCreate ? (
         <HtmlTooltip title="Clone">
           <IconButton
             size="small"
@@ -443,7 +443,7 @@ export default function Contact(props) {
         </HtmlTooltip>
       )}
       <GridDeleteIcon
-        hasDeletePermission={contactPermissions.isDelete}
+        hasDeletePermission={contactPermissions?.isDelete}
         ownerId={params.data.ownerId}
         userId={user?.user?._id}
         onDelete={() => {
@@ -456,7 +456,7 @@ export default function Contact(props) {
         entity="contact"
       />
 
-      {contactPermissions.isUpdate && params.data?.isAllowedToUpdate ? (
+      {contactPermissions?.isUpdate && params.data?.isAllowedToUpdate ? (
         <HtmlTooltip title="Entity">
           <IconButton
             size="small"
@@ -890,7 +890,7 @@ export default function Contact(props) {
                 </Grid>
 
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {contactPermissions.isCreate && (
+                  {contactPermissions?.isCreate && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -905,7 +905,7 @@ export default function Contact(props) {
                     </>
                   )}
 
-                  {(contactPermissions.isDelete || contactPermissions.isUpdate) && (
+                  {(contactPermissions?.isDelete || contactPermissions?.isUpdate) && (
                     <>
                       <Button
                         disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
@@ -931,7 +931,7 @@ export default function Contact(props) {
                         open={Boolean(anchorEl)}
                         onClose={closeActions}
                       >
-                        {contactPermissions.isDelete && (
+                        {contactPermissions?.isDelete && (
                           <MenuItem
                             disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                             onClick={() => {
@@ -958,7 +958,7 @@ export default function Contact(props) {
                             Give Access to Portal
                           </MenuItem>
                         )}
-                        {contactPermissions.isUpdate && contactResource === 'customerContact' && permissions?.productInventory && (
+                        {contactPermissions?.isUpdate && contactResource === 'customerContact' && permissions?.productInventory && (
                           <MenuItem
                             disabled={
                               getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 ||
@@ -973,7 +973,7 @@ export default function Contact(props) {
                             <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
                           </MenuItem>
                         )}
-                        {contactPermissions.isUpdate && (
+                        {contactPermissions?.isUpdate && (
                           <MenuItem
                             disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                             onClick={() => {

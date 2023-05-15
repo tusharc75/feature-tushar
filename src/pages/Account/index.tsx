@@ -536,7 +536,7 @@ export default function Account(props) {
         </HtmlTooltip>
       )}
 
-      {accountPermissions.isUpdate && accountPermissions.approveAccount && params.data.approved ? (
+      {accountPermissions?.isUpdate && accountPermissions?.approveAccount && params.data.approved ? (
         <HtmlTooltip title="Disapprove">
           <IconButton
             aria-label="Disapprove"
@@ -571,7 +571,7 @@ export default function Account(props) {
       )}
 
       <GridDeleteIcon
-        hasDeletePermission={accountPermissions.isDelete}
+        hasDeletePermission={accountPermissions?.isDelete}
         ownerId={params.data.ownerId}
         userId={user?.user?._id}
         onDelete={() => {
@@ -583,7 +583,7 @@ export default function Account(props) {
         }}
         entity="account"
       />
-      {accountPermissions.isUpdate && params.data?.isAllowedToUpdate ? (
+      {accountPermissions?.isUpdate && params.data?.isAllowedToUpdate ? (
         <HtmlTooltip title="Entity">
           <IconButton
             size="small"
@@ -1212,7 +1212,7 @@ export default function Account(props) {
                     </Button>
                   )}
 
-                  {!isOffline && (accountPermissions.isDelete || accountPermissions.approveAccount) && (
+                  {!isOffline && (accountPermissions?.isDelete || accountPermissions?.approveAccount) && (
                     <Button
                       disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -1238,7 +1238,7 @@ export default function Account(props) {
                     open={Boolean(anchorEl)}
                     onClose={closeActions}
                   >
-                    {accountPermissions.isUpdate && accountPermissions.approveAccount && (
+                    {accountPermissions?.isUpdate && accountPermissions?.approveAccount && (
                       <MenuItem
                         disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.filter((d) => !d.approved).length === 0}
                         onClick={() => {
@@ -1254,7 +1254,7 @@ export default function Account(props) {
                         <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.filter((d) => !d.approved).length} />
                       </MenuItem>
                     )}
-                    {accountPermissions.isUpdate && accountPermissions.approveAccount && (
+                    {accountPermissions?.isUpdate && accountPermissions?.approveAccount && (
                       <MenuItem
                         disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.filter((d) => d.approved).length === 0}
                         onClick={() => {
@@ -1270,7 +1270,7 @@ export default function Account(props) {
                         <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.filter((d) => d.approved).length} />
                       </MenuItem>
                     )}
-                    {accountPermissions.isDelete && (
+                    {accountPermissions?.isDelete && (
                       <MenuItem
                         disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                         onClick={() => {
@@ -1286,7 +1286,7 @@ export default function Account(props) {
                         Delete
                       </MenuItem>
                     )}
-                    {accountPermissions.isUpdate && accountResource === 'customerAccount' && permissions?.productInventory && (
+                    {accountPermissions?.isUpdate && accountResource === 'customerAccount' && permissions?.productInventory && (
                       <MenuItem
                         disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                         onClick={() => {
@@ -1298,7 +1298,7 @@ export default function Account(props) {
                         <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
                       </MenuItem>
                     )}
-                    {accountPermissions.isUpdate && (
+                    {accountPermissions?.isUpdate && (
                       <MenuItem
                         disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                         onClick={() => {

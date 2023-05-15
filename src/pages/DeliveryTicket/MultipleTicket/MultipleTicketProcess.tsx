@@ -189,7 +189,7 @@ const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => 
                     <CustomSwipableList
                         allowSelection={true}
                         allowSwipe={true}
-                        permissions={permissions.deliveryTicket}
+                        permissions={permissions?.deliveryTicket}
                         primaryField={columns?.find((d) => d.primaryField)}
                         onClick={(data) => {
                             history.push(`${routes.deliveryTicketDetail.path}/${data._id}`);

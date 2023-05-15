@@ -43,8 +43,8 @@ const CurrencyConverter = () => {
   });
 
   useEffect(() => {
-    if (permissions && permissions.currencyConverter) {
-      setCurrencyConverterPermissions(permissions.currencyConverter);
+    if (permissions && permissions?.currencyConverter) {
+      setCurrencyConverterPermissions(permissions?.currencyConverter);
     }
   }, [permissions]);
 
