@@ -3230,6 +3230,9 @@ body {
 }
 
 .custom-react-table-v1 {
+  .MuiTablePagination-actions {
+    margin-left: 32px;
+  }
   &.vertical-center {
     .td,
     td,
