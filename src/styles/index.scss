@@ -2602,7 +2602,7 @@ svg.MuiSvgIcon-root {
 
   .new-headerbox-button-v1 {
     @media all and (min-width: 1200px) {
-      --padding: 7px 11px;
+      --padding: 8.5px 11px;
       --spacing: 18px;
     }
 
@@ -3143,7 +3143,7 @@ body {
   .text-truncate {
     font-family: 'Poppins', sans-serif, 'Inter', sans-serif;
     font-weight: 400;
-    font-size: 14px;
+    font-size: 13px;
     line-height: 19px;
     color: #1d1d1d;
   }
@@ -3258,8 +3258,8 @@ body {
   .ag-header-cell-label,
   .th {
     & > * {
-      font-weight: 500 !important;
-      font-size: 14px !important;
+      font-weight: 600 !important;
+      font-size: 13px !important;
       line-height: 18px !important;
       color: #2a3547 !important;
     }
@@ -3269,7 +3269,7 @@ body {
   td {
     & > * {
       font-weight: 400 !important;
-      font-size: 14px !important;
+      font-size: 13px !important;
       // line-height: 19px !important;
       color: #2a3547;
     }
