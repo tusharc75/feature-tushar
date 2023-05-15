@@ -3241,8 +3241,8 @@ body {
       display: flex;
       align-items: center;
       min-height: 50px;
-      & > * {
-        width: 100%;
+      & > *:not(button) {
+        flex-grow: 1;
       }
     }
   }
