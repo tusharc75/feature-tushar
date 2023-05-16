@@ -19,6 +19,7 @@ import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
+import { isEqual } from 'lodash';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
@@ -53,7 +54,6 @@ export default function ManageAttachment({
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [attachmentToDelete, setAttachemnetToDelete] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formValues, setFormValues] = useState({});
   const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
@@ -74,7 +74,6 @@ export default function ManageAttachment({
             });
             setOtherAttachments(data.file);
           }
-          setFormValues(data);
           setIsFetching(false);
           setInitialValues({ ...data, fileUrl: data.file && data.file.length && data.file ? data.file[0]?.url : '' });
         })
@@ -88,7 +87,6 @@ export default function ManageAttachment({
         .then(({ data: { data } }) => {
           setCanEdit(data?.canEdit);
           setInitialValues(data);
-          setFormValues(data);
           parentFolder = data?.parentFolder;
           setIsFetching(false);
         })
@@ -99,10 +97,8 @@ export default function ManageAttachment({
     } else {
       if (type === 'file') {
         setInitialValues({ name: '', fileUrl: '' });
-        setFormValues({ name: '', fileUrl: '' });
       } else {
         setInitialValues({ name: '' });
-        setFormValues({ name: '' });
       }
       setIsFetching(false);
     }
@@ -211,16 +207,6 @@ export default function ManageAttachment({
     setShowConfirmationDialog(false);
   };
 
-  const isFieldNotTouched = (initialValues, values) => {
-    return Object.values(initialValues).toString() === Object.values(values).toString();
-  };
-
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
 
   return !isFetching ? (
     initialValues ? (
@@ -229,7 +215,7 @@ export default function ManageAttachment({
           <>
             <CustomDialogHeader
               onClose={() => {
-                if (isFieldNotTouched(initialValues, formValues)) handleClose();
+                if (isEqual(initialValues, values)) handleClose();
                 else setShowConfirmDialog(true);
               }}
               title={`${attachmentId ? 'Edit' : 'New'} ${type === 'file' ? 'Attachment' : 'Folder'}`}
@@ -256,7 +242,6 @@ export default function ManageAttachment({
                         helperText={touched['name'] && errors['name']}
                         onChange={(e) => {
                           setFieldValue('name', e.target.value.trimStart());
-                          handleValuesChange({ name: e.target.value.trimStart() });
                         }}
                       />
                     </Grid>
@@ -275,7 +260,6 @@ export default function ManageAttachment({
                             size="small"
                             setFieldValue={(fname, file) => {
                               setFieldValue('fileUrl', file);
-                              handleValuesChange({ fileUrl: file });
                               onUploadFile(file);
                             }}
                             doNotShowUploadedFile={true}
@@ -296,7 +280,7 @@ export default function ManageAttachment({
                 color="primary"
                 size="small"
                 onClick={() => {
-                  if (isFieldNotTouched(initialValues, values)) handleClose();
+                  if (isEqual(initialValues, values)) handleClose();
                   else setShowConfirmDialog(true);
                 }}
               >

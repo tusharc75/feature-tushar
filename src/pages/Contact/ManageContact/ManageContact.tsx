@@ -26,6 +26,7 @@ import ManageContactDialog from './index';
 import ManageAddressDialog from "../../../components/Address/ManageAddressDialog"
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from 'src/components/Helpers/Routes';
+import { isEqual } from 'lodash';
 
 const arr = [...Array(9).keys()];
 
@@ -186,7 +187,6 @@ export default function ManageContact(props) {
       setCollaboratorDataSource(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorCommonDataSource));
     }
   };
-  //  Owner, Collaborator Code - End
 
   const onReportsToDropdownOpen = (selectedAccount) => {
     setReportsToDataSource(reportsToMainDataSource.filter((d) => d.parentAccount === selectedAccount));
@@ -211,6 +211,7 @@ export default function ManageContact(props) {
       setReportsToDataSource(tempReportsToMainDataSource.filter((d) => d.parentAccount === selectedAccount));
     }
   };
+
   const onSubmit = (values) => {
     handleSubmit(values, false);
   };
@@ -231,7 +232,6 @@ export default function ManageContact(props) {
     const err = Object.keys(errors);
     if (err.length) {
       const input = document.querySelector(`input[name=${err[0]}]`);
-
       input.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
@@ -239,15 +239,6 @@ export default function ManageContact(props) {
       });
     }
   };
-
-  const isFieldNotTouched = (contactData, values) => {
-    return (
-      Object.values(simplifyValues(contactData.initialValues, contactData.fields)).toString() ===
-      Object.values(simplifyValues(values, contactData.fields)).toString()
-    );
-  };
-
-
 
   return (
     <>
@@ -264,46 +255,42 @@ export default function ManageContact(props) {
         fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
       >
-        <CustomDialogHeader
-          onClose={() => {
-            if (isFieldNotTouched(contactData, formValues)) {
-              onClose();
-            } else {
-              setShowConfirmDialog(true);
-            }
-          }}
-          title={isClone ? `Clone - ${cloneHeading}` : isNew
-            ? contactResource === 'customerContact' ? `Add ${routes?.customerContact?.title}` : `Add ${routes?.supplierContact?.title}`
-            : `Editing ${contactData?.initialValues?.firstName ?? ''} ${contactData?.initialValues?.lastName ?? ''}`
-          }
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen((prevState) => !prevState);
-          }}
-          showManimizeMaximize={true}
-        />
-
         {contactData.fields.length > 0 ? (
           <>
             <Formik
               initialValues={contactData.initialValues}
               validationSchema={yupSchema(contactData.fields)}
-              // validate={(values) => formValidation(values, contactData.fields)}
               validateOnMount
               onSubmit={onSubmit}
             >
               {({
                 submitForm,
-
                 values,
                 errors,
                 touched,
                 setFieldValue
               }) => (
                 <>
+                  <CustomDialogHeader
+                    onClose={() => {
+                      if (isEqual(contactData.initialValues, values)) {
+                        onClose();
+                      } else {
+                        setShowConfirmDialog(true);
+                      }
+                    }}
+                    title={isClone ? `Clone - ${cloneHeading}` : isNew
+                      ? contactResource === 'customerContact' ? `Add ${routes?.customerContact?.title}` : `Add ${routes?.supplierContact?.title}`
+                      : `Editing ${contactData?.initialValues?.firstName ?? ''} ${contactData?.initialValues?.lastName ?? ''}`
+                    }
+                    isMinimized={!fullScreen}
+                    onMinimizeMaximize={() => {
+                      setFullScreen((prevState) => !prevState);
+                    }}
+                    showManimizeMaximize={true}
+                  />
                   <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
-                      {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                       {formsData &&
                         formsData
                           .filter((item) => item.name !== additionalFieldName)
@@ -672,7 +659,7 @@ export default function ManageContact(props) {
                   <CustomDialogFooter>
                     <Button
                       onClick={() => {
-                        if (isFieldNotTouched(contactData, values)) onClose();
+                        if (isEqual(contactData.initialValues, values)) onClose();
                         else setShowConfirmDialog(true);
                       }}
                       variant="outlined"
@@ -681,15 +668,11 @@ export default function ManageContact(props) {
                     >
                       Cancel
                     </Button>
-
                     <Button
                       variant="contained"
                       color="primary"
                       size="small"
-                      disabled={
-                        loading || uploadingImageOrFileProgress > 0
-                        // isFieldNotTouched(contactData, values)
-                      }
+                      disabled={loading || uploadingImageOrFileProgress > 0}
                       onClick={(e) => {
                         e.preventDefault();
                         handleScroll(errors);

@@ -28,6 +28,7 @@ import { FaDiceOne } from "react-icons/fa";
 import ManageAccountDialog from "./index";
 import ManageAddressDialog from "../../../components/Address/ManageAddressDialog";
 import routes from "src/components/Helpers/Routes";
+import { isEqual } from "lodash";
 
 const arr = [...Array(9).keys()];
 
@@ -276,20 +277,6 @@ export default function ManageAccount(props) {
     }
   }
 
-  const isFieldNotTouched = (accountData, values) => {
-    if (formikRef.current) {
-      return Object.values(
-        simplifyValues(
-          accountData.initialValues,
-          accountData.fields
-        )
-      ).toString() ===
-        Object.values(
-          simplifyValues(formikRef.current.values, accountData.fields)
-        ).toString()
-    }
-  }
-
   const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
     if (values && values.hasOwnProperty(formFieldNames.marketSegment)) {
       const getNewAddedMarketSegment = marketSegmentSource.find(
@@ -316,8 +303,6 @@ export default function ManageAccount(props) {
     return values;
   };
 
-
-
   const marketSegmentChange = (marketSegmentId: string) => {
     setSubMarketSegmentDataSource(marketSegmentId ? mainMarketSegmentDataSource.filter(d => d.parentMarketSegment === marketSegmentId) : []);
   }
@@ -337,24 +322,6 @@ export default function ManageAccount(props) {
         }}
         open={open}
       >
-        <CustomDialogHeader
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen(prevState => !prevState)
-          }}
-          showManimizeMaximize={true}
-          onClose={() => {
-            if (isFieldNotTouched(accountData, formValues)) {
-              onClose({})
-            } else {
-              setShowConfirmDialog(true)
-            }
-          }}
-          title={isClone ? `Clone - ${accountNameForClone}` :
-            isNew ? accountResource === "customerAccount" ? `Add ${routes?.customerAccount?.title}` : `Add ${routes?.supplierAccount?.title}`
-              : `Editing ${accountData.initialValues.accountName ? accountData.initialValues.accountName : ""}`
-          }
-        />
         {accountData.fields.length > 0 ? (
           <>
             <Formik
@@ -376,6 +343,24 @@ export default function ManageAccount(props) {
                 setFieldValue,
               }) => (
                 <>
+                  <CustomDialogHeader
+                    isMinimized={!fullScreen}
+                    onMinimizeMaximize={() => {
+                      setFullScreen(prevState => !prevState)
+                    }}
+                    showManimizeMaximize={true}
+                    onClose={() => {
+                      if (isEqual(accountData.initialValues, values)) {
+                        onClose({})
+                      } else {
+                        setShowConfirmDialog(true)
+                      }
+                    }}
+                    title={isClone ? `Clone - ${accountNameForClone}` :
+                      isNew ? accountResource === "customerAccount" ? `Add ${routes?.customerAccount?.title}` : `Add ${routes?.supplierAccount?.title}`
+                        : `Editing ${accountData.initialValues.accountName ? accountData.initialValues.accountName : ""}`
+                    }
+                  />
                   <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
                       {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
@@ -1100,7 +1085,7 @@ export default function ManageAccount(props) {
                   <CustomDialogFooter>
                     <Button
                       onClick={() => {
-                        if (isFieldNotTouched(accountData, values)) onClose({})
+                        if (isEqual(accountData.initialValues, values)) onClose({})
                         else setShowConfirmDialog(true)
                       }}
                       variant="outlined"
@@ -1117,8 +1102,6 @@ export default function ManageAccount(props) {
                       disabled={
                         loading ||
                         uploadingImageOrFileProgress > 0
-                        // isFieldNotTouched(accountData, values)
-                        // || Object.keys(errors).length > 0 ? true : false
                       }
                       onClick={(e) => {
                         e.preventDefault();
@@ -1165,102 +1148,103 @@ export default function ManageAccount(props) {
           </>
         ) : (
           <CustomDialogContent>
-            <CommonSkeleton lenArray={arr} />
+            <Box p={2} height={500} bgcolor="white">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
           </CustomDialogContent>
         )}
       </Dialog>
 
-      {
-        showAddMarketSegmentDialog && <ManageMarketSegmentDialog
-          marketSegmentId={null}
-          onClose={() => {
-            setShowAddMarketSegmentDialog(false);
-          }}
-          onSuccess={(data) => {
-            if (data?._id) {
-              setMainMarketSegmentDataSource((prevState) => {
+      {showAddMarketSegmentDialog && <ManageMarketSegmentDialog
+        marketSegmentId={null}
+        onClose={() => {
+          setShowAddMarketSegmentDialog(false);
+        }}
+        onSuccess={(data) => {
+          if (data?._id) {
+            setMainMarketSegmentDataSource((prevState) => {
+              return [
+                ...prevState,
+                {
+                  optionValue: data._id,
+                  optionLabel: data.name,
+                  order: mainMarketSegmentDataSource.length,
+                  default: false,
+                  parentMarketSegment: data.parentMarketSegment
+                }
+              ];
+            });
+
+            //  If no parent selected, consider that as parent and add it in Market Segment
+            if (data.parentMarketSegment === "") {
+              setMarketSegmentDataSource((prevState) => {
                 return [
                   ...prevState,
                   {
                     optionValue: data._id,
                     optionLabel: data.name,
-                    order: mainMarketSegmentDataSource.length,
+                    order: marketSegmentDataSource.length,
                     default: false,
                     parentMarketSegment: data.parentMarketSegment
                   }
                 ];
               });
-
-              //  If no parent selected, consider that as parent and add it in Market Segment
-              if (data.parentMarketSegment === "") {
-                setMarketSegmentDataSource((prevState) => {
-                  return [
-                    ...prevState,
-                    {
-                      optionValue: data._id,
-                      optionLabel: data.name,
-                      order: marketSegmentDataSource.length,
-                      default: false,
-                      parentMarketSegment: data.parentMarketSegment
-                    }
-                  ];
-                });
-                setSubMarketSegmentDataSource([]);
-                setNewMarketSegmentId(data._id);
-                setNewSubMarketSegmentId(null);
+              setSubMarketSegmentDataSource([]);
+              setNewMarketSegmentId(data._id);
+              setNewSubMarketSegmentId(null);
+            } else {
+              //  If parent selected, consider that as a child
+              if (marketSegmentDataSource.some(d => d?.optionValue === data.parentMarketSegment)) {
+                setSubMarketSegmentDataSource([
+                  ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
+                  {
+                    optionValue: data._id,
+                    optionLabel: data.name,
+                    order: subMarketSegmentDataSource.length,
+                    default: false,
+                    parentMarketSegment: data.parentMarketSegment
+                  }]
+                );
               } else {
-                //  If parent selected, consider that as a child
-                if (marketSegmentDataSource.some(d => d?.optionValue === data.parentMarketSegment)) {
-                  setSubMarketSegmentDataSource([
-                    ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
-                    {
-                      optionValue: data._id,
-                      optionLabel: data.name,
-                      order: subMarketSegmentDataSource.length,
-                      default: false,
-                      parentMarketSegment: data.parentMarketSegment
-                    }]
-                  );
-                } else {
 
-                  let initializeMarketSegmentDataSource = [];
-                  mainMarketSegmentDataSource.forEach(option => {
-                    if (option.parentMarketSegment === "" || mainMarketSegmentDataSource.some(s => s.parentMarketSegment === option.optionValue)) {
-                      initializeMarketSegmentDataSource.push(option);
-                    }
-                  })
-
-                  if (!initializeMarketSegmentDataSource.some(s => s.optionValue === data.parentMarketSegment)) {
-                    const getMarketSegment = mainMarketSegmentDataSource.find(d => d?.optionValue === data.parentMarketSegment);
-
-                    initializeMarketSegmentDataSource.push({
-                      optionValue: getMarketSegment.optionValue,
-                      optionLabel: getMarketSegment.optionLabel,
-                      order: initializeMarketSegmentDataSource.length,
-                      default: false,
-                      parentMarketSegment: getMarketSegment.parentMarketSegment
-                    })
+                let initializeMarketSegmentDataSource = [];
+                mainMarketSegmentDataSource.forEach(option => {
+                  if (option.parentMarketSegment === "" || mainMarketSegmentDataSource.some(s => s.parentMarketSegment === option.optionValue)) {
+                    initializeMarketSegmentDataSource.push(option);
                   }
-                  setMarketSegmentDataSource(initializeMarketSegmentDataSource);
+                })
 
-                  setSubMarketSegmentDataSource([
-                    ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
-                    {
-                      optionValue: data._id,
-                      optionLabel: data.name,
-                      order: subMarketSegmentDataSource.length,
-                      default: false,
-                      parentMarketSegment: data.parentMarketSegment
-                    }]
-                  );
+                if (!initializeMarketSegmentDataSource.some(s => s.optionValue === data.parentMarketSegment)) {
+                  const getMarketSegment = mainMarketSegmentDataSource.find(d => d?.optionValue === data.parentMarketSegment);
+
+                  initializeMarketSegmentDataSource.push({
+                    optionValue: getMarketSegment.optionValue,
+                    optionLabel: getMarketSegment.optionLabel,
+                    order: initializeMarketSegmentDataSource.length,
+                    default: false,
+                    parentMarketSegment: getMarketSegment.parentMarketSegment
+                  })
                 }
-                setNewMarketSegmentId(data.parentMarketSegment);
-                setNewSubMarketSegmentId(data._id);
+                setMarketSegmentDataSource(initializeMarketSegmentDataSource);
+
+                setSubMarketSegmentDataSource([
+                  ...mainMarketSegmentDataSource.filter(s => s.parentMarketSegment === data.parentMarketSegment),
+                  {
+                    optionValue: data._id,
+                    optionLabel: data.name,
+                    order: subMarketSegmentDataSource.length,
+                    default: false,
+                    parentMarketSegment: data.parentMarketSegment
+                  }]
+                );
               }
+              setNewMarketSegmentId(data.parentMarketSegment);
+              setNewSubMarketSegmentId(data._id);
             }
-            setShowAddMarketSegmentDialog(false);
-          }}
-        />
+          }
+          setShowAddMarketSegmentDialog(false);
+        }}
+      />
       }
     </>
   );
