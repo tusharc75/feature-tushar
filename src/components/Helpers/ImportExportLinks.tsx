@@ -5,6 +5,8 @@ import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
+import { ImportIcon, ExportIcon, DownloadIcon } from 'src/assets/svg/svgIcons';
+
 import { BsCloudDownload, CiImport, CiExport } from 'react-icons/all';
 
 const useStyles = makeStyles((theme) => ({
@@ -433,7 +435,7 @@ export default function ImportExportLinks({
               >
                 {/* {extraImportExportLinks.length > 0 || ImportInput} */}
                 <span>Import from Excel</span>
-                <CiImport />
+                <ImportIcon />
               </label>
               {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
             </>
@@ -452,7 +454,7 @@ export default function ImportExportLinks({
               Export to Excel{' '}
               {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
             </span>
-            <CiExport />
+            <ExportIcon />
           </label>
           {isDownloadExcel && !onlyExport && (
             <>
@@ -468,7 +470,7 @@ export default function ImportExportLinks({
                 className={`new-headerbox-button-v1`}
               >
                 <span>Download Template</span>
-                <BsCloudDownload />
+                <DownloadIcon />
               </label>
             </>
           )}
