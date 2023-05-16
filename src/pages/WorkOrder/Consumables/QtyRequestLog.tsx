@@ -61,7 +61,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId }) {
                   <TableCell>Product</TableCell>
                   <TableCell>Qty</TableCell>
                   <TableCell>Request By</TableCell>
-                  <TableCell>Responce By</TableCell>
+                  <TableCell>Response By</TableCell>
                   <TableCell>Action</TableCell>
                 </TableRow>
               </TableHead>

@@ -134,8 +134,6 @@ export const getCustomColumnData = (title, field) => {
 };
 
 export const generateCustomTableColumns = (fields: any[], currency: string, renderedFrom = null) => {
-
-  console.log(fields)
   let column = [];
   let _fields = fields;
   _fields.forEach((ele) => {
