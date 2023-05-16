@@ -33,6 +33,7 @@ import { useData } from '../../../StateProvider/Provider';
 import Loader from '../../Loader';
 import { dateFormat, dateFormatForInputControl } from '../../../constants/helpers';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
+import { isEqual } from 'lodash';
 
 const TaskSchema = object().shape({
   name: string().required('Please enter task name'),
@@ -53,7 +54,6 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
   const [openAddSub, setOpenAddSub] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formValues, setFormValues] = useState({});
 
   useEffect(() => {
     fetchTaskDetail();
@@ -76,7 +76,6 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
           }
           setInitialValues(null);
           setInitialValues(data);
-          setFormValues(data);
         })
         .catch((err) => { });
     } else {
@@ -90,7 +89,6 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
         dueDate: new Date()
       };
       setInitialValues(initialData);
-      setFormValues(initialData);
     }
   };
 
@@ -127,278 +125,262 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
     return errors;
   }
 
-  const isFieldNotTouched = (initialValues, values) => {
-    return Object.values(initialValues).toString() === Object.values(values).toString();
-  };
-
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
-
   return (
-    <>
-      <CustomDialogHeader
-        title={`${id ? 'Edit' : 'New'} Task`}
-        onClose={() => {
-          if (isFieldNotTouched(initialValues, formValues)) handleClose();
-          else setShowConfirmDialog(true);
-        }}
-        isMinimized={isMinimized}
-        onMinimizeMaximize={onMinimizeMaximize}
-        showManimizeMaximize={showManimizeMaximize}
-      ></CustomDialogHeader>
-      {initialValues ? (
-        <Formik initialValues={initialValues} validationSchema={TaskSchema} onSubmit={handleSave} validate={validate}>
-          {({ submitForm, touched, errors, setFieldValue, values }) => (
-            <>
-              <CustomDialogContent>
-                <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <Box padding={1}>
-                    <MuiPickersUtilsProvider utils={DateUtils}>
-                      <Box mb={2}>
-                        <Breadcrumbs separator="/" aria-label="breadcrumb">
-                          {initialValues.parent &&
-                            initialValues.parent.map((_p, index) => {
-                              return (
-                                <Button
-                                  size="small"
-                                  key={index}
-                                  className="cursor-pointer asdfasfdasdfas"
-                                  onClick={() => setId(_p._id)}
-                                  color="primary"
-                                >
-                                  {_p.name}
-                                </Button>
-                              );
-                            })}
-                        </Breadcrumbs>
-                      </Box>
-                      <Grid container spacing={3}>
-                        <Grid item xs={12} md={7} sm={6}>
+    <> {initialValues ? (
+      <Formik initialValues={initialValues} validationSchema={TaskSchema} onSubmit={handleSave} validate={validate}>
+        {({ submitForm, touched, errors, setFieldValue, values }) => (
+          <>
+            <CustomDialogHeader
+              title={`${id ? 'Edit' : 'New'} Task`}
+              onClose={() => {
+                if (isEqual(initialValues, values)) handleClose();
+                else setShowConfirmDialog(true);
+              }}
+              isMinimized={isMinimized}
+              onMinimizeMaximize={onMinimizeMaximize}
+              showManimizeMaximize={showManimizeMaximize}
+            ></CustomDialogHeader>
+            <CustomDialogContent>
+              <Form autoComplete="off" autoCorrect="off" noValidate>
+                <Box padding={1}>
+                  <MuiPickersUtilsProvider utils={DateUtils}>
+                    <Box mb={2}>
+                      <Breadcrumbs separator="/" aria-label="breadcrumb">
+                        {initialValues.parent &&
+                          initialValues.parent.map((_p, index) => {
+                            return (
+                              <Button
+                                size="small"
+                                key={index}
+                                className="cursor-pointer asdfasfdasdfas"
+                                onClick={() => setId(_p._id)}
+                                color="primary"
+                              >
+                                {_p.name}
+                              </Button>
+                            );
+                          })}
+                      </Breadcrumbs>
+                    </Box>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={7} sm={6}>
+                        <TextField
+                          variant="outlined"
+                          type="text"
+                          label="Task Name"
+                          required={true}
+                          name="name"
+                          fullWidth
+                          margin="dense"
+                          value={values['name']}
+                          error={touched['name'] && Boolean(errors['name'])}
+                          helperText={touched['name'] && errors['name']}
+                          onChange={(e) => {
+                            setFieldValue('name', e.target.value.trimStart());
+                          }}
+                        />
+                        <Box pt={1}>
                           <TextField
-                            variant="outlined"
-                            type="text"
-                            label="Task Name"
-                            required={true}
-                            name="name"
                             fullWidth
                             margin="dense"
-                            value={values['name']}
-                            error={touched['name'] && Boolean(errors['name'])}
-                            helperText={touched['name'] && errors['name']}
+                            type="text"
+                            multiline
+                            rows={3}
+                            label="Description"
+                            name="description"
+                            variant="outlined"
                             onChange={(e) => {
-                              setFieldValue('name', e.target.value.trimStart());
-                              handleValuesChange({ name: e.target.value.trimStart() });
+                              setFieldValue('description', e.target.value);
                             }}
                           />
+                        </Box>
+                        {id && (
                           <Box pt={1}>
-                            <TextField
-                              fullWidth
-                              margin="dense"
-                              type="text"
-                              multiline
-                              rows={3}
-                              label="Description"
-                              name="description"
-                              variant="outlined"
-                              onChange={(e) => {
-                                setFieldValue('description', e.target.value);
-                                handleValuesChange({ description: e.target.value });
-                              }}
-                            />
+                            <Button
+                              variant="contained"
+                              size="small"
+                              disableElevation
+                              onClick={() => setOpenAddSub(true)}
+                              startIcon={<TableChartIcon />}
+                            >
+                              Add a child Task
+                            </Button>
                           </Box>
-                          {id && (
-                            <Box pt={1}>
-                              <Button
-                                variant="contained"
-                                size="small"
-                                disableElevation
-                                onClick={() => setOpenAddSub(true)}
-                                startIcon={<TableChartIcon />}
-                              >
-                                Add a child Task
-                              </Button>
-                            </Box>
-                          )}
+                        )}
+                        <Box mt={2}>
+                          <SubTask
+                            openAddSub={openAddSub}
+                            setOpenAddSub={setOpenAddSub}
+                            data={initialValues}
+                            fetchTaskDetail={fetchTaskDetail}
+                            setId={setId}
+                          />
+                        </Box>
+                        {id && (
                           <Box mt={2}>
-                            <SubTask
-                              openAddSub={openAddSub}
-                              setOpenAddSub={setOpenAddSub}
-                              data={initialValues}
-                              fetchTaskDetail={fetchTaskDetail}
-                              setId={setId}
-                            />
+                            <RelatedToDispay relatedTo={initialValues.relatedTo} />
                           </Box>
-                          {id && (
-                            <Box mt={2}>
-                              <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                            </Box>
-                          )}
-                          {id && (
-                            <Box mt={2}>
-                              <Divider />
-                              <Box mt={1}>
-                                <Comment referenceId={id} />
-                              </Box>
-                            </Box>
-                          )}
-                        </Grid>
-                        <Grid item xs={12} md={5} sm={6}>
-                          <Fragment>
+                        )}
+                        {id && (
+                          <Box mt={2}>
+                            <Divider />
                             <Box mt={1}>
-                              <Box>
-                                <FormControl variant="outlined" fullWidth>
-                                  <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
-                                  <Select
-                                    labelId="demo-simple-select-outlined-label"
-                                    id="demo-simple-select-outlined"
-                                    margin="dense"
-                                    label="Status"
-                                    name="status"
-                                    value={values['status']}
-                                  >
-                                    {statusList.map((_status, index) => (
-                                      <MenuItem key={index} value={_status.status}>
-                                        {_status.status}
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                              </Box>
-                              <Box pt={1}>
-                                <Grid container spacing={1}>
-                                  <Grid item xs={12} sm={12} md={12}>
-                                    <UserDropdown
-                                      name="assignee"
-                                      label="Assignee"
-                                      errors={errors}
-                                      touched={touched}
-                                      required={false}
-                                      setFieldValue={(name, value) => {
-                                        handleValuesChange({ [name]: value });
-                                        setFieldValue(name, value);
-                                      }}
-                                      multiple={true}
-                                      value={values['assignee']}
-                                      email={[]}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={12} sm={12} md={12}>
-                                    <UserDropdown
-                                      name="reporter"
-                                      label="Reporter"
-                                      errors={errors}
-                                      touched={touched}
-                                      required={true}
-                                      setFieldValue={(name, value) => {
-                                        handleValuesChange({ [name]: value });
-                                        setFieldValue(name, value);
-                                      }}
-                                      multiple={false}
-                                      value={values['reporter']}
-                                    />
-                                  </Grid>
-                                </Grid>
-                              </Box>
-                              <Box pt={1}>
-                                <Grid container spacing={1}>
-                                  <Grid item xs={12} sm={12} md={12}>
-                                    <KeyboardDatePicker
-                                      label="Start Date"
-                                      name="startDate"
-                                      autoOk
-                                      variant="inline"
-                                      inputVariant="outlined"
-                                      fullWidth
-                                      margin="dense"
-                                      format={dateFormatForInputControl}
-                                      value={values.startDate}
-                                      onChange={(value) => {
-                                        setFieldValue('dueDate', value);
-                                        setFieldValue('startDate', value);
-                                      }}
-                                      maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={12} sm={12} md={12}>
-                                    <KeyboardDatePicker
-                                      label="Due Date"
-                                      name="dueDate"
-                                      autoOk
-                                      variant="inline"
-                                      inputVariant="outlined"
-                                      fullWidth
-                                      margin="dense"
-                                      minDate={values.startDate}
-                                      maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                                      value={values.dueDate}
-                                      onChange={(value) => {
-                                        setFieldValue('dueDate', value);
-                                      }}
-                                      format={dateFormatForInputControl}
-                                    />
-                                    {initialValues.createdBy && initialValues.createdBy.date && (
-                                      <Box mt={1} color="text.secondary">
-                                        <Typography variant="body2">Created {moment(initialValues.createdBy.date).format(dateFormat)}</Typography>
-                                      </Box>
-                                    )}
-                                    {initialValues.updatedBy && initialValues.updatedBy.date && (
-                                      <Box mt={1} color="text.secondary">
-                                        <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format(dateFormat)}</Typography>
-                                      </Box>
-                                    )}
-                                  </Grid>
-                                </Grid>
-                              </Box>
+                              <Comment referenceId={id} />
                             </Box>
-                          </Fragment>
-                        </Grid>
+                          </Box>
+                        )}
                       </Grid>
-                    </MuiPickersUtilsProvider>
-                  </Box>
-                </Form>
-              </CustomDialogContent>
-              <CustomDialogFooter>
-                <Button
-                  disabled={isSubmitting}
-                  color="primary"
-                  size="small"
-                  onClick={() => {
-                    if (isFieldNotTouched(initialValues, values)) handleClose();
-                    else setShowConfirmDialog(true);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button disabled={isSubmitting} type="button" color="primary" size="small" variant="contained" onClick={submitForm}>
-                  {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
-                </Button>
-              </CustomDialogFooter>
-              {showConfirmDialog ? (
-                <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
-                  open={showConfirmDialog}
-                  onSave={() => {
-                    setShowConfirmDialog(false);
-                    submitForm();
-                  }}
-                  onClose={() => {
-                    setShowConfirmDialog(false);
-                    handleClose();
-                  }}
-                />
-              ) : null}
-            </>
-          )}
-        </Formik>
-      ) : (
-        <CustomDialogContent>
-          <Loader minHeight="500px" text="Loading..." />
-        </CustomDialogContent>
-      )}
+                      <Grid item xs={12} md={5} sm={6}>
+                        <Fragment>
+                          <Box mt={1}>
+                            <Box>
+                              <FormControl variant="outlined" fullWidth>
+                                <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
+                                <Select
+                                  labelId="demo-simple-select-outlined-label"
+                                  id="demo-simple-select-outlined"
+                                  margin="dense"
+                                  label="Status"
+                                  name="status"
+                                  value={values['status']}
+                                >
+                                  {statusList.map((_status, index) => (
+                                    <MenuItem key={index} value={_status.status}>
+                                      {_status.status}
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </Box>
+                            <Box pt={1}>
+                              <Grid container spacing={1}>
+                                <Grid item xs={12} sm={12} md={12}>
+                                  <UserDropdown
+                                    name="assignee"
+                                    label="Assignee"
+                                    errors={errors}
+                                    touched={touched}
+                                    required={false}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    multiple={true}
+                                    value={values['assignee']}
+                                    email={[]}
+                                  />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={12}>
+                                  <UserDropdown
+                                    name="reporter"
+                                    label="Reporter"
+                                    errors={errors}
+                                    touched={touched}
+                                    required={true}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    multiple={false}
+                                    value={values['reporter']}
+                                  />
+                                </Grid>
+                              </Grid>
+                            </Box>
+                            <Box pt={1}>
+                              <Grid container spacing={1}>
+                                <Grid item xs={12} sm={12} md={12}>
+                                  <KeyboardDatePicker
+                                    label="Start Date"
+                                    name="startDate"
+                                    autoOk
+                                    variant="inline"
+                                    inputVariant="outlined"
+                                    fullWidth
+                                    margin="dense"
+                                    format={dateFormatForInputControl}
+                                    value={values.startDate}
+                                    onChange={(value) => {
+                                      setFieldValue('dueDate', value);
+                                      setFieldValue('startDate', value);
+                                    }}
+                                    maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                                  />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={12}>
+                                  <KeyboardDatePicker
+                                    label="Due Date"
+                                    name="dueDate"
+                                    autoOk
+                                    variant="inline"
+                                    inputVariant="outlined"
+                                    fullWidth
+                                    margin="dense"
+                                    minDate={values.startDate}
+                                    maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                                    value={values.dueDate}
+                                    onChange={(value) => {
+                                      setFieldValue('dueDate', value);
+                                    }}
+                                    format={dateFormatForInputControl}
+                                  />
+                                  {initialValues.createdBy && initialValues.createdBy.date && (
+                                    <Box mt={1} color="text.secondary">
+                                      <Typography variant="body2">Created {moment(initialValues.createdBy.date).format(dateFormat)}</Typography>
+                                    </Box>
+                                  )}
+                                  {initialValues.updatedBy && initialValues.updatedBy.date && (
+                                    <Box mt={1} color="text.secondary">
+                                      <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format(dateFormat)}</Typography>
+                                    </Box>
+                                  )}
+                                </Grid>
+                              </Grid>
+                            </Box>
+                          </Box>
+                        </Fragment>
+                      </Grid>
+                    </Grid>
+                  </MuiPickersUtilsProvider>
+                </Box>
+              </Form>
+            </CustomDialogContent>
+            <CustomDialogFooter>
+              <Button
+                disabled={isSubmitting}
+                color="primary"
+                size="small"
+                onClick={() => {
+                  if (isEqual(initialValues, values)) handleClose();
+                  else setShowConfirmDialog(true);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button disabled={isSubmitting} type="button" color="primary" size="small" variant="contained" onClick={submitForm}>
+                {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
+              </Button>
+            </CustomDialogFooter>
+            {showConfirmDialog ? (
+              <ConfirmCancelDialog
+                close={() => setShowConfirmDialog(false)}
+                open={showConfirmDialog}
+                onSave={() => {
+                  setShowConfirmDialog(false);
+                  submitForm();
+                }}
+                onClose={() => {
+                  setShowConfirmDialog(false);
+                  handleClose();
+                }}
+              />
+            ) : null}
+          </>
+        )}
+      </Formik>
+    ) : (
+      <CustomDialogContent>
+        <Loader minHeight="500px" text="Loading..." />
+      </CustomDialogContent>
+    )}
     </>
   );
 };

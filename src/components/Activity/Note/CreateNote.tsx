@@ -26,6 +26,7 @@ import { displayDate } from "../../../constants/helpers"
 import TinyMce from "../../../components/TinyMCE"
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 import CommonSkeleton from "../../Helpers/CommonSkeleton";
+import { isEqual } from "lodash";
 
 const NoteSchema = object().shape({
     name: string()
@@ -71,16 +72,17 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
     const [open, setOpen] = useState(false)
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-    const [formValues, setFormValues] = useState({})
 
     useEffect(() => {
         fetchNoteDetail();
     }, []);
+
     const checkImageUrl = (url) => {
         let extension = url.substring(url.lastIndexOf("."),).toLowerCase()
         let imageExtensions = [".tif", "tiff", ".bmp", ".jpg", "jpeg", ".gif", ".png", ".eps", ".raw", ".cr2", ".nef", ".orf", ".sr2"]
         return imageExtensions.indexOf(extension) >= 0
     }
+
     const fetchNoteDetail = async () => {
         if (noteId) {
             setLoading(true)
@@ -100,7 +102,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
                         setOtherAttachments([...otherAttachments])
                     }
                     setInitialValues(data)
-                    setFormValues(data)
                     setLoading(false)
                 })
                 .catch(() => {
@@ -110,7 +111,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
         else {
             let initialData = { name: "", description: "", fileUrl: '' }
             setInitialValues(initialData)
-            setFormValues(initialData)
         }
     };
 
@@ -143,6 +143,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
                 });
         }
     };
+
     const handleUploadImage = (event) => {
         if (event.target.files && event.target.files.length) {
             const file = event.target.files[0];
@@ -167,6 +168,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
                 // toastConfig.setToastConfig(err);
             });
     };
+    
     const onUploadFile = file => {
         if (checkImageUrl(file)) {
             setFileImageAttachments((prevState) => ([...prevState, file]));
@@ -193,18 +195,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
         if (data && data?.source) return data.source
     }
 
-    const isFieldNotTouched = (initialValues, values) => {
-        let initialData = { ...initialValues, description: initialValues?.description.toString("html") ?? "" }
-        let dataValues = { ...values, description: values?.description.toString("html") ?? "" }
-        return (Object.values(initialData).toString() === Object.values(dataValues).toString())
-
-    }
-    const handleValuesChange = (data) => {
-        setFormValues((prevState) => ({
-            ...prevState,
-            ...data
-        }))
-    }
 
     const renderFileThumbnails = (
         <Grid container spacing={1} className={emailStyles.createEmailContainer}>
@@ -264,7 +254,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
         </Grid >
     )
 
-
     return (!initialValues ? <>
         <CustomDialogHeader
             title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
@@ -285,7 +274,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
                 <>
                     <CustomDialogHeader
                         onClose={() => {
-                            if (isFieldNotTouched(initialValues, formValues)) handleClose()
+                            if (isEqual(initialValues, values)) handleClose()
                             else setShowConfirmDialog(true)
                         }}
                         title={`${noteId ? "Edit" : "New"} Note`}
@@ -313,7 +302,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
                                                 helperText={touched["name"] && errors["name"]}
                                                 onChange={(e) => {
                                                     setFieldValue("name", e.target.value.trimStart())
-                                                    handleValuesChange({ name: e.target.value.trimStart() })
                                                 }}
                                             />
                                             {renderFileThumbnails}
@@ -341,7 +329,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
                                                 <TinyMce
                                                     onChange={(value) => {
                                                         setFieldValue("description", value)
-                                                        handleValuesChange({ description: value })
                                                     }}
                                                     initialValue={initialValues?.description}
                                                     imageOrFileUploadCompletePercentage={(
@@ -383,7 +370,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
                         <Button size="small" variant='outlined' type="button" color="primary"
                             disabled={uploading}
                             onClick={() => {
-                                if (isFieldNotTouched(initialValues, values)) handleClose()
+                                if (isEqual(initialValues, values)) handleClose()
                                 else setShowConfirmDialog(true)
                             }}>Cancel</Button>
                         <Button size="small" type="button" color="primary" variant="contained"

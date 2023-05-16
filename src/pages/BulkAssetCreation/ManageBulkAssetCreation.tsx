@@ -18,12 +18,12 @@ import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { FaDiceOne } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
-import moment from "moment";
 import { useData } from "../../StateProvider/Provider";
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../Account/ManageAccount";
 import ManageContactDialog from "../Contact/ManageContact";
+import { isEqual } from "lodash";
 
 const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, onClose, onSuccess, referenceId = null, refrenceData = null }) => {
 
@@ -131,26 +131,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
         setFormsData(setFieldsInAscendingOrder(initialData.fields));
     }, [initialData.fields]);
 
-    const handleSubmit = async (
-        errors,
-        setTouched,
-        values,
-        setValues,
-        setErrors
-    ) => {
-        if (Object.keys(errors).length) {
-            initialData.fields.forEach((input) => {
-                if (input.required || values[input.fieldName]) {
-                    setTouched(input.fieldName, true);
-                }
-            });
-            setErrors({ ...errors });
-        } else {
-            handleUpdateBulkAssetCreation(values)
-        }
-    };
-
-    const handleUpdateBulkAssetCreation = (values) => {
+    const handleSubmit = (values) => {
         setLoading(true)
         if (bulkAssetCreationId && isClone === false) {
             values._id = bulkAssetCreationId
@@ -180,15 +161,6 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
             });
         }
     };
-
-    const isFieldNotTouched = (initialData, values) => {
-        return Object.values(
-            simplifyValues(initialData.values, formsData[0]?.sectionFields || [])
-        ).toString() ===
-            Object.values(
-                simplifyValues(values, formsData[0]?.sectionFields || [])
-            ).toString()
-    }
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
         setOwnerData(
@@ -234,20 +206,19 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                 initialValues={initialData.values}
                 validationSchema={yupSchema(initialData.fields)}
                 validateOnMount
-                onSubmit={() => { }}
+                onSubmit={handleSubmit}
             >
                 {({ values,
                     errors,
                     touched,
                     setFieldValue,
-                    setFieldTouched,
-                    setErrors,
+                    handleSubmit,
                     setValues,
                 }) => (
                     <Fragment>
                         <CustomDialogHeader title={bulkAssetCreationId ? (isClone ? `Clone - ${cloneHeading}` : `Update [ ${bulkAssetCreationData?.baNumber || ""} ]`) : "Create " + routes.bulkAssetCreation.title}
                             onClose={() => {
-                                if (isFieldNotTouched(initialData, values)) onClose()
+                                if (isEqual(initialData.values, values)) onClose()
                                 else setShowConfirmDialog(true)
                             }}
                             isMinimized={!fullScreen}
@@ -571,7 +542,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                         <CustomDialogFooter>
                             <Button size="small" color="primary"
                                 onClick={() => {
-                                    if (isFieldNotTouched(initialData, values)) onClose()
+                                    if (isEqual(initialData.values, values)) onClose()
                                     else setShowConfirmDialog(true)
                                 }}
                             >Cancel</Button>
@@ -579,22 +550,12 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                                 loading={loading}
                                 variant="contained"
                                 color="primary"
-                                type="submit"
                                 onClick={(e) => {
                                     e.preventDefault();
                                     handleScroll(errors)
-                                    handleSubmit(
-                                        errors,
-                                        setFieldTouched,
-                                        values,
-                                        setValues,
-                                        setErrors
-                                    );
+                                    handleSubmit();
                                 }}
-                                disabled={
-                                    loading
-                                    // isFieldNotTouched(initialData, values)
-                                }
+                                disabled={loading}
                             > Save</CustomButton>
                         </CustomDialogFooter>
                         {
@@ -605,13 +566,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                                     onSave={() => {
                                         setShowConfirmDialog(false)
                                         handleScroll(errors)
-                                        handleSubmit(
-                                            errors,
-                                            setFieldTouched,
-                                            values,
-                                            setValues,
-                                            setErrors
-                                        );
+                                        handleSubmit();
                                     }}
                                     onClose={() => {
                                         setShowConfirmDialog(false)
