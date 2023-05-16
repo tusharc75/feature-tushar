@@ -1,7 +1,7 @@
-import { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
-import { Grid, Paper, Button, Box, TextField, CircularProgress, Link as MuiLink } from '@material-ui/core';
+import { Grid, Paper, Button, Box, TextField, CircularProgress, Link as MuiLink, Typography } from '@material-ui/core';
 import { Formik, Form } from 'formik';
 import { useData } from '../../StateProvider/Provider';
 import { SET_USER, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
@@ -18,33 +18,12 @@ import { isEmpty } from 'lodash';
 import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
 import { AzureLogin } from '../../components/Azure/Azure';
 import { SiMicrosoftoffice } from 'react-icons/si';
-import { SVG } from '../../assets';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import { entity, eProduct } from '../../constants/helpers';
 import routes from 'src/components/Helpers/Routes';
+import { Logo, LoginImage } from 'src/assets/authenticationAssets';
 
-const useStyles = makeStyles(() => ({
-  container: {
-    height: '90vh',
-    width: '90vw',
-    overflow: 'hidden'
-  },
-  grid: {
-    height: '100%'
-  },
-  formSide: {
-    height: '100%',
-    width: '100%',
-    padding: '30px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  logo: {
-    width: '140px',
-    height: '100%'
-  }
-}));
+import styles from './index.module.scss';
 
 const Login = () => {
   const notification = useContext(CustomNotificationCountContext);
@@ -52,7 +31,6 @@ const Login = () => {
 
   const toastConfig = useContext(CustomToastContext);
   const { dispatch }: any = useData();
-  const classes = useStyles();
   const [isSubmitting, setSubmitting] = useState(false);
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
@@ -200,118 +178,119 @@ const Login = () => {
   };
 
   return (
-    <div className="login-bg">
-      <Paper elevation={10} className={classes.container}>
-        <Grid container className={classes.grid}>
-          <Grid item sm={6} md={5} className="loginSidebar">
-            <Box display={{ xs: 'none', sm: 'block', md: 'block' }}>
-              <img className="imgLogin" src={SVG('imgComputer')} />
-            </Box>
-          </Grid>
-          <Grid item sm={6} md={7} xs={12} className={classes.formSide}>
-            <Box textAlign="center">
-              <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
-              <Box my={4} />
-              <Formik
-                initialValues={{
-                  email: ['local'].includes(process.env.REACT_APP_ENV) ? 'gagan@test.com' : '',
-                  password: ['local'].includes(process.env.REACT_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
-                }}
-                validate={validateForm}
-                onSubmit={handleSubmit}
-              >
-                {({ submitForm, values, errors, touched, setFieldValue }) => (
-                  <Form>
-                    <Box display="flex" flexDirection="column" alignItems="center">
-                      <Box mb={3}>
-                        <TextField
-                          data-testid="email"
-                          style={{ width: 260 }}
-                          variant="outlined"
-                          type="email"
-                          size="small"
-                          label="Email"
-                          name="email"
-                          value={values['email']}
-                          error={touched['email'] && Boolean(errors['email'])}
-                          helperText={touched['email'] && errors['email']}
-                          onChange={(e) => setFieldValue('email', e.target.value)}
-                        />
-                      </Box>
-                      <Box>
-                        <TextField
-                          data-testid="password"
-                          style={{ width: 260 }}
-                          variant="outlined"
-                          type={showPassword ? 'text' : 'password'}
-                          size="small"
-                          label="Password"
-                          name="password"
-                          value={values['password']}
-                          error={touched['password'] && Boolean(errors['password'])}
-                          helperText={touched['password'] && errors['password']}
-                          onChange={(e) => setFieldValue('password', e.target.value)}
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)}>
-                                  {showPassword ? <Visibility /> : <VisibilityOff />}
-                                </IconButton>
-                              </InputAdornment>
-                            )
-                          }}
-                        />
-                      </Box>
-                      <Box width={260} mt={1}>
-                        <Box textAlign="right">
-                          <MuiLink component={Link} to="/forget-password">
-                            Forgot Password?
-                          </MuiLink>
-                        </Box>
-                      </Box>
-                      <Box width={260} className="mt-2">
-                        <Button
-                          disabled={isSubmitting}
-                          fullWidth
-                          variant="contained"
-                          className="logo-bg-color"
-                          type="submit"
-                          onClick={submitForm}
-                          startIcon={isSubmitting && <CircularProgress color='inherit' size={20} />}
-                        >
-                          Login
-                        </Button>
+    <div className={styles.main}>
+      <div className={styles.bg}>
+        <div className={styles.contentContainer}>
+          <div className={styles.left}>
+            <div className={styles.logo}>
+              <Logo />
+            </div>
+            <Formik
+              initialValues={{
+                email: ['local'].includes(process.env.REACT_APP_ENV) ? 'gagan@test.com' : '',
+                password: ['local'].includes(process.env.REACT_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
+              }}
+              validate={validateForm}
+              onSubmit={handleSubmit}
+            >
+              {({ submitForm, values, errors, touched, setFieldValue }) => (
+                <Form>
+                  <UnauthenticatedTemplate>
+                    <AzureLogin />
+                  </UnauthenticatedTemplate>
+                  <Box className={styles.or}>
+                    <Typography>or sign in with</Typography>
+                  </Box>
+                  <div className={styles.fields}>
+                    <div className={styles.input}>
+                      <TextField
+                        data-testid="email"
+                        variant="outlined"
+                        type="email"
+                        size="medium"
+                        label="Email"
+                        name="email"
+                        value={values['email']}
+                        error={touched['email'] && Boolean(errors['email'])}
+                        helperText={touched['email'] && errors['email']}
+                        fullWidth
+                        onChange={(e) => setFieldValue('email', e.target.value)}
+                      />
+                    </div>
+                    <div className={styles.input}>
+                      <TextField
+                        data-testid="password"
+                        variant="outlined"
+                        type={showPassword ? 'text' : 'password'}
+                        size="medium"
+                        label="Password"
+                        name="password"
+                        value={values['password']}
+                        error={touched['password'] && Boolean(errors['password'])}
+                        helperText={touched['password'] && errors['password']}
+                        onChange={(e) => setFieldValue('password', e.target.value)}
+                        fullWidth
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)}>
+                                {showPassword ? <Visibility /> : <VisibilityOff />}
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <Box className={styles.formBottomText}>
+                    <MuiLink component={Link} to="/forget-password">
+                      Forgot Password?
+                    </MuiLink>
+                  </Box>
 
-                        <Box className="mt-2">
-                          <AuthenticatedTemplate>
-                            {invalidAzureLogin ? (
-                              <span>Not authorized loging out in {counter}</span>
-                            ) : (
-                              <Button
-                                className="logo-bg-color"
-                                variant="contained"
-                                fullWidth
-                                startIcon={<SiMicrosoftoffice />}
-                                disabled={isSubmitting}
-                                onClick={() => instance.logoutPopup()}
-                              >
-                                Office 365 Log Out
-                              </Button>
-                            )}
-                          </AuthenticatedTemplate>
-                          <UnauthenticatedTemplate>
-                            <AzureLogin />
-                          </UnauthenticatedTemplate>
-                        </Box>
-                      </Box>
-                    </Box>
-                  </Form>
-                )}
-              </Formik>
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
+                  <Box>
+                    <Button
+                      disabled={isSubmitting}
+                      fullWidth
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      onClick={submitForm}
+                      startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
+                    >
+                      Sign In
+                    </Button>
+
+                    <AuthenticatedTemplate>
+                      {invalidAzureLogin ? (
+                        <span>Not authorized loging out in {counter}</span>
+                      ) : (
+                        <Button
+                          className="logo-bg-color"
+                          variant="contained"
+                          fullWidth
+                          startIcon={<SiMicrosoftoffice />}
+                          disabled={isSubmitting}
+                          onClick={() => instance.logoutPopup()}
+                        >
+                          Office 365 Log Out
+                        </Button>
+                      )}
+                    </AuthenticatedTemplate>
+                  </Box>
+                </Form>
+              )}
+            </Formik>
+          </div>
+          <div className={styles.right} style={{ '--right-padding': '71px 85px 83px 59px' } as React.CSSProperties}>
+            <div className={styles.illustration}>
+              <LoginImage />
+            </div>
+            <Typography component="h2">Enhancing your ERP and B2B System</Typography>
+            <Typography component="p">Lorem ipsum dolor sit amet consectetur. Viverra vitae duis sodales ante interdum morbi ipsum nibh.</Typography>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

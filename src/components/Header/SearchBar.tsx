@@ -189,7 +189,7 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
       <div
         className={`${styles.filtered_data} `}
         ref={listContainerRef}
-        style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll', scrollPadding: '48px 0 0 0' }}
+        style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll', scrollPadding: '48px 0 0 0', marginBottom: 20 }}
       >
         {filteredData.length !== 0 ? (
           filteredData.map((section, pkey) => {
@@ -209,7 +209,7 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
                       <ListItemIcon className={styles.listIcon}>
                         <CallMadeIcon style={{ fontSize: 16 }} />
                       </ListItemIcon>
-                      <ListItemText primary={<span style={{ fontWeight: 500 }}>{item.resourceLabel}</span>} />
+                      <ListItemText primary={<span style={{ fontWeight: 500, fontSize: '15px' }}>{item.resourceLabel}</span>} />
                     </ListItem>
                   );
                 })}
