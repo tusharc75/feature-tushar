@@ -1,71 +1,19 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import {
-  Container,
-  CssBaseline,
-  Grid,
-  Paper,
-  Button,
-  Box,
-  Link as MuiLink,
-  CircularProgress,
-  TextField,
-} from '@material-ui/core';
+import { CssBaseline, Button, Box, Link as MuiLink, CircularProgress, TextField, Typography } from '@material-ui/core';
 import { Formik, Form } from 'formik';
 import queryString from 'query-string';
 import { Redirect, Link } from 'react-router-dom';
-import demoImg from '../../assets/clip-hardworking-man.png';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { SET_USER, USER_LOADING } from '../../StateProvider/actionTypes';
 import { useData } from '../../StateProvider/Provider';
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    marginTop: theme.spacing(5),
-    [theme.breakpoints.up('xs')]: {
-      marginTop: theme.spacing(10),
-    },
-  },
-  formContainer: {
-    textAlign: 'center',
-    padding: theme.spacing(10, 5),
-  },
-  form: {
-    marginTop: theme.spacing(5),
-    display: 'flex',
-    flexDirection: 'column',
-  },
-
-  image: {
-    display: 'none',
-    [theme.breakpoints.up('md')]: {
-      display: 'grid',
-      placeItems: 'center',
-    },
-  },
-  FormControl: {
-    marginBottom: theme.spacing(3),
-  },
-  button: {
-    marginTop: theme.spacing(2),
-    background: theme.palette.secondary.main,
-    color: '#fff',
-
-    '&:hover': {
-      backgroundColor: theme.palette.secondary.main,
-    },
-  },
-  bottomLinks: {
-    marginTop: theme.spacing(2),
-    display: 'flex',
-    justifyContent: 'space-between',
-  },
-}));
+import { BsArrowLeft } from 'react-icons/bs';
+import styles from './index.module.scss';
+import { CreatePasswordImage, Logo } from 'src/assets/authenticationAssets';
 
 const ResetPassword = () => {
-  const toastConfig = useContext(CustomToastContext)
-  const classes = useStyles();
+  const toastConfig = useContext(CustomToastContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTokenValid, setIsTokenValid] = useState(false);
   const [tokenChecking, setTokenChecking] = useState(false);
@@ -73,23 +21,21 @@ const ResetPassword = () => {
   const { dispatch }: any = useData();
 
   useEffect(() => {
-    checkToken()
+    checkToken();
   }, []);
 
   const checkToken = async () => {
-    setTokenChecking(true)
+    setTokenChecking(true);
     axiosInstance(null, { Authorization: `Bearer ${token}` })
-      .get(
-        `/user/check-token`)
+      .get(`/user/check-token`)
       .then(({ data }) => {
-        data.data ?
-          setIsTokenValid(data.data)
+        data.data
+          ? setIsTokenValid(data.data)
           : toastConfig.setToastConfig({
-            message: 'Token is invalid',
-            type: 'error',
-            open: true,
-          });
-
+              message: 'Token is invalid',
+              type: 'error',
+              open: true
+            });
       })
       .catch((error) => {
         console.error(error);
@@ -101,21 +47,18 @@ const ResetPassword = () => {
     setIsSubmitting(true);
 
     axiosInstance(null, { Authorization: `Bearer ${token}` })
-      .post(
-        `/user/reset-password`,
-        {
-          password: values.password,
-        },
-      )
+      .post(`/user/reset-password`, {
+        password: values.password
+      })
       .then(({ data }) => {
         setIsSubmitting(false);
         setIsSubmitting(false);
-        localStorage.setItem("token", data.data.token);
+        localStorage.setItem('token', data.data.token);
         dispatch({ type: USER_LOADING, payload: true });
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
         axiosInstance()
           .get(`/user/me`)
@@ -124,8 +67,8 @@ const ResetPassword = () => {
             dispatch({ type: USER_LOADING, payload: false });
             toastConfig.setToastConfig({
               open: true,
-              type: "success",
-              message: data.message,
+              type: 'success',
+              message: data.message
             });
           })
           .catch((error) => {
@@ -145,122 +88,129 @@ const ResetPassword = () => {
 
     if (!values.password) {
       errors.password = 'Required field';
-    }
-    else if (!values.confirmPassword) {
+    } else if (!values.confirmPassword) {
       errors.confirmPassword = 'Required field';
-    }
-    else if (
-      !/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(
-        values.password,
-      )
-    ) {
-      errors.password =
-        'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
-    }
-    else if (
-      !/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(
-        values.confirmPassword,
-      )
-    ) {
-      errors.confirmPassword =
-        'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
-    }
-    else if (values.confirmPassword !== values.password) {
+    } else if (!/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(values.password)) {
+      errors.password = 'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
+    } else if (!/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(values.confirmPassword)) {
+      errors.confirmPassword = 'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
+    } else if (values.confirmPassword !== values.password) {
       errors.confirmPassword = 'Password and confirm Password does not match';
     }
     return errors;
   };
 
   return !email && !token ? (
-    <Redirect to='/login' />
+    <Redirect to="/login" />
   ) : (
     <React.Fragment>
       <CssBaseline />
-      <Container maxWidth='md'>
-        <Paper elevation={1} className={classes.container}>
-          <Grid container>
-            <Grid item xs={12} sm={12} md={6} className={classes.formContainer}>
-              <h2>Create A New Password</h2>
+      <div className={styles.main}>
+        <div className={styles.bg}>
+          <div className={styles.contentContainer}>
+            <div className={styles.left}>
+              <div className={styles.logo}>
+                <Logo />
+              </div>
               <Formik
                 initialValues={{
                   email,
                   password: '',
-                  confirmPassword: '',
+                  confirmPassword: ''
                 }}
                 validate={validateForm}
-                onSubmit={handleSubmit}>
+                onSubmit={handleSubmit}
+              >
                 {({ submitForm, values, touched, errors, setFieldValue }) => (
-                  <Form className={classes.form}>
-                    <TextField
-                      name='email'
-                      type='email'
-                      label='Email'
-                      disabled
-                      variant='outlined'
-                      required
-                      value={values["email"]}
-                      error={touched['email'] && Boolean(errors['email'])}
-                      helperText={touched['email'] && errors['email']}
-                      onChange={(e) => {
-                        setFieldValue('email', e.target.value);
-                      }}
-                    />
-                    <br />
-                    <TextField
-                      type='password'
-                      label='New Password'
-                      name='password'
-                      disabled={!isTokenValid || !tokenChecking}
-                      variant='outlined'
-                      required
-                      value={values["password"]}
-                      error={touched['password'] && Boolean(errors['password'])}
-                      helperText={touched['password'] && errors['password']}
-                      onChange={(e) => {
-                        setFieldValue('password', e.target.value);
-                      }}
-                    />
-                    <br />
-                    <TextField
-                      type='password'
-                      label='Confirm Password'
-                      name='confirmPassword'
-                      disabled={!isTokenValid || !tokenChecking}
-                      variant='outlined'
-                      required
-                      value={values["confirmPassword"]}
-                      error={touched['confirmPassword'] && Boolean(errors['confirmPassword'])}
-                      helperText={touched['confirmPassword'] && errors['confirmPassword']}
-                      onChange={(e) => {
-                        setFieldValue('confirmPassword', e.target.value);
-                      }}
-                    />
-                    <br />
+                  <Form>
+                    <div className={styles.fields}>
+                      <div className={styles.input}>
+                        <TextField
+                          name="email"
+                          type="email"
+                          label="Email"
+                          disabled
+                          variant="outlined"
+                          required
+                          value={values['email']}
+                          fullWidth
+                          error={touched['email'] && Boolean(errors['email'])}
+                          helperText={touched['email'] && errors['email']}
+                          onChange={(e) => {
+                            setFieldValue('email', e.target.value);
+                          }}
+                        />
+                      </div>
+                      <div className={styles.input}>
+                        <TextField
+                          type="password"
+                          label="New Password"
+                          name="password"
+                          fullWidth
+                          disabled={!isTokenValid || !tokenChecking}
+                          variant="outlined"
+                          required
+                          value={values['password']}
+                          error={touched['password'] && Boolean(errors['password'])}
+                          helperText={touched['password'] && errors['password']}
+                          onChange={(e) => {
+                            setFieldValue('password', e.target.value);
+                          }}
+                        />
+                      </div>
+                      <div className={styles.input}>
+                        <TextField
+                          type="password"
+                          label="Confirm Password"
+                          name="confirmPassword"
+                          disabled={!isTokenValid || !tokenChecking}
+                          variant="outlined"
+                          fullWidth
+                          required
+                          value={values['confirmPassword']}
+                          error={touched['confirmPassword'] && Boolean(errors['confirmPassword'])}
+                          helperText={touched['confirmPassword'] && errors['confirmPassword']}
+                          onChange={(e) => {
+                            setFieldValue('confirmPassword', e.target.value);
+                          }}
+                        />
+                      </div>
+                    </div>
+
                     <Button
-                      variant='contained'
-                      color='primary'
-                      size="small"
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      className={styles.submitButton}
+                      fullWidth
                       disabled={isSubmitting || !isTokenValid || !tokenChecking}
                       onClick={submitForm}
-                      startIcon={isSubmitting && <CircularProgress size={20} color='inherit' />}
+                      startIcon={isSubmitting && <CircularProgress size={20} color="inherit" />}
                     >
                       Submit
                     </Button>
                   </Form>
                 )}
               </Formik>
-              <Box className={classes.bottomLinks}>
-                <MuiLink to='/login' component={Link}>
+              <Box className={styles.formBottomTextleft}>
+                <MuiLink component={Link} to="/login">
+                  <BsArrowLeft />
                   Go To Login
                 </MuiLink>
               </Box>
-            </Grid>
-            <Grid item xs={12} sm={12} md={6} className={classes.image}>
-              <img src={demoImg} alt='illustration' style={{ width: '100%' }} />
-            </Grid>
-          </Grid>
-        </Paper>
-      </Container>
+            </div>
+            <div className={styles.right} style={{ '--right-padding': '70px 44px 86px 44px' } as React.CSSProperties}>
+              <div className={styles.illustration}>
+                <CreatePasswordImage />
+              </div>
+              <Typography component="h2">Create New Password</Typography>
+              <Typography component="p">
+                Lorem ipsum dolor sit amet consectetur. Viverra vitae duis sodales ante interdum morbi ipsum nibh.
+              </Typography>
+            </div>
+          </div>
+        </div>
+      </div>
     </React.Fragment>
   );
 };

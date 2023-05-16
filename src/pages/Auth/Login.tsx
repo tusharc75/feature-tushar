@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useHistory, Link } from 'react-router-dom';
-import { makeStyles } from '@material-ui/core/styles';
-import { Grid, Paper, Button, Box, TextField, CircularProgress, Link as MuiLink, Typography } from '@material-ui/core';
+import { CssBaseline, Button, Box, TextField, CircularProgress, Link as MuiLink, Typography } from '@material-ui/core';
 import { Formik, Form } from 'formik';
 import { useData } from '../../StateProvider/Provider';
 import { SET_USER, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
@@ -19,7 +18,7 @@ import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
 import { AzureLogin } from '../../components/Azure/Azure';
 import { SiMicrosoftoffice } from 'react-icons/si';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
-import { entity, eProduct } from '../../constants/helpers';
+import { entity } from '../../constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import { Logo, LoginImage } from 'src/assets/authenticationAssets';
 
@@ -178,120 +177,126 @@ const Login = () => {
   };
 
   return (
-    <div className={styles.main}>
-      <div className={styles.bg}>
-        <div className={styles.contentContainer}>
-          <div className={styles.left}>
-            <div className={styles.logo}>
-              <Logo />
-            </div>
-            <Formik
-              initialValues={{
-                email: ['local'].includes(process.env.REACT_APP_ENV) ? 'gagan@test.com' : '',
-                password: ['local'].includes(process.env.REACT_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
-              }}
-              validate={validateForm}
-              onSubmit={handleSubmit}
-            >
-              {({ submitForm, values, errors, touched, setFieldValue }) => (
-                <Form>
-                  <UnauthenticatedTemplate>
-                    <AzureLogin />
-                  </UnauthenticatedTemplate>
-                  <Box className={styles.or}>
-                    <Typography>or sign in with</Typography>
-                  </Box>
-                  <div className={styles.fields}>
-                    <div className={styles.input}>
-                      <TextField
-                        data-testid="email"
-                        variant="outlined"
-                        type="email"
-                        size="medium"
-                        label="Email"
-                        name="email"
-                        value={values['email']}
-                        error={touched['email'] && Boolean(errors['email'])}
-                        helperText={touched['email'] && errors['email']}
-                        fullWidth
-                        onChange={(e) => setFieldValue('email', e.target.value)}
-                      />
-                    </div>
-                    <div className={styles.input}>
-                      <TextField
-                        data-testid="password"
-                        variant="outlined"
-                        type={showPassword ? 'text' : 'password'}
-                        size="medium"
-                        label="Password"
-                        name="password"
-                        value={values['password']}
-                        error={touched['password'] && Boolean(errors['password'])}
-                        helperText={touched['password'] && errors['password']}
-                        onChange={(e) => setFieldValue('password', e.target.value)}
-                        fullWidth
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)}>
-                                {showPassword ? <Visibility /> : <VisibilityOff />}
-                              </IconButton>
-                            </InputAdornment>
-                          )
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <Box className={styles.formBottomText}>
-                    <MuiLink component={Link} to="/forget-password">
-                      Forgot Password?
-                    </MuiLink>
-                  </Box>
-
-                  <Box>
-                    <Button
-                      disabled={isSubmitting}
-                      fullWidth
-                      variant="contained"
-                      color="primary"
-                      type="submit"
-                      onClick={submitForm}
-                      startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
-                    >
-                      Sign In
-                    </Button>
-
-                    <AuthenticatedTemplate>
-                      {invalidAzureLogin ? (
-                        <span>Not authorized loging out in {counter}</span>
-                      ) : (
-                        <Button
-                          className="logo-bg-color"
-                          variant="contained"
+    <>
+      <CssBaseline />
+      <div className={styles.main}>
+        <div className={styles.bg}>
+          <div className={styles.contentContainer}>
+            <div className={styles.left}>
+              <div className={styles.logo}>
+                <Logo />
+              </div>
+              <Formik
+                initialValues={{
+                  email: ['local'].includes(process.env.REACT_APP_ENV) ? 'gagan@test.com' : '',
+                  password: ['local'].includes(process.env.REACT_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
+                }}
+                validate={validateForm}
+                onSubmit={handleSubmit}
+              >
+                {({ submitForm, values, errors, touched, setFieldValue }) => (
+                  <Form>
+                    <UnauthenticatedTemplate>
+                      <AzureLogin />
+                    </UnauthenticatedTemplate>
+                    <Box className={styles.or}>
+                      <Typography>or sign in with</Typography>
+                    </Box>
+                    <div className={styles.fields}>
+                      <div className={styles.input}>
+                        <TextField
+                          data-testid="email"
+                          variant="outlined"
+                          type="email"
+                          size="medium"
+                          label="Email"
+                          name="email"
+                          value={values['email']}
+                          error={touched['email'] && Boolean(errors['email'])}
+                          helperText={touched['email'] && errors['email']}
                           fullWidth
-                          startIcon={<SiMicrosoftoffice />}
-                          disabled={isSubmitting}
-                          onClick={() => instance.logoutPopup()}
-                        >
-                          Office 365 Log Out
-                        </Button>
-                      )}
-                    </AuthenticatedTemplate>
-                  </Box>
-                </Form>
-              )}
-            </Formik>
-          </div>
-          <div className={styles.right} style={{ '--right-padding': '71px 85px 83px 59px' } as React.CSSProperties}>
-            <div className={styles.illustration}>
-              <LoginImage />
+                          onChange={(e) => setFieldValue('email', e.target.value)}
+                        />
+                      </div>
+                      <div className={styles.input}>
+                        <TextField
+                          data-testid="password"
+                          variant="outlined"
+                          type={showPassword ? 'text' : 'password'}
+                          size="medium"
+                          label="Password"
+                          name="password"
+                          value={values['password']}
+                          error={touched['password'] && Boolean(errors['password'])}
+                          helperText={touched['password'] && errors['password']}
+                          onChange={(e) => setFieldValue('password', e.target.value)}
+                          fullWidth
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)}>
+                                  {showPassword ? <Visibility /> : <VisibilityOff />}
+                                </IconButton>
+                              </InputAdornment>
+                            )
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <Box className={styles.formBottomText}>
+                      <MuiLink component={Link} to="/forget-password">
+                        Forgot Password?
+                      </MuiLink>
+                    </Box>
+
+                    <Box>
+                      <Button
+                        disabled={isSubmitting}
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        type="submit"
+                        className={styles.submitButton}
+                        onClick={submitForm}
+                        startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
+                      >
+                        Sign In
+                      </Button>
+
+                      <AuthenticatedTemplate>
+                        {invalidAzureLogin ? (
+                          <span>Not authorized loging out in {counter}</span>
+                        ) : (
+                          <Button
+                            className="logo-bg-color"
+                            variant="contained"
+                            fullWidth
+                            startIcon={<SiMicrosoftoffice />}
+                            disabled={isSubmitting}
+                            onClick={() => instance.logoutPopup()}
+                          >
+                            Office 365 Log Out
+                          </Button>
+                        )}
+                      </AuthenticatedTemplate>
+                    </Box>
+                  </Form>
+                )}
+              </Formik>
             </div>
-            <Typography component="h2">Enhancing your ERP and B2B System</Typography>
-            <Typography component="p">Lorem ipsum dolor sit amet consectetur. Viverra vitae duis sodales ante interdum morbi ipsum nibh.</Typography>
+            <div className={styles.right} style={{ '--right-padding': '71px 85px 83px 59px' } as React.CSSProperties}>
+              <div className={styles.illustration}>
+                <LoginImage />
+              </div>
+              <Typography component="h2">Enhancing your ERP and B2B System</Typography>
+              <Typography component="p">
+                Lorem ipsum dolor sit amet consectetur. Viverra vitae duis sodales ante interdum morbi ipsum nibh.
+              </Typography>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

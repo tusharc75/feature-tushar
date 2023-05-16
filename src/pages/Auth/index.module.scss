@@ -14,7 +14,6 @@
   }
 
   svg {
-    width: 100%;
     max-width: 100%;
   }
 
@@ -40,10 +39,7 @@
     background-color: #fff;
     border-radius: 4px;
   }
-  .left {
-    padding: var(--left-padding, 30px 20px);
-    border-right: 1px solid #e2e2e2;
-  }
+
   .logo {
     max-width: scaleFunc(129px);
     max-height: scaleFunc(35px);
@@ -73,6 +69,9 @@
     }
     margin: scaleFunc(19px) 0 scaleFunc(24px);
   }
+  .fields {
+    margin-bottom: scaleFunc(18px);
+  }
   .input {
     margin-bottom: scaleFunc(24px);
 
@@ -81,17 +80,46 @@
     }
   }
   .formBottomText {
-    padding: scaleFunc(20px) 0 scaleFunc(36px);
+    margin: scaleFunc(20px) 0 scaleFunc(36px);
     text-align: right;
     color: #2a3547;
     font-weight: 500;
     font-size: scaleFunc(13px);
     line-height: 19px;
+    & a {
+      display: inline-flex;
+      align-items: center;
+      gap: scaleFunc(14px);
+    }
     & a:hover {
       color: var(--link);
     }
   }
+  .formBottomTextleft {
+    margin: scaleFunc(18px) 0 0;
+    color: #2a3547;
+    font-weight: 500;
+    font-size: scaleFunc(13px);
+    line-height: 19px;
 
+    & a {
+      display: inline-flex;
+      align-items: center;
+      gap: scaleFunc(14px);
+    }
+    & a:hover {
+      color: var(--link);
+    }
+  }
+  .right,
+  .left {
+    display: grid;
+    align-items: center;
+  }
+  .left {
+    padding: var(--left-padding, 30px 20px);
+    border-right: 1px solid #e2e2e2;
+  }
   .right {
     @media all and (max-width: 768px) {
       display: none;
@@ -99,6 +127,9 @@
     padding: var(--right-padding);
     .illustration {
       margin-bottom: scaleFunc(46px);
+      max-width: max-content;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     h2 {
@@ -116,5 +147,9 @@
       text-align: center;
       color: #545454;
     }
+  }
+  .submitButton {
+    border-radius: 6px !important;
+    min-height: scaleFunc(38px) !important;
   }
 }
