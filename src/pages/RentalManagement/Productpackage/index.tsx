@@ -38,7 +38,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
 
-  // const [recordToUpdate, setRecordToUpdate] = useState(null);
 
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -672,8 +671,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           onClose={() => {
             setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
             setIsBulkEdit(false);
-            // setRecordToUpdate(null);
-
             if (isInlineEdit) {
               setIsInlineEdit(false);
             }
