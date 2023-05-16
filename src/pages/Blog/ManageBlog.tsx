@@ -11,7 +11,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { CustomDialogTransition, isFieldNotTouched, setFieldsInAscendingOrder } from 'src/constants/helpers';
+import { CustomDialogTransition, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
@@ -28,10 +28,7 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
-  const [formValues, setFormValues] = useState({});
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
-
-  const ref = useRef(null);
 
   useEffect(() => {
     fetchFields();
@@ -117,17 +114,6 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
         });
     }
   };
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
-
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
 
   return (
     <Dialog
@@ -148,24 +134,19 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           onSubmit={handleSubmit}
-          validate={validate}
-          innerRef={ref}
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose()
+                  else setShowConfirmDialog(true)
                 }}
                 title={`${id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.title ? `(${initialData.values?.title})` : ''}`
-                    : `Create New Blog`
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.title ? `(${initialData.values?.title})` : ''}`
+                  : `Create New Blog`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -200,7 +181,6 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                       type={field.type}
                                       options={field.option}
                                       setFieldValue={(name, value) => {
-                                        handleValuesChange({ [name]: value });
                                         setFieldValue(name, value);
                                       }}
                                       required={field.required}
@@ -232,17 +212,8 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
-                    else setShowConfirmDialog(true);
+                    if (isEqual(initialData.values, values)) onClose()
+                    else setShowConfirmDialog(true)
                   }}
                 >
                   Cancel

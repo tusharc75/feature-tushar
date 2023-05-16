@@ -860,7 +860,7 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                                                                                     : <FormTypes
                                                                                         {...field}
                                                                                         fieldData={field}
-                                                                                        allFields={initialData.fields}
+                                                                                        fields={initialData.fields}
                                                                                         isNew={!Boolean(deliveryTicketId)}
                                                                                         values={values}
                                                                                         errors={errors}
@@ -889,7 +889,7 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                                                 <FormTypes
                                                     {...field}
                                                     fieldData={field}
-                                                    allFields={initialData.fields}
+                                                    fields={initialData.fields}
                                                     disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
                                                     isNew={Boolean(deliveryTicketId)}
                                                     values={values}

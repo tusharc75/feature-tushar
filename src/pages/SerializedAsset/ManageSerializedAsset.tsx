@@ -24,6 +24,7 @@ import { useData } from '../../StateProvider/Provider';
 import CreateProductCategory from '../ProductCategory/CreateProductCategory';
 import CreateProduct from "../../components/Product/CreateProduct";
 import ManageAccountDialog from "../Account/ManageAccount";
+import { isEqual } from 'lodash';
 
 const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null, isNew = true,
   referenceType = null, referenceData = null }) => {
@@ -37,7 +38,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
   const [allFields, setAllFields] = useState([]);
   const [productDescriptionOptions, setProductDescriptionOptions] = useState([]);
   const [cloneHeading, setCloneHeading] = useState('')
-  const [formValues, setFormValues] = useState({});
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [productOpen, setProductOpen] = useState({ open: false, isClone: false });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -83,7 +83,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
                 });
-                setFormValues(getObjKeysWithValues(oldValues, fieldsDataForCreate));
                 setLoading(false);
               } else {
                 fieldsDataForUpdate?.forEach((e: any) => {
@@ -95,7 +94,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                   fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
                 });
-                setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
               }
             })
             .catch((error) => {
@@ -134,7 +132,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
             values: createValues
           });
-          setFormValues(createValues);
         }
       })
       .catch((error) => {
@@ -172,20 +169,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
     }
   };
 
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
-
-  const isFieldNotTouched = (initialData, values) => {
-    return (
-      Object.values(simplifyValues(initialData.values, initialData?.fields[0]?.sectionFields || [])).toString() ===
-      Object.values(simplifyValues(values, initialData?.fields[0]?.sectionFields || [])).toString()
-    );
-  };
-
   return (
     <>
       <Dialog
@@ -210,7 +193,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                     productInventoryId ? (isClone ? `Clone - ${cloneHeading}` : 'Update ' + routes.serializedAsset.title) : 'Create ' + routes.serializedAsset.title
                   }
                   onClose={() => {
-                    if (isFieldNotTouched(initialData, values)) onClose();
+                    if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                   isMinimized={!fullScreen}
@@ -258,10 +241,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                               const productCategory = val && val?.productCategory ? val?.productCategory : '';
                                               setFieldValue(field.fieldName, value);
                                               setFieldValue('productCategory', productCategory);
-                                              handleValuesChange({
-                                                [field.fieldName]: value,
-                                                productCategory: productCategory
-                                              });
                                               const productLabel = productCategory
                                                 ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionLabel
                                                 : '';
@@ -314,10 +293,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                               const label = val && val.optionLabel ? val.optionLabel : '';
                                               setFieldValue(field.fieldName, value);
                                               setFieldValue("product", "")
-                                              handleValuesChange({
-                                                [field.fieldName]: value && value.optionValue ? value.optionValue : "",
-                                                "product": ""
-                                              });
                                               sessionStorage.setItem('productCategoryId', JSON.stringify(value))
                                               sessionStorage.setItem('productCategoryName', JSON.stringify(label))
                                             }}
@@ -418,7 +393,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                         type={field.type}
                                         options={field.option}
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value });
                                           setFieldValue(name, value);
                                         }}
                                         required={field.required}
@@ -533,7 +507,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                     size="small"
                     color="primary"
                     onClick={() => {
-                      if (isFieldNotTouched(initialData, values)) onClose();
+                      if (isEqual(initialData.values, values)) onClose();
                       else setShowConfirmDialog(true);
                       sessionStorage.removeItem('productCategoryId')
                       sessionStorage.removeItem('productCategoryName')

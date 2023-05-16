@@ -590,40 +590,36 @@ const User: FC = () => {
 
   return (
     <>
-      {
-        isOpen?.open && (
-          <ManageUserDialog
-            open={isOpen?.open}
-            isClone={isOpen?.isClone}
-            close={handleClose}
-            onSuccess={(obj) => { setUserList([]); fetchUsers() }}
-            userId={isOpen?.idToClone}
-            dataToUpdate={null}
-            isNew={isOpen?.isClone ? false : true}
-            isUserSetupPermission={isUserSetupPermission}
-          />
-          // <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
-        )
-      }
-      {
-        openUserSetupDialog && (
-          <UserSetupDialog
-            open={openUserSetupDialog}
-            close={() => setOpenUserSetupDialog(false)}
-            userIds={selectedRecords.map((d) => d._id)}
-            onSuccess={() => {
-              setOpenUserSetupDialog(false)
-              fetchUsers()
-            }}
-            fetchUsers={() => fetchUsers()}
-            userList={userList}
-            selectedRecords={selectedRecords}
-            isRoleSetUpPermission={isRoleSetUpPermission}
-            isApprovalProcess={isLoggedInUserBrandAdmin}
-            roleAccessIds={roleAccessOfLoggedInUser}
-            entityAccessIds={entityAccess}
-          />
-        )
+      {isOpen?.open && (
+        <ManageUserDialog
+          open={isOpen?.open}
+          isClone={isOpen?.isClone}
+          close={handleClose}
+          onSuccess={(obj) => { setUserList([]); fetchUsers() }}
+          userId={isOpen?.idToClone}
+          dataToUpdate={null}
+          isNew={isOpen?.isClone ? false : true}
+          isUserSetupPermission={isUserSetupPermission}
+        />
+      )}
+      {openUserSetupDialog && (
+        <UserSetupDialog
+          open={openUserSetupDialog}
+          close={() => setOpenUserSetupDialog(false)}
+          userIds={selectedRecords.map((d) => d._id)}
+          onSuccess={() => {
+            setOpenUserSetupDialog(false)
+            fetchUsers()
+          }}
+          fetchUsers={() => fetchUsers()}
+          userList={userList}
+          selectedRecords={selectedRecords}
+          isRoleSetUpPermission={isRoleSetUpPermission}
+          isApprovalProcess={isLoggedInUserBrandAdmin}
+          roleAccessIds={roleAccessOfLoggedInUser}
+          entityAccessIds={entityAccess}
+        />
+      )
       }
       {globalRolesDialogOpen && (
         <Dialog
@@ -835,7 +831,7 @@ const User: FC = () => {
                 showOnlyShowFilteredRecordSwitch={true}
                 showFilters={true}
                 resource={sidebarResource.user}
-                
+
               /> : null}
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (

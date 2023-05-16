@@ -17,7 +17,6 @@ import {
   generateUniqueIdOnly,
   getCollaboratorDropdownDataSource,
   getOwnerDropdownDataSource,
-  isFieldNotTouched,
   setFieldsInAscendingOrder
 } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -58,8 +57,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const [addressData, setAddressData] = useState([]);
   const [billingAddress, setBillingAddress] = useState([]);
   const [shippingAddress, setShippingAddress] = useState([]);
-  const [formValues, setFormValues] = useState({});
-  const ref = useRef(null);
   const history = useHistory();
 
   const updateAccountDropdown = (data) => {
@@ -166,7 +163,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
           fields: fieldsDataForCreate,
           values: tempInitialData
         });
-        setFormValues(tempInitialData)
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -211,13 +207,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
           toastConfig.setToastConfig(error);
         });
     }
-  };
-
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
   };
 
   useEffect(() => {
@@ -266,21 +255,19 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
       open={true}
       fullWidth
       onClose={(e, reason) => {
-        if (isFieldNotTouched(initialData.data, formValues)) onClose()
-        else setShowConfirmDialog(true)
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true)
+        }
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} innerRef={ref}>
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
                 title={`${id
                   ? isClone
@@ -346,9 +333,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                               if (initialData?.fields?.some((e) => e.fieldName === 'shippingAddress')) {
                                                 setFieldValue('shippingAddress', '');
                                               }
-                                              handleValuesChange({
-                                                [field.fieldName]: value && value.optionValue ? value.optionValue : ''
-                                              });
                                             }}
                                           />
                                         </Grid>
@@ -396,7 +380,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                             options={customerContactDataSource}
                                             doNotShowInfoTooltip={true}
                                             setFieldValue={(name, value) => {
-                                              handleValuesChange({ [name]: value });
                                               setFieldValue(name, value);
                                             }}
                                             disabled={!isClone ? id && field.disableOnEdit : false}
@@ -444,7 +427,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                         options={ownerData}
                                         onChange={(e, val) => {
                                           setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                          handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : '' });
 
                                           if (val && val.optionValue !== user?.user?._id) {
                                             const checkOwnerAddedInCollaborator = values['collaborator'].find(
@@ -455,9 +437,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                                 ...values['collaborator'],
                                                 collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
                                               ]);
-                                              handleValuesChange({
-                                                collaborator: collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                              });
                                             }
                                           }
                                         }}
@@ -485,7 +464,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                         type={field.type}
                                         options={collaboratorData}
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value });
                                           setFieldValue(name, value);
                                         }}
                                         required={field.required}
@@ -613,16 +591,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
+                    if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >

@@ -17,8 +17,6 @@ import {
   getObjKeys,
   getObjKeysWithValues,
   getOwnerDropdownDataSource,
-  isFieldNotTouched,
-  salesOrder,
   setFieldsInAscendingOrder,
   yupSchema,
   generateUniqueIdOnly,
@@ -54,7 +52,6 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [contactData, setContactData] = useState([]);
@@ -185,7 +182,6 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
               fields: fieldsDataForCreate,
               initialValues: getObjKeysWithValues(rest, fieldsDataForCreate)
             });
-            setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
             setLoading(false);
           } else {
             setSalesDetails(data);
@@ -193,7 +189,6 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
               fields: fieldsDataForUpdate,
               initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
             });
-            setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
             setLoading(false);
           }
         } catch (error) {
@@ -206,26 +201,12 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
           fields: fieldsDataForCreate,
           initialValues: initialData
         });
-        setFormValues(initialData);
         setLoading(false);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
-
-  // const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
-  //   if (Object.keys(errors).length) {
-  //     salesData.fields.forEach((input) => {
-  //       if (input.required || values[input.fieldName]) {
-  //         setTouched(input.fieldName, true);
-  //       }
-  //     });
-  //     setErrors({ ...errors });
-  //   } else {
-  //     handleUpdateSalesOrder(values);
-  //   }
-  // };
 
   const handleSubmit = (values) => {
     setLoading(true);
@@ -296,12 +277,6 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
     }
   };
 
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
 
   return (
     <>

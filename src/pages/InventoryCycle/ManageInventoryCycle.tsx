@@ -10,12 +10,13 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, isFieldNotTouched } from './../../constants/helpers';
+import { CustomDialogTransition } from './../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import { isEqual } from 'lodash';
 
 const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDisabled = false, isClone = false }) => {
 
@@ -140,17 +141,8 @@ const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDi
                   : values['name'] : 'Create ' + routes.inventoryCycle.title
                 }
                 onClose={() => {
-                  if (
-                    isFieldNotTouched(
-                      {
-                        initialValues: initialData.values,
-                        fields: initialData.fields
-                      },
-                      values
-                    )
-                  )
-                    onClose();
-                  else setShowConfirmDialog(true);
+                  if (isEqual(initialData.values, values)) onClose()
+                  else setShowConfirmDialog(true)
                 }}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -179,17 +171,8 @@ const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDi
                   size="small"
                   color="primary"
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
-                    else setShowConfirmDialog(true);
+                    if (isEqual(initialData.values, values)) onClose()
+                    else setShowConfirmDialog(true)
                   }}
                 >
                   {isUpdateDisabled ? 'Close' : 'Cancel'}
