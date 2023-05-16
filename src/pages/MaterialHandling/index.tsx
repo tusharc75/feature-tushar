@@ -9,7 +9,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Request from './Request';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { Autocomplete } from '@material-ui/lab';
-import { SelectAllSharp } from '@material-ui/icons';
 
 const MaterialHandling = () => {
 
