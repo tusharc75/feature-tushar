@@ -284,14 +284,12 @@ const Login = () => {
                 )}
               </Formik>
             </div>
-            <div className={styles.right} style={{ '--right-padding': '71px 85px 83px 59px' } as React.CSSProperties}>
+            <div className={styles.right} style={{ '--right-padding': '71px 51px 83px 51px' } as React.CSSProperties}>
               <div className={styles.illustration}>
                 <LoginImage />
               </div>
               <Typography component="h2">Enhancing your ERP and B2B System</Typography>
-              <Typography component="p">
-                Lorem ipsum dolor sit amet consectetur. Viverra vitae duis sodales ante interdum morbi ipsum nibh.
-              </Typography>
+              <Typography component="p">Unleash the potential with our all in one platform that provides ERP and B2B solutions at ease. </Typography>
             </div>
           </div>
         </div>

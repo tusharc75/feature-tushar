@@ -113,8 +113,11 @@
   }
   .right,
   .left {
-    display: grid;
-    align-items: center;
+    // display: grid;
+    // align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
   .left {
     padding: var(--left-padding, 30px 20px);
@@ -139,6 +142,9 @@
       color: #2a3042;
       font-weight: 600;
       margin-bottom: scaleFunc(14px);
+      max-width: 281px;
+      margin-left: auto;
+      margin-right: auto;
     }
     p {
       font-weight: 400;

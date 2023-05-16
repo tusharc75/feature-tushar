@@ -5,6 +5,7 @@ import { object, string } from 'yup';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { BsArrowLeft } from 'react-icons/bs';
 
 import styles from './index.module.scss';
 import { ForgetPasswordImage, Logo } from 'src/assets/authenticationAssets';
@@ -75,12 +76,6 @@ const ForgetPassword = () => {
                       </div>
                     </div>
 
-                    <Box className={styles.formBottomText}>
-                      <MuiLink component={Link} to="/login">
-                        Go To Login
-                      </MuiLink>
-                    </Box>
-
                     <Button
                       variant="contained"
                       color="primary"
@@ -93,6 +88,13 @@ const ForgetPassword = () => {
                     >
                       Submit
                     </Button>
+
+                    <Box className={styles.formBottomTextleft}>
+                      <MuiLink component={Link} to="/login">
+                        <BsArrowLeft />
+                        Go To Login
+                      </MuiLink>
+                    </Box>
                   </Form>
                 )}
               </Formik>

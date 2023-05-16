@@ -204,9 +204,7 @@ const ResetPassword = () => {
                 <CreatePasswordImage />
               </div>
               <Typography component="h2">Create New Password</Typography>
-              <Typography component="p">
-                Lorem ipsum dolor sit amet consectetur. Viverra vitae duis sodales ante interdum morbi ipsum nibh.
-              </Typography>
+              <Typography component="p">Easily create new password in just a few clicks without any hassle.</Typography>
             </div>
           </div>
         </div>
