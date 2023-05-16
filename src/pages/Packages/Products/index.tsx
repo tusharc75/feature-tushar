@@ -247,6 +247,7 @@ const ProductsTable = ({ packageId, packageData }) => {
         .catch((err) => {
           setRemovingProducts(false);
           setShowProductConfirmBox(false);
+          setSelectedRecords([])
           setToastConfig(err);
         });
     }
@@ -256,11 +257,13 @@ const ProductsTable = ({ packageId, packageData }) => {
         .then(() => {
           setRemovingProducts(false);
           setShowProductConfirmBox(false);
+          setSelectedRecords([])
           fetchData();
         })
         .catch((err) => {
           setRemovingProducts(false);
           setShowProductConfirmBox(false);
+          setSelectedRecords([])
           setToastConfig(err);
         });
     }
@@ -411,6 +414,7 @@ const ProductsTable = ({ packageId, packageData }) => {
           message={`Are you sure you want to delete ?`}
           onClose={() => {
             setShowProductConfirmBox(false);
+            setSelectedRecords([])
           }}
           okBtnLoading={isRemovingProducts}
           onOk={removeProducts}

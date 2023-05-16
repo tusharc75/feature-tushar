@@ -271,6 +271,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.isDropdown = values.isDropdown || false;
             ele.isSystemGenerate = values?.isSystemGenerate || false;
             ele.isColumnEditable = values?.isColumnEditable || false;
+            ele.isHideColumnSum = values?.isHideColumnSum || false;
 
             if (values?.hasOwnProperty('isWarningTooltip')) {
               ele.isWarningTooltip = values.isWarningTooltip;
@@ -1092,6 +1093,21 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         />
                       }
                       label="Editable Column"
+                    />
+
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="isHideColumnSum"
+                          checked={values['isHideColumnSum']}
+                          onChange={(e) => {
+                            setFieldValue('isHideColumnSum', e.target.checked);
+                            handleValuesChange({ isHideColumnSum: e.target.checked });
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Hide Column Sum"
                     />
 
                     <FormControlLabel

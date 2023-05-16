@@ -296,7 +296,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                                     errors={errors}
                                     disabled={(Boolean(repairJob) && field.disableOnEdit && !isClone)}
                                     fieldData={field}
-                                    allFields={initialData.fields}
+                                    fields={initialData.fields}
                                     touched={touched}
                                     label={field.fieldLabel}
                                     name={field.fieldName}

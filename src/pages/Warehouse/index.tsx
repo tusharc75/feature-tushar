@@ -54,8 +54,7 @@ const Warehouse = () => {
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [open, setOpen] = useState({ open: false, isClone: false });
-  const [addressResource, setAddressResource] = useState(null);
+  const [open, setOpen] = useState({ open: false, isClone: false, id: null });
   const [anchorEl, setAnchorEl] = useState(null);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
   const [warehouseId, setWarehouseId] = useState('');
@@ -71,14 +70,6 @@ const Warehouse = () => {
     state;
   const [sortOpen, setSortOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
-
-  useEffect(() => {
-    const parsedParams = queryString.parse(location?.search);
-    if (parsedParams?.id) {
-      setAddressResource({ id: parsedParams?.id });
-      setOpen({ open: true, isClone: false });
-    }
-  }, [location]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -172,8 +163,7 @@ const Warehouse = () => {
             aria-label="Clone"
             disabled={!permissions?.warehouse?.isCreate}
             onClick={() => {
-              setAddressResource(params.data);
-              setOpen({ open: true, isClone: true });
+              setOpen({ open: true, isClone: true, id: params.data._id });
             }}
           >
             <FileCopyIcon fontSize="small" color={permissions?.warehouse?.isCreate ? 'primary' : 'inherit'} />
@@ -419,8 +409,7 @@ const Warehouse = () => {
                   {permissions?.warehouse?.isCreate && (
                     <Button
                       onClick={() => {
-                        setAddressResource(null);
-                        setOpen({ open: true, isClone: false });
+                        setOpen({ open: true, isClone: false, id: null });
                       }}
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       size="small"
@@ -569,11 +558,11 @@ const Warehouse = () => {
         )}
         {open?.open && (
           <ManageWarehouse
-            addressResource={addressResource}
+            warehouseId={open.id}
             open={open?.open}
-            close={() => setOpen({ open: false, isClone: false })}
+            close={() => setOpen({ open: false, isClone: false, id: null })}
             onSuccess={() => {
-              setOpen({ open: false, isClone: false });
+              setOpen({ open: false, isClone: false, id: null });
               fetchWarehouses();
             }}
             isClone={open?.isClone}

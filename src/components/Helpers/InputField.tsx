@@ -55,7 +55,6 @@ const InputField = (props) => {
                       isTooltip={field.isTooltip}
                       tooltipMessage={field.tooltipMessage}
                       fields={fieldsData}
-                      allFields={fieldsData}
                       fieldData={field}
                     />
                   ) : field.fieldName === 'day' ? (
@@ -76,7 +75,6 @@ const InputField = (props) => {
                           isTooltip={field.isTooltip}
                           tooltipMessage={field.tooltipMessage}
                           fields={fieldsData}
-                          allFields={fieldsData}
                           fieldData={field}
                         />
                       </Grid>
@@ -99,7 +97,6 @@ const InputField = (props) => {
                           isTooltip={field.isTooltip}
                           tooltipMessage={field.tooltipMessage}
                           fields={fieldsData}
-                          allFields={fieldsData}
                           fieldData={field}
                         />
                       </Grid>
@@ -128,7 +125,6 @@ const InputField = (props) => {
                             isTooltip={field.isTooltip}
                             tooltipMessage={field.tooltipMessage}
                             fields={fieldsData}
-                            allFields={fieldsData}
                             fieldData={field}
                           />
                         </Grid>
@@ -205,7 +201,6 @@ const InputField = (props) => {
                             : null
                         }
                         fields={fieldsData}
-                        allFields={fieldsData}
                         fieldData={field}
                       />
                     </Grid>

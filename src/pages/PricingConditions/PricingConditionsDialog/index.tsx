@@ -10,13 +10,13 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import CustomButton from '../../../components/Helpers/CustomButton'
 import routes from "../../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, isFieldNotTouched } from "./../../../constants/helpers";
+import { CustomDialogTransition } from "./../../../constants/helpers";
 import InputField from "../../../components/Helpers/InputField";
 import { getObjKeysWithValues, getObjKeys, yupSchema, pricingCondition } from "../../../constants/helpers";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
-import { startCase } from 'lodash';
+import { isEqual, startCase } from 'lodash';
 import { useHistory } from "react-router-dom";
 import { useData } from "../../../StateProvider/Provider";
 import moment from "moment";
@@ -132,11 +132,8 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
                         <CustomDialogHeader
                             title={isClone ? "Clone" : pricingConditionId ? !isUpdateDisabled ? "Update " + routes.pricingCondition.title : values["name"] : "Create " + routes.pricingCondition.title}
                             onClose={() => {
-                                if (isFieldNotTouched({
-                                    initialValues: initialData.values,
-                                    fields: initialData.fields
-                                }, values)) onClose()
-                                else setShowConfirmDialog(true)
+                                if (isEqual(initialData.values, values)) onClose();
+                                else setShowConfirmDialog(true);
                             }}
                             isMinimized={!fullScreen}
                             onMinimizeMaximize={() => {
@@ -163,11 +160,8 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
                         <CustomDialogFooter>
                             <Button size="small" color="primary"
                                 onClick={() => {
-                                    if (isFieldNotTouched({
-                                        initialValues: initialData.values,
-                                        fields: initialData.fields
-                                    }, values)) onClose()
-                                    else setShowConfirmDialog(true)
+                                    if (isEqual(initialData.values, values)) onClose();
+                                    else setShowConfirmDialog(true);
                                 }}
 
                             >{"Close"}</Button>

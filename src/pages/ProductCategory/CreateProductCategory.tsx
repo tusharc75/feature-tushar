@@ -10,23 +10,24 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, isFieldNotTouched } from './../../constants/helpers';
+import { CustomDialogTransition } from './../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import { isEqual } from 'lodash';
 
 const CreateProductCategory = (props) => {
+  
   const toastConfig = useContext(CustomToastContext);
   const { productCategoryId, onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [formValues, setFormValues] = useState({});
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [saveClick, setSaveClick] = useState(false);
-  const [cloneHeading,setCloneHeading]= useState('')
+  const [cloneHeading, setCloneHeading] = useState('')
 
   useEffect(() => {
     axiosInstance()
@@ -50,13 +51,11 @@ const CreateProductCategory = (props) => {
                   fields: fieldsDataForCreate,
                   values: getObjKeysWithValues({ ...rest }, fieldsDataForCreate)
                 });
-                setFormValues(getObjKeysWithValues({ ...rest }, fieldsDataForCreate));
               } else {
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
                 });
-                setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
               }
             })
             .catch((error) => {
@@ -67,7 +66,6 @@ const CreateProductCategory = (props) => {
             fields: fieldsDataForCreate,
             values: getObjKeys('', fieldsDataForCreate)
           });
-          setFormValues(getObjKeys('', fieldsDataForCreate));
         }
       })
       .catch((error) => {
@@ -110,13 +108,6 @@ const CreateProductCategory = (props) => {
     }
   };
 
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
-
   return (
     <Dialog
       maxWidth="md"
@@ -146,22 +137,13 @@ const CreateProductCategory = (props) => {
                   isClone
                     ? `Clone - ${cloneHeading}`
                     : productCategoryId
-                    ? !isUpdateDisabled
-                      ? 'Update ' + routes.productCategory.title
-                      : values['name']
-                    : 'Create ' + routes.productCategory.title
+                      ? !isUpdateDisabled
+                        ? 'Update ' + routes.productCategory.title
+                        : values['name']
+                      : 'Create ' + routes.productCategory.title
                 }
                 onClose={() => {
-                  if (
-                    isFieldNotTouched(
-                      {
-                        initialValues: initialData.values,
-                        fields: initialData.fields
-                      },
-                      values
-                    )
-                  )
-                    onClose();
+                  if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
                 isMinimized={!fullScreen}
@@ -172,14 +154,11 @@ const CreateProductCategory = (props) => {
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
-
                   <InputField
                     disabled={isUpdateDisabled}
                     errors={errors}
                     values={values}
                     setFieldValue={(name, value) => {
-                      handleValuesChange({ [name]: value });
                       setFieldValue(name, value);
                     }}
                     touched={touched}
@@ -194,16 +173,7 @@ const CreateProductCategory = (props) => {
                   size="small"
                   color="primary"
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
+                    if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >

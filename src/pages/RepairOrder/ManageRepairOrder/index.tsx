@@ -653,7 +653,7 @@ const ManageRepairOrder = ({
                                     <FormTypes
                                       {...field}
                                       fieldData={field}
-                                      allFields={initialData?.fields}
+                                      fields={initialData?.fields}
                                       disabled={(Boolean(repairOrderId) && field.disableOnEdit && !isClone) || field.isUneditable}
                                       values={values}
                                       errors={errors}

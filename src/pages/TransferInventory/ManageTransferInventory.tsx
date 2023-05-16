@@ -225,7 +225,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                 <FormTypes
                                   isNew={Boolean(transferInventoryId)}
                                   {...field}
-                                  allFields={allFields}
+                                  fields={allFields}
                                   fieldData={field}
                                   disabled={(Boolean(transferInventoryId) && field.disableOnEdit)}
                                   values={values}

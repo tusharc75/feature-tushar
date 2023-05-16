@@ -1,4 +1,4 @@
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@material-ui/core';
+import { Box, Typography } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
@@ -8,22 +8,148 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { dateTimeFormat } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 
-function QtyRequestLog({ onClose, workOrderId, uniqueId }) {
+function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom }) {
 
   const [fullScreen, setFullScreen] = useState(false);
-
+  const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
-  const [requestData, setRequestData] = useState(null);
+  const [rowsData, setRowsData] = useState([]);
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
+    fetchColumn();
     fetchData();
   }, [workOrderId, uniqueId]);
+
+  const fetchColumn = async () => {
+    const column = [];
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+          fieldNames: ['productName', 'productNumber', 'productDescription']
+        }
+      ]
+    });
+    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
+    productFields?.forEach((e) => {
+      if (e?.fieldName === 'productName') {
+        column.push({
+          accessor: e?.fieldName,
+          Header: e?.fieldLabel,
+          width: 200,
+          hide: false,
+          Cell: ({ row }) => {
+            return row?.original[e?.fieldName] ?
+              <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.product?.optionValue}`} target="_blank">
+                {row?.original[e?.fieldName]}
+              </a>
+              : <NoDataCell />;
+          }
+        });
+      }
+      else {
+        column.push({
+          accessor: e?.fieldName,
+          Header: e?.fieldLabel,
+          width: 200,
+          Cell: ({ row }) => {
+            return row?.original[e?.fieldName] ? <p className="text-truncate">{row?.original[e?.fieldName]}</p> : <NoDataCell />;
+          }
+        });
+      }
+    });
+    const extracolumns: any = [
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        width: 200,
+        hide: false,
+        Cell: ({ row }) => {
+          return row?.original['qty'] ? <p className="text-truncate">{row?.original['qty']}</p> : <NoDataCell />;
+        }
+      },
+      ...(user?.user?.brandPolicy?.storageLocation ? [
+        {
+          accessor: 'storageLocation',
+          Header: 'Storage Location',
+          width: 200,
+          hide: false,
+          Cell: ({ row }) => {
+            return row?.original['storageLocation'] ? <p className="text-truncate">{row?.original['storageLocation']}</p> : <NoDataCell />;
+          }
+        }
+      ] : []),
+      {
+        accessor: 'requestBy',
+        Header: 'Request By',
+        width: 200,
+        Cell: ({ row }) => {
+          return row?.original['requestBy'] ? <p className="text-truncate">{row?.original['requestBy']}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'requestDate',
+        Header: 'Request Date',
+        width: 200,
+        Cell: ({ row }) => {
+          return row?.original['requestDate'] ? <p className="text-truncate">{moment(row?.original['requestDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'responseBy',
+        Header: 'Response By ',
+        width: 200,
+        Cell: ({ row }) => {
+          return row?.original['responseBy'] ? <p className="text-truncate">{row?.original['responseBy']}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'responseDate',
+        Header: 'Response Date',
+        width: 200,
+        Cell: ({ row }) => {
+          return row?.original['responseDate'] ? <p className="text-truncate">{moment(row?.original['responseDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
+        }
+      }
+    ];
+    extracolumns.push({
+      accessor: 'status',
+      Header: 'Status',
+      minWidth: 200,
+      width: 200,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => {
+        return <Typography variant='body2'>{row?.original?.status}</Typography>
+      }
+    });
+    setColumns([...column, ...extracolumns]);
+  };
 
   const fetchData = () => {
     axiosInstance().get(`/material-handling/request/${workOrderId}`)
       .then(({ data: { data } }) => {
-        setRequestData(data?.filter((e) => e.uniqueId === uniqueId))
+        const filteredData = data?.filter((e) => e.uniqueId === uniqueId);
+        filteredData?.forEach((e) => {
+          e.productName = e.product?.optionLabel;
+          e.productDescription = e.product?.productDescription;
+          e.productNumber = e.product?.productNumber;
+          e.requestBy = e.requestBy?.optionLabel;
+          e.responseBy = e.responseBy?.optionLabel;
+          e.storageLocation = e.storageLocation?.optionLabel;
+        });
+        setRowsData(filteredData)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -50,47 +176,25 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId }) {
       }}
       showManimizeMaximize={true}
     />
-
     <CustomDialogContent>
-      {requestData ?
+      {rowsData && columns ?
         <Box p={2}>
-          <TableContainer component={Paper}>
-            <Table aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Product</TableCell>
-                  <TableCell>Qty</TableCell>
-                  <TableCell>Request By</TableCell>
-                  <TableCell>Responce By</TableCell>
-                  <TableCell>Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {requestData?.map((data, index) => {
-                  return <TableRow key={index}>
-                    <TableCell scope="row">{data?.product?.optionLabel}</TableCell>
-                    <TableCell scope="row">{data?.qty}</TableCell>
-                    <TableCell scope="row">
-                      <Typography variant='body2'>{data?.requestBy?.optionLabel}</Typography>
-                      <Typography variant='body2'>{moment(data?.requestDate)?.format(dateTimeFormat)}</Typography>
-                    </TableCell>
-                    <TableCell scope="row">
-                      {data?.responseBy ?
-                        <>
-                          <Typography variant='body2'>{data?.responseBy?.optionLabel}</Typography>
-                          <Typography variant='body2'>{moment(data?.responseBy)?.format(dateTimeFormat)}</Typography>
-                        </> :
-                        <span>---</span>
-                      }
-                    </TableCell>
-                    <TableCell scope="row">
-                      {data?.status}
-                    </TableCell>
-                  </TableRow>
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+        <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
+        <CustomReactTable
+          height={'calc(100vh - 200px)'}
+          columns={columns}
+          data={rowsData}
+          onSelect={() => {
+          }}
+          childrenProperty="subRows"
+          uniqueKey="_id"
+          hideSelection={true}
+          hideAction={false}
+          hideExpander={true}
+          renderedFrom={renderedFrom}
+          isClientSideGrid={true}
+        />
+      </Box>
         </Box> :
         <Box p={2} height={500} bgcolor="white">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

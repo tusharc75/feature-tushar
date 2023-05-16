@@ -684,7 +684,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                                 touched={touched}
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
-                                                                                allFields={initialData.fields}
+                                                                                fields={initialData.fields}
                                                                                 type={field.type}
                                                                                 options={field.option}
                                                                                 setFieldValue={(name, value) => {

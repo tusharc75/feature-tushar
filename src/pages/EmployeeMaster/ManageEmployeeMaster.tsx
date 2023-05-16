@@ -11,7 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, isFieldNotTouched, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
@@ -28,7 +28,6 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
-  const ref = useRef(null);
 
   useEffect(() => {
     fetchFields();
@@ -93,7 +92,7 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
         .post(`${routes?.employeeMaster?.path}`, values)
         .then(({ data }) => {
           setLoading(false);
-         onSuccess(data.data);
+          onSuccess(data.data);
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
@@ -109,127 +108,111 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
     }
   };
 
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
+
 
   return (
     <Dialog
-    maxWidth="md"
-    fullScreen={fullScreen || isMobile || isTablet}
-    TransitionComponent={CustomDialogTransition}
-    aria-labelledby="customized-dialog-title"
-    open={true}
-    fullWidth
-    onClose={(e, reason) => {
-      if (reason !== 'backdropClick') {
-        setShowConfirmDialog(true);
-      }
-    }}
-  >
-    {initialData.fields.length ? (
-      <Formik
-        initialValues={initialData.values}
-        validationSchema={yupSchema(initialData.fields)}
-        onSubmit={handleSubmit}
-        validate={validate}
-        innerRef={ref}
-      >
-        {({ values, errors, setFieldValue, touched, submitForm }) => (
-          <Fragment>
-            <CustomDialogHeader
-              onClose={() => {
-                if (!isEqual(ref.current.values, initialData.values)) {
-                  setShowConfirmDialog(true);
-                } else {
-                  onClose();
-                }
-              }}
-              title={`${id
+      maxWidth="md"
+      fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+      aria-labelledby="customized-dialog-title"
+      open={true}
+      fullWidth
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true);
+        }
+      }}
+    >
+      {initialData.fields.length ? (
+        <Formik
+          initialValues={initialData.values}
+          validationSchema={yupSchema(initialData.fields)}
+          onSubmit={handleSubmit}
+        >
+          {({ values, errors, setFieldValue, touched, submitForm }) => (
+            <Fragment>
+              <CustomDialogHeader
+                onClose={() => {
+                  if (isEqual(initialData.values, values)) onClose()
+                  else setShowConfirmDialog(true)
+                }}
+                title={`${id
                   ? isClone
                     ? `Clone - ${cloneHeading}`
                     : `Update ${initialData.values?.employeeNumber ? `(${initialData.values?.employeeNumber})` : ''}`
                   : `Create Employee Master`
-                }`}
-              isMinimized={!fullScreen}
-              onMinimizeMaximize={() => {
-                setFullScreen((prevState) => !prevState);
-              }}
-              showManimizeMaximize={true}
-            />
-            <CustomDialogContent>
-              <Form autoComplete="off" autoCorrect="off" noValidate >
-                <InputField
-                  errors={errors}
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  touched={touched}
-                  fieldsData={initialData.fields}
+                  }`}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              />
+              <CustomDialogContent>
+                <Form autoComplete="off" autoCorrect="off" noValidate >
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    onImageUploadCompletePercentage={(completePercentage) => {
+                      setUploadingImageOrFileProgress(completePercentage)
+                    }}
+                  />
+                </Form>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <Button
                   size="small"
-                  fullWidth
-                  onImageUploadCompletePercentage={(completePercentage)=>{
-                    setUploadingImageOrFileProgress(completePercentage)
+                  color="primary"
+                  disabled={submitting}
+                  onClick={() => {
+                    if (isEqual(initialData.values, values)) onClose()
+                    else setShowConfirmDialog(true)
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  disabled={loading || submitting || uploadingImageOrFileProgress > 0}
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  size="small"
+                  onClick={submitForm}
+                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                >
+                  {' '}
+                  Save
+                </Button>
+              </CustomDialogFooter>
+              {showConfirmDialog ? (
+                <ConfirmationCancelDialog
+                  close={() => setShowConfirmDialog(false)}
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false);
+                    onClose();
                   }}
                 />
-              </Form>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <Button
-                size="small"
-                color="primary"
-                disabled={submitting}
-                onClick={() => {
-                  if (
-                    isFieldNotTouched(
-                      {
-                        initialValues: initialData.values,
-                        fields: initialData.fields
-                      },
-                      values
-                    )
-                  ) onClose();
-                  else setShowConfirmDialog(true);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                disabled={loading || submitting || uploadingImageOrFileProgress > 0}
-                variant="contained"
-                color="primary"
-                type="submit"
-                size="small"
-                onClick={submitForm}
-                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
-              >
-                {' '}
-                Save
-              </Button>
-            </CustomDialogFooter>
-            {showConfirmDialog ? (
-              <ConfirmationCancelDialog
-                close={() => setShowConfirmDialog(false)}
-                open={showConfirmDialog}
-                onSave={() => {
-                  setShowConfirmDialog(false);
-                  submitForm();
-                }}
-                onClose={() => {
-                  setShowConfirmDialog(false);
-                  onClose();
-                }}
-              />
-            ) : null}
-          </Fragment>
-        )}
-      </Formik>
-    ) : (
-      <Box p={2} height={500} bgcolor="white">
-        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-      </Box>
-    )}
-  </Dialog>
+              ) : null}
+            </Fragment>
+          )}
+        </Formik>
+      ) : (
+        <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+    </Dialog>
   )
 };
 

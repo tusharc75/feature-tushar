@@ -125,6 +125,7 @@ export const getCustomColumnData = (title, field) => {
       show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
       disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
       editable: field?.isColumnEditable ?? false,
+      isHideColumnSum: field?.isHideColumnSum ?? false,
       decimalPlaces: field?.decimalPlaces,
       primaryField: field?.primaryField ?? false
     };
@@ -198,7 +199,7 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
                 .reduce((sum, row) => row.values[fieldName] + sum, 0);
               return (
                 <>
-                  {currencySymbol} {formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? total}
+                  {ele?.isHideColumnSum ? '' : `${currencySymbol} ${formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? total}`}
                 </>
               );
             }
@@ -238,7 +239,7 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
               const qtyTotal = info.rows
                 .filter((f) => !f.original.parentId && f.original.hasOwnProperty(ele.fieldName) && !isNaN(f.original[ele.fieldName]))
                 .reduce((sum, row) => row.original[currentColumn.accessor] + sum, 0);
-              return <>{qtyTotal}</>;
+              return <>{ele?.isHideColumnSum ? '' : qtyTotal}</>;
             }
           });
         } else if (ele.type === 'checkBox') {
