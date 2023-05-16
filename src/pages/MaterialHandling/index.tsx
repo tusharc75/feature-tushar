@@ -62,6 +62,9 @@ const MaterialHandling = () => {
                   >
                     <Box p={2}>
                       <Typography>{`Work Order : ${data?.workOrderNumber}`}</Typography>
+                      <Typography>{`Product : ${data?.product?.optionLabel}`}</Typography>
+                      <Typography>{`Asset : ${data?.serializedAsset?.optionLabel}`}</Typography>
+                      <Typography>{`${routes.warehouse.title} : ${data?.warehouse?.optionLabel}`}</Typography>
                     </Box>
                   </Box>
                 );
