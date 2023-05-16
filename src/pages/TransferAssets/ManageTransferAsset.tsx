@@ -14,7 +14,7 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, transferAsset, setFieldsInAscendingOrder, generateUniqueIdOnly, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
-import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from 'src/constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from 'src/components/Helpers/FormTypes';

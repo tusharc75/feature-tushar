@@ -11,7 +11,6 @@ import {
   getObjKeysWithValues,
   initializeDropdownById,
   opportunity,
-  simplifyValues,
   customerAccount,
   setFieldsInAscendingOrder,
   getUniqueCurrencies,

@@ -14,7 +14,6 @@ import {
     getObjKeys,
     yupSchema,
     getObjKeysWithValues,
-    simplifyValues,
     pricingCondition,
     setFieldsInAscendingOrder,
     getUniqueCurrencies,
