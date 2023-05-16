@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -10,7 +10,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
-import { CustomDialogTransition, isFieldNotTouched } from 'src/constants/helpers';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
@@ -26,9 +26,6 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('')
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const ref = useRef(null);
-
-
 
   useEffect(() => {
     fetchFields();
@@ -109,10 +106,7 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
     }
   };
 
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
+
 
   return (
     <Dialog
@@ -133,24 +127,19 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           onSubmit={handleSubmit}
-          validate={validate}
-          innerRef={ref}
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose()
+                  else setShowConfirmDialog(true)
                 }}
                 title={`${id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
-                    : `Create Frequently Asked Question`
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
+                  : `Create Frequently Asked Question`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -177,16 +166,8 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    ) onClose();
-                    else setShowConfirmDialog(true);
+                    if (isEqual(initialData.values, values)) onClose()
+                    else setShowConfirmDialog(true)
                   }}
                 >
                   Cancel

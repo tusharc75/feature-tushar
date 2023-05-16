@@ -60,7 +60,12 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
 
   // GET ATTACHMENT ICON
   const getFileIconSrc = (file) => {
-    if (file.contentType) {
+    if (mimeDb[file]) {
+      let extension = `.${mimeDb[file].extensions[0]}`;
+      let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+      if (data && data?.source) return data.source;
+    }
+    if (file?.contentType) {
       let extension = `.${mimeDb[file.contentType].extensions[0]}`;
       let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
       if (data && data?.source) return data.source;

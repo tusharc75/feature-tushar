@@ -10,13 +10,14 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { fetch_service_order_addOn_fields } from 'src/components/ServiceOrder/helper';
-import { CustomDialogTransition, getObjKeys, getObjKeysWithValues, isFieldNotTouched, yupSchema } from 'src/constants/helpers';
+import { CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 
 const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData }) => {
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -24,7 +25,6 @@ const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData
   const toastConfig = useContext(CustomToastContext);
   const [fields, setFields] = useState([]);
 
-  const ref = useRef(null);
 
   useEffect(() => {
     fetchFields();
@@ -109,16 +109,13 @@ const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} innerRef={ref}>
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose()
+                  else setShowConfirmDialog(true)
                 }}
                 title={`${addOnData ? 'Edit' : 'Add'} Manual Entry`}
                 isMinimized={!fullScreen}
@@ -203,17 +200,8 @@ const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
-                    else setShowConfirmDialog(true);
+                    if (isEqual(initialData.values, values)) onClose()
+                    else setShowConfirmDialog(true)
                   }}
                 >
                   Cancel

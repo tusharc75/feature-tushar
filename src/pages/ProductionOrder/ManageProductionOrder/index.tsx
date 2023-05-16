@@ -487,7 +487,7 @@ const ManageProductionOrder = ({
                                       productionOrderId={productionOrderId}
                                       {...field}
                                       fieldData={field}
-                                      allFields={initialData?.fields}
+                                      fields={initialData?.fields}
                                       disabled={(productionOrderId && field.disableOnEdit)}
                                       values={values}
                                       errors={errors}

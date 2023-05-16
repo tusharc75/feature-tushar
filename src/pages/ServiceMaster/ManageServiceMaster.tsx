@@ -188,7 +188,7 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
                                   isNew={Boolean(serviceMasterId)}
                                   {...field}
                                   fieldData={field}
-                                  allFields={initialData.fields}
+                                  fields={initialData.fields}
                                   disabled={(Boolean(serviceMasterId) && field.disableOnEdit && !isClone) || false}
                                   values={values}
                                   errors={errors}

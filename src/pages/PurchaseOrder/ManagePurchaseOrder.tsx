@@ -23,6 +23,7 @@ import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../Account/ManageAccount";
 import ManageContactDialog from "../Contact/ManageContact";
+import { isEqual } from "lodash";
 
 const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, products = [], services = [],
     currency = null, rentalManagementId = null, warehouseId = null, disableEdit = false, refrenceData = null }) => {
@@ -150,26 +151,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
         setFormsData(setFieldsInAscendingOrder(initialData.fields));
     }, [initialData.fields]);
 
-    const handleSubmit = async (
-        errors,
-        setTouched,
-        values,
-        setValues,
-        setErrors
-    ) => {
-        if (Object.keys(errors).length) {
-            initialData.fields.forEach((input) => {
-                if (input.required || values[input.fieldName]) {
-                    setTouched(input.fieldName, true);
-                }
-            });
-            setErrors({ ...errors });
-        } else {
-            handleUpdatePurchaseOrder(values)
-        }
-    };
-
-    const handleUpdatePurchaseOrder = (values) => {
+    const handleSubmit = (values) => {
         setLoading(true)
         if (purchaseOrderId && isClone === false) {
             values._id = purchaseOrderId
@@ -202,15 +184,6 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
             });
         }
     };
-
-    const isFieldNotTouched = (initialData, values) => {
-        return Object.values(
-            simplifyValues(initialData.values, formsData[0]?.sectionFields || [])
-        ).toString() ===
-            Object.values(
-                simplifyValues(values, formsData[0]?.sectionFields || [])
-            ).toString()
-    }
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
         setOwnerData(
@@ -256,7 +229,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                 initialValues={initialData.values}
                 validationSchema={yupSchema(initialData.fields)}
                 validateOnMount
-                onSubmit={() => { }}
+                onSubmit={handleSubmit}
             >
                 {({ values,
                     errors,
@@ -265,11 +238,12 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     setFieldTouched,
                     setErrors,
                     setValues,
+                    handleSubmit
                 }) => (
                     <Fragment>
                         <CustomDialogHeader title={purchaseOrderId ? (isClone ? `Clone - ${cloneHeading}` : `Update - ${purchaseOrderData?.purchaseOrderNumber || ""}`) : "Create " + routes.purchaseOrder.title}
                             onClose={() => {
-                                if (isFieldNotTouched(initialData, values)) onClose()
+                                if (isEqual(initialData.values, values)) onClose()
                                 else setShowConfirmDialog(true)
                             }}
                             isMinimized={!fullScreen}
@@ -587,7 +561,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                     touched={touched}
                                                                                     label={field.fieldLabel}
                                                                                     fieldData={field}
-                                                                                    allFields={initialData.fields}
+                                                                                    fields={initialData.fields}
                                                                                     name={field.fieldName}
                                                                                     type={field.type}
                                                                                     options={field.option}
@@ -612,7 +586,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                         <CustomDialogFooter>
                             <Button size="small" color="primary"
                                 onClick={() => {
-                                    if (isFieldNotTouched(initialData, values)) onClose()
+                                    if (isEqual(initialData.values, values)) onClose()
                                     else setShowConfirmDialog(true)
                                 }}
                             >Cancel</Button>
@@ -620,22 +594,12 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                 loading={loading}
                                 variant="contained"
                                 color="primary"
-                                type="submit"
                                 onClick={(e) => {
                                     e.preventDefault();
                                     handleScroll(errors)
-                                    handleSubmit(
-                                        errors,
-                                        setFieldTouched,
-                                        values,
-                                        setValues,
-                                        setErrors
-                                    );
+                                    handleSubmit();
                                 }}
-                                disabled={
-                                    loading
-                                    // isFieldNotTouched(initialData, values)
-                                }
+                                disabled={loading}
                             > Save</CustomButton>
                         </CustomDialogFooter>
                         {
@@ -646,13 +610,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                     onSave={() => {
                                         setShowConfirmDialog(false)
                                         handleScroll(errors)
-                                        handleSubmit(
-                                            errors,
-                                            setFieldTouched,
-                                            values,
-                                            setValues,
-                                            setErrors
-                                        );
+                                        handleSubmit();
                                     }}
                                     onClose={() => {
                                         setShowConfirmDialog(false)

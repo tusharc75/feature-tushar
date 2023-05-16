@@ -11,12 +11,13 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import { address, CustomDialogTransition, setFieldsInAscendingOrder } from '../../constants/helpers';
-import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched } from '../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
+import { isEqual } from 'lodash';
 
 const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -238,19 +239,8 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
               <CustomDialogHeader
                 title={addressData ? 'Edit Address' : 'Add Address'}
                 onClose={() => {
-                  if (
-                    isFieldNotTouched(
-                      {
-                        fields: initialData.fields,
-                        initialValues: initialData.values
-                      },
-                      values
-                    )
-                  ) {
-                    onClose();
-                  } else {
-                    setShowConfirmDialog(true);
-                  }
+                  if (isEqual(initialData.values, values)) onClose()
+                  else setShowConfirmDialog(true)
                 }}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -292,23 +282,23 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
                                       onChange={
                                         field.fieldName === 'fullAddress'
                                           ? (_, val) => {
-                                              if (typeof val !== 'object') return;
-                                              getFullAddress(val);
-                                              if (!val?.place_id) {
-                                                setAddressDetail(null);
-                                              }
+                                            if (typeof val !== 'object') return;
+                                            getFullAddress(val);
+                                            if (!val?.place_id) {
+                                              setAddressDetail(null);
                                             }
+                                          }
                                           : (e: React.ChangeEvent<HTMLInputElement>) => {
-                                              const { name, value } = e.target;
+                                            const { name, value } = e.target;
 
-                                              if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
+                                            if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
 
-                                              setAddressDetail((prevState: any) => ({
-                                                ...prevState,
-                                                [name]: value
-                                              }));
-                                              setLatLngChangedManually(true);
-                                            }
+                                            setAddressDetail((prevState: any) => ({
+                                              ...prevState,
+                                              [name]: value
+                                            }));
+                                            setLatLngChangedManually(true);
+                                          }
                                       }
                                     />
                                   }
@@ -404,19 +394,8 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
                   size="small"
                   color="primary"
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          fields: initialData.fields,
-                          initialValues: initialData.values
-                        },
-                        values
-                      )
-                    ) {
-                      onClose();
-                    } else {
-                      setShowConfirmDialog(true);
-                    }
+                    if (isEqual(initialData.values, values)) onClose()
+                    else setShowConfirmDialog(true)
                   }}
                 >
                   Cancel

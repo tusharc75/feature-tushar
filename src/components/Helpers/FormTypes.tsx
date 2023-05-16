@@ -131,6 +131,7 @@ const useStyles = makeStyles(() => ({
     border: "none",
   },
 }));
+
 const RedSwitch = withStyles({
   switchBase: {
     color: red[500],
@@ -262,7 +263,6 @@ const FormTypes = (props) => {
     handleRemoveField,
     showErrorMessage = false,
     selectedCurrencyCode = null,
-    allFields = [],
     ...rest
   } = props;
 
@@ -883,7 +883,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : (type === 'dropDown' || type === 'multiSelect') &&
-    lookup && [sidebarResource.wellMaster, sidebarResource.wellNumber, sidebarResource.warehouse, sidebarResource.storageLocation
+    (lookup || fieldData?.lookup) && [sidebarResource.wellMaster, sidebarResource.wellNumber, sidebarResource.warehouse, sidebarResource.storageLocation
       , sidebarResource.competencyType, sidebarResource.competencies].includes(fieldData?.lookupResource) ? (
     <Dropdown
       InfoLabel={InfoLabel}
@@ -895,7 +895,6 @@ const FormTypes = (props) => {
       type={type}
       onChange={onChange}
       label={label}
-      lookup={lookup}
       name={name}
       addFieldOption={addFieldOption}
       setOptionsList={setOptionsList}
@@ -909,7 +908,7 @@ const FormTypes = (props) => {
       setOptionSaveDialog={setOptionSaveDialog}
       AddOptionDialog={AddOptionDialog}
       setFieldValue={setFieldValue}
-      allFields={allFields}
+      fields={fields}
     />
   ) : type === 'dropDown' || type === 'lookup' || (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse)
     || (type === 'formula' && fieldData && fieldData.isDropdown) ? (

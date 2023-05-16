@@ -16,7 +16,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { useHistory } from "react-router-dom";
-import { getObjKeys, yupSchema, isFieldNotTouched, setFieldsInAscendingOrder, getObjKeysWithValues, cycleCountPhysicalInventory } from "../../constants/helpers";
+import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues, cycleCountPhysicalInventory } from "../../constants/helpers";
 import { useData } from '../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";

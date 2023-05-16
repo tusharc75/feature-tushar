@@ -91,8 +91,8 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false }
   };
 
   useEffect(() => {
-    setVisibleColumnsExcel(allColumn)
-  }, [columns])
+    setVisibleColumnsExcel(allColumn);
+  }, [columns]);
 
   const fetchEmailAttachment = () => {
     let tempColumns = columns
@@ -280,7 +280,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false }
                           style={{ marginRight: 8 }}
                           checked={
                             showExcelArrangeColumns &&
-                              ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
+                            ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
                               ? true
                               : selected
                           }

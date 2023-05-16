@@ -20,17 +20,15 @@ import {
   yupSchema,
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
-  isFieldNotTouched} from "../../constants/helpers";
+} from "../../constants/helpers";
 import { useLocation, useHistory } from "react-router-dom";
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { useData } from "../../StateProvider/Provider";
 import { isTablet } from 'react-device-detect';
-import {FaDiceOne} from "react-icons/fa";
-interface InitialData {
-  fields: any[];
-  values: object;
-}
+import { FaDiceOne } from "react-icons/fa";
+import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import { isEqual } from "lodash";
 
 export default function ManageUserDialog({
   open,
@@ -43,6 +41,7 @@ export default function ManageUserDialog({
   redirectToDetailsScreen = true,
   isUserSetupPermission = false
 }) {
+
   const {
     state: { user, permissions },
   }: any = useData();
@@ -51,20 +50,16 @@ export default function ManageUserDialog({
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [initialData, setInitialData] = useState<InitialData>({
-    fields: [],
-    values: dataToUpdate ? dataToUpdate : {},
-  });
+
+  const [initialData, setInitialData] = useState({ fields: [], values: dataToUpdate ? dataToUpdate : {}, });
   const location = useLocation();
   const history = useHistory();
   const [formsData, setFormsData] = useState([]);
   const [reportsToDataSource, setReportsToDataSource] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
-    useState(0);
-  const [formValues, setFormValues] = useState(dataToUpdate ? dataToUpdate : {})
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [cloneHeadingName,setCloneHeadingName] = useState('');
+  const [cloneHeadingName, setCloneHeadingName] = useState('');
 
   const getInitialData = useCallback(() => {
     setLoading(true);
@@ -72,12 +67,7 @@ export default function ManageUserDialog({
       .get("/field?resource=User")
       .then(({ data: { data } }) => {
         const newFields = [];
-
-        data
-          .filter((d) => (isNew ? d.isCreate : d.isUpdate))
-          .map((_f) => newFields.push(_f.fieldData));
-
-        let dataToClone
+        data.filter((d) => (isNew ? d.isCreate : d.isUpdate)).map((_f) => newFields.push(_f.fieldData));
         if (isClone && userId) {
           axiosInstance().get(`/user/${userId}`).then(({ data: { data } }) => {
             const { _id, createdBy, permissions, firstName, lastName, updatedBy, ...rest } = data
@@ -87,7 +77,6 @@ export default function ManageUserDialog({
                 ? getObjKeys("", newFields)
                 : getObjKeysWithValues({ ...rest }, newFields),
             });
-            setFormValues(isNew ? getObjKeys("", newFields) : getObjKeysWithValues({ ...rest }, newFields))
             setCloneHeadingName(firstName)
           })
         }
@@ -98,16 +87,13 @@ export default function ManageUserDialog({
               ? getObjKeys("", newFields)
               : getObjKeysWithValues(dataToUpdate, newFields),
           });
-          setFormValues(isNew ? getObjKeys("", newFields) : getObjKeysWithValues(dataToUpdate, newFields))
         }
-
         setLoading(false);
       })
       .catch((err) => {
         setToastConfig(err);
         setLoading(false);
       });
-    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -136,10 +122,8 @@ export default function ManageUserDialog({
 
   const handleSubmit = (values) => {
     setSubmitting(true);
-
     if (isNew) {
-      axiosInstance()
-        .post("/user", values)
+      axiosInstance().post("/user", values)
         .then(({ data }) => {
           const newId = data.data[0]._id;
           setToastConfig({
@@ -148,26 +132,19 @@ export default function ManageUserDialog({
             message: data.message,
           });
           setSubmitting(false);
-
-          // if (redirectToDetailsScreen) {
           history.push({
             pathname: `/user/detail/${newId}`,
             search: isUserSetupPermission ? '?userSetup=true' : '',
             state: { location: location },
           });
           close();
-          // }
-          // else {
-          //     onSuccess(data.data[0])
-          // }
         })
         .catch((error) => {
           setToastConfig(error);
           setSubmitting(false);
         });
     } else {
-      axiosInstance()
-        .put(`/user`, { ...values, _id: userId })
+      axiosInstance().put(`/user`, { ...values, _id: userId })
         .then(({ data }) => {
           setToastConfig({
             open: true,
@@ -176,7 +153,7 @@ export default function ManageUserDialog({
           });
           setSubmitting(false);
           onSuccess(data);
-              
+
         })
         .catch((error) => {
           setToastConfig(error);
@@ -184,6 +161,7 @@ export default function ManageUserDialog({
         });
     }
   };
+
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
     if (err.length) {
@@ -199,13 +177,6 @@ export default function ManageUserDialog({
     }
   }
 
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }))
-  }
-
   return (
     <Dialog
       open={open}
@@ -218,61 +189,7 @@ export default function ManageUserDialog({
         }
       }}
     >
-      <CustomDialogHeader
-        title={
-          isClone ? `Clone User - ${cloneHeadingName}` :
-            isNew
-              ? "Create New User"
-              : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName]
-                .filter((f) => f)
-                .join(" ")}`
-        }
-        onClose={() => {
-          if (isFieldNotTouched({
-            initialValues: initialData.values,
-            fields: initialData.fields
-          }, formValues)) close()
-          else setShowConfirmDialog(true)
-        }}
-        isMinimized={!fullScreen}
-        onMinimizeMaximize={() => {
-          setFullScreen(prevState => !prevState)
-        }}
-        showManimizeMaximize={true}
-      />
-
-      {loading || !initialData.fields.length ? (
-        <>
-          <CustomDialogContent>
-            <Skeleton width="100%" height="70px" />
-            <Grid container spacing={2}>
-              {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <Grid key={i} item xs={12} sm={6} md={6}>
-                  <Skeleton width="100%" height="60px" />
-                </Grid>
-              ))}
-            </Grid>
-          </CustomDialogContent>
-          <CustomDialogFooter>
-            <Button
-              size="small"
-              variant="outlined"
-              color="primary"
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="small"
-              variant="contained"
-              color="primary"
-              disabled={loading}
-            >
-              Submit
-            </Button>
-          </CustomDialogFooter>
-        </>
-      ) : (
+      {!loading && initialData.fields.length ? (
         <Formik
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
@@ -280,15 +197,30 @@ export default function ManageUserDialog({
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <>
+              <CustomDialogHeader
+                title={
+                  isClone ? `Clone User - ${cloneHeadingName}` :
+                    isNew
+                      ? "Create New User"
+                      : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName].filter((f) => f).join(" ")}`
+                }
+                onClose={() => {
+                  if (isEqual(values, initialData.values)) close()
+                  else setShowConfirmDialog(true)
+                }}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
+              />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
-
                   {formsData &&
                     formsData.map((form, i) => (
                       <div key={i}>
                         <div className={"detail-box-content"}>
-                          <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                          <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                           <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
                         </div>
                         <Box marginY={2}>
@@ -311,7 +243,6 @@ export default function ManageUserDialog({
                                     type={field.type}
                                     options={reportsToDataSource}
                                     setFieldValue={(name, value) => {
-                                      handleValuesChange({ [name]: value })
                                       setFieldValue(name, value)
                                     }}
                                     onChange={(e, val) => {
@@ -322,6 +253,8 @@ export default function ManageUserDialog({
                                           : ""
                                       );
                                     }}
+                                    fieldData={field}
+                                    fields={initialData.fields}
                                     required={field.required}
                                     fullWidth
                                     isTooltip={field?.isTooltip || false}
@@ -338,13 +271,14 @@ export default function ManageUserDialog({
                                     type={field.type}
                                     options={field.option}
                                     setFieldValue={(name, value) => {
-                                      handleValuesChange({ [name]: value })
                                       setFieldValue(name, value)
                                     }}
                                     required={field.required}
                                     fullWidth
                                     isTooltip={field?.isTooltip || false}
                                     tooltipMessage={field?.tooltipMessage}
+                                    fieldData={field}
+                                    fields={initialData.fields}
                                     size="small"
                                     imageOrFileUploadCompletePercentage={
                                       ["imageUpload", "fileUpload"].some(
@@ -374,10 +308,7 @@ export default function ManageUserDialog({
                   size="small"
                   disabled={isSubmitting || loading}
                   onClick={() => {
-                    if (isFieldNotTouched({
-                      initialValues: initialData.values,
-                      fields: initialData.fields
-                    }, values)) close()
+                    if (isEqual(values, initialData.values)) close()
                     else setShowConfirmDialog(true)
                   }}
                 >
@@ -395,13 +326,13 @@ export default function ManageUserDialog({
                     isSubmitting || loading || uploadingImageOrFileProgress > 0
                   }
                 >
-                  {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
+                  {isSubmitting ? <CircularProgress size={22} /> : "Save"}
                 </Button>
               </CustomDialogFooter>
               {
                 showConfirmDialog ?
                   <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
+                    close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false)
@@ -417,7 +348,9 @@ export default function ManageUserDialog({
             </>
           )}
         </Formik>
-      )}
+      ) : <Box p={2} height={500} bgcolor="white">
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>}
     </Dialog>
   );
 }

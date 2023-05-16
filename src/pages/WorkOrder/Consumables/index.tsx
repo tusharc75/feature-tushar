@@ -329,6 +329,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           <QtyRequestLog
             uniqueId={openLogDialog.uniqueId}
             workOrderId={workOrderId}
+            renderedFrom={renderedFrom}
             onClose={() => {
               setOpenLogDialog({
                 open: false,
