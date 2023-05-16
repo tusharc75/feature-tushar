@@ -12,7 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, isFieldNotTouched } from 'src/constants/helpers';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
@@ -27,7 +27,6 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const ref = useRef(null);
 
   useEffect(() => {
     fetchFields();
@@ -36,7 +35,7 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
   const fetchFields = async () => {
     try {
       let data;
-      const response:any = await axiosInstance().get('/field?resource=Competencies');
+      const response: any = await axiosInstance().get('/field?resource=Competencies');
       data = response?.data?.data;
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -44,7 +43,7 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
       if (id) {
         axiosInstance()
           .get(`${routes?.competencies?.path}/${id}`)
-          .then(({ data: { data } }:any) => {
+          .then(({ data: { data } }: any) => {
             let fields = fieldsDataForUpdate;
             let tempData = data;
             if (isClone) {
@@ -72,7 +71,7 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
           });
       }
       else {
-        const tempInitialData:any = getObjKeys('', fieldsDataForCreate);
+        const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
         if (referenceData?.competencyType) {
           fieldsDataForCreate?.forEach((e) => {
             if (e.fieldName === "competencyType") {
@@ -96,7 +95,7 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
     setSubmitting(true);
     if (id && !isClone) {
       values._id = id
-      axiosInstance().put(`${routes.competencies?.path}`, values).then(({ data }:any) => {
+      axiosInstance().put(`${routes.competencies?.path}`, values).then(({ data }: any) => {
         setSubmitting(false);
         onSuccess()
         toastConfig.setToastConfig({
@@ -111,11 +110,11 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
     } else {
       axiosInstance()
         .post(`${routes.competencies?.path}`, values)
-        .then(({ data: { data, message } }:any) => {
+        .then(({ data: { data, message } }: any) => {
           setLoading(false);
           if (referenceData) {
             onSuccess(data.data);
-          }else{
+          } else {
             history.push(`${routes.competenciesDetail.path}/${data._id}`);
             onSuccess(data.data);
           }
@@ -134,10 +133,7 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
     }
   };
 
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
+
 
   return (
     <Dialog
@@ -158,18 +154,13 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           onSubmit={handleSubmit}
-          validate={validate}
-          innerRef={ref}
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose()
+                  else setShowConfirmDialog(true)
                 }}
                 title={`${id
                   ? isClone
@@ -202,17 +193,8 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
-                    else setShowConfirmDialog(true);
+                    if (isEqual(initialData.values, values)) onClose()
+                    else setShowConfirmDialog(true)
                   }}
                 >
                   Cancel

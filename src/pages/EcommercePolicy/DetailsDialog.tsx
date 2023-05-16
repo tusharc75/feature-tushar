@@ -8,14 +8,13 @@ import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
-import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, isFieldNotTouched } from './../../constants/helpers';
+import { CustomDialogTransition } from './../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@material-ui/core';
-import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import { isEqual } from 'lodash';
 
 const DetailsDialog = (props) => {
 
@@ -24,7 +23,6 @@ const DetailsDialog = (props) => {
 
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [formValues, setFormValues] = useState({});
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [saveClick, setSaveClick] = useState(false);
@@ -124,17 +122,8 @@ const DetailsDialog = (props) => {
                   size="small"
                   color="primary"
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
-                    else setShowConfirmDialog(true);
+                    if (isEqual(initialData.values, values)) onClose()
+                    else setShowConfirmDialog(true)
                   }}
                 >
                   {isUpdateDisabled ? 'Close' : 'Cancel'}

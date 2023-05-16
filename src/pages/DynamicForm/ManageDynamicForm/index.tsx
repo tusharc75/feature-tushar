@@ -11,7 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, isFieldNotTouched } from 'src/constants/helpers';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 
@@ -143,11 +143,8 @@ const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, isClone
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose()
+                  else setShowConfirmDialog(true)
                 }}
                 title={`${id ? isClone ? `Clone` : `Edit` : `Create`}`}
                 isMinimized={!fullScreen}
@@ -175,17 +172,8 @@ const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, isClone
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
-                    else setShowConfirmDialog(true);
+                    if (isEqual(initialData.values, values)) onClose()
+                    else setShowConfirmDialog(true)
                   }}
                 >
                   Cancel

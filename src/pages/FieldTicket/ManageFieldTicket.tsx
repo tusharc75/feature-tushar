@@ -11,7 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, generateUniqueIdOnly, isFieldNotTouched, serviceMaster } from 'src/constants/helpers';
+import { CustomDialogTransition, generateUniqueIdOnly, serviceMaster } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
@@ -29,7 +29,6 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const ref = useRef(null);
   const [stepOptions, setStepOptions] = useState(referenceData?.steps || []);
   const [completeSteps, setCompleteSteps] = useState([]);
 
@@ -147,11 +146,6 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     }
   };
 
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
-
   return (
     <Dialog
       maxWidth="md"
@@ -171,26 +165,20 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           onSubmit={handleSubmit}
-          validate={validate}
-          innerRef={ref}
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose()
+                  else setShowConfirmDialog(true)
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
-                    : `Create ${routes?.fieldTicket?.title}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
+                  : `Create ${routes?.fieldTicket?.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -252,17 +240,8 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
-                    else setShowConfirmDialog(true);
+                    if (isEqual(initialData.values, values)) onClose()
+                    else setShowConfirmDialog(true)
                   }}
                 >
                   Cancel

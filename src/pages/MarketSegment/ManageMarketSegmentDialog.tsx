@@ -12,12 +12,13 @@ import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, marketSegment, setFieldsInAscendingOrder } from "../../constants/helpers";
-import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched } from "../../constants/helpers";
+import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
-import {FaDiceOne} from "react-icons/fa";
+import { FaDiceOne } from "react-icons/fa";
+import { isEqual } from "lodash";
 
 const ManageMarketSegmentDialog = (props) => {
 
@@ -120,10 +121,7 @@ const ManageMarketSegmentDialog = (props) => {
                     <Fragment>
                         <CustomDialogHeader title={isClone ? "Clone" : marketSegmentId ? "Update " + routes.marketSegment.title : "Create " + routes.marketSegment.title}
                             onClose={() => {
-                                if (isFieldNotTouched({
-                                    fields: initialData.fields,
-                                    initialValues: initialData.values
-                                }, values)) onClose()
+                                if (isEqual(initialData.values, values)) onClose()
                                 else setShowConfirmDialog(true)
                             }}
                             isMinimized={!fullScreen}
@@ -133,15 +131,13 @@ const ManageMarketSegmentDialog = (props) => {
                             showManimizeMaximize={true}
                         ></CustomDialogHeader>
                         <CustomDialogContent>
-
                             <Form noValidate>
-                                {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                                 {formsData &&
                                     formsData.map((form, index1) => {
                                         return form.name ? (
                                             <div key={index1}>
                                                 <div className={"detail-box-content"}>
-                                                    <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
+                                                    <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                                                     <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
                                                 </div>
                                                 <Box marginY={2}>
@@ -200,10 +196,7 @@ const ManageMarketSegmentDialog = (props) => {
                         <CustomDialogFooter>
                             <Button size="small" color="primary"
                                 onClick={() => {
-                                    if (isFieldNotTouched({
-                                        fields: initialData.fields,
-                                        initialValues: initialData.values
-                                    }, values)) onClose()
+                                    if (isEqual(initialData.values, values)) onClose()
                                     else setShowConfirmDialog(true)
                                 }}
                             >Cancel</Button>

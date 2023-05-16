@@ -28,7 +28,6 @@ const AddressDetailPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addressFields, setAddressFields] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [addressResource, setAddressResource] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.address]);
 
   useEffect(() => {
@@ -45,7 +44,6 @@ const AddressDetailPage = () => {
         data: { data }
       } = await axiosInstance().get(`/address/${id}`);
       setAddressData(data);
-      setAddressResource({ id: data._id });
       setCustomizedRoutes([routes.address, { title: data.fullAddress }]);
       setLoading(false);
     } catch (error) {

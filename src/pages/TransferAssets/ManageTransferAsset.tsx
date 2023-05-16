@@ -568,7 +568,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     label={field.fieldLabel}
                                     name={field.fieldName}
                                     fieldData={field}
-                                    allFields={allFields}
+                                    fields={allFields}
                                     type={field.type}
                                     options={field.option}
                                     setFieldValue={(name, value) => {

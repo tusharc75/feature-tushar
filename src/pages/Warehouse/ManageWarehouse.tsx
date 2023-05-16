@@ -6,26 +6,23 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../constants/helpers";
 import InputField from "../../components/Helpers/InputField";
-import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched, sidebarResource } from "../../constants/helpers";
+import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import { isEqual } from "lodash";
 
-const ManageWarehouse = (props) => {
+const ManageWarehouse = ({ warehouseId, close, onSuccess, isClone = false, open }) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { addressResource, close, onSuccess, isClone = false, open } = props;
-    const [cloneHeading,setCloneHeading] = useState('')
+    const [cloneHeading, setCloneHeading] = useState('')
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
-    
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Warehouse").then(({ data: { data } }) => {
@@ -33,8 +30,8 @@ const ManageWarehouse = (props) => {
 
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-            if (addressResource) {
-                axiosInstance().get(`/warehouse/` + addressResource?.id).then(({ data: { data } }) => {
+            if (warehouseId) {
+                axiosInstance().get(`/warehouse/` + warehouseId).then(({ data: { data } }) => {
                     let fields = fieldsDataForUpdate
                     let tempData = data
                     if (isClone) {
@@ -61,13 +58,13 @@ const ManageWarehouse = (props) => {
             .catch((error) => {
                 toastConfig.setToastConfig(error);
             });
-    }, [addressResource]);
+    }, [warehouseId]);
 
 
     const handleSubmit = (values) => {
         setSubmitting(true)
-        if (addressResource?.id && !isClone) {
-            values._id = addressResource?.id
+        if (warehouseId && !isClone) {
+            values._id = warehouseId
             axiosInstance().put(`/warehouse`, values).then(({ data }) => {
                 setSubmitting(false);
                 onSuccess()
@@ -125,12 +122,9 @@ const ManageWarehouse = (props) => {
                 }) => (
                     <Fragment>
                         <CustomDialogHeader
-                            title={isClone ? `Clone - ${cloneHeading}` : addressResource?.id ? `Update ${initialData?.values["warehouseName"] ?? ""}` : "Create Plant"}
+                            title={isClone ? `Clone - ${cloneHeading}` : warehouseId ? `Update ${initialData?.values["warehouseName"] ?? ""}` : "Create Plant"}
                             onClose={() => {
-                                if (isFieldNotTouched({
-                                    initialValues: initialData.values,
-                                    fields: initialData.fields
-                                }, values)) close()
+                                if (isEqual(values, initialData.values)) close()
                                 else setShowConfirmDialog(true)
                             }}
                             isMinimized={!fullScreen}
@@ -154,13 +148,10 @@ const ManageWarehouse = (props) => {
                             </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button size="small" color="primary" 
+                            <Button size="small" color="primary"
                                 disabled={submitting}
                                 onClick={() => {
-                                    if (isFieldNotTouched({
-                                        initialValues: initialData.values,
-                                        fields: initialData.fields
-                                    }, values)) close()
+                                    if (isEqual(values, initialData.values)) close()
                                     else setShowConfirmDialog(true)
                                 }}
                             >Cancel</Button>
@@ -177,7 +168,7 @@ const ManageWarehouse = (props) => {
                         {
                             showConfirmDialog ?
                                 <ConfirmCancelDialog
-                                close={() => setShowConfirmDialog(false)}
+                                    close={() => setShowConfirmDialog(false)}
                                     open={showConfirmDialog}
                                     onSave={() => {
                                         setShowConfirmDialog(false)

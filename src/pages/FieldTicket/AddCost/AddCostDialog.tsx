@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, isFieldNotTouched, yupSchema } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { isEqual } from 'lodash';
@@ -16,13 +16,13 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
+  
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
-  const ref = useRef(null);
 
   useEffect(() => {
     fetchFields();
@@ -107,17 +107,13 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           onSubmit={handleSubmit}
-          innerRef={ref}
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose()
+                  else setShowConfirmDialog(true)
                 }}
                 title={costData ? `Edit ${costData.description}` : `Add Cost`}
                 isMinimized={!fullScreen}
@@ -145,17 +141,8 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
-                    else setShowConfirmDialog(true);
+                    if (isEqual(initialData.values, values)) onClose()
+                    else setShowConfirmDialog(true)
                   }}
                 >
                   Cancel
