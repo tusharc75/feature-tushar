@@ -7,7 +7,6 @@ import {
   getCollaboratorDropdownDataSource,
   getOwnerDropdownDataSource,
   setFieldsInAscendingOrder,
-  simplifyValues,
   yupSchema,
 } from "../../../constants/helpers";
 import FormTypes from "../../../components/Helpers/FormTypes";

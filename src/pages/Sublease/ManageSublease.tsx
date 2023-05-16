@@ -14,7 +14,7 @@ import {
     CustomDialogTransition, generateUniqueIdOnly, getCollaboratorDropdownDataSource,
     getOwnerDropdownDataSource, sublease, setFieldsInAscendingOrder, supplierAccount, supplierContact, SUBLEASE_STATUS
 } from "../../constants/helpers";
-import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from "../../constants/helpers";
+import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box, Grid, IconButton, Tooltip } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";

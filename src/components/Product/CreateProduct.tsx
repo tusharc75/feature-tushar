@@ -934,8 +934,6 @@ const CreateProduct = (props) => {
                                 color="primary"
                                 type="submit"
                                 disabled={uploadingImageOrFileProgress > 0 || submitting}
-                                // disabled={Object.values(simplifyValues(initialData.values, initialData.fields)).toString() ===
-                                //     Object.values(simplifyValues(values, initialData.fields)).toString()}
                                 onClick={(e) => {
                                     e.preventDefault();
                                     handleScroll(errors)
