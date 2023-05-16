@@ -2687,6 +2687,15 @@ svg.MuiSvgIcon-root {
     opacity: 1 !important;
     color: #5b5b5b !important;
   }
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+  }
+}
+.azure-login {
+  font-weight: 500 !important;
+  color: #2a3547 !important;
+  padding: 7px 20px !important;
+  border-radius: 6px !important;
 }
 
 .main-container-v1 {
