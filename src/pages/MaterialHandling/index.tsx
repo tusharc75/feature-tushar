@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, IconButton, TextField, Typography } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -7,24 +7,45 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Request from './Request';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import { Autocomplete } from '@material-ui/lab';
 
 const MaterialHandling = () => {
 
   const toastConfig = useContext(CustomToastContext);
-  
+
   const { state: { permissions, selectedEntity, user } }: any = useData();
 
   const [workOrder, setWorkOrder] = useState(null);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
+  const [plantOptions, setPlantOptions] = useState([]);
+  const [selectedPlant, setSelectedPlant] = useState(null)
+
+  useEffect(() => {
+    axiosInstance()
+      .get('/sa-formbuilder/lookup?lookupResource=Warehouse')
+      .then(({ data: { data } }) => {
+        setPlantOptions(data.Warehouse);
+        if (selectedPlant === null && data?.Warehouse.length) {
+          setSelectedPlant(null);
+        }
+      });
+  }, [])
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedPlant]);
 
   const fetchData = () => {
     setWorkOrder(null);
+    let api = `/material-handling`;
+
+    if (selectedPlant) {
+      api = `${api}?filterById=${JSON.stringify([{ field: 'warehouse', term: selectedPlant.optionValue }])}&filterType=and`;
+    }
+
     axiosInstance()
-      .get(`/material-handling`)
+      .get(api)
       .then(({ data: { data } }) => {
         setWorkOrder(data)
         if (data?.length) {
@@ -44,6 +65,29 @@ const MaterialHandling = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
+        <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} gridGap={8} pb={2}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Autocomplete
+                options={plantOptions}
+                fullWidth
+                getOptionLabel={(option: any) => option.optionLabel}
+                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                value={plantOptions.filter((data) => data.optionValue === selectedPlant?.optionValue).length ? plantOptions.filter((data) => data.optionValue === selectedPlant?.optionValue)[0] : ''}
+                onChange={(e, val) => {
+                  setSelectedPlant(val);
+                }}
+                size="small"
+                renderInput={(params) => <TextField {...params} label={routes.warehouse.title} variant="outlined" />}
+              />
+            </Grid>
+          </Grid>
+          <Box>
+            <IconButton size="small" onClick={() => fetchData()}>
+              <RefreshIcon />
+            </IconButton>
+          </Box>
+        </Box>
         {workOrder ? (
           <Grid container spacing={2}>
             <Grid item xs={12} md={3} sm={12}>
