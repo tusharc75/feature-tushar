@@ -258,6 +258,7 @@ export default function ImportExportLinks({
       >
         {permissions?.isCreate && imptExptDnldMenuDta.action === 'import' && (
           <MenuItem>
+            {ImportInput}
             <label htmlFor="importFromExcel" className="cursor-pointer">
               <span>{title !== '' ? `${title} Import ` : `Import from Excel`}</span>
             </label>
@@ -356,6 +357,7 @@ export default function ImportExportLinks({
         >
           {permissions?.isCreate && !onlyExport && (
             <MenuItem>
+              {ImportInput}
               <label htmlFor="importFromExcel">{title !== '' ? `Import ${title}` : `Import from Excel`}</label>
             </MenuItem>
           )}
