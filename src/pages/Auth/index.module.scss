@@ -1,0 +1,120 @@
+@function scaleFunc($base) {
+  $scale: 1;
+  $result: calc($base * $scale);
+  @return $base * $scale;
+}
+
+.main {
+  --left-padding: 60px 75px 60px 45px;
+  --right-padding: 60px 75px 60px 45px;
+  --grid-cols: 2fr 1.6fr;
+  @media all and (max-width: 768px) {
+    --left-padding: 30px 20px;
+    --grid-cols: 1fr;
+  }
+
+  svg {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .bg {
+    width: 100%;
+    height: 100vh;
+    background-color: #eff2fd;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .contentContainer {
+    margin-left: auto;
+    margin-right: auto;
+    display: grid;
+    grid-template-columns: var(--grid-cols);
+    min-width: Min(scaleFunc(955px), 100%);
+    max-width: scaleFunc(955px);
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #fff;
+    border-radius: 4px;
+  }
+  .left {
+    padding: var(--left-padding, 30px 20px);
+    border-right: 1px solid #e2e2e2;
+  }
+  .logo {
+    max-width: scaleFunc(129px);
+    max-height: scaleFunc(35px);
+    margin-bottom: scaleFunc(31px);
+    svg {
+      max-width: scaleFunc(129px);
+      max-height: scaleFunc(35px);
+    }
+  }
+  .or {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 19px;
+    &::before,
+    &::after {
+      content: '';
+      height: 1px;
+      background-color: #dbe0e8;
+      display: block;
+      flex-grow: 1;
+    }
+    p {
+      font-weight: 400;
+      font-size: scaleFunc(13px);
+      line-height: 1.3;
+    }
+    margin: scaleFunc(19px) 0 scaleFunc(24px);
+  }
+  .input {
+    margin-bottom: scaleFunc(24px);
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+  .formBottomText {
+    padding: scaleFunc(20px) 0 scaleFunc(36px);
+    text-align: right;
+    color: #2a3547;
+    font-weight: 500;
+    font-size: scaleFunc(13px);
+    line-height: 19px;
+    & a:hover {
+      color: var(--link);
+    }
+  }
+
+  .right {
+    @media all and (max-width: 768px) {
+      display: none;
+    }
+    padding: var(--right-padding);
+    .illustration {
+      margin-bottom: scaleFunc(46px);
+    }
+
+    h2 {
+      font-size: scaleFunc(20px);
+      line-height: 190%;
+      text-align: center;
+      color: #2a3042;
+      font-weight: 600;
+      margin-bottom: scaleFunc(14px);
+    }
+    p {
+      font-weight: 400;
+      font-size: scaleFunc(13px);
+      line-height: 192%;
+      text-align: center;
+      color: #545454;
+    }
+  }
+}
