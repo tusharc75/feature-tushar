@@ -91,7 +91,7 @@ const CreateFormBuilder = () => {
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
 
   const sectionNameList = ['Sales Management', 'eCommerce', 'Inventory Management',
-    'Rental Operations Management', 'Repair & Maintenance Management', 'Purchasing Management', 'Planning & Forecasting'];
+    'Rental Operations Management', 'Repair & Maintenance Management', 'Purchasing Management', 'Planning & Forecasting','Collaboration Tools'];
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
