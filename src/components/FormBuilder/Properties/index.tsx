@@ -33,64 +33,19 @@ import { checkFormula } from '../../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { ResourceDropdown } from './resourceDropdown';
 import { MinMax } from '../AddField/minMax';
+import axiosInstance from 'src/axios/axiosInstance';
+import { useData } from 'src/StateProvider/Provider';
 
 const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
 });
 
-const LookupResource = [
-  { name: 'Supplier Account', value: 'Supplier Account' },
-  { name: 'Customer Account', value: 'Customer Account' },
-  { name: 'User', value: 'User' },
-  { name: 'Supplier Contact', value: 'Supplier Contact' },
-  { name: 'Customer Contact', value: 'Customer Contact' },
-  { name: 'Brand', value: 'Brand' },
-  { name: 'Entity', value: 'Entity' },
-  { name: 'Role', value: 'Role' },
-  { name: 'Lead', value: 'Lead' },
-  { name: 'Opportunity', value: 'Opportunity' },
-  { name: 'Product Master', value: 'Product' },
-  { name: 'Serialized Assets', value: 'Serialized Asset' },
-  { name: 'Product Category', value: 'Product Category' },
-  { name: 'Project Sales', value: 'Project Sales' },
-  { name: 'Quotes', value: 'Quotes' },
-  { name: 'Quotation', value: 'Quotation' },
-  { name: 'Price Template', value: 'Price Template' },
-  { name: 'Product Template', value: 'Product Template' },
-  { name: 'Pdf Template', value: 'Quote Pdf Template' },
-  { name: 'Terms & Conditions', value: 'Terms & Conditions' },
-  { name: 'Plants', value: 'Warehouse' },
-  { name: 'Budget', value: 'Budget' },
-  { name: 'Market Segment', value: 'Market Segment' },
-  { name: 'Rental Management', value: 'Rental Management' },
-  { name: 'Delivery Ticket', value: 'Delivery Ticket' },
-  { name: 'Packages', value: 'Packages' },
-  { name: 'Purchase Order', value: 'Purchase Order' },
-  { name: 'Pricing Condition', value: 'Pricing Condition' },
-  { name: 'Repair Job', value: 'Repair Job' },
-  { name: 'Sales Order', value: 'Sales Order' },
-  { name: 'Transfer Asset', value: 'Transfer Asset' },
-  { name: 'Address', value: 'Address' },
-  { name: 'Sublease', value: 'Sublease' },
-  { name: 'Zone', value: 'Zone' },
-  { name: 'Well Master', value: 'Well Master' },
-  { name: 'Well Number', value: 'Well Number' },
-  { name: 'Bulk Asset Creation', value: 'Bulk Asset Creation' },
-  { name: 'Repair Type', value: 'Repair Type' },
-  { name: 'Transfer Inventory', value: 'Transfer Inventory' },
-  { name: 'Service Master', value: 'Service Master' },
-  { name: 'Repair Order', value: 'Repair Order' },
-  { name: 'Work Order', value: 'Work Order' },
-  { name: 'Invoice', value: 'Invoice' },
-  { name: 'Field Service Order', value: 'Field Service Order' },
-  { name: 'Employee Master', value: 'Employee Master' },
-  { name: 'Competency Type', value: 'Competency Type' },
-  { name: 'Competencies', value: 'Competencies' },
-  { name: 'Storage Location', value: 'Storage Location' },
-].sort((a, b) => a.name.localeCompare(b.name));
-
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField }) => {
   const [initialValues, setInitialValues] = useState({ ...fieldData });
+
+  const {
+    state: { user }
+  }: any = useData();
 
   const inputRef = useRef(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -101,8 +56,17 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     Converter: false
   });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [LookupResource, setLookupResource] = useState([]);
 
   //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
+
+  useEffect(() => {
+    axiosInstance().get(`sa-formbuilder/lookup/options?type=brand&brandId=${user?.user?.brand}`)
+      .then((data) => {
+        setLookupResource(data?.data?.data)
+      })
+      .catch(err => console.log(err))
+  }, [user])
 
   useEffect(() => {
     if (fieldData.type === 'dropDown' && !fieldData.lookup) {
@@ -1126,7 +1090,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       label="Uneditable"
                     />
 
-                    {initialValues.hasOwnProperty('disableOnEdit') && (
+                    {initialValues?.hasOwnProperty('disableOnEdit') && (
                       <FormControlLabel
                         control={
                           <Checkbox
