@@ -113,10 +113,10 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
         .then(({ data: { data, message } }: any) => {
           setLoading(false);
           if (referenceData) {
-            onSuccess(data.data);
+            onSuccess(data);
           } else {
             history.push(`${routes.competenciesDetail.path}/${data._id}`);
-            onSuccess(data.data);
+            onSuccess(data);
           }
           setSubmitting(true);
           toastConfig.setToastConfig({
