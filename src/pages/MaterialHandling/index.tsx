@@ -9,6 +9,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Request from './Request';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { Autocomplete } from '@material-ui/lab';
+import { Link } from 'react-router-dom'
 
 const MaterialHandling = () => {
 
@@ -26,9 +27,6 @@ const MaterialHandling = () => {
       .get('/sa-formbuilder/lookup?lookupResource=Warehouse')
       .then(({ data: { data } }) => {
         setPlantOptions(data.Warehouse);
-        if (selectedPlant === null && data?.Warehouse.length) {
-          setSelectedPlant(null);
-        }
       });
   }, [])
 
@@ -38,23 +36,19 @@ const MaterialHandling = () => {
 
   const fetchData = () => {
     setWorkOrder(null);
+    setSelectedWorkOrder(null)
     let api = `/material-handling`;
-
     if (selectedPlant) {
       api = `${api}?filterById=${JSON.stringify([{ field: 'warehouse', term: selectedPlant.optionValue }])}&filterType=and`;
     }
-
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data } }) => {
-        setWorkOrder(data)
-        if (data?.length) {
-          setSelectedWorkOrder(data[0])
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    axiosInstance().get(api).then(({ data: { data } }) => {
+      setWorkOrder(data)
+      if (data?.length) {
+        setSelectedWorkOrder(data[0])
+      }
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   return (
