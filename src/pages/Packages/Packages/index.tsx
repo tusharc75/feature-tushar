@@ -78,9 +78,6 @@ const PackagesTable = ({ packageId, packageData }) => {
       });
   };
 
-  // needed in future
-  //   const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
-
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=Packages`)
@@ -109,15 +106,20 @@ const PackagesTable = ({ packageId, packageData }) => {
   };
 
   const handleUpdateQuantity = (row) => {
-    axiosInstance()
-      .put(`${packages.api}/${packageId}/package`, {
-        ids: [row.data._id],
-        qty: Number(row.data.qty)
-      })
-      .then(() => {
-        fetchData();
-      })
-      .catch((err) => setToastConfig(err));
+    if (Number(row.data.qty) > 0) {
+      axiosInstance()
+        .put(`${packages.api}/${packageId}/package`, {
+          ids: [row.data._id],
+          qty: Number(row.data.qty)
+        })
+        .then(() => {
+          fetchData();
+        })
+        .catch((err) => setToastConfig(err));
+    }
+    else {
+      fetchData();
+    }
   };
 
   const removeProducts = () => {
