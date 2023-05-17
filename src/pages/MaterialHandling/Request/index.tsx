@@ -11,9 +11,9 @@ import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { camelCase } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import CommentDialog from './CommentDialog';
 
 const Request = ({ workOrder }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
@@ -21,47 +21,51 @@ const Request = ({ workOrder }) => {
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
 
+  const [commentDialog, setCommentDialog] = useState({ open: false, data: null });
+
   const {
     state: { user }
   }: any = useData();
 
   useEffect(() => {
-    fetchColumn()
+    fetchColumn();
     fetchData();
   }, [workOrder]);
 
   const handleUpdateStatus = (status, ids, comment) => {
-    setLoading(true)
+    setLoading(true);
     axiosInstance()
       .put(`/material-handling/status/${workOrder}`, { status, ids, comment })
       .then(({ data }) => {
-        setLoading(false)
+        setLoading(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        fetchData()
+        setCommentDialog({ open: false, data: null });
+        fetchData();
       })
       .catch((err) => {
-        setLoading(false)
+        setLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
 
   const fetchData = () => {
-    setRowsData(null)
-    axiosInstance().get(`/material-handling/request/${workOrder}`)
+    setRowsData(null);
+    axiosInstance()
+      .get(`/material-handling/request/${workOrder}`)
       .then(({ data: { data } }) => {
         data?.forEach((e) => {
-          e.productName = e.product?.optionLabel
-          e.productDescription = e.product?.productDescription
-          e.productNumber = e.product?.productNumber
-          e.requestBy = e.requestBy?.optionLabel
-          e.responseBy = e.responseBy?.optionLabel
-          e.storageLocation = e.storageLocation?.optionLabel
-        })
-        setRowsData(data)
+          e.productName = e.product?.optionLabel;
+          e.productDescription = e.product?.productDescription;
+          e.productNumber = e.product?.productNumber;
+          e.requestBy = e.requestBy?.optionLabel;
+          e.responseBy = e.responseBy?.optionLabel;
+          e.storageLocation = e.storageLocation?.optionLabel;
+        });
+        setRowsData(data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -69,7 +73,7 @@ const Request = ({ workOrder }) => {
   };
 
   const fetchColumn = async () => {
-    setColumns(null)
+    setColumns(null);
     const column = [];
     const {
       data: { data }
@@ -90,15 +94,16 @@ const Request = ({ workOrder }) => {
           width: 200,
           hide: false,
           Cell: ({ row }) => {
-            return row.original[e?.fieldName] ?
+            return row.original[e?.fieldName] ? (
               <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.product?.optionValue}`} target="_blank">
                 {row.original[e?.fieldName]}
               </a>
-              : <NoDataCell />;
+            ) : (
+              <NoDataCell />
+            );
           }
         });
-      }
-      else {
+      } else {
         column.push({
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
@@ -119,17 +124,19 @@ const Request = ({ workOrder }) => {
           return row.original['qty'] ? <p className="text-truncate">{row.original['qty']}</p> : <NoDataCell />;
         }
       },
-      ...(user?.user?.brandPolicy?.storageLocation ? [
-        {
-          accessor: 'storageLocation',
-          Header: 'Storage Location',
-          width: 200,
-          hide: false,
-          Cell: ({ row }) => {
-            return row.original['storageLocation'] ? <p className="text-truncate">{row.original['storageLocation']}</p> : <NoDataCell />;
-          }
-        }
-      ] : []),
+      ...(user?.user?.brandPolicy?.storageLocation
+        ? [
+            {
+              accessor: 'storageLocation',
+              Header: 'Storage Location',
+              width: 200,
+              hide: false,
+              Cell: ({ row }) => {
+                return row.original['storageLocation'] ? <p className="text-truncate">{row.original['storageLocation']}</p> : <NoDataCell />;
+              }
+            }
+          ]
+        : []),
       {
         accessor: 'requestBy',
         Header: 'Request By',
@@ -143,7 +150,11 @@ const Request = ({ workOrder }) => {
         Header: 'Request Date',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['requestDate'] ? <p className="text-truncate">{moment(row.original['requestDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row.original['requestDate'] ? (
+            <p className="text-truncate">{moment(row.original['requestDate']).format(dateTimeFormat)}</p>
+          ) : (
+            <NoDataCell />
+          );
         }
       },
       {
@@ -159,7 +170,11 @@ const Request = ({ workOrder }) => {
         Header: 'Response Date',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['responseDate'] ? <p className="text-truncate">{moment(row.original['responseDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row.original['responseDate'] ? (
+            <p className="text-truncate">{moment(row.original['responseDate']).format(dateTimeFormat)}</p>
+          ) : (
+            <NoDataCell />
+          );
         }
       },
       {
@@ -180,15 +195,19 @@ const Request = ({ workOrder }) => {
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }) => {
-        return row.original['status'] === MATERIAL_REQUEST_STATUS.requested ?
-          <Box display='flex'>
+        return row.original['status'] === MATERIAL_REQUEST_STATUS.requested ? (
+          <Box display="flex">
             <Button
               variant="outlined"
               className={'btn-outline-v1'}
               size="small"
               disabled={loading}
               onClick={() => {
-                handleUpdateStatus(MATERIAL_REQUEST_STATUS.processed, [{ _id: row.original?._id, uniqueId: row.original?.uniqueId, qty: row.original?.qty }], '');
+                handleUpdateStatus(
+                  MATERIAL_REQUEST_STATUS.processed,
+                  [{ _id: row.original?._id, uniqueId: row.original?.uniqueId, qty: row.original?.qty }],
+                  ''
+                );
               }}
             >
               Process
@@ -200,40 +219,59 @@ const Request = ({ workOrder }) => {
               size="small"
               disabled={loading}
               onClick={() => {
-                handleUpdateStatus(MATERIAL_REQUEST_STATUS.rejected, [{ _id: row.original?._id, uniqueId: row.original?.uniqueId, qty: row.original?.qty }], 'rejected');
+                setCommentDialog({ open: true, data: row.original });
               }}
             >
               Reject
             </Button>
           </Box>
-          :
-          <Typography variant='body2'>{row.original?.status}</Typography>
+        ) : (
+          <Typography variant="body2">{row.original?.status}</Typography>
+        );
       }
     });
     setColumns([...column, ...extracolumns]);
   };
 
-  return (rowsData && columns ?
-    <Box zIndex={5} width={'100%'} height={'calc(100vh - 345px)'}>
-      <CustomReactTable
-        height={'calc(100vh - 345px)'}
-        columns={columns}
-        data={rowsData}
-        onSelect={() => {
-        }}
-        childrenProperty="subRows"
-        uniqueKey="_id"
-        hideSelection={true}
-        hideAction={false}
-        hideExpander={true}
-        renderedFrom={camelCase(routes.materialHandling.title)}
-        isClientSideGrid={true}
-      />
-    </Box>
-    :
-    <Box height={500} bgcolor="white">
-      <CommonSkeleton lenArray={[...Array(10).keys()]} />
-    </Box>
+  return (
+    <>
+      {rowsData && columns ? (
+        <Box zIndex={5} width={'100%'} height={'calc(100vh - 345px)'}>
+          <CustomReactTable
+            height={'calc(100vh - 345px)'}
+            columns={columns}
+            data={rowsData}
+            onSelect={() => {}}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            hideSelection={true}
+            hideAction={false}
+            hideExpander={true}
+            renderedFrom={camelCase(routes.materialHandling.title)}
+            isClientSideGrid={true}
+          />
+        </Box>
+      ) : (
+        <Box height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+      {commentDialog.open && (
+        <CommentDialog
+          open={commentDialog.open}
+          loading={loading}
+          onClose={() => setCommentDialog({ open: false, data: null })}
+          data={commentDialog.data}
+          onSuccess={(comment) => {
+            handleUpdateStatus(
+              MATERIAL_REQUEST_STATUS.rejected,
+              [{ _id: commentDialog.data?._id, uniqueId: commentDialog.data?.uniqueId, qty: commentDialog.data?.qty }],
+              comment || ''
+            );
+          }}
+        />
+      )}
+    </>
   );
 };
 
