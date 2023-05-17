@@ -126,16 +126,16 @@ const Request = ({ workOrder }) => {
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-            {
-              accessor: 'storageLocation',
-              Header: 'Storage Location',
-              width: 200,
-              hide: false,
-              Cell: ({ row }) => {
-                return row.original['storageLocation'] ? <p className="text-truncate">{row.original['storageLocation']}</p> : <NoDataCell />;
-              }
+          {
+            accessor: 'storageLocation',
+            Header: 'Storage Location',
+            width: 200,
+            hide: false,
+            Cell: ({ row }) => {
+              return row.original['storageLocation'] ? <p className="text-truncate">{row.original['storageLocation']}</p> : <NoDataCell />;
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'requestBy',
@@ -189,8 +189,8 @@ const Request = ({ workOrder }) => {
     extracolumns.push({
       accessor: 'action',
       Header: 'Action',
-      minWidth: 250,
-      width: 250,
+      minWidth: 230,
+      width: 230,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
@@ -198,8 +198,8 @@ const Request = ({ workOrder }) => {
         return row.original['status'] === MATERIAL_REQUEST_STATUS.requested ? (
           <Box display="flex">
             <Button
-              variant="outlined"
-              className={'btn-outline-v1'}
+              variant="contained"
+              color="primary"
               size="small"
               disabled={loading}
               onClick={() => {
@@ -212,10 +212,10 @@ const Request = ({ workOrder }) => {
             >
               Process
             </Button>
-            <Box pl={2} />
+            <Box pl={1} />
             <Button
               variant="outlined"
-              className={'btn-outline-red-v1'}
+              color="secondary"
               size="small"
               disabled={loading}
               onClick={() => {
@@ -241,7 +241,7 @@ const Request = ({ workOrder }) => {
             height={'calc(100vh - 345px)'}
             columns={columns}
             data={rowsData}
-            onSelect={() => {}}
+            onSelect={() => { }}
             childrenProperty="subRows"
             uniqueKey="_id"
             hideSelection={true}
@@ -261,7 +261,6 @@ const Request = ({ workOrder }) => {
           open={commentDialog.open}
           loading={loading}
           onClose={() => setCommentDialog({ open: false, data: null })}
-          data={commentDialog.data}
           onSuccess={(comment) => {
             handleUpdateStatus(
               MATERIAL_REQUEST_STATUS.rejected,
