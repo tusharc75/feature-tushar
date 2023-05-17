@@ -20,7 +20,6 @@ import HistoryIcon from '@material-ui/icons/History';
 import { useData } from 'src/StateProvider/Provider';
 
 const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
-
   let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
   const toastConfig = useContext(CustomToastContext);
@@ -36,11 +35,10 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
     state: { user }
   }: any = useData();
 
-
   useEffect(() => {
     fetchColumns();
     fetchData();
-  }, [allowedToEdit]);
+  }, [allowedToEdit, workOrderId]);
 
   const fetchColumns = () => {
     const column: any = [
@@ -87,14 +85,16 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
-      ...(user?.user?.brandPolicy?.workOrderConsumableRequest ? [
-        {
-          accessor: 'requestedQty',
-          Header: 'Requested Qty',
-          width: 150,
-          Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-        }
-      ] : []),
+      ...(user?.user?.brandPolicy?.workOrderConsumableRequest
+        ? [
+            {
+              accessor: 'requestedQty',
+              Header: 'Requested Qty',
+              width: 150,
+              Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+            }
+          ]
+        : []),
       {
         accessor: 'consumedQty',
         Header: 'Consumed Qty',
@@ -145,6 +145,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   };
 
   const fetchData = async () => {
+    setDataRows(null);
     var query = ``;
     if (service && uniqueId) {
       query = query + `?service=${service}&uniqueId=${uniqueId}`;
@@ -152,12 +153,13 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
     if (stepId) {
       query = query + `&stepId=${stepId}`;
     }
+    console.log('consumableLog', query);
     axiosInstance()
       .get(`${workOrder.api}/${workOrderId}/consumable${query}`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res: any = {
-            ...prepareDataForGrid(u),
+            ...prepareDataForGrid(u)
           };
           res.hideSelection = u?.qty - u?.consumedQty === 0 ? true : false;
           return res;
@@ -333,7 +335,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
             onClose={() => {
               setOpenLogDialog({
                 open: false,
-                uniqueId: null,
+                uniqueId: null
               });
             }}
           />
