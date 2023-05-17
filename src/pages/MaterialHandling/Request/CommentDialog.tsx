@@ -1,25 +1,33 @@
-import { Box, Button, Dialog, DialogContent, DialogTitle, TextField, Typography } from '@material-ui/core';
+import { Box, Button, Dialog, TextField } from '@material-ui/core';
 import React from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import CustomDialog from 'src/components/Helpers/CustomDialog';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
-function CommentDialog({ open, data, loading, onClose, onSuccess }) {
+function CommentDialog({ open, loading, onClose, onSuccess }) {
+
   const [comment, setComment] = React.useState('');
+
   return (
     <Dialog open={open} fullWidth TransitionComponent={CustomDialogTransition}>
       <CustomDialogHeader
         onClose={onClose}
-        title={data?.product?.optionLabel + ' Rejection Reason'}
+        title={'Comment'}
         showManimizeMaximize={false}
         showRequiredLabel={false}
       />
       <CustomDialogContent>
-        <Box>
-          <TextField fullWidth multiline rows={4} variant="outlined" label="Comment" value={comment} onChange={(e) => setComment(e.target.value)} />
+        <Box p={2}>
+          <TextField
+            fullWidth
+            multiline
+            rows={2}
+            variant="outlined"
+            label="Comment"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)} />
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
@@ -29,7 +37,7 @@ function CommentDialog({ open, data, loading, onClose, onSuccess }) {
           color="primary"
           size="small"
           onClick={() => {
-            onClose();
+            onClose()
           }}
         >
           Cancel
@@ -38,7 +46,7 @@ function CommentDialog({ open, data, loading, onClose, onSuccess }) {
           loading={loading}
           variant="contained"
           color="primary"
-          disabled={comment === '' || loading}
+          disabled={loading}
           onClick={(e) => {
             e.preventDefault();
             onSuccess(comment);
