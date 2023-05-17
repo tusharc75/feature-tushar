@@ -51,33 +51,6 @@ const UpdateDetailsDialog = (props) => {
     // eslint-disable-next-line
   }, []);
 
-  const simplifyValues = (obj) => {
-    const newObj = {};
-    if (obj) {
-      for (const { fieldData } of fields) {
-        if (fieldData.type === "multiSelect") {
-          if (Array.isArray(newObj[fieldData.fieldName])) {
-            newObj[fieldData.fieldName] = obj[fieldData.fieldName].join(", ");
-          } else {
-            newObj[fieldData.fieldName] = "";
-          }
-        } else if (
-          fieldData.type === "switch" ||
-          fieldData.type === "checkBox"
-        ) {
-          newObj[fieldData.fieldName] = obj[fieldData.fieldName]
-            ? "Active"
-            : "Inactive";
-        } else {
-          newObj[fieldData.fieldName] = obj[fieldData.fieldName]
-            ? obj[fieldData.fieldName]
-            : "";
-        }
-      }
-    }
-    return newObj;
-  };
-
   const sortArray = () => {
     const sections = [];
     const allFields = fields.sort(
@@ -218,7 +191,7 @@ const UpdateDetailsDialog = (props) => {
                                         setCurrencySymbol(null);
                                       }
                                     }
-                                    : field.fieldData.type === "dropDown" ? (e,val) => {
+                                    : field.fieldData.type === "dropDown" ? (e, val) => {
                                       setFieldValue(
                                         field.fieldData.fieldName,
                                         val && val.optionValue
@@ -226,7 +199,7 @@ const UpdateDetailsDialog = (props) => {
                                           : ""
                                       );
                                     }
-                                    : null
+                                      : null
                                 }
                               />
                             )
@@ -255,12 +228,7 @@ const UpdateDetailsDialog = (props) => {
                 color="primary"
                 size="small"
                 onClick={submitForm}
-                disabled={
-                  Object.values(simplifyValues(initialVals)).toString() ===
-                  Object.values(simplifyValues(values)).toString() ||
-                  isUpdating ||
-                  uploadingImageOrFileProgress > 0
-                }
+                disabled={isUpdating || uploadingImageOrFileProgress > 0}
               >
                 {isUpdating ? <CircularProgress size={20} /> : "Save"}
               </Button>

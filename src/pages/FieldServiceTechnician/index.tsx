@@ -140,7 +140,7 @@ const FieldServiceTechnician = () => {
                     }}
                     style={{
                       cursor: 'pointer',
-                      backgroundColor: selectedFieldService === data ? '#298b88' : getBgColor(data),
+                      backgroundColor: selectedFieldService === data ? '#0f9fa9' : getBgColor(data),
                       color: selectedFieldService === data ? 'white' : 'black',
                       border: '1px solid #ebebeb'
                     }}

@@ -23,7 +23,6 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE
 } from '../../constants/helpers';
-import Steps from './Steps';
 import ManageRentalManagementDialog from './ManageRental';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import ContentFullScreen from '../../components/ContentFullScreen';
@@ -53,7 +52,7 @@ import Services from './Services';
 import Consumables from './Consumables';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { IoMdDownload } from 'react-icons/io';
-import Steps2, { getIndex } from 'src/components/Steps';
+import Steps, { getIndex } from 'src/components/Steps';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -611,7 +610,7 @@ const RentalManagementDetailsPage = () => {
             </Box>
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
-            <Steps2
+            <Steps
               isNextStep={false}
               nextStep={nextStep}
               steps={rentalSteps}

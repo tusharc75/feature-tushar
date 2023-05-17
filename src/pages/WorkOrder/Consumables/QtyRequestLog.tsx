@@ -120,6 +120,14 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom }) {
         Cell: ({ row }) => {
           return row?.original['responseDate'] ? <p className="text-truncate">{moment(row?.original['responseDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
         }
+      },
+      {
+        accessor: 'comment',
+        Header: 'Comment',
+        width: 200,
+        Cell: ({ row }) => {
+          return row?.original['comment'] ? <p className="text-truncate">{row?.original['comment']}</p> : <NoDataCell />;
+        }
       }
     ];
     extracolumns.push({
@@ -174,27 +182,28 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom }) {
       onMinimizeMaximize={() => {
         setFullScreen((prevState) => !prevState);
       }}
+      showRequiredLabel={false}
       showManimizeMaximize={true}
     />
     <CustomDialogContent>
       {rowsData && columns ?
         <Box p={2}>
-        <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
-        <CustomReactTable
-          height={'calc(100vh - 200px)'}
-          columns={columns}
-          data={rowsData}
-          onSelect={() => {
-          }}
-          childrenProperty="subRows"
-          uniqueKey="_id"
-          hideSelection={true}
-          hideAction={false}
-          hideExpander={true}
-          renderedFrom={renderedFrom}
-          isClientSideGrid={true}
-        />
-      </Box>
+          <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
+            <CustomReactTable
+              height={'calc(100vh - 200px)'}
+              columns={columns}
+              data={rowsData}
+              onSelect={() => {
+              }}
+              childrenProperty="subRows"
+              uniqueKey="_id"
+              hideSelection={true}
+              hideAction={false}
+              hideExpander={true}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+            />
+          </Box>
         </Box> :
         <Box p={2} height={500} bgcolor="white">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

@@ -19,23 +19,21 @@ const Request = ({ workOrder }) => {
   const [loading, setLoading] = useState(false);
 
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState([]);
-
+  const [rowsData, setRowsData] = useState(null);
 
   const {
     state: { user }
   }: any = useData();
-
 
   useEffect(() => {
     fetchColumn()
     fetchData();
   }, [workOrder]);
 
-  const handleUpdateStatus = (status, ids) => {
+  const handleUpdateStatus = (status, ids, comment) => {
     setLoading(true)
     axiosInstance()
-      .put(`/material-handling/status/${workOrder}`, { status, ids })
+      .put(`/material-handling/status/${workOrder}`, { status, ids, comment })
       .then(({ data }) => {
         setLoading(false)
         toastConfig.setToastConfig({
@@ -52,6 +50,7 @@ const Request = ({ workOrder }) => {
   };
 
   const fetchData = () => {
+    setRowsData(null)
     axiosInstance().get(`/material-handling/request/${workOrder}`)
       .then(({ data: { data } }) => {
         data?.forEach((e) => {
@@ -70,6 +69,7 @@ const Request = ({ workOrder }) => {
   };
 
   const fetchColumn = async () => {
+    setColumns(null)
     const column = [];
     const {
       data: { data }
@@ -161,6 +161,14 @@ const Request = ({ workOrder }) => {
         Cell: ({ row }) => {
           return row.original['responseDate'] ? <p className="text-truncate">{moment(row.original['responseDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
         }
+      },
+      {
+        accessor: 'comment',
+        Header: 'Comment',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['comment'] ? <p className="text-truncate">{row.original['comment']}</p> : <NoDataCell />;
+        }
       }
     ];
     extracolumns.push({
@@ -180,7 +188,7 @@ const Request = ({ workOrder }) => {
               size="small"
               disabled={loading}
               onClick={() => {
-                handleUpdateStatus(MATERIAL_REQUEST_STATUS.processed, [{ _id: row.original?._id, uniqueId: row.original?.uniqueId, qty: row.original?.qty }]);
+                handleUpdateStatus(MATERIAL_REQUEST_STATUS.processed, [{ _id: row.original?._id, uniqueId: row.original?.uniqueId, qty: row.original?.qty }], '');
               }}
             >
               Process
@@ -192,7 +200,7 @@ const Request = ({ workOrder }) => {
               size="small"
               disabled={loading}
               onClick={() => {
-                handleUpdateStatus(MATERIAL_REQUEST_STATUS.rejected, [{ _id: row.original?._id, uniqueId: row.original?.uniqueId, qty: row.original?.qty }]);
+                handleUpdateStatus(MATERIAL_REQUEST_STATUS.rejected, [{ _id: row.original?._id, uniqueId: row.original?.uniqueId, qty: row.original?.qty }], 'rejected');
               }}
             >
               Reject
@@ -206,25 +214,24 @@ const Request = ({ workOrder }) => {
   };
 
   return (rowsData && columns ?
-    <Box p={2}>
-      <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
-        <CustomReactTable
-          height={'calc(100vh - 200px)'}
-          columns={columns}
-          data={rowsData}
-          onSelect={() => {
-          }}
-          childrenProperty="subRows"
-          uniqueKey="_id"
-          hideSelection={true}
-          hideAction={false}
-          hideExpander={true}
-          renderedFrom={camelCase(routes.materialHandling.title)}
-          isClientSideGrid={true}
-        />
-      </Box>
-    </Box> :
-    <Box p={2} height={500} bgcolor="white">
+    <Box zIndex={5} width={'100%'} height={'calc(100vh - 345px)'}>
+      <CustomReactTable
+        height={'calc(100vh - 345px)'}
+        columns={columns}
+        data={rowsData}
+        onSelect={() => {
+        }}
+        childrenProperty="subRows"
+        uniqueKey="_id"
+        hideSelection={true}
+        hideAction={false}
+        hideExpander={true}
+        renderedFrom={camelCase(routes.materialHandling.title)}
+        isClientSideGrid={true}
+      />
+    </Box>
+    :
+    <Box height={500} bgcolor="white">
       <CommonSkeleton lenArray={[...Array(10).keys()]} />
     </Box>
   );

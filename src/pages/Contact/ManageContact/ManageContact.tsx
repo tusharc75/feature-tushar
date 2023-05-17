@@ -5,7 +5,6 @@ import {
   CustomDialogTransition,
   getCollaboratorDropdownDataSource,
   getOwnerDropdownDataSource,
-  simplifyValues,
   yupSchema,
   setFieldsInAscendingOrder
 } from '../../../constants/helpers';

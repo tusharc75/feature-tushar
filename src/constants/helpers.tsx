@@ -1130,10 +1130,6 @@ interface IPermission {
   };
 }
 
-export const isFieldNotTouched = (data, values) => {
-  return Object.values(simplifyValues(data.initialValues, data.fields)).toString() === Object.values(simplifyValues(values, data.fields)).toString();
-};
-
 export const getPermissions = (user, selectedEntity = undefined): IPermission | null => {
   if (user) {
     let permissions = {};
@@ -1240,29 +1236,6 @@ export const downloadExcel = (fileDetails, fileName) => {
     document.body.removeChild(a);
   }
 };
-
-export const simplifyValues = (obj, fields) => {
-  const newObj = {};
-  if (obj) {
-    for (const fieldData of fields) {
-      // if (fieldData.type === "multiSelect") {
-      //     if (Array.isArray(obj[fieldData.fieldName])) {
-      //         newObj[fieldData.fieldName] = obj[fieldData.fieldName].reduce
-      //     }
-      // } else if (
-      if (fieldData.type === 'switch' || fieldData.type === 'checkBox') {
-        newObj[fieldData.fieldName] = obj[fieldData.fieldName] ? 'Active' : 'Inactive';
-      } else {
-        newObj[fieldData.fieldName] = obj[fieldData.fieldName] ? obj[fieldData.fieldName] : '';
-      }
-    }
-  }
-  return newObj;
-};
-
-// export const review = {
-//   reviewsApi: '/product/review'
-// };
 
 export const getUniqueCurrencies = () => {
   return uniqBy(currencies, 'currencyCode');

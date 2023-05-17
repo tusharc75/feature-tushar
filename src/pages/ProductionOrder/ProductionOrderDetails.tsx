@@ -15,7 +15,7 @@ import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import TabPanel from 'src/components/TabPanel';
-import Steps2, { getIndex } from 'src/components/Steps';
+import Steps, { getIndex } from 'src/components/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -314,7 +314,7 @@ const ProductionOrderDetails = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps2
+          <Steps
             isNextStep={false}
             nextStep={nextStep}
             steps={productionOrderProcessSteps}
