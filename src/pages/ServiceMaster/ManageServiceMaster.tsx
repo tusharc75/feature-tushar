@@ -13,17 +13,13 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, setFieldsInAscendingOrder, serviceMaster, generateUniqueIdOnly } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
-import AddIcon from '@material-ui/icons/AddCircle';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
-import ManageCompetencyType from '../CompetencyType/ManageCompetencyType';
-import InfoIcon from '@material-ui/icons/Info';
-import ManageCompetencies from '../Competencies/ManageCompetencies';
 
 const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -38,47 +34,7 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
   const [serviceMasterManage, setServiceMasterManage] = useState(null);
-  const [showAddCompetencyTypeDialog, setShowAddCompetencyTypeDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [competencyTypeOptions, setCompetencyTypeOptions] = useState([]);
-  const [competenciesOptions, setCompetenciesOptions] = useState([])
-  const [showCompetenciesDialog, setShowCompetenciesDialog] = useState(false)
-
-
-  const updateCompetencyTypeDropdown = (data) => {
-    const competencyTypeFields = initialData.fields;
-    const competencyTypeFieldIndex = competencyTypeFields.findIndex((d) => d.fieldName === 'competencyType');
-    if (competencyTypeFieldIndex > -1) {
-      competencyTypeFields[competencyTypeFieldIndex].option = [
-        ...competencyTypeFields[competencyTypeFieldIndex].option,
-        {
-          optionValue: data._id,
-          optionLabel: data.competencyType,
-          order: competencyTypeFields[competencyTypeFieldIndex].option.length,
-          default: false,
-        }
-      ];
-      setCompetencyTypeOptions(competencyTypeFields[competencyTypeFieldIndex].option);
-    }
-  };
-
-  const updateCompetenciesDropdown = (data) => {
-    const competenciesFields = initialData.fields;
-    const competencieseFieldIndex = competenciesFields.findIndex((d) => d.fieldName === 'competencies');
-    if (competencieseFieldIndex > -1) {
-      competenciesFields[competencieseFieldIndex].option = [
-        ...competenciesFields[competencieseFieldIndex].option,
-        {
-          optionValue: data._id,
-          optionLabel: data.competencyName,
-          order: competenciesFields[competencieseFieldIndex].option.length,
-          default: false,
-        }
-      ];
-      setCompetenciesOptions(competenciesFields[competencieseFieldIndex].option);
-    }
-  };
-
 
   useEffect(() => {
     axiosInstance()
@@ -123,14 +79,6 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
   }, [serviceMasterId]);
 
   useEffect(() => {
-    let competencyTypeOptions = initialData.fields.find((d) => d.fieldName === 'competencyType');
-    if (competencyTypeOptions) {
-      setCompetencyTypeOptions(competencyTypeOptions.option);
-    }
-    let competenciesOptions = initialData.fields.find((d) => d.fieldName === 'competencies');
-    if (competenciesOptions) {
-      setCompetenciesOptions(competenciesOptions.option);
-    }
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
   }, [initialData.fields]);
 
@@ -236,142 +184,28 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field, index2) => (
                               <Grid key={index2} item xs={12} sm={6} md={6}>
-                                {field.fieldName === 'competencyType' ? (
-                                  <Grid container spacing={1}>
-                                    <Grid
-                                      item
-                                      xs={permissions?.competencyType?.isCreate ? 11 : 11}
-                                      sm={permissions?.competencyType?.isCreate ? 11 : 11}
-                                      md={permissions?.competencyType?.isCreate ? 11 : 11}
-                                    >
-                                      <FormTypes
-                                        isNew={Boolean(serviceMasterId)}
-                                        {...field}
-                                        fieldData={field}
-                                        fields={initialData.fields}
-                                        disabled={(Boolean(serviceMasterId) && field.disableOnEdit && !isClone) || false}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={competencyTypeOptions}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                         }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    </Grid>
-                                    {permissions?.competencyType?.isCreate && (
-                                      <Grid item xs={1} sm={1} md={1}>
-                                        <Tooltip title="Create Competency Type" className="mt-1">
-                                          <IconButton
-                                            onClick={() => {
-                                              setShowAddCompetencyTypeDialog(true);
-                                            }}
-                                            disabled={!isClone ? serviceMasterId && field.disableOnEdit : false}
-                                            size="small"
-                                          >
-                                            <AddIcon
-                                              color={isClone ? 'primary' : serviceMasterId && field.disableOnEdit ? 'disabled' : 'primary'}
-                                            />
-                                          </IconButton>
-                                        </Tooltip>
-                                      </Grid>
-                                    )}
-                                    {field?.tooltipMessage ? (
-                                      <Grid item xs={1} sm={1} md={1}>
-                                        <Tooltip title={field?.tooltipMessage ?? ''}>
-                                          <InfoIcon color="disabled" />
-                                        </Tooltip>
-                                      </Grid>
-                                    ) : null}
-                                  </Grid>
-                                ) : field.fieldName === 'competencies' ? (
-                                  <Grid container spacing={1}>
-                                    <Grid
-                                      item
-                                      xs={permissions?.competencies?.isCreate ? 11 : 11}
-                                      sm={permissions?.competencies?.isCreate ? 11 : 11}
-                                      md={permissions?.competencies?.isCreate ? 11 : 11}
-                                    >
-                                      <FormTypes
-                                        isNew={Boolean(serviceMasterId)}
-                                        {...field}
-                                        fieldData={field}
-                                        fields={initialData.fields}
-                                        disabled={(Boolean(serviceMasterId) && field.disableOnEdit && !isClone) || false}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={competenciesOptions}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    </Grid>
-                                    {permissions?.competencies?.isCreate && (
-                                      <Grid item xs={1} sm={1} md={1}>
-                                        <Tooltip title="Create Competencies" className="mt-1">
-                                          <IconButton
-                                            onClick={() => {
-                                              setShowCompetenciesDialog(true);
-                                            }}
-                                            disabled={!isClone ? serviceMasterId && field.disableOnEdit : false}
-                                            size="small"
-                                          >
-                                            <AddIcon
-                                              color={isClone ? 'primary' : serviceMasterId && field.disableOnEdit ? 'disabled' : 'primary'}
-                                            />
-                                          </IconButton>
-                                        </Tooltip>
-                                      </Grid>
-                                    )}
-                                    {field?.tooltipMessage ? (
-                                      <Grid item xs={1} sm={1} md={1}>
-                                        <Tooltip title={field?.tooltipMessage ?? ''}>
-                                          <InfoIcon color="disabled" />
-                                        </Tooltip>
-                                      </Grid>
-                                    ) : null}
-                                  </Grid>
-                                ) : (
-                                  <FormTypes
-                                    isNew={Boolean(serviceMasterId)}
-                                    {...field}
-                                    fieldData={field}
-                                    fields={initialData.fields}
-                                    disabled={(Boolean(serviceMasterId) && field.disableOnEdit && !isClone) || false}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                  />
-                                )}
+                                <FormTypes
+                                  isNew={Boolean(serviceMasterId)}
+                                  {...field}
+                                  fieldData={field}
+                                  fields={initialData.fields}
+                                  disabled={(Boolean(serviceMasterId) && field.disableOnEdit && !isClone) || false}
+                                  values={values}
+                                  errors={errors}
+                                  touched={touched}
+                                  label={field.fieldLabel}
+                                  name={field.fieldName}
+                                  type={field.type}
+                                  options={field.option}
+                                  setFieldValue={(name, value) => {
+                                    setFieldValue(name, value);
+                                  }}
+                                  required={field.required}
+                                  fullWidth
+                                  isTooltip={field?.isTooltip || false}
+                                  tooltipMessage={field?.tooltipMessage}
+                                  size="small"
+                                />
                               </Grid>
                             ))}
                           </Grid>
@@ -423,38 +257,6 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
                     setShowConfirmDialog(false);
                     onClose();
                   }}
-                />
-              ) : null}
-              {showAddCompetencyTypeDialog ? (
-                <ManageCompetencyType
-                  id={null}
-                  isClone={false}
-                  onClose={() => setShowAddCompetencyTypeDialog(false)}
-                  onSuccess={(data) => {
-                    setShowAddCompetencyTypeDialog(false)
-                    updateCompetencyTypeDropdown(data[0])
-                    if (initialData?.fields?.some((e) => e.fieldName === 'competencyType')) {
-                      setFieldValue('competencyType', data[0]._id);
-                    }
-                    if (initialData?.fields?.some((e) => e.fieldName === 'competencies')) {
-                      setFieldValue('competencies', '');
-                    }
-                  }}
-                />
-              ) : null}
-              {showCompetenciesDialog ? (
-                  <ManageCompetencies
-                  id={null}
-                  isClone={false}
-                  onClose={() => setShowCompetenciesDialog(false)}
-                  onSuccess={(data) => {
-                    setShowCompetenciesDialog(false)
-                    updateCompetenciesDropdown(data)
-                    if (initialData?.fields?.some((e) => e.fieldName === 'competencies')) {
-                      setFieldValue('competencies', [...values['competencies'], data._id]);
-                    }
-                  }}
-                  referenceData={{competencyType: values['competencyType']}}
                 />
               ) : null}
             </Fragment>
