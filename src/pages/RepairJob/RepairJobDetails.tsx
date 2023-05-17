@@ -18,8 +18,7 @@ import TabPanel from 'src/components/TabPanel';
 import AddSerializedAsset from './AddSerializedAsset';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
-
-import Steps2, { getIndex } from 'src/components/Steps';
+import Steps, { getIndex } from 'src/components/Steps';
 import { GiAbstract055 } from 'react-icons/gi';
 import { camelCase } from 'lodash';
 import { RiFlowChart } from 'react-icons/ri';
@@ -292,7 +291,7 @@ const RepairJobDetails = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Steps2
+            <Steps
               isNextStep={false}
               nextStep={nextStep}
               steps={repairJobProcessSteps}
