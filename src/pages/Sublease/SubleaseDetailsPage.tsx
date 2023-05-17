@@ -12,7 +12,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { sublease, SUBLEASE_STATUS, subleaseSteps, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManageSublease from './ManageSublease';
-import Steps from '../RentalManagement/Steps';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import TabPanel from '../../components/TabPanel';
@@ -25,7 +24,7 @@ import { GiAbstract055 } from 'react-icons/gi';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import Steps2, { getIndex } from 'src/components/Steps';
+import Steps, { getIndex } from 'src/components/Steps';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -228,7 +227,7 @@ const SubleaseDetailsPage = () => {
           <Grid item xs={12} sm={12} md={12} lg={12}>
             {subleaseData ? (
               <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Steps2
+                <Steps
                   isNextStep={false}
                   nextStep={nextStep}
                   steps={subleaseSteps}
