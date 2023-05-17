@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { ACTIVITY_RESOURCE, transferInventory } from 'src/constants/helpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
-import Steps2 from 'src/components/Steps';
+import Steps from 'src/components/Steps';
 import { transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import TabPanel from 'src/components/TabPanel';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
@@ -285,7 +285,7 @@ const TransferInventoryDetailPage = () => {
         <TabPanel value={tabValue} index={1}>
           {transferInventoryData && (
             <Box>
-              <Steps2
+              <Steps
                 steps={transferInventorySteps}
                 currentStep={currentStep}
                 setCurrentStep={setCurrentStep}

@@ -29,12 +29,11 @@ import Product from './Product';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import Activity from '../../components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-import Steps from '../RentalManagement/Steps';
 import { camelCase } from 'lodash';
 import SerializedAsset from './SerializedAsset';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import Steps2, { getIndex } from 'src/components/Steps';
+import Steps, { getIndex } from 'src/components/Steps';
 
 const BulkAssetCreationDetailsPage = () => {
   const renderedFrom = camelCase(routes?.bulkAssetCreation.title);
@@ -253,7 +252,7 @@ const BulkAssetCreationDetailsPage = () => {
               </Grid>
             ) : (
               <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Steps2
+                <Steps
                   isNextStep={false}
                   nextStep={nextStep}
                   steps={bulkAssetCreationSteps}

@@ -1026,7 +1026,7 @@ body::-webkit-scrollbar-thumb {
   .activity {
     padding: 6px 10px;
     background: #ffffff;
-    border-left: 4px solid #298b88;
+    border-left: 4px solid #0f9fa9;
     box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.08);
     border-radius: 4px;
     margin-block: 8px;
@@ -1116,13 +1116,13 @@ body::-webkit-scrollbar-thumb {
 
 .btn-view {
   background: #f7fffb;
-  border: 1px solid #298b88;
+  border: 1px solid #0f9fa9;
   box-shadow: 0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06);
   border-radius: 3.62963px;
   font-weight: 600;
   font-size: 14px;
   line-height: 16px;
-  color: #298b88;
+  color: #0f9fa9;
   cursor: pointer;
   transition: all 0.3s;
   &:hover {
@@ -3023,7 +3023,7 @@ body {
   }
   .btn-primary-v1 {
     padding: var(--button-v1-padding);
-    border: 1px solid #298b88 !important;
+    border: 1px solid #0f9fa9 !important;
   }
 
   .btn-outline-red-v1 {
@@ -3413,8 +3413,8 @@ body {
   }
 }
 .accordion-outlined-button {
-  border: 1px solid #298b88 !important;
-  color: #298b88 !important;
+  border: 1px solid #0f9fa9 !important;
+  color: #0f9fa9 !important;
   min-width: 124px !important;
   &:hover {
     background-color: rgba(0, 0, 0, 0.04) !important;

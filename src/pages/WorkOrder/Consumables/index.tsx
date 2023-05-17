@@ -24,7 +24,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
   const toastConfig = useContext(CustomToastContext);
-
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
@@ -36,33 +35,58 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
     state: { user }
   }: any = useData();
 
-
   useEffect(() => {
     fetchColumns();
     fetchData();
-  }, [allowedToEdit]);
+  }, [allowedToEdit, workOrderId]);
 
-  const fetchColumns = () => {
-    const column: any = [
-      {
-        accessor: 'product',
-        Header: 'Product',
-        width: 300,
-        Cell: ({ row }) =>
-          row?.original?.product ? (
-            <p className="text-truncate" title={row?.original?.product}>
-              <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.productId}`} target="_blank">
-                {row.original.product}
+  const fetchColumns = async () => {
+
+    const column = [];
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+          fieldNames: ['productName', 'productNumber', 'productDescription']
+        }
+      ]
+    });
+    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
+    productFields?.forEach((e) => {
+      if (e?.fieldName === 'productName') {
+        column.push({
+          accessor: e?.fieldName,
+          Header: e?.fieldLabel,
+          width: 200,
+          hide: false,
+          Cell: ({ row }) => {
+            return row.original[e?.fieldName] ?
+              <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
+                {row.original[e?.fieldName]}
               </a>
-            </p>
-          ) : (
-            <NoDataCell />
-          )
-      },
+              : <NoDataCell />;
+          }
+        });
+      }
+      else {
+        column.push({
+          accessor: e?.fieldName,
+          Header: e?.fieldLabel,
+          width: 200,
+          Cell: ({ row }) => {
+            return row.original[e?.fieldName] ? <p className="text-truncate">{row.original[e?.fieldName]}</p> : <NoDataCell />;
+          }
+        });
+      }
+    });
+
+    const extracolumns: any = [
       {
         accessor: 'service',
         Header: 'Service',
-        width: 300,
+        width: 200,
         Cell: ({ row }) =>
           row?.original?.service ? (
             <p className="text-truncate" title={row?.original?.service}>
@@ -77,7 +101,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       {
         accessor: 'stepName',
         Header: 'Step Name',
-        width: 300,
+        width: 200,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.stepName || <NoDataCell />}</p>
       },
       {
@@ -85,16 +109,19 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         Header: 'Qty',
         editable: allowedToEdit,
         width: 150,
+        hide: false,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
-      ...(user?.user?.brandPolicy?.workOrderConsumableRequest ? [
-        {
-          accessor: 'requestedQty',
-          Header: 'Requested Qty',
-          width: 150,
-          Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-        }
-      ] : []),
+      ...(user?.user?.brandPolicy?.workOrderConsumableRequest
+        ? [
+          {
+            accessor: 'requestedQty',
+            Header: 'Requested Qty',
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+          }
+        ]
+        : []),
       {
         accessor: 'consumedQty',
         Header: 'Consumed Qty',
@@ -106,7 +133,9 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         Header: 'Action',
         width: 100,
         minWidth: 100,
+        sticky: 'right',
         disableFilters: true,
+        hide: false,
         canDrag: false,
         Cell: ({ row }: any) => (
           <div style={{ display: 'flex', justifyContent: 'right' }}>
@@ -141,10 +170,12 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         )
       }
     ];
-    setColumns(column);
+
+    setColumns([...column, ...extracolumns]);
   };
 
   const fetchData = async () => {
+    setDataRows(null);
     var query = ``;
     if (service && uniqueId) {
       query = query + `?service=${service}&uniqueId=${uniqueId}`;
@@ -157,8 +188,11 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res: any = {
-            ...prepareDataForGrid(u),
+            ...prepareDataForGrid(u)
           };
+          res.productName = u?.product?.optionLabel
+          res.productDescription = u?.product?.productDescription
+          res.productNumber = u?.product?.productNumber
           res.hideSelection = u?.qty - u?.consumedQty === 0 ? true : false;
           return res;
         });
@@ -291,6 +325,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
               hideExpander={true}
+              hideSelection={allowedToEdit ? false : true}
             />
           ) : (
             <Box p={2} height={500} bgcolor="white">
@@ -333,7 +368,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
             onClose={() => {
               setOpenLogDialog({
                 open: false,
-                uniqueId: null,
+                uniqueId: null
               });
             }}
           />

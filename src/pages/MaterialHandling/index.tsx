@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, TextField, Typography } from '@material-ui/core';
+import { Box, Grid, IconButton, Tab, Tabs, TextField, Typography } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -9,53 +9,82 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Request from './Request';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { Autocomplete } from '@material-ui/lab';
+import TabPanel from 'src/components/TabPanel';
+import Consumables from '../WorkOrder/Consumables';
 
 const MaterialHandling = () => {
-
   const toastConfig = useContext(CustomToastContext);
 
-  const { state: { permissions, selectedEntity, user } }: any = useData();
+  const {
+    state: { permissions, selectedEntity, user }
+  }: any = useData();
 
   const [workOrder, setWorkOrder] = useState(null);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
-  const [plantOptions, setPlantOptions] = useState([]);
-  const [selectedPlant, setSelectedPlant] = useState(null)
+  const [warehouseOptions, setWarehouseOptions] = useState([]);
+  const [selectedPlant, setSelectedPlant] = useState(null);
+  const [tabValue, setTabValue] = useState<any>(0);
 
   useEffect(() => {
     axiosInstance()
       .get('/sa-formbuilder/lookup?lookupResource=Warehouse')
       .then(({ data: { data } }) => {
-        setPlantOptions(data.Warehouse);
-        if (selectedPlant === null && data?.Warehouse.length) {
-          setSelectedPlant(null);
+        const warehouses: any = [];
+        if (data['Warehouse'] && data['Warehouse']?.length) {
+          data['Warehouse']?.forEach((ele) => {
+            if (ele?.manager && ele?.manager?.includes(user?.user?._id)) {
+              warehouses.push(ele)
+            }
+          })
         }
+        setWarehouseOptions(warehouses);
       });
-  }, [])
+  }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [selectedPlant]);
+    if (warehouseOptions && warehouseOptions?.length) {
+      fetchData();
+    }
+    else {
+      setWorkOrder([])
+    }
+  }, [selectedPlant, warehouseOptions]);
 
   const fetchData = () => {
     setWorkOrder(null);
+    setSelectedWorkOrder(null);
     let api = `/material-handling`;
-
+    const filterById: any = []
     if (selectedPlant) {
-      api = `${api}?filterById=${JSON.stringify([{ field: 'warehouse', term: selectedPlant.optionValue }])}&filterType=and`;
+      filterById.push({ field: 'warehouse', term: selectedPlant.optionValue })
     }
-
+    else {
+      filterById.push({ field: 'warehouse', term: { "$in": warehouseOptions?.map((e) => e?.optionValue) } })
+    }
+    api = `${api}?filterById=${JSON.stringify(filterById)}&filterType=and`;
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
-        setWorkOrder(data)
+        setWorkOrder(data);
         if (data?.length) {
-          setSelectedWorkOrder(data[0])
+          setSelectedWorkOrder(data[0]);
         }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
 
   return (
     <Box className="main-container-v1">
@@ -69,11 +98,15 @@ const MaterialHandling = () => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6} md={3}>
               <Autocomplete
-                options={plantOptions}
+                options={warehouseOptions}
                 fullWidth
                 getOptionLabel={(option: any) => option.optionLabel}
                 getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                value={plantOptions.filter((data) => data.optionValue === selectedPlant?.optionValue).length ? plantOptions.filter((data) => data.optionValue === selectedPlant?.optionValue)[0] : ''}
+                value={
+                  warehouseOptions.filter((data) => data.optionValue === selectedPlant?.optionValue).length
+                    ? warehouseOptions.filter((data) => data.optionValue === selectedPlant?.optionValue)[0]
+                    : ''
+                }
                 onChange={(e, val) => {
                   setSelectedPlant(val);
                 }}
@@ -93,13 +126,16 @@ const MaterialHandling = () => {
             <Grid item xs={12} md={3} sm={12}>
               {workOrder?.map((data, index) => {
                 return (
-                  <Box mb={2} key={index}
+                  <Box
+                    mb={2}
+                    key={index}
                     onClick={() => {
                       setSelectedWorkOrder(data);
+                      setTabValue(0)
                     }}
                     style={{
                       cursor: 'pointer',
-                      backgroundColor: selectedWorkOrder === data ? '#298b88' : 'white',
+                      backgroundColor: selectedWorkOrder === data ? '#0f9fa9' : 'white',
                       color: selectedWorkOrder === data ? 'white' : 'black',
                       border: '1px solid #ebebeb'
                     }}
@@ -116,8 +152,56 @@ const MaterialHandling = () => {
             </Grid>
             <Grid item xs={12} md={9} sm={12}>
               {selectedWorkOrder && (
-                <Box style={{ border: '1px solid #ebebeb' }}  >
-                  <Request workOrder={selectedWorkOrder?._id} />
+                <Box>
+                  <Tabs
+                    className="new-tab-container-v1"
+                    value={tabValue}
+                    onChange={handleMainTabChange}
+                    textColor="primary"
+                    TabIndicatorProps={{
+                      style: {
+                        display: 'none'
+                      }
+                    }}
+                  >
+                    <Tab
+                      className={'tabLayout'}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          Requests
+                        </div>
+                      }
+                      {...a11yProps(0)}
+                    />
+                    <Tab
+                      className={'tabLayout'}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          Consumables
+                        </div>
+                      }
+                      {...a11yProps(1)}
+                    />
+                  </Tabs>
+                  <TabPanel value={tabValue} index={0}>
+                    <Box>
+                      <Request workOrder={selectedWorkOrder?._id} />
+                    </Box>
+                  </TabPanel>
+                  <TabPanel value={tabValue} index={1}>
+                    <Box>
+                      <Consumables
+                        allowedToEdit={false}
+                        isCreate={false}
+                        workOrderId={selectedWorkOrder?._id}
+                        warehouse={selectedWorkOrder?.warehouse?.optionValue}
+                        service={null}
+                        uniqueId={null}
+                        stepId={null}
+                        serviceName={null}
+                      />
+                    </Box>
+                  </TabPanel>
                 </Box>
               )}
             </Grid>
