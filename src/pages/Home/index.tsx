@@ -96,7 +96,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
           if (
             section.head === 'Setups' ||
             section.head === 'Setups & Administration' ||
-            section.head === 'Collaborate' ||
+            section.head === 'Collaboration Tools' ||
             section.head === 'Activities'
           )
             return <></>;
@@ -222,7 +222,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
 
   useEffect(() => {
     if (objBySectionName) {
-      if (mode === 'Collaboration Tools') setColabData(objBySectionName['Collaborate'] || objBySectionName['Activities'] || null);
+      if (mode === 'Collaboration Tools') setColabData(objBySectionName['Collaboration Tools'] || objBySectionName['Activities'] || null);
       else setColabData(objBySectionName['Setups & Administration'] || objBySectionName['Setups'] || objBySectionName['Product Setup'] || null);
     }
   }, [objBySectionName]);
