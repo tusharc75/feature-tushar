@@ -38,7 +38,6 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
   const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formValues, setFormValues] = useState({});
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -82,7 +81,6 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
           fields: fieldsData,
           values: isNew ? tempData : getObjKeysWithValues(values, fieldsData)
         });
-        setFormValues(isNew ? tempData : getObjKeysWithValues(values, fieldsData));
         setLoading(false);
       })
       .catch((err) => {

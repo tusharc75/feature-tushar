@@ -88,7 +88,6 @@ export default function ManageQuoteDialog({
     values: {}
   });
 
-  const [formValues, setFormValues] = useState({});
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
@@ -430,13 +429,11 @@ export default function ManageQuoteDialog({
               ...getObjKeysWithValues(rest, newFields)
             }
           });
-          setFormValues(getObjKeysWithValues(rest, newFields));
         } else {
           setInitialData({
             fields: newFields,
             values: isNew ? initialData : getObjKeysWithValues(dataToUpdate, newFields)
           });
-          setFormValues(isNew ? initialData : getObjKeysWithValues(dataToUpdate, newFields));
         }
       });
   };
@@ -808,10 +805,6 @@ export default function ManageQuoteDialog({
                                             type={field.type}
                                             options={accountData}
                                             disabled={!isClone ? accountFieldDisable || (!isNew && field.disableOnEdit) : false}
-                                            // setFieldValue={(name, value) => {
-                                            //   handleValuesChange({ [name]: value })
-                                            //   setFieldValue(name, value)
-                                            // }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
@@ -1066,7 +1059,6 @@ export default function ManageQuoteDialog({
                                               type={field.type}
                                               options={countryBillToDropDown}
                                               setFieldValue={(name, value) => {
-                                                // handleValuesChange(name, value);
                                                 setFieldValue(name, value);
                                               }}
                                               required={field.required}
@@ -1123,7 +1115,6 @@ export default function ManageQuoteDialog({
                                               type={field.type}
                                               options={countrySellToDropDown}
                                               setFieldValue={(name, value) => {
-                                                // handleValuesChange(name, value);
                                                 setFieldValue(name, value);
                                               }}
                                               required={field.required}

@@ -174,7 +174,6 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [formsData, setFormsData] = useState([]);
-  const [formValues, setFormValues] = useState({});
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [loading, setLoading] = useState(false);

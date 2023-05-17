@@ -7,7 +7,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { Checkbox, FormControlLabel, Grid } from '@material-ui/core';
 
-export const MinMax = ({ values, setFieldValue, handleValuesChange, touched, errors }) => {
+export const MinMax = ({ values, setFieldValue, touched, errors }) => {
 
     const toastConfig = useContext(CustomToastContext)
     const [services, setServices] = useState([]);
@@ -28,9 +28,6 @@ export const MinMax = ({ values, setFieldValue, handleValuesChange, touched, err
                     checked={values['isMinMaxValue']}
                     onChange={(e) => {
                         setFieldValue('isMinMaxValue', e.target.checked);
-                        handleValuesChange({
-                            isMinMaxValue: e.target.checked
-                        });
                     }}
                     color="primary"
                 />
@@ -52,9 +49,6 @@ export const MinMax = ({ values, setFieldValue, handleValuesChange, touched, err
                         helperText={touched['minValue'] && errors['minValue']}
                         onChange={(e) => {
                             setFieldValue('minValue', parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-                            handleValuesChange({
-                                minValue: parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
-                            });
                         }}
                     />
                 </Grid>
@@ -71,9 +65,6 @@ export const MinMax = ({ values, setFieldValue, handleValuesChange, touched, err
                         helperText={touched['maxValue'] && errors['maxValue']}
                         onChange={(e) => {
                             setFieldValue('maxValue', parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-                            handleValuesChange({
-                                maxValue: parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
-                            });
                         }}
                     />
                 </Grid>
@@ -87,9 +78,6 @@ export const MinMax = ({ values, setFieldValue, handleValuesChange, touched, err
                             getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                             onChange={(_, newVal: any) => {
                                 setFieldValue('minValueServiceAdd', newVal?.optionValue);
-                                handleValuesChange({
-                                    minValueServiceAdd: newVal?.optionValue
-                                });
                             }}
                             renderInput={(params) => <TextField {...params} margin="dense" label="Add Service, if value less than min." name="passAddon" variant="outlined" />}
                         />
@@ -103,9 +91,6 @@ export const MinMax = ({ values, setFieldValue, handleValuesChange, touched, err
                             getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                             onChange={(_, newVal: any) => {
                                 setFieldValue('maxValueServiceAdd', newVal?.optionValue);
-                                handleValuesChange({
-                                    maxValueServiceAdd: newVal?.optionValue
-                                });
                             }}
                             renderInput={(params) => <TextField {...params} margin="dense" label="Add Service, if value more than max." name="passAddon" variant="outlined" />}
                         />

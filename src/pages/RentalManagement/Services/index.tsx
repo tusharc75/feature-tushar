@@ -24,7 +24,7 @@ import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceD
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 
 const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -99,12 +99,12 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -257,16 +257,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent?.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent?.packageDetail?.packageName;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
@@ -299,16 +299,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -468,6 +468,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
     setDeleteData(obj);
   };
 
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    if (inputField.hasOwnProperty('qtyDisplay')) {
+      inputField['qty'] = inputField['qtyDisplay'];
+    }
+    let rows: any = [{ ...rowData, ...updatedData }];
+    rows = await calculateRowsField(material, inputField, allFields, updatedData);
+    handleSaveData(rows);
+  }
+
   return (
     <Fragment>
       {allowedToEdit && (
@@ -560,10 +570,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
             hideSelection={isOffline || !allowedToEdit}
             hideAction={isOffline || !allowedToEdit}
             renderedFrom="rental_management_sevices_1"
-            onSaveEdit={async (inputField, updatedData) => {
-              let rows = await calculateRowsField(material, inputField, allFields, updatedData);
-              handleSaveData(rows);
-            }}
+            onSaveEdit={onSaveInlineEdit}
             isClientSideGrid={true}
           />
         </Box>

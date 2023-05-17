@@ -44,7 +44,6 @@ export default function ManageAccount(props) {
     fromProject,
     accountId = null,
     formValues = {},
-    handleValuesChange = null,
     marketSegmentId = null,
     isClone,
     accountNameForClone,
@@ -389,7 +388,6 @@ export default function ManageAccount(props) {
                                           ownerDataSource
                                         }
                                         onChange={(e, val) => {
-                                          // handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : "");
                                           setFieldValue(
                                             field.fieldName,
                                             val && val.optionValue
@@ -418,13 +416,6 @@ export default function ManageAccount(props) {
                                                       values["owner"]
                                                   )
                                                   : collaboratorDataSource;
-
-                                              // handleValuesChange("collaborator", newCollaboratorDataSource.find(
-                                              //   (d) =>
-                                              //     d?.optionValue ===
-                                              //     user?.user?._id
-                                              // ).optionValue)
-
                                               setFieldValue("collaborator", [
                                                 ...values["collaborator"],
                                                 newCollaboratorDataSource.find(
@@ -471,7 +462,6 @@ export default function ManageAccount(props) {
                                           collaboratorDataSource
                                         }
                                         setFieldValue={(name, value) => {
-                                          // handleValuesChange(field.fieldName, value);
                                           setFieldValue(field.fieldName, value)
                                         }}
                                         required={field.required}
@@ -503,14 +493,10 @@ export default function ManageAccount(props) {
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onChange={(e, value) => {
-
-                                          // handleValuesChange(field.fieldName, value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [])
                                           setFieldValue(
                                             field.fieldName,
                                             value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
                                           );
-                                          // handleValuesChange("owner", "")
-                                          // handleValuesChange("collaborator", [])
                                           setFieldValue("owner", "");
                                           setFieldValue("collaborator", []);
                                         }}
@@ -527,7 +513,6 @@ export default function ManageAccount(props) {
                                         name={field.fieldName}
                                         type={field.type}
                                         setFieldValue={(name, value) => {
-                                          // handleValuesChange(name, value)
                                           setFieldValue(name, value)
                                         }}
                                         required={field.required}
@@ -536,7 +521,6 @@ export default function ManageAccount(props) {
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onChange={(e) => {
-                                          // handleValuesChange(field.fieldName, e.target.checked)
                                           setFieldValue(
                                             field.fieldName,
                                             e.target.checked
@@ -547,13 +531,10 @@ export default function ManageAccount(props) {
                                             setIsShippingSameAsBilling(false)
                                             setFieldValue("shippingAddress", []);
                                           }
-
-
                                           if (
                                             e.target.checked &&
                                             values.billingAddress
                                           ) {
-                                            // handleValuesChange("shippingAddress", values.billingAddress)
                                             setFieldValue(
                                               "shippingAddress",
                                               values.billingAddress
@@ -592,7 +573,6 @@ export default function ManageAccount(props) {
                                               options={addressDataSource}
                                               setFieldValue={(name, value) => {
                                                 setFieldValue(field.fieldName, value)
-                                                handleValuesChange({ [name]: value })
                                                 if (
                                                   values.isShippingAddressSameAsBillingAddress ===
                                                   true
@@ -608,23 +588,6 @@ export default function ManageAccount(props) {
                                               isTooltip={field?.isTooltip || false}
                                               tooltipMessage={field?.tooltipMessage}
                                               size="small"
-                                            // onChange={(event, newValue) => {
-                                            //   // handleValuesChange(field.fieldName, newValue?.description ?? "")
-                                            //   setFieldValue(
-                                            //     field.fieldName,
-                                            //     newValue?.description ?? ""
-                                            //   );
-                                            //   if (
-                                            //     values.isShippingAddressSameAsBillingAddress ===
-                                            //     true
-                                            //   ) {
-                                            //     // handleValuesChange("shippingAddress", newValue?.description ?? "")
-                                            //     setFieldValue(
-                                            //       "shippingAddress",
-                                            //       newValue?.description ?? ""
-                                            //     );
-                                            //   }
-                                            // }}
                                             />
                                           </Grid>
                                           {(
@@ -689,7 +652,6 @@ export default function ManageAccount(props) {
                                                 type={field.type}
                                                 options={addressDataSource}
                                                 setFieldValue={(name, value) => {
-                                                  handleValuesChange({ [name]: value })
                                                   setFieldValue(field.fieldName, value)
                                                 }}
                                                 required={field.required}
@@ -758,9 +720,7 @@ export default function ManageAccount(props) {
                                                   type={field.type}
                                                   options={parentAccountDataSource}
                                                   setFieldValue={(name, value) => {
-                                                    // handleValuesChange(name, value);
                                                     setFieldValue(name, value)
-
                                                   }}
                                                   required={field.required}
                                                   fullWidth
@@ -830,7 +790,6 @@ export default function ManageAccount(props) {
                                                   name={field.fieldName}
                                                   type={field.type}
                                                   setFieldValue={(name, value) => {
-                                                    // handleValuesChange({ [name]: value })
                                                     setFieldValue(name, value)
                                                   }}
                                                   required={field.required}
@@ -916,7 +875,6 @@ export default function ManageAccount(props) {
                                                     name={field.fieldName}
                                                     type={field.type}
                                                     setFieldValue={(name, value) => {
-                                                      // handleValuesChange({ [name]: value })
                                                       setFieldValue(name, value)
                                                     }}
                                                     required={field.required}
@@ -986,7 +944,6 @@ export default function ManageAccount(props) {
                                                 type={field.type}
                                                 options={field.option}
                                                 setFieldValue={(name, value) => {
-                                                  // handleValuesChange(name, value);
                                                   setFieldValue(name, value)
                                                 }}
                                                 required={field.required}
