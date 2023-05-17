@@ -100,7 +100,7 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
         .post(`/competency-type`, values)
         .then(({ data }) => {
           setLoading(false);
-          onSuccess(data?.data);
+          onSuccess(data?.data[0]);
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,

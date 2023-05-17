@@ -9,7 +9,9 @@ import { getNestedlookupDependentOn, sidebarResource } from 'src/constants/helpe
 import ManageWellMaster from 'src/pages/WellMaster/ManageWellMaster';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
 import ManageStorageLocation from 'src/pages/StorageLocation/ManageStorageLocation';
+import ManageCompetencyType from "src/pages/CompetencyType/ManageCompetencyType"
 import { camelCase } from 'lodash';
+import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
 
 function Dropdown({
     InfoLabel,
@@ -445,6 +447,79 @@ function Dropdown({
                                             }
                                         }}
                                     />}
+                                </>
+                            </HtmlTooltip>
+                        </Box>)}
+                        {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.competencyType && permissions?.competencyType?.isCreate && (
+                        <Box>
+                            <HtmlTooltip title={`Add ${name}`} className="formActionButton">
+                                <>
+                                    <IconButton disabled={fieldData?.isUneditable || rest?.disabled} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                                        <AddCircleIcon />
+                                    </IconButton>
+                                    {lookupDialog &&
+                                        <ManageCompetencyType
+                                            id={null}
+                                            onClose={() => setLookupDialog(false)}
+                                            isClone={false}
+                                            onSuccess={(data) => {
+                                                setLookupDialog(false)
+                                                if (data.competencyType && data._id) {
+                                                    let tempNewOption = {
+                                                        default: false,
+                                                        optionLabel: data.competencyType,
+                                                        optionValue: data._id,
+                                                        order: option.length
+                                                    }
+                                                    addFieldOption(tempNewOption);
+                                                    setOptionsList([tempNewOption, ...option]);
+                                                    handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                                }
+                                            }}
+                                        />}
+                                </>
+                            </HtmlTooltip>
+                        </Box>)}
+                        {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.competencies && permissions?.competencies?.isCreate && (
+                        <Box>
+                            <HtmlTooltip title={`Add ${name}`} className="formActionButton">
+                                <>
+                                    <IconButton disabled={fieldData?.isUneditable || rest?.disabled} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                                        <AddCircleIcon />
+                                    </IconButton>
+                                    {lookupDialog &&
+                                        <ManageCompetencies
+                                            referenceData={{ competencyType: values[fieldData.lookupDependentOn] }}
+                                            isClone={false}
+                                            onClose={() => setLookupDialog(false)}
+                                            onSuccess={(data) => {
+                                                setLookupDialog(false)
+                                                if (data.competencyName && data._id) {
+                                                    let tempNewOption = {
+                                                        default: false,
+                                                        optionLabel: data.competencyName,
+                                                        optionValue: data._id,
+                                                        order: option.length,
+                                                        competencyType: data.competencyType
+                                                    }
+                                                    addFieldOption(tempNewOption);
+                                                    setOptionsList([tempNewOption, ...option]);
+                                                    if (fieldData.lookupDependentOn) {
+                                                        if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
+                                                            if (type === "multiSelect") {
+                                                                handleChange(name, tempNewOption && tempNewOption.optionValue ? [tempNewOption.optionValue] : []);
+                                                            }
+                                                            else {
+                                                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                                            }
+                                                        }
+                                                    }
+                                                    else {
+                                                        handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                                    }
+                                                }
+                                            }}
+                                        />}
                                 </>
                             </HtmlTooltip>
                         </Box>)}
