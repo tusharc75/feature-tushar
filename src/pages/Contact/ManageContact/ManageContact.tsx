@@ -54,7 +54,6 @@ export default function ManageContact(props) {
     contactId = null,
     accountId = null,
     formValues = {},
-    handleValuesChange = null,
     isClone = false,
     isAccountFieldDisable = false,
     contactApi,
@@ -315,9 +314,7 @@ export default function ManageContact(props) {
                                           type={field.type}
                                           options={ownerDataSource}
                                           onChange={(e, val) => {
-                                            handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : '');
                                             setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-
                                             if (val && val.optionValue !== user?.user?._id) {
                                               const checkOwnerAddedInCollaborator = values['collaborator'].find(
                                                 (d) => d?.optionValue === user?.user?._id
@@ -326,11 +323,6 @@ export default function ManageContact(props) {
                                                 const newCollaboratorDataSource = fromProject
                                                   ? collaborators.filter((c) => c.optionValue !== values['owner'])
                                                   : collaboratorDataSource;
-
-                                                handleValuesChange(
-                                                  'collaborator',
-                                                  newCollaboratorDataSource.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                                );
                                                 setFieldValue('collaborator', [
                                                   ...values['collaborator'],
                                                   newCollaboratorDataSource.find((d) => d?.optionValue === user?.user?._id).optionValue
@@ -418,7 +410,6 @@ export default function ManageContact(props) {
                                           type={field.type}
                                           options={collaboratorDataSource}
                                           setFieldValue={(name, value) => {
-                                            handleValuesChange(name, value);
                                             setFieldValue(name, value);
                                           }}
                                           required={field.required}
@@ -457,9 +448,7 @@ export default function ManageContact(props) {
                                               size="small"
                                               doNotShowInfoTooltip={true}
                                               onChange={(e, value) => {
-                                                handleValuesChange(field.fieldName, value && value.optionValue ? value.optionValue : '');
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                                handleValuesChange('reportsTo', '');
                                                 setFieldValue('reportsTo', '');
                                               }}
                                             />
@@ -511,7 +500,6 @@ export default function ManageContact(props) {
                                               type={field.type}
                                               options={reportsToDataSource}
                                               setFieldValue={(name, value) => {
-                                                handleValuesChange(name, value);
                                                 setFieldValue(name, value);
                                               }}
                                               required={field.required}
@@ -559,17 +547,10 @@ export default function ManageContact(props) {
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
                                           onChange={(e, value) => {
-                                            handleValuesChange(
-                                              field.fieldName,
-                                              value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
-                                            );
                                             setFieldValue(
                                               field.fieldName,
                                               value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
                                             );
-
-                                            handleValuesChange('owner', '');
-                                            handleValuesChange('collaborator', []);
                                             setFieldValue('owner', '');
                                             setFieldValue('collaborator', []);
                                           }}
@@ -587,7 +568,6 @@ export default function ManageContact(props) {
                                           type={field.type}
                                           options={field.option}
                                           setFieldValue={(name, value) => {
-                                            handleValuesChange(name, value);
                                             setFieldValue(name, value);
                                           }}
                                           required={field.required}

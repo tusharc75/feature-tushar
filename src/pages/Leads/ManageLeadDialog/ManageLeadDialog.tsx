@@ -74,7 +74,6 @@ export default function ManageLeadDialog({
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
-  const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
 
@@ -220,14 +219,12 @@ export default function ManageLeadDialog({
                 fields: newFields,
                 values: getObjKeysWithValues(tempData, newFields)
               });
-              setFormValues(getObjKeysWithValues(tempData, newFields));
             });
         } else {
           setInitialData({
             fields: newFields,
             values: getObjKeys('', newFields)
           });
-          setFormValues(getObjKeys('', newFields));
         }
 
         setTimeout(() => setLoadingData(false), 500);
@@ -243,7 +240,6 @@ export default function ManageLeadDialog({
           fields: newFields,
           values: getObjKeysWithValues(dataToUpdate, newFields)
         });
-        setFormValues(getObjKeysWithValues(dataToUpdate, newFields));
         setTimeout(() => setLoadingData(false), 500);
       }
     }

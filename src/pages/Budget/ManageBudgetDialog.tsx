@@ -79,7 +79,6 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
@@ -172,7 +171,6 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                 fields: newFields,
                 values: getObjKeysWithValues(clonedData, newFields)
               });
-              setFormValues(getObjKeysWithValues(clonedData, newFields));
             })
             .catch((error) => {
               toastConfig.setToastConfig(error);
@@ -185,12 +183,6 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
               filterData.map((m) => m.fieldData)
             )
           });
-          setFormValues(
-            getObjKeys(
-              '',
-              filterData.map((m) => m.fieldData)
-            )
-          );
         }
 
         if (filterData.length > 0) {
