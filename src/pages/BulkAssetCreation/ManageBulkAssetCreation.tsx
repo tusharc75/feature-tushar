@@ -441,10 +441,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                                                                                         ? val.optionValue
                                                                                         : ""
                                                                                 );
-                                                                                // handleValuesChange({
-                                                                                //     [field.fieldName]: val && val.optionValue ? val.optionValue : ""
-                                                                                // })
-
+                                                                
                                                                                 if (
                                                                                     val &&
                                                                                     val.optionValue !== user?.user?._id
@@ -493,7 +490,6 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                                                                             type={field.type}
                                                                             options={collaboratorData}
                                                                             setFieldValue={(name, value) => {
-                                                                                // handleValuesChange({ [name]: value })
                                                                                 setFieldValue(name, value)
                                                                             }}
                                                                             required={field.required}

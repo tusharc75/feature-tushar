@@ -74,7 +74,6 @@ const CreateProjectSales = ({
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showAddAddresstDialog, setShowAddAddresstDialog] = useState(false);
   const [addressDataSource, setAddressDataSource] = useState([]);
@@ -146,13 +145,11 @@ const CreateProjectSales = ({
                   fields: newFields,
                   values: tempObjKeysWithValues
                 });
-                setFormValues(tempObjKeysWithValues);
               } else {
                 setInitialData({
                   fields: newFields,
                   values: getObjKeysWithValues(data, newFields)
                 });
-                setFormValues(getObjKeysWithValues(data, newFields));
               }
               setProductSalesName(data.projectName);
 
@@ -178,9 +175,7 @@ const CreateProjectSales = ({
             fields: createFields,
             values: tempObjKeysWithValues
           });
-          setFormValues(tempObjKeysWithValues);
         }
-
         setTimeout(() => setLoading(false), 500);
       })
       .catch((err) => {

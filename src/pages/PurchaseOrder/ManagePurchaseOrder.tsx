@@ -485,10 +485,6 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                                 ? val.optionValue
                                                                                                 : ""
                                                                                         );
-                                                                                        // handleValuesChange({
-                                                                                        //     [field.fieldName]: val && val.optionValue ? val.optionValue : ""
-                                                                                        // })
-
                                                                                         if (
                                                                                             val &&
                                                                                             val.optionValue !== user?.user?._id
@@ -537,7 +533,6 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                     type={field.type}
                                                                                     options={collaboratorData}
                                                                                     setFieldValue={(name, value) => {
-                                                                                        // handleValuesChange({ [name]: value })
                                                                                         setFieldValue(name, value)
                                                                                     }}
                                                                                     required={field.required}

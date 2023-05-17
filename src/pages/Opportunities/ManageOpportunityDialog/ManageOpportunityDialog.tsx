@@ -90,7 +90,6 @@ export default function ManageOpportunityDialog({
   const [addressType, setAddressType] = useState('');
   const ref = useRef(null);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
-  const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
@@ -253,7 +252,6 @@ export default function ManageOpportunityDialog({
           fields: newFields,
           values: isNew ? tempInitialData : getObjKeysWithValues(dataToUpdate, newFields)
         });
-        setFormValues(isNew ? tempInitialData : getObjKeysWithValues(dataToUpdate, newFields));
       });
   };
 
@@ -457,13 +455,6 @@ export default function ManageOpportunityDialog({
                                               type={field.type}
                                               options={accountData}
                                               onChange={(e, value) => {
-                                                setFormValues((prevState) => ({
-                                                  ...prevState,
-                                                  [field.fieldName]: value && value.optionValue ? value.optionValue : '',
-                                                  marketSegment: value?.marketSegment ?? '',
-                                                  subMarketSegment: value?.subMarketSegment ?? ''
-                                                }));
-
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
                                                 if (initialData?.fields?.some((e) => e.fieldName === 'marketSegment')) {
                                                   setFieldValue('marketSegment', value?.marketSegment ?? '');

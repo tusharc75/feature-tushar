@@ -55,7 +55,6 @@ const ManageProductionOrder = ({
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [contactData, setContactData] = useState([]);
   const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
@@ -169,14 +168,12 @@ const ManageProductionOrder = ({
               fields: fieldsDataForCreate,
               values: getObjKeysWithValues(rest, fieldsDataForCreate)
             });
-            setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
             setLoading(false);
           } else {
             setInitialData({
               fields: fieldsDataForUpdate,
               values: getObjKeysWithValues(data, fieldsDataForUpdate)
             });
-            setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
             setLoading(false);
           }
         } catch (error) {
@@ -189,7 +186,6 @@ const ManageProductionOrder = ({
           fields: fieldsDataForCreate,
           values: initialData
         });
-        setFormValues(initialData);
         setLoading(false);
       }
     } catch (error) {
