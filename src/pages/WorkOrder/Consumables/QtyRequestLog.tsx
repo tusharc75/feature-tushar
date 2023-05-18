@@ -80,23 +80,26 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-            {
-              accessor: 'storageLocation',
-              Header: 'Storage Location',
-              width: 200,
-              hide: false,
-              Cell: ({ row }) => {
-                return row?.original['storageLocation'] ? <p className="text-truncate">{row?.original['storageLocation']}</p> : <NoDataCell />;
-              }
+          {
+            accessor: 'storageLocation',
+            Header: 'Storage Location',
+            width: 200,
+            hide: false,
+            Cell: ({ row }) => {
+              return row?.original['storageLocation'] ? <p className="text-truncate">{row?.original['storageLocation']}</p> : <NoDataCell />;
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'requestBy',
         Header: 'Request By',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['requestBy'] ? <p className="text-truncate">{row?.original['requestBy']}</p> : <NoDataCell />;
+          return row?.original['requestBy'] ?
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['requestBy']?.optionValue}`} target="_blank">
+              {row?.original['requestBy']?.optionLabel}
+            </a> : <NoDataCell />;
         }
       },
       {
@@ -116,7 +119,10 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
         Header: 'Response By ',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['responseBy'] ? <p className="text-truncate">{row?.original['responseBy']}</p> : <NoDataCell />;
+          return row?.original['responseBy'] ?
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['responseBy']?.optionValue}`} target="_blank">
+              {row?.original['responseBy']?.optionLabel}
+            </a> : <NoDataCell />;
         }
       },
       {
@@ -203,7 +209,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
                 height={'calc(100vh - 200px)'}
                 columns={columns}
                 data={rowsData}
-                onSelect={() => {}}
+                onSelect={() => { }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}
