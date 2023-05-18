@@ -76,7 +76,7 @@ export default function ColorModeProvider({ children }: ColorModeInterface) {
   );
 }
 
-export const theme = createTheme({
+const getDesignTokens = (mode: ThemeColor) => ({
   typography: {
     fontFamily: [
       'Poppins',
@@ -92,36 +92,6 @@ export const theme = createTheme({
       '"Segoe UI Symbol"'
     ].join(',')
   },
-  palette: {
-    primary: {
-      light: '#091823', //"#003f57",
-      main: '#163340' //"#003f57",
-    },
-    secondary: {
-      light: '#047d1c',
-      main: '#047d1c',
-      dark: '#047d1c'
-    },
-    error: {
-      light: '#e57373',
-      main: '#f44336',
-      dark: '#d32f2f',
-      contrastText: '#fff'
-    },
-    info: {
-      light: '#75e2dd',
-      main: '#2196f3',
-      dark: '#1976d2'
-    },
-    success: {
-      light: '#81c784',
-      main: '#4caf50',
-      dark: '#388e3c'
-    }
-  }
-});
-
-const getDesignTokens = (mode: ThemeColor) => ({
   palette: {
     mode,
     type: mode,
