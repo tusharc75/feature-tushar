@@ -28,7 +28,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
-  const [openLogDialog, setOpenLogDialog] = useState({ open: false, uniqueId: null, data:null });
+  const [openLogDialog, setOpenLogDialog] = useState({ open: false, uniqueId: null, data: null });
 
   const {
     state: { user }
@@ -113,13 +113,13 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       },
       ...(user?.user?.brandPolicy?.workOrderConsumableRequest
         ? [
-            {
-              accessor: 'requestedQty',
-              Header: 'Requested Qty',
-              width: 150,
-              Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'requestedQty',
+            Header: 'Requested Qty',
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+          }
+        ]
         : []),
       {
         accessor: 'consumedQty',
@@ -137,14 +137,14 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         hide: false,
         canDrag: false,
         Cell: ({ row }: any) => (
-           <div style={{ display: 'flex', justifyContent: 'right' }}>
+          <div style={{ display: 'flex', justifyContent: 'right' }}>
             {row.original?.isqtyRequestLog && (
               <HtmlTooltip title="View Logs">
                 <IconButton
                   size="small"
                   aria-label="Delete"
                   onClick={() => {
-                    setOpenLogDialog({ open: true, uniqueId: row.original._id, data:row.original });
+                    setOpenLogDialog({ open: true, uniqueId: row.original._id, data: row.original });
                   }}
                 >
                   <HistoryIcon />
@@ -156,12 +156,12 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
                 <IconButton
                   size="small"
                   aria-label="Delete"
-                  disabled={row?.original?.consumedQty ? true : false}
+                  disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
                   onClick={() => {
                     handleDelete([row.original]);
                   }}
                 >
-                  <DeleteIcon color={row?.original?.consumedQty ? 'disabled' : 'error'} />
+                  <DeleteIcon color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -192,7 +192,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           res.productName = u?.product?.optionLabel;
           res.productDescription = u?.product?.productDescription;
           res.productNumber = u?.product?.productNumber;
-          res.hideSelection = u?.qty - u?.consumedQty === 0 ? true : false;
+          res.hideSelection = u?.qty - ((u?.consumedQty || 0) + (u?.requestedQty || 0)) === 0 ? true : false;
           return res;
         });
         setDataRows(rows);
