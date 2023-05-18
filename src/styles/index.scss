@@ -47,11 +47,27 @@
   --new_theme_color: #0f9fa9;
   --ag-odd-row-background-color: #fff;
 }
+[data-mode='dark'] body {
+  background-color: #0e0e23;
+}
+[data-mode='dark']:root {
+  --ag-header-background-color: #0e0e23;
+  --ag-background-color: #0e0e23;
+  --ag-odd-row-background-color: #0e0e23;
+  --ag-row-border-color: #3d3d5c;
+  --ag-border-color: #3d3d5c;
+  --ag-row-hover-color: hsl(240, 43%, 15%);
+  --ag-header-cell-hover-background-color: hsl(240, 43%, 15%);
+  --link: #95dfff;
+}
 
 @import '~ag-grid-community/dist/styles/ag-theme-material/sass/_ag-theme-material-mixin.scss';
 
 .ag-theme-material {
   border: 1px solid #eeeaea;
+  [data-mode='dark'] & {
+    border: 1px solid #3d3d5c;
+  }
   @include ag-theme-material(
     (
       font-family: (
@@ -591,6 +607,9 @@ body::-webkit-scrollbar-thumb {
   background: #e7e7e7;
   width: 6px;
   cursor: col-resize;
+  [data-mode='dark'] & {
+    background: #3d3d5c;
+  }
 }
 
 .agPagination {
@@ -813,6 +832,9 @@ body::-webkit-scrollbar-thumb {
   border-radius: 6px 6px 0 0;
   box-shadow: 0px 3.90676px 39.0676px rgba(0, 0, 0, 0.08);
   overflow-y: hidden;
+  [data-mode='dark'] & {
+    background-color: #0e0e23;
+  }
 
   padding: 25px;
 
@@ -2696,6 +2718,13 @@ svg.MuiSvgIcon-root {
   color: #2a3547 !important;
   padding: 7px 20px !important;
   border-radius: 6px !important;
+  [data-mode='dark'] & {
+    background-color: transparent !important;
+    color: #fff !important;
+    &:hover {
+      background-color: hsl(240, 43%, 20%) !important;
+    }
+  }
 }
 
 .main-container-v1 {
@@ -2757,6 +2786,10 @@ svg.MuiSvgIcon-root {
     border-radius: 10px;
     min-height: 700px;
     isolation: isolate;
+
+    [data-mode='dark'] & {
+      background-color: #0e0e23;
+    }
 
     // height: calc(100vh - 136px);
     @media all and (max-width: 768px) {
@@ -3245,6 +3278,9 @@ body {
       font-size: 13px !important;
       line-height: 18px !important;
       color: #2a3547 !important;
+      [data-mode='dark'] & {
+        color: #fff !important;
+      }
     }
   }
   td,
@@ -3255,6 +3291,9 @@ body {
       font-size: 13px !important;
       // line-height: 19px !important;
       color: #2a3547;
+      [data-mode='dark'] & {
+        color: #e5e5e5 !important;
+      }
     }
   }
 
