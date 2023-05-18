@@ -210,7 +210,7 @@ const AddRepairType = (props: Props) => {
                 history.push(`${routes.repairJobDetail.path}/${data._id}?openEdit=true`);
               }}
               extraParamsToCheckDelete={false}
-              onDelete={() => { }}
+              onDelete={() => {}}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -218,7 +218,7 @@ const AddRepairType = (props: Props) => {
               chips={[]}
               onCreate={false}
               showClone={true}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -240,7 +240,7 @@ const AddRepairType = (props: Props) => {
             />
           )
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

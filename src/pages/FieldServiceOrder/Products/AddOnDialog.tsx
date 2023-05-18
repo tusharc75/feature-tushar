@@ -17,14 +17,12 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 
 const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const [fields, setFields] = useState([]);
-
 
   useEffect(() => {
     fetchFields();
@@ -109,13 +107,13 @@ const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (isEqual(initialData.values, values)) onClose()
-                  else setShowConfirmDialog(true)
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
                 title={`${addOnData ? 'Edit' : 'Add'} Manual Entry`}
                 isMinimized={!fullScreen}
@@ -200,8 +198,8 @@ const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (isEqual(initialData.values, values)) onClose()
-                    else setShowConfirmDialog(true)
+                    if (isEqual(initialData.values, values)) onClose();
+                    else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
@@ -236,7 +234,7 @@ const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

@@ -147,7 +147,6 @@ const AddCost = ({ id, fieldTicketData }) => {
       });
   };
 
-
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
@@ -164,8 +163,8 @@ const AddCost = ({ id, fieldTicketData }) => {
           </Button>
         </Box>
         <Box display="flex">
-           <PreviewDownload resource={RESOURCE_LABEL.fieldTicket} referenceId={id} columns={columns} />
-            <Box mr={1} />
+          <PreviewDownload resource={RESOURCE_LABEL.fieldTicket} referenceId={id} columns={columns} />
+          <Box mr={1} />
           <Button
             disabled={selectedRecords.length ? false : true}
             variant={'outlined'}
@@ -220,7 +219,7 @@ const AddCost = ({ id, fieldTicketData }) => {
           />
         </Box>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

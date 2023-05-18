@@ -42,9 +42,7 @@ interface TabPanelProps {
   value: any;
 }
 
-
 const SerializedAssetDetailsPage = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.serializedAsset.title);
   const { id } = useParams();
@@ -73,14 +71,13 @@ const SerializedAssetDetailsPage = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
-
   const NameRenderer = (params) => (
     <>
       {params.value ? (
         params.data.type === 'Loading Ticket' ||
-          params.data.type === 'Receiving Ticket' ||
-          params.data.type === 'Return Ticket' ||
-          params.data.type === 'Delivery Ticket' ? (
+        params.data.type === 'Receiving Ticket' ||
+        params.data.type === 'Return Ticket' ||
+        params.data.type === 'Delivery Ticket' ? (
           <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link>
@@ -305,7 +302,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: productInventoryData.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -315,10 +312,12 @@ const SerializedAssetDetailsPage = () => {
     setUpdateLoading(true);
     axiosInstance()
       .put(`${serializedAsset.api}/update-status`, {
-        assets: [{
-          _id: productInventoryData._id,
-          currentStatus: productInventoryData?.status
-        }],
+        assets: [
+          {
+            _id: productInventoryData._id,
+            currentStatus: productInventoryData?.status
+          }
+        ],
         status: obj?.status,
         comment: obj?.reason ? obj?.reason : '',
         reference: { _id: productInventoryData._id, type: INVENTORY_HISTORY_TYPE.serializedAssets }
@@ -505,7 +504,7 @@ const SerializedAssetDetailsPage = () => {
                             refreshGrid={fetchProductInventoryHistory}
                           />
                         ) : (
-                          <Box p={2} height={500} bgcolor="white">
+                          <Box p={2} height={500}>
                             <CommonSkeleton lenArray={[...Array(10).keys()]} />
                           </Box>
                         )}

@@ -499,7 +499,10 @@ const ProductTemplate = () => {
                             variant="contained"
                             size="small"
                             onClick={() => {
-                              if (hasPermissionToUpdate && (!isEqual(ref.current.values, initialValues) || !isEqual(initialValues.section, section))) {
+                              if (
+                                hasPermissionToUpdate &&
+                                (!isEqual(ref.current.values, initialValues) || !isEqual(initialValues.section, section))
+                              ) {
                                 if ((id === '0' && productTemplatePermissions.isCreate) || (id !== '0' && productTemplatePermissions.isUpdate)) {
                                   setShowConfirmDialog(true);
                                 } else {
@@ -515,7 +518,7 @@ const ProductTemplate = () => {
                         </Box>
                       </Grid>
                     </Grid>
-                    <Grid container spacing={1} >
+                    <Grid container spacing={1}>
                       <Grid item xs={12} sm={4}>
                         {
                           <Autocomplete
@@ -532,8 +535,8 @@ const ProductTemplate = () => {
                               setFieldValue('entity', val && val?.map((d) => d._id));
                               val && val.length !== 0
                                 ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                                )
+                                    ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                                  )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                             }}
                             renderInput={(params) => (
@@ -568,10 +571,10 @@ const ProductTemplate = () => {
                             onOpen={() =>
                               values['entity'] && values['entity'].length !== 0
                                 ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                    ownerCollaboratorDataConst.filter((data) =>
+                                      values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                    )
                                   )
-                                )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                             }
                             renderInput={(params) => (
@@ -608,10 +611,10 @@ const ProductTemplate = () => {
                             onOpen={() =>
                               values['entity'] && values['entity'].length !== 0
                                 ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                    ownerCollaboratorDataConst.filter((data) =>
+                                      values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                    )
                                   )
-                                )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                             }
                             renderInput={(params) => (
@@ -686,7 +689,7 @@ const ProductTemplate = () => {
               )}
             </Formik>
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}

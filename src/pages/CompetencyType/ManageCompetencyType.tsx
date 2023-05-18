@@ -115,12 +115,10 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
     }
   };
 
-
   function validate(values) {
     const errors = {};
     return errors;
   }
-
 
   return (
     <Dialog
@@ -137,12 +135,7 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-          validate={validate}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} validate={validate}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <>
               <CustomDialogHeader
@@ -153,12 +146,13 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
                     onClose();
                   }
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
-                  : `Create ${routes.competencyType.title}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
+                    : `Create ${routes.competencyType.title}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -256,7 +250,7 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

@@ -16,7 +16,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
-  
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -32,7 +31,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
     setInitialData({ fields: [], values: {} });
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`);
     var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || "USD");
+    data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || 'USD');
     if (costData) {
       setInitialData({
         fields: data,
@@ -47,7 +46,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
   };
 
   const handleSubmit = (values) => {
-    setSubmitting(true)
+    setSubmitting(true);
     if (costData) {
       axiosInstance()
         .put(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [{ ...values, _id: costData._id }])
@@ -87,7 +86,6 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
     }
   };
 
-
   return (
     <Dialog
       maxWidth="md"
@@ -103,17 +101,13 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (isEqual(initialData.values, values)) onClose()
-                  else setShowConfirmDialog(true)
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
                 title={costData ? `Edit ${costData.description}` : `Add Cost`}
                 isMinimized={!fullScreen}
@@ -141,8 +135,8 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (isEqual(initialData.values, values)) onClose()
-                    else setShowConfirmDialog(true)
+                    if (isEqual(initialData.values, values)) onClose();
+                    else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
@@ -177,12 +171,12 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
     </Dialog>
-  )
-}
+  );
+};
 
-export default AddCostDialog
+export default AddCostDialog;

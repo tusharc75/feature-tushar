@@ -17,6 +17,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { HiArrowRight } from 'react-icons/hi';
 import { groupByKey, assignIconAndText } from './helpers';
 import Chart from './Chart';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 function Dashboard() {
   const history = useHistory();
@@ -138,6 +139,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
 };
 
 const RenderDialog = ({ modalContent, handleClose, handleRoutes }) => {
+  const [themeColor] = useAppTheme();
   const DialogContent = withStyles((theme) => ({
     root: {
       padding: theme.spacing(2)
@@ -158,6 +160,7 @@ const RenderDialog = ({ modalContent, handleClose, handleRoutes }) => {
           borderRadius: 16,
           margin: 15,
           marginBottom: 94,
+          background: themeColor === 'dark' ? '#0e0e23' : '#fff',
           boxShadow:
             '0px 165px 66px rgba(142, 159, 199, 0.01), 0px 93px 56px rgba(142, 159, 199, 0.05), 0px 41px 41px rgba(142, 159, 199, 0.09), 0px 10px 23px rgba(142, 159, 199, 0.1), 0px 0px 0px rgba(142, 159, 199, 0.1)'
         }

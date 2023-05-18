@@ -92,7 +92,7 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields])
+  }, [initialData.fields]);
 
   const handleSubmit = (values) => {
     setSubmitting(true);
@@ -366,7 +366,7 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

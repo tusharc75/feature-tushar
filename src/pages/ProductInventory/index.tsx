@@ -228,9 +228,9 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-          .filter((d) => d.optionValue !== 'All')
-          .map((d) => d.optionValue)
-          .toString()
+            .filter((d) => d.optionValue !== 'All')
+            .map((d) => d.optionValue)
+            .toString()
         : plantId;
 
     let deepFilter = '';
@@ -242,7 +242,7 @@ const InventoryProduct = () => {
     }
 
     if (storageLocationId) {
-      deepFilter = `${deepFilter}&storageLocation=${storageLocationId}`
+      deepFilter = `${deepFilter}&storageLocation=${storageLocationId}`;
     }
 
     let filterById = [];
@@ -338,10 +338,10 @@ const InventoryProduct = () => {
             !permissions?.productInventory?.isUpdate
               ? TOOLTIP_MESSAGE.remove
               : params?.data?.plantId === 'All'
-                ? 'Select Plant'
-                : !params?.data?.availableInventory
-                  ? 'Inventory not available'
-                  : 'Remove'
+              ? 'Select Plant'
+              : !params?.data?.availableInventory
+              ? 'Inventory not available'
+              : 'Remove'
           }
         >
           <span>
@@ -519,11 +519,15 @@ const InventoryProduct = () => {
                 getOptionLabel={(option: any) => option.optionLabel}
                 disableClearable
                 getOptionSelected={(option: any, val) => option.optionValue === val}
-                value={plantOptions.filter((data) => data.optionValue === plantId).length ? plantOptions.filter((data) => data.optionValue === plantId)[0] : ''}
+                value={
+                  plantOptions.filter((data) => data.optionValue === plantId).length
+                    ? plantOptions.filter((data) => data.optionValue === plantId)[0]
+                    : ''
+                }
                 onChange={(e, val) => {
                   if (val !== null) {
                     setPlantId(val && val.optionValue ? val.optionValue : '');
-                    setStorageLocationId(null)
+                    setStorageLocationId(null);
                   }
                 }}
                 renderInput={(params) =>
@@ -542,13 +546,17 @@ const InventoryProduct = () => {
                   )
                 }
               />
-              {user?.user?.brandPolicy?.storageLocation &&
+              {user?.user?.brandPolicy?.storageLocation && (
                 <Autocomplete
                   style={{ width: '250px' }}
-                  options={storageLocationOptions.filter(item => item.warehouse === plantId)}
-                  getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                  options={storageLocationOptions.filter((item) => item.warehouse === plantId)}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => option.optionValue === val}
-                  value={storageLocationOptions.filter((data) => data.optionValue === storageLocationId).length ? storageLocationOptions.filter((data) => data.optionValue === storageLocationId)[0] : ''}
+                  value={
+                    storageLocationOptions.filter((data) => data.optionValue === storageLocationId).length
+                      ? storageLocationOptions.filter((data) => data.optionValue === storageLocationId)[0]
+                      : ''
+                  }
                   onChange={(e, val) => {
                     setStorageLocationId(val?.optionValue);
                   }}
@@ -568,7 +576,7 @@ const InventoryProduct = () => {
                     )
                   }
                 />
-              }
+              )}
               {fromProductMaster?.product && (
                 <Chip
                   className="ml-3"
@@ -713,7 +721,7 @@ const InventoryProduct = () => {
             />
           ) : null
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
@@ -724,9 +732,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                    .filter((d) => d.optionValue !== 'All')
+                    .map((d) => d.optionValue)
+                    .toString()
                 : plantId
             }
           />
@@ -742,9 +750,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                    .filter((d) => d.optionValue !== 'All')
+                    .map((d) => d.optionValue)
+                    .toString()
                 : plantId
             }
             storageLocation={storageLocationId}
@@ -760,9 +768,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                    .filter((d) => d.optionValue !== 'All')
+                    .map((d) => d.optionValue)
+                    .toString()
                 : plantId
             }
           />
@@ -783,7 +791,7 @@ const InventoryProduct = () => {
         )}
         {settingDialogOpen && <SettingsDialog warehouse={plantId} onClose={() => setSettingDialogOpen(false)} />}
       </div>
-    </Fragment >
+    </Fragment>
   );
 };
 

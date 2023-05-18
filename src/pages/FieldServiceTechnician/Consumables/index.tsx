@@ -12,7 +12,6 @@ import ConsumablesQtyDialog from './ConsumablesQtyDialog';
 import { isMobile } from 'react-device-detect';
 
 const Consumables = ({ selectedFieldService, recall }) => {
-
   let renderedFrom = camelCase(routes?.fieldTicket.title + '_consumables');
 
   const [dataRows, setDataRows] = useState(null);
@@ -116,7 +115,7 @@ const Consumables = ({ selectedFieldService, recall }) => {
               hideExpander={true}
             />
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}

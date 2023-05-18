@@ -80,7 +80,9 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   const fetchFields = async () => {
     let columns: any = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
-    const productFields = productResult?.data?.data?.filter((e) => ['productCategory', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName));
+    const productFields = productResult?.data?.data?.filter((e) =>
+      ['productCategory', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName)
+    );
     columns.push({
       accessor: 'index',
       Header: 'Index',
@@ -104,17 +106,19 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     });
     columns.push({
       accessor: 'detail',
-      Header: "Detail",
+      Header: 'Detail',
       minWidth: 200,
       width: 200,
       primaryField: true,
       Cell: ({ row, rows }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {!allowedToEdit ? (
-            <p className='text-truncate'> {row.original.detail}</p>
+            <p className="text-truncate"> {row.original.detail}</p>
           ) : (
             <p
-              onClick={() => { openMaterial(row.original, rows) }}
+              onClick={() => {
+                openMaterial(row.original, rows);
+              }}
               className="link text-truncate"
               title={row.original.detail}
             >
@@ -143,11 +147,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             </IconButton>
           )}
         </div>
-      ),
+      )
     });
     columns.push({
       accessor: 'description',
-      Header: "Description",
+      Header: 'Description',
       width: 200,
       Cell: ({ row }) => {
         return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
@@ -188,9 +192,9 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
 
     const p_fields = await fetch_po_product_fields(purchaseOrderData?.currency);
     const s_fields = await fetch_po_service_fields(purchaseOrderData?.currency);
-    setServiceFields(s_fields)
+    setServiceFields(s_fields);
     const c_fields = await fetch_po_cost_fields(purchaseOrderData?.currency);
-    setCostFields(c_fields)
+    setCostFields(c_fields);
 
     p_fields.forEach((element) => {
       if (element.fieldName === 'price' && element.required) {
@@ -217,7 +221,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 size="small"
                 aria-label="Edit"
                 onClick={() => {
-                  openMaterial(row.original, rows)
+                  openMaterial(row.original, rows);
                 }}
               >
                 <EditIcon color="primary" />
@@ -248,7 +252,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 userId={user?.user?._id}
                 onDelete={() => {
                   setShowDeleteConfirmBox(true);
-                  setDeletePurchaseOrderItem([row.original])
+                  setDeletePurchaseOrderItem([row.original]);
                 }}
                 entity=""
               />
@@ -261,7 +265,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     if (!allowedToEdit) {
       columns?.forEach((e: any) => {
         e.editable = false;
-      })
+      });
     }
     setColumns([...columns]);
   };
@@ -276,7 +280,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     if (data.type === 'Manual Entry') {
       setShowCostDialog({ open: true, data: data, showSaveAndNext: data?.index < rows?.length ? true : false });
     }
-  }
+  };
 
   const fetchData = async () => {
     setNextStep(false);
@@ -286,9 +290,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     const costResponce: any = await axiosInstance().get(`${purchaseOrder.api}/cost/${purchaseOrderData._id}`);
 
     const data = [
-      ...(productResponce?.data?.data?.length && productResponce?.data?.data?.map((e: any) => {
-        return { ...e, type: 'Product' };
-      }) || []),
+      ...((productResponce?.data?.data?.length &&
+        productResponce?.data?.data?.map((e: any) => {
+          return { ...e, type: 'Product' };
+        })) ||
+        []),
       ...((serviceResponse?.data?.data?.length &&
         serviceResponse?.data?.data?.map((e: any) => {
           return { ...e, type: 'Service' };
@@ -310,9 +316,15 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         ...finalObject
       };
       res.index = index + 1;
-      res.detail = item.type === 'Product' ? item?.productDetail?.productName : item.type === 'Service' ? item?.serviceDetail?.serviceName : item?.description
-      res.description = item.type === 'Product' ? item?.productDetail?.productDescription : item.type === 'Service' ? item?.serviceDetail?.serviceDescription : item?.description
-      res.materialId = item.type === 'Product' ? item?.productDetail?._id : item.type === 'Service' ? item?.serviceDetail?._id : item?._id
+      res.detail =
+        item.type === 'Product' ? item?.productDetail?.productName : item.type === 'Service' ? item?.serviceDetail?.serviceName : item?.description;
+      res.description =
+        item.type === 'Product'
+          ? item?.productDetail?.productDescription
+          : item.type === 'Service'
+          ? item?.serviceDetail?.serviceDescription
+          : item?.description;
+      res.materialId = item.type === 'Product' ? item?.productDetail?._id : item.type === 'Service' ? item?.serviceDetail?._id : item?._id;
       res.productNumber = item.productDetail?.productNumber;
       res.serializedProduct = item.productDetail?.serializedProduct;
       res.serializedProductView = item.productDetail?.serializedProduct ? 'Yes' : 'No';
@@ -390,38 +402,36 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   };
 
   const handleUpdateQty = (rows, saveAndNext = false) => {
-    setLoadingEdit(true)
-    axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows }).then(() => {
-      setAddProductDialog(false);
-      fetchData();
-      setAddingProducts(false);
-      setIsBulkEdit(false);
-      if (saveAndNext) {
-        const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-        if (rowIndex < rowsData?.length - 1) {
-          if (rowsData[rowIndex + 1]?.type === "Product") {
-            setShowProductDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
+    setLoadingEdit(true);
+    axiosInstance()
+      .put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
+      .then(() => {
+        setAddProductDialog(false);
+        fetchData();
+        setAddingProducts(false);
+        setIsBulkEdit(false);
+        if (saveAndNext) {
+          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          if (rowIndex < rowsData?.length - 1) {
+            if (rowsData[rowIndex + 1]?.type === 'Product') {
+              setShowProductDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+            } else if (rowsData[rowIndex + 1]?.type === 'Service') {
+              setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
+              setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+            } else if (rowsData[rowIndex + 1]?.type === 'Manual Entry') {
+              setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
+              setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+            } else {
+              setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
+            }
           }
-          else if (rowsData[rowIndex + 1]?.type === "Service") {
-            setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-            setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-          }
-          else if (rowsData[rowIndex + 1]?.type === "Manual Entry") {
-            setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-            setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-          }
-          else {
-            setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-          }
+        } else {
+          setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
         }
-      }
-      else {
-        setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-      }
-      setLoadingEdit(false)
-    })
+        setLoadingEdit(false);
+      })
       .catch((error) => {
-        setLoadingEdit(false)
+        setLoadingEdit(false);
         setAddProductDialog(false);
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
@@ -429,18 +439,18 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   };
 
   const handleDelete = async () => {
-    const product = deletePurchaseOrderItem?.filter((e) => e.type === "Product");
-    const service = deletePurchaseOrderItem?.filter((e) => e.type === "Service");
-    const cost = deletePurchaseOrderItem?.filter((e) => e.type === "Manual Entry");
+    const product = deletePurchaseOrderItem?.filter((e) => e.type === 'Product');
+    const service = deletePurchaseOrderItem?.filter((e) => e.type === 'Service');
+    const cost = deletePurchaseOrderItem?.filter((e) => e.type === 'Manual Entry');
 
     if (product?.length) {
-      await axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/delete`, { ids: product?.map((e) => e._id) })
+      await axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/delete`, { ids: product?.map((e) => e._id) });
     }
     if (service?.length) {
-      await axiosInstance().post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/delete`, { ids: service?.map((e) => e._id) })
+      await axiosInstance().post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/delete`, { ids: service?.map((e) => e._id) });
     }
     if (cost?.length) {
-      await axiosInstance().post(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/delete`, { ids: cost?.map((e) => e._id) })
+      await axiosInstance().post(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/delete`, { ids: cost?.map((e) => e._id) });
     }
     fetchData();
     setShowDeleteConfirmBox(false);
@@ -448,13 +458,13 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   };
 
   const handleAddCost = (rows) => {
-    setLoadingEdit(true)
+    setLoadingEdit(true);
     axiosInstance()
       .post(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/add`, { additionalCost: rows })
       .then(() => {
         fetchData();
         setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
-        setLoadingEdit(false)
+        setLoadingEdit(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -462,7 +472,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   };
 
   const handleUpdateCost = (rows, saveAndNext = false) => {
-    setLoadingEdit(true)
+    setLoadingEdit(true);
     axiosInstance()
       .put(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/update`, { additionalCost: rows })
       .then(() => {
@@ -470,26 +480,22 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         if (saveAndNext) {
           const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
           if (rowIndex < rowsData?.length - 1) {
-            if (rowsData[rowIndex + 1]?.type === "Product") {
+            if (rowsData[rowIndex + 1]?.type === 'Product') {
               setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowProductDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-            }
-            else if (rowsData[rowIndex + 1]?.type === "Service") {
+              setShowProductDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+            } else if (rowsData[rowIndex + 1]?.type === 'Service') {
               setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-            }
-            else if (rowsData[rowIndex + 1]?.type === "Manual Entry") {
-              setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-            }
-            else {
+              setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+            } else if (rowsData[rowIndex + 1]?.type === 'Manual Entry') {
+              setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+            } else {
               setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
             }
           }
-        }
-        else {
+        } else {
           setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
         }
-        setLoadingEdit(false)
+        setLoadingEdit(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -500,7 +506,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     let tempServiceArray = rows?.map((d) => ({
       serviceId: d._id,
       qty: d.qty ? parseInt(d.qty) : 1,
-      unit: d?.unitMain?.length ? d?.unitMain[0] : '',
+      unit: d?.unitMain?.length ? d?.unitMain[0] : ''
     }));
     axiosInstance()
       .post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/add`, { services: tempServiceArray })
@@ -514,7 +520,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   };
 
   const handleUpdateService = (rows, saveAndNext = false) => {
-    setLoadingEdit(true)
+    setLoadingEdit(true);
     axiosInstance()
       .put(`${purchaseOrder.api}/service/${purchaseOrderData._id}/update`, { services: rows })
       .then(() => {
@@ -522,26 +528,22 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         if (saveAndNext) {
           const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
           if (rowIndex < rowsData?.length - 1) {
-            if (rowsData[rowIndex + 1]?.type === "Product") {
+            if (rowsData[rowIndex + 1]?.type === 'Product') {
               setShowServiceDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowProductDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-            }
-            else if (rowsData[rowIndex + 1]?.type === "Service") {
-              setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-            }
-            else if (rowsData[rowIndex + 1]?.type === "Manual Entry") {
+              setShowProductDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+            } else if (rowsData[rowIndex + 1]?.type === 'Service') {
+              setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+            } else if (rowsData[rowIndex + 1]?.type === 'Manual Entry') {
               setShowServiceDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false })
-            }
-            else {
+              setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+            } else {
               setShowServiceDialog({ open: false, data: null, showSaveAndNext: false });
             }
           }
-        }
-        else {
+        } else {
           setShowServiceDialog({ open: false, data: null, showSaveAndNext: false });
         }
-        setLoadingEdit(false)
+        setLoadingEdit(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -550,13 +552,13 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = material.find((d) => d._id === updatedData._id);
-    if (rowData?.type === "Product") {
+    if (rowData?.type === 'Product') {
       if (inputField?.qty) {
-        if (inputField?.qty < ((rowData?.actualReceived || 0) + (rowData?.rejectQuantity || 0))) {
+        if (inputField?.qty < (rowData?.actualReceived || 0) + (rowData?.rejectQuantity || 0)) {
           toastConfig.setToastConfig({
             open: true,
-            type: "error",
-            message: 'Quantity should be greater than Actual Received and Reject Quantity',
+            type: 'error',
+            message: 'Quantity should be greater than Actual Received and Reject Quantity'
           });
           return false;
         }
@@ -564,13 +566,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       let rows: any = [{ ...rowData, ...updatedData }];
       rows = await calculateRowsField(material, inputField, productFields, updatedData);
       handleUpdateQty(rows);
-    }
-    else if (rowData?.type === "Service") {
+    } else if (rowData?.type === 'Service') {
       let rows: any = [{ ...rowData, ...updatedData }];
       rows = await calculateRowsField(material, inputField, serviceFields, updatedData);
       handleUpdateService(rows);
-    }
-    else if (rowData?.type === "Manual Entry") {
+    } else if (rowData?.type === 'Manual Entry') {
       let rows: any = [{ ...rowData, ...updatedData }];
       rows = await calculateRowsField(material, inputField, costFields, updatedData);
       handleUpdateCost(rows);
@@ -598,7 +598,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               open={Boolean(addAnchorEl)}
               onClose={closeAddActions}
             >
-              {permissions?.product?.isRead &&
+              {permissions?.product?.isRead && (
                 <MenuItem
                   onClick={() => {
                     closeAddActions();
@@ -606,8 +606,9 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   }}
                 >
                   Add Products
-                </MenuItem>}
-              {permissions?.serviceMaster?.isRead &&
+                </MenuItem>
+              )}
+              {permissions?.serviceMaster?.isRead && (
                 <MenuItem
                   onClick={() => {
                     closeAddActions();
@@ -615,7 +616,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   }}
                 >
                   Add Services
-                </MenuItem>}
+                </MenuItem>
+              )}
               <MenuItem
                 onClick={() => {
                   closeAddActions();
@@ -654,19 +656,31 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               onClose={closeActions}
             >
               <MenuItem
-                disabled={selectedProducts?.filter((e) => !e.hideSelection).length > 0
-                  && uniq(map(selectedProducts?.filter((e) => !e.hideSelection), 'type'))?.length === 1 ? false : true}
+                disabled={
+                  selectedProducts?.filter((e) => !e.hideSelection).length > 0 &&
+                  uniq(
+                    map(
+                      selectedProducts?.filter((e) => !e.hideSelection),
+                      'type'
+                    )
+                  )?.length === 1
+                    ? false
+                    : true
+                }
                 onClick={() => {
                   closeActions();
                   setIsBulkEdit(true);
-                  const typeUniq: any = uniq(map(selectedProducts?.filter((e) => !e.hideSelection), 'type'));
-                  if (typeUniq[0] === "Product") {
+                  const typeUniq: any = uniq(
+                    map(
+                      selectedProducts?.filter((e) => !e.hideSelection),
+                      'type'
+                    )
+                  );
+                  if (typeUniq[0] === 'Product') {
                     setShowProductDialog({ open: true, data: null, showSaveAndNext: false });
-                  }
-                  else if (typeUniq[0] === "Service") {
+                  } else if (typeUniq[0] === 'Service') {
                     setShowServiceDialog({ open: true, data: null, showSaveAndNext: false });
-                  }
-                  else {
+                  } else {
                     setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
                   }
                 }}
@@ -678,7 +692,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   onClick={() => {
                     closeActions();
                     setShowDeleteConfirmBox(true);
-                    setDeletePurchaseOrderItem(selectedProducts?.filter((e) => !e.hideSelection))
+                    setDeletePurchaseOrderItem(selectedProducts?.filter((e) => !e.hideSelection));
                   }}
                 >
                   Delete
@@ -707,7 +721,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           />
         </Box>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

@@ -701,9 +701,7 @@ const SerializedAsset = () => {
                           }}
                           disabled={
                             [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) =>
-                              [INVENTORY_STATUS.available, INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(
-                                o.status
-                              )
+                              [INVENTORY_STATUS.available, INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(o.status)
                             ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
                               ? false
                               : true
@@ -879,7 +877,7 @@ const SerializedAsset = () => {
             />
           ) : null
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
@@ -899,8 +897,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

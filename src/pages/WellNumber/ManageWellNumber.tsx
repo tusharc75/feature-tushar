@@ -22,7 +22,6 @@ import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 
 const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refrenceData = null }) => {
-
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -59,11 +58,11 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refr
               } else {
                 if (refrenceData?.wellName) {
                   fieldsDataForCreate?.forEach((e) => {
-                    if (e.fieldName === "wellName") {
-                      e.disableOnEdit = true
+                    if (e.fieldName === 'wellName') {
+                      e.disableOnEdit = true;
                       e.isUneditable = true;
                     }
-                  })
+                  });
                 }
                 setInitialData({
                   fields: fieldsDataForUpdate,
@@ -78,12 +77,12 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refr
           let createValues: any = getObjKeys('', fieldsDataForCreate);
           if (refrenceData?.wellName) {
             fieldsDataForCreate?.forEach((e) => {
-              if (e.fieldName === "wellName") {
+              if (e.fieldName === 'wellName') {
                 createValues.wellName = refrenceData?.wellName;
-                e.disableOnEdit = true
+                e.disableOnEdit = true;
                 e.isUneditable = true;
               }
-            })
+            });
           }
           setInitialData({
             fields: fieldsDataForCreate,
@@ -131,8 +130,7 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refr
           setLoading(false);
           if (refrenceData) {
             onSuccess(data.data);
-          }
-          else {
+          } else {
             history.push(`${routes.wellNumberDetail.path}/${data?.data?._id}`);
           }
         })
@@ -180,9 +178,7 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refr
           {({ values, errors, touched, submitForm, setFieldValue }) => (
             <Fragment>
               <CustomDialogHeader
-                title={
-                  id ? (isClone ? `Clone - ${cloneHeading}` : `Update ${wellNumberData?.wellNumber}`) : 'Create ' + routes.wellNumber.title
-                }
+                title={id ? (isClone ? `Clone - ${cloneHeading}` : `Update ${wellNumberData?.wellNumber}`) : 'Create ' + routes.wellNumber.title}
                 onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {
                     setShowConfirmDialog(true);
@@ -287,7 +283,7 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refr
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

@@ -168,12 +168,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
 
   return (
     <Fragment>
-      <PreviewDownload 
-        resource={RESOURCE_LABEL.salesOrder} 
-        referenceId={salesOrderData._id} 
-        columns={columns}
-        isSendEmail={true}
-      />
+      <PreviewDownload resource={RESOURCE_LABEL.salesOrder} referenceId={salesOrderData._id} columns={columns} isSendEmail={true} />
       <Grid item xs={12} md={12} sm={12}>
         {columns && rowsData ? (
           <>
@@ -192,7 +187,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
             </Box>
           </>
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

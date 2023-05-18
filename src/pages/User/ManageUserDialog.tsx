@@ -1,34 +1,21 @@
-import { useEffect, useState, useContext, useCallback } from "react";
-import {
-  Dialog,
-  Button,
-  CircularProgress,
-  Grid,
-  useTheme,
-  useMediaQuery,
-  Box,
-} from "@material-ui/core";
-import { Skeleton } from "@material-ui/lab";
-import { Formik, Form } from "formik";
-import axiosInstance from "../../axios/axiosInstance";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import {
-  getObjKeys,
-  yupSchema,
-  getObjKeysWithValues,
-  setFieldsInAscendingOrder,
-} from "../../constants/helpers";
-import { useLocation, useHistory } from "react-router-dom";
-import FormTypes from "../../components/Helpers/FormTypes";
-import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
-import { useData } from "../../StateProvider/Provider";
+import { useEffect, useState, useContext, useCallback } from 'react';
+import { Dialog, Button, CircularProgress, Grid, useTheme, useMediaQuery, Box } from '@material-ui/core';
+import { Skeleton } from '@material-ui/lab';
+import { Formik, Form } from 'formik';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { getObjKeys, yupSchema, getObjKeysWithValues, setFieldsInAscendingOrder } from '../../constants/helpers';
+import { useLocation, useHistory } from 'react-router-dom';
+import FormTypes from '../../components/Helpers/FormTypes';
+import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import { useData } from '../../StateProvider/Provider';
 import { isTablet } from 'react-device-detect';
-import { FaDiceOne } from "react-icons/fa";
-import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
-import { isEqual } from "lodash";
+import { FaDiceOne } from 'react-icons/fa';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { isEqual } from 'lodash';
 
 export default function ManageUserDialog({
   open,
@@ -41,22 +28,21 @@ export default function ManageUserDialog({
   redirectToDetailsScreen = true,
   isUserSetupPermission = false
 }) {
-
   const {
-    state: { user, permissions },
+    state: { user, permissions }
   }: any = useData();
   const { setToastConfig } = useContext(CustomToastContext);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
+  const isMobile = useMediaQuery(theme.breakpoints.down('xs'));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [initialData, setInitialData] = useState({ fields: [], values: dataToUpdate ? dataToUpdate : {}, });
+  const [initialData, setInitialData] = useState({ fields: [], values: dataToUpdate ? dataToUpdate : {} });
   const location = useLocation();
   const history = useHistory();
   const [formsData, setFormsData] = useState([]);
   const [reportsToDataSource, setReportsToDataSource] = useState([]);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeadingName, setCloneHeadingName] = useState('');
@@ -64,28 +50,25 @@ export default function ManageUserDialog({
   const getInitialData = useCallback(() => {
     setLoading(true);
     axiosInstance()
-      .get("/field?resource=User")
+      .get('/field?resource=User')
       .then(({ data: { data } }) => {
         const newFields = [];
         data.filter((d) => (isNew ? d.isCreate : d.isUpdate)).map((_f) => newFields.push(_f.fieldData));
         if (isClone && userId) {
-          axiosInstance().get(`/user/${userId}`).then(({ data: { data } }) => {
-            const { _id, createdBy, permissions, firstName, lastName, updatedBy, ...rest } = data
-            setInitialData({
-              fields: newFields,
-              values: isNew
-                ? getObjKeys("", newFields)
-                : getObjKeysWithValues({ ...rest }, newFields),
+          axiosInstance()
+            .get(`/user/${userId}`)
+            .then(({ data: { data } }) => {
+              const { _id, createdBy, permissions, firstName, lastName, updatedBy, ...rest } = data;
+              setInitialData({
+                fields: newFields,
+                values: isNew ? getObjKeys('', newFields) : getObjKeysWithValues({ ...rest }, newFields)
+              });
+              setCloneHeadingName(firstName);
             });
-            setCloneHeadingName(firstName)
-          })
-        }
-        else {
+        } else {
           setInitialData({
             fields: newFields,
-            values: isNew
-              ? getObjKeys("", newFields)
-              : getObjKeysWithValues(dataToUpdate, newFields),
+            values: isNew ? getObjKeys('', newFields) : getObjKeysWithValues(dataToUpdate, newFields)
           });
         }
         setLoading(false);
@@ -102,17 +85,12 @@ export default function ManageUserDialog({
 
   useEffect(() => {
     if (initialData.fields.length > 0) {
-      const reportsToDropdownData = initialData.fields.find(
-        (d) => d.fieldName === "reportsTo"
-      );
+      const reportsToDropdownData = initialData.fields.find((d) => d.fieldName === 'reportsTo');
       if (reportsToDropdownData) {
         if (isNew) {
           setReportsToDataSource(reportsToDropdownData.option);
         } else {
-          let currentContactRemovedDataSource =
-            reportsToDropdownData.option.filter(
-              (d) => d?.optionValue !== userId
-            );
+          let currentContactRemovedDataSource = reportsToDropdownData.option.filter((d) => d?.optionValue !== userId);
           setReportsToDataSource(currentContactRemovedDataSource);
         }
       }
@@ -123,19 +101,20 @@ export default function ManageUserDialog({
   const handleSubmit = (values) => {
     setSubmitting(true);
     if (isNew) {
-      axiosInstance().post("/user", values)
+      axiosInstance()
+        .post('/user', values)
         .then(({ data }) => {
           const newId = data.data[0]._id;
           setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
           setSubmitting(false);
           history.push({
             pathname: `/user/detail/${newId}`,
             search: isUserSetupPermission ? '?userSetup=true' : '',
-            state: { location: location },
+            state: { location: location }
           });
           close();
         })
@@ -144,16 +123,16 @@ export default function ManageUserDialog({
           setSubmitting(false);
         });
     } else {
-      axiosInstance().put(`/user`, { ...values, _id: userId })
+      axiosInstance()
+        .put(`/user`, { ...values, _id: userId })
         .then(({ data }) => {
           setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
           setSubmitting(false);
           onSuccess(data);
-
         })
         .catch((error) => {
           setToastConfig(error);
@@ -165,52 +144,47 @@ export default function ManageUserDialog({
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
     if (err.length) {
-      const input = document.querySelector(
-        `input[name=${err[0]}]`,
-      );
+      const input = document.querySelector(`input[name=${err[0]}]`);
 
       input.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
-        inline: 'start',
+        inline: 'start'
       });
     }
-  }
+  };
 
   return (
     <Dialog
       open={open}
       maxWidth="md"
       fullWidth
-      fullScreen={fullScreen || (isMobile || isTablet)}
+      fullScreen={fullScreen || isMobile || isTablet}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
-          setShowConfirmDialog(true)
+          setShowConfirmDialog(true);
         }
       }}
     >
       {!loading && initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <>
               <CustomDialogHeader
                 title={
-                  isClone ? `Clone User - ${cloneHeadingName}` :
-                    isNew
-                      ? "Create New User"
-                      : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName].filter((f) => f).join(" ")}`
+                  isClone
+                    ? `Clone User - ${cloneHeadingName}`
+                    : isNew
+                    ? 'Create New User'
+                    : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName].filter((f) => f).join(' ')}`
                 }
                 onClose={() => {
-                  if (isEqual(values, initialData.values)) close()
-                  else setShowConfirmDialog(true)
+                  if (isEqual(values, initialData.values)) close();
+                  else setShowConfirmDialog(true);
                 }}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
-                  setFullScreen(prevState => !prevState)
+                  setFullScreen((prevState) => !prevState);
                 }}
                 showManimizeMaximize={true}
               />
@@ -219,21 +193,15 @@ export default function ManageUserDialog({
                   {formsData &&
                     formsData.map((form, i) => (
                       <div key={i}>
-                        <div className={"detail-box-content"}>
-                          <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-                          <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                        <div className={'detail-box-content'}>
+                          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
                         </div>
                         <Box marginY={2}>
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field) => (
-                              <Grid
-                                key={field.fieldName}
-                                item
-                                xs={12}
-                                sm={6}
-                                md={6}
-                              >
-                                {field.fieldName === "reportsTo" ? (
+                              <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                {field.fieldName === 'reportsTo' ? (
                                   <FormTypes
                                     values={values}
                                     errors={errors}
@@ -243,15 +211,10 @@ export default function ManageUserDialog({
                                     type={field.type}
                                     options={reportsToDataSource}
                                     setFieldValue={(name, value) => {
-                                      setFieldValue(name, value)
+                                      setFieldValue(name, value);
                                     }}
                                     onChange={(e, val) => {
-                                      setFieldValue(
-                                        field.fieldName,
-                                        val && val.optionValue
-                                          ? val.optionValue
-                                          : ""
-                                      );
+                                      setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
                                     }}
                                     fieldData={field}
                                     fields={initialData.fields}
@@ -271,7 +234,7 @@ export default function ManageUserDialog({
                                     type={field.type}
                                     options={field.option}
                                     setFieldValue={(name, value) => {
-                                      setFieldValue(name, value)
+                                      setFieldValue(name, value);
                                     }}
                                     required={field.required}
                                     fullWidth
@@ -281,14 +244,10 @@ export default function ManageUserDialog({
                                     fields={initialData.fields}
                                     size="small"
                                     imageOrFileUploadCompletePercentage={
-                                      ["imageUpload", "fileUpload"].some(
-                                        (s) => s === field.type
-                                      )
+                                      ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                         ? (completePercentage) => {
-                                          setUploadingImageOrFileProgress(
-                                            completePercentage
-                                          );
-                                        }
+                                            setUploadingImageOrFileProgress(completePercentage);
+                                          }
                                         : null
                                     }
                                   />
@@ -308,8 +267,8 @@ export default function ManageUserDialog({
                   size="small"
                   disabled={isSubmitting || loading}
                   onClick={() => {
-                    if (isEqual(values, initialData.values)) close()
-                    else setShowConfirmDialog(true)
+                    if (isEqual(values, initialData.values)) close();
+                    else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
@@ -319,38 +278,37 @@ export default function ManageUserDialog({
                   color="primary"
                   size="small"
                   onClick={() => {
-                    handleScroll(errors)
-                    submitForm()
+                    handleScroll(errors);
+                    submitForm();
                   }}
-                  disabled={
-                    isSubmitting || loading || uploadingImageOrFileProgress > 0
-                  }
+                  disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0}
                 >
-                  {isSubmitting ? <CircularProgress size={22} /> : "Save"}
+                  {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
                 </Button>
               </CustomDialogFooter>
-              {
-                showConfirmDialog ?
-                  <ConfirmCancelDialog
-                    close={() => setShowConfirmDialog(false)}
-                    open={showConfirmDialog}
-                    onSave={() => {
-                      setShowConfirmDialog(false)
-                      handleScroll(errors)
-                      submitForm();
-                    }}
-                    onClose={() => {
-                      setShowConfirmDialog(false)
-                      close()
-                    }}
-                  /> : null
-              }
+              {showConfirmDialog ? (
+                <ConfirmCancelDialog
+                  close={() => setShowConfirmDialog(false)}
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false);
+                    handleScroll(errors);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false);
+                    close();
+                  }}
+                />
+              ) : null}
             </>
           )}
         </Formik>
-      ) : <Box p={2} height={500} bgcolor="white">
-        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-      </Box>}
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
     </Dialog>
   );
 }

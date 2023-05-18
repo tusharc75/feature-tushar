@@ -104,7 +104,7 @@ const SurveysData = ({ surveyId }) => {
     </>
   );
 
-  const handleDelete = () => { };
+  const handleDelete = () => {};
 
   return (
     <div>
@@ -128,7 +128,7 @@ const SurveysData = ({ surveyId }) => {
           refreshGrid={fetchData}
         />
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

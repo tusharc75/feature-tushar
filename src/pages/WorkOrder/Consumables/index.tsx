@@ -20,7 +20,6 @@ import HistoryIcon from '@material-ui/icons/History';
 import { useData } from 'src/StateProvider/Provider';
 
 const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
-
   let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
   const toastConfig = useContext(CustomToastContext);
@@ -29,7 +28,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
-  const [openLogDialog, setOpenLogDialog] = useState({ open: false, uniqueId: null });
+  const [openLogDialog, setOpenLogDialog] = useState({ open: false, uniqueId: null, data: null });
 
   const {
     state: { user }
@@ -41,7 +40,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   }, [allowedToEdit, workOrderId]);
 
   const fetchColumns = async () => {
-
     const column = [];
     const {
       data: { data }
@@ -62,15 +60,16 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           width: 200,
           hide: false,
           Cell: ({ row }) => {
-            return row.original[e?.fieldName] ?
+            return row.original[e?.fieldName] ? (
               <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
                 {row.original[e?.fieldName]}
               </a>
-              : <NoDataCell />;
+            ) : (
+              <NoDataCell />
+            );
           }
         });
-      }
-      else {
+      } else {
         column.push({
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
@@ -145,7 +144,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
                   size="small"
                   aria-label="Delete"
                   onClick={() => {
-                    setOpenLogDialog({ open: true, uniqueId: row.original._id });
+                    setOpenLogDialog({ open: true, uniqueId: row.original._id, data: row.original });
                   }}
                 >
                   <HistoryIcon />
@@ -157,12 +156,12 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
                 <IconButton
                   size="small"
                   aria-label="Delete"
-                  disabled={row?.original?.consumedQty ? true : false}
+                  disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
                   onClick={() => {
                     handleDelete([row.original]);
                   }}
                 >
-                  <DeleteIcon color={row?.original?.consumedQty ? 'disabled' : 'error'} />
+                  <DeleteIcon color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -190,10 +189,10 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           let res: any = {
             ...prepareDataForGrid(u)
           };
-          res.productName = u?.product?.optionLabel
-          res.productDescription = u?.product?.productDescription
-          res.productNumber = u?.product?.productNumber
-          res.hideSelection = u?.qty - u?.consumedQty === 0 ? true : false;
+          res.productName = u?.product?.optionLabel;
+          res.productDescription = u?.product?.productDescription;
+          res.productNumber = u?.product?.productNumber;
+          res.hideSelection = u?.qty - ((u?.consumedQty || 0) + (u?.requestedQty || 0)) === 0 ? true : false;
           return res;
         });
         setDataRows(rows);
@@ -328,7 +327,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
               hideSelection={allowedToEdit ? false : true}
             />
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
@@ -365,10 +364,12 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
             uniqueId={openLogDialog.uniqueId}
             workOrderId={workOrderId}
             renderedFrom={renderedFrom}
+            productName={openLogDialog?.data?.productName}
             onClose={() => {
               setOpenLogDialog({
                 open: false,
-                uniqueId: null
+                uniqueId: null,
+                data: null
               });
             }}
           />

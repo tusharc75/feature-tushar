@@ -23,7 +23,6 @@ import './components/Chatter/style.scss';
 import { CustomChatNotificationCountProvider } from './StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { GlobalChatProvider } from './StateProvider/GlobalChatContext';
 import { CustomOfflineProvider } from './StateProvider/OfflineContext/OfflineContext';
-// import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import { version } from '../package.json';
 
 // @ts-ignore

@@ -38,7 +38,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
 
-
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
 
@@ -653,7 +652,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           />
         </Box>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

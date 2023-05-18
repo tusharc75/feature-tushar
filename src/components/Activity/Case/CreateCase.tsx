@@ -64,23 +64,21 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
     if (id) {
       await GetCaseDetail(id)
         .then(({ data }) => {
-          if (data?.assignee && data?.assignee !== "") {
-            if (typeof data?.assignee === "string") {
+          if (data?.assignee && data?.assignee !== '') {
+            if (typeof data?.assignee === 'string') {
               data['assignee'] = [{ userId: data?.assignee }];
-            }
-            else {
+            } else {
               data['assignee'] = data?.assignee?.map((assignee) => ({
                 userId: assignee
               }));
             }
-          }
-          else {
-            data['assignee'] = []
+          } else {
+            data['assignee'] = [];
           }
           setInitialValues(null);
           setInitialValues(data);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       let initialData = {
         name: '',
@@ -374,7 +372,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
         </Formik>
       ) : (
         <CustomDialogContent>
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         </CustomDialogContent>

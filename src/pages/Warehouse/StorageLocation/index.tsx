@@ -17,7 +17,6 @@ import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import ManageStorageLocation from 'src/pages/StorageLocation/ManageStorageLocation';
 
 const StorageLocation = ({ warehouse }) => {
-
   let renderedFrom = camelCase(routes.storageLocation?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
@@ -113,7 +112,6 @@ const StorageLocation = ({ warehouse }) => {
         dispatch({ type: 'loading', loading: false });
       });
   };
-  
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -285,7 +283,7 @@ const StorageLocation = ({ warehouse }) => {
           showOnlyShowFilteredRecordSwitch={true}
         />
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
