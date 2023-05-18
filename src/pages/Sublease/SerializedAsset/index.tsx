@@ -295,8 +295,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                       if (subleaseData?.wellNumber) {
                         if (subleaseData?.wellNumber?.optionValue) {
                           data['wellNumber'] = subleaseData?.wellNumber?.optionValue;
-                        }
-                        else {
+                        } else {
                           data['wellNumber'] = subleaseData?.wellNumber?.map((e) => e?.optionValue);
                         }
                       }
@@ -386,7 +385,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
             />
           )
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

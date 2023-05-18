@@ -1,15 +1,15 @@
-import { useEffect, useState, useContext, useReducer, Fragment } from "react";
-import { useParams, useHistory } from "react-router-dom";
-import ThumbUpIcon from "@material-ui/icons/ThumbUp";
-import ThumbDownIcon from "@material-ui/icons/ThumbDown";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { Box, Button, Card, CardContent, Dialog, Grid, IconButton, Paper, Tooltip, Typography, useMediaQuery, } from "@material-ui/core";
-import { GiAbstract055, GiVintageRobot } from "react-icons/gi";
-import { AiOutlineEye } from "react-icons/ai";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import Activity from "../../components/Activity";
-import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
+import { useEffect, useState, useContext, useReducer, Fragment } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
+import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import ThumbDownIcon from '@material-ui/icons/ThumbDown';
+import axiosInstance from '../../axios/axiosInstance';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { Box, Button, Card, CardContent, Dialog, Grid, IconButton, Paper, Tooltip, Typography, useMediaQuery } from '@material-ui/core';
+import { GiAbstract055, GiVintageRobot } from 'react-icons/gi';
+import { AiOutlineEye } from 'react-icons/ai';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import Activity from '../../components/Activity';
+import PerformanceTuningImg from '../../assets/PerformanceTuning.png';
 import {
   CustomDialogTransition,
   formatAmountWithCurrency,
@@ -20,35 +20,34 @@ import {
   ACTIVITY_RESOURCE,
   sidebarResource,
   quotation
-} from "../../constants/helpers";
-import { startCase } from "lodash";
-import { useData } from "../../StateProvider/Provider";
-import { isMobile, isTablet } from "react-device-detect";
-import DOAReasonDialog from "./DOAReasonDialog"
-import Loader from "../../components/Loader";
-import ActivityButton from "src/components/Activity/ActivityButton";
-import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
-import NoDataCell from "src/components/Helpers/NoDataCell";
-import { generateCustomTableColumns } from "src/constants/columns";
-import { fetch_quotation_product_fields } from "src/components/Quotation/helper";
-import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+} from '../../constants/helpers';
+import { startCase } from 'lodash';
+import { useData } from '../../StateProvider/Provider';
+import { isMobile, isTablet } from 'react-device-detect';
+import DOAReasonDialog from './DOAReasonDialog';
+import Loader from '../../components/Loader';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { generateCustomTableColumns } from 'src/constants/columns';
+import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const DoaQuotationApproval = () => {
-
   const {
     state: {
-      user: { user: currentUser },
-    },
+      user: { user: currentUser }
+    }
   } = useData();
   const { setToastConfig } = useContext(CustomToastContext);
 
   const history = useHistory();
   const { id } = useParams();
   const [DOAData, setDOAData] = useState(null);
-  const [PDFName, setPDFName] = useState("");
+  const [PDFName, setPDFName] = useState('');
   const [QStatus, setQStatus] = useState(true);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
-  const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
+  const [quoteStatusChangeData, setQuoteStatusChangeData] = useState('');
   const [quoteData, setQuoteData] = useState(null);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -66,18 +65,17 @@ const DoaQuotationApproval = () => {
   }, [id]);
 
   const fetchQuote = async () => {
-
-    const responseDoaRequest = await axiosInstance().get("/doa-request/get-detail/" + id);
+    const responseDoaRequest = await axiosInstance().get('/doa-request/get-detail/' + id);
     const doaRequest = responseDoaRequest?.data?.data;
 
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${doaRequest.quotation}/${doaRequest.versionId}`);
-    const material = response?.data?.data?.material
+    const material = response?.data?.data?.material;
 
-    setDOAData(doaRequest)
-    setQuoteData(doaRequest.quotationDetail)
-    fetchFields(doaRequest.quotationDetail)
-    fetchRows(material, doaRequest.quotationDetail)
-    if (doaRequest?.versionDetail?.status !== "Sent for DOA") {
+    setDOAData(doaRequest);
+    setQuoteData(doaRequest.quotationDetail);
+    fetchFields(doaRequest.quotationDetail);
+    fetchRows(material, doaRequest.quotationDetail);
+    if (doaRequest?.versionDetail?.status !== 'Sent for DOA') {
       setQStatus(false);
     }
   };
@@ -111,14 +109,15 @@ const DoaQuotationApproval = () => {
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -132,14 +131,15 @@ const DoaQuotationApproval = () => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.srno = parent.srno + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -154,7 +154,7 @@ const DoaQuotationApproval = () => {
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(data, quotationData?.currency, "quotation_product_package");
+    const newColumns = generateCustomTableColumns(data, quotationData?.currency, 'quotation_product_package');
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -165,7 +165,7 @@ const DoaQuotationApproval = () => {
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (<p className="text-truncate">{row.original.srno}</p>),
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -175,14 +175,7 @@ const DoaQuotationApproval = () => {
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
         width: 100,
-        Cell: ({ row }) =>
-          row.original['type'] ? (
-            <p>
-              {`${startCase(row.original?.type)} `}
-            </p>
-          ) : (
-            <NoDataCell />
-          )
+        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       },
       {
         accessor: 'detail',
@@ -191,14 +184,12 @@ const DoaQuotationApproval = () => {
         width: 300,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>
-              {row.original?.detail}
-            </p>
-            {row.original?.subRows?.length ?
-              <Box ml={1} >
+            <p>{row.original?.detail}</p>
+            {row.original?.subRows?.length ? (
+              <Box ml={1}>
                 <span>({row.original?.subRows?.length})</span>
               </Box>
-              : null}
+            ) : null}
           </div>
         )
       },
@@ -220,11 +211,11 @@ const DoaQuotationApproval = () => {
 
   const ViewQuote = () => {
     axiosInstance()
-      .get("/user/download?fileName=" + PDFName, {
-        responseType: "blob",
+      .get('/user/download?fileName=' + PDFName, {
+        responseType: 'blob'
       })
       .then(({ data }) => {
-        const file = new Blob([data], { type: "application/pdf" });
+        const file = new Blob([data], { type: 'application/pdf' });
         const fileURL = URL.createObjectURL(file);
         const pdfWindow = window.open();
         pdfWindow.location.href = fileURL;
@@ -235,25 +226,25 @@ const DoaQuotationApproval = () => {
   };
 
   const QuoteStatusChange = (accepted, signature, comment) => {
-    if (accepted !== "Rejected") {
+    if (accepted !== 'Rejected') {
       axiosInstance()
-        .post("/doa-request/doaResponse/" + id, { response: "Accepted" })
+        .post('/doa-request/doaResponse/' + id, { response: 'Accepted' })
         .then(({ data }) => {
-          history.push("/doa-request");
+          history.push('/doa-request');
         })
         .catch((err) => {
           setToastConfig(err);
-          setShowQuoteStatusChangeDialog(false)
+          setShowQuoteStatusChangeDialog(false);
         });
     } else {
       axiosInstance()
-        .post("/doa-request/doaResponse/" + id, { response: "Rejected", comment: comment })
+        .post('/doa-request/doaResponse/' + id, { response: 'Rejected', comment: comment })
         .then(({ data }) => {
-          history.push("/doa-request");
+          history.push('/doa-request');
         })
         .catch((err) => {
           setToastConfig(err);
-          setShowQuoteStatusChangeDialog(false)
+          setShowQuoteStatusChangeDialog(false);
         });
     }
   };
@@ -262,24 +253,20 @@ const DoaQuotationApproval = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: "DOA Requests", path: "/doa-request" }, { title: DOAData?.DOAName || id }]} />
+          <CustomBreadCrumbs routes={[{ title: 'DOA Requests', path: '/doa-request' }, { title: DOAData?.DOAName || id }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <Button
-              onClick={() => ViewQuote()}
-              variant="outlined"
-              size="small"
-              startIcon={<AiOutlineEye />}
-              color="primary"
-            >
+            <Button onClick={() => ViewQuote()} variant="outlined" size="small" startIcon={<AiOutlineEye />} color="primary">
               View
             </Button>
-            {DOAData?.DOARequestThrough?.some((u) => u.user.includes(currentUser._id)) && (DOAData?.status !== "Accepted" && DOAData?.status !== "Rejected") ? (
+            {DOAData?.DOARequestThrough?.some((u) => u.user.includes(currentUser._id)) &&
+            DOAData?.status !== 'Accepted' &&
+            DOAData?.status !== 'Rejected' ? (
               <>
                 <Button
                   onClick={() => {
-                    QuoteStatusChange("Accepted", "", "")
+                    QuoteStatusChange('Accepted', '', '');
                   }}
                   variant="outlined"
                   size="small"
@@ -290,8 +277,8 @@ const DoaQuotationApproval = () => {
                 </Button>
                 <Button
                   onClick={() => {
-                    setQuoteStatusChangeData("Rejected")
-                    setShowQuoteStatusChangeDialog(true)
+                    setQuoteStatusChangeData('Rejected');
+                    setShowQuoteStatusChangeDialog(true);
                   }}
                   startIcon={<ThumbDownIcon />}
                   variant="outlined"
@@ -307,9 +294,9 @@ const DoaQuotationApproval = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        {quoteData &&
+        {quoteData && (
           <Box mb={3}>
-            <Grid container spacing={2} >
+            <Grid container spacing={2}>
               <Grid item xs={4}>
                 <Card>
                   <CardContent>
@@ -336,26 +323,26 @@ const DoaQuotationApproval = () => {
               </Grid>
             </Grid>
           </Box>
-        }
+        )}
         {columns && rowsData ? (
           <Box mt={3} zIndex={5} width={'100%'}>
             <CustomReactTable
               height={'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
-              onSelect={() => { }}
+              onSelect={() => {}}
               childrenProperty="subRows"
               uniqueKey="_id"
               renderedFrom="quotation_product_package"
               isClientSideGrid={true}
               hideSelection={true}
             />
-          </Box>) :
-          (
-            <Box p={2} height={500} bgcolor="white">
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
+          </Box>
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </Box>
       {showQuoteStatusChangeDialog && (
         <DOAReasonDialog
@@ -365,7 +352,7 @@ const DoaQuotationApproval = () => {
           accepted={quoteStatusChangeData}
         />
       )}
-    </Box >
+    </Box>
   );
 };
 

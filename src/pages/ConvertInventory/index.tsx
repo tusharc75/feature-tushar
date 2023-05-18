@@ -261,7 +261,9 @@ const ConvertInventory = () => {
                     setStorageLocationId(null);
                   }
                 }}
-                renderInput={(params) => <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />}
+                renderInput={(params) => (
+                  <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                )}
               />
               {user?.user?.brandPolicy?.storageLocation && (
                 <Autocomplete
@@ -361,7 +363,7 @@ const ConvertInventory = () => {
             />
           ) : null
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

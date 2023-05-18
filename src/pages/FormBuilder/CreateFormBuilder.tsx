@@ -18,7 +18,7 @@ import { RiCloseCircleFill, RiSaveFill } from 'react-icons/all';
 import TextField from '@material-ui/core/TextField';
 import { camelCase } from 'lodash';
 import { Autocomplete } from '@material-ui/lab';
-import History from "./History"
+import History from './History';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -90,8 +90,16 @@ const CreateFormBuilder = () => {
   const [sectionName, setsectionName] = useState('');
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
 
-  const sectionNameList = ['Sales Management', 'eCommerce', 'Inventory Management',
-    'Rental Operations Management', 'Repair & Maintenance Management', 'Purchasing Management', 'Planning & Forecasting','Collaboration Tools'];
+  const sectionNameList = [
+    'Sales Management',
+    'eCommerce',
+    'Inventory Management',
+    'Rental Operations Management',
+    'Repair & Maintenance Management',
+    'Purchasing Management',
+    'Planning & Forecasting',
+    'Collaboration Tools'
+  ];
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -120,7 +128,6 @@ const CreateFormBuilder = () => {
   const closeHistoryDialog = () => {
     setOpenHistoryDialog(false);
   };
-
 
   useEffect(() => {
     window.history.pushState(null, null, window.location.pathname);
@@ -179,7 +186,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => { });
+          .catch((error) => {});
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -432,20 +439,13 @@ const CreateFormBuilder = () => {
               ) : null}
             </Fragment>
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
         </Box>
       </Box>
-      {openHistoryDialog && (
-        <History
-          onClose={() => closeHistoryDialog()}
-          open={openHistoryDialog}
-          resource={resource}
-        />
-      )
-      }
+      {openHistoryDialog && <History onClose={() => closeHistoryDialog()} open={openHistoryDialog} resource={resource} />}
     </Fragment>
   );
 };

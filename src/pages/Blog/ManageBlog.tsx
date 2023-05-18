@@ -130,24 +130,21 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <>
               <CustomDialogHeader
                 onClose={() => {
-                  if (isEqual(initialData.values, values)) onClose()
-                  else setShowConfirmDialog(true)
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.title ? `(${initialData.values?.title})` : ''}`
-                  : `Create New Blog`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.title ? `(${initialData.values?.title})` : ''}`
+                    : `Create New Blog`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -191,8 +188,8 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                       imageOrFileUploadCompletePercentage={
                                         ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                           ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(completePercentage);
-                                          }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                           : null
                                       }
                                     />
@@ -212,8 +209,8 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (isEqual(initialData.values, values)) onClose()
-                    else setShowConfirmDialog(true)
+                    if (isEqual(initialData.values, values)) onClose();
+                    else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
@@ -249,7 +246,7 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

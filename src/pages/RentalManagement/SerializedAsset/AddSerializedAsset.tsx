@@ -93,7 +93,7 @@ const AddSerializedAsset = ({
       .then(({ data: { data, count } }) => {
         setPlantList(data);
       })
-      .catch((error) => { });
+      .catch((error) => {});
   }, []);
 
   const fetchGridColumns = () => {
@@ -330,32 +330,32 @@ const AddSerializedAsset = ({
                     <Box style={{ display: 'inline' }}>
                       {serializedProducts.length > 0
                         ? serializedProducts.map((d) => (
-                          <Box
-                            m={0.5}
-                            p={1}
-                            border={1}
-                            className="cursor-pointer"
-                            borderColor="grey.300"
-                            onClick={() => {
-                              if (selectedProduct === d.id) {
-                                setSelectedProduct(null);
-                              } else {
-                                setSelectedProduct(d.id);
-                              }
-                            }}
-                            style={{ display: 'inline-block' }}
-                            bgcolor={d.id === selectedProduct && 'primary.main'}
-                            color={d.id === selectedProduct && 'white'}
-                          >
-                            {d?.qty < 0 ? (
-                              <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                            ) : d?.qty === 0 ? (
-                              <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                            ) : (
-                              <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                            )}
-                          </Box>
-                        ))
+                            <Box
+                              m={0.5}
+                              p={1}
+                              border={1}
+                              className="cursor-pointer"
+                              borderColor="grey.300"
+                              onClick={() => {
+                                if (selectedProduct === d.id) {
+                                  setSelectedProduct(null);
+                                } else {
+                                  setSelectedProduct(d.id);
+                                }
+                              }}
+                              style={{ display: 'inline-block' }}
+                              bgcolor={d.id === selectedProduct && 'primary.main'}
+                              color={d.id === selectedProduct && 'white'}
+                            >
+                              {d?.qty < 0 ? (
+                                <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                              ) : d?.qty === 0 ? (
+                                <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                              ) : (
+                                <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                              )}
+                            </Box>
+                          ))
                         : null}
                     </Box>
                   </Box>
@@ -473,10 +473,10 @@ const AddSerializedAsset = ({
                           getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()
                             ? 'Direct transfer to customer location'
                             : referenceType === 'Rental Job'
-                              ? 'Add to Job'
-                              : referenceType === 'ReplaceAsset'
-                                ? 'Replace'
-                                : 'Add'
+                            ? 'Add to Job'
+                            : referenceType === 'ReplaceAsset'
+                            ? 'Replace'
+                            : 'Add'
                         }
                       >
                         <Button
@@ -563,7 +563,7 @@ const AddSerializedAsset = ({
                   refreshGrid={fetchProductInventory}
                 />
               ) : (
-                <Box p={2} height={500} bgcolor="white">
+                <Box p={2} height={500}>
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
               )}

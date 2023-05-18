@@ -20,7 +20,6 @@ import HistoryIcon from '@material-ui/icons/History';
 import { useData } from 'src/StateProvider/Provider';
 
 const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
-
   let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
   const toastConfig = useContext(CustomToastContext);
@@ -41,7 +40,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   }, [allowedToEdit, workOrderId]);
 
   const fetchColumns = async () => {
-
     const column = [];
     const {
       data: { data }
@@ -62,15 +60,16 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           width: 200,
           hide: false,
           Cell: ({ row }) => {
-            return row.original[e?.fieldName] ?
+            return row.original[e?.fieldName] ? (
               <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
                 {row.original[e?.fieldName]}
               </a>
-              : <NoDataCell />;
+            ) : (
+              <NoDataCell />
+            );
           }
         });
-      }
-      else {
+      } else {
         column.push({
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
@@ -114,13 +113,13 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       },
       ...(user?.user?.brandPolicy?.workOrderConsumableRequest
         ? [
-          {
-            accessor: 'requestedQty',
-            Header: 'Requested Qty',
-            width: 150,
-            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-          }
-        ]
+            {
+              accessor: 'requestedQty',
+              Header: 'Requested Qty',
+              width: 150,
+              Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+            }
+          ]
         : []),
       {
         accessor: 'consumedQty',
@@ -190,9 +189,9 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           let res: any = {
             ...prepareDataForGrid(u)
           };
-          res.productName = u?.product?.optionLabel
-          res.productDescription = u?.product?.productDescription
-          res.productNumber = u?.product?.productNumber
+          res.productName = u?.product?.optionLabel;
+          res.productDescription = u?.product?.productDescription;
+          res.productNumber = u?.product?.productNumber;
           res.hideSelection = u?.qty - u?.consumedQty === 0 ? true : false;
           return res;
         });
@@ -328,7 +327,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
               hideSelection={allowedToEdit ? false : true}
             />
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}

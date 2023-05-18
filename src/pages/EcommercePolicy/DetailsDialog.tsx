@@ -17,7 +17,6 @@ import { Box } from '@material-ui/core';
 import { isEqual } from 'lodash';
 
 const DetailsDialog = (props) => {
-
   const toastConfig = useContext(CustomToastContext);
   const { onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
 
@@ -50,15 +49,17 @@ const DetailsDialog = (props) => {
   }, []);
 
   const handleSubmit = (values) => {
-    axiosInstance().put(`/e-commerce-policy`, values).then(({ data: { data } }) => {
-      setLoading(false);
-      onSuccess(data);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: 'Updated Successfully'
-      });
-    })
+    axiosInstance()
+      .put(`/e-commerce-policy`, values)
+      .then(({ data: { data } }) => {
+        setLoading(false);
+        onSuccess(data);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Updated Successfully'
+        });
+      })
       .catch((error) => {
         setLoading(false);
         toastConfig.setToastConfig(error);
@@ -91,7 +92,7 @@ const DetailsDialog = (props) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={"Update"}
+                title={'Update'}
                 onClose={() => {
                   onClose();
                 }}
@@ -122,8 +123,8 @@ const DetailsDialog = (props) => {
                   size="small"
                   color="primary"
                   onClick={() => {
-                    if (isEqual(initialData.values, values)) onClose()
-                    else setShowConfirmDialog(true)
+                    if (isEqual(initialData.values, values)) onClose();
+                    else setShowConfirmDialog(true);
                   }}
                 >
                   {isUpdateDisabled ? 'Close' : 'Cancel'}
@@ -139,7 +140,7 @@ const DetailsDialog = (props) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

@@ -46,14 +46,12 @@ import { flattenArray } from 'src/constants/columns';
 import { calculateRowsField } from '../RentalManagment/helper';
 
 const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSave }) => {
-
   const [fullScreen, setFullScreen] = useState(true);
   const [displayRows, setDisplayRows] = useState([]);
   const [constColummns, setConstColummns] = useState([]);
   const [flatRows, setFlatRows] = useState(data);
   const [touched, setTouched] = useState<any>({});
   const [error, setError] = useState<any>({});
-
 
   useEffect(() => {
     generateColumnField();
@@ -176,21 +174,19 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
   };
 
   const updateData = async (row, inputField, value) => {
-    let temflatRows = flatRows
+    let temflatRows = flatRows;
     let tempIndex = temflatRows.findIndex((obj) => obj._id === row._id);
-    flatRows[tempIndex][inputField] = value
+    flatRows[tempIndex][inputField] = value;
     const values = { [inputField]: value };
     const calValues = await calculateRowsField(flattenArray(temflatRows), values, fields, temflatRows[tempIndex]);
-    temflatRows = flatRows.map(d => {
-      let calculateTempIndex = calValues.findIndex((obj) => obj._id === d._id)
+    temflatRows = flatRows.map((d) => {
+      let calculateTempIndex = calValues.findIndex((obj) => obj._id === d._id);
       if (calculateTempIndex > -1) {
-        return calValues[calculateTempIndex]
-      }
-      else return d;
+        return calValues[calculateTempIndex];
+      } else return d;
     });
-    setFlatRows(temflatRows)
+    setFlatRows(temflatRows);
   };
-
 
   return (
     <Dialog
@@ -327,7 +323,7 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
           </CustomDialogFooter>
         </>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

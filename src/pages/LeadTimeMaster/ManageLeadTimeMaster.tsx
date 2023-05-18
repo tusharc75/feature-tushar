@@ -27,13 +27,13 @@ import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import { Autocomplete } from '@material-ui/lab';
 import React from 'react';
 import routes from 'src/components/Helpers/Routes';
-import { useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const history = useHistory()
+  const history = useHistory();
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -106,10 +106,10 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
       values.leadTimeDays = totalDays || 0;
       axiosInstance()
         .post(`${leadTimeMaster.api}`, values)
-        .then(({ data: { data, message} }) => {
+        .then(({ data: { data, message } }) => {
           onClose();
           setSubmitting(false);
-          history.push(`${routes.leadTimeMasterDetail.path}/${data?._id}`)
+          history.push(`${routes.leadTimeMasterDetail.path}/${data?._id}`);
           onSuccess();
           toastConfig.setToastConfig({
             open: true,
@@ -193,16 +193,10 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
       open={true}
     >
       {initialData?.fields?.length ? (
-        <Formik
-          innerRef={ref} 
-          initialValues={initialData.values} 
-          validationSchema={yupSchema(allFields)} 
-          validateOnMount 
-          onSubmit={handleSubmit}
-        >
+        <Formik innerRef={ref} initialValues={initialData.values} validationSchema={yupSchema(allFields)} validateOnMount onSubmit={handleSubmit}>
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
-               <CustomDialogHeader
+              <CustomDialogHeader
                 title={title}
                 onClose={(e, reason) => {
                   if (isEqual(initialData.values, values)) {
@@ -217,7 +211,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                 }}
                 showManimizeMaximize={true}
               />
-               <CustomDialogContent>
+              <CustomDialogContent>
                 <Form>
                   {initialData.fields.length > 0 &&
                     initialData.fields.map((form, i) => {
@@ -409,10 +403,10 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
             </Fragment>
           )}
         </Formik>
-      ): (
-        <Box p={2} height={500} bgcolor="white">
-        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-      </Box>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
       )}
     </Dialog>
   );

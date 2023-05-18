@@ -18,20 +18,20 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import routes from 'src/components/Helpers/Routes';
 
-
 const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, renderedFrom, ignoreIds }) => {
-
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
-  const [columns, setColumns] = useState(null)
+  const [columns, setColumns] = useState(null);
 
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
-    removeLocalStorage(localStorageSelectedRecords)
+    removeLocalStorage(localStorageSelectedRecords);
     fetchFields();
   }, []);
 
@@ -41,19 +41,28 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
 
   const fetchFields = async () => {
     const column = [];
-    const productResult = await axiosInstance().get('/field?resource=Product&view=true')
-    const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "serializedProduct"].includes(e?.fieldData?.fieldName));
+    const productResult = await axiosInstance().get('/field?resource=Product&view=true');
+    const productFields = productResult?.data?.data?.filter((e) =>
+      ['productName', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName)
+    );
     productFields?.forEach((e) => {
-      if (e?.fieldData?.fieldName === "productName") {
-        column.push({ field: "productName", primaryField: true, headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" })
+      if (e?.fieldData?.fieldName === 'productName') {
+        column.push({
+          field: 'productName',
+          primaryField: true,
+          headerName: e?.fieldData?.fieldLabel,
+          show: true,
+          disabled: true,
+          cellRenderer: 'nameRenderer'
+        });
       }
-      if (e?.fieldData?.fieldName === "productNumber") {
-        column.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+      if (e?.fieldData?.fieldName === 'productNumber') {
+        column.push({ field: 'productNumber', headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: 'commonRenderer' });
       }
-      if (e?.fieldData?.fieldName === "serializedProduct") {
-        column.push({ field: "serializedProduct", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "checkboxRenderer" })
+      if (e?.fieldData?.fieldName === 'serializedProduct') {
+        column.push({ field: 'serializedProduct', headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: 'checkboxRenderer' });
       }
-    })
+    });
     column.push({
       field: 'qty',
       headerName: 'Quantity',
@@ -74,8 +83,8 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
       editable: false,
       filter: false
     });
-    setColumns([...column])
-  }
+    setColumns([...column]);
+  };
 
   const fetchProductInventory = () => {
     dispatch({ type: 'loading', loading: true });
@@ -83,14 +92,15 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
       gridApi.setRowData([]);
     }
     const queryString = getQueryString();
-    axiosInstance().get(`${productInventory.api}?wareHouse=${warehouse}&${queryString}`)
+    axiosInstance()
+      .get(`${productInventory.api}?wareHouse=${warehouse}&${queryString}`)
       .then(({ data: { data, count } }) => {
         const selectedProducts = getLocalStorageArrayData(localStorageSelectedRecords);
         let rows = data?.map((u: any) => {
           const selectedData = selectedProducts.find((d: any) => d._id === u._id);
           let finalObject = prepareDataForGrid(u);
           finalObject['productId'] = u._id;
-          finalObject['inventory'] = u?.inventory ? (u?.inventory - (u?.softHold || 0)) : 0;
+          finalObject['inventory'] = u?.inventory ? u?.inventory - (u?.softHold || 0) : 0;
           finalObject['qty'] = selectedData ? selectedData.qty : finalObject['inventory'] ? 1 : 0;
           finalObject['hideSelection'] = finalObject['inventory'] ? false : true;
           return {
@@ -116,15 +126,14 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   };
 
   const getQueryString = () => {
-
     let deepFilter = `page=${page}&limit=${limit}`;
 
     if (storageLocation) {
-      deepFilter = deepFilter + `&storageLocation=${storageLocation}`
+      deepFilter = deepFilter + `&storageLocation=${storageLocation}`;
     }
 
     if (ignoreIds?.length) {
-      deepFilter = deepFilter + `&ignoreIds=${JSON.stringify(ignoreIds)}`
+      deepFilter = deepFilter + `&ignoreIds=${JSON.stringify(ignoreIds)}`;
     }
 
     const updatedFilters = [];
@@ -286,11 +295,11 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
             renderedFrom={renderedFrom}
             refreshGrid={fetchProductInventory}
           />
-        )
-          : <Box p={2} height={500} bgcolor="white">
+        ) : (
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        }
+        )}
       </CustomDialogContent>
     </Dialog>
   );

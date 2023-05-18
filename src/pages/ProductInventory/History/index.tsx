@@ -19,25 +19,24 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { Autocomplete } from '@material-ui/lab';
 
 const History = ({ product, warehouse, storageLocation }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting, } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting } = state;
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const [isRevertConfirmation, setIsRevertConfirmation] = useState({ open: false, _id: "", product: "" });
+  const [isRevertConfirmation, setIsRevertConfirmation] = useState({ open: false, _id: '', product: '' });
   const [revertLoading, setRevertLoading] = useState(false);
 
   const [warehouseOptions, setWarehouseOptions] = useState(null);
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
 
-  const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse && warehouse?.split(",")?.length === 1 ? warehouse : "All");
+  const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse && warehouse?.split(',')?.length === 1 ? warehouse : 'All');
   const [selectedStorageLocation, setSelectedStorageLocation] = useState(storageLocation);
 
-  const renderedFrom = "Product_Inventory_History"
+  const renderedFrom = 'Product_Inventory_History';
 
   useEffect(() => {
     getWarehouse();
@@ -70,24 +69,27 @@ const History = ({ product, warehouse, storageLocation }) => {
   };
 
   const getQueryString = () => {
-
     let deepFilter = `?page=${page}&limit=${limit}`;
 
     if (selectedWarehouse) {
-      let tempWarehouse = selectedWarehouse === 'All'
-        ? warehouseOptions?.filter((d) => d.optionValue !== 'All').map((d) => d.optionValue).toString()
-        : selectedWarehouse;
+      let tempWarehouse =
+        selectedWarehouse === 'All'
+          ? warehouseOptions
+              ?.filter((d) => d.optionValue !== 'All')
+              .map((d) => d.optionValue)
+              .toString()
+          : selectedWarehouse;
 
-      deepFilter = `${deepFilter}&warehouse=${tempWarehouse}`
+      deepFilter = `${deepFilter}&warehouse=${tempWarehouse}`;
     }
 
     if (selectedStorageLocation) {
-      deepFilter = `${deepFilter}&storageLocation=${selectedStorageLocation}`
+      deepFilter = `${deepFilter}&storageLocation=${selectedStorageLocation}`;
     }
 
     let filterById = [];
     if (filterById.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
     }
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
@@ -117,14 +119,18 @@ const History = ({ product, warehouse, storageLocation }) => {
   const columns = [
     { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false },
     {
-      field: 'referenceType', headerName: 'Reference Type', show: true,
+      field: 'referenceType',
+      headerName: 'Reference Type',
+      show: true,
       filter: true,
       sortable: false,
       cellRenderer: 'commonRenderer'
     },
     { field: 'reference', headerName: 'Reference', show: true, filter: false, sortable: false, cellRenderer: 'referenceRenderer' },
     {
-      field: 'type', headerName: 'Type', show: true,
+      field: 'type',
+      headerName: 'Type',
+      show: true,
       filter: true,
       sortable: false,
       cellRenderer: 'commonRenderer'
@@ -148,16 +154,18 @@ const History = ({ product, warehouse, storageLocation }) => {
     { field: 'finalInventory', headerName: 'Final Inventory', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
     { field: 'price', headerName: 'Price', show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
-    ...(warehouse && warehouse?.split(",")?.length === 1 ? [
-      {
-        field: 'finalAvgPrice',
-        headerName: 'Final Average Price',
-        show: true,
-        cellRenderer: 'commonRenderer',
-        filter: false,
-        sortable: false
-      }
-    ] : []),
+    ...(warehouse && warehouse?.split(',')?.length === 1
+      ? [
+          {
+            field: 'finalAvgPrice',
+            headerName: 'Final Average Price',
+            show: true,
+            cellRenderer: 'commonRenderer',
+            filter: false,
+            sortable: false
+          }
+        ]
+      : []),
     {
       field: 'warehouse',
       headerName: routes.warehouse.title,
@@ -166,16 +174,18 @@ const History = ({ product, warehouse, storageLocation }) => {
       sortable: false,
       cellRenderer: 'warehouseRenderer'
     },
-    ...(user?.user?.brandPolicy?.storageLocation ? [
-      {
-        field: 'storageLocation',
-        headerName: 'Storage Location',
-        show: true,
-        filter: false,
-        sortable: false,
-        cellRenderer: 'storageLocationRenderer'
-      }
-    ] : []),
+    ...(user?.user?.brandPolicy?.storageLocation
+      ? [
+          {
+            field: 'storageLocation',
+            headerName: 'Storage Location',
+            show: true,
+            filter: false,
+            sortable: false,
+            cellRenderer: 'storageLocationRenderer'
+          }
+        ]
+      : []),
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer', filter: true, sortable: false },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
     { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'userRenderer', filter: true, sortable: false },
@@ -269,20 +279,21 @@ const History = ({ product, warehouse, storageLocation }) => {
     );
 
   const handleRevert = () => {
-    setRevertLoading(true)
+    setRevertLoading(true);
     let data = { comment: 'Reverted' };
-    axiosInstance().put(`${productInventory.api}/${isRevertConfirmation.product}/ledger-revert/${isRevertConfirmation._id}`, data)
+    axiosInstance()
+      .put(`${productInventory.api}/${isRevertConfirmation.product}/ledger-revert/${isRevertConfirmation._id}`, data)
       .then(({ data: { data } }) => {
-        setRevertLoading(false)
-        setIsRevertConfirmation({ open: false, _id: "", product: "" })
+        setRevertLoading(false);
+        setIsRevertConfirmation({ open: false, _id: '', product: '' });
         dispatch({ type: 'initialize', data: [], count: 0 });
         fetchRecords();
       })
       .catch((error) => {
-        setRevertLoading(false)
+        setRevertLoading(false);
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const ActionsRenderer = (params) => (
     <>
@@ -293,7 +304,7 @@ const History = ({ product, warehouse, storageLocation }) => {
               size="small"
               aria-label="revert"
               onClick={() => {
-                setIsRevertConfirmation({ open: true, _id: params?.data?._id, product: params?.data?.product })
+                setIsRevertConfirmation({ open: true, _id: params?.data?._id, product: params?.data?.product });
               }}
             >
               <Autorenew fontSize="small" color="primary" />
@@ -317,54 +328,50 @@ const History = ({ product, warehouse, storageLocation }) => {
 
   return (
     <>
-      {warehouseOptions &&
-        <Box display="flex" >
+      {warehouseOptions && (
+        <Box display="flex">
           <Autocomplete
             style={{ width: '250px' }}
             options={warehouseOptions}
             getOptionLabel={(option: any) => option.optionLabel}
             disableClearable
             getOptionSelected={(option: any, val) => option.optionValue === val}
-            value={warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0] : ''}
+            value={
+              warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+                ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+                : ''
+            }
             onChange={(e, val) => {
               if (val !== null) {
                 setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
-                setSelectedStorageLocation(null)
+                setSelectedStorageLocation(null);
               }
             }}
-            renderInput={(params) =>
-              <TextField
-                {...params}
-                margin="dense"
-                name="plant"
-                label={routes.warehouse.title}
-                variant="outlined"
-                fullWidth />
-            }
+            renderInput={(params) => (
+              <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+            )}
           />
-          {user?.user?.brandPolicy?.storageLocation &&
+          {user?.user?.brandPolicy?.storageLocation && (
             <Autocomplete
               style={{ width: '250px', marginLeft: '10px' }}
-              options={storageLocationOptions.filter(item => item.warehouse === selectedWarehouse)}
-              getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+              options={storageLocationOptions.filter((item) => item.warehouse === selectedWarehouse)}
+              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
               getOptionSelected={(option: any, val) => option.optionValue === val}
-              value={storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation).length ? storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation)[0] : ''}
+              value={
+                storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation).length
+                  ? storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation)[0]
+                  : ''
+              }
               onChange={(e, val) => {
                 setSelectedStorageLocation(val?.optionValue);
               }}
-              renderInput={(params) =>
-                <TextField
-                  {...params}
-                  margin="dense"
-                  name="storageLocation"
-                  label="Storage Location"
-                  variant="outlined"
-                  fullWidth />
-              }
+              renderInput={(params) => (
+                <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
+              )}
             />
-          }
+          )}
         </Box>
-      }
+      )}
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           <CustomAgGrid
@@ -384,22 +391,22 @@ const History = ({ product, warehouse, storageLocation }) => {
             refreshGrid={fetchRecords}
           />
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
       </Grid>
-      {isRevertConfirmation.open &&
+      {isRevertConfirmation.open && (
         <ConfirmationDialog
           open={true}
           message={`Are you sure you want to revert ?`}
           onClose={() => {
-            setIsRevertConfirmation({ open: false, _id: "", product: "" })
+            setIsRevertConfirmation({ open: false, _id: '', product: '' });
           }}
           okBtnLoading={revertLoading}
           onOk={handleRevert}
         />
-      }
+      )}
     </>
   );
 };

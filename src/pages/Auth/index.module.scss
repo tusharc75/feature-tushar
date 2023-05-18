@@ -26,6 +26,9 @@
     place-items: center;
     padding-left: 20px;
     padding-right: 20px;
+    [data-mode='dark'] & {
+      background-color: #24243e;
+    }
   }
   .contentContainer {
     margin-left: auto;
@@ -38,6 +41,9 @@
     margin-right: auto;
     background-color: #fff;
     border-radius: 4px;
+    [data-mode='dark'] & {
+      background-color: #0e0e23;
+    }
   }
 
   .logo {
@@ -86,10 +92,14 @@
     font-weight: 500;
     font-size: scaleFunc(13px);
     line-height: 19px;
+    [data-mode='dark'] & {
+      color: #fff;
+    }
     & a {
       display: inline-flex;
       align-items: center;
       gap: scaleFunc(14px);
+      color: inherit;
     }
     & a:hover {
       color: var(--link);
@@ -101,11 +111,14 @@
     font-weight: 500;
     font-size: scaleFunc(13px);
     line-height: 19px;
-
+    [data-mode='dark'] & {
+      color: #fff;
+    }
     & a {
       display: inline-flex;
       align-items: center;
       gap: scaleFunc(14px);
+      color: inherit;
     }
     & a:hover {
       color: var(--link);
@@ -145,6 +158,9 @@
       max-width: 281px;
       margin-left: auto;
       margin-right: auto;
+      [data-mode='dark'] & {
+        color: #fff;
+      }
     }
     p {
       font-weight: 400;
@@ -152,6 +168,9 @@
       line-height: 192%;
       text-align: center;
       color: #545454;
+      [data-mode='dark'] & {
+        color: #b8b8b8;
+      }
     }
   }
   .submitButton {

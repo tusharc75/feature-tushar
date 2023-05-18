@@ -2,14 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import {
-  arrayToDropwdownOption,
-  CHILD_RESOURCE,
-  CustomDialogTransition,
-  getObjKeys,
-  getObjKeysWithValues,
-  yupSchema
-} from 'src/constants/helpers';
+import { arrayToDropwdownOption, CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -22,7 +15,6 @@ import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -40,10 +32,10 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, planningData?.currency);
     if (bulkEdit) {
-      let unitArray: any = []
-      materialData?.forEach(element => {
+      let unitArray: any = [];
+      materialData?.forEach((element) => {
         if (element?.[`${element.type}Detail`]?.unit) {
-          unitArray.push([...element?.[`${element.type}Detail`]?.unit])
+          unitArray.push([...element?.[`${element.type}Detail`]?.unit]);
         }
       });
       let unit: any = unitArray?.shift()?.filter(function (v) {
@@ -51,32 +43,31 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
           return a.indexOf(v) !== -1;
         });
       });
-      const unitOptions: any = arrayToDropwdownOption(unit)
+      const unitOptions: any = arrayToDropwdownOption(unit);
       data.forEach((element) => {
-        if (element.fieldName === "unit") {
+        if (element.fieldName === 'unit') {
           element.option = unitOptions;
         }
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;
-      })
-      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
+      });
+      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
       setInitialData({
         fields: data,
-        values: getObjKeys("", data),
+        values: getObjKeys('', data)
       });
-    }
-    else {
-      let unitOptions: any = []
+    } else {
+      let unitOptions: any = [];
       if (materialData?.[`${materialData.type}Detail`]?.unit) {
         unitOptions = arrayToDropwdownOption(materialData?.[`${materialData.type}Detail`]?.unit);
       }
-      data.forEach(element => {
-        if (element.fieldName === "unit") {
+      data.forEach((element) => {
+        if (element.fieldName === 'unit') {
           element.option = unitOptions;
         }
       });
-      setAllFields(JSON.parse(JSON.stringify(data)))
+      setAllFields(JSON.parse(JSON.stringify(data)));
       setInitialData({
         fields: data,
         values: getObjKeysWithValues(materialData, data)
@@ -96,20 +87,19 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
   };
 
   const handleSubmit = (values) => {
-    let returnData = []
+    let returnData = [];
     if (bulkEdit) {
       for (const x in values) {
-        if (values[x] === "" || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
-          delete values[x]
+        if (values[x] === '' || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
+          delete values[x];
         }
       }
-      materialData.forEach(element => {
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
-        returnData.push({ ...element, ...calValues })
-      })
+      materialData.forEach((element) => {
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        returnData.push({ ...element, ...calValues });
+      });
       handleUpdate(returnData);
-    }
-    else {
+    } else {
       returnData = [{ ...materialData, ...values }];
       handleUpdate(returnData, saveAndNext);
     }
@@ -135,7 +125,7 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={bulkEdit ? "Bulk Edit" : `Edit - ${materialData?.index} (${materialData?.detail || ""})`}
+                title={bulkEdit ? 'Bulk Edit' : `Edit - ${materialData?.index} (${materialData?.detail || ''})`}
                 onClose={() => {
                   onClose();
                 }}
@@ -225,7 +215,7 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
                 >
                   {'Close'}
                 </Button>
-                {bulkEdit === false && showSaveAndNext &&
+                {bulkEdit === false && showSaveAndNext && (
                   <CustomButton
                     loading={loadingEdit}
                     disabled={loadingEdit}
@@ -234,10 +224,13 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
                     type="submit"
                     onClick={() => {
                       setSaveAndNext(true);
-                      submitForm()
+                      submitForm();
                     }}
-                  > Save & Next
-                  </CustomButton>}
+                  >
+                    {' '}
+                    Save & Next
+                  </CustomButton>
+                )}
                 <CustomButton
                   loading={loadingEdit}
                   disabled={loadingEdit}
@@ -246,7 +239,7 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
                   type="submit"
                   onClick={() => {
                     setSaveAndNext(false);
-                    submitForm()
+                    submitForm();
                   }}
                 >
                   Save
@@ -256,7 +249,7 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

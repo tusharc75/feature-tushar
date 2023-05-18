@@ -13,12 +13,7 @@ import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import {
-  isObjectEmpty,
-  gridLoadingTimeout,
-  getLocalStorageArrayData,
-  removeLocalStorage
-} from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -36,7 +31,6 @@ import ManageDynamicForm from './ManageDynamicForm';
 import { useParams, useHistory } from 'react-router-dom';
 
 const DynamicForm = () => {
-
   const { route } = useParams();
 
   const resource = startCase(route?.replace(/-/g, ' '));
@@ -101,7 +95,8 @@ const DynamicForm = () => {
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
-      }).catch((error) => {
+      })
+      .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
@@ -190,13 +185,16 @@ const DynamicForm = () => {
     } else {
       ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
     }
-    axiosInstance().put(`/dynamic-form/remove`, { ids: ids },
-      {
-        headers: {
-          Resource: resource
+    axiosInstance()
+      .put(
+        `/dynamic-form/remove`,
+        { ids: ids },
+        {
+          headers: {
+            Resource: resource
+          }
         }
-      }
-    )
+      )
       .then(() => {
         removeLocalStorage(localStorageSelectedRecords);
         fetchData();
@@ -500,7 +498,7 @@ const DynamicForm = () => {
             )
           ) : null
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

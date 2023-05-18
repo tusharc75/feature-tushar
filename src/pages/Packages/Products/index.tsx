@@ -86,8 +86,9 @@ const ProductsTable = ({ packageId, packageData }) => {
   };
 
   const fetchColumns = async () => {
-
-    const { data: { data } } = await axiosInstance().put(`/field/find-field-labels`, {
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
       fields: [
         {
           resource: 'Product',
@@ -247,7 +248,7 @@ const ProductsTable = ({ packageId, packageData }) => {
         .catch((err) => {
           setRemovingProducts(false);
           setShowProductConfirmBox(false);
-          setSelectedRecords([])
+          setSelectedRecords([]);
           setToastConfig(err);
         });
     }
@@ -257,13 +258,13 @@ const ProductsTable = ({ packageId, packageData }) => {
         .then(() => {
           setRemovingProducts(false);
           setShowProductConfirmBox(false);
-          setSelectedRecords([])
+          setSelectedRecords([]);
           fetchData();
         })
         .catch((err) => {
           setRemovingProducts(false);
           setShowProductConfirmBox(false);
-          setSelectedRecords([])
+          setSelectedRecords([]);
           setToastConfig(err);
         });
     }
@@ -389,7 +390,7 @@ const ProductsTable = ({ packageId, packageData }) => {
           onSaveEdit={onSaveInlineEdit}
         />
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
@@ -414,7 +415,7 @@ const ProductsTable = ({ packageId, packageData }) => {
           message={`Are you sure you want to delete ?`}
           onClose={() => {
             setShowProductConfirmBox(false);
-            setSelectedRecords([])
+            setSelectedRecords([]);
           }}
           okBtnLoading={isRemovingProducts}
           onOk={removeProducts}

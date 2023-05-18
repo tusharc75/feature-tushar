@@ -33,9 +33,9 @@ const MaterialHandling = () => {
         if (data['Warehouse'] && data['Warehouse']?.length) {
           data['Warehouse']?.forEach((ele) => {
             if (ele?.manager && ele?.manager?.includes(user?.user?._id)) {
-              warehouses.push(ele)
+              warehouses.push(ele);
             }
-          })
+          });
         }
         setWarehouseOptions(warehouses);
       });
@@ -44,9 +44,8 @@ const MaterialHandling = () => {
   useEffect(() => {
     if (warehouseOptions && warehouseOptions?.length) {
       fetchData();
-    }
-    else {
-      setWorkOrder([])
+    } else {
+      setWorkOrder([]);
     }
   }, [selectedPlant, warehouseOptions]);
 
@@ -54,12 +53,11 @@ const MaterialHandling = () => {
     setWorkOrder(null);
     setSelectedWorkOrder(null);
     let api = `/material-handling`;
-    const filterById: any = []
+    const filterById: any = [];
     if (selectedPlant) {
-      filterById.push({ field: 'warehouse', term: selectedPlant.optionValue })
-    }
-    else {
-      filterById.push({ field: 'warehouse', term: { "$in": warehouseOptions?.map((e) => e?.optionValue) } })
+      filterById.push({ field: 'warehouse', term: selectedPlant.optionValue });
+    } else {
+      filterById.push({ field: 'warehouse', term: { $in: warehouseOptions?.map((e) => e?.optionValue) } });
     }
     api = `${api}?filterById=${JSON.stringify(filterById)}&filterType=and`;
     axiosInstance()
@@ -131,7 +129,7 @@ const MaterialHandling = () => {
                     key={index}
                     onClick={() => {
                       setSelectedWorkOrder(data);
-                      setTabValue(0)
+                      setTabValue(0);
                     }}
                     style={{
                       cursor: 'pointer',
@@ -164,24 +162,8 @@ const MaterialHandling = () => {
                       }
                     }}
                   >
-                    <Tab
-                      className={'tabLayout'}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          Requests
-                        </div>
-                      }
-                      {...a11yProps(0)}
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          Consumables
-                        </div>
-                      }
-                      {...a11yProps(1)}
-                    />
+                    <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Requests</div>} {...a11yProps(0)} />
+                    <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Consumables</div>} {...a11yProps(1)} />
                   </Tabs>
                   <TabPanel value={tabValue} index={0}>
                     <Box>
@@ -207,7 +189,7 @@ const MaterialHandling = () => {
             </Grid>
           </Grid>
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

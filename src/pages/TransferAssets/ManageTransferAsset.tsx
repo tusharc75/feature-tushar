@@ -13,7 +13,13 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CustomButton from 'src/components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, transferAsset, setFieldsInAscendingOrder, generateUniqueIdOnly, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
+import {
+  CustomDialogTransition,
+  transferAsset,
+  setFieldsInAscendingOrder,
+  generateUniqueIdOnly,
+  TRANSFER_INVENTORY_STATUS
+} from 'src/constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -22,7 +28,7 @@ import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
 import ManageAccountDialog from '../Account/ManageAccount/index';
-import { FaDiceOne } from "react-icons/fa";
+import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 
 interface Props {
@@ -42,8 +48,18 @@ const ManageTransferAsset: FC<Props> = (props) => {
   const {
     state: { selectedEntity, permissions }
   }: any = useData();
-  const { isClone = false, transferAssetId = null, onClose, onSuccess, number = '', isEditable = false, isMainInfoEditable = false,
-    referenceType = null, referenceId = null, referenceData = null } = props;
+  const {
+    isClone = false,
+    transferAssetId = null,
+    onClose,
+    onSuccess,
+    number = '',
+    isEditable = false,
+    isMainInfoEditable = false,
+    referenceType = null,
+    referenceId = null,
+    referenceData = null
+  } = props;
 
   const toastConfig = useContext(CustomToastContext);
   const initialRender = useRef(true);
@@ -56,10 +72,10 @@ const ManageTransferAsset: FC<Props> = (props) => {
   const [plantsToCategoryOptions, setPlantsToCategoryOptions] = useState([]);
   const [supplierToCategoryOptions, setSupplierToCategoryOptions] = useState([]);
   const [customerToCategoryOptions, setCustomerToCategoryOptions] = useState([]);
-  const [plantShipToOptions, setPlantShipToOptions] = useState([])
-  const [supplierShipToOptions, setSupplierShipToOptions] = useState([])
-  const [customerShipToOptions, setCustomerShipToOptions] = useState([])
-  const [cloneHeading, setCloneHeading] = useState('')
+  const [plantShipToOptions, setPlantShipToOptions] = useState([]);
+  const [supplierShipToOptions, setSupplierShipToOptions] = useState([]);
+  const [customerShipToOptions, setCustomerShipToOptions] = useState([]);
+  const [cloneHeading, setCloneHeading] = useState('');
   const [customerOpen, setCustomerOpen] = useState({ open: false, isClone: false });
   const [supplierOpen, setSupplierOpen] = useState({ open: false, isClone: false });
 
@@ -69,7 +85,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
     axiosInstance()
       .get('/field?resource=Transfer Asset')
       .then(({ data: { data } }) => {
-        data = data.filter((obj) => obj?.fieldData?.fieldName !== "rentalJob");
+        data = data.filter((obj) => obj?.fieldData?.fieldName !== 'rentalJob');
 
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -84,9 +100,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
         setPlantsToCategoryOptions(plantsToOptions);
         setSupplierToCategoryOptions(supplierToOptions);
         setCustomerToCategoryOptions(cusomerToOptions);
-        setPlantShipToOptions(plantToOptions)
-        setCustomerShipToOptions(customerShipToOptions)
-        setSupplierShipToOptions(supplierShipToOptions)
+        setPlantShipToOptions(plantToOptions);
+        setCustomerShipToOptions(customerShipToOptions);
+        setSupplierShipToOptions(supplierShipToOptions);
 
         if (transferAssetId) {
           axiosInstance()
@@ -94,10 +110,10 @@ const ManageTransferAsset: FC<Props> = (props) => {
             .then(({ data: { data } }) => {
               if (isClone) {
                 const { _id, createdBy, updatedBy, entity, transferAssetNumber, ...rest } = data;
-                let oldValues = { ...rest }
+                let oldValues = { ...rest };
                 oldValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`;
-                oldValues.status = "New"
-                setCloneHeading(transferAssetNumber)
+                oldValues.status = 'New';
+                setCloneHeading(transferAssetNumber);
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
@@ -117,29 +133,29 @@ const ManageTransferAsset: FC<Props> = (props) => {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
           setAllFields(fieldsDataForCreate);
           createValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`;
-          if (referenceType === "Rental Job") {
-            createValues["transferFromPlant"] = referenceData?.transferFromPlant;
-            createValues["transfertoPlant"] = referenceData?.transferToPlant;
+          if (referenceType === 'Rental Job') {
+            createValues['transferFromPlant'] = referenceData?.transferFromPlant;
+            createValues['transfertoPlant'] = referenceData?.transferToPlant;
             fieldsDataForCreate?.forEach((e) => {
-              if (e.fieldName === "transfertoPlant") {
-                const plantAddress = e?.option?.filter((e) => e.optionValue === referenceData?.transferToPlant)
+              if (e.fieldName === 'transfertoPlant') {
+                const plantAddress = e?.option?.filter((e) => e.optionValue === referenceData?.transferToPlant);
                 if (plantAddress.length) {
-                  createValues["plantShipTo"] = plantAddress[0].address
+                  createValues['plantShipTo'] = plantAddress[0].address;
                 }
               }
-            })
-            createValues["rentalJob"] = referenceId;
-            if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
-              createValues["wellName"] = referenceData?.wellName
+            });
+            createValues['rentalJob'] = referenceId;
+            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellName')) {
+              createValues['wellName'] = referenceData?.wellName;
             }
-            if (fieldsDataForCreate.some((e) => e.fieldName === "wellNumber") && referenceData?.wellNumber) {
-              createValues["wellNumber"] = referenceData?.wellNumber
+            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellNumber') && referenceData?.wellNumber) {
+              createValues['wellNumber'] = referenceData?.wellNumber;
             }
-            if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
-              createValues["afeNumber"] = referenceData?.afeNumber
+            if (fieldsDataForCreate.some((e) => e.fieldName === 'afeNumber')) {
+              createValues['afeNumber'] = referenceData?.afeNumber;
             }
-            if (fieldsDataForCreate.some((e) => e.fieldName === "processor")) {
-              createValues["processor"] = referenceData?.processor
+            if (fieldsDataForCreate.some((e) => e.fieldName === 'processor')) {
+              createValues['processor'] = referenceData?.processor;
             }
           }
           setInitialData({
@@ -224,13 +240,13 @@ const ManageTransferAsset: FC<Props> = (props) => {
 
   const validate = (values) => {
     const errors = {};
-    if (values?.transferType === "Internal") {
+    if (values?.transferType === 'Internal') {
       if (values?.transferFromPlant === values?.transfertoPlant) {
         errors['transfertoPlant'] = 'Transfer from and to plant can not be same';
       }
     }
     return errors;
-  }
+  };
 
   return (
     <Dialog
@@ -286,9 +302,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
                   {initialData.fields.length > 0 &&
                     initialData.fields.map((form, i) => (
                       <div key={i}>
-                        <div className={"detail-box-content"}>
-                          <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-                          <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                        <div className={'detail-box-content'}>
+                          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
                         </div>
                         <Box marginY={2}>
                           <Grid spacing={3} container alignItems="center">
@@ -337,7 +353,13 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                           name={field.fieldName}
                                           fieldData={field}
                                           type={field.type}
-                                          options={plantShipToOptions.filter(plant => plant?.optionValue === plantsToCategoryOptions.find(p => p.optionValue === values?.transfertoPlant)?.address) ?? []}
+                                          options={
+                                            plantShipToOptions.filter(
+                                              (plant) =>
+                                                plant?.optionValue ===
+                                                plantsToCategoryOptions.find((p) => p.optionValue === values?.transfertoPlant)?.address
+                                            ) ?? []
+                                          }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
@@ -357,7 +379,10 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     {field.fieldName === 'transfertoSupplier' && (
                                       <Grid key={index2} item xs={12} sm={6} md={6}>
                                         <Grid container spacing={1} alignItems="center">
-                                          <Grid item xs={isMainInfoEditable ? 12 : !isMainInfoEditable && permissions?.supplierAccount?.isCreate ? 11 : 12}  >
+                                          <Grid
+                                            item
+                                            xs={isMainInfoEditable ? 12 : !isMainInfoEditable && permissions?.supplierAccount?.isCreate ? 11 : 12}
+                                          >
                                             <FormTypes
                                               isNew={Boolean(transferAssetId)}
                                               {...field}
@@ -373,9 +398,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                               setFieldValue={(name, value) => {
                                                 setFieldValue(name, value);
                                                 const address = field.option?.find((_d: any) => _d?.optionValue === value)?.shippingAddress ?? [];
-                                                const options = supplierShipToOptions.filter(option => address.includes(option.optionValue))
-                                                setSupplierShipToOptions(options)
-                                                setFieldValue('supplierShipTo', "");
+                                                const options = supplierShipToOptions.filter((option) => address.includes(option.optionValue));
+                                                setSupplierShipToOptions(options);
+                                                setFieldValue('supplierShipTo', '');
                                               }}
                                               required={values?.transferType.includes('Supplier')}
                                               fullWidth
@@ -446,8 +471,8 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                               setFieldValue={(name, value) => {
                                                 setFieldValue(name, value);
                                                 const address = field.option?.find((_d: any) => _d?.optionValue === value)?.shippingAddress ?? [];
-                                                const options = customerShipToOptions.filter(option => address.includes(option.optionValue))
-                                                setCustomerShipToOptions(options)
+                                                const options = customerShipToOptions.filter((option) => address.includes(option.optionValue));
+                                                setCustomerShipToOptions(options);
                                                 setFieldValue('customerShipTo', '');
                                               }}
                                               required={values?.transferType.includes('Customer')}
@@ -561,7 +586,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   <FormTypes
                                     isNew={Boolean(transferAssetId)}
                                     {...field}
-                                    disabled={(Boolean(transferAssetId) && field.disableOnEdit)}
+                                    disabled={Boolean(transferAssetId) && field.disableOnEdit}
                                     values={values}
                                     errors={errors}
                                     touched={touched}
@@ -685,7 +710,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

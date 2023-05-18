@@ -13,7 +13,14 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { wellMaster, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, sidebarResource, removeLocalStorage } from '../../constants/helpers';
+import {
+  wellMaster,
+  isObjectEmpty,
+  gridLoadingTimeout,
+  getLocalStorageArrayData,
+  sidebarResource,
+  removeLocalStorage
+} from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -416,17 +423,17 @@ const WellMaster = () => {
                     >
                       Delete
                     </MenuItem>
-                    {permissions?.wellMaster?.isUpdate &&
+                    {permissions?.wellMaster?.isUpdate && (
                       <MergeRecords
                         selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                         resource={sidebarResource?.wellMaster}
                         closeActions={closeActions}
                         onSuccess={() => {
                           localStorage.removeItem(localStorageSelectedRecords);
-                          fetchData()
+                          fetchData();
                         }}
                       />
-                    }
+                    )}
                   </Menu>
                 </Grid>
               </Box>
@@ -489,7 +496,7 @@ const WellMaster = () => {
             )
           ) : null
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

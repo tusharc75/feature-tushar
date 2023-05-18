@@ -22,7 +22,6 @@ import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 
 const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, allowedToEdit }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -43,11 +42,11 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
 
   useEffect(() => {
     fetchFields();
-    fetchData()
+    fetchData();
   }, [quotationData, allowedToEdit]);
 
   const fetchFields = async () => {
-    setColumns(null)
+    setColumns(null);
     var data = [];
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.quotationCost}`);
     data = response?.data?.data;
@@ -140,8 +139,8 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
         setShowCostDialog(false);
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
       })
       .catch((error) => {
@@ -162,8 +161,8 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
         setShowCostDialog(false);
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
       })
       .catch((error) => {
@@ -176,11 +175,11 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
       .post(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/delete`, { ids: deleteRecords })
       .then(({ data }) => {
         fetchData();
-        setShowDeleteConfirmBox(false)
+        setShowDeleteConfirmBox(false);
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
       })
       .catch((error) => {
@@ -278,7 +277,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
           />
         </Box>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

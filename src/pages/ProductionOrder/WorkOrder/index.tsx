@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment } from 'react';
-import { Box, IconButton} from '@material-ui/core';
+import { Box, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -61,7 +61,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-              <p className="text-truncate">{row.original?.detail}</p>
+            <p className="text-truncate">{row.original?.detail}</p>
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -83,7 +83,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         accessor: 'workOrder',
         Header: 'Work Order',
         Cell: ({ row }) =>
-      row.original.workOrder  ? (
+          row.original.workOrder ? (
             <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original.workOrder?.optionValue}`} target="_blank">
               {row.original.workOrder?.optionLabel}
             </a>
@@ -119,14 +119,13 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       parent.qtyDisplay = parent.qty;
       parent.workOrder = parent?.workOrder;
       parent.subRows = generateNestedData(data.material, parent);
-      
     });
 
-      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
-        setNextStep(false);
-      } else {
-        setNextStep(true);
-      }
+    if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
+      setNextStep(false);
+    } else {
+      setNextStep(true);
+    }
     setRowsData(rows);
   };
 
@@ -154,7 +153,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={() => { }}
+              onSelect={() => {}}
               childrenProperty="subRows"
               uniqueKey="_id"
               renderedFrom={renderedFrom}
@@ -165,7 +164,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           </Box>
         </>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

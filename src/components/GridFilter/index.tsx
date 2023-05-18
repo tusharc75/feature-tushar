@@ -50,7 +50,17 @@ function GridFilter({
     setSelectedUserFilter(selectedFilter);
   }, []);
 
-  const FILTER_NOT_APPLIED = ['fileUpload', 'multiFileUpload', 'imageUpload', 'multiImageUpload', 'richTextEditor', 'signature', 'colorPicker', 'number', 'decimal'];
+  const FILTER_NOT_APPLIED = [
+    'fileUpload',
+    'multiFileUpload',
+    'imageUpload',
+    'multiImageUpload',
+    'richTextEditor',
+    'signature',
+    'colorPicker',
+    'number',
+    'decimal'
+  ];
 
   const fetchColumns = () => {
     axiosInstance()
@@ -398,7 +408,7 @@ function GridFilter({
                   );
                 })
               ) : (
-                <Box p={2} height={500} bgcolor="white">
+                <Box p={2} height={500}>
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
               )}

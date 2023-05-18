@@ -51,7 +51,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
         e.isColumnEditable = false;
       });
     }
-    setAllFields(fields)
+    setAllFields(fields);
     const newColumns = generateCustomTableColumns(fields, rentalManagementData?.currency, renderedFrom);
     let column: any = [
       {
@@ -63,7 +63,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
         Footer: () => {
           return <>Total</>;
         }
-      },
+      }
     ];
     column = [...column, ...newColumns];
     const isPriceRequired = fields.filter((el) => el.fieldName === 'price' && el.required).length > 0;
@@ -89,21 +89,25 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                   setSelectedCostData(row?.original);
                 }}
               >
-                <EditIcon color="primary" fontSize='small' />
+                <EditIcon color="primary" fontSize="small" />
               </IconButton>
             </HtmlTooltip>
             {permissions?.rentalManagement?.isUpdate && allowedToEdit ? (
-              <HtmlTooltip title="Delete" >
-                <IconButton size="small" aria-label="Delete" onClick={() => {
-                  setDeleteData([row?.original?._id]);
-                }}>
-                  <DeleteIcon color="error" fontSize='small' />
+              <HtmlTooltip title="Delete">
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setDeleteData([row?.original?._id]);
+                  }}
+                >
+                  <DeleteIcon color="error" fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
             ) : (
               <HtmlTooltip className="cursor-stop" title={`You do not have permission to delete rentalManagement`}>
                 <IconButton size="small" aria-label="Delete">
-                  <DeleteIcon fontSize='small' />
+                  <DeleteIcon fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -191,7 +195,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
-    handleUpdateCost(rows)
+    handleUpdateCost(rows);
   };
 
   return (
@@ -238,7 +242,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                   disabled={isDeleting}
                   onClick={() => {
                     setDeleteData(selectedProducts?.map(({ _id }: any) => _id));
-                    handleClose()
+                    handleClose();
                   }}
                 >
                   Delete
@@ -266,12 +270,11 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
             hideExpander={true}
           />
         </Box>
-      )
-        : (
-          <Box p={2} height={500} bgcolor="white">
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
       {showCostDialog && (
         <AdditionalCostDialog
           onClose={() => {

@@ -5,13 +5,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../Helpers/SearchBox';
-import {
-  gridLoadingTimeout,
-  isObjectEmpty,
-  prepareDataForGrid,
-  getLocalStorageArrayData,
-  serializedAsset,
-} from 'src/constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData, serializedAsset } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
@@ -149,7 +143,7 @@ const AssignSerializedAssetDialog = ({
     }
     if (reference === 'planning') {
       deepFilter = `${deepFilter}&planning=true`;
-      const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate }
+      const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
       deepFilter = `${deepFilter}&date=${JSON.stringify(dateFilter)}`;
     }
     if (showFilteredRecordsOnly) {
@@ -198,7 +192,7 @@ const AssignSerializedAssetDialog = ({
     });
     tempProducts?.forEach((e) => {
       e.qty = e?.qty - [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((obj) => obj.productId === e.id).length;
-    })
+    });
     setProducts(tempProducts);
   }, [selectedRecords]);
 
@@ -217,29 +211,32 @@ const AssignSerializedAssetDialog = ({
               <Box style={{ display: 'inline' }}>
                 {products.length > 0
                   ? products?.map((d) => (
-                    <Box
-                      m={0.5}
-                      p={1}
-                      border={1}
-                      className="cursor-pointer"
-                      borderColor="grey.300"
-                      onClick={() => {
-                        if (selectedProduct === d.id) {
-                          setSelectedProduct(null);
-                        } else {
-                          setSelectedProduct(d.id);
-                        }
-                      }}
-                      style={{ display: 'inline-block' }}
-                      bgcolor={d.id === selectedProduct && 'primary.main'}
-                      color={d.id === selectedProduct && 'white'}
-                    >
-                      {d?.qty < 0 ?
-                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                        : (d?.qty === 0 ? <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span> :
-                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>)}
-                    </Box>
-                  ))
+                      <Box
+                        m={0.5}
+                        p={1}
+                        border={1}
+                        className="cursor-pointer"
+                        borderColor="grey.300"
+                        onClick={() => {
+                          if (selectedProduct === d.id) {
+                            setSelectedProduct(null);
+                          } else {
+                            setSelectedProduct(d.id);
+                          }
+                        }}
+                        style={{ display: 'inline-block' }}
+                        bgcolor={d.id === selectedProduct && 'primary.main'}
+                        color={d.id === selectedProduct && 'white'}
+                      >
+                        {d?.qty < 0 ? (
+                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                        ) : d?.qty === 0 ? (
+                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                        ) : (
+                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                        )}
+                      </Box>
+                    ))
                   : null}
               </Box>
             </Grid>
@@ -247,7 +244,12 @@ const AssignSerializedAssetDialog = ({
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
-                  disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0 || products?.some(d => d?.qty < 0)}
+                  disabled={
+                    isAssigning ||
+                    disableSaveButton ||
+                    [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0 ||
+                    products?.some((d) => d?.qty < 0)
+                  }
                   onClick={() => {
                     if (selectedProducts?.length) {
                       const data = [];
@@ -257,15 +259,14 @@ const AssignSerializedAssetDialog = ({
                         while (qty) {
                           const result = selectedAssets.filter((f) => f.productId === ele.product && !f.isCounted);
                           if (result.length) {
-                            data.push({ ...ele, asset: result[0]._id })
+                            data.push({ ...ele, asset: result[0]._id });
                             result[0].isCounted = true;
                           }
                           qty--;
                         }
-                      })
+                      });
                       handleSucess(data);
-                    }
-                    else {
+                    } else {
                       handleSucess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                     }
                   }}
@@ -297,18 +298,18 @@ const AssignSerializedAssetDialog = ({
             allowAction={false}
             loading={loading}
             allowSelection={true}
-            onCellValueChanged={() => { }}
+            onCellValueChanged={() => {}}
             showOnlyShowFilteredRecordSwitch={true}
             refreshGrid={fetchData}
             renderedFrom={renderedFrom}
           />
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
       </CustomDialogContent>
-    </Dialog >
+    </Dialog>
   );
 };
 

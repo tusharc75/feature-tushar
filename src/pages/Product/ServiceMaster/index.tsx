@@ -119,7 +119,13 @@ const ServiceMaster = (props: Props) => {
         minWidth: 200,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original?.description ? <p className="text-truncate" title={row.original?.description}>{row.original?.description}</p> : <NoDataCell />}
+            {row.original?.description ? (
+              <p className="text-truncate" title={row.original?.description}>
+                {row.original?.description}
+              </p>
+            ) : (
+              <NoDataCell />
+            )}
           </div>
         )
       },
@@ -129,7 +135,7 @@ const ServiceMaster = (props: Props) => {
         width: 150,
         minWidth: 150,
         editable: permissions?.product?.isUpdate ? true : false,
-        Cell: ({ row }) => row.original?.qty ? <p>{row.original?.qty}</p> : <NoDataCell />
+        Cell: ({ row }) => (row.original?.qty ? <p>{row.original?.qty}</p> : <NoDataCell />)
       },
       {
         accessor: 'stepName',
@@ -151,7 +157,7 @@ const ServiceMaster = (props: Props) => {
         accessor: 'preWork',
         Header: 'Pre Work',
         width: 70,
-        Cell: ({ row }) => row.original?.preWork ? <p className="text-truncate">{row.original?.preWork}</p> : <NoDataCell />
+        Cell: ({ row }) => (row.original?.preWork ? <p className="text-truncate">{row.original?.preWork}</p> : <NoDataCell />)
       });
     }
     if (serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'serviceType')) {
@@ -424,8 +430,8 @@ const ServiceMaster = (props: Props) => {
   const onSaveInlineEdit = async (inputField, updatedData) => {
     if (updatedData.type === 'Product') {
       const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-      if (rowData && parseInt(inputField["qty"])) {
-        handleSaveData({ _id: rowData._id, qty: parseInt(inputField["qty"]) });
+      if (rowData && parseInt(inputField['qty'])) {
+        handleSaveData({ _id: rowData._id, qty: parseInt(inputField['qty']) });
       }
     }
   };
@@ -529,7 +535,7 @@ const ServiceMaster = (props: Props) => {
           isClientSideGrid={true}
         />
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

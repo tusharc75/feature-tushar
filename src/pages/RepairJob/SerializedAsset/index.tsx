@@ -202,12 +202,11 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     data['isPickupFromDisable'] = true;
 
     data['wellName'] = repairJobData?.wellName?.optionValue;
-    
+
     if (repairJobData?.wellNumber) {
       if (repairJobData?.wellNumber?.optionValue) {
         data['wellNumber'] = repairJobData?.wellNumber?.optionValue;
-      }
-      else {
+      } else {
         data['wellNumber'] = repairJobData?.wellNumber?.map((e) => e?.optionValue);
       }
     }
@@ -484,7 +483,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             />
           )
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
