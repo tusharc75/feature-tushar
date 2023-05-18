@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Grid, ThemeProvider, CssBaseline } from '@material-ui/core';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import ColorModeProvider, { theme } from './constants/AppConfig';
+import ColorModeProvider from './constants/AppConfig';
 import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToastContext';
 import { CustomNotificationCountContext } from './StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import axiosInstance from './axios/axiosInstance';
