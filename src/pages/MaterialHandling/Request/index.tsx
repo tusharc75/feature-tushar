@@ -64,9 +64,12 @@ const Request = ({ workOrder }) => {
           e.productName = e.product?.optionLabel;
           e.productDescription = e.product?.productDescription;
           e.productNumber = e.product?.productNumber;
-          e.requestBy = e.requestBy?.optionLabel;
-          e.responseBy = e.responseBy?.optionLabel;
-          e.storageLocation = e.storageLocation?.optionLabel;
+          e.storageLocationId = e?.storageLocation?.optionValue;
+          e.storageLocation = e?.storageLocation?.optionLabel;
+          e.requestById = e?.requestBy?.optionValue;
+          e.requestBy = e?.requestBy?.optionLabel;
+          e.responseById = e?.responseBy?.optionValue;
+          e.responseBy = e?.responseBy?.optionLabel;
         });
         setRowsData(data);
       })
@@ -95,7 +98,6 @@ const Request = ({ workOrder }) => {
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
           width: 200,
-          hide: false,
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.product?.optionValue}`} target="_blank">
@@ -122,7 +124,6 @@ const Request = ({ workOrder }) => {
         accessor: 'qty',
         Header: 'Qty',
         width: 200,
-        hide: false,
         Cell: ({ row }) => {
           return row.original['qty'] ? <p className="text-truncate">{row.original['qty']}</p> : <NoDataCell />;
         }
@@ -133,9 +134,11 @@ const Request = ({ workOrder }) => {
             accessor: 'storageLocation',
             Header: 'Storage Location',
             width: 200,
-            hide: false,
             Cell: ({ row }) => {
-              return row.original['storageLocation'] ? <p className="text-truncate">{row.original['storageLocation']}</p> : <NoDataCell />;
+              return row?.original['storageLocation'] ?
+                <a className="link text-truncate" href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`} target="_blank">
+                  {row?.original['storageLocation']}
+                </a> : <NoDataCell />;
             }
           }
         ]
@@ -145,7 +148,10 @@ const Request = ({ workOrder }) => {
         Header: 'Request By',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['requestBy'] ? <p className="text-truncate">{row.original['requestBy']}</p> : <NoDataCell />;
+          return row?.original['requestBy'] ?
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['requestById']}`} target="_blank">
+              {row?.original['requestBy']}
+            </a> : <NoDataCell />;
         }
       },
       {
@@ -165,7 +171,10 @@ const Request = ({ workOrder }) => {
         Header: 'Response By ',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['responseBy'] ? <p className="text-truncate">{row.original['responseBy']}</p> : <NoDataCell />;
+          return row?.original['responseBy'] ?
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['responseById']}`} target="_blank">
+              {row?.original['responseBy']}
+            </a> : <NoDataCell />;
         }
       },
       {
@@ -244,12 +253,6 @@ const Request = ({ workOrder }) => {
     setAnchorEl(null);
   };
 
-  const disableBulkProcessReject = () => {
-    return selectedRecords?.some((item) => {
-      return item?.status === 'Processed' || item?.status === 'Rejected';
-    });
-  }
-
 
   return (
     <>
@@ -258,7 +261,9 @@ const Request = ({ workOrder }) => {
           <Box />
           <Box>
             <Button
-              disabled={selectedRecords?.length > 0 ? false : true}
+              disabled={selectedRecords?.length > 0 &&
+                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                ? false : true}
               variant={isMobile ? 'text' : 'outlined'}
               color="default"
               size="small"
@@ -281,56 +286,54 @@ const Request = ({ workOrder }) => {
               onClose={closeActions}
             >
               <MenuItem
-              disabled={disableBulkProcessReject()}
-              onClick={() => {
-                let records = selectedRecords?.map((item) => {
-                  return {
-                    _id: item?._id,
-                    uniqueId: item?.uniqueId,
-                    qty: item?.qty
-                  }
-                })
-                handleUpdateStatus(
-                  MATERIAL_REQUEST_STATUS.processed,
-                  records,
-                  ''
-                );
-                closeActions()
-              }}
+                onClick={() => {
+                  let records = selectedRecords?.map((item) => {
+                    return {
+                      _id: item?._id,
+                      uniqueId: item?.uniqueId,
+                      qty: item?.qty
+                    }
+                  })
+                  handleUpdateStatus(
+                    MATERIAL_REQUEST_STATUS.processed,
+                    records,
+                    ''
+                  );
+                  closeActions()
+                }}
               >Process</MenuItem>
               <MenuItem
-              disabled={disableBulkProcessReject()}
-              onClick={() => {
-                setCommentDialog({ open: true, data: null });
-                closeActions()
-              }}
+                onClick={() => {
+                  setCommentDialog({ open: true, data: null });
+                  closeActions()
+                }}
               >Reject</MenuItem>
             </Menu>
           </Box>
         </Box>
       </Box>
       <Box pt={2}>
-      {rowsData && columns ? (
-        <Box zIndex={5} width={'100%'} height={'calc(100vh - 345px)'}>
-          <CustomReactTable
-            height={'calc(100vh - 345px)'}
-            columns={columns}
-            data={rowsData}
-            onSelect={setSelectedRecords}
-            childrenProperty="subRows"
-            uniqueKey="_id"
-            hideSelection={false}
-            hideAction={false}
-            hideExpander={true}
-            renderedFrom={camelCase(routes.materialHandling.title)}
-            isClientSideGrid={true}
-          />
-        </Box>
-      ) : (
-        <Box height={500} bgcolor="white">
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+        {rowsData && columns ? (
+          <Box zIndex={5} width={'100%'} height={'calc(100vh - 345px)'}>
+            <CustomReactTable
+              height={'calc(100vh - 345px)'}
+              columns={columns}
+              data={rowsData}
+              onSelect={setSelectedRecords}
+              childrenProperty="subRows"
+              uniqueKey="_id"
+              hideSelection={false}
+              hideAction={false}
+              hideExpander={true}
+              renderedFrom={camelCase(routes.materialHandling.title)}
+              isClientSideGrid={true}
+            />
+          </Box>
+        ) : (
+          <Box height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </Box>
       {commentDialog.open && (
         <CommentDialog
@@ -338,7 +341,7 @@ const Request = ({ workOrder }) => {
           loading={loading}
           onClose={() => setCommentDialog({ open: false, data: null })}
           onSuccess={(comment) => {
-            if(selectedRecords?.length && !commentDialog?.data ) {
+            if (selectedRecords?.length && !commentDialog?.data) {
               let records = selectedRecords?.map((item) => {
                 return {
                   _id: item?._id,
@@ -358,7 +361,7 @@ const Request = ({ workOrder }) => {
                 comment || ''
               );
             }
-           
+
           }}
         />
       )}

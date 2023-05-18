@@ -14,7 +14,8 @@ import routes from 'src/components/Helpers/Routes';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 
 function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productName }) {
-  const [fullScreen, setFullScreen] = useState(false);
+
+  const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [rowsData, setRowsData] = useState([]);
@@ -46,7 +47,6 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
           width: 200,
-          hide: false,
           Cell: ({ row }) => {
             return row?.original[e?.fieldName] ? (
               <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.product?.optionValue}`} target="_blank">
@@ -73,7 +73,6 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
         accessor: 'qty',
         Header: 'Qty',
         width: 200,
-        hide: false,
         Cell: ({ row }) => {
           return row?.original['qty'] ? <p className="text-truncate">{row?.original['qty']}</p> : <NoDataCell />;
         }
@@ -84,9 +83,11 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
             accessor: 'storageLocation',
             Header: 'Storage Location',
             width: 200,
-            hide: false,
             Cell: ({ row }) => {
-              return row?.original['storageLocation'] ? <p className="text-truncate">{row?.original['storageLocation']}</p> : <NoDataCell />;
+              return row?.original['storageLocation'] ?
+                <a className="link text-truncate" href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`} target="_blank">
+                  {row?.original['storageLocation']}
+                </a> : <NoDataCell />;
             }
           }
         ]
@@ -97,8 +98,8 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
         width: 200,
         Cell: ({ row }) => {
           return row?.original['requestBy'] ?
-            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['requestBy']?.optionValue}`} target="_blank">
-              {row?.original['requestBy']?.optionLabel}
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['requestById']}`} target="_blank">
+              {row?.original['requestBy']}
             </a> : <NoDataCell />;
         }
       },
@@ -120,8 +121,8 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
         width: 200,
         Cell: ({ row }) => {
           return row?.original['responseBy'] ?
-            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['responseBy']?.optionValue}`} target="_blank">
-              {row?.original['responseBy']?.optionLabel}
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['responseById']}`} target="_blank">
+              {row?.original['responseBy']}
             </a> : <NoDataCell />;
         }
       },
@@ -170,7 +171,12 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
           e.productName = e.product?.optionLabel;
           e.productDescription = e.product?.productDescription;
           e.productNumber = e.product?.productNumber;
-          e.storageLocation = e.storageLocation?.optionLabel;
+          e.storageLocationId = e?.storageLocation?.optionValue;
+          e.storageLocation = e?.storageLocation?.optionLabel;
+          e.requestById = e?.requestBy?.optionValue;
+          e.requestBy = e?.requestBy?.optionLabel;
+          e.responseById = e?.responseBy?.optionValue;
+          e.responseBy = e?.responseBy?.optionLabel;
         });
         setRowsData(filteredData);
       })
@@ -192,7 +198,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
       }}
     >
       <CustomDialogHeader
-        title={`Logs (${productName})`}
+        title={`Logs - ${productName}`}
         onClose={onClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
