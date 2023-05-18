@@ -114,8 +114,6 @@ const CustomGridFilterHeader = (props) => {
           <RefreshButton isOffline={isOffline} refreshGrid={refreshGrid} />
         </div>
       </div>
-
-      {/* ALL MODALS */}
       {isFilterOpen && (
         <GridFilter
           resource={resource}
@@ -123,7 +121,6 @@ const CustomGridFilterHeader = (props) => {
           handleClose={handleFilterClose}
           setSelectedFilter={setSelectedFilter}
           selectedFilter={selectedFilter}
-          // setChipData={setChipData}
           currentFomValue={currentFomValue}
           setCurrentFomValue={setCurrentFomValue}
         />
@@ -152,7 +149,6 @@ const DisplyaFilters = (props) => {
     }
   }, [chipData]);
 
-  // currentGridApi.addEventListener
   const chipDataSetter = (currentGridApi, filterModel) => {
     if (filterModel) {
       const keys = Object.keys(filterModel);
@@ -165,14 +161,19 @@ const DisplyaFilters = (props) => {
             element.filter.from && element.filter.to
               ? `${element.filter.from ? element.filter.from : null} - ${element.filter.to ? element.filter.to : null}`
               : element.filter.from || element.filter.to
-              ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
-              : null;
+                ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
+                : null;
           const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: dateValue, name: keys[i] };
           filterData.push(data);
-          continue;
         }
-        const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: element.filter, name: keys[i] };
-        filterData.push(data);
+        else if (element.operator && element.condition1) {
+          const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: element?.condition1?.filter?.map((e) => e?.optionLabel)?.toString(), name: keys[i] };
+          filterData.push(data);
+        }
+        else {
+          const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: element.filter, name: keys[i] };
+          filterData.push(data);
+        }
       }
       setChipData(filterData);
     }
