@@ -19,7 +19,6 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 
 const CreateProductCategory = (props) => {
-  
   const toastConfig = useContext(CustomToastContext);
   const { productCategoryId, onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
   const [loading, setLoading] = useState(false);
@@ -27,7 +26,7 @@ const CreateProductCategory = (props) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [saveClick, setSaveClick] = useState(false);
-  const [cloneHeading, setCloneHeading] = useState('')
+  const [cloneHeading, setCloneHeading] = useState('');
 
   useEffect(() => {
     axiosInstance()
@@ -45,7 +44,7 @@ const CreateProductCategory = (props) => {
                 (data) => data.optionValue !== productCategoryId
               );
               const { name, ...rest } = data;
-              setCloneHeading(name)
+              setCloneHeading(name);
               if (isClone) {
                 setInitialData({
                   fields: fieldsDataForCreate,
@@ -137,10 +136,10 @@ const CreateProductCategory = (props) => {
                   isClone
                     ? `Clone - ${cloneHeading}`
                     : productCategoryId
-                      ? !isUpdateDisabled
-                        ? 'Update ' + routes.productCategory.title
-                        : values['name']
-                      : 'Create ' + routes.productCategory.title
+                    ? !isUpdateDisabled
+                      ? 'Update ' + routes.productCategory.title
+                      : values['name']
+                    : 'Create ' + routes.productCategory.title
                 }
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();
@@ -203,7 +202,7 @@ const CreateProductCategory = (props) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

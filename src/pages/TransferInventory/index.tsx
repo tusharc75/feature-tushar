@@ -39,14 +39,14 @@ const TransferInventory = () => {
   const TransferInventoryType = [
     {
       key: `All ${routes.transferInventory.title}`,
-      value: 1,
+      value: 1
     },
     {
       key: `My ${routes.transferInventory.title}`,
-      value: 2,
-    },
+      value: 2
+    }
   ];
-  const renderedFrom = camelCase(routes?.transferInventory.title)
+  const renderedFrom = camelCase(routes?.transferInventory.title);
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferInventoryDialog, setShowManageTransferInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -120,10 +120,14 @@ const TransferInventory = () => {
       .then(({ data }) => {
         let rows = data.data?.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject['canDelete'] = (permissions?.transferInventory?.isDelete && u?.status === TRANSFER_INVENTORY_STATUS.new && u?.products?.length === 0)
-            && [...(u.collaborator || []), u.owner].some((d) => d?.optionValue === user?.user?._id);
+          finalObject['canDelete'] =
+            permissions?.transferInventory?.isDelete &&
+            u?.status === TRANSFER_INVENTORY_STATUS.new &&
+            u?.products?.length === 0 &&
+            [...(u.collaborator || []), u.owner].some((d) => d?.optionValue === user?.user?._id);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.transferInventory?.isUpdate && [...(u.collaborator || []), u.owner].some((d) => d?.optionValue === user?.user?._id);
+          finalObject['allowedToEdit'] =
+            permissions?.transferInventory?.isUpdate && [...(u.collaborator || []), u.owner].some((d) => d?.optionValue === user?.user?._id);
           return finalObject;
         });
         data.data = data.data?.map((u, i) => ({
@@ -141,7 +145,6 @@ const TransferInventory = () => {
   };
 
   const getQueryString = (isExport = false) => {
-
     let deepFilter = `?page=${page}&limit=${limit}`;
     if (selectedType === 2) {
       deepFilter = deepFilter + `&myRecords=1`;
@@ -149,7 +152,7 @@ const TransferInventory = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    
+
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
@@ -170,7 +173,7 @@ const TransferInventory = () => {
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -211,14 +214,13 @@ const TransferInventory = () => {
 
   const handleTransferInventoryTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`)
-  }
+    history.push(`?type=${filterValues}`);
+  };
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
       setFilter(newFilter);
       handleTransferInventoryTypeSel(TransferInventoryType.find((d) => d.key === newFilter).value);
-
     }
   };
 
@@ -237,7 +239,7 @@ const TransferInventory = () => {
           </IconButton>
         </HtmlTooltip>
       )}
-      {(params?.data?.canDelete) && (
+      {params?.data?.canDelete && (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
@@ -375,11 +377,17 @@ const TransferInventory = () => {
                     filters={filters}
                   />
                 </div>
-              ) :
+              ) : (
                 <HideWhenOffline>
                   <div className={`align-items-center gap-1 layout-for-mobile `}>
                     {TransferInventoryType && (
-                      <ToggleButtonGroup size="small" className="ml-2" value={TransferInventoryType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                      <ToggleButtonGroup
+                        size="small"
+                        className="ml-2"
+                        value={TransferInventoryType[selectedType - 1].key}
+                        exclusive
+                        onChange={handleFilter}
+                      >
                         {TransferInventoryType.map((k, index) => {
                           return (
                             <ToggleButton value={k.key} key={index}>
@@ -391,7 +399,7 @@ const TransferInventory = () => {
                     )}
                   </div>
                 </HideWhenOffline>
-              }
+              )}
             </Grid>
             <Grid xs={12} sm={12} md={6} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -508,7 +516,7 @@ const TransferInventory = () => {
             )
           ) : null
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

@@ -497,8 +497,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             field.fieldName === 'pricingMethod' && priceConditionList && values['pricingCondition']
                                               ? priceMethodList
                                               : field.fieldName === 'pricingCondition' && values['pricingMethod']
-                                                ? priceConditionList
-                                                : field.option
+                                              ? priceConditionList
+                                              : field.option
                                           }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
@@ -692,7 +692,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

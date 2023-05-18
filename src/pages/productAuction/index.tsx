@@ -15,7 +15,14 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, productAuction, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import {
+  isObjectEmpty,
+  gridLoadingTimeout,
+  getLocalStorageArrayData,
+  productAuction,
+  removeLocalStorage,
+  sidebarResource
+} from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -33,7 +40,6 @@ import { camelCase } from 'lodash';
 import ManageProductAuction from './ManageProductAuction';
 
 const ProductAuction = () => {
-
   let renderedFrom = camelCase(routes.productAuction?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -49,7 +55,8 @@ const ProductAuction = () => {
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
   const [isOpenDialog, setisOpenDialog] = useState(false);
 
@@ -175,7 +182,7 @@ const ProductAuction = () => {
     axiosInstance()
       .put(`${productAuction.api}/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords)
+        removeLocalStorage(localStorageSelectedRecords);
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -458,7 +465,7 @@ const ProductAuction = () => {
             )
           ) : null
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

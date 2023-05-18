@@ -239,8 +239,8 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
               <CustomDialogHeader
                 title={addressData ? 'Edit Address' : 'Add Address'}
                 onClose={() => {
-                  if (isEqual(initialData.values, values)) onClose()
-                  else setShowConfirmDialog(true)
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -282,23 +282,23 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
                                       onChange={
                                         field.fieldName === 'fullAddress'
                                           ? (_, val) => {
-                                            if (typeof val !== 'object') return;
-                                            getFullAddress(val);
-                                            if (!val?.place_id) {
-                                              setAddressDetail(null);
+                                              if (typeof val !== 'object') return;
+                                              getFullAddress(val);
+                                              if (!val?.place_id) {
+                                                setAddressDetail(null);
+                                              }
                                             }
-                                          }
                                           : (e: React.ChangeEvent<HTMLInputElement>) => {
-                                            const { name, value } = e.target;
+                                              const { name, value } = e.target;
 
-                                            if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
+                                              if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
 
-                                            setAddressDetail((prevState: any) => ({
-                                              ...prevState,
-                                              [name]: value
-                                            }));
-                                            setLatLngChangedManually(true);
-                                          }
+                                              setAddressDetail((prevState: any) => ({
+                                                ...prevState,
+                                                [name]: value
+                                              }));
+                                              setLatLngChangedManually(true);
+                                            }
                                       }
                                     />
                                   }
@@ -394,8 +394,8 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
                   size="small"
                   color="primary"
                   onClick={() => {
-                    if (isEqual(initialData.values, values)) onClose()
-                    else setShowConfirmDialog(true)
+                    if (isEqual(initialData.values, values)) onClose();
+                    else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
@@ -423,7 +423,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

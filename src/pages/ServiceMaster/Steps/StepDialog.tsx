@@ -103,7 +103,7 @@ export default function StepDialog({
         isReturnToStepOnFail: stepData?.isReturnToStepOnFail === null ? false : stepData?.isReturnToStepOnFail,
         returnToStepOnFail: stepData?.returnToStepOnFail || '',
         isReturnToServiceOnFail: stepData?.isReturnToServiceOnFail === null ? false : stepData?.isReturnToServiceOnFail,
-        returnToServiceOnFail: stepData?.returnToServiceOnFail || '',
+        returnToServiceOnFail: stepData?.returnToServiceOnFail || ''
       });
     } else if (stepId != '') {
       axiosInstance()
@@ -128,7 +128,7 @@ export default function StepDialog({
             isReturnToStepOnFail: data?.isReturnToStepOnFail === null ? false : data?.isReturnToStepOnFail,
             returnToStepOnFail: data?.returnToStepOnFail || '',
             isReturnToServiceOnFail: data?.isReturnToServiceOnFail === null ? false : data?.isReturnToServiceOnFail,
-            returnToServiceOnFail: data?.returnToServiceOnFail || '',
+            returnToServiceOnFail: data?.returnToServiceOnFail || ''
           });
         })
         .catch((err) => {
@@ -336,8 +336,9 @@ export default function StepDialog({
                         <TextField
                           InputProps={{
                             startAdornment: (
-                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                                }`}</InputAdornment>
+                              <InputAdornment position="start">{`${
+                                values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                              }`}</InputAdornment>
                             )
                           }}
                           margin="dense"
@@ -360,8 +361,9 @@ export default function StepDialog({
                         <TextField
                           InputProps={{
                             startAdornment: (
-                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                                }`}</InputAdornment>
+                              <InputAdornment position="start">{`${
+                                values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                              }`}</InputAdornment>
                             )
                           }}
                           margin="dense"
@@ -393,7 +395,8 @@ export default function StepDialog({
                               setFieldValue('isPassFail', e.target.checked);
                             }}
                             color="primary"
-                          />}
+                          />
+                        }
                         label="Pass Fail Logic"
                       />
                     </Box>
@@ -540,7 +543,13 @@ export default function StepDialog({
                                     setFieldValue('jumpStepsPass', values);
                                   }}
                                   renderInput={(params) => (
-                                    <TextField {...params} label="Skip Steps on Pass" name="jumpStepsPass" disabled={notEditable} variant="outlined" />
+                                    <TextField
+                                      {...params}
+                                      label="Skip Steps on Pass"
+                                      name="jumpStepsPass"
+                                      disabled={notEditable}
+                                      variant="outlined"
+                                    />
                                   )}
                                 />
                               )}
@@ -587,14 +596,20 @@ export default function StepDialog({
                                     setFieldValue('jumpStepsFail', values);
                                   }}
                                   renderInput={(params) => (
-                                    <TextField {...params} label="Skip Steps on Fail" name="jumpStepsFail" disabled={notEditable} variant="outlined" />
+                                    <TextField
+                                      {...params}
+                                      label="Skip Steps on Fail"
+                                      name="jumpStepsFail"
+                                      disabled={notEditable}
+                                      variant="outlined"
+                                    />
                                   )}
                                 />
                               )}
                             </Grid>
                           </Grid>
                         </Box>
-                        {user?.brandPolicy?.repairOrderQuotation &&
+                        {user?.brandPolicy?.repairOrderQuotation && (
                           <Box pt={2}>
                             <Grid container>
                               <Grid item xs={6}>
@@ -615,7 +630,7 @@ export default function StepDialog({
                               </Grid>
                             </Grid>
                           </Box>
-                        }
+                        )}
                         <Box pt={2}>
                           <Grid container>
                             <Grid item xs={6}>
@@ -643,7 +658,9 @@ export default function StepDialog({
                                   fullWidth
                                   disabled={notEditable}
                                   size="small"
-                                  value={values?.returnToStepOnFail ? stepOption?.find((data) => data?.optionValue === values?.returnToStepOnFail) : ''}
+                                  value={
+                                    values?.returnToStepOnFail ? stepOption?.find((data) => data?.optionValue === values?.returnToStepOnFail) : ''
+                                  }
                                   getOptionLabel={(option) => option.optionLabel}
                                   getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
@@ -722,7 +739,6 @@ export default function StepDialog({
                         </Button>
                       </Box>
                     )}
-
                   </CustomDialogContent>
                   <CustomDialogFooter>
                     <Button
@@ -735,13 +751,7 @@ export default function StepDialog({
                       Cancel
                     </Button>
                     {reference === 'workOrder' && notEditable ? null : (
-                      <CustomButton
-                        loading={loading}
-                        disabled={loading}
-                        onSubmit={submitForm}
-                        variant="contained"
-                        color="primary"
-                        type="submit">
+                      <CustomButton loading={loading} disabled={loading} onSubmit={submitForm} variant="contained" color="primary" type="submit">
                         Save
                       </CustomButton>
                     )}
@@ -750,29 +760,29 @@ export default function StepDialog({
               </Fragment>
             )}
           </Formik>
-        ) : <Box p={2} height={500} bgcolor="white">
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </Dialog>
-      {
-        openFieldDialog && (
-          <FieldDialog
-            reference={'workOrder'}
-            serviceId={serviceId}
-            stepIds={[stepId]}
-            steps={[]}
-            fields={fields}
-            notEditable={notEditable}
-            handleClose={() => {
-              setOpenFieldDialog(false);
-            }}
-            handleSucess={(data: any) => {
-              setFields(data);
-              setOpenFieldDialog(false);
-            }}
-          />
-        )
-      }
+      {openFieldDialog && (
+        <FieldDialog
+          reference={'workOrder'}
+          serviceId={serviceId}
+          stepIds={[stepId]}
+          steps={[]}
+          fields={fields}
+          notEditable={notEditable}
+          handleClose={() => {
+            setOpenFieldDialog(false);
+          }}
+          handleSucess={(data: any) => {
+            setFields(data);
+            setOpenFieldDialog(false);
+          }}
+        />
+      )}
     </>
   );
 }

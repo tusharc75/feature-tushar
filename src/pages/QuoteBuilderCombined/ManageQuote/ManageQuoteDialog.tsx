@@ -88,7 +88,6 @@ export default function ManageQuoteDialog({
     values: {}
   });
 
-
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
@@ -1960,7 +1959,7 @@ export default function ManageQuoteDialog({
             )}
           </Formik>
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

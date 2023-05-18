@@ -16,7 +16,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 
 const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, isClone = false, id = null }) => {
-
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -38,11 +37,12 @@ const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, isClone
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       if (id) {
-        axiosInstance().get(`/dynamic-form/${id}`, {
-          headers: {
-            Resource: resource
-          }
-        })
+        axiosInstance()
+          .get(`/dynamic-form/${id}`, {
+            headers: {
+              Resource: resource
+            }
+          })
           .then(({ data: { data } }) => {
             setInitialData({
               fields: isClone ? fieldsDataForCreate : fieldsDataForUpdate,
@@ -133,20 +133,15 @@ const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, isClone
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-          validate={validate}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} validate={validate}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (isEqual(initialData.values, values)) onClose()
-                  else setShowConfirmDialog(true)
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
-                title={`${id ? isClone ? `Clone` : `Edit` : `Create`}`}
+                title={`${id ? (isClone ? `Clone` : `Edit`) : `Create`}`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -172,8 +167,8 @@ const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, isClone
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (isEqual(initialData.values, values)) onClose()
-                    else setShowConfirmDialog(true)
+                    if (isEqual(initialData.values, values)) onClose();
+                    else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
@@ -209,7 +204,7 @@ const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, isClone
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

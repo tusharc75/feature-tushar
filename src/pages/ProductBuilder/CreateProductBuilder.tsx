@@ -1,44 +1,41 @@
-import React, { useState, useEffect, Fragment, useContext } from "react";
-import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
-import Button from "@material-ui/core/Button";
-import { useParams, useHistory } from "react-router-dom";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { Formik, Form } from "formik";
-import { object, string } from "yup";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../axios/axiosInstance";
-import CustomContainer from "../../components/CustomContainer";
-import routes from "../../components/Helpers/Routes";
-import ProductBuilder from "../../components/productBuilder";
-import { BiArrowBack } from "react-icons/bi";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import FormTypes from "../../components/Helpers/FormTypes";
-import { useData } from "../../StateProvider/Provider";
-import { TextField } from "@material-ui/core";
+import React, { useState, useEffect, Fragment, useContext } from 'react';
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import { useParams, useHistory } from 'react-router-dom';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import { Formik, Form } from 'formik';
+import { object, string } from 'yup';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomContainer from '../../components/CustomContainer';
+import routes from '../../components/Helpers/Routes';
+import ProductBuilder from '../../components/productBuilder';
+import { BiArrowBack } from 'react-icons/bi';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import FormTypes from '../../components/Helpers/FormTypes';
+import { useData } from '../../StateProvider/Provider';
+import { TextField } from '@material-ui/core';
 
 const ProductBuilderSchema = object().shape({
-  name: string()
-    .min(3, "Too Short!")
-    .max(50, "Too Long")
-    .required("name is required"),
+  name: string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required')
 });
 
 const CreateProductBuilder = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
-      permissions: { productBuilder: permissions },
-    },
+      permissions: { productBuilder: permissions }
+    }
   }: any = useData();
   const history = useHistory();
   const { id } = useParams();
 
   const [isUpdating] = useState(false);
   const [initialValues, setInitialValues] = useState(null);
-  const [currency, setCurrency] = useState("")
+  const [currency, setCurrency] = useState('');
 
   useEffect(() => {
     fetchOneProductBuilder();
@@ -49,16 +46,16 @@ const CreateProductBuilder = () => {
       .get(`/productBuilder/` + id)
       .then(({ data: { data } }) => {
         setInitialValues(data);
-        setCurrency(data?.currency)
+        setCurrency(data?.currency);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
-  const handleSave = () => { };
+  const handleSave = () => {};
 
-  const refreshProducts = (data) => { };
+  const refreshProducts = (data) => {};
 
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
@@ -77,38 +74,25 @@ const CreateProductBuilder = () => {
             routes={[
               {
                 title: routes.productBuilder.title,
-                path: routes.productBuilder.path,
+                path: routes.productBuilder.path
               },
               {
-                title: id === "0" ? "New" : initialValues && initialValues.name,
-              },
+                title: id === '0' ? 'New' : initialValues && initialValues.name
+              }
             ]}
           />
         </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-        </Grid>
+        <Grid item md={8} sm={1} xs={2}></Grid>
       </Grid>
       <CustomContainer>
         {initialValues ? (
-          <Formik
-            initialValues={initialValues}
-            validationSchema={ProductBuilderSchema}
-            onSubmit={handleSave}
-          >
+          <Formik initialValues={initialValues} validationSchema={ProductBuilderSchema} onSubmit={handleSave}>
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Form>
                 <Box p={1} bgcolor="white">
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={3}>
-                      <TextField
-                        fullWidth
-                        margin="dense"
-                        type="text"
-                        label="Name"
-                        name="name"
-                        variant="outlined"
-                        disabled={true}
-                      />
+                      <TextField fullWidth margin="dense" type="text" label="Name" name="name" variant="outlined" disabled={true} />
                     </Grid>
                     <Grid item xs={12} sm={3}>
                       <Box mt={1}>
@@ -116,14 +100,14 @@ const CreateProductBuilder = () => {
                           values={values}
                           errors={errors}
                           touched={touched}
-                          label={"Currency"}
+                          label={'Currency'}
                           name="currency"
                           type="currency"
                           setFieldValue={setFieldValue}
                           required={true}
                           fullWidth
                           isTooltip={false}
-                          tooltipMessage={""}
+                          tooltipMessage={''}
                           size="small"
                           disabled={true}
                         />
@@ -137,7 +121,7 @@ const CreateProductBuilder = () => {
                           variant="contained"
                           onClick={() =>
                             history.push({
-                              pathname: routes.productBuilder.path,
+                              pathname: routes.productBuilder.path
                             })
                           }
                           startIcon={<BiArrowBack />}
@@ -149,13 +133,7 @@ const CreateProductBuilder = () => {
                   </Grid>
                 </Box>
                 <Box p={1}>
-                  <Tabs
-                    className="oms-tab"
-                    indicatorColor="primary"
-                    textColor="primary"
-                    value={tabIndex}
-                    onChange={handleChange}
-                  >
+                  <Tabs className="oms-tab" indicatorColor="primary" textColor="primary" value={tabIndex} onChange={handleChange}>
                     <Tab label="Product" />
                     <Tab label="Cost" />
                     {/* <Tab label="All" /> */}
@@ -164,11 +142,7 @@ const CreateProductBuilder = () => {
                 {tabIndex === 0 && (
                   <Fragment>
                     <Box p={1}>
-                      <Grid
-                        item
-                        xs={12} md={6} sm={6}
-                        className="d-flex align-items-center gap-1"
-                      >
+                      <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
                         {permissions.isUpdate && (
                           <>
                             <Button
@@ -210,7 +184,7 @@ const CreateProductBuilder = () => {
                           refreshProducts={refreshProducts}
                           Editable={true}
                           stage="product"
-                          setColumnForPDFExcel={() => { }}
+                          setColumnForPDFExcel={() => {}}
                         />
                       )}
                     </Box>
@@ -233,7 +207,7 @@ const CreateProductBuilder = () => {
                           refreshProducts={refreshProducts}
                           Editable={true}
                           stage="cost"
-                          setColumnForPDFExcel={() => { }}
+                          setColumnForPDFExcel={() => {}}
                         />
                       )}
                     </Box>
@@ -243,11 +217,7 @@ const CreateProductBuilder = () => {
                 {tabIndex === 2 && (
                   <Fragment>
                     <Box p={1}>
-                      <Grid
-                        item
-                        xs={6}
-                        className="d-flex align-items-center gap-1"
-                      >
+                      <Grid item xs={6} className="d-flex align-items-center gap-1">
                         {permissions.isUpdate && (
                           <>
                             <Button
@@ -288,7 +258,7 @@ const CreateProductBuilder = () => {
                           setIsAddExistingProduct={setIsAddExistingProduct}
                           refreshProducts={refreshProducts}
                           Editable={true}
-                          setColumnForPDFExcel={() => { }}
+                          setColumnForPDFExcel={() => {}}
                         />
                       )}
                     </Box>
@@ -298,7 +268,7 @@ const CreateProductBuilder = () => {
             )}
           </Formik>
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

@@ -371,9 +371,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
-              onEdit={(data) => { }}
+              onEdit={(data) => {}}
               extraParamsToCheckDelete={true}
-              onDelete={(data) => { }}
+              onDelete={(data) => {}}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -391,7 +391,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={(data) => { }}
+              onClone={(data) => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -416,7 +416,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
             />
           )
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

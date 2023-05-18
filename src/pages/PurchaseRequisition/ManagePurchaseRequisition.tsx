@@ -18,9 +18,10 @@ import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
 const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null }) => {
-
   const history = useHistory();
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
@@ -50,7 +51,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
             if (isClone) {
               fields = fieldsDataForCreate;
               const { purchaseRequisitionNumber, ...rest } = data;
-              rest.purchaseRequisitionNumber = `PR_${generateUniqueIdOnly()}`
+              rest.purchaseRequisitionNumber = `PR_${generateUniqueIdOnly()}`;
               setCloneHeading(purchaseRequisitionNumber);
               tempData = rest;
             }
@@ -62,8 +63,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
-      }
-      else {
+      } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['purchaseRequisitionNumber'] = `PR_${generateUniqueIdOnly()}`;
         setInitialData({
@@ -79,19 +79,22 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
   const handleSubmit = (values) => {
     setSubmitting(true);
     if (id && !isClone) {
-      values._id = id
-      axiosInstance().put(`${routes.purchaseRequisition?.path}`, values).then(({ data }) => {
-        setSubmitting(false);
-        onSuccess()
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
+      values._id = id;
+      axiosInstance()
+        .put(`${routes.purchaseRequisition?.path}`, values)
+        .then(({ data }) => {
+          setSubmitting(false);
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     } else {
       axiosInstance()
         .post(`${routes.purchaseRequisition?.path}`, values)
@@ -102,15 +105,15 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: message,
+            type: 'success',
+            message: message
           });
         })
         .catch((error) => {
           setLoading(false);
           setSubmitting(false);
           toastConfig.setToastConfig(error);
-        })
+        });
     }
   };
 
@@ -134,12 +137,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-          validate={validate}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} validate={validate}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
@@ -150,12 +148,13 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
                     setShowConfirmDialog(true);
                   }
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.purchaseRequisitionNumber ? `(${initialData.values?.purchaseRequisitionNumber})` : ''}`
-                  : `Create ${routes?.purchaseRequisition?.title}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.purchaseRequisitionNumber ? `(${initialData.values?.purchaseRequisitionNumber})` : ''}`
+                    : `Create ${routes?.purchaseRequisition?.title}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -221,7 +220,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

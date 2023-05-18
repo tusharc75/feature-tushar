@@ -81,15 +81,14 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
           let initialData: any = { ...getObjKeys('', fieldsDataForCreate) };
           if (refrenceData?.customerAccount) {
             fieldsDataForCreate?.forEach((e) => {
-              if (e.fieldName === "customerAccount") {
-                if (e.type === "multiSelect") {
+              if (e.fieldName === 'customerAccount') {
+                if (e.type === 'multiSelect') {
                   initialData.customerAccount = [refrenceData?.customerAccount];
-                }
-                else {
+                } else {
                   initialData.customerAccount = refrenceData?.customerAccount;
                 }
               }
-            })
+            });
           }
           setAllFields(fieldsDataForCreate);
           setInitialData({
@@ -135,8 +134,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
           });
           if (refrenceData) {
             onSuccess(data);
-          }
-          else {
+          } else {
             history.push(`${routes.wellMasterDetail.path}/${data?._id}`);
           }
         })
@@ -265,7 +263,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
                   disabled={submitting}
                   onClick={(e) => {
                     e.preventDefault();
-                    handleScroll(errors)
+                    handleScroll(errors);
                     submitForm();
                   }}
                 >
@@ -291,7 +289,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

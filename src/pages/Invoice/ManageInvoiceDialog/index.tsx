@@ -602,7 +602,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                     onClick={() => {
                       if (isEqual(initialData.values, values)) {
                         onClose();
-                      }else{
+                      } else {
                         setShowConfirmDialog(true);
                       }
                     }}
@@ -613,10 +613,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                     loading={loading}
                     variant="contained"
                     color="primary"
-                    disabled={
-                      uploadingImageOrFileProgress > 0 ||
-                      loading
-                    }
+                    disabled={uploadingImageOrFileProgress > 0 || loading}
                     onClick={(e) => {
                       e.preventDefault();
                       handleScroll(errors);
@@ -685,7 +682,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             )}
           </Formik>
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

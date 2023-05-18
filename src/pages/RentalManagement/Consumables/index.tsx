@@ -25,14 +25,7 @@ import { calculatePrice, fetch_rental_product_fields, getNestedSubRows } from '.
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import AddExistingProductInventory from '../Productpackage/AddExistingProductInventory';
 
-const Consumables = ({
-  rentalManagementData,
-  setNextStep,
-  currencySymbol,
-  renderedFrom,
-  stepFullScreen,
-  allowedToEdit
-}: any) => {
+const Consumables = ({ rentalManagementData, setNextStep, currencySymbol, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -533,7 +526,7 @@ const Consumables = ({
               />
             </Box>
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}

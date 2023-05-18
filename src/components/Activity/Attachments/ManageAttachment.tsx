@@ -60,7 +60,6 @@ export default function ManageAttachment({
     fetchAttachmentDetail();
   }, []);
 
-
   const fetchAttachmentDetail = async () => {
     setIsFetching(true);
     if (attachmentId && type === 'file') {
@@ -70,7 +69,7 @@ export default function ManageAttachment({
           setCanEdit(data?.canEdit);
           if (data.file && data.file.length) {
             data?.file?.sort((a: any, b: any) => {
-              return (new Date(b?.date)).getTime() - (new Date(a?.date)).getTime();
+              return new Date(b?.date).getTime() - new Date(a?.date).getTime();
             });
             setOtherAttachments(data.file);
           }
@@ -103,7 +102,7 @@ export default function ManageAttachment({
       setIsFetching(false);
     }
   };
-  
+
   const handleSave = (values) => {
     let request: any = {};
     if (type === 'file') {
@@ -206,7 +205,6 @@ export default function ManageAttachment({
     setAttachemnetToDelete('');
     setShowConfirmationDialog(false);
   };
-
 
   return !isFetching ? (
     initialValues ? (
@@ -341,7 +339,7 @@ export default function ManageAttachment({
     ) : null
   ) : (
     <div>
-      <Box p={2} height={500} bgcolor="white">
+      <Box p={2} height={500}>
         <CommonSkeleton lenArray={[...Array(10).keys()]} />
       </Box>
     </div>

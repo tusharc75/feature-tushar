@@ -47,6 +47,8 @@
   --new_theme_color: #0f9fa9;
   --ag-odd-row-background-color: #fff;
 }
+
+// Dark Theme
 [data-mode='dark'] body {
   background-color: #0e0e23;
 }
@@ -58,7 +60,24 @@
   --ag-border-color: #3d3d5c;
   --ag-row-hover-color: hsl(240, 43%, 15%);
   --ag-header-cell-hover-background-color: hsl(240, 43%, 15%);
+  --ag-selected-row-background-color: hsl(240, 43%, 15%);
+  --ag-checkbox-checked-color: #0f9fa9;
+  --ag-checkbox-unchecked-color: #0f9fa9;
   --link: #95dfff;
+}
+[data-mode='dark'] {
+  .MuiOutlinedInput-notchedOutline {
+    border-color: #0e0e23 !important;
+  }
+  .MuiOutlinedInput-root {
+    background-color: #282845;
+  }
+  .MuiFormLabel-root.Mui-focused {
+    color: white !important;
+  }
+  .MuiFormControl-root {
+    outline: none !important;
+  }
 }
 
 @import '~ag-grid-community/dist/styles/ag-theme-material/sass/_ag-theme-material-mixin.scss';
@@ -220,6 +239,9 @@ body > iframe {
 /* Track */
 ::-webkit-scrollbar-track {
   background: #f2f2f2;
+  [data-mode='dark'] & {
+    background-color: #0e0e23;
+  }
 }
 
 /* Handle */
@@ -694,7 +716,6 @@ body::-webkit-scrollbar-thumb {
   }
 
   color: var(--secondary);
-  background-color: #ffffff !important;
   padding: var(--padding, 0 0 15px);
   border-radius: 6px 6px 0 0;
   row-gap: 5px;
@@ -711,6 +732,10 @@ body::-webkit-scrollbar-thumb {
     border: 0;
     border-radius: 6px !important;
     margin-left: 10px !important;
+    [data-mode='dark'] & {
+      background: #282845;
+      color: #ffffff !important;
+    }
 
     &:first-of-type {
       margin-left: 0 !important;
@@ -2633,6 +2658,9 @@ svg.MuiSvgIcon-root {
   ol {
     li {
       color: #163340 !important;
+      [data-mode='dark'] & {
+        color: #fff !important;
+      }
 
       a {
         margin: 0px 4px;
@@ -2644,6 +2672,9 @@ svg.MuiSvgIcon-root {
         font-size: 14px;
         color: #163340 !important;
         font-weight: 600;
+        [data-mode='dark'] & {
+          color: #fff !important;
+        }
       }
 
       p {
@@ -2651,6 +2682,9 @@ svg.MuiSvgIcon-root {
         font-size: 14px;
         color: #163340 !important;
         font-weight: 400;
+        [data-mode='dark'] & {
+          color: #c6c6c6 !important;
+        }
       }
     }
   }
@@ -2673,6 +2707,12 @@ svg.MuiSvgIcon-root {
   box-shadow: 0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06);
   border-radius: 3.62963px;
   margin-right: 18px;
+
+  [data-mode='dark'] & {
+    color: #fff;
+    background-color: #0e0e23;
+    border: 1px solid #0e0e23;
+  }
 
   &:last-of-type {
     margin-right: 0;
@@ -2711,6 +2751,14 @@ svg.MuiSvgIcon-root {
   }
   &:hover {
     background-color: rgba(0, 0, 0, 0.04) !important;
+  }
+  [data-mode='dark'] & {
+    background-color: #282845 !important;
+    color: white !important;
+    border: 1px solid #282845 !important;
+    &:disabled {
+      opacity: 0.6 !important;
+    }
   }
 }
 .azure-login {
@@ -3053,6 +3101,14 @@ body {
       color: #737373;
       font-weight: 400;
     }
+    [data-mode='dark'] & {
+      background-color: #282845 !important;
+      color: white !important;
+      border: 1px solid #282845 !important;
+      &:disabled {
+        opacity: 0.6 !important;
+      }
+    }
   }
   .btn-primary-v1 {
     padding: var(--button-v1-padding);
@@ -3194,6 +3250,10 @@ body {
   .MuiTablePagination-input {
     background-color: #f2f2f2;
     border-radius: 2px;
+    [data-mode='dark'] & {
+      background-color: #282845;
+      color: #fff;
+    }
   }
   .MuiTablePagination-actions {
     button {
@@ -3202,9 +3262,17 @@ body {
       border-radius: 0 !important;
       max-width: 34px;
       max-height: 34px;
+      [data-mode='dark'] & {
+        background-color: #767699;
+        color: #fff;
+      }
       &:disabled {
         background: #f8f8f8;
         color: #a7a7a7 !important;
+        [data-mode='dark'] & {
+          background-color: #282845;
+          color: #fff !important;
+        }
       }
     }
   }

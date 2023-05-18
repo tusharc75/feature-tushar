@@ -31,7 +31,6 @@ interface Props {
 }
 
 const ManageTransferInventory: FC<Props> = (props) => {
-
   const { isClone = false, transferInventoryId = null, onClose, onSuccess } = props;
 
   const {
@@ -98,10 +97,10 @@ const ManageTransferInventory: FC<Props> = (props) => {
               } else {
                 if (data?.canEdit === false) {
                   fieldsDataForUpdate?.forEach((e) => {
-                    if (["transferFromPlant", "transferFromStorageLocation"]?.includes(e?.fieldName)) {
+                    if (['transferFromPlant', 'transferFromStorageLocation']?.includes(e?.fieldName)) {
                       e.isUneditable = true;
                     }
-                  })
+                  });
                 }
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
@@ -163,14 +162,13 @@ const ManageTransferInventory: FC<Props> = (props) => {
       if (values?.transferFromStorageLocation === values?.transferToStorageLocation) {
         errors['transferToStorageLocation'] = 'Transfer from and to storage location can not be same';
       }
-    }
-    else {
+    } else {
       if (values?.transferFromPlant === values?.transfertoPlant) {
         errors['transfertoPlant'] = 'Transfer from and to plant can not be same';
       }
     }
     return errors;
-  }
+  };
 
   return (
     <Dialog
@@ -187,17 +185,16 @@ const ManageTransferInventory: FC<Props> = (props) => {
       fullWidth
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(allFields)}
-          onSubmit={handleSubmit}
-          validate={validate}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(allFields)} onSubmit={handleSubmit} validate={validate}>
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={transferInventoryId ? isClone ? `Clone - ${cloneHeading}` : `Update - ${values?.transferNumber}`
-                  : 'Create ' + routes.transferInventory.title
+                title={
+                  transferInventoryId
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update - ${values?.transferNumber}`
+                    : 'Create ' + routes.transferInventory.title
                 }
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();
@@ -227,7 +224,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                   {...field}
                                   fields={allFields}
                                   fieldData={field}
-                                  disabled={(Boolean(transferInventoryId) && field.disableOnEdit)}
+                                  disabled={Boolean(transferInventoryId) && field.disableOnEdit}
                                   values={values}
                                   errors={errors}
                                   touched={touched}
@@ -285,7 +282,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

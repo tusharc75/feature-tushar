@@ -230,7 +230,7 @@ export const CreateEmail = ({
             toastConfig.setToastConfig(err);
           });
       }
-    } catch (e) { }
+    } catch (e) {}
   };
 
   const handleSendQuoteEmail = async (values) => {
@@ -388,284 +388,287 @@ export const CreateEmail = ({
   };
 
   return (
-    <>  {initialValues && !loading ? (
-      <Formik
-        initialValues={initialValues}
-        validationSchema={EmailSchema}
-        onSubmit={isQuoteBuilder ? handleSendQuoteEmail : handleSave}
-        onKeyPress={onKeyPress}
-      >
-        {({ submitForm, touched, errors, setFieldValue, values }) => (
-          <>
-            <CustomDialogHeader
-              title={`${emailId ? 'View' : 'New'} Email`}
-              onClose={() => {
-                if (isEqual(initialValues, values)) handleClose();
-                else setShowConfirmDialog(true);
-              }}
-              isMinimized={isMinimized}
-              onMinimizeMaximize={onMinimizeMaximize}
-              showManimizeMaximize={showManimizeMaximize}
-            ></CustomDialogHeader>
-            <CustomDialogContent>
-              <Form autoComplete="off" autoCorrect="off" noValidate>
-                <MuiPickersUtilsProvider utils={DateUtils}>
-                  <Box padding={1}>
-                    {emailId ? (
-                      <Fragment>
-                        <Typography variant="subtitle1">Subject : {initialValues.name || initialValues.subject} </Typography>
-                        <Box mt={1} mb={1}>
-                          <Typography variant="subtitle1">To : {initialValues.to.join()} </Typography>
-                        </Box>
-                        {initialValues.to.length && (
-                          <Box mt={1} mb={1}>
-                            <Typography variant="subtitle1">Cc : {initialValues.cc.join() || '----'} </Typography>
-                          </Box>
-                        )}
-                        <Divider />
-                        <Box mt={2} paddingLeft={3}>
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: initialValues.content || initialValues.message
-                            }}
-                          />
-                        </Box>
-                        {renderFileThumbnails}
-                        <ImageAttachments
-                          imageAttachments={imageAttachments}
-                          onImageClick={(attachment) => {
-                            setImageSource(attachment);
-                            setOpen(true);
-                          }}
-                          isCreateOnly={true}
-                          onDelete={handleDeleteImageAttachment}
-                          emailId={emailId}
-                        />
-
-                        {initialValues?.relatedTo && initialValues.relatedTo.length ? (
-                          <Box mt={2}>
-                            <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                          </Box>
-                        ) : null}
-                        <Box mt={1} color="text.secondary">
-                          <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format(dateTimeFormat)}</Typography>
-                        </Box>
-                      </Fragment>
-                    ) : (
-                      <Grid container spacing={3}>
-                        {showESign && (
-                          <Grid item className="pull-right p-0" xs={12}>
-                            <FormControlLabel
-                              disabled={!isESign}
-                              key={1}
-                              control={<Switch checked={toogle['e-Sign']} name="e-Sign" onChange={handleChangePermissions} />}
-                              label="e-Sign"
-                            />
-                          </Grid>
-                        )}
-                        <Grid item xs={12}>
-                          <TextField
-                            autoComplete="off"
-                            variant="outlined"
-                            type="text"
-                            label="Subject"
-                            required={true}
-                            name="subject"
-                            fullWidth
-                            margin="dense"
-                            value={values['subject']}
-                            error={touched['subject'] && Boolean(errors['subject'])}
-                            helperText={touched['subject'] && errors['subject']}
-                            onChange={(e) => {
-                              setFieldValue('subject', e.target.value.trimStart());
-                            }}
-                          />
-                          <Autocomplete
-                            multiple
-                            disableCloseOnSelect={true}
-                            options={options.filter((option) => values.cc.indexOf(option) < 0)}
-                            freeSolo
-                            renderTags={(value, getTagProps) =>
-                              value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                variant="outlined"
-                                label="To"
-                                margin="dense"
-                                required={true}
-                                error={touched['to'] && Boolean(errors['to'])}
-                                helperText={touched['to'] && errors['to']}
-                                name="to"
-                              />
-                            )}
-                            value={values['to']}
-                            onBlur={(e: any) => {
-                              if (e.target.value && e.target.value.trim() != '' && validations.email.test(e.target.value)) {
-                                setFieldValue('to', isQuoteBuilder ? [e.target.value] : [...values['to'], e.target.value]);
-                              }
-                            }}
-                            onChange={(e, value) => {
-                              // if (isQuoteBuilder) {
-                              //   if (value && value.length) {
-                              //     value = [value.slice(-1)[0]];
-                              //   }
-                              // }
-                              let emails = [];
-                              for (var email of value) {
-                                if (validations.email.test(email)) {
-                                  emails.push(email);
-                                }
-                              }
-                              setFieldValue('to', emails);
-                            }}
-                          />
-                          <Autocomplete
-                            multiple
-                            disableCloseOnSelect={true}
-                            options={isQuoteBuilder ? cc : options.filter((option) => values.to.indexOf(option) < 0)}
-                            freeSolo
-                            renderTags={(value, getTagProps) =>
-                              value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                variant="outlined"
-                                label="Cc"
-                                margin="dense"
-                                error={touched['cc'] && Boolean(errors['cc'])}
-                                helperText={touched['cc'] && errors['cc']}
-                                name="cc"
-                              />
-                            )}
-                            value={values['cc']}
-                            onBlur={(e: any) => {
-                              if (
-                                e.target.value &&
-                                e.target.value.trim() != '' &&
-                                /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)
-                              ) {
-                                setFieldValue('cc', [...values['cc'], e.target.value]);
-                              }
-                            }}
-                            onChange={(e, value) => {
-                              let val = [];
-                              for (var email of value) {
-                                if (validations.email.test(email)) {
-                                  val.push(email);
-                                }
-                              }
-                              setFieldValue('cc', val);
-                            }}
-                          />
-
-                          <Box>
-                            {renderFileThumbnails}
-                            {isQuoteBuilder ? renderQuotesFileThumbnails : null}
-                            {isQuoteBuilder ? renderQuotesOtherFileThumbnails : null}
-                            <ImageAttachments
-                              imageAttachments={fileImageAttachments}
-                              onImageClick={(attachment) => {
-                                setImageSource(attachment);
-                                setOpen(true);
-                              }}
-                              isCreateOnly={true}
-                              onDelete={handleDeleteFileImageAttachment}
-                              emailId={emailId}
-                            />
-                            <ImageAttachments
-                              imageAttachments={imageAttachments}
-                              onImageClick={(attachment) => {
-                                setImageSource(attachment);
-                                setOpen(true);
-                              }}
-                              isCreateOnly={true}
-                              onDelete={handleDeleteImageAttachment}
-                              emailId={emailId}
-                            />
-                            <TinyMce
-                              onChange={(value) => {
-                                setFieldValue('content', value);
-                              }}
-                              initialValue={initialValues?.content}
-                              imageOrFileUploadCompletePercentage={(completePercentage) => {
-                                setUploadingImageOrFileProgress(completePercentage);
-                              }}
-                              doNotShowUploadFile={false}
-                              onUploadFile={onUploadFile}
-                              onUploadImage={handleUploadImage}
-                              usePublicUrlforFileUpload={true}
-                              isSendToCustomer={isQuoteBuilder ? true : false}
-                              onQuoteUpload={handleQuoteUpload}
-                            />
-                          </Box>
-                        </Grid>
-                      </Grid>
-                    )}
-                  </Box>
-                </MuiPickersUtilsProvider>
-              </Form>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <Button
-                color="primary"
-                size="small"
-                disabled={sending}
-                onClick={() => {
+    <>
+      {' '}
+      {initialValues && !loading ? (
+        <Formik
+          initialValues={initialValues}
+          validationSchema={EmailSchema}
+          onSubmit={isQuoteBuilder ? handleSendQuoteEmail : handleSave}
+          onKeyPress={onKeyPress}
+        >
+          {({ submitForm, touched, errors, setFieldValue, values }) => (
+            <>
+              <CustomDialogHeader
+                title={`${emailId ? 'View' : 'New'} Email`}
+                onClose={() => {
                   if (isEqual(initialValues, values)) handleClose();
                   else setShowConfirmDialog(true);
                 }}
-              >
-                Cancel
-              </Button>
-              {!emailId && (
+                isMinimized={isMinimized}
+                onMinimizeMaximize={onMinimizeMaximize}
+                showManimizeMaximize={showManimizeMaximize}
+              ></CustomDialogHeader>
+              <CustomDialogContent>
+                <Form autoComplete="off" autoCorrect="off" noValidate>
+                  <MuiPickersUtilsProvider utils={DateUtils}>
+                    <Box padding={1}>
+                      {emailId ? (
+                        <Fragment>
+                          <Typography variant="subtitle1">Subject : {initialValues.name || initialValues.subject} </Typography>
+                          <Box mt={1} mb={1}>
+                            <Typography variant="subtitle1">To : {initialValues.to.join()} </Typography>
+                          </Box>
+                          {initialValues.to.length && (
+                            <Box mt={1} mb={1}>
+                              <Typography variant="subtitle1">Cc : {initialValues.cc.join() || '----'} </Typography>
+                            </Box>
+                          )}
+                          <Divider />
+                          <Box mt={2} paddingLeft={3}>
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: initialValues.content || initialValues.message
+                              }}
+                            />
+                          </Box>
+                          {renderFileThumbnails}
+                          <ImageAttachments
+                            imageAttachments={imageAttachments}
+                            onImageClick={(attachment) => {
+                              setImageSource(attachment);
+                              setOpen(true);
+                            }}
+                            isCreateOnly={true}
+                            onDelete={handleDeleteImageAttachment}
+                            emailId={emailId}
+                          />
+
+                          {initialValues?.relatedTo && initialValues.relatedTo.length ? (
+                            <Box mt={2}>
+                              <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                            </Box>
+                          ) : null}
+                          <Box mt={1} color="text.secondary">
+                            <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format(dateTimeFormat)}</Typography>
+                          </Box>
+                        </Fragment>
+                      ) : (
+                        <Grid container spacing={3}>
+                          {showESign && (
+                            <Grid item className="pull-right p-0" xs={12}>
+                              <FormControlLabel
+                                disabled={!isESign}
+                                key={1}
+                                control={<Switch checked={toogle['e-Sign']} name="e-Sign" onChange={handleChangePermissions} />}
+                                label="e-Sign"
+                              />
+                            </Grid>
+                          )}
+                          <Grid item xs={12}>
+                            <TextField
+                              autoComplete="off"
+                              variant="outlined"
+                              type="text"
+                              label="Subject"
+                              required={true}
+                              name="subject"
+                              fullWidth
+                              margin="dense"
+                              value={values['subject']}
+                              error={touched['subject'] && Boolean(errors['subject'])}
+                              helperText={touched['subject'] && errors['subject']}
+                              onChange={(e) => {
+                                setFieldValue('subject', e.target.value.trimStart());
+                              }}
+                            />
+                            <Autocomplete
+                              multiple
+                              disableCloseOnSelect={true}
+                              options={options.filter((option) => values.cc.indexOf(option) < 0)}
+                              freeSolo
+                              renderTags={(value, getTagProps) =>
+                                value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  variant="outlined"
+                                  label="To"
+                                  margin="dense"
+                                  required={true}
+                                  error={touched['to'] && Boolean(errors['to'])}
+                                  helperText={touched['to'] && errors['to']}
+                                  name="to"
+                                />
+                              )}
+                              value={values['to']}
+                              onBlur={(e: any) => {
+                                if (e.target.value && e.target.value.trim() != '' && validations.email.test(e.target.value)) {
+                                  setFieldValue('to', isQuoteBuilder ? [e.target.value] : [...values['to'], e.target.value]);
+                                }
+                              }}
+                              onChange={(e, value) => {
+                                // if (isQuoteBuilder) {
+                                //   if (value && value.length) {
+                                //     value = [value.slice(-1)[0]];
+                                //   }
+                                // }
+                                let emails = [];
+                                for (var email of value) {
+                                  if (validations.email.test(email)) {
+                                    emails.push(email);
+                                  }
+                                }
+                                setFieldValue('to', emails);
+                              }}
+                            />
+                            <Autocomplete
+                              multiple
+                              disableCloseOnSelect={true}
+                              options={isQuoteBuilder ? cc : options.filter((option) => values.to.indexOf(option) < 0)}
+                              freeSolo
+                              renderTags={(value, getTagProps) =>
+                                value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  variant="outlined"
+                                  label="Cc"
+                                  margin="dense"
+                                  error={touched['cc'] && Boolean(errors['cc'])}
+                                  helperText={touched['cc'] && errors['cc']}
+                                  name="cc"
+                                />
+                              )}
+                              value={values['cc']}
+                              onBlur={(e: any) => {
+                                if (
+                                  e.target.value &&
+                                  e.target.value.trim() != '' &&
+                                  /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)
+                                ) {
+                                  setFieldValue('cc', [...values['cc'], e.target.value]);
+                                }
+                              }}
+                              onChange={(e, value) => {
+                                let val = [];
+                                for (var email of value) {
+                                  if (validations.email.test(email)) {
+                                    val.push(email);
+                                  }
+                                }
+                                setFieldValue('cc', val);
+                              }}
+                            />
+
+                            <Box>
+                              {renderFileThumbnails}
+                              {isQuoteBuilder ? renderQuotesFileThumbnails : null}
+                              {isQuoteBuilder ? renderQuotesOtherFileThumbnails : null}
+                              <ImageAttachments
+                                imageAttachments={fileImageAttachments}
+                                onImageClick={(attachment) => {
+                                  setImageSource(attachment);
+                                  setOpen(true);
+                                }}
+                                isCreateOnly={true}
+                                onDelete={handleDeleteFileImageAttachment}
+                                emailId={emailId}
+                              />
+                              <ImageAttachments
+                                imageAttachments={imageAttachments}
+                                onImageClick={(attachment) => {
+                                  setImageSource(attachment);
+                                  setOpen(true);
+                                }}
+                                isCreateOnly={true}
+                                onDelete={handleDeleteImageAttachment}
+                                emailId={emailId}
+                              />
+                              <TinyMce
+                                onChange={(value) => {
+                                  setFieldValue('content', value);
+                                }}
+                                initialValue={initialValues?.content}
+                                imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                  setUploadingImageOrFileProgress(completePercentage);
+                                }}
+                                doNotShowUploadFile={false}
+                                onUploadFile={onUploadFile}
+                                onUploadImage={handleUploadImage}
+                                usePublicUrlforFileUpload={true}
+                                isSendToCustomer={isQuoteBuilder ? true : false}
+                                onQuoteUpload={handleQuoteUpload}
+                              />
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      )}
+                    </Box>
+                  </MuiPickersUtilsProvider>
+                </Form>
+              </CustomDialogContent>
+              <CustomDialogFooter>
                 <Button
-                  type="button"
-                  size="small"
                   color="primary"
-                  variant="contained"
-                  disabled={sending || uploadingImageOrFileProgress > 0 || generatingFile}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    submitForm();
+                  size="small"
+                  disabled={sending}
+                  onClick={() => {
+                    if (isEqual(initialValues, values)) handleClose();
+                    else setShowConfirmDialog(true);
                   }}
                 >
-                  {sending ? (
-                    <>
-                      <CircularProgress color="inherit" size={14} style={{ marginRight: '10px' }} />
-                      Sending ...{' '}
-                    </>
-                  ) : (
-                    'send'
-                  )}
+                  Cancel
                 </Button>
-              )}
-            </CustomDialogFooter>
-            {showConfirmDialog ? (
-              <ConfirmCancelDialog
-                close={() => setShowConfirmDialog(false)}
-                open={showConfirmDialog}
-                onSave={() => {
-                  setShowConfirmDialog(false);
-                  submitForm();
-                }}
-                onClose={() => {
-                  setShowConfirmDialog(false);
-                  handleClose();
-                }}
-              />
-            ) : null}
-          </>
-        )}
-      </Formik>
-    )
-      : <CustomDialogContent>
-        <Box p={2} height={500} bgcolor="white">
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      </CustomDialogContent>}
+                {!emailId && (
+                  <Button
+                    type="button"
+                    size="small"
+                    color="primary"
+                    variant="contained"
+                    disabled={sending || uploadingImageOrFileProgress > 0 || generatingFile}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      submitForm();
+                    }}
+                  >
+                    {sending ? (
+                      <>
+                        <CircularProgress color="inherit" size={14} style={{ marginRight: '10px' }} />
+                        Sending ...{' '}
+                      </>
+                    ) : (
+                      'send'
+                    )}
+                  </Button>
+                )}
+              </CustomDialogFooter>
+              {showConfirmDialog ? (
+                <ConfirmCancelDialog
+                  close={() => setShowConfirmDialog(false)}
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false);
+                    handleClose();
+                  }}
+                />
+              ) : null}
+            </>
+          )}
+        </Formik>
+      ) : (
+        <CustomDialogContent>
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        </CustomDialogContent>
+      )}
       {open ? (
         <ImagePreview
           open={open}

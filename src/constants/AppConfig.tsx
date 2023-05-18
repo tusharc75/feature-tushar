@@ -155,8 +155,8 @@ const getDesignTokens = (mode: ThemeColor) => ({
         }
       : {
           primary: {
-            light: '#091823', //"#003f57",
-            main: '#163340' //"#003f57",
+            light: '#fff', //"#003f57",
+            main: '#fff' //"#003f57",
           },
           secondary: {
             light: '#047d1c',

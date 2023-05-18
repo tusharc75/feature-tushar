@@ -4,15 +4,15 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
-import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, arrayToDropwdownOption } from "../../../constants/helpers";
-import { Formik, Form } from "formik";
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
-import CustomButton from '../../../components/Helpers/CustomButton'
-import { FaDiceOne } from "react-icons/fa";
-import FormTypes from "../../../components/Helpers/FormTypes";
-import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
+import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
+import { Formik, Form } from 'formik';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import CustomButton from '../../../components/Helpers/CustomButton';
+import { FaDiceOne } from 'react-icons/fa';
+import FormTypes from '../../../components/Helpers/FormTypes';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
 import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/helper';
 
@@ -21,45 +21,43 @@ interface EditDialogProps {
   handleSaveData: VoidFunction | any;
   repairOrderData: any;
   rowData?: object | any;
-  material: any[]
-  selectedProducts: any[]
-  isBulkedit: any
-  loading: any
+  material: any[];
+  selectedProducts: any[];
+  isBulkedit: any;
+  loading: any;
 }
 
-const RepairOrderQtyDialog: FC<EditDialogProps> = (
-  {
-    onClose,
-    handleSaveData,
-    repairOrderData,
-    rowData,
-    material,
-    selectedProducts,
-    isBulkedit,
-    loading
-  }) => {
-
+const RepairOrderQtyDialog: FC<EditDialogProps> = ({
+  onClose,
+  handleSaveData,
+  repairOrderData,
+  rowData,
+  material,
+  selectedProducts,
+  isBulkedit,
+  loading
+}) => {
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
-    fetchData()
+    fetchData();
   }, []);
 
   const fetchData = async () => {
     var data = await fetch_repair_order_product_fields(repairOrderData?.currency);
-    setAllFields(JSON.parse(JSON.stringify(data)))
+    setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
-      let unitArray: any = []
-      let pricingMethodArray: any = []
-      selectedProducts?.forEach(element => {
+      let unitArray: any = [];
+      let pricingMethodArray: any = [];
+      selectedProducts?.forEach((element) => {
         if (element?.[`${element.type}Detail`]?.unit) {
-          unitArray.push([...element?.[`${element?.type}Detail`]?.unit])
+          unitArray.push([...element?.[`${element?.type}Detail`]?.unit]);
         }
       });
       let unit: any = unitArray?.shift()?.filter(function (v) {
@@ -68,40 +66,39 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = (
         });
       });
 
-      const unitOptions: any = arrayToDropwdownOption(unit)
+      const unitOptions: any = arrayToDropwdownOption(unit);
       data.forEach((element) => {
-        if (element.fieldName === "unit") {
+        if (element.fieldName === 'unit') {
           element.option = unitOptions;
         }
         element.required = false;
-      })
-      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
+      });
+      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
       setInitialData({
         fields: data,
-        values: { ...getObjKeys("", data) },
+        values: { ...getObjKeys('', data) }
       });
-    }
-    else {
-      let unitOptions: any = []
+    } else {
+      let unitOptions: any = [];
       if (rowData?.[`${rowData.type}Detail`]?.unit) {
         unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
       }
-      data.forEach(element => {
-        if (element.fieldName === "unit") {
+      data.forEach((element) => {
+        if (element.fieldName === 'unit') {
           element.option = unitOptions;
         }
 
-        if (element.fieldName === "qty" && rowData?.serializedProduct === false && rowData?.hideSelection) {
+        if (element.fieldName === 'qty' && rowData?.serializedProduct === false && rowData?.hideSelection) {
           element.isUneditable = true;
         }
       });
       setInitialData({
         fields: data,
-        values: getObjKeysWithValues(rowData, data),
+        values: getObjKeysWithValues(rowData, data)
       });
     }
     EvaluteproductFields(data);
-  }
+  };
 
   const EvaluteproductFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
@@ -110,8 +107,8 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = (
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
-    setFields(customData)
-  }
+    setFields(customData);
+  };
 
   const getTitle = () => {
     if (rowData) {
@@ -121,38 +118,36 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = (
       }
       return editTitle;
     } else {
-      return "Bulk Edit";
+      return 'Bulk Edit';
     }
-  }
+  };
 
   const handleSubmit = async (values) => {
     if (isBulkedit) {
       for (const x in values) {
-        if (values[x] === "" || (Array.isArray(values[x]) && values[x].length === 0)) {
-          delete values[x]
+        if (values[x] === '' || (Array.isArray(values[x]) && values[x].length === 0)) {
+          delete values[x];
         }
       }
-      let rows: any = []
-      if (values["unit"] || values["qty"]) {
-        selectedProducts.forEach(d => {
+      let rows: any = [];
+      if (values['unit'] || values['qty']) {
+        selectedProducts.forEach((d) => {
           const element: any = {};
           element.materialId = d.materialId;
           element.type = d.type;
-          element.unit = values["unit"] || d.unit;
-          element.qty = values["qty"] || d.qty;
+          element.unit = values['unit'] || d.unit;
+          element.qty = values['qty'] || d.qty;
           rows.push(element);
         });
       }
 
-      handleSaveData(rows)
-    }
-    else {
-      if (rowData.type === "package" && !showConfirmationDialog) {
+      handleSaveData(rows);
+    } else {
+      if (rowData.type === 'package' && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
-      }
-      else {
-        let rows: any = [{ ...rowData, ...values }]
-        handleSaveData(rows)
+      } else {
+        let rows: any = [{ ...rowData, ...values }];
+        handleSaveData(rows);
         setShowConfirmationDialog(false);
       }
     }
@@ -164,12 +159,11 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = (
       if (rowData.parentId) {
         const _package = material?.filter((e) => e._id === rowData.parentId);
         if (_package.length) {
-          if ((values.qty * _package[0].qty) < rowData.assetQty) {
+          if (values.qty * _package[0].qty < rowData.assetQty) {
             errors['qty'] = 'The quantity is less than what was assigned.';
           }
         }
-      }
-      else {
+      } else {
         if (values.qty < rowData.assetQty) {
           errors['qty'] = 'The quantity is less than what was assigned.';
         }
@@ -178,154 +172,153 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = (
     return errors;
   }
 
-  return (<Dialog
-    maxWidth="md"
-    fullScreen={fullScreen || (isMobile || isTablet)}
-    TransitionComponent={CustomDialogTransition}
-    aria-labelledby="customized-dialog-title"
-    open={true}
-    fullWidth
-  >
-    {initialData && initialData.fields.length ?
-      <Formik
-        innerRef={ref}
-        enableReinitialize={true}
-        initialValues={initialData.values}
-        validationSchema={yupSchema(initialData.fields)}
-        validateOnMount
-        validate={validate}
-        onSubmit={handleSubmit}>
-        {({ values,
-          errors,
-          touched,
-          setFieldValue,
-          submitForm,
-        }) => (
-          <Fragment>
-            <CustomDialogHeader
-              title={getTitle()}
-              onClose={() => {
-                if (!isEqual(ref?.current?.values, initialData.values)) {
-                  setShowConfirmDialog(true)
-                }
-                else {
-                  onClose()
-                }
-              }}
-              isMinimized={!fullScreen}
-              onMinimizeMaximize={() => {
-                setFullScreen(prevState => !prevState)
-              }}
-              showManimizeMaximize={true}
-            ></CustomDialogHeader>
-            <CustomDialogContent>
-              {isBulkedit && <h6 className="form-label-style mb-2" >* Please enter value you want to bulk update.</h6>}
-              <Form autoComplete="off" autoCorrect="off" noValidate >
-                {fields && fields.map((section, i) => (
-                  <div key={i}>
-                    <div className={"detail-box-content detail-product-box"}>
-                      <div className={"product-form-layout"}>
-                        <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-                        <h2 className={`${"form-label-style"} ${"form-label-product"}`} >
-                          {section.name}
-                        </h2>
-                      </div>
-                    </div>
-                    <Box marginY={2}>
-                      <Grid spacing={3} container>
-                        {section.sectionFields && section.sectionFields.map((field) => (
-                          (<Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                            <Box display="flex" >
-                              <Box flexGrow={1}  >
-                                <FormTypes
-                                  {...field}
-                                  fields={initialData.fields}
-                                  fieldData={field}
-                                  values={values}
-                                  errors={errors}
-                                  touched={touched}
-                                  label={field.fieldLabel}
-                                  name={field.fieldName}
-                                  type={field.type}
-                                  options={field.option}
-                                  setFieldValue={(name, value) => {
-                                    setFieldValue(name, value)
-                                  }}
-                                  required={field.required}
-                                  fullWidth
-                                  isTooltip={field.isTooltip}
-                                  tooltipMessage={field.tooltipMessage}
-                                  size="small"
-                                />
-                              </Box>
-                            </Box>
-                          </Grid>
-                          )
-                        ))}
-                      </Grid>
-                    </Box>
-                  </div>
-                ))}
-              </Form>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <Button
-                size="small"
-                color="primary"
-                onClick={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true)
-                  }
-                  else {
-                    onClose()
-                  }
-                }}
-              >{"Close"}</Button>
-              <CustomButton
-                loading={loading}
-                disabled={loading || isEqual(ref?.current?.values, initialData.values)}
-                variant="contained"
-                color="primary"
-                type="submit"
-                onClick={submitForm}
-              > Save
-              </CustomButton>
-            </CustomDialogFooter>
-            {
-              showConfirmationDialog && <ConfirmationDialog
-                open={showConfirmationDialog}
-                message="Would you prefer to override the product-level  configuration?"
-                onOk={() => {
-                  submitForm()
-                }}
+  return (
+    <Dialog
+      maxWidth="md"
+      fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+      aria-labelledby="customized-dialog-title"
+      open={true}
+      fullWidth
+    >
+      {initialData && initialData.fields.length ? (
+        <Formik
+          innerRef={ref}
+          enableReinitialize={true}
+          initialValues={initialData.values}
+          validationSchema={yupSchema(initialData.fields)}
+          validateOnMount
+          validate={validate}
+          onSubmit={handleSubmit}
+        >
+          {({ values, errors, touched, setFieldValue, submitForm }) => (
+            <Fragment>
+              <CustomDialogHeader
+                title={getTitle()}
                 onClose={() => {
-                  setShowConfirmationDialog(false)
+                  if (!isEqual(ref?.current?.values, initialData.values)) {
+                    setShowConfirmDialog(true);
+                  } else {
+                    onClose();
+                  }
                 }}
-              />
-            }
-            {
-              showConfirmDialog ?
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              ></CustomDialogHeader>
+              <CustomDialogContent>
+                {isBulkedit && <h6 className="form-label-style mb-2">* Please enter value you want to bulk update.</h6>}
+                <Form autoComplete="off" autoCorrect="off" noValidate>
+                  {fields &&
+                    fields.map((section, i) => (
+                      <div key={i}>
+                        <div className={'detail-box-content detail-product-box'}>
+                          <div className={'product-form-layout'}>
+                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                            <h2 className={`${'form-label-style'} ${'form-label-product'}`}>{section.name}</h2>
+                          </div>
+                        </div>
+                        <Box marginY={2}>
+                          <Grid spacing={3} container>
+                            {section.sectionFields &&
+                              section.sectionFields.map((field) => (
+                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Box display="flex">
+                                    <Box flexGrow={1}>
+                                      <FormTypes
+                                        {...field}
+                                        fields={initialData.fields}
+                                        fieldData={field}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value);
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field.isTooltip}
+                                        tooltipMessage={field.tooltipMessage}
+                                        size="small"
+                                      />
+                                    </Box>
+                                  </Box>
+                                </Grid>
+                              ))}
+                          </Grid>
+                        </Box>
+                      </div>
+                    ))}
+                </Form>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <Button
+                  size="small"
+                  color="primary"
+                  onClick={() => {
+                    if (!isEqual(ref.current.values, initialData.values)) {
+                      setShowConfirmDialog(true);
+                    } else {
+                      onClose();
+                    }
+                  }}
+                >
+                  {'Close'}
+                </Button>
+                <CustomButton
+                  loading={loading}
+                  disabled={loading || isEqual(ref?.current?.values, initialData.values)}
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  onClick={submitForm}
+                >
+                  {' '}
+                  Save
+                </CustomButton>
+              </CustomDialogFooter>
+              {showConfirmationDialog && (
+                <ConfirmationDialog
+                  open={showConfirmationDialog}
+                  message="Would you prefer to override the product-level  configuration?"
+                  onOk={() => {
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmationDialog(false);
+                  }}
+                />
+              )}
+              {showConfirmDialog ? (
                 <ConfirmCancelDialog
                   close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
-                    setShowConfirmDialog(false)
-                    submitForm()
+                    setShowConfirmDialog(false);
+                    submitForm();
                   }}
                   onClose={() => {
-                    setShowConfirmDialog(false)
-                    onClose()
+                    setShowConfirmDialog(false);
+                    onClose();
                   }}
-                /> : null
-            }
-          </Fragment>
-        )}
-      </Formik>
-      :
-      <Box p={2} height={500} bgcolor="white">
-        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-      </Box>}
-  </Dialog>);
+                />
+              ) : null}
+            </Fragment>
+          )}
+        </Formik>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+    </Dialog>
+  );
 };
 
 export default RepairOrderQtyDialog;
