@@ -13,7 +13,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 
-function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom }) {
+function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productName }) {
   const [fullScreen, setFullScreen] = useState(false);
   const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -164,8 +164,6 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom }) {
           e.productName = e.product?.optionLabel;
           e.productDescription = e.product?.productDescription;
           e.productNumber = e.product?.productNumber;
-          e.requestBy = e.requestBy?.optionLabel;
-          e.responseBy = e.responseBy?.optionLabel;
           e.storageLocation = e.storageLocation?.optionLabel;
         });
         setRowsData(filteredData);
@@ -188,7 +186,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom }) {
       }}
     >
       <CustomDialogHeader
-        title={'Logs'}
+        title={`Logs (${productName})`}
         onClose={onClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
@@ -217,7 +215,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom }) {
             </Box>
           </Box>
         ) : (
-          <Box p={2} height={500}>
+          <Box p={2} height={500} bgcolor="white">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
