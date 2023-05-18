@@ -196,7 +196,6 @@ const Layout = ({ children, width }) => {
     }
   };
 
-  console.log(theme);
 
   return (
     <div ref={contentRef}>

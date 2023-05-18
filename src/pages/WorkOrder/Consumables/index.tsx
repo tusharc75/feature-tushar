@@ -58,7 +58,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
           width: 200,
-          hide: false,
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
@@ -108,7 +107,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         Header: 'Qty',
         editable: allowedToEdit,
         width: 150,
-        hide: false,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
       ...(user?.user?.brandPolicy?.workOrderConsumableRequest
@@ -134,7 +132,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         minWidth: 100,
         sticky: 'right',
         disableFilters: true,
-        hide: false,
         canDrag: false,
         Cell: ({ row }: any) => (
           <div style={{ display: 'flex', justifyContent: 'right' }}>
@@ -245,7 +242,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    if (parseInt(inputField.qty) < updatedData.consumedQty) {
+    if (parseInt(inputField.qty) < ((updatedData?.consumedQty || 0) + (updatedData?.requestedQty || 0))) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
