@@ -113,6 +113,9 @@
   }
   .MuiDialogActions-root {
     background: #ebebeb;
+    [data-mode='dark'] & {
+      background: #282845;
+    }
   }
 }
 

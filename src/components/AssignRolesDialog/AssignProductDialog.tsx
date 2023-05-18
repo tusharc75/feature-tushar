@@ -176,12 +176,11 @@ const AssignProductDialog = ({
         term: 'Part'
       });
     }
-    if (reference === "purchaseOrder") {
+    if (reference === 'purchaseOrder') {
       if (!user?.user?.brandPolicy?.showSerializedProduct) {
         updatedFilters.push({ field: 'serializedProduct', term: 'No' });
       }
-    }
-    else {
+    } else {
       if (serialized != null) {
         updatedFilters.push({
           field: 'serializedProduct',
@@ -362,7 +361,7 @@ const AssignProductDialog = ({
               renderedFrom={renderedFrom}
             />
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}

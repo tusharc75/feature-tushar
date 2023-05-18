@@ -1,158 +1,160 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, IconButton, Tooltip, Chip } from "@material-ui/core";
-import axiosInstance from "src/axios/axiosInstance";
-import { useData } from "src/StateProvider/Provider";
-import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
-import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { cageManagement, gridLoadingTimeout, isObjectEmpty } from "src/constants/helpers";
-import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, ImageRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
-import HtmlTooltip from "../../../components/CustomTooltipTitle";
+import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import { Grid, Box, IconButton, Tooltip, Chip } from '@material-ui/core';
+import axiosInstance from 'src/axios/axiosInstance';
+import { useData } from 'src/StateProvider/Provider';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { cageManagement, gridLoadingTimeout, isObjectEmpty } from 'src/constants/helpers';
+import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import { CommonRenderer, ImageRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { prepareDataForGrid } from '../../../constants/helpers';
 import AddToPhotosOutlinedIcon from '@material-ui/icons/AddToPhotosOutlined';
 
 const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, searchVal, productCategory, refreshData }) => {
+  const toastConfig = useContext(CustomToastContext);
 
-    const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user, permissions }
+  }: any = useData();
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-    const { state: { user, permissions } }: any = useData();
-    const [gridApi, setGridApi] = useState(null);
-    const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const columns = [
+    { field: 'productName', headerName: 'Product Name', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'productImage', headerName: 'Product Image', show: false, cellRenderer: 'imageRenderer' },
+    { field: 'availableInventory', headerName: 'Inventory', filter: false, show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'productCategory', headerName: 'Product Category', show: false, cellRenderer: 'commonRenderer' }
+  ];
 
-    const columns = [
-        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "productImage", headerName: "Product Image", show: false, cellRenderer: "imageRenderer" },
-        { field: "availableInventory", headerName: "Inventory", filter: false, show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "productCategory", headerName: "Product Category", show: false, cellRenderer: "commonRenderer" },
-    ]
+  const ActionsRenderer = (params) => (
+    <HtmlTooltip title={params?.data?.inventory ? 'Pickup' : 'No inventory'}>
+      <span>
+        <IconButton
+          size="small"
+          disabled={!params.data?.inventory || params.data?.inventory === 0}
+          aria-label="Pickup"
+          onClick={() => {
+            setAssignHistoryProductQty(params.data);
+          }}
+          color={params?.data?.inventory ? 'secondary' : 'inherit'}
+        >
+          <AddToPhotosOutlinedIcon fontSize="small" />
+        </IconButton>
+      </span>
+    </HtmlTooltip>
+  );
 
-    const ActionsRenderer = (params) => (
-        <HtmlTooltip title={params?.data?.inventory ? 'Pickup' : 'No inventory'} >
-            <span>
-                <IconButton
-                    size="small"
-                    disabled={!params.data?.inventory || params.data?.inventory === 0}
-                    aria-label="Pickup"
-                    onClick={() => {
-                        setAssignHistoryProductQty(params.data)
-                    }}
-                    color={params?.data?.inventory ? "secondary" : "inherit"}
-                >
-                    <AddToPhotosOutlinedIcon fontSize="small" />
-                </IconButton>
-            </span>
-        </HtmlTooltip>
-    );
+  const frameWorkComponent = {
+    commonRenderer: CommonRenderer,
+    imageRenderer: ImageRenderer,
+    actionsRenderer: ActionsRenderer
+  };
 
-    const frameWorkComponent = {
-        commonRenderer: CommonRenderer,
-        imageRenderer: ImageRenderer,
-        actionsRenderer: ActionsRenderer
-    };
-
-    useEffect(() => {
-        if (plantId) {
-            fetchProducts();
-        }
-    }, [page, limit, filters, sorting, search, plantId, productCategory, refreshData]);
-
-    useEffect(() => {
-        dispatch({ type: 'search', search: searchVal });
-    }, [searchVal]);
-
-    const getQueryString = () => {
-        let deepFilter = `&page=${page}&limit=${limit}`;
-        if (!isObjectEmpty(filters)) {
-            const updatedFilters = [];
-            Object.keys(filters).forEach((field) => {
-                updatedFilters.push({
-                    field: field,
-                    term: filters[field].filter
-                });
-            });
-            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
-        }
-        if (sorting.length > 0) {
-            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-        }
-        const filterById = [];
-        if (productCategory && productCategory !== '') {
-            filterById.push({ field: 'productCategory', term: productCategory });
-        }
-        if (filterById.length) {
-            deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
-        }
-        if (search) {
-            deepFilter = `${deepFilter}&search=${search}`;
-        }
-        return deepFilter;
-    };
-
-    const fetchProducts = () => {
-        dispatch({ type: 'loading', loading: true });
-        const queryString = getQueryString();
-        if (gridApi) {
-            gridApi.setRowData([]);
-        }
-        let api = `${cageManagement.api}?wareHouse=${plantId}${queryString}`;
-        axiosInstance().get(api).then(({ data: { data, count } }) => {
-            let rows = data?.map((u) => {
-                let finalObject = prepareDataForGrid(u);
-                return {
-                    plantId: plantId,
-                    ...finalObject
-                };
-            });
-            dispatch({ type: 'initialize', data: rows, count: count });
-            setTimeout(() => {
-                dispatch({ type: 'loading', loading: false });
-            }, gridLoadingTimeout);
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-            dispatch({ type: 'loading', loading: false });
-        })
+  useEffect(() => {
+    if (plantId) {
+      fetchProducts();
     }
+  }, [page, limit, filters, sorting, search, plantId, productCategory, refreshData]);
 
-    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-    if (columnState) {
-        columns.forEach((item) => {
-            columnState.forEach((d) => {
-                if (d.colId === item.field) {
-                    item.show = !d.hide;
-                }
-            });
+  useEffect(() => {
+    dispatch({ type: 'search', search: searchVal });
+  }, [searchVal]);
+
+  const getQueryString = () => {
+    let deepFilter = `&page=${page}&limit=${limit}`;
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+      Object.keys(filters).forEach((field) => {
+        updatedFilters.push({
+          field: field,
+          term: filters[field].filter
         });
+      });
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    const filterById = [];
+    if (productCategory && productCategory !== '') {
+      filterById.push({ field: 'productCategory', term: productCategory });
+    }
+    if (filterById.length) {
+      deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+    return deepFilter;
+  };
 
+  const fetchProducts = () => {
+    dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+    let api = `${cageManagement.api}?wareHouse=${plantId}${queryString}`;
+    axiosInstance()
+      .get(api)
+      .then(({ data: { data, count } }) => {
+        let rows = data?.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          return {
+            plantId: plantId,
+            ...finalObject
+          };
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        dispatch({ type: 'loading', loading: false });
+      });
+  };
 
-    return (
-        <Fragment>
-            {columns && frameWorkComponent ?
-                <CustomAgGrid
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameWorkComponent}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={100}
-                    loading={loading}
-                    renderedFrom={renderedFrom}
-                    refreshGrid={fetchProducts}
-                    allowSelection={false} />
-                : <Box
-                    p={2}
-                    height={500}
-                    bgcolor="white">
-                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Box>
-            }
-        </Fragment>
-    );
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+  if (columnState) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
+
+  return (
+    <Fragment>
+      {columns && frameWorkComponent ? (
+        <CustomAgGrid
+          columns={columns}
+          dataRows={dataRows}
+          frameworkComponents={frameWorkComponent}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          actionWidth={100}
+          loading={loading}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchProducts}
+          allowSelection={false}
+        />
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+    </Fragment>
+  );
 };
 
 export default ProductGridLayout;

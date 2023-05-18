@@ -20,12 +20,11 @@ import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 
 const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
-  
+
   const [columns, setColumns] = useState([]);
   const [rowsData, setRowsData] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
@@ -97,12 +96,12 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
         )
     });
     setColumns(column);
-    fetchAdditionalCost()
+    fetchAdditionalCost();
   };
 
   const fetchAdditionalCost = async () => {
     try {
-      setNextStep(false);  
+      setNextStep(false);
       const response = await axiosInstance().get(`${salesOrder.api}/additionalcost/${salesOrderData._id}`);
       let rows = response?.data?.data;
       rows?.forEach((parent, i) => {
@@ -118,14 +117,14 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
   const handleAddCost = (rows) => {
     axiosInstance()
       .post(`${salesOrder.api}/additionalcost/${salesOrderData._id}/add`, { additionalCost: rows })
-      .then(({data}) => {
+      .then(({ data }) => {
         fetchAdditionalCost();
         setShowCostDialog(false);
         toastConfig.setToastConfig({
-            open: true,
-            type: "success",
-            message: data.message,
-          });
+          open: true,
+          type: 'success',
+          message: data.message
+        });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -134,20 +133,20 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
 
   const handleUpdateCost = (rows) => {
     rows.forEach((element) => {
-        delete element.index;
-        delete element.isValid;
-        delete element.hideSelection;
-      });
+      delete element.index;
+      delete element.isValid;
+      delete element.hideSelection;
+    });
     axiosInstance()
       .put(`${salesOrder.api}/additionalcost/${salesOrderData._id}/update`, { additionalCost: rows })
-      .then(({data}) => {
+      .then(({ data }) => {
         fetchAdditionalCost();
         setShowCostDialog(false);
         toastConfig.setToastConfig({
-            open: true,
-            type: "success",
-            message: data.message,
-          });
+          open: true,
+          type: 'success',
+          message: data.message
+        });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -157,14 +156,14 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
   const handleDeleteCost = () => {
     axiosInstance()
       .post(`${salesOrder.api}/additionalcost/${salesOrderData._id}/delete`, { ids: deleteRecords })
-      .then(({data}) => {
+      .then(({ data }) => {
         fetchAdditionalCost();
-        setShowDeleteConfirmBox(false)
+        setShowDeleteConfirmBox(false);
         toastConfig.setToastConfig({
-            open: true,
-            type: "success",
-            message: data.message,
-          });
+          open: true,
+          type: 'success',
+          message: data.message
+        });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -185,7 +184,6 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
   const closeActions = () => {
     setAnchorEl(null);
   };
-
 
   return (
     <Fragment>
@@ -262,7 +260,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
           />
         </Box>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
@@ -278,7 +276,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
           costData={selectedCostData}
         />
       )}
-        {showDeleteConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete  ? `}

@@ -2,12 +2,7 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import {
-  CustomDialogTransition,
-  getObjKeysWithValues,
-  setFieldsInAscendingOrder,
-  yupSchema
-} from 'src/constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -280,7 +275,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                   }}
                   showManimizeMaximize={true}
                 />
-                 <CustomDialogContent>
+                <CustomDialogContent>
                   <Form>
                     {formsData &&
                       formsData.map((form, i) => {
@@ -341,8 +336,8 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                     color="primary"
                     size="small"
                     onClick={() => {
-                        if (isEqual(initialData.values, values)) onClose();
-                        else setShowConfirmDialog(true);
+                      if (isEqual(initialData.values, values)) onClose();
+                      else setShowConfirmDialog(true);
                     }}
                   >
                     Cancel
@@ -379,7 +374,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
             )}
           </Formik>
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

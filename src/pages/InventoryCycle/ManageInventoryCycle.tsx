@@ -19,7 +19,6 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 
 const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDisabled = false, isClone = false }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
@@ -137,12 +136,18 @@ const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDi
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={isClone ? `Clone - ${cloneHeading}` : inventoryCycleId ? !isUpdateDisabled ? 'Update ' + routes.inventoryCycle.title
-                  : values['name'] : 'Create ' + routes.inventoryCycle.title
+                title={
+                  isClone
+                    ? `Clone - ${cloneHeading}`
+                    : inventoryCycleId
+                    ? !isUpdateDisabled
+                      ? 'Update ' + routes.inventoryCycle.title
+                      : values['name']
+                    : 'Create ' + routes.inventoryCycle.title
                 }
                 onClose={() => {
-                  if (isEqual(initialData.values, values)) onClose()
-                  else setShowConfirmDialog(true)
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -171,8 +176,8 @@ const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDi
                   size="small"
                   color="primary"
                   onClick={() => {
-                    if (isEqual(initialData.values, values)) onClose()
-                    else setShowConfirmDialog(true)
+                    if (isEqual(initialData.values, values)) onClose();
+                    else setShowConfirmDialog(true);
                   }}
                 >
                   {isUpdateDisabled ? 'Close' : 'Cancel'}
@@ -201,7 +206,7 @@ const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDi
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

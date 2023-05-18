@@ -959,7 +959,7 @@ const CreateProduct = (props) => {
                     </Fragment>
                 )}
             </Formik> :
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500} >
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
         }

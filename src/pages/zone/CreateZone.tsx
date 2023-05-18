@@ -19,7 +19,6 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 
 const CreateZone = (props) => {
-  
   const toastConfig = useContext(CustomToastContext);
   const { zoneId, onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
   const [loading, setLoading] = useState(false);
@@ -27,7 +26,7 @@ const CreateZone = (props) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [saveClick, setSaveClick] = useState(false);
-  const [cloneHeading, setCloneHeading] = useState('')
+  const [cloneHeading, setCloneHeading] = useState('');
 
   useEffect(() => {
     axiosInstance()
@@ -41,11 +40,9 @@ const CreateZone = (props) => {
             .get(`/zone/` + zoneId)
             .then(({ data: { data } }) => {
               let tempOptionArray = fieldsDataForUpdate.find((d) => d.fieldName === 'name').option;
-              fieldsDataForUpdate.find((d) => d.fieldName === 'name').option = tempOptionArray.filter(
-                (data) => data.optionValue !== zoneId
-              );
+              fieldsDataForUpdate.find((d) => d.fieldName === 'name').option = tempOptionArray.filter((data) => data.optionValue !== zoneId);
               const { name, ...rest } = data;
-              setCloneHeading(name)
+              setCloneHeading(name);
               if (isClone) {
                 setInitialData({
                   fields: fieldsDataForUpdate,
@@ -137,10 +134,10 @@ const CreateZone = (props) => {
                   isClone
                     ? `Clone - ${cloneHeading}`
                     : zoneId
-                      ? !isUpdateDisabled
-                        ? 'Update ' + routes.zone.title
-                        : values['name']
-                      : 'Create ' + routes.zone.title
+                    ? !isUpdateDisabled
+                      ? 'Update ' + routes.zone.title
+                      : values['name']
+                    : 'Create ' + routes.zone.title
                 }
                 onClose={() => {
                   if (isEqual(values, initialData.values)) onClose();
@@ -203,7 +200,7 @@ const CreateZone = (props) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

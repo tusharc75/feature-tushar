@@ -3,7 +3,14 @@ import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core
 import { ExpandMore } from '@material-ui/icons';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
+import {
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource
+} from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -17,7 +24,6 @@ import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
 
 const Competencies = ({ competencyType }) => {
-
   let renderedFrom = camelCase(routes.competencies?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -295,20 +301,20 @@ const Competencies = ({ competencyType }) => {
           showOnlyShowFilteredRecordSwitch={true}
         />
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
       {openDialog.open && (
         <ManageCompetencies
-        id={openDialog.id}
-        isClone={false}
-        onClose={() => setOpenDialog({ open: false, id: null })}
-        onSuccess={() => {
-          setOpenDialog({ open: false, id: null });
-          fetchData();
-        }}
-        referenceData={{competencyType: competencyType}}
+          id={openDialog.id}
+          isClone={false}
+          onClose={() => setOpenDialog({ open: false, id: null })}
+          onSuccess={() => {
+            setOpenDialog({ open: false, id: null });
+            fetchData();
+          }}
+          referenceData={{ competencyType: competencyType }}
         />
       )}
       {showDeleteConfirmBox && (

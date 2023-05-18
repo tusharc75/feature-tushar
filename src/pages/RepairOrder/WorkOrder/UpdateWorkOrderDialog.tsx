@@ -2,12 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import {
-  CHILD_RESOURCE,
-  CustomDialogTransition,
-  getObjKeysWithValues,
-  yupSchema
-} from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -20,7 +15,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdit, repairOrderData }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
@@ -36,11 +30,11 @@ const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdi
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderService}`);
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, repairOrderData?.currency || 'USD');
-      setAllFields(JSON.parse(JSON.stringify(data)))
-      setInitialData({
-        fields: data,
-        values: getObjKeysWithValues(materialData, data)
-      });
+    setAllFields(JSON.parse(JSON.stringify(data)));
+    setInitialData({
+      fields: data,
+      values: getObjKeysWithValues(materialData, data)
+    });
     EvaluteFields(data);
   };
 
@@ -55,9 +49,9 @@ const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdi
   };
 
   const handleSubmit = (values) => {
-    let returnData = []
-      returnData = [{ ...materialData, ...values }];
-      handleUpdate(returnData, saveAndNext);
+    let returnData = [];
+    returnData = [{ ...materialData, ...values }];
+    handleUpdate(returnData, saveAndNext);
   };
 
   return (
@@ -80,7 +74,7 @@ const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdi
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={ `Edit - ${materialData?.index} (${materialData?.detail || ""})`}
+                title={`Edit - ${materialData?.index} (${materialData?.detail || ''})`}
                 onClose={() => {
                   onClose();
                 }}
@@ -180,7 +174,7 @@ const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdi
                   type="submit"
                   onClick={() => {
                     setSaveAndNext(false);
-                    submitForm()
+                    submitForm();
                   }}
                 >
                   Save
@@ -190,7 +184,7 @@ const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdi
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

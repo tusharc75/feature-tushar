@@ -21,7 +21,7 @@ const FleetDispatch = () => {
   const [fleets, setFleets] = useState(null);
   const [jobs, setJobs] = useState(null);
   const [dispatchDialogOpen, setDispatchDialogOpen] = useState({ open: false, fleet: null, job: null });
-  const [showMapView, setShowMapView] = useState(false)
+  const [showMapView, setShowMapView] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -51,21 +51,17 @@ const FleetDispatch = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Box className='d-flex justify-content-end align-items-center mb-4'>
+        <Box className="d-flex justify-content-end align-items-center mb-4">
           <Box className="d-flex align-items-center">
             <IconButton
               size="small"
               onClick={() => {
-                setShowMapView(true)
+                setShowMapView(true);
               }}
             >
               <Map fontSize="small" color="primary" />
             </IconButton>
-            <IconButton
-              className='ml-2'
-              size="small"
-              onClick={fetchData}
-            >
+            <IconButton className="ml-2" size="small" onClick={fetchData}>
               <RefreshIcon fontSize="small" color="primary" />
             </IconButton>
           </Box>
@@ -82,7 +78,7 @@ const FleetDispatch = () => {
             </Grid>
           </DndProvider>
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
@@ -112,12 +108,13 @@ const FleetDispatch = () => {
             job={dispatchDialogOpen.job}
           />
         )}
-        {showMapView &&
+        {showMapView && (
           <MapView
             handleClose={() => {
-              setShowMapView(false)
+              setShowMapView(false);
             }}
-          />}
+          />
+        )}
       </Box>
     </Box>
   );

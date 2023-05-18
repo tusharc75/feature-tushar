@@ -17,7 +17,6 @@ import CardColTimeline, { datarowInterface } from 'src/components/CardColTimelin
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const WorkOrderSupervisor = () => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [selectedUser, setSelectedUser] = useState(null);
@@ -34,7 +33,10 @@ const WorkOrderSupervisor = () => {
   const [loading, setLoading] = useState(true);
 
   const [timeFrame, setTimeFrame] = React.useState<any>('custom');
-  const [globalFilters, setGlobalFilters] = useState({ from: new Date(moment().startOf('month').format('YYYY/MM/DD')), to: new Date(moment().endOf('month').format('YYYY/MM/DD')) });
+  const [globalFilters, setGlobalFilters] = useState({
+    from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
+    to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
+  });
 
   useEffect(() => {
     let timeout = setTimeout(fetchData, 600);
@@ -86,7 +88,7 @@ const WorkOrderSupervisor = () => {
   }, []);
 
   const fetchData = async () => {
-    setLoading(true)
+    setLoading(true);
     const queryString = getQueryString();
     try {
       let data;
@@ -120,16 +122,16 @@ const WorkOrderSupervisor = () => {
         Pending: { data: pending, color: '#F8A300' },
         'In-Progress': { data: inProgress, color: '#F16A9A' },
         Completed: { data: completed, color: '#31AC1D' }
-      })
-      setLoading(false)
+      });
+      setLoading(false);
     } catch (error) {
-      setLoading(false)
+      setLoading(false);
       toastConfig.setToastConfig(error);
     }
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = '?'
+    let deepFilter = '?';
     if (selectedUser) {
       deepFilter = `${deepFilter}&user=${selectedUser}`;
     }
@@ -147,7 +149,6 @@ const WorkOrderSupervisor = () => {
     }
     return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
-
 
   const cardDataRows: datarowInterface[] = [
     { accessor: 'workOrder', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?.workOrderId}` },
@@ -253,7 +254,13 @@ const WorkOrderSupervisor = () => {
               />
               <FormControl style={{ width: '150px' }} size="medium" margin="dense" variant="outlined">
                 <InputLabel id="duration">Select Duration</InputLabel>
-                <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)} label="Select Duration">
+                <Select
+                  labelId="duration"
+                  id="time-duration"
+                  value={timeFrame}
+                  onChange={(e) => setTimeFrame(e.target.value)}
+                  label="Select Duration"
+                >
                   <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                   <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
                   <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
@@ -293,7 +300,7 @@ const WorkOrderSupervisor = () => {
               />
             </Box>
           </div>
-          {serviceData ?
+          {serviceData ? (
             <CardColTimeline
               data={serviceData}
               loading={loading}
@@ -301,11 +308,12 @@ const WorkOrderSupervisor = () => {
               passFailStatus={true}
               passFailAccessor="serviceStatus"
               px={2}
-            /> :
-            <Box p={2} height={500} bgcolor="white">
+            />
+          ) : (
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
-          }
+          )}
         </div>
       </Fragment>
     </MuiPickersUtilsProvider>

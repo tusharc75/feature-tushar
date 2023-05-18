@@ -32,7 +32,7 @@ const WorkOrder = ({
   allowedToDelete,
   isPostWorkService,
   setCurrentStep,
-  createNewVersionQuote,
+  createNewVersionQuote
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -102,7 +102,7 @@ const WorkOrder = ({
                 onClick={() => {
                   setUpdateDialog({
                     open: true,
-                    data: row.original,
+                    data: row.original
                   });
                 }}
                 className="link text-truncate"
@@ -236,63 +236,61 @@ const WorkOrder = ({
       }
     ];
     coloum = [...coloum, ...newColumns];
-    coloum.push(
-      {
-        accessor: 'action',
-        Header: 'Action',
-        minWidth: 70,
-        width: 70,
-        sticky: 'right',
-        disableFilters: true,
-        canDrag: false,
-        Cell: ({ row }) => {
-          return row?.original?.type === 'service' || row?.original?.type === 'package' ? (
-            <>
-              <IconButton
-                disabled={
+    coloum.push({
+      accessor: 'action',
+      Header: 'Action',
+      minWidth: 70,
+      width: 70,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => {
+        return row?.original?.type === 'service' || row?.original?.type === 'package' ? (
+          <>
+            <IconButton
+              disabled={
+                row?.original?.type === 'package' && row?.original?.subRows?.length === 0
+                  ? false
+                  : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
+                  ? false
+                  : true
+              }
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                setDeleteData([row.original]);
+                setShowConfirmBox(true);
+              }}
+            >
+              <Delete
+                fontSize="small"
+                color={
                   row?.original?.type === 'package' && row?.original?.subRows?.length === 0
-                    ? false
+                    ? 'error'
                     : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
-                      ? false
-                      : true
+                    ? 'error'
+                    : 'disabled'
                 }
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  setDeleteData([row.original]);
-                  setShowConfirmBox(true);
-                }}
-              >
-                <Delete
-                  fontSize="small"
-                  color={
-                    row?.original?.type === 'package' && row?.original?.subRows?.length === 0
-                      ? 'error'
-                      : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
-                        ? 'error'
-                        : 'disabled'
-                  }
-                />
-              </IconButton>
-            </>
-          ) : row?.original?.type === 'serializedAsset' ? (
-            <>
-              <IconButton
-                disabled={row.original?.subRows?.length === 0 ? false : true}
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  setDeleteData([row.original]);
-                  setShowConfirmBox(true);
-                }}
-              >
-                <Delete fontSize="small" color={row.original?.subRows?.length === 0 ? 'error' : 'disabled'} />
-              </IconButton>
-            </>
-          ) : null;
-        }
+              />
+            </IconButton>
+          </>
+        ) : row?.original?.type === 'serializedAsset' ? (
+          <>
+            <IconButton
+              disabled={row.original?.subRows?.length === 0 ? false : true}
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                setDeleteData([row.original]);
+                setShowConfirmBox(true);
+              }}
+            >
+              <Delete fontSize="small" color={row.original?.subRows?.length === 0 ? 'error' : 'disabled'} />
+            </IconButton>
+          </>
+        ) : null;
       }
-    );
+    });
     setColumns(coloum);
   };
 
@@ -370,35 +368,37 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'service'
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'serializedAsset'
-            ? parent?.serializedAsset?.assetNumber
-            : parent?.packageDetail?.packageName
-        }`;
+          ? parent?.serializedAsset?.assetNumber
+          : parent?.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'serializedAsset'
-                ? parent?.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === 'service'
-        ? parent.serviceDetail?.status
-        : parent.type === 'product'
+      parent.status = `${
+        parent.type === 'service'
+          ? parent.serviceDetail?.status
+          : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
-        }`;
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
@@ -442,18 +442,18 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow?.serializedAsset?.assetNumber
-              : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow?.serializedAsset?.assetNumber
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -575,7 +575,6 @@ const WorkOrder = ({
       });
   };
 
-
   return (
     <Fragment>
       <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
@@ -613,7 +612,7 @@ const WorkOrder = ({
                 Add Services
               </MenuItem>
               <MenuItem
-                disabled={selectedProducts?.filter((d) => d.type === "service")?.length > 0 ? false : true}
+                disabled={selectedProducts?.filter((d) => d.type === 'service')?.length > 0 ? false : true}
                 onClick={() => {
                   closeActions();
                   setUserAssignDialog(true);
@@ -641,19 +640,19 @@ const WorkOrder = ({
                 disabled={
                   selectedProducts?.filter((e) => e.type === 'service').length
                     ? selectedServices?.filter(
-                      (d) =>
-                        d.type === 'service' &&
-                        d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
-                        d.status === WORKORDER_SERVICE_STATUS.pending
-                    )?.length === selectedServices?.length
+                        (d) =>
+                          d.type === 'service' &&
+                          d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
+                          d.status === WORKORDER_SERVICE_STATUS.pending
+                      )?.length === selectedServices?.length
                       ? false
                       : true
                     : selectedAssets?.length
-                      ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
-                        selectedAssets?.length
-                        ? false
-                        : true
+                    ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
+                      selectedAssets?.length
+                      ? false
                       : true
+                    : true
                 }
               >
                 Delete
@@ -685,7 +684,7 @@ const WorkOrder = ({
               />
             </Box>
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
@@ -753,7 +752,6 @@ const WorkOrder = ({
                 setUpdateDialog({ open: false, data: null });
               }}
               materialData={updateDialog.data}
-
               handleUpdate={handleSaveData}
               loadingEdit={isUpdating}
               repairOrderData={repairOrderData}

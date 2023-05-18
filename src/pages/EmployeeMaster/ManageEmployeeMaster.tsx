@@ -42,22 +42,25 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       if (id) {
-        axiosInstance().get(`${routes?.employeeMaster?.path}/${id}`).then(({ data: { data } }) => {
-          let fields = fieldsDataForUpdate
-          let tempData = data
-          if (isClone) {
-            fields = fieldsDataForCreate
-            const { employeeNumber, ...rest } = data
-            setCloneHeading(employeeNumber);
-            tempData = { ...rest, employeeNumber }
-          }
-          setInitialData({
-            fields: fields,
-            values: getObjKeysWithValues(tempData, fields),
+        axiosInstance()
+          .get(`${routes?.employeeMaster?.path}/${id}`)
+          .then(({ data: { data } }) => {
+            let fields = fieldsDataForUpdate;
+            let tempData = data;
+            if (isClone) {
+              fields = fieldsDataForCreate;
+              const { employeeNumber, ...rest } = data;
+              setCloneHeading(employeeNumber);
+              tempData = { ...rest, employeeNumber };
+            }
+            setInitialData({
+              fields: fields,
+              values: getObjKeysWithValues(tempData, fields)
+            });
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
-        }).catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         setInitialData({
@@ -65,7 +68,6 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
           values: tempInitialData
         });
       }
-
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -74,19 +76,22 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
   const handleSubmit = (values) => {
     setSubmitting(true);
     if (id && !isClone) {
-      values._id = id
-      axiosInstance().put(`${routes?.employeeMaster?.path}`, values).then(({ data }) => {
-        setSubmitting(false);
-        onSuccess()
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
+      values._id = id;
+      axiosInstance()
+        .put(`${routes?.employeeMaster?.path}`, values)
+        .then(({ data }) => {
+          setSubmitting(false);
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     } else {
       axiosInstance()
         .post(`${routes?.employeeMaster?.path}`, values)
@@ -96,19 +101,17 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
         })
         .catch((error) => {
           setLoading(false);
           setSubmitting(false);
           toastConfig.setToastConfig(error);
-        })
+        });
     }
   };
-
-
 
   return (
     <Dialog
@@ -125,24 +128,21 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (isEqual(initialData.values, values)) onClose()
-                  else setShowConfirmDialog(true)
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.employeeNumber ? `(${initialData.values?.employeeNumber})` : ''}`
-                  : `Create Employee Master`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.employeeNumber ? `(${initialData.values?.employeeNumber})` : ''}`
+                    : `Create Employee Master`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -150,7 +150,7 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
                 showManimizeMaximize={true}
               />
               <CustomDialogContent>
-                <Form autoComplete="off" autoCorrect="off" noValidate >
+                <Form autoComplete="off" autoCorrect="off" noValidate>
                   <InputField
                     errors={errors}
                     values={values}
@@ -160,7 +160,7 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
                     size="small"
                     fullWidth
                     onImageUploadCompletePercentage={(completePercentage) => {
-                      setUploadingImageOrFileProgress(completePercentage)
+                      setUploadingImageOrFileProgress(completePercentage);
                     }}
                   />
                 </Form>
@@ -171,8 +171,8 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (isEqual(initialData.values, values)) onClose()
-                    else setShowConfirmDialog(true)
+                    if (isEqual(initialData.values, values)) onClose();
+                    else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
@@ -208,12 +208,12 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
     </Dialog>
-  )
+  );
 };
 
 export default ManageEmployeeMaster;

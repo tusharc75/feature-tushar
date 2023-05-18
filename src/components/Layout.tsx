@@ -9,6 +9,7 @@ import GlobalUserChat from './GlobalUserChat';
 import { useData } from '../StateProvider/Provider';
 import { SET_START_TOUR } from '../StateProvider/actionTypes';
 import { AccountDetailsSteps, AccountSteps, DashboardSteps, UserSteps, ContactsSteps, ContactDetailsSteps } from '../constants/tourSteps';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const useStyles = makeStyles(() => ({
   content: {
@@ -35,6 +36,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 const Layout = ({ children, width }) => {
+  const [theme] = useAppTheme();
   const contentRef = useRef(null);
   const bodyRef = useRef(null);
   const { key, pathname } = useLocation();
@@ -194,6 +196,8 @@ const Layout = ({ children, width }) => {
     }
   };
 
+  console.log(theme);
+
   return (
     <div ref={contentRef}>
       <Joyride
@@ -224,7 +228,7 @@ const Layout = ({ children, width }) => {
           transition={{ duration: 0.3 }}
           exit={{ opacity: 0 }}
           className={classes.content}
-          style={{ backgroundColor: '#f1f5ff' }}
+          style={{ backgroundColor: theme === 'light' ? '#f1f5ff' : '#24243e' }}
           onClick={handleToggleState}
         >
           <div className={classes.layout} ref={bodyRef} onScroll={onScroll}>

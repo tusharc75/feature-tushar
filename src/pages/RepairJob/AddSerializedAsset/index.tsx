@@ -367,7 +367,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -396,7 +396,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
             />
           )
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

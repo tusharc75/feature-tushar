@@ -15,7 +15,14 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { storageLocation, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, sidebarResource, removeLocalStorage } from '../../constants/helpers';
+import {
+  storageLocation,
+  isObjectEmpty,
+  gridLoadingTimeout,
+  getLocalStorageArrayData,
+  sidebarResource,
+  removeLocalStorage
+} from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -33,7 +40,6 @@ import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 
 const WellNumber = () => {
-
   let renderedFrom = camelCase(routes.wellNumber?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -475,7 +481,7 @@ const WellNumber = () => {
             )
           ) : null
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

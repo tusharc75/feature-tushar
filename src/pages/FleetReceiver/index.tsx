@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: '4px',
     border: '1px solid #ebebeb',
     padding: '15px',
-    backgroundColor: "#F8FFFC",
+    backgroundColor: '#F8FFFC',
     transition: 'transform .2s, background .3s',
     '&:hover': {
       transform: 'scale(1.02)',
@@ -64,12 +64,10 @@ const useStyles = makeStyles((theme) => ({
     display: 'inline-block !important',
     verticalAlign: 'bottom',
     marginRight: '10px'
-  },
+  }
 }));
 
-
 const FleetReceiver = () => {
-
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -108,7 +106,13 @@ const FleetReceiver = () => {
             <Grid container spacing={2}>
               {fleets?.map((data, index) => (
                 <Grid item md={6} xs={12} sm={4}>
-                  <Box key={index} className={classes.fleetBox} onClick={() => { setReceiverDialogOpen({ open: true, fleet: data }) }}  >
+                  <Box
+                    key={index}
+                    className={classes.fleetBox}
+                    onClick={() => {
+                      setReceiverDialogOpen({ open: true, fleet: data });
+                    }}
+                  >
                     <Box className={classes.contentContainer}>
                       <Box sx={{ flexBasis: '20px' }}>
                         <LocalShippingIcon className={`${classes.truckIcon} ${classes.icon}`} />
@@ -134,12 +138,12 @@ const FleetReceiver = () => {
               ))}
             </Grid>
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               No Data Found
             </Box>
           )
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
@@ -156,7 +160,7 @@ const FleetReceiver = () => {
           data={receiverDialogOpen?.fleet}
         />
       )}
-    </Box >
+    </Box>
   );
 };
 

@@ -24,17 +24,18 @@ import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { FaDiceOne } from "react-icons/fa";
+import { FaDiceOne } from 'react-icons/fa';
 import moment from 'moment';
-import { useData } from "../../../StateProvider/Provider";
+import { useData } from '../../../StateProvider/Provider';
 import { isEqual } from 'lodash';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 
 const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSuccess, referenceType = null, referenceData = null }) => {
-
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const { state: { permissions, user, selectedEntity } }: any = useData();
+  const {
+    state: { permissions, user, selectedEntity }
+  }: any = useData();
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [formsData, setFormsData] = useState([]);
@@ -44,7 +45,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState('');
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
@@ -52,78 +53,84 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
 
   useEffect(() => {
     setLoading(true);
-    axiosInstance().get(`/field?resource=${sidebarResource.repairJob}`).then(({ data: { data } }) => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.repairJob}`)
+      .then(({ data: { data } }) => {
+        data = data.filter((obj) => obj?.fieldData?.fieldName !== 'rentalJob');
 
-      data = data.filter((obj) => obj?.fieldData?.fieldName !== "rentalJob");
+        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-      if (repairJobId) {
-        axiosInstance().get(`${repairJob.api}/` + repairJobId).then(({ data: { data } }) => {
-          if (isClone) {
-            const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
-            setTitle(`Clone - ${repairJobName}`)
-            rest.repairJobName = `RJ_${generateUniqueIdOnly()}`;
-            rest.status = `New`;
-            setInitialData({
-              fields: fieldsDataForCreate,
-              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }
-            });
-            setLoading(false);
-          } else {
-            axiosInstance().get(`${repairJob.api}/${repairJobId}/assets`)
-              .then(({ data: { data: assetData } }) => {
-                if (assetData.length) {
-                  fieldsDataForUpdate?.forEach((e) => {
-                    if (e.fieldName === "warehouse") {
-                      e.disableOnEdit = true;
-                      e.isUneditable = true;
-                    }
-                  })
-                }
-                setTitle(`Editing - [${data.repairJobName}]`)
+        if (repairJobId) {
+          axiosInstance()
+            .get(`${repairJob.api}/` + repairJobId)
+            .then(({ data: { data } }) => {
+              if (isClone) {
+                const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
+                setTitle(`Clone - ${repairJobName}`);
+                rest.repairJobName = `RJ_${generateUniqueIdOnly()}`;
+                rest.status = `New`;
                 setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
+                  fields: fieldsDataForCreate,
+                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }
                 });
-              }).catch((error) => {
-                toastConfig.setToastConfig(error);
-              });
-            setLoading(false);
+                setLoading(false);
+              } else {
+                axiosInstance()
+                  .get(`${repairJob.api}/${repairJobId}/assets`)
+                  .then(({ data: { data: assetData } }) => {
+                    if (assetData.length) {
+                      fieldsDataForUpdate?.forEach((e) => {
+                        if (e.fieldName === 'warehouse') {
+                          e.disableOnEdit = true;
+                          e.isUneditable = true;
+                        }
+                      });
+                    }
+                    setTitle(`Editing - [${data.repairJobName}]`);
+                    setInitialData({
+                      fields: fieldsDataForUpdate,
+                      values: getObjKeysWithValues(data, fieldsDataForUpdate)
+                    });
+                  })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+                setLoading(false);
+              }
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
+        } else {
+          setTitle(`Create ${routes.repairJob.title}`);
+          let initialData = { ...getObjKeys('', fieldsDataForCreate), repairJobName: `RJ_${generateUniqueIdOnly()}` };
+          if (fieldsDataForCreate?.some((e) => e.fieldName === 'expectedCompletionDate')) {
+            initialData['expectedCompletionDate'] = null;
           }
-        }).catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-      } else {
-        setTitle(`Create ${routes.repairJob.title}`)
-        let initialData = { ...getObjKeys('', fieldsDataForCreate), repairJobName: `RJ_${generateUniqueIdOnly()}` };
-        if (fieldsDataForCreate?.some((e) => e.fieldName === "expectedCompletionDate")) {
-          initialData["expectedCompletionDate"] = null;
+          if (referenceType === 'Rental Job') {
+            initialData['warehouse'] = referenceData?.warehouse;
+            initialData['rentalJob'] = referenceData?._id;
+            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellName')) {
+              initialData['wellName'] = referenceData?.wellName;
+            }
+            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellNumber') && referenceData?.wellNumber) {
+              initialData['wellNumber'] = referenceData?.wellNumber;
+            }
+            if (fieldsDataForCreate.some((e) => e.fieldName === 'afeNumber')) {
+              initialData['afeNumber'] = referenceData?.afeNumber;
+            }
+          }
+          if (referenceType === 'Product Inventory') {
+            initialData['warehouse'] = referenceData?.warehouse;
+          }
+          setInitialData({
+            fields: fieldsDataForCreate,
+            values: initialData
+          });
+          setLoading(false);
         }
-        if (referenceType === "Rental Job") {
-          initialData["warehouse"] = referenceData?.warehouse
-          initialData["rentalJob"] = referenceData?._id
-          if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
-            initialData["wellName"] = referenceData?.wellName
-          }
-          if (fieldsDataForCreate.some((e) => e.fieldName === "wellNumber") && referenceData?.wellNumber) {
-            initialData["wellNumber"] = referenceData?.wellNumber
-          }
-          if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
-            initialData["afeNumber"] = referenceData?.afeNumber
-          }
-        }
-        if (referenceType === "Product Inventory") {
-          initialData["warehouse"] = referenceData?.warehouse
-        }
-        setInitialData({
-          fields: fieldsDataForCreate,
-          values: initialData
-        });
-        setLoading(false);
-      }
-    })
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -149,32 +156,36 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
           toastConfig.setToastConfig(error);
         });
     } else {
-      const { productInventory, ...rest } = values
-      axiosInstance().post(`${repairJob.api}`, rest).then(({ data: { data, message } }) => {
-        axiosInstance().put(`${repairJob.api}/${data._id}/process-status`, {
-          "processStatus": repairJobProcessSteps[0]
+      const { productInventory, ...rest } = values;
+      axiosInstance()
+        .post(`${repairJob.api}`, rest)
+        .then(({ data: { data, message } }) => {
+          axiosInstance()
+            .put(`${repairJob.api}/${data._id}/process-status`, {
+              processStatus: repairJobProcessSteps[0]
+            })
+            .then(() => {
+              if (!referenceType) {
+                history.push(`${routes.repairJobDetail.path}/${data._id}`);
+              }
+              setSubmitting(false);
+              onSuccess(data);
+              toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: message
+              });
+            })
+            .catch((error) => {
+              setSubmitting(false);
+              onSuccess(data);
+              toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: message
+              });
+            });
         })
-          .then(() => {
-            if (!referenceType) {
-              history.push(`${routes.repairJobDetail.path}/${data._id}`);
-            }
-            setSubmitting(false);
-            onSuccess(data);
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: message
-            });
-          }).catch((error) => {
-            setSubmitting(false);
-            onSuccess(data);
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: message
-            });
-          });
-      })
         .catch((error) => {
           setSubmitting(false);
           toastConfig.setToastConfig(error);
@@ -194,193 +205,194 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
     }
   };
 
-  return (<Dialog
-    maxWidth="md"
-    fullWidth
-    fullScreen={fullScreen || (isMobile || isTablet)}
-    TransitionComponent={CustomDialogTransition}
-    aria-labelledby="customized-dialog-title"
-    onClose={(e, reason) => {
-      if (reason !== 'backdropClick') {
-        setShowConfirmDialog(true);
-      }
-    }}
-    open={true}
-  >
-    {formsData && formsData?.length ?
-      <Formik
-        initialValues={initialData.values}
-        validationSchema={yupSchema(initialData.fields)}
-        validateOnMount
-        onSubmit={handleSubmit}>
-        {({ values, errors, touched, setFieldValue, submitForm }) => (
-          <>
-            <CustomDialogHeader
-              title={title}
-              onClose={(e, reason) => {
-                if (isEqual(values, initialData.values)) {
-                  onClose()
-                }
-                else {
-                  setShowConfirmDialog(true)
-                }
-              }}
-              isMinimized={!fullScreen}
-              onMinimizeMaximize={() => {
-                setFullScreen(prevState => !prevState)
-              }}
-              showManimizeMaximize={true}
-            />
-            <CustomDialogContent>
-              <Form>
-                {formsData.map((form, i) => {
-                  return (form.name && (
-                    <div key={i}>
-                      <div className={"detail-box-content"}>
-                        <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-                        <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
-                      </div>
-                      <Box marginY={2}>
-                        <Grid spacing={3} container>
-                          {form.sectionFields.map((field) =>
-                            <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                              {field.fieldName === "startDate"
-                                ? <FormTypes
-                                  repairJobId={repairJobId}
-                                  {...field}
-                                  disabled={(!repairJobId && field.disableOnEdit)}
-                                  values={values}
-                                  fieldData={field}
-                                  errors={errors}
-                                  touched={touched}
-                                  label={field.fieldLabel}
-                                  name={field.fieldName}
-                                  type={field.type}
-                                  options={field.option}
-                                  setFieldValue={(name, value) => {
-                                    setFieldValue(name, value);
-                                  }}
-                                  required={field.required}
-                                  fullWidth
-                                  isTooltip={field?.isTooltip || false}
-                                  tooltipMessage={field?.tooltipMessage}
-                                  size="small"
-                                  minDate={new Date()}
-                                  maxDate={values["expectedCompletionDate"] ? moment(values["expectedCompletionDate"]) : moment().add(5, "years")}
-                                /> : field.fieldName === "expectedCompletionDate"
-                                  ? <FormTypes
-                                    repairJobId={repairJobId}
-                                    {...field}
-                                    disabled={(!repairJobId && field.disableOnEdit)}
-                                    values={values}
-                                    fieldData={field}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                    minDate={values["startDate"]}
-                                  /> :
-                                  <FormTypes
-                                    {...field}
-                                    values={values}
-                                    errors={errors}
-                                    disabled={(Boolean(repairJob) && field.disableOnEdit && !isClone)}
-                                    fieldData={field}
-                                    fields={initialData.fields}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                    imageOrFileUploadCompletePercentage={
-                                      ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                        ? (completePercentage) => {
-                                          setUploadingImageOrFileProgress(completePercentage);
-                                        }
-                                        : null
-                                    }
-                                  />}
-                            </Grid>
-                          )}
-                        </Grid>
-                      </Box>
-                    </div>
-                  )
-                  );
-                })}
-              </Form>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <Button
-                disabled={submitting}
-                type="button"
-                variant="outlined"
-                color="primary"
-                size="small"
-                onClick={() => {
+  return (
+    <Dialog
+      maxWidth="md"
+      fullWidth
+      fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+      aria-labelledby="customized-dialog-title"
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true);
+        }
+      }}
+      open={true}
+    >
+      {formsData && formsData?.length ? (
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
+          {({ values, errors, touched, setFieldValue, submitForm }) => (
+            <>
+              <CustomDialogHeader
+                title={title}
+                onClose={(e, reason) => {
                   if (isEqual(values, initialData.values)) {
-                    onClose()
+                    onClose();
+                  } else {
+                    setShowConfirmDialog(true);
                   }
-                  else {
-                    setShowConfirmDialog(true)
-                  }
                 }}
-              >
-                Cancel
-              </Button>
-              <CustomButton
-                loading={loading}
-                variant="contained"
-                color="primary"
-                startIcon={submitting && <CircularProgress size={20} color='inherit' />}
-                disabled={submitting}
-                onClick={(e) => {
-                  submitForm();
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
                 }}
-              >
-                Save
-              </CustomButton>
-            </CustomDialogFooter>
-            {showConfirmDialog && (
-              <ConfirmCancelDialog
-                close={() => setShowConfirmDialog(false)}
-                open={showConfirmDialog}
-                onSave={() => {
-                  setShowConfirmDialog(false);
-                  handleScroll(errors);
-                  submitForm();
-                }}
-                onClose={() => {
-                  setShowConfirmDialog(false);
-                  onClose();
-                }}
+                showManimizeMaximize={true}
               />
-            )}
-          </>
-        )}
-      </Formik>
-      : <Box p={2} height={500} bgcolor="white">
-        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-      </Box>}
-  </Dialog>
+              <CustomDialogContent>
+                <Form>
+                  {formsData.map((form, i) => {
+                    return (
+                      form.name && (
+                        <div key={i}>
+                          <div className={'detail-box-content'}>
+                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                          </div>
+                          <Box marginY={2}>
+                            <Grid spacing={3} container>
+                              {form.sectionFields.map((field) => (
+                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  {field.fieldName === 'startDate' ? (
+                                    <FormTypes
+                                      repairJobId={repairJobId}
+                                      {...field}
+                                      disabled={!repairJobId && field.disableOnEdit}
+                                      values={values}
+                                      fieldData={field}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      minDate={new Date()}
+                                      maxDate={values['expectedCompletionDate'] ? moment(values['expectedCompletionDate']) : moment().add(5, 'years')}
+                                    />
+                                  ) : field.fieldName === 'expectedCompletionDate' ? (
+                                    <FormTypes
+                                      repairJobId={repairJobId}
+                                      {...field}
+                                      disabled={!repairJobId && field.disableOnEdit}
+                                      values={values}
+                                      fieldData={field}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      minDate={values['startDate']}
+                                    />
+                                  ) : (
+                                    <FormTypes
+                                      {...field}
+                                      values={values}
+                                      errors={errors}
+                                      disabled={Boolean(repairJob) && field.disableOnEdit && !isClone}
+                                      fieldData={field}
+                                      fields={initialData.fields}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      imageOrFileUploadCompletePercentage={
+                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                          ? (completePercentage) => {
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
+                                          : null
+                                      }
+                                    />
+                                  )}
+                                </Grid>
+                              ))}
+                            </Grid>
+                          </Box>
+                        </div>
+                      )
+                    );
+                  })}
+                </Form>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <Button
+                  disabled={submitting}
+                  type="button"
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                  onClick={() => {
+                    if (isEqual(values, initialData.values)) {
+                      onClose();
+                    } else {
+                      setShowConfirmDialog(true);
+                    }
+                  }}
+                >
+                  Cancel
+                </Button>
+                <CustomButton
+                  loading={loading}
+                  variant="contained"
+                  color="primary"
+                  startIcon={submitting && <CircularProgress size={20} color="inherit" />}
+                  disabled={submitting}
+                  onClick={(e) => {
+                    submitForm();
+                  }}
+                >
+                  Save
+                </CustomButton>
+              </CustomDialogFooter>
+              {showConfirmDialog && (
+                <ConfirmCancelDialog
+                  close={() => setShowConfirmDialog(false)}
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false);
+                    handleScroll(errors);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false);
+                    onClose();
+                  }}
+                />
+              )}
+            </>
+          )}
+        </Formik>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+    </Dialog>
   );
 };
 

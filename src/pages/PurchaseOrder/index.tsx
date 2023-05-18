@@ -536,7 +536,7 @@ const PurchaseOrder = () => {
                     <MenuItem
                       disabled={
                         permissions?.purchaseOrder?.isDelete &&
-                          selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
+                        selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
                           ? false
                           : true
                       }
@@ -641,7 +641,7 @@ const PurchaseOrder = () => {
             )
           ) : null
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

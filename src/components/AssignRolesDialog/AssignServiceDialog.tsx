@@ -24,7 +24,6 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 let searchTimeout;
 
 const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, extraStaticFilter = [], serviceType = '' }) => {
-
   const renderedFrom = `${routes.serviceMaster.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -268,7 +267,7 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
             renderedFrom={renderedFrom}
           />
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

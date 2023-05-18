@@ -15,11 +15,12 @@ import { CustomDialogTransition, generateUniqueIdOnly } from 'src/constants/help
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-import { useHistory } from "react-router-dom";
+import { useHistory } from 'react-router-dom';
 
 const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
-
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
@@ -51,7 +52,7 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
             if (isClone) {
               fields = fieldsDataForCreate;
               const { irtTicketNumber, ...rest } = data;
-              rest.irtTicketNumber = `IRT_${generateUniqueIdOnly()}`
+              rest.irtTicketNumber = `IRT_${generateUniqueIdOnly()}`;
               setCloneHeading(irtTicketNumber);
               tempData = rest;
             }
@@ -63,8 +64,7 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
-      }
-      else {
+      } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['irtTicketNumber'] = `IRT_${generateUniqueIdOnly()}`;
 
@@ -112,7 +112,11 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
         .then(({ data: { data } }) => {
           if (referenceData) {
             axiosInstance()
-              .post(`${routes?.irtTicket?.path}/approver/${data._id}`, { approver: referenceData?.approver?.map((e) => { return { user: e } }) })
+              .post(`${routes?.irtTicket?.path}/approver/${data._id}`, {
+                approver: referenceData?.approver?.map((e) => {
+                  return { user: e };
+                })
+              })
               .then(({ data }) => {
                 setLoading(false);
                 onSuccess(data);
@@ -126,8 +130,7 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
               .catch((error) => {
                 toastConfig.setToastConfig(error);
               });
-          }
-          else {
+          } else {
             history.push(`${routes?.irtTicketDetail?.path}/${data._id}`);
             setLoading(false);
             onSuccess(data);
@@ -178,15 +181,16 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (isEqual(initialData.values, values)) onClose()
-                  else setShowConfirmDialog(true)
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.irtTicketNumber ? `(${initialData.values?.irtTicketNumber})` : ''}`
-                  : `Create ${routes?.irtTicket?.title}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.irtTicketNumber ? `(${initialData.values?.irtTicketNumber})` : ''}`
+                    : `Create ${routes?.irtTicket?.title}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -212,8 +216,8 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (isEqual(initialData.values, values)) onClose()
-                    else setShowConfirmDialog(true)
+                    if (isEqual(initialData.values, values)) onClose();
+                    else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
@@ -249,7 +253,7 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
