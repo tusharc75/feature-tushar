@@ -1,4 +1,4 @@
-import Box from '@material-ui/core/Box/Box';
+import { Box, Menu, MenuItem } from '@material-ui/core';
 import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -12,6 +12,8 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { camelCase } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommentDialog from './CommentDialog';
+import { isMobile } from 'react-device-detect';
+import { ExpandMore } from '@material-ui/icons';
 
 const Request = ({ workOrder }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -20,7 +22,8 @@ const Request = ({ workOrder }) => {
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-
+  const [selectedRecords, setSelectedRecords] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [commentDialog, setCommentDialog] = useState({ open: false, data: null });
 
   const {
@@ -233,18 +236,90 @@ const Request = ({ workOrder }) => {
     setColumns([...column, ...extracolumns]);
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const disableBulkProcessReject = () => {
+    return selectedRecords?.some((item) => {
+      return item?.status === 'Processed' || item?.status === 'Rejected';
+    });
+  }
+
+
   return (
     <>
+      <Box>
+        <Box display='flex' justifyContent={'space-between'}>
+          <Box />
+          <Box>
+            <Button
+              disabled={selectedRecords?.length > 0 ? false : true}
+              variant={isMobile ? 'text' : 'outlined'}
+              color="default"
+              size="small"
+              onClick={openActions}
+              aria-controls="action-menu"
+              endIcon={<ExpandMore />}
+            >
+              {isMobile ? '' : 'Actions'}
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+              disabled={disableBulkProcessReject()}
+              onClick={() => {
+                let records = selectedRecords?.map((item) => {
+                  return {
+                    _id: item?._id,
+                    uniqueId: item?.uniqueId,
+                    qty: item?.qty
+                  }
+                })
+                handleUpdateStatus(
+                  MATERIAL_REQUEST_STATUS.processed,
+                  records,
+                  ''
+                );
+                closeActions()
+              }}
+              >Process</MenuItem>
+              <MenuItem
+              disabled={disableBulkProcessReject()}
+              onClick={() => {
+                setCommentDialog({ open: true, data: null });
+                closeActions()
+              }}
+              >Reject</MenuItem>
+            </Menu>
+          </Box>
+        </Box>
+      </Box>
+      <Box pt={2}>
       {rowsData && columns ? (
         <Box zIndex={5} width={'100%'} height={'calc(100vh - 345px)'}>
           <CustomReactTable
             height={'calc(100vh - 345px)'}
             columns={columns}
             data={rowsData}
-            onSelect={() => { }}
+            onSelect={setSelectedRecords}
             childrenProperty="subRows"
             uniqueKey="_id"
-            hideSelection={true}
+            hideSelection={false}
             hideAction={false}
             hideExpander={true}
             renderedFrom={camelCase(routes.materialHandling.title)}
@@ -256,17 +331,34 @@ const Request = ({ workOrder }) => {
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
+      </Box>
       {commentDialog.open && (
         <CommentDialog
           open={commentDialog.open}
           loading={loading}
           onClose={() => setCommentDialog({ open: false, data: null })}
           onSuccess={(comment) => {
-            handleUpdateStatus(
-              MATERIAL_REQUEST_STATUS.rejected,
-              [{ _id: commentDialog.data?._id, uniqueId: commentDialog.data?.uniqueId, qty: commentDialog.data?.qty }],
-              comment || ''
-            );
+            if(selectedRecords?.length && !commentDialog?.data ) {
+              let records = selectedRecords?.map((item) => {
+                return {
+                  _id: item?._id,
+                  uniqueId: item?.uniqueId,
+                  qty: item?.qty
+                }
+              })
+              handleUpdateStatus(
+                MATERIAL_REQUEST_STATUS.rejected,
+                records,
+                comment || ''
+              );
+            } else {
+              handleUpdateStatus(
+                MATERIAL_REQUEST_STATUS.rejected,
+                [{ _id: commentDialog.data?._id, uniqueId: commentDialog.data?.uniqueId, qty: commentDialog.data?.qty }],
+                comment || ''
+              );
+            }
+           
           }}
         />
       )}
