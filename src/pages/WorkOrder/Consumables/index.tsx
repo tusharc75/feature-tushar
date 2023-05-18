@@ -29,7 +29,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
-  const [openLogDialog, setOpenLogDialog] = useState({ open: false, uniqueId: null });
+  const [openLogDialog, setOpenLogDialog] = useState({ open: false, uniqueId: null, data:null });
 
   const {
     state: { user }
@@ -138,14 +138,14 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         hide: false,
         canDrag: false,
         Cell: ({ row }: any) => (
-          <div style={{ display: 'flex', justifyContent: 'right' }}>
+           <div style={{ display: 'flex', justifyContent: 'right' }}>
             {row.original?.isqtyRequestLog && (
               <HtmlTooltip title="View Logs">
                 <IconButton
                   size="small"
                   aria-label="Delete"
                   onClick={() => {
-                    setOpenLogDialog({ open: true, uniqueId: row.original._id });
+                    setOpenLogDialog({ open: true, uniqueId: row.original._id, data:row.original });
                   }}
                 >
                   <HistoryIcon />
@@ -365,10 +365,12 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
             uniqueId={openLogDialog.uniqueId}
             workOrderId={workOrderId}
             renderedFrom={renderedFrom}
+            productName={openLogDialog?.data?.productName}
             onClose={() => {
               setOpenLogDialog({
                 open: false,
-                uniqueId: null
+                uniqueId: null,
+                data: null
               });
             }}
           />

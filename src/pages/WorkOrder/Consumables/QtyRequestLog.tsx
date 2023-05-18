@@ -13,7 +13,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 
-function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom }) {
+function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productName }) {
 
   const [fullScreen, setFullScreen] = useState(false);
   const [columns, setColumns] = useState(null);
@@ -94,7 +94,11 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom }) {
         Header: 'Request By',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['requestBy'] ? <p className="text-truncate">{row?.original['requestBy']}</p> : <NoDataCell />;
+          return row?.original['requestBy'] ? (
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row.original?.requestBy?.optionValue}`} target="_blank">
+            {row?.original['requestBy']?.optionLabel}
+          </a>
+          ): <NoDataCell />;
         }
       },
       {
@@ -110,7 +114,11 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom }) {
         Header: 'Response By ',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['responseBy'] ? <p className="text-truncate">{row?.original['responseBy']}</p> : <NoDataCell />;
+          return row?.original['responseBy'] ? (
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row.original?.responseBy?.optionValue}`} target="_blank">
+            {row?.original['responseBy']?.optionLabel}
+          </a>
+          ) : <NoDataCell />;
         }
       },
       {
@@ -153,8 +161,6 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom }) {
           e.productName = e.product?.optionLabel;
           e.productDescription = e.product?.productDescription;
           e.productNumber = e.product?.productNumber;
-          e.requestBy = e.requestBy?.optionLabel;
-          e.responseBy = e.responseBy?.optionLabel;
           e.storageLocation = e.storageLocation?.optionLabel;
         });
         setRowsData(filteredData)
@@ -176,7 +182,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom }) {
     }}
   >
     <CustomDialogHeader
-      title={'Logs'}
+      title={`Logs (${productName})`}
       onClose={onClose}
       isMinimized={!fullScreen}
       onMinimizeMaximize={() => {
