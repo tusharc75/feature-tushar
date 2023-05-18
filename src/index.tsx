@@ -7,7 +7,6 @@ import { CustomToastProvider } from './StateProvider/CustomToastContext/CustomTo
 import { MsalProvider } from '@azure/msal-react';
 import AzureInstance from './AzureInstance';
 import { init } from '@sentry/react';
-
 import 'ag-grid-community/dist/styles/ag-grid.min.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './styles/index.scss';
@@ -18,14 +17,12 @@ import './styles/responsive-styles.scss';
 import './styles/rbc-calender.scss';
 import './styles/vis-network/vis-network.min.css';
 import './styles/safari.scss';
-
 import { Integrations } from '@sentry/tracing';
 import { CustomNotificationCountProvider } from './StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import './components/Chatter/style.scss';
 import { CustomChatNotificationCountProvider } from './StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { GlobalChatProvider } from './StateProvider/GlobalChatContext';
 import { CustomOfflineProvider } from './StateProvider/OfflineContext/OfflineContext';
-// import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import { version } from '../package.json';
 
 // @ts-ignore
