@@ -7,6 +7,7 @@ import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Gauges from 'src/components/Gauges';
+import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 
 const useStyles = makeStyles((theme) => ({
   cardBox: {
@@ -58,9 +59,10 @@ const useStyles = makeStyles((theme) => ({
 const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, loading }) => {
   const classes = useStyles();
   const history = useHistory();
+  const [searchQuery] = useStore((store) => store[SEARCH]);
 
   const {
-    state: { permissions, searchQuery }
+    state: { permissions }
   }: any = useData();
 
   useEffect(() => {

@@ -10,6 +10,9 @@ $isAppliedBill: #a8ec9c;
     // border: 1px solid #ddd;
     .tr {
       background: #fff;
+      [data-mode='dark'] & {
+        background: #0e0e23;
+      }
 
       :last-child {
         .td {
@@ -20,23 +23,36 @@ $isAppliedBill: #a8ec9c;
 
     .tr:nth-of-type(even) {
       background: white;
+      [data-mode='dark'] & {
+        background: #0e0e23;
+      }
     }
 
     .th[data-sticky-td='true'] {
       background: white;
+      [data-mode='dark'] & {
+        background: #0e0e23;
+      }
     }
 
     .table-header {
       padding: 8px !important;
       background-color: white !important;
+      [data-mode='dark'] & {
+        background: #0e0e23 !important;
+      }
       //color: white !important;
-      border-right: 1px solid #ddd !important;
+      border-right: 1px solid var(--dark-mode-border-color, #ddd) !important;
     }
 
     .th {
       padding: 5px;
       //border-right: 1px solid #ddd;
       background: white;
+      [data-mode='dark'] & {
+        background: #0e0e23;
+        color: white;
+      }
       overflow: hidden;
 
       // :last-child {
@@ -209,11 +225,11 @@ $isAppliedBill: #a8ec9c;
       }
 
       [data-sticky-last-left-td] {
-        border-right: 0px solid #ddd;
+        border-right: 0px solid var(--dark-mode-border-color, #ddd);
       }
 
       [data-sticky-first-right-td] {
-        border-left: 0px solid #ddd;
+        border-left: 0px solid var(--dark-mode-border-color, #ddd);
       }
     }
   }

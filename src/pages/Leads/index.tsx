@@ -30,11 +30,11 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import { isMobile, isTablet } from 'react-device-detect';
 import { BsBuilding, AiFillMail } from 'react-icons/all';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-
-
+import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 
 let leadTimeout;
 const Leads = () => {
+  const [searchQuery] = useStore((store) => store[SEARCH]);
 
   const LeadTypes = [
     {
@@ -51,7 +51,7 @@ const Leads = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, selectedEntity, permissions, searchQuery }
+    state: { user, selectedEntity, permissions }
   }: any = useData();
   const { getColumnData } = useColumns();
   const { leadResource, leadApi } = lead;
