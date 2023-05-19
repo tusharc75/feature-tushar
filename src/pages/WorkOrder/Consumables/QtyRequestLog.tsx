@@ -94,7 +94,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
         : []),
       {
         accessor: 'requestBy',
-        Header: 'Request By',
+        Header: 'Requestd By',
         width: 200,
         Cell: ({ row }) => {
           return row?.original['requestBy'] ?
@@ -105,7 +105,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
       },
       {
         accessor: 'requestDate',
-        Header: 'Request Date',
+        Header: 'Requestd Date',
         width: 200,
         Cell: ({ row }) => {
           return row?.original['requestDate'] ? (
@@ -116,23 +116,23 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
         }
       },
       {
-        accessor: 'responseBy',
-        Header: 'Response By ',
+        accessor: 'processBy',
+        Header: 'Processed By',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['responseBy'] ?
-            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['responseById']}`} target="_blank">
-              {row?.original['responseBy']}
+          return row?.original['processBy'] ?
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['processById']}`} target="_blank">
+              {row?.original['processBy']}
             </a> : <NoDataCell />;
         }
       },
       {
-        accessor: 'responseDate',
-        Header: 'Response Date',
+        accessor: 'processDate',
+        Header: 'Processed Date',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['responseDate'] ? (
-            <p className="text-truncate">{moment(row?.original['responseDate']).format(dateTimeFormat)}</p>
+          return row?.original['processDate'] ? (
+            <p className="text-truncate">{moment(row?.original['processDate']).format(dateTimeFormat)}</p>
           ) : (
             <NoDataCell />
           );
@@ -175,8 +175,8 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
           e.storageLocation = e?.storageLocation?.optionLabel;
           e.requestById = e?.requestBy?.optionValue;
           e.requestBy = e?.requestBy?.optionLabel;
-          e.responseById = e?.responseBy?.optionValue;
-          e.responseBy = e?.responseBy?.optionLabel;
+          e.processById = e?.processBy?.optionValue;
+          e.processBy = e?.processBy?.optionLabel;
         });
         setRowsData(filteredData);
       })
