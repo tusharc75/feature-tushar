@@ -21,7 +21,7 @@ import { useData } from 'src/StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from 'src/constants/useColumns';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import { AiFillCrown, MdAdd, MdSort, MdFilterList } from 'react-icons/all';
@@ -162,23 +162,22 @@ const BulkAssetCreation = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    let filterById = [];
-    if (fromRental) {
-      filterById.push({ field: 'rentalJob', term: fromRental?._id });
-    }
-    if (filterById.length > 0) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
-    }
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
 
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
+
+    if (fromRental) {
+      filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
+    }
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(deepFilters)}`;
+    }
+
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -255,19 +254,6 @@ const BulkAssetCreation = () => {
 
   const closeActions = () => {
     setAnchorEl(null);
-  };
-
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
   };
 
   const handleOpen = () => {
