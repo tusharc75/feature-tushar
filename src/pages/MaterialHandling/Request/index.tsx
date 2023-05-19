@@ -257,7 +257,7 @@ const Request = ({ workOrder }) => {
                 <Box pl={1} />
               </Fragment>
             )}
-            {row.original["processesLogs"] && row.original["processesLogs"]?.length && (
+            {row.original["processesLogs"] && row.original["processesLogs"]?.length > 0 && (
               <HtmlTooltip title="View Logs">
                 <IconButton
                   size="small"
