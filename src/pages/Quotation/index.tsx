@@ -226,7 +226,7 @@ const Quotation = () => {
       } else if (accountDetails.resource === supplierAccount.accountResource) {
         filterByIds.push({
           field: 'supplierAccountName',
-          term: accountDetails.accountId
+          term: { $in: [accountDetails.accountId] }
         })
       }
     }
