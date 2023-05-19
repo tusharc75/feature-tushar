@@ -20,6 +20,7 @@ import HistoryIcon from '@material-ui/icons/History';
 import { useData } from 'src/StateProvider/Provider';
 
 const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
+  
   let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
   const toastConfig = useContext(CustomToastContext);
@@ -29,7 +30,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, uniqueId: null, data: null });
-
   const [consumeRequest, setConsumeRequest] = useState(false);
 
   const {
@@ -39,7 +39,13 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   useEffect(() => {
     var allowRequest = false;
     if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
-      allowRequest = true;
+      console.log(warehouse)
+      if (warehouse?.manager && warehouse?.manager?.includes(user?.user?._id)) {
+        allowRequest = false;
+      }
+      else {
+        allowRequest = true;
+      }
     }
     setConsumeRequest(allowRequest)
     fetchColumns(allowRequest);
