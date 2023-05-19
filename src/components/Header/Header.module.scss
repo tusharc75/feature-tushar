@@ -135,9 +135,16 @@
   background-color: #fff;
   color: #000;
   overflow: hidden;
+  [data-mode='dark'] & {
+    background-color: #0e0e23;
+  }
   .filtered_data {
     max-height: 330px;
     background-color: white;
+
+    [data-mode='dark'] & {
+      background-color: #0e0e23;
+    }
 
     .resultUL {
       position: relative;
@@ -161,6 +168,10 @@
       top: 0;
       z-index: 1;
       font-size: 14px;
+      [data-mode='dark'] & {
+        background-color: #282845;
+        color: white;
+      }
     }
     .heaaderResults {
       padding: 3px 23px;
@@ -169,6 +180,9 @@
       font-weight: 500;
       font-size: 15px;
       transition: backgorund 0s;
+      [data-mode='dark'] & {
+        color: white;
+      }
     }
     .listIcon {
       min-width: unset;
@@ -176,6 +190,7 @@
     }
     .no_result_container {
       padding: 20px 0;
+      -webkit-user-select: none;
       user-select: none;
       svg {
         fill: var(--grey);
@@ -186,6 +201,7 @@
     }
     .no_result {
       color: var(--grey);
+      -webkit-user-select: none;
       user-select: none;
       text-align: center;
     }

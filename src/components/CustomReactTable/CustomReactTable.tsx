@@ -424,7 +424,7 @@ export default function CustomReactTable({
         style={{
           display: 'block',
           overflow: 'auto',
-          background: 'white',
+
           height: height ?? '100%'
           // maxWidth: "100%",
           // overflowX: "scroll",
