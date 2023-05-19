@@ -1539,9 +1539,16 @@ const ReceivingTicket = ({
               )}
           </Menu>
           {(repairJobCount > 0 || repairOrderCount > 0) && (
-            <IconButton onClick={openLinkActions} size="small" color="primary">
-              <ExpandMore fontSize="inherit" />
-            </IconButton>
+            <Button
+              onClick={openLinkActions}
+              variant="outlined"
+              color="default"
+              size="small"
+              aria-controls="action-menu"
+              endIcon={<ExpandMore fontSize="inherit" />}
+            >
+              Tickets
+            </Button>
           )}
           <Menu
             anchorEl={anchorLinkActionEl}
