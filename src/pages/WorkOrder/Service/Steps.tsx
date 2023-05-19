@@ -168,7 +168,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Service = ({
+const Steps = ({
   workOrderId,
   warehouse,
   selectedService,
@@ -191,6 +191,7 @@ const Service = ({
   const [assignSteps, setAssignSteps] = useState(false);
   const [commentsDialog, setCommentsDialog] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
+
 
   const {
     state: {
@@ -1099,7 +1100,7 @@ const Service = ({
   );
 };
 
-export default Service;
+export default Steps;
 
 export const RenderPassFailChip = ({ status, className = '', ...others }) => {
   return (

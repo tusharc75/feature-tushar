@@ -54,7 +54,7 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
         if (data[sidebarResource.storageLocation]) {
-          const storageLocationOption = data[sidebarResource.storageLocation]?.filter((e) => e.warehouse === warehouse);
+          const storageLocationOption = data[sidebarResource.storageLocation]?.filter((e) => e.warehouse === warehouse?.optionValue);
           setStorageLocationOptions(storageLocationOption);
         }
       });
