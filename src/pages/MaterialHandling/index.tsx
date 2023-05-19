@@ -9,8 +9,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Request from './Request';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { Autocomplete } from '@material-ui/lab';
-import TabPanel from 'src/components/TabPanel';
-import Consumables from '../WorkOrder/Consumables';
 
 const MaterialHandling = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -23,7 +21,6 @@ const MaterialHandling = () => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [selectedPlant, setSelectedPlant] = useState(null);
-  const [tabValue, setTabValue] = useState<any>(0);
 
   useEffect(() => {
     axiosInstance()
@@ -73,16 +70,6 @@ const MaterialHandling = () => {
       });
   };
 
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setTabValue(newValue);
-  };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   return (
     <Box className="main-container-v1">
@@ -129,7 +116,6 @@ const MaterialHandling = () => {
                     key={index}
                     onClick={() => {
                       setSelectedWorkOrder(data);
-                      setTabValue(0);
                     }}
                     style={{
                       cursor: 'pointer',
@@ -150,40 +136,8 @@ const MaterialHandling = () => {
             </Grid>
             <Grid item xs={12} md={9} sm={12}>
               {selectedWorkOrder && (
-                <Box>
-                  <Tabs
-                    className="new-tab-container-v1"
-                    value={tabValue}
-                    onChange={handleMainTabChange}
-                    textColor="primary"
-                    TabIndicatorProps={{
-                      style: {
-                        display: 'none'
-                      }
-                    }}
-                  >
-                    <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Requests</div>} {...a11yProps(0)} />
-                    <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Consumables</div>} {...a11yProps(1)} />
-                  </Tabs>
-                  <TabPanel value={tabValue} index={0}>
-                    <Box>
-                      <Request workOrder={selectedWorkOrder?._id} />
-                    </Box>
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={1}>
-                    <Box>
-                      <Consumables
-                        allowedToEdit={false}
-                        isCreate={false}
-                        workOrderId={selectedWorkOrder?._id}
-                        warehouse={selectedWorkOrder?.warehouse?.optionValue}
-                        service={null}
-                        uniqueId={null}
-                        stepId={null}
-                        serviceName={null}
-                      />
-                    </Box>
-                  </TabPanel>
+                <Box p={2} style={{ border: '1px solid #ebebeb' }}>
+                  <Request workOrder={selectedWorkOrder?._id} />
                 </Box>
               )}
             </Grid>

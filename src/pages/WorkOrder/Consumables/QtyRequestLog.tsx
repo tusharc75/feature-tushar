@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Button, IconButton, Typography } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
@@ -7,11 +7,15 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { dateTimeFormat } from 'src/constants/helpers';
+import { MATERIAL_REQUEST_STATUS, dateTimeFormat } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import ProcessLogs from './ProcessLogs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import HistoryIcon from '@material-ui/icons/History';
+import QtyWithdrawalDialog from './QtyWithdrawalDialog';
 
 function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productName }) {
 
@@ -19,9 +23,13 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
   const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [rowsData, setRowsData] = useState([]);
+  const [withdrawalQtyDialog, setWithdrawalQtyDialog] = useState({ open: false, data: null });
+
   const {
     state: { user }
   }: any = useData();
+
+  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [] });
 
   useEffect(() => {
     fetchColumn();
@@ -29,52 +37,53 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
   }, [workOrderId, uniqueId]);
 
   const fetchColumn = async () => {
-    const column = [];
-    const {
-      data: { data }
-    } = await axiosInstance().put(`/field/find-field-labels`, {
-      fields: [
-        {
-          resource: 'Product',
-          fieldNames: ['productName', 'productNumber', 'productDescription']
-        }
-      ]
-    });
-    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
-    productFields?.forEach((e) => {
-      if (e?.fieldName === 'productName') {
-        column.push({
-          accessor: e?.fieldName,
-          Header: e?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) => {
-            return row?.original[e?.fieldName] ? (
-              <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.product?.optionValue}`} target="_blank">
-                {row?.original[e?.fieldName]}
-              </a>
-            ) : (
-              <NoDataCell />
-            );
-          }
-        });
-      } else {
-        column.push({
-          accessor: e?.fieldName,
-          Header: e?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) => {
-            return row?.original[e?.fieldName] ? <p className="text-truncate">{row?.original[e?.fieldName]}</p> : <NoDataCell />;
-          }
-        });
-      }
-    });
-    const extracolumns: any = [
+    setColumns(null)
+    const column: any = [
       {
-        accessor: 'qty',
-        Header: 'Qty',
+        accessor: 'requestDate',
+        Header: 'Requested Date',
         width: 200,
         Cell: ({ row }) => {
+          return row?.original['requestDate'] ? (
+            <p className="text-truncate">{moment(row?.original['requestDate']).format(dateTimeFormat)}</p>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'requestBy',
+        Header: 'Requestd By',
+        width: 200,
+        Cell: ({ row }) => {
+          return row?.original['requestBy'] ?
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['requestById']}`} target="_blank">
+              {row?.original['requestBy']}
+            </a> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'qty',
+        Header: 'Requestd Qty',
+        width: 150,
+        Cell: ({ row }) => {
           return row?.original['qty'] ? <p className="text-truncate">{row?.original['qty']}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'processedQty',
+        Header: 'Processed Qty',
+        width: 150,
+        Cell: ({ row }) => {
+          return row?.original['processedQty'] ? <p className="text-truncate">{row?.original['processedQty']}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'status',
+        Header: 'Status',
+        width: 150,
+        Cell: ({ row }) => {
+          return row?.original['status'] ? <p className="text-truncate">{row?.original['status']}</p> : <NoDataCell />;
         }
       },
       ...(user?.user?.brandPolicy?.storageLocation
@@ -93,46 +102,23 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
         ]
         : []),
       {
-        accessor: 'requestBy',
-        Header: 'Request By',
+        accessor: 'processBy',
+        Header: 'Processed By',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['requestBy'] ?
-            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['requestById']}`} target="_blank">
-              {row?.original['requestBy']}
+          return row?.original['processBy'] ?
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['processById']}`} target="_blank">
+              {row?.original['processBy']}
             </a> : <NoDataCell />;
         }
       },
       {
-        accessor: 'requestDate',
-        Header: 'Request Date',
+        accessor: 'processDate',
+        Header: 'Processed Date',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['requestDate'] ? (
-            <p className="text-truncate">{moment(row?.original['requestDate']).format(dateTimeFormat)}</p>
-          ) : (
-            <NoDataCell />
-          );
-        }
-      },
-      {
-        accessor: 'responseBy',
-        Header: 'Response By ',
-        width: 200,
-        Cell: ({ row }) => {
-          return row?.original['responseBy'] ?
-            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['responseById']}`} target="_blank">
-              {row?.original['responseBy']}
-            </a> : <NoDataCell />;
-        }
-      },
-      {
-        accessor: 'responseDate',
-        Header: 'Response Date',
-        width: 200,
-        Cell: ({ row }) => {
-          return row?.original['responseDate'] ? (
-            <p className="text-truncate">{moment(row?.original['responseDate']).format(dateTimeFormat)}</p>
+          return row?.original['processDate'] ? (
+            <p className="text-truncate">{moment(row?.original['processDate']).format(dateTimeFormat)}</p>
           ) : (
             <NoDataCell />
           );
@@ -145,21 +131,47 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
         Cell: ({ row }) => {
           return row?.original['comment'] ? <p className="text-truncate">{row?.original['comment']}</p> : <NoDataCell />;
         }
+      },
+      {
+        accessor: 'action',
+        Header: 'Action',
+        width: 150,
+        minWidth: 150,
+        sticky: 'right',
+        disableFilters: true,
+        canDrag: false,
+        Cell: ({ row }: any) => (
+          <div style={{ display: 'flex', justifyContent: 'right' }}>
+            {row.original['status'] === MATERIAL_REQUEST_STATUS.requested && (
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => {
+                  setWithdrawalQtyDialog({ open: true, data: row.original })
+                }}
+              >
+                Withdrawal
+              </Button>
+            )}
+            {row.original["processesLogs"] && row.original["processesLogs"]?.length > 0 && (
+              <HtmlTooltip title="View Logs">
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setOpenProcessLogs({ open: true, logs: row.original["processesLogs"] });
+                  }}
+                >
+                  <HistoryIcon />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+          </div>
+        )
       }
     ];
-    extracolumns.push({
-      accessor: 'status',
-      Header: 'Status',
-      minWidth: 200,
-      width: 200,
-      sticky: 'right',
-      disableFilters: true,
-      canDrag: false,
-      Cell: ({ row }) => {
-        return <Typography variant="body2">{row?.original?.status}</Typography>;
-      }
-    });
-    setColumns([...column, ...extracolumns]);
+    setColumns([...column]);
   };
 
   const fetchData = () => {
@@ -168,15 +180,12 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
       .then(({ data: { data } }) => {
         const filteredData = data?.filter((e) => e.uniqueId === uniqueId);
         filteredData?.forEach((e) => {
-          e.productName = e.product?.optionLabel;
-          e.productDescription = e.product?.productDescription;
-          e.productNumber = e.product?.productNumber;
           e.storageLocationId = e?.storageLocation?.optionValue;
           e.storageLocation = e?.storageLocation?.optionLabel;
           e.requestById = e?.requestBy?.optionValue;
           e.requestBy = e?.requestBy?.optionLabel;
-          e.responseById = e?.responseBy?.optionValue;
-          e.responseBy = e?.responseBy?.optionLabel;
+          e.processById = e?.processBy?.optionValue;
+          e.processBy = e?.processBy?.optionLabel;
         });
         setRowsData(filteredData);
       })
@@ -186,53 +195,77 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
   };
 
   return (
-    <Dialog
-      open
-      fullScreen={fullScreen}
-      maxWidth="md"
-      fullWidth
-      onClose={(e, reason) => {
-        if (reason !== 'backdropClick') {
-          onClose();
-        }
-      }}
-    >
-      <CustomDialogHeader
-        title={`Logs - ${productName}`}
-        onClose={onClose}
-        isMinimized={!fullScreen}
-        onMinimizeMaximize={() => {
-          setFullScreen((prevState) => !prevState);
+    <>
+      <Dialog
+        open
+        fullScreen={fullScreen}
+        maxWidth="md"
+        fullWidth
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            onClose();
+          }
         }}
-        showRequiredLabel={false}
-        showManimizeMaximize={true}
-      />
-      <CustomDialogContent>
-        {rowsData && columns ? (
-          <Box p={2}>
-            <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
-              <CustomReactTable
-                height={'calc(100vh - 200px)'}
-                columns={columns}
-                data={rowsData}
-                onSelect={() => { }}
-                childrenProperty="subRows"
-                uniqueKey="_id"
-                hideSelection={true}
-                hideAction={false}
-                hideExpander={true}
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-              />
+      >
+        <CustomDialogHeader
+          title={`Logs - ${productName}`}
+          onClose={onClose}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
+          }}
+          showRequiredLabel={false}
+          showManimizeMaximize={true}
+        />
+        <CustomDialogContent>
+          {rowsData && columns ? (
+            <Box p={2}>
+              <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
+                <CustomReactTable
+                  height={'calc(100vh - 200px)'}
+                  columns={columns}
+                  data={rowsData}
+                  onSelect={() => { }}
+                  childrenProperty="subRows"
+                  uniqueKey="_id"
+                  hideSelection={true}
+                  hideAction={false}
+                  hideExpander={true}
+                  renderedFrom={renderedFrom}
+                  isClientSideGrid={true}
+                />
+              </Box>
             </Box>
-          </Box>
-        ) : (
-          <Box p={2} height={500} bgcolor="white">
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </CustomDialogContent>
-    </Dialog>
+          ) : (
+            <Box p={2} height={500} bgcolor="white">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+        </CustomDialogContent>
+        {openProcessLogs.open &&
+          <ProcessLogs
+            onClose={() => {
+              setOpenProcessLogs({ open: false, logs: [] })
+            }}
+            logsData={openProcessLogs.logs}
+            productName={productName}
+          />
+        }
+      </Dialog>
+      {withdrawalQtyDialog.open &&
+        <QtyWithdrawalDialog
+          onSuccess={() => {
+            setWithdrawalQtyDialog({ open: false, data: null })
+            fetchColumn()
+            fetchData()
+          }}
+          onClose={() => {
+            setWithdrawalQtyDialog({ open: false, data: null })
+          }}
+          data={withdrawalQtyDialog.data}
+          workOrderId={workOrderId}
+        />}
+    </>
   );
 }
 

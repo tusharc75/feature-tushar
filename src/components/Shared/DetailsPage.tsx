@@ -394,7 +394,11 @@ const Details = (props: DetailProps) => {
                       sm={gridSize ?? dynamicSize(6, field.fieldData.type)}
                       xl={gridSize ?? dynamicSize(4, field.fieldData.type)}
                     >
-                      <Grid container alignItems="center" style={{ border: field.fieldData.type === 'imageUpload' ? 0 : '1px solid #EDEDED' }}>
+                      <Grid
+                        container
+                        alignItems="center"
+                        style={{ border: field.fieldData.type === 'imageUpload' ? 0 : '1px solid var(--dark-mode-border-color, #EDEDED)' }}
+                      >
                         <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(5, field.fieldData.type)}>
                           <div
                             className="d-flex align-items-center formdata-title-v1"

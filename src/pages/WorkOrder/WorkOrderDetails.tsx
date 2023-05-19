@@ -291,13 +291,10 @@ const WorkOrderDetails = () => {
                     </Fragment>
                   )}
                 <Button
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  color="primary"
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
                   size="small"
                   onClick={previewWorkOrderPdf}
-                  className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  endIcon={previewPdf ? <CircularProgress size={20} /> : null}
+                  className={'btn-outline-v1'}
                   disabled={previewPdf}
                 >
                   {isMobile && !isTablet ? <VisibilityIcon color="primary" /> : 'Preview'}
@@ -400,7 +397,7 @@ const WorkOrderDetails = () => {
               allowedToEdit={allowedToEdit && !completed}
               isCreate={false}
               workOrderId={id}
-              warehouse={workOrderData?.warehouse?.optionValue}
+              warehouse={workOrderData?.warehouse}
               service={null}
               uniqueId={null}
               stepId={null}

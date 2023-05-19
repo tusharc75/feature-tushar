@@ -25,7 +25,7 @@ import { useData } from '../../StateProvider/Provider';
 import { RiBillLine } from 'react-icons/ri';
 import { Autocomplete } from '@material-ui/lab';
 import TextField from '@material-ui/core/TextField';
-import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from 'src/constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import Tooltip from '@material-ui/core/Tooltip';
 import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
@@ -322,36 +322,37 @@ const Product = () => {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    const updatedFilters = [];
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
+
+    if (productType && productType !== '') {
+      deepFilters.push({ field: 'productType', term: productType });
     }
+    if (productType && productType !== '') {
+      deepFilters.push({ field: 'productType', term: productType });
+    }
+    if (productCategory && productCategory !== '') {
+      filterByIds.push({ field: 'productCategory', term: productCategory });
+    }
+    if (productTemplate && productTemplate !== '') {
+      filterByIds.push({ field: 'productTemplate', term: productTemplate });
+    }
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(deepFilters)}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+  
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
-    const filterById = [];
-    if (productCategory && productCategory !== '') {
-      filterById.push({ field: 'productCategory', term: productCategory });
-    }
-    if (productTemplate && productTemplate !== '') {
-      filterById.push({ field: 'productTemplate', term: productTemplate });
-    }
-    if (productType && productType !== '') {
-      updatedFilters.push({ field: 'productType', term: productType });
-    }
-    if (filterById.length) {
-      deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
-    }
-
-    if (updatedFilters.length > 0) return `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
 
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -479,18 +480,6 @@ const Product = () => {
     setisOpenDialog(false);
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
 
   const handleSubmit = (ids: string[]) => {
     setSubmitting(true);

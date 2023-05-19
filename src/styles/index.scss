@@ -64,6 +64,8 @@
   --ag-checkbox-checked-color: #0f9fa9;
   --ag-checkbox-unchecked-color: #0f9fa9;
   --link: #95dfff;
+  --dark-mode-border-color: #3d3d5c;
+  --common-border-color: #3d3d5c;
 }
 [data-mode='dark'] {
   .MuiOutlinedInput-notchedOutline {
@@ -2766,9 +2768,11 @@ svg.MuiSvgIcon-root {
   color: #2a3547 !important;
   padding: 7px 20px !important;
   border-radius: 6px !important;
+
   [data-mode='dark'] & {
     background-color: transparent !important;
     color: #fff !important;
+    border: 1px solid #555555 !important;
     &:hover {
       background-color: hsl(240, 43%, 20%) !important;
     }
@@ -2927,6 +2931,10 @@ svg.MuiSvgIcon-root {
     border-bottom: 1px solid #cecece;
     width: 100%;
     margin-bottom: 30px;
+    [data-mode='dark'] & {
+      color: #fff;
+      border-bottom: 1px solid #555555;
+    }
 
     @media all and (max-width: 768px) {
       margin-bottom: 15px;
@@ -2949,6 +2957,11 @@ svg.MuiSvgIcon-root {
       border: 1px solid #dcdcdc !important;
       border-bottom: 0 !important;
       min-width: max-content;
+      [data-mode='dark'] & {
+        background-color: #282845;
+        color: #fff;
+        border: 1px solid #555555 !important;
+      }
 
       &:first-of-type {
         border-radius: 6px 0 0 0px !important;
@@ -3159,31 +3172,39 @@ body {
   border-radius: 4.06331px 4.06331px 0px 0px;
   display: flex;
   align-items: center;
+  [data-mode='dark'] & {
+    background: #282845;
+  }
 
   & > :is(h1, h2, h3, h4, h5, h6) {
     font-weight: 600;
     font-size: 14px;
     line-height: 1.05;
     color: #2a3042;
+    [data-mode='dark'] & {
+      color: #fff;
+    }
   }
 }
 
 .formdata-v1 {
   padding: 20px 28px 32px;
-  border: 1px solid #ececec;
+  border: 1px solid var(--dark-mode-border-color, #ececec);
   box-shadow: 0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03);
   border-radius: 0px 0px 4.04585px 4.04585px;
 }
 
 .formdata-title-v1 {
-  border-right: 1px solid #e2e2e2;
+  border-right: 1px solid var(--dark-mode-border-color, #e2e2e2);
 
   & :is(h1, h2, h3, h4, h5) {
     padding: 8.6px 10px;
     color: #404855;
     font-size: 13px;
     font-weight: 600;
-
+    [data-mode='dark'] & {
+      color: #fff;
+    }
     @media all and (max-width: 600px) {
       padding: 7px 8px;
       font-size: 0.8rem;
@@ -3197,7 +3218,9 @@ body {
     font-size: 0.9rem;
     color: #5e5e5e;
     font-weight: 400;
-
+    [data-mode='dark'] & {
+      color: #e5e5e5;
+    }
     @media all and (max-width: 600px) {
       padding: 6px 8px;
       font-size: 0.8rem;
@@ -3205,10 +3228,17 @@ body {
   }
   & a > * {
     color: var(--link);
+    [data-mode='dark'] & {
+      color: var(--link);
+    }
   }
 }
 
 .custom-react-table {
+  background-color: white;
+  [data-mode='dark'] & {
+    background-color: #0e0e23;
+  }
   * {
     font-family: 'Inter', sans-serif;
   }
@@ -3218,6 +3248,9 @@ body {
     font-size: 13px;
     line-height: 19px;
     color: #1d1d1d;
+    [data-mode='dark'] & {
+      color: #e5e5e5;
+    }
   }
   .ag-header-cell-text {
     font-style: normal;
@@ -3377,8 +3410,11 @@ body {
     right: 1px;
     top: 1px;
     padding: 11px;
-    border-left: 1px solid rgb(229, 229, 229);
+    border-left: 1px solid var(--common-border-color);
     border-radius: 0px;
+    [data-mode='dark'] & {
+      background-color: #282845;
+    }
   }
   .arrange-view-v2 {
     z-index: 2;

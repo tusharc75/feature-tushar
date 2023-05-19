@@ -20,6 +20,7 @@ import HistoryIcon from '@material-ui/icons/History';
 import { useData } from 'src/StateProvider/Provider';
 
 const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
+  
   let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
   const toastConfig = useContext(CustomToastContext);
@@ -29,17 +30,29 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, uniqueId: null, data: null });
+  const [consumeRequest, setConsumeRequest] = useState(false);
 
   const {
     state: { user }
   }: any = useData();
 
   useEffect(() => {
-    fetchColumns();
+    var allowRequest = false;
+    if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
+      console.log(warehouse)
+      if (warehouse?.manager && warehouse?.manager?.includes(user?.user?._id)) {
+        allowRequest = false;
+      }
+      else {
+        allowRequest = true;
+      }
+    }
+    setConsumeRequest(allowRequest)
+    fetchColumns(allowRequest);
     fetchData();
   }, [allowedToEdit, workOrderId]);
 
-  const fetchColumns = async () => {
+  const fetchColumns = async (allowRequest) => {
     const column = [];
     const {
       data: { data }
@@ -109,7 +122,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
-      ...(user?.user?.brandPolicy?.workOrderConsumableRequest
+      ...(allowRequest
         ? [
           {
             accessor: 'requestedQty',
@@ -298,7 +311,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
               size="small"
               variant="contained"
             >
-              {'Consume '}{' '}
+              {consumeRequest ? 'Request ' : 'Consume '}{' '}
               {selectedRecords?.filter((e) => !e?.hideSelection).length > 0
                 ? '(' + selectedRecords?.filter((e) => !e?.hideSelection).length + ')'
                 : ''}
@@ -354,6 +367,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
             warehouse={warehouse}
             selectedRecords={selectedRecords?.filter((e) => !e?.hideSelection)}
             serviceName={serviceName}
+            consumeRequest={consumeRequest}
           />
         )}
         {openLogDialog.open && (

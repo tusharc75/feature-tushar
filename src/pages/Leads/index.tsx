@@ -23,19 +23,19 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import './style.scss';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { FcProcess } from 'react-icons/fc';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BsBuilding, AiFillMail } from 'react-icons/all';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-
-
+import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 
 let leadTimeout;
 const Leads = () => {
-  
+  const [searchQuery] = useStore((store) => store[SEARCH]);
+
   const LeadTypes = [
     {
       key: `All ${routes.lead.title}`,
@@ -51,7 +51,7 @@ const Leads = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, selectedEntity, permissions, searchQuery }
+    state: { user, selectedEntity, permissions }
   }: any = useData();
   const { getColumnData } = useColumns();
   const { leadResource, leadApi } = lead;
@@ -222,36 +222,6 @@ const Leads = () => {
     </>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      case 'relatedOpportunity':
-        return 'staticData.opportunity.opportunityName';
-
-      default:
-        return field;
-    }
-  };
-
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
-
-    if (field !== updatedField) return updatedField;
-
-    switch (field) {
-      case 'owner':
-        return 'owner.optionLabel';
-
-      default:
-        return field;
-    }
-  };
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     if (selectedType === 2) {
@@ -263,20 +233,22 @@ const Leads = () => {
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
 
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(deepFilters)}`;
+    }
+
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {

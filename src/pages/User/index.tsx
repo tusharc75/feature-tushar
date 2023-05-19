@@ -34,7 +34,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ResourceTransferDialog from "../../components/ResourceTransferDialog"
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from "../../constants/useColumns"
 
 
 let userTimeout: ReturnType<typeof setTimeout>;
@@ -227,66 +227,40 @@ const User: FC = () => {
       </>
     );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case "createdBy":
-        return "createdBy.user.concatedName";
-
-      case "updatedBy":
-        return "updatedBy.user.concatedName";
-
-      default:
-        return field;
-    }
-  }
-
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
-
-    if (field !== updatedField) return updatedField;
-
-    switch (field) {
-      case "companyWideRole":
-        return "role.name";
-
-      default:
-        return field;
-    }
-  }
-
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&withoutRoleLookup=true`;
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
 
     if (entityRoleRedirectDetails?.id) {
       switch (entityRoleRedirectDetails?.type) {
         case "entity":
-          deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "entities.entity", term: entityRoleRedirectDetails?.id }])}`
+          filterByIds.push({ field: "entities.entity", term: entityRoleRedirectDetails?.id })
           break;
 
         case "globalRole":
-          deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "role", term: entityRoleRedirectDetails?.id }])}`
+          filterByIds.push({ field: "role", term: entityRoleRedirectDetails?.id })
           break;
 
         case "regionalRole":
-          deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "entities.role", term: entityRoleRedirectDetails?.id }])}`
+          filterByIds.push({ field: "entities.role", term: entityRoleRedirectDetails?.id })
           break;
       }
     }
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(deepFilters)}`;
+    }
 
-      Object.keys(filters).forEach(field => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        })
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
     }
 
     if (search) {
