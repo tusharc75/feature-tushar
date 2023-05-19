@@ -158,6 +158,13 @@ const Planning = () => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
+    if (selectedPlanningType) {
+      deepFilters.push({
+        field: 'type',
+        term: selectedPlanningType
+      });
+    }
+
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
